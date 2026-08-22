@@ -221,9 +221,20 @@
         <div id="stepSection_1" class="step-fade space-y-4">
           <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5">
             
-            <div class="border-b border-zinc-100 pb-3.5">
-              <h2 class="text-base sm:text-lg font-bold text-zinc-900">Identitas Penilai</h2>
-              <p class="text-xs text-zinc-500 mt-0.5">Masukkan identitas akun mahasiswa Anda untuk verifikasi presensi.</p>
+            <div class="border-b border-zinc-100 pb-3.5 flex items-center justify-between gap-2">
+              <div>
+                <h2 class="text-base sm:text-lg font-bold text-zinc-900">Identitas Penilai</h2>
+                <p class="text-xs text-zinc-500 mt-0.5">Masukkan identitas akun mahasiswa Anda untuk verifikasi presensi.</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <span id="autoSaveIndicator" class="hidden text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span>Draf Tersimpan</span>
+                </span>
+                <button type="button" onclick="clearFormDraftManually()" title="Hapus Draf Isian" class="text-[10px] text-zinc-400 hover:text-rose-600 transition underline cursor-pointer">
+                  Reset Draf
+                </button>
+              </div>
             </div>
 
             <!-- Email Field -->
@@ -239,7 +250,7 @@
                   inputmode="email"
                   placeholder="nama.nim@email.ac.id" 
                   class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 outline-none transition bg-white placeholder-zinc-400"
-                  oninput="validateEmailLive(this.value)"
+                  oninput="validateEmailLive(this.value); saveFormDraft();"
                 >
                 <div id="emailCheckIcon" class="absolute right-3 top-2.5 hidden">
                   <span class="text-emerald-600 font-bold text-xs">✓ Valid</span>
@@ -260,6 +271,7 @@
                 autocapitalize="words"
                 placeholder="Tuliskan nama lengkap Anda..." 
                 class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 outline-none transition bg-white placeholder-zinc-400"
+                oninput="saveFormDraft();"
               >
             </div>
 
@@ -763,6 +775,7 @@
     document.addEventListener("DOMContentLoaded", function() {
       loadLocalCache();
       updateStepUI(1);
+      restoreFormDraft();
       fetchInitialFormData(false);
       // Pre-fetch rekap data secara diam-diam di background agar instan saat dibuka
       setTimeout(() => loadRekapData(true), 400);
@@ -824,10 +837,14 @@
 
           renderConfigHeader();
           renderGroupOptions();
+          restoreFormDraft();
         }
       } catch (err) {
         renderConfigHeader();
         renderGroupOptions();
+        restoreFormDraft();
+      } finally {
+        if (loading) loading.classList.add("hidden");
       }
     }
 
@@ -964,15 +981,17 @@
             maxlength="${maxChars}" 
             placeholder="Tuliskan masukan evaluasi untuk ${member.name}..." 
             class="w-full p-2.5 rounded-lg border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 outline-none bg-white transition leading-relaxed placeholder-zinc-400"
-            oninput="updateCharCounter(this, 'charCount_${eIdx}', ${maxChars})"
+            oninput="updateCharCounter(this, 'charCount_${eIdx}', ${maxChars}); saveFormDraft();"
           ></textarea>
         `;
         evalContainer.appendChild(box);
       });
+
+      saveFormDraft();
     }
 
     // Navigation Step
-    function updateStepUI(step) {
+    function updateStepUI(step, skipSave = false) {
       currentStep = step;
       const meta = stepMetadata[step];
       document.getElementById("stepNumberBadge").textContent = meta.badge;
@@ -995,6 +1014,10 @@
             tabBtn.className = "py-1 px-1 rounded text-[11px] font-medium transition text-zinc-400 bg-zinc-50 border border-transparent";
           }
         }
+      }
+
+      if (!skipSave) {
+        saveFormDraft();
       }
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1055,6 +1078,7 @@
       document.getElementById("inputNilaiSlider").value = val;
       document.getElementById("inputNilaiNumber").value = val;
       updateScoreBadge(val);
+      saveFormDraft();
     }
 
     function adjustScore(delta) {
@@ -1074,6 +1098,7 @@
         document.getElementById("inputNilaiSlider").value = val;
       }
       updateScoreBadge(val);
+      saveFormDraft();
     }
 
     function updateScoreBadge(val) {
@@ -1112,6 +1137,7 @@
         if (card) card.className = "flex items-center p-3 rounded-lg border border-zinc-200 hover:border-zinc-400 bg-white cursor-pointer transition text-xs";
       }
       updateBestPresenterBadge();
+      saveFormDraft();
     }
 
     function updateBestPresenterBadge() {
@@ -1130,6 +1156,154 @@
         } else {
           counterEl.className = "text-[10px] text-zinc-400 font-mono";
         }
+      }
+    }
+
+    // =========================================================================
+    // 💾 AUTO-SAVE FORM DRAFT ENGINE (PENYIMPANAN OTOMATIS ISIAN MAHASISWA)
+    // =========================================================================
+    function saveFormDraft() {
+      try {
+        const email = document.getElementById("inputEmail") ? document.getElementById("inputEmail").value : "";
+        const nama = document.getElementById("inputNama") ? document.getElementById("inputNama").value : "";
+        const groupName = selectedGroupObj ? selectedGroupObj.name : "";
+        const nilai = document.getElementById("inputNilaiNumber") ? document.getElementById("inputNilaiNumber").value : "85";
+        
+        const evaluasi = {};
+        document.querySelectorAll("#evaluationInputsContainer textarea").forEach(ta => {
+          const member = ta.getAttribute("data-member");
+          if (member) {
+            evaluasi[member] = ta.value;
+          }
+        });
+
+        // Hanya simpan jika ada isian yang diinputkan pengguna
+        if (!email && !nama && !groupName && selectedBestPresenters.length === 0 && Object.keys(evaluasi).length === 0) {
+          return;
+        }
+
+        const draft = {
+          email: email,
+          nama: nama,
+          groupName: groupName,
+          nilai: nilai,
+          bestPresenters: selectedBestPresenters,
+          evaluasi: evaluasi,
+          step: currentStep,
+          timestamp: Date.now()
+        };
+
+        localStorage.setItem("PGSD_FORM_DRAFT", JSON.stringify(draft));
+
+        const indicator = document.getElementById("autoSaveIndicator");
+        if (indicator) indicator.classList.remove("hidden");
+      } catch (e) {}
+    }
+
+    let isDraftAlreadyRestored = false;
+    function restoreFormDraft() {
+      if (isDraftAlreadyRestored) return;
+      try {
+        const raw = localStorage.getItem("PGSD_FORM_DRAFT");
+        if (!raw) return;
+        const draft = JSON.parse(raw);
+        if (!draft) return;
+
+        // 1. Pulihkan Step 1 (Identitas)
+        if (draft.email) {
+          const emailEl = document.getElementById("inputEmail");
+          if (emailEl) {
+            emailEl.value = draft.email;
+            validateEmailLive(draft.email);
+          }
+        }
+        if (draft.nama) {
+          const namaEl = document.getElementById("inputNama");
+          if (namaEl) namaEl.value = draft.nama;
+        }
+
+        // 2. Pulihkan Pemilihan Kelompok & Sub-komponennya
+        if (draft.groupName && groupsData && groupsData.length > 0) {
+          const grpIdx = groupsData.findIndex(g => g.name === draft.groupName);
+          if (grpIdx !== -1) {
+            const radio = document.querySelector(`input[name="selectedGroup"][value="${draft.groupName}"]`);
+            if (radio) radio.checked = true;
+            
+            onSelectGroup(draft.groupName, grpIdx);
+
+            // 3. Pulihkan Skor
+            if (draft.nilai) {
+              const numEl = document.getElementById("inputNilaiNumber");
+              const sliEl = document.getElementById("inputNilaiSlider");
+              if (numEl) numEl.value = draft.nilai;
+              if (sliEl) sliEl.value = draft.nilai;
+              updateScoreBadge(draft.nilai);
+            }
+
+            // 4. Pulihkan Presentator Terbaik
+            if (draft.bestPresenters && Array.isArray(draft.bestPresenters)) {
+              selectedBestPresenters = [...draft.bestPresenters];
+              updateBestPresenterBadge();
+              selectedBestPresenters.forEach(bName => {
+                const cb = document.querySelector(`#bestPresenterList input[value="${bName}"]`);
+                if (cb) {
+                  cb.checked = true;
+                  const lbl = cb.closest("label");
+                  if (lbl) lbl.className = "flex items-center p-3 rounded-lg border border-zinc-900 bg-zinc-50 shadow-xs cursor-pointer transition text-xs";
+                }
+              });
+            }
+
+            // 5. Pulihkan Evaluasi Kualitatif per Mahasiswa
+            if (draft.evaluasi) {
+              const maxChars = parseInt(appConfig["Maksimal_Karakter_Evaluasi"] || 500);
+              document.querySelectorAll("#evaluationInputsContainer textarea").forEach((ta, eIdx) => {
+                const member = ta.getAttribute("data-member");
+                if (member && draft.evaluasi[member] !== undefined) {
+                  ta.value = draft.evaluasi[member];
+                  const counterEl = document.getElementById(`charCount_${eIdx}`);
+                  if (counterEl) {
+                    counterEl.textContent = `${ta.value.length}/${maxChars}`;
+                  }
+                }
+              });
+            }
+
+            // 6. Pulihkan Posisi Step Halaman
+            if (draft.step && draft.step > 1 && draft.step <= 4) {
+              if (draft.step >= 2 && draft.email && draft.nama) {
+                if (draft.step >= 3 && draft.groupName) {
+                  if (draft.step === 4 && draft.bestPresenters && draft.bestPresenters.length > 0) {
+                    document.getElementById("summaryPenilai").textContent = draft.nama;
+                    document.getElementById("summaryKelompok").textContent = draft.groupName;
+                    document.getElementById("summarySkor").textContent = draft.nilai || 85;
+                    document.getElementById("summaryPresentator").textContent = draft.bestPresenters.join(", ");
+                    updateStepUI(4, true);
+                  } else {
+                    updateStepUI(3, true);
+                  }
+                } else {
+                  updateStepUI(2, true);
+                }
+              }
+            }
+          }
+        }
+
+        const indicator = document.getElementById("autoSaveIndicator");
+        if (indicator) indicator.classList.remove("hidden");
+
+        if (draft.email || draft.nama || draft.groupName) {
+          isDraftAlreadyRestored = true;
+          showToast("💾 Draf pengisian Anda sebelumnya telah dipulihkan otomatis.", "info");
+        }
+      } catch (e) {}
+    }
+
+    function clearFormDraftManually() {
+      if (confirm("Apakah Anda yakin ingin mengosongkan draf isian formulir?")) {
+        localStorage.removeItem("PGSD_FORM_DRAFT");
+        window.location.reload();
       }
     }
 
@@ -1254,6 +1428,8 @@
         spinner.classList.add("hidden");
 
         if (res.success) {
+          // Bersihkan draf otomatis karena sudah resmi terkirim
+          localStorage.removeItem("PGSD_FORM_DRAFT");
           showSuccessModal(payload.kelompok);
         } else {
           showToast(res.error, "error");
@@ -1273,6 +1449,8 @@
 
     function resetFormAndCloseModal() {
       document.getElementById("successModal").classList.add("hidden");
+      localStorage.removeItem("PGSD_FORM_DRAFT");
+      
       const radioChecked = document.querySelector("input[name='selectedGroup']:checked");
       if (radioChecked) radioChecked.checked = false;
       document.querySelectorAll(".group-card").forEach(c => {
