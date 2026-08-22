@@ -107,29 +107,29 @@
     
     <!-- Top Header -->
     <header class="bg-zinc-950 text-white border-b border-zinc-800 sticky top-0 z-30 shadow-md">
-      <div class="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+      <div class="max-w-5xl mx-auto px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-4">
         
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-100 flex items-center justify-center font-bold text-xs">
+        <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-100 flex items-center justify-center font-bold text-xs flex-shrink-0">
             ⚙️
           </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <h1 class="font-bold text-xs sm:text-sm text-zinc-100">Admin Control Panel</h1>
-              <span class="px-1.5 py-0.2 rounded text-[10px] font-mono font-semibold bg-zinc-800 text-emerald-400 border border-zinc-700">Live</span>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5 sm:gap-2">
+              <h1 class="font-bold text-xs sm:text-sm text-zinc-100 truncate">Admin Control Panel</h1>
+              <span class="px-1.5 py-0.2 rounded text-[9px] sm:text-[10px] font-mono font-semibold bg-zinc-800 text-emerald-400 border border-zinc-700 flex-shrink-0">Live</span>
             </div>
-            <p class="text-[11px] text-zinc-400">PGSD 5E • FKIP Universitas Lambung Mangkurat</p>
+            <p class="text-[10px] sm:text-[11px] text-zinc-400 truncate">PGSD 5E • FKIP ULM</p>
           </div>
         </div>
 
-        <div class="flex items-center gap-2">
-          <a href="/" target="_blank" class="px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs font-medium transition flex items-center gap-1.5">
-            <span>Buka Form</span>
-            <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+          <a href="/" target="_blank" class="px-2.5 sm:px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-[11px] sm:text-xs font-medium transition flex items-center gap-1">
+            <span>Form</span>
+            <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
             </svg>
           </a>
-          <button onclick="handleLogout()" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium transition cursor-pointer">
+          <button onclick="handleLogout()" class="px-2.5 sm:px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-[11px] sm:text-xs font-medium transition cursor-pointer">
             Keluar
           </button>
         </div>
@@ -137,33 +137,33 @@
       </div>
 
       <!-- Main Navigation 4 Tabs -->
-      <div class="max-w-5xl mx-auto px-4 sm:px-6 pb-2.5 pt-0.5">
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-1 p-1 bg-zinc-900 rounded-lg border border-zinc-800 text-xs font-semibold">
+      <div class="max-w-5xl mx-auto px-3 sm:px-6 pb-2.5 pt-0.5">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-1 p-1 bg-zinc-900 rounded-lg border border-zinc-800 text-[11px] sm:text-xs font-semibold">
           <button 
             id="adminTabBtn_data" 
             onclick="switchAdminTab('data')" 
-            class="py-1.5 px-2 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition flex items-center justify-center gap-1 cursor-pointer text-center truncate"
+            class="py-2 px-1.5 sm:px-2 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition flex items-center justify-center gap-1 cursor-pointer text-center truncate"
           >
             <span>📋 Kelompok</span>
           </button>
           <button 
             id="adminTabBtn_config" 
             onclick="switchAdminTab('config')" 
-            class="py-1.5 px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1 cursor-pointer text-center truncate"
+            class="py-2 px-1.5 sm:px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1 cursor-pointer text-center truncate"
           >
             <span>⚙️ Konfigurasi</span>
           </button>
           <button 
             id="adminTabBtn_responses" 
             onclick="switchAdminTab('responses')" 
-            class="py-1.5 px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1 cursor-pointer text-center truncate"
+            class="py-2 px-1.5 sm:px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1 cursor-pointer text-center truncate"
           >
-            <span>📝 Data Respons</span>
+            <span>📝 Respons</span>
           </button>
           <button 
             id="adminTabBtn_system" 
             onclick="switchAdminTab('system')" 
-            class="py-1.5 px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1 cursor-pointer text-center truncate"
+            class="py-2 px-1.5 sm:px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1 cursor-pointer text-center truncate"
           >
             <span>🔒 Sistem</span>
           </button>
@@ -172,20 +172,20 @@
     </header>
 
     <!-- Main Admin Content -->
-    <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <main class="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
 
       <!-- Toast Alert -->
-      <div id="adminToast" class="hidden p-4 rounded-xl border text-xs font-medium flex items-center gap-2.5 transition-all">
+      <div id="adminToast" class="hidden p-3.5 sm:p-4 rounded-xl border text-xs font-medium flex items-center gap-2.5 transition-all">
         <span id="adminToastIcon" class="font-bold"></span>
         <span id="adminToastMsg" class="flex-1"></span>
       </div>
 
       <!-- ⚡ QUICK SESSI CONTROL WIDGET (PENENTUAN SESI MINGGU AKTIF OLEH ADMIN) -->
-      <div class="bg-white rounded-xl border border-zinc-200 p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="bg-white rounded-xl border border-zinc-200 p-4 sm:p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
         <div class="space-y-1">
           <div class="flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <h2 class="text-xs font-bold uppercase tracking-wider text-zinc-500 font-mono">Penentuan Sesi Minggu Aktif</h2>
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0"></span>
+            <h2 class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-zinc-500 font-mono">Penentuan Sesi Minggu Aktif</h2>
           </div>
           <p class="text-xs text-zinc-900 font-medium">
             Sesi aktif saat ini di formulir: <strong id="quickActiveSessionLabel" class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-mono">Minggu 1</strong>
@@ -193,10 +193,10 @@
           <p class="text-[11px] text-zinc-400">Pilih sesi minggu di bawah ini untuk menentukan kelompok mana yang akan tampil di form penilaian mahasiswa.</p>
         </div>
 
-        <div class="flex items-center gap-2 flex-shrink-0">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto flex-shrink-0">
           <select 
             id="quickSessionSelect" 
-            class="px-3 py-2 rounded-lg border border-zinc-300 text-xs font-bold bg-zinc-50 focus:bg-white focus:border-zinc-900 outline-none cursor-pointer"
+            class="w-full sm:w-auto px-3 py-2 rounded-lg border border-zinc-300 text-xs font-bold bg-zinc-50 focus:bg-white focus:border-zinc-900 outline-none cursor-pointer"
           >
             <option value="Minggu 1">Minggu 1</option>
             <option value="Minggu 2">Minggu 2</option>
@@ -221,7 +221,7 @@
             type="button" 
             onclick="applyQuickActiveSession()" 
             id="btnApplyQuickSession" 
-            class="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center gap-1.5 shadow-xs whitespace-nowrap"
+            class="w-full sm:w-auto px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 shadow-xs whitespace-nowrap"
           >
             <span>Terapkan Sesi</span>
           </button>
@@ -231,21 +231,21 @@
       <!-- ===================================================================== -->
       <!-- TAB 1: 📋 MANAJEMEN DATA KELOMPOK & MAHASISWA -->
       <!-- ===================================================================== -->
-      <div id="adminView_data" class="space-y-5 fade-enter">
+      <div id="adminView_data" class="space-y-4 sm:space-y-5 fade-enter">
         
         <!-- Action Toolbar -->
-        <div class="bg-white rounded-xl border border-zinc-200 p-4 sm:p-5 shadow-xs space-y-4">
+        <div class="bg-white rounded-xl border border-zinc-200 p-4 sm:p-5 shadow-xs space-y-3.5 sm:space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 class="text-base font-bold text-zinc-900">Manajemen Kelompok & Anggota</h2>
-              <p class="text-xs text-zinc-500 mt-0.5">Kelola susunan kelompok, anggota mahasiswa, sesi tampil, dan status aktif.</p>
+              <h2 class="text-sm sm:text-base font-bold text-zinc-900">Manajemen Kelompok & Anggota</h2>
+              <p class="text-[11px] sm:text-xs text-zinc-500 mt-0.5">Kelola susunan kelompok, anggota mahasiswa, sesi tampil, dan status aktif.</p>
             </div>
 
-            <div class="flex flex-wrap items-center gap-2">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
               <button 
                 type="button" 
                 onclick="openAddGroupModal()" 
-                class="px-3.5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center gap-1.5 shadow-xs"
+                class="w-full sm:w-auto px-3.5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
               >
                 <span>+ Tambah Kelompok</span>
               </button>
@@ -253,7 +253,7 @@
                 type="button" 
                 onclick="saveAllMasterDataToBackend()" 
                 id="btnSaveMasterData" 
-                class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center gap-1.5 shadow-xs"
+                class="w-full sm:w-auto px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
               >
                 <span>💾 Simpan ke Spreadsheet</span>
               </button>
@@ -261,7 +261,7 @@
           </div>
 
           <!-- Search & Sesi Filter Bar -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-zinc-100">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-zinc-100">
             <div class="sm:col-span-2 relative">
               <input 
                 type="text" 
@@ -290,12 +290,14 @@
         </div>
 
         <!-- Group List Container -->
-        <div id="masterGroupsListContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div id="masterGroupsListContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-3.5 sm:gap-4">
+          <!-- Dynamic Editable Group Cards -->
+        </div>
           <!-- Dynamic Editable Group Cards -->
         </div>
 
         <!-- Empty Master Groups -->
-        <div id="emptyMasterGroups" class="hidden p-8 text-center bg-white rounded-xl border border-zinc-200 space-y-2">
+        <div id="emptyMasterGroups" class="hidden p-6 sm:p-8 text-center bg-white rounded-xl border border-zinc-200 space-y-2">
           <p class="text-sm font-semibold text-zinc-800">Tidak ada data kelompok.</p>
           <p class="text-xs text-zinc-500">Klik tombol '+ Tambah Kelompok' di atas untuk membuat kelompok baru.</p>
         </div>
@@ -305,33 +307,33 @@
       <!-- ===================================================================== -->
       <!-- TAB 2: ⚙️ KONFIGURASI PERKULIAHAN -->
       <!-- ===================================================================== -->
-      <div id="adminView_config" class="space-y-5 fade-enter hidden">
-        <form onsubmit="handleSaveConfigForm(event)" class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-6">
+      <div id="adminView_config" class="space-y-4 sm:space-y-5 fade-enter hidden">
+        <form onsubmit="handleSaveConfigForm(event)" class="bg-white rounded-xl border border-zinc-200 p-4 sm:p-7 shadow-xs space-y-5 sm:space-y-6">
           
-          <div class="flex items-center justify-between border-b border-zinc-100 pb-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 pb-3.5">
             <div>
-              <h2 class="text-base font-bold text-zinc-900">Konfigurasi Parameter Perkuliahan</h2>
-              <p class="text-xs text-zinc-500 mt-0.5">Atur sesi aktif (Minggu 1 - 16), rentang penilaian, identitas mata kuliah, dan aturan form.</p>
+              <h2 class="text-sm sm:text-base font-bold text-zinc-900">Konfigurasi Parameter Perkuliahan</h2>
+              <p class="text-[11px] sm:text-xs text-zinc-500 mt-0.5">Atur sesi aktif (Minggu 1 - 16), rentang penilaian, identitas mata kuliah, dan aturan form.</p>
             </div>
             <button 
               type="submit" 
-              class="px-5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 cursor-pointer shadow-xs"
+              class="w-full sm:w-auto px-5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 cursor-pointer shadow-xs text-center justify-center"
             >
               Simpan Konfigurasi
             </button>
           </div>
 
           <!-- Section A: Sesi & Identitas Perkuliahan -->
-          <div class="space-y-4">
-            <h3 class="text-xs font-bold text-zinc-400 uppercase tracking-wider font-mono">1. Sesi & Identitas Mata Kuliah</h3>
+          <div class="space-y-3.5 sm:space-y-4">
+            <h3 class="text-[11px] sm:text-xs font-bold text-zinc-400 uppercase tracking-wider font-mono">1. Sesi & Identitas Mata Kuliah</h3>
             
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 text-xs">
               <div class="space-y-1.5">
                 <label class="block font-semibold text-zinc-700">Sesi Minggu Aktif <span class="text-rose-500">*</span></label>
                 <select 
                   id="cfg_Sesi_Minggu_Aktif" 
                   required 
-                  class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs font-semibold bg-white focus:border-zinc-900 outline-none"
+                  class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs font-semibold bg-white focus:border-zinc-900 outline-none cursor-pointer"
                 >
                   <option value="Minggu 1">Minggu 1</option>
                   <option value="Minggu 2">Minggu 2</option>
@@ -410,10 +412,10 @@
           </div>
 
           <!-- Section B: Batasan Nilai & Formulir -->
-          <div class="space-y-4 pt-4 border-t border-zinc-100">
-            <h3 class="text-xs font-bold text-zinc-400 uppercase tracking-wider font-mono">2. Batasan Skor & Formulir</h3>
+          <div class="space-y-3.5 sm:space-y-4 pt-4 border-t border-zinc-100">
+            <h3 class="text-[11px] sm:text-xs font-bold text-zinc-400 uppercase tracking-wider font-mono">2. Batasan Skor & Formulir</h3>
             
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 text-xs">
               <div class="space-y-1.5">
                 <label class="block font-semibold text-zinc-700">Nilai Kelompok Minimal</label>
                 <input 
@@ -462,7 +464,7 @@
                 <label class="block font-semibold text-zinc-700">Tampilkan Ulasan Kualitatif ke Publik</label>
                 <select 
                   id="cfg_Tampilkan_Ulasan_Publik" 
-                  class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs font-medium bg-white focus:border-zinc-900 outline-none"
+                  class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs font-medium bg-white focus:border-zinc-900 outline-none cursor-pointer"
                 >
                   <option value="AKTIF">AKTIF (Dapat dilihat mahasiswa di Rekap)</option>
                   <option value="NONAKTIF">NONAKTIF (Disembunyikan, hanya skor yang tampil)</option>
@@ -485,7 +487,7 @@
           <div class="pt-4 border-t border-zinc-100 flex justify-end">
             <button 
               type="submit" 
-              class="px-6 py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 cursor-pointer shadow-xs"
+              class="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 cursor-pointer shadow-xs text-center justify-center"
             >
               Simpan Semua Konfigurasi
             </button>
@@ -497,29 +499,29 @@
       <!-- ===================================================================== -->
       <!-- TAB 3: 📝 DATA RESPONS PENILAIAN & RESET PER PENGIRIMAN -->
       <!-- ===================================================================== -->
-      <div id="adminView_responses" class="space-y-5 fade-enter hidden">
+      <div id="adminView_responses" class="space-y-4 sm:space-y-5 fade-enter hidden">
         
         <!-- Action & Filter Bar for Responses -->
-        <div class="bg-white rounded-xl border border-zinc-200 p-4 sm:p-5 shadow-xs space-y-4">
+        <div class="bg-white rounded-xl border border-zinc-200 p-4 sm:p-5 shadow-xs space-y-3.5 sm:space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 class="text-base font-bold text-zinc-900">Data Respons & Pengiriman Mahasiswa</h2>
-              <p class="text-xs text-zinc-500 mt-0.5">Kelola jawaban masuk, pantau skor, dan reset/hapus data pengiriman yang salah.</p>
+              <h2 class="text-sm sm:text-base font-bold text-zinc-900">Data Respons & Pengiriman Mahasiswa</h2>
+              <p class="text-[11px] sm:text-xs text-zinc-500 mt-0.5">Kelola jawaban masuk, pantau skor, dan reset/hapus data pengiriman yang salah.</p>
             </div>
 
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 w-full sm:w-auto">
               <button 
                 type="button" 
                 onclick="fetchAdminResponsesList()" 
                 id="btnRefreshResponses"
-                class="px-3.5 py-2 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center gap-1.5 shadow-xs"
+                class="flex-1 sm:flex-none px-3.5 py-2 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
               >
                 <span>🔄 Segarkan Data</span>
               </button>
               <a 
                 href="https://docs.google.com/spreadsheets/d/1D7nQcVEbmOKjgcJ6LzKeeDQPQxhAIiCELRC9eP9w7WU/edit" 
                 target="_blank" 
-                class="px-3.5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition flex items-center gap-1.5 shadow-xs"
+                class="flex-1 sm:flex-none px-3.5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition flex items-center justify-center gap-1.5 shadow-xs"
               >
                 <span>📊 Google Sheets</span>
               </a>
@@ -527,7 +529,7 @@
           </div>
 
           <!-- Multi Filter Bar -->
-          <div class="grid grid-cols-1 sm:grid-cols-4 gap-2.5 pt-2 border-t border-zinc-100">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-2 border-t border-zinc-100">
             <div class="sm:col-span-2 relative">
               <input 
                 type="text" 
@@ -547,7 +549,7 @@
               <select 
                 id="filterResponseGroupSelect" 
                 onchange="filterResponsesDisplay()" 
-                class="w-full px-3 py-2 rounded-lg border border-zinc-300 text-xs font-medium bg-white focus:border-zinc-900 outline-none"
+                class="w-full px-3 py-2 rounded-lg border border-zinc-300 text-xs font-medium bg-white focus:border-zinc-900 outline-none cursor-pointer"
               >
                 <option value="ALL">Semua Kelompok</option>
               </select>
@@ -557,7 +559,7 @@
               <select 
                 id="filterResponseSesiSelect" 
                 onchange="filterResponsesDisplay()" 
-                class="w-full px-3 py-2 rounded-lg border border-zinc-300 text-xs font-medium bg-white focus:border-zinc-900 outline-none"
+                class="w-full px-3 py-2 rounded-lg border border-zinc-300 text-xs font-medium bg-white focus:border-zinc-900 outline-none cursor-pointer"
               >
                 <option value="ALL">Semua Sesi Minggu</option>
                 <option value="Minggu 1">Minggu 1</option>
@@ -581,9 +583,9 @@
           </div>
 
           <!-- Counter info -->
-          <div class="flex items-center justify-between text-xs text-zinc-500 pt-1">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs text-zinc-500 pt-1">
             <span id="responseCountLabel">Menampilkan 0 respons</span>
-            <span class="text-[11px] text-zinc-400 italic">Klik tombol 'Hapus/Reset' pada baris untuk membatalkan pengiriman</span>
+            <span class="text-[10px] sm:text-[11px] text-zinc-400 italic">Klik tombol 'Hapus/Reset' pada baris untuk membatalkan pengiriman</span>
           </div>
         </div>
 
@@ -593,7 +595,7 @@
         </div>
 
         <!-- Empty Responses State -->
-        <div id="emptyResponsesState" class="hidden p-8 text-center bg-white rounded-xl border border-zinc-200 space-y-2">
+        <div id="emptyResponsesState" class="hidden p-6 sm:p-8 text-center bg-white rounded-xl border border-zinc-200 space-y-2">
           <p class="text-sm font-semibold text-zinc-800">Belum ada respons penilaian yang cocok.</p>
           <p class="text-xs text-zinc-500">Data penilaian akan otomatis muncul di sini begitu mahasiswa mengirim formulir.</p>
         </div>
@@ -603,21 +605,21 @@
       <!-- ===================================================================== -->
       <!-- TAB 4: 🔒 SISTEM, DATABASE & KEAMANAN -->
       <!-- ===================================================================== -->
-      <div id="adminView_system" class="space-y-5 fade-enter hidden">
+      <div id="adminView_system" class="space-y-4 sm:space-y-5 fade-enter hidden">
         
         <!-- CARD 1: BACKEND REST API CONFIGURATION -->
-        <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5">
-          <div class="border-b border-zinc-100 pb-3.5 flex items-center justify-between gap-2">
+        <div class="bg-white rounded-xl border border-zinc-200 p-4 sm:p-7 shadow-xs space-y-4 sm:space-y-5">
+          <div class="border-b border-zinc-100 pb-3 flex items-center justify-between gap-2">
             <div>
-              <h2 class="text-base font-bold text-zinc-900">Konfigurasi URL Backend API</h2>
-              <p class="text-xs text-zinc-500 mt-0.5">URL Google Apps Script Web App yang menerima & menyimpan data ke Spreadsheet.</p>
+              <h2 class="text-sm sm:text-base font-bold text-zinc-900">Konfigurasi URL Backend API</h2>
+              <p class="text-[11px] sm:text-xs text-zinc-500 mt-0.5">URL Google Apps Script Web App yang menerima & menyimpan data ke Spreadsheet.</p>
             </div>
-            <span class="text-[11px] font-mono font-medium px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <span class="text-[10px] sm:text-[11px] font-mono font-medium px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
               Endpoint
             </span>
           </div>
 
-          <div class="space-y-4">
+          <div class="space-y-3.5 sm:space-y-4">
             <div class="space-y-1.5">
               <label class="block text-xs font-semibold text-zinc-700">Google Apps Script Exec URL</label>
               <div class="flex flex-col sm:flex-row gap-2">
@@ -627,19 +629,19 @@
                   placeholder="https://script.google.com/macros/s/.../exec" 
                   class="flex-1 px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs font-mono focus:border-zinc-900 outline-none bg-white"
                 >
-                <div class="flex gap-2">
+                <div class="grid grid-cols-2 sm:flex gap-2 w-full sm:w-auto">
                   <button 
                     type="button" 
                     onclick="testConnectionLive()" 
                     id="btnTestConnection"
-                    class="px-4 py-2.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center gap-1.5 whitespace-nowrap"
+                    class="px-3.5 sm:px-4 py-2.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap"
                   >
                     <span>⚡ Uji Koneksi</span>
                   </button>
                   <button 
                     type="button" 
                     onclick="saveApiUrl()" 
-                    class="px-5 py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 cursor-pointer shadow-xs whitespace-nowrap"
+                    class="px-4 sm:px-5 py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 cursor-pointer shadow-xs whitespace-nowrap text-center justify-center"
                   >
                     Simpan URL
                   </button>
@@ -648,7 +650,7 @@
             </div>
 
             <!-- Live Ping Results -->
-            <div id="pingResultBox" class="hidden p-4 rounded-lg bg-zinc-50 border border-zinc-200 text-xs space-y-1.5 font-mono">
+            <div id="pingResultBox" class="hidden p-3.5 sm:p-4 rounded-lg bg-zinc-50 border border-zinc-200 text-xs space-y-1.5 font-mono">
               <div class="flex items-center justify-between">
                 <span class="font-bold text-zinc-800">Status Endpoint:</span>
                 <span id="pingStatusText" class="font-bold text-emerald-600">Online 200 OK</span>
@@ -666,10 +668,10 @@
         </div>
 
         <!-- CARD 2: DATABASE & MASS RESET -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
           
           <!-- Database Link & Reset All -->
-          <div class="bg-white rounded-xl border border-zinc-200 p-5 shadow-xs flex flex-col justify-between space-y-4">
+          <div class="bg-white rounded-xl border border-zinc-200 p-4 sm:p-5 shadow-xs flex flex-col justify-between space-y-4">
             <div>
               <div class="text-xs font-semibold text-zinc-400 uppercase font-mono">Data Respons Masuk</div>
               <div class="flex items-center justify-between mt-1">
@@ -690,7 +692,7 @@
           </div>
 
           <!-- Purge Cache Action -->
-          <div class="bg-white rounded-xl border border-zinc-200 p-5 shadow-xs flex flex-col justify-between space-y-4">
+          <div class="bg-white rounded-xl border border-zinc-200 p-4 sm:p-5 shadow-xs flex flex-col justify-between space-y-4">
             <div>
               <div class="text-xs font-semibold text-zinc-400 uppercase font-mono">Cache & Sinkronisasi</div>
               <h3 class="text-sm font-bold text-zinc-900 mt-1">Segarkan Cache Sistem</h3>
@@ -711,7 +713,7 @@
         </div>
 
         <!-- CARD 3: SECURITY & PASSWORD CHANGE -->
-        <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-4">
+        <div class="bg-white rounded-xl border border-zinc-200 p-4 sm:p-7 shadow-xs space-y-3.5 sm:space-y-4">
           <div class="border-b border-zinc-100 pb-3">
             <h2 class="text-sm font-bold text-zinc-900">Keamanan Akses Kata Sandi Admin</h2>
             <p class="text-xs text-zinc-500 mt-0.5">Ubah kata sandi untuk melindungi halaman admin ini.</p>
@@ -732,7 +734,7 @@
             <div class="flex items-end">
               <button 
                 type="submit" 
-                class="w-full py-2 px-4 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition cursor-pointer"
+                class="w-full py-2 px-4 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition cursor-pointer text-center justify-center"
               >
                 Simpan Sandi Baru
               </button>
@@ -746,7 +748,7 @@
 
     <!-- Admin Footer -->
     <footer class="w-full py-4 text-center text-xs text-zinc-400 border-t border-zinc-200 bg-white mt-auto">
-      <div class="max-w-5xl mx-auto px-4 flex items-center justify-between">
+      <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-1">
         <p>© 2026 PGSD Kelas 5E • FKIP ULM</p>
         <p class="font-mono text-[11px]">Admin Control Panel</p>
       </div>
@@ -757,8 +759,8 @@
   <!-- ========================================================================= -->
   <!-- ➕ MODAL: TAMBAH / EDIT KELOMPOK -->
   <!-- ========================================================================= -->
-  <div id="groupModal" class="hidden fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl max-w-md w-full p-5 sm:p-6 space-y-4 shadow-xl border border-zinc-200 fade-enter">
+  <div id="groupModal" class="hidden fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-xl max-w-md w-full p-4 sm:p-6 space-y-4 shadow-xl border border-zinc-200 fade-enter max-h-[90vh] overflow-y-auto custom-scrollbar">
       <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
         <h3 class="text-sm font-bold text-zinc-900" id="groupModalTitle">Tambah Kelompok Baru</h3>
         <button type="button" onclick="closeGroupModal()" class="w-7 h-7 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center text-sm font-bold cursor-pointer">✕</button>
@@ -780,7 +782,7 @@
 
         <div class="space-y-1">
           <label class="block font-semibold text-zinc-700">Sesi Tampil <span class="text-rose-500">*</span></label>
-          <select id="groupModalSesi" class="w-full px-3 py-2 rounded-lg border border-zinc-300 bg-white focus:border-zinc-900 outline-none font-semibold">
+          <select id="groupModalSesi" class="w-full px-3 py-2 rounded-lg border border-zinc-300 bg-white focus:border-zinc-900 outline-none font-semibold cursor-pointer">
             <option value="Minggu 1">Minggu 1</option>
             <option value="Minggu 2">Minggu 2</option>
             <option value="Minggu 3">Minggu 3</option>
@@ -802,15 +804,15 @@
 
         <div class="space-y-1">
           <label class="block font-semibold text-zinc-700">Status Keaktifan</label>
-          <select id="groupModalStatus" class="w-full px-3 py-2 rounded-lg border border-zinc-300 bg-white focus:border-zinc-900 outline-none font-medium">
+          <select id="groupModalStatus" class="w-full px-3 py-2 rounded-lg border border-zinc-300 bg-white focus:border-zinc-900 outline-none font-medium cursor-pointer">
             <option value="AKTIF">AKTIF (Dapat dipilih mahasiswa)</option>
             <option value="NONAKTIF">NONAKTIF (Disembunyikan)</option>
           </select>
         </div>
 
-        <div class="pt-2 flex justify-end gap-2 border-t border-zinc-100">
-          <button type="button" onclick="closeGroupModal()" class="px-3.5 py-2 rounded-lg border border-zinc-200 text-zinc-700 hover:bg-zinc-50 font-medium">Batal</button>
-          <button type="submit" class="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white font-semibold shadow-xs">Simpan Kelompok</button>
+        <div class="pt-2 grid grid-cols-2 sm:flex sm:justify-end gap-2 border-t border-zinc-100">
+          <button type="button" onclick="closeGroupModal()" class="w-full sm:w-auto px-3.5 py-2 rounded-lg border border-zinc-200 text-zinc-700 hover:bg-zinc-50 font-medium">Batal</button>
+          <button type="submit" class="w-full sm:w-auto px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white font-semibold shadow-xs">Simpan Kelompok</button>
         </div>
       </form>
     </div>
@@ -819,8 +821,8 @@
   <!-- ========================================================================= -->
   <!-- ➕ MODAL: TAMBAH / EDIT MAHASISWA (ANGGOTA) -->
   <!-- ========================================================================= -->
-  <div id="memberModal" class="hidden fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl max-w-md w-full p-5 sm:p-6 space-y-4 shadow-xl border border-zinc-200 fade-enter">
+  <div id="memberModal" class="hidden fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-xl max-w-md w-full p-4 sm:p-6 space-y-4 shadow-xl border border-zinc-200 fade-enter max-h-[90vh] overflow-y-auto custom-scrollbar">
       <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
         <div>
           <h3 class="text-sm font-bold text-zinc-900" id="memberModalTitle">Tambah Anggota Mahasiswa</h3>
@@ -856,15 +858,15 @@
 
         <div class="space-y-1">
           <label class="block font-semibold text-zinc-700">Status Anggota</label>
-          <select id="memberModalStatus" class="w-full px-3 py-2 rounded-lg border border-zinc-300 bg-white focus:border-zinc-900 outline-none font-medium">
+          <select id="memberModalStatus" class="w-full px-3 py-2 rounded-lg border border-zinc-300 bg-white focus:border-zinc-900 outline-none font-medium cursor-pointer">
             <option value="AKTIF">AKTIF</option>
             <option value="NONAKTIF">NONAKTIF</option>
           </select>
         </div>
 
-        <div class="pt-2 flex justify-end gap-2 border-t border-zinc-100">
-          <button type="button" onclick="closeMemberModal()" class="px-3.5 py-2 rounded-lg border border-zinc-200 text-zinc-700 hover:bg-zinc-50 font-medium">Batal</button>
-          <button type="submit" class="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white font-semibold shadow-xs">Simpan Anggota</button>
+        <div class="pt-2 grid grid-cols-2 sm:flex sm:justify-end gap-2 border-t border-zinc-100">
+          <button type="button" onclick="closeMemberModal()" class="w-full sm:w-auto px-3.5 py-2 rounded-lg border border-zinc-200 text-zinc-700 hover:bg-zinc-50 font-medium">Batal</button>
+          <button type="submit" class="w-full sm:w-auto px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white font-semibold shadow-xs">Simpan Anggota</button>
         </div>
       </form>
     </div>
@@ -873,8 +875,8 @@
   <!-- ========================================================================= -->
   <!-- 👁️ MODAL: DETAIL ULASAN KUALITATIF RESPONS -->
   <!-- ========================================================================= -->
-  <div id="responseDetailModal" class="hidden fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl max-w-lg w-full p-5 sm:p-6 space-y-4 shadow-xl border border-zinc-200 fade-enter">
+  <div id="responseDetailModal" class="hidden fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-xl max-w-lg w-full p-4 sm:p-6 space-y-4 shadow-xl border border-zinc-200 fade-enter max-h-[90vh] overflow-y-auto custom-scrollbar">
       <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
         <div>
           <h3 class="text-sm font-bold text-zinc-900">Catatan Masukan Penilai</h3>
@@ -888,7 +890,7 @@
       </div>
 
       <div class="pt-2 flex justify-end border-t border-zinc-100">
-        <button type="button" onclick="closeResponseDetailModal()" class="px-4 py-2 rounded-lg bg-zinc-900 text-white text-xs font-semibold">Tutup</button>
+        <button type="button" onclick="closeResponseDetailModal()" class="w-full sm:w-auto px-4 py-2 rounded-lg bg-zinc-900 text-white text-xs font-semibold">Tutup</button>
       </div>
     </div>
   </div>
@@ -896,13 +898,13 @@
   <!-- ========================================================================= -->
   <!-- ⚠️ MODAL: KONFIRMASI RESET SELURUH RESPONS -->
   <!-- ========================================================================= -->
-  <div id="resetConfirmModal" class="hidden fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl max-w-sm w-full p-6 text-center space-y-4 shadow-xl border border-zinc-200 fade-enter">
+  <div id="resetConfirmModal" class="hidden fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-xl max-w-sm w-full p-5 sm:p-6 text-center space-y-4 shadow-xl border border-zinc-200 fade-enter max-h-[90vh] overflow-y-auto">
       <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto text-xl font-bold border border-rose-200">
         ⚠️
       </div>
       <div>
-        <h3 class="text-base font-bold text-zinc-900">Kosongkan Seluruh Respons?</h3>
+        <h3 class="text-sm sm:text-base font-bold text-zinc-900">Kosongkan Seluruh Respons?</h3>
         <p class="text-xs text-zinc-500 leading-relaxed mt-1">
           Tindakan ini akan menghapus seluruh data pengiriman penilaian di Google Spreadsheet. Tindakan ini tidak dapat dibatalkan.
         </p>
@@ -1072,18 +1074,18 @@
         const memberRows = members.map((m, mIdx) => `
           <div class="flex items-center justify-between gap-2 p-2 rounded-lg bg-zinc-50 border border-zinc-200/80 text-xs">
             <div class="min-w-0 flex-1">
-              <div class="flex items-center gap-1.5">
-                <span class="font-semibold text-zinc-900 truncate">${m.name}</span>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="font-semibold text-zinc-900 truncate max-w-[150px] sm:max-w-none">${m.name}</span>
                 ${m.status === 'NONAKTIF' ? '<span class="text-[9px] bg-rose-100 text-rose-700 px-1 rounded font-mono">Nonaktif</span>' : ''}
               </div>
-              <p class="text-[10px] text-zinc-400 font-mono">${m.nim || 'NIM -'}</p>
+              <p class="text-[10px] text-zinc-400 font-mono truncate">${m.nim || 'NIM -'}</p>
             </div>
             <div class="flex items-center gap-1 flex-shrink-0">
               <button 
                 type="button" 
                 onclick="openEditMemberModal(${gIdx}, ${mIdx})" 
                 title="Edit Mahasiswa" 
-                class="p-1 rounded hover:bg-zinc-200 text-zinc-600 text-xs transition cursor-pointer"
+                class="p-1.5 rounded hover:bg-zinc-200 text-zinc-600 text-xs transition cursor-pointer"
               >
                 ✏️
               </button>
@@ -1091,7 +1093,7 @@
                 type="button" 
                 onclick="deleteMember(${gIdx}, ${mIdx})" 
                 title="Hapus Mahasiswa" 
-                class="p-1 rounded hover:bg-rose-100 text-rose-600 text-xs transition cursor-pointer"
+                class="p-1.5 rounded hover:bg-rose-100 text-rose-600 text-xs transition cursor-pointer"
               >
                 ✕
               </button>
@@ -1103,23 +1105,23 @@
           <div class="space-y-3">
             <!-- Group Card Header -->
             <div class="flex items-start justify-between gap-2 border-b border-zinc-100 pb-3">
-              <div>
-                <div class="flex items-center gap-2">
-                  <h3 class="font-bold text-sm text-zinc-900">${gName}</h3>
-                  <span class="text-[10px] font-mono font-medium px-2 py-0.5 rounded ${gStatus === 'AKTIF' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-zinc-100 text-zinc-500 border border-zinc-200'}">
+              <div class="min-w-0">
+                <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                  <h3 class="font-bold text-sm text-zinc-900 truncate">${gName}</h3>
+                  <span class="text-[9px] sm:text-[10px] font-mono font-medium px-2 py-0.5 rounded ${gStatus === 'AKTIF' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-zinc-100 text-zinc-500 border border-zinc-200'}">
                     ${gStatus}
                   </span>
                 </div>
-                <span class="text-xs text-zinc-500 font-medium">${gSesi} • ${members.length} Anggota</span>
+                <span class="text-[11px] sm:text-xs text-zinc-500 font-medium">${gSesi} • ${members.length} Anggota</span>
               </div>
 
               <!-- Group Card Header Actions -->
-              <div class="flex items-center gap-1">
+              <div class="flex items-center gap-1 flex-shrink-0">
                 <button 
                   type="button" 
                   onclick="openEditGroupModal(${gIdx})" 
                   title="Edit Kelompok" 
-                  class="p-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-100 text-zinc-700 text-xs transition cursor-pointer"
+                  class="px-2 py-1 sm:px-2.5 sm:py-1 rounded-lg border border-zinc-200 hover:bg-zinc-100 text-zinc-700 text-[11px] sm:text-xs font-medium transition cursor-pointer"
                 >
                   ✏️ Edit
                 </button>
@@ -1127,7 +1129,7 @@
                   type="button" 
                   onclick="deleteGroup(${gIdx})" 
                   title="Hapus Kelompok" 
-                  class="p-1.5 rounded-lg border border-rose-200 hover:bg-rose-50 text-rose-600 text-xs transition cursor-pointer"
+                  class="p-1 sm:px-2 sm:py-1 rounded-lg border border-rose-200 hover:bg-rose-50 text-rose-600 text-xs transition cursor-pointer"
                 >
                   🗑️
                 </button>
@@ -1145,7 +1147,7 @@
             <button 
               type="button" 
               onclick="openAddMemberModal(${gIdx})" 
-              class="w-full py-1.5 px-3 rounded-lg border border-dashed border-zinc-300 hover:border-zinc-900 text-zinc-700 text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer"
+              class="w-full py-2 px-3 rounded-lg border border-dashed border-zinc-300 hover:border-zinc-900 text-zinc-700 text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <span>+ Tambah Anggota</span>
             </button>
@@ -1482,7 +1484,7 @@
         } else {
           showAdminToast(res.error || "Gagal menyimpan konfigurasi.", "error");
         }
-      } catch (err) {
+    } catch (err) {
         showAdminToast("Koneksi gagal: " + err, "error");
       }
     }
@@ -1586,11 +1588,11 @@
 
         card.innerHTML = `
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-100 pb-3">
-            <div class="flex items-center gap-2 flex-wrap">
+            <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
               <span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-zinc-100 text-zinc-700 border border-zinc-200">
                 ${r.idRespons}
               </span>
-              <span class="text-xs text-zinc-500 font-mono">${r.timestamp}</span>
+              <span class="text-[11px] sm:text-xs text-zinc-500 font-mono">${r.timestamp}</span>
               <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-zinc-900 text-white">
                 ${r.sesi}
               </span>
@@ -1600,25 +1602,25 @@
             <button 
               type="button" 
               onclick="deleteSingleResponse('${r.idRespons}', '${r.namaPenilai}', '${r.kelompok}')" 
-              class="px-3 py-1.5 rounded-lg border border-rose-200 hover:bg-rose-50 text-rose-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 self-start sm:self-auto"
+              class="w-full sm:w-auto px-3 py-1.5 rounded-lg border border-rose-200 hover:bg-rose-50 text-rose-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 self-stretch sm:self-auto"
             >
               <span>🗑️ Hapus / Reset Respons Ini</span>
             </button>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 text-xs">
             
             <!-- Col 1: Penilai -->
             <div class="space-y-1 bg-zinc-50 p-2.5 rounded-lg border border-zinc-200/70">
               <span class="text-[10px] font-semibold text-zinc-400 uppercase font-mono">Identitas Penilai</span>
-              <p class="font-bold text-zinc-900">${r.namaPenilai}</p>
+              <p class="font-bold text-zinc-900 truncate">${r.namaPenilai}</p>
               <p class="text-[11px] text-zinc-500 font-mono truncate">${r.email}</p>
             </div>
 
             <!-- Col 2: Kelompok & Nilai -->
             <div class="space-y-1 bg-zinc-50 p-2.5 rounded-lg border border-zinc-200/70">
               <span class="text-[10px] font-semibold text-zinc-400 uppercase font-mono">Kelompok Dinilai & Skor</span>
-              <p class="font-bold text-zinc-900">${r.kelompok}</p>
+              <p class="font-bold text-zinc-900 truncate">${r.kelompok}</p>
               <p class="text-xs font-mono font-bold text-emerald-600">Nilai: ${r.nilaiKelompok} / 100</p>
             </div>
 
