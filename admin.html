@@ -122,7 +122,13 @@
           </div>
         </div>
 
-        <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+        <!-- Global Live Cloud Sync Status Badge & Action Buttons -->
+        <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          <div id="cloudSyncBadge" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-950/60 text-emerald-400 border border-emerald-800/80 transition-all">
+            <span id="cloudSyncDot" class="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0"></span>
+            <span id="cloudSyncText">Tersinkronisasi</span>
+          </div>
+
           <a href="/" target="_blank" class="px-2.5 sm:px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-[11px] sm:text-xs font-medium transition flex items-center gap-1">
             <span>Form</span>
             <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -180,7 +186,25 @@
         <span id="adminToastMsg" class="flex-1"></span>
       </div>
 
-      <!-- ⚡ QUICK SESSI CONTROL WIDGET (PENENTUAN SESI MINGGU AKTIF OLEH ADMIN) -->
+      <!-- ⚠️ OFFLINE / SLOW CONNECTION SAFETY RECOVERY BANNER -->
+      <div id="offlineSyncBanner" class="hidden p-3 sm:p-4 bg-amber-500/10 border border-amber-500/30 text-amber-900 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs fade-enter">
+        <div class="flex items-start sm:items-center gap-2.5">
+          <span class="text-base flex-shrink-0">⚠️</span>
+          <div>
+            <p class="font-bold text-amber-950">Koneksi Internet Lambat / Terputus</p>
+            <p class="text-amber-800 text-[11px] mt-0.5">Perubahan Anda tetap aman tersimpan di browser dan akan otomatis dikirim saat koneksi pulih.</p>
+          </div>
+        </div>
+        <button 
+          type="button" 
+          onclick="processPendingSyncQueue()" 
+          class="w-full sm:w-auto px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg shadow-xs flex-shrink-0 cursor-pointer flex items-center justify-center gap-1.5 transition active:scale-98"
+        >
+          <span>🔄 Kirim Sekarang</span>
+        </button>
+      </div>
+
+      <!-- ⚡ QUICK SESSI CONTROL WIDGET (PENENTUAN SESI MINGGU AKTIF OLEH ADMIN - SINGLE SOURCE OF TRUTH) -->
       <div class="bg-white rounded-xl border border-zinc-200 p-4 sm:p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
         <div class="space-y-1">
           <div class="flex items-center gap-2">
@@ -190,13 +214,14 @@
           <p class="text-xs text-zinc-900 font-medium">
             Sesi aktif saat ini di formulir: <strong id="quickActiveSessionLabel" class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-mono">Minggu 1</strong>
           </p>
-          <p class="text-[11px] text-zinc-400">Pilih sesi minggu di bawah ini untuk menentukan kelompok mana yang akan tampil di form penilaian mahasiswa.</p>
+          <p class="text-[11px] text-zinc-400">Pilih sesi minggu untuk menentukan kelompok mana yang akan tampil di formulir mahasiswa. <em>Tersimpan otomatis seketika.</em></p>
         </div>
 
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto flex-shrink-0">
           <select 
             id="quickSessionSelect" 
-            class="w-full sm:w-auto px-3 py-2 rounded-lg border border-zinc-300 text-xs font-bold bg-zinc-50 focus:bg-white focus:border-zinc-900 outline-none cursor-pointer"
+            onchange="handleQuickSessionChange(this.value)"
+            class="w-full sm:w-auto px-3.5 py-2 rounded-lg border border-zinc-300 text-xs font-bold bg-zinc-50 focus:bg-white focus:border-zinc-900 outline-none cursor-pointer"
           >
             <option value="Minggu 1">Minggu 1</option>
             <option value="Minggu 2">Minggu 2</option>
@@ -217,14 +242,9 @@
             <option value="SEMUA">SEMUA (Tampilkan Semua Kelompok)</option>
           </select>
 
-          <button 
-            type="button" 
-            onclick="applyQuickActiveSession()" 
-            id="btnApplyQuickSession" 
-            class="w-full sm:w-auto px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 shadow-xs whitespace-nowrap"
-          >
-            <span>Terapkan Sesi</span>
-          </button>
+          <span class="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-1.5 rounded border border-emerald-200 text-center font-medium">
+            ⚡ Auto-Save
+          </span>
         </div>
       </div>
 
@@ -238,7 +258,7 @@
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h2 class="text-sm sm:text-base font-bold text-zinc-900">Manajemen Kelompok & Anggota</h2>
-              <p class="text-[11px] sm:text-xs text-zinc-500 mt-0.5">Kelola susunan kelompok, anggota mahasiswa, sesi tampil, dan status aktif.</p>
+              <p class="text-[11px] sm:text-xs text-zinc-500 mt-0.5">Kelola susunan kelompok & anggota. Seluruh perubahan tersimpan otomatis ke Spreadsheet.</p>
             </div>
 
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
@@ -251,11 +271,12 @@
               </button>
               <button 
                 type="button" 
-                onclick="saveAllMasterDataToBackend()" 
-                id="btnSaveMasterData" 
-                class="w-full sm:w-auto px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
+                onclick="fetchAdminFullData()" 
+                id="btnRefreshMasterData" 
+                title="Tarik data terbaru langsung dari Google Spreadsheet"
+                class="w-full sm:w-auto px-3.5 py-2 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
               >
-                <span>💾 Simpan ke Spreadsheet</span>
+                <span>🔄 Segarkan</span>
               </button>
             </div>
           </div>
@@ -293,8 +314,6 @@
         <div id="masterGroupsListContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-3.5 sm:gap-4">
           <!-- Dynamic Editable Group Cards -->
         </div>
-          <!-- Dynamic Editable Group Cards -->
-        </div>
 
         <!-- Empty Master Groups -->
         <div id="emptyMasterGroups" class="hidden p-6 sm:p-8 text-center bg-white rounded-xl border border-zinc-200 space-y-2">
@@ -305,63 +324,36 @@
       </div>
 
       <!-- ===================================================================== -->
-      <!-- TAB 2: ⚙️ KONFIGURASI PERKULIAHAN -->
+      <!-- TAB 2: ⚙️ KONFIGURASI PERKULIAHAN (AUTO-SAVE) -->
       <!-- ===================================================================== -->
       <div id="adminView_config" class="space-y-4 sm:space-y-5 fade-enter hidden">
-        <form onsubmit="handleSaveConfigForm(event)" class="bg-white rounded-xl border border-zinc-200 p-4 sm:p-7 shadow-xs space-y-5 sm:space-y-6">
+        <form id="formConfigParameters" onsubmit="event.preventDefault()" class="bg-white rounded-xl border border-zinc-200 p-4 sm:p-7 shadow-xs space-y-5 sm:space-y-6">
           
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 pb-3.5">
             <div>
               <h2 class="text-sm sm:text-base font-bold text-zinc-900">Konfigurasi Parameter Perkuliahan</h2>
-              <p class="text-[11px] sm:text-xs text-zinc-500 mt-0.5">Atur sesi aktif (Minggu 1 - 16), rentang penilaian, identitas mata kuliah, dan aturan form.</p>
+              <p class="text-[11px] sm:text-xs text-zinc-500 mt-0.5">Atur identitas mata kuliah, rentang skor, dan aturan formulir. <em>Tersimpan otomatis saat diedit.</em></p>
             </div>
-            <button 
-              type="submit" 
-              class="w-full sm:w-auto px-5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 cursor-pointer shadow-xs text-center justify-center"
-            >
-              Simpan Konfigurasi
-            </button>
+            <div class="flex items-center gap-2">
+              <span class="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span>Auto-Save Aktif</span>
+              </span>
+            </div>
           </div>
 
-          <!-- Section A: Sesi & Identitas Perkuliahan -->
+          <!-- Section A: Identitas Perkuliahan (Sesi Aktif Redundan telah dipindahkan ke Widget Utama) -->
           <div class="space-y-3.5 sm:space-y-4">
-            <h3 class="text-[11px] sm:text-xs font-bold text-zinc-400 uppercase tracking-wider font-mono">1. Sesi & Identitas Mata Kuliah</h3>
+            <h3 class="text-[11px] sm:text-xs font-bold text-zinc-400 uppercase tracking-wider font-mono">1. Identitas Mata Kuliah</h3>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 text-xs">
-              <div class="space-y-1.5">
-                <label class="block font-semibold text-zinc-700">Sesi Minggu Aktif <span class="text-rose-500">*</span></label>
-                <select 
-                  id="cfg_Sesi_Minggu_Aktif" 
-                  required 
-                  class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs font-semibold bg-white focus:border-zinc-900 outline-none cursor-pointer"
-                >
-                  <option value="Minggu 1">Minggu 1</option>
-                  <option value="Minggu 2">Minggu 2</option>
-                  <option value="Minggu 3">Minggu 3</option>
-                  <option value="Minggu 4">Minggu 4</option>
-                  <option value="Minggu 5">Minggu 5</option>
-                  <option value="Minggu 6">Minggu 6</option>
-                  <option value="Minggu 7">Minggu 7</option>
-                  <option value="Minggu 8">Minggu 8</option>
-                  <option value="Minggu 9">Minggu 9</option>
-                  <option value="Minggu 10">Minggu 10</option>
-                  <option value="Minggu 11">Minggu 11</option>
-                  <option value="Minggu 12">Minggu 12</option>
-                  <option value="Minggu 13">Minggu 13</option>
-                  <option value="Minggu 14">Minggu 14</option>
-                  <option value="Minggu 15">Minggu 15</option>
-                  <option value="Minggu 16">Minggu 16</option>
-                  <option value="SEMUA">SEMUA (Tampilkan Semua Kelompok)</option>
-                </select>
-                <p class="text-[11px] text-zinc-400">Hanya kelompok dengan sesi minggu ini yang tampil di pilihan form mahasiswa.</p>
-              </div>
-
-              <div class="space-y-1.5">
+              <div class="space-y-1.5 sm:col-span-2">
                 <label class="block font-semibold text-zinc-700">Judul Formulir <span class="text-rose-500">*</span></label>
                 <input 
                   type="text" 
                   id="cfg_Judul_Form" 
                   required 
+                  oninput="handleConfigInputAutoSave()"
                   placeholder="Penilaian Presentasi PGSD 5E" 
                   class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none"
                 >
@@ -373,6 +365,7 @@
                   type="text" 
                   id="cfg_Mata_Kuliah" 
                   required 
+                  oninput="handleConfigInputAutoSave()"
                   placeholder="Bimbingan Konseling di SD" 
                   class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none"
                 >
@@ -384,6 +377,7 @@
                   type="text" 
                   id="cfg_Dosen_Pengampu" 
                   required 
+                  oninput="handleConfigInputAutoSave()"
                   placeholder="Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd." 
                   class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none"
                 >
@@ -394,6 +388,7 @@
                 <input 
                   type="text" 
                   id="cfg_Kelas" 
+                  oninput="handleConfigInputAutoSave()"
                   placeholder="5E" 
                   class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none"
                 >
@@ -404,6 +399,7 @@
                 <input 
                   type="text" 
                   id="cfg_Jurusan" 
+                  oninput="handleConfigInputAutoSave()"
                   placeholder="PGSD" 
                   class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none"
                 >
@@ -423,6 +419,7 @@
                   id="cfg_Nilai_Kelompok_Min" 
                   required 
                   value="50" 
+                  oninput="handleConfigInputAutoSave()"
                   class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none font-mono"
                 >
               </div>
@@ -434,6 +431,7 @@
                   id="cfg_Nilai_Kelompok_Max" 
                   required 
                   value="100" 
+                  oninput="handleConfigInputAutoSave()"
                   class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none font-mono"
                 >
               </div>
@@ -445,6 +443,7 @@
                   id="cfg_Maksimal_Pilihan_Presentator_Terbaik" 
                   required 
                   value="2" 
+                  oninput="handleConfigInputAutoSave()"
                   class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none font-mono"
                 >
               </div>
@@ -456,6 +455,7 @@
                   id="cfg_Maksimal_Karakter_Evaluasi" 
                   required 
                   value="500" 
+                  oninput="handleConfigInputAutoSave()"
                   class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none font-mono"
                 >
               </div>
@@ -464,6 +464,7 @@
                 <label class="block font-semibold text-zinc-700">Tampilkan Ulasan Kualitatif ke Publik</label>
                 <select 
                   id="cfg_Tampilkan_Ulasan_Publik" 
+                  onchange="handleConfigInputAutoSave(true)"
                   class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs font-medium bg-white focus:border-zinc-900 outline-none cursor-pointer"
                 >
                   <option value="AKTIF">AKTIF (Dapat dilihat mahasiswa di Rekap)</option>
@@ -476,6 +477,7 @@
                 <input 
                   type="text" 
                   id="cfg_Domain_Email_Wajib" 
+                  oninput="handleConfigInputAutoSave()"
                   placeholder="mhs.ulm.ac.id, ulm.ac.id" 
                   class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none font-mono"
                 >
@@ -484,13 +486,9 @@
             </div>
           </div>
 
-          <div class="pt-4 border-t border-zinc-100 flex justify-end">
-            <button 
-              type="submit" 
-              class="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 cursor-pointer shadow-xs text-center justify-center"
-            >
-              Simpan Semua Konfigurasi
-            </button>
+          <div class="pt-4 border-t border-zinc-100 flex items-center justify-between text-xs text-zinc-400">
+            <span>💾 Data otomatis dikirim ke Google Sheets setelah Anda mengetik / memilih opsi.</span>
+            <span id="configSyncStatusMini" class="font-mono text-emerald-600 font-semibold">🟢 Tersinkron</span>
           </div>
 
         </form>
@@ -928,7 +926,7 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- 💻 JAVASCRIPT APP LOGIC -->
+  <!-- 💻 JAVASCRIPT APP LOGIC: AUTO-SAVE & OFFLINE RESILIENT ENGINE -->
   <!-- ========================================================================= -->
   <script>
     const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycby9JWeXZVkmnx2suT2eS5yk-sS39v-avHsaA4OV-D7fjcvsTGfawtQaCoxHcH90HjiRTg/exec";
@@ -938,6 +936,8 @@
     let adminAppConfig = {};
     let adminResponsesList = [];
     let currentAdminTab = 'data';
+    let isSyncingQueue = false;
+    let configDebounceTimer = null;
 
     function getAdminPassword() {
       return localStorage.getItem("PGSD_ADMIN_PASS") || DEFAULT_ADMIN_PASS;
@@ -947,7 +947,167 @@
       return localStorage.getItem("PGSD_API_URL") || DEFAULT_API_URL;
     }
 
-    // Check Session Auth on Load
+    // =========================================================================
+    // 🛡️ SYNC STATE & OFFLINE RECOVERY ENGINE
+    // =========================================================================
+    function setSyncState(state, customText) {
+      const badge = document.getElementById("cloudSyncBadge");
+      const dot = document.getElementById("cloudSyncDot");
+      const text = document.getElementById("cloudSyncText");
+      const banner = document.getElementById("offlineSyncBanner");
+      const miniConfig = document.getElementById("configSyncStatusMini");
+
+      if (!badge || !dot || !text) return;
+      badge.classList.remove("hidden");
+
+      if (state === 'saving') {
+        badge.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-950/60 text-amber-300 border border-amber-800/80 transition-all";
+        dot.className = "w-2 h-2 rounded-full bg-amber-400 animate-ping flex-shrink-0";
+        text.textContent = customText || "Menyimpan...";
+        if (miniConfig) {
+          miniConfig.className = "font-mono text-amber-600 font-semibold";
+          miniConfig.textContent = "⏳ Menyimpan...";
+        }
+      } else if (state === 'synced') {
+        badge.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-950/60 text-emerald-400 border border-emerald-800/80 transition-all";
+        dot.className = "w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0";
+        text.textContent = customText || "Tersinkronisasi";
+        if (banner) banner.classList.add("hidden");
+        if (miniConfig) {
+          miniConfig.className = "font-mono text-emerald-600 font-semibold";
+          miniConfig.textContent = "🟢 Tersinkron";
+        }
+      } else if (state === 'offline' || state === 'error') {
+        badge.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-rose-950/60 text-rose-300 border border-rose-800/80 transition-all";
+        dot.className = "w-2 h-2 rounded-full bg-rose-500 flex-shrink-0";
+        text.textContent = customText || (state === 'offline' ? "Terputus (Offline)" : "Gagal Kirim");
+        if (banner) banner.classList.remove("hidden");
+        if (miniConfig) {
+          miniConfig.className = "font-mono text-rose-600 font-semibold";
+          miniConfig.textContent = "🔴 Belum Tersinkron";
+        }
+      }
+    }
+
+    function getPendingSyncQueue() {
+      try {
+        return JSON.parse(localStorage.getItem("PGSD_ADMIN_PENDING_SYNC") || "[]");
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function savePendingSyncQueue(queue) {
+      if (!queue || queue.length === 0) {
+        localStorage.removeItem("PGSD_ADMIN_PENDING_SYNC");
+      } else {
+        localStorage.setItem("PGSD_ADMIN_PENDING_SYNC", JSON.stringify(queue));
+      }
+    }
+
+    function queueSyncTask(type, payload) {
+      let queue = getPendingSyncQueue();
+      // Replace existing task of same type to avoid redundant payloads
+      queue = queue.filter(t => t.type !== type);
+      queue.push({
+        type: type,
+        payload: payload,
+        timestamp: Date.now()
+      });
+      savePendingSyncQueue(queue);
+      processPendingSyncQueue();
+    }
+
+    async function processPendingSyncQueue() {
+      if (isSyncingQueue) return;
+      const queue = getPendingSyncQueue();
+      if (queue.length === 0) {
+        setSyncState('synced');
+        return;
+      }
+
+      isSyncingQueue = true;
+      setSyncState('saving');
+
+      const apiUrl = getApiUrl();
+
+      while (queue.length > 0) {
+        const task = queue[0];
+        let action = task.type === 'groups' ? 'adminSaveMasterData' : 'adminSaveConfig';
+        let bodyPayload = { action: action };
+        if (task.type === 'groups') {
+          bodyPayload.groups = task.payload;
+        } else {
+          bodyPayload.config = task.payload;
+        }
+
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+          const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(bodyPayload),
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+
+          const res = await response.json();
+          if (res.success) {
+            queue.shift();
+            savePendingSyncQueue(queue);
+            localStorage.removeItem("PGSD_CACHE_GROUPS");
+            localStorage.removeItem("PGSD_CACHE_CONFIG");
+          } else {
+            console.error("Sync API error:", res.error);
+            isSyncingQueue = false;
+            setSyncState('error', 'Gagal Simpan');
+            showAdminToast("Gagal menyimpan ke Google Sheets: " + (res.error || "Error tidak diketahui"), "error");
+            return;
+          }
+        } catch (err) {
+          console.warn("Sync network error / offline:", err);
+          isSyncingQueue = false;
+          setSyncState('offline', 'Offline (Tersimpan Lokal)');
+          return;
+        }
+      }
+
+      isSyncingQueue = false;
+      setSyncState('synced');
+    }
+
+    function triggerAutoSaveMasterData() {
+      queueSyncTask('groups', adminMasterGroups);
+    }
+
+    function triggerAutoSaveConfig() {
+      queueSyncTask('config', adminAppConfig);
+    }
+
+    // Network Status Listeners
+    window.addEventListener('online', function() {
+      showAdminToast("Koneksi internet terhubung kembali. Memproses sinkronisasi ke Spreadsheet...", "info");
+      processPendingSyncQueue();
+    });
+
+    window.addEventListener('offline', function() {
+      setSyncState('offline');
+      showAdminToast("Koneksi internet terputus. Data perubahan tetap aman tersimpan di browser.", "warning");
+    });
+
+    // Periodic Retry if pending
+    setInterval(() => {
+      const q = getPendingSyncQueue();
+      if (q.length > 0 && navigator.onLine && !isSyncingQueue) {
+        processPendingSyncQueue();
+      }
+    }, 20000);
+
+    // =========================================================================
+    // 🔑 AUTHENTICATION & INITIALIZATION
+    // =========================================================================
     document.addEventListener("DOMContentLoaded", function() {
       const isAuth = sessionStorage.getItem("PGSD_ADMIN_AUTH");
       if (isAuth === "true") {
@@ -977,6 +1137,12 @@
       document.getElementById("adminDashboard").classList.remove("hidden");
       document.getElementById("inputApiUrl").value = getApiUrl();
       fetchAdminFullData();
+      
+      // Process any pending sync queue left over from earlier session
+      const q = getPendingSyncQueue();
+      if (q.length > 0) {
+        processPendingSyncQueue();
+      }
     }
 
     function handleLogout() {
@@ -995,10 +1161,10 @@
         
         if (t === tabKey) {
           view.classList.remove("hidden");
-          btn.className = "py-1.5 px-2 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition flex items-center justify-center gap-1 cursor-pointer text-center truncate font-bold";
+          btn.className = "py-2 px-1.5 sm:px-2 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition flex items-center justify-center gap-1 cursor-pointer text-center truncate font-bold";
         } else {
           view.classList.add("hidden");
-          btn.className = "py-1.5 px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1 cursor-pointer text-center truncate";
+          btn.className = "py-2 px-1.5 sm:px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1 cursor-pointer text-center truncate";
         }
       });
 
@@ -1011,10 +1177,21 @@
     // 🌐 FETCH ALL DATA FROM BACKEND FOR ADMIN
     // =========================================================================
     async function fetchAdminFullData() {
+      const refreshBtn = document.getElementById("btnRefreshMasterData");
+      if (refreshBtn) {
+        refreshBtn.disabled = true;
+        refreshBtn.innerHTML = `<span>⏳ Memuat...</span>`;
+      }
+
       const apiUrl = getApiUrl();
       try {
         const response = await fetch(`${apiUrl}?action=adminGetFullData&_t=${Date.now()}`);
         const res = await response.json();
+
+        if (refreshBtn) {
+          refreshBtn.disabled = false;
+          refreshBtn.innerHTML = `<span>🔄 Segarkan</span>`;
+        }
 
         if (res.success) {
           adminMasterGroups = res.groups || [];
@@ -1025,16 +1202,21 @@
           populateConfigFormValues();
           populateMasterSesiFilter();
           populateResponseGroupFilter();
+          setSyncState('synced');
         } else {
           showAdminToast("Gagal mengambil data dari Google Sheets: " + res.error, "error");
         }
       } catch (err) {
+        if (refreshBtn) {
+          refreshBtn.disabled = false;
+          refreshBtn.innerHTML = `<span>🔄 Segarkan</span>`;
+        }
         showAdminToast("Gagal terhubung ke API backend: " + err, "error");
       }
     }
 
     // =========================================================================
-    // 📋 TAB 1 LOGIC: DATA KELOMPOK & MAHASISWA
+    // 📋 TAB 1 LOGIC: DATA KELOMPOK & MAHASISWA (AUTO-SAVE)
     // =========================================================================
     function renderMasterGroups() {
       const container = document.getElementById("masterGroupsListContainer");
@@ -1178,14 +1360,14 @@
         if (g.sesi) sesiSet.add(g.sesi);
       });
 
-      sesiSet.forEach(s => {
+      Array.from(sesiSet).sort().forEach(s => {
         const opt = document.createElement("option");
         opt.value = s;
         opt.textContent = `Sesi: ${s}`;
         select.appendChild(opt);
       });
 
-      select.value = currentVal;
+      select.value = currentVal || "ALL";
     }
 
     // Modal Kelompok Actions
@@ -1227,7 +1409,7 @@
         adminMasterGroups[editIdx].name = name;
         adminMasterGroups[editIdx].sesi = sesi;
         adminMasterGroups[editIdx].status = status;
-        showAdminToast(`Kelompok '${name}' berhasil diperbarui. Klik 'Simpan ke Spreadsheet' untuk menerapkan.`, "info");
+        showAdminToast(`Kelompok '${name}' berhasil diperbarui & disimpan.`, "success");
       } else {
         adminMasterGroups.push({
           name: name,
@@ -1235,13 +1417,14 @@
           status: status,
           members: []
         });
-        showAdminToast(`Kelompok '${name}' berhasil ditambahkan. Klik 'Simpan ke Spreadsheet' untuk menerapkan.`, "info");
+        showAdminToast(`Kelompok '${name}' berhasil ditambahkan & disimpan.`, "success");
       }
 
       closeGroupModal();
       renderMasterGroups();
       populateMasterSesiFilter();
       populateResponseGroupFilter();
+      triggerAutoSaveMasterData();
     }
 
     function deleteGroup(gIdx) {
@@ -1249,11 +1432,13 @@
       if (!grp) return;
 
       if (confirm(`Apakah Anda yakin ingin menghapus '${grp.name}' beserta seluruh ${grp.members.length} anggotanya?`)) {
+        const deletedName = grp.name;
         adminMasterGroups.splice(gIdx, 1);
         renderMasterGroups();
         populateMasterSesiFilter();
         populateResponseGroupFilter();
-        showAdminToast(`Kelompok '${grp.name}' dihapus dari daftar lokal. Klik 'Simpan ke Spreadsheet' untuk menerapkan.`, "warning");
+        triggerAutoSaveMasterData();
+        showAdminToast(`Kelompok '${deletedName}' dihapus & disimpan.`, "warning");
       }
     }
 
@@ -1303,14 +1488,15 @@
 
       if (mIdx >= 0) {
         adminMasterGroups[gIdx].members[mIdx] = { name, nim, status };
-        showAdminToast(`Data '${name}' diperbarui.`, "info");
+        showAdminToast(`Data '${name}' diperbarui & disimpan.`, "success");
       } else {
-        adminMasterGroups.push ? adminMasterGroups[gIdx].members.push({ name, nim, status }) : null;
-        showAdminToast(`'${name}' ditambahkan ke ${adminMasterGroups[gIdx].name}.`, "info");
+        adminMasterGroups[gIdx].members.push({ name, nim, status });
+        showAdminToast(`'${name}' ditambahkan ke ${adminMasterGroups[gIdx].name} & disimpan.`, "success");
       }
 
       closeMemberModal();
       renderMasterGroups();
+      triggerAutoSaveMasterData();
     }
 
     function deleteMember(gIdx, mIdx) {
@@ -1321,49 +1507,13 @@
       if (confirm(`Hapus anggota '${mem.name}' dari ${grp.name}?`)) {
         grp.members.splice(mIdx, 1);
         renderMasterGroups();
+        triggerAutoSaveMasterData();
         showAdminToast(`'${mem.name}' dihapus dari ${grp.name}.`, "warning");
       }
     }
 
-    // Save All Master Groups to Backend
-    async function saveAllMasterDataToBackend() {
-      const btn = document.getElementById("btnSaveMasterData");
-      btn.disabled = true;
-      btn.innerHTML = `<span>⏳ Menyimpan ke Google Sheets...</span>`;
-
-      const apiUrl = getApiUrl();
-      const payload = {
-        action: "adminSaveMasterData",
-        groups: adminMasterGroups
-      };
-
-      try {
-        const response = await fetch(apiUrl, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(payload)
-        });
-
-        const res = await response.json();
-        btn.disabled = false;
-        btn.innerHTML = `<span>💾 Simpan ke Spreadsheet</span>`;
-
-        if (res.success) {
-          localStorage.removeItem("PGSD_CACHE_GROUPS");
-          localStorage.removeItem("PGSD_CACHE_CONFIG");
-          showAdminToast(res.message || "Data master berhasil disimpan ke Spreadsheet!", "success");
-        } else {
-          showAdminToast(res.error || "Gagal menyimpan data master.", "error");
-        }
-      } catch (err) {
-        btn.disabled = false;
-        btn.innerHTML = `<span>💾 Simpan ke Spreadsheet</span>`;
-        showAdminToast("Gagal terhubung ke API: " + err, "error");
-      }
-    }
-
     // =========================================================================
-    // ⚙️ TAB 2 LOGIC: KONFIGURASI PERKULIAHAN & QUICK SESSION CONTROLLER
+    // ⚙️ TAB 2 LOGIC: KONFIGURASI PERKULIAHAN & QUICK SESSION (AUTO-SAVE)
     // =========================================================================
     function updateQuickSessionUI(sesi) {
       const label = document.getElementById("quickActiveSessionLabel");
@@ -1373,53 +1523,15 @@
       if (select) select.value = cleanSesi;
     }
 
-    async function applyQuickActiveSession() {
-      const select = document.getElementById("quickSessionSelect");
-      const newSesi = select.value;
-      const btn = document.getElementById("btnApplyQuickSession");
-
-      btn.disabled = true;
-      btn.innerHTML = `<span>⏳ Menerapkan...</span>`;
-
+    function handleQuickSessionChange(newSesi) {
       adminAppConfig["Sesi_Minggu_Aktif"] = newSesi;
-      const cfgEl = document.getElementById("cfg_Sesi_Minggu_Aktif");
-      if (cfgEl) cfgEl.value = newSesi;
-
-      const apiUrl = getApiUrl();
-      const payload = {
-        action: "adminSaveConfig",
-        config: adminAppConfig
-      };
-
-      try {
-        const response = await fetch(apiUrl, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(payload)
-        });
-
-        const res = await response.json();
-        btn.disabled = false;
-        btn.innerHTML = `<span>Terapkan Sesi</span>`;
-
-        if (res.success) {
-          localStorage.removeItem("PGSD_CACHE_CONFIG");
-          localStorage.removeItem("PGSD_CACHE_GROUPS");
-          updateQuickSessionUI(newSesi);
-          showAdminToast(`Sesi aktif berhasil diubah menjadi '${newSesi}' dan langsung aktif di formulir!`, "success");
-        } else {
-          showAdminToast(res.error || "Gagal menerapkan sesi.", "error");
-        }
-      } catch (err) {
-        btn.disabled = false;
-        btn.innerHTML = `<span>Terapkan Sesi</span>`;
-        showAdminToast("Koneksi gagal: " + err, "error");
-      }
+      updateQuickSessionUI(newSesi);
+      triggerAutoSaveConfig();
+      showAdminToast(`Sesi aktif diubah ke '${newSesi}' & otomatis tersimpan!`, "info");
     }
 
     function populateConfigFormValues() {
       const keys = [
-        "Sesi_Minggu_Aktif",
         "Judul_Form",
         "Mata_Kuliah",
         "Dosen_Pengampu",
@@ -1443,50 +1555,26 @@
       updateQuickSessionUI(adminAppConfig["Sesi_Minggu_Aktif"] || "Minggu 1");
     }
 
-    async function handleSaveConfigForm(e) {
-      e.preventDefault();
+    function handleConfigInputAutoSave(isImmediate) {
+      if (configDebounceTimer) clearTimeout(configDebounceTimer);
 
-      const newConfig = {
-        "Sesi_Minggu_Aktif": document.getElementById("cfg_Sesi_Minggu_Aktif").value.trim(),
-        "Judul_Form": document.getElementById("cfg_Judul_Form").value.trim(),
-        "Mata_Kuliah": document.getElementById("cfg_Mata_Kuliah").value.trim(),
-        "Dosen_Pengampu": document.getElementById("cfg_Dosen_Pengampu").value.trim(),
-        "Kelas": document.getElementById("cfg_Kelas").value.trim(),
-        "Jurusan": document.getElementById("cfg_Jurusan").value.trim(),
-        "Nilai_Kelompok_Min": document.getElementById("cfg_Nilai_Kelompok_Min").value.trim(),
-        "Nilai_Kelompok_Max": document.getElementById("cfg_Nilai_Kelompok_Max").value.trim(),
-        "Maksimal_Pilihan_Presentator_Terbaik": document.getElementById("cfg_Maksimal_Pilihan_Presentator_Terbaik").value.trim(),
-        "Maksimal_Karakter_Evaluasi": document.getElementById("cfg_Maksimal_Karakter_Evaluasi").value.trim(),
-        "Tampilkan_Ulasan_Publik": document.getElementById("cfg_Tampilkan_Ulasan_Publik").value.trim(),
-        "Domain_Email_Wajib": document.getElementById("cfg_Domain_Email_Wajib").value.trim()
-      };
+      const delay = isImmediate ? 0 : 600;
+      configDebounceTimer = setTimeout(() => {
+        // Collect current values
+        adminAppConfig["Judul_Form"] = (document.getElementById("cfg_Judul_Form")?.value || "").trim();
+        adminAppConfig["Mata_Kuliah"] = (document.getElementById("cfg_Mata_Kuliah")?.value || "").trim();
+        adminAppConfig["Dosen_Pengampu"] = (document.getElementById("cfg_Dosen_Pengampu")?.value || "").trim();
+        adminAppConfig["Kelas"] = (document.getElementById("cfg_Kelas")?.value || "").trim();
+        adminAppConfig["Jurusan"] = (document.getElementById("cfg_Jurusan")?.value || "").trim();
+        adminAppConfig["Nilai_Kelompok_Min"] = (document.getElementById("cfg_Nilai_Kelompok_Min")?.value || "50").trim();
+        adminAppConfig["Nilai_Kelompok_Max"] = (document.getElementById("cfg_Nilai_Kelompok_Max")?.value || "100").trim();
+        adminAppConfig["Maksimal_Pilihan_Presentator_Terbaik"] = (document.getElementById("cfg_Maksimal_Pilihan_Presentator_Terbaik")?.value || "2").trim();
+        adminAppConfig["Maksimal_Karakter_Evaluasi"] = (document.getElementById("cfg_Maksimal_Karakter_Evaluasi")?.value || "500").trim();
+        adminAppConfig["Tampilkan_Ulasan_Publik"] = document.getElementById("cfg_Tampilkan_Ulasan_Publik")?.value || "AKTIF";
+        adminAppConfig["Domain_Email_Wajib"] = (document.getElementById("cfg_Domain_Email_Wajib")?.value || "").trim();
 
-      const apiUrl = getApiUrl();
-      const payload = {
-        action: "adminSaveConfig",
-        config: newConfig
-      };
-
-      try {
-        const response = await fetch(apiUrl, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(payload)
-        });
-
-        const res = await response.json();
-        if (res.success) {
-          adminAppConfig = newConfig;
-          localStorage.removeItem("PGSD_CACHE_CONFIG");
-          localStorage.removeItem("PGSD_CACHE_GROUPS");
-          updateQuickSessionUI(newConfig["Sesi_Minggu_Aktif"]);
-          showAdminToast("Konfigurasi sistem perkuliahan berhasil disimpan ke Spreadsheet!", "success");
-        } else {
-          showAdminToast(res.error || "Gagal menyimpan konfigurasi.", "error");
-        }
-    } catch (err) {
-        showAdminToast("Koneksi gagal: " + err, "error");
-      }
+        triggerAutoSaveConfig();
+      }, delay);
     }
 
     // =========================================================================
