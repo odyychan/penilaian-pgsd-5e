@@ -9,7 +9,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   
   <script>
     tailwind.config = {
@@ -18,23 +18,6 @@
           fontFamily: {
             sans: ['"Plus Jakarta Sans"', '"Inter"', 'sans-serif'],
             mono: ['"JetBrains Mono"', 'monospace'],
-          },
-          colors: {
-            brand: {
-              50: '#f4f4f5',
-              100: '#e4e4e7',
-              200: '#d4d4d8',
-              500: '#71717a',
-              900: '#18181b',
-              950: '#09090b',
-            },
-            accent: {
-              50: '#eff6ff',
-              100: '#dbeafe',
-              500: '#3b82f6',
-              600: '#2563eb',
-              700: '#1d4ed8',
-            }
           }
         }
       }
@@ -167,42 +150,27 @@
     <!-- ========================================================================= -->
     <div id="viewForm" class="space-y-5">
 
-      <!-- DESKRIPSI PENGANTAR FORMULIR (FORMAL & ENGAGING) -->
-      <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-6 shadow-xs space-y-3.5">
-        <div class="space-y-1">
-          <div class="flex items-center gap-2">
-            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-zinc-100 text-zinc-700 border border-zinc-200">
-              Peer-Assessment
-            </span>
-            <span class="text-xs text-zinc-400">•</span>
-            <span class="text-xs text-zinc-500 font-medium">Evaluasi Kinerja Rekan Sejawat</span>
-          </div>
+      <!-- INFORMASI FORMULIR & IDENTITAS AKADEMIK -->
+      <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-6 shadow-xs space-y-4">
+        <div>
           <h2 class="text-base sm:text-lg font-bold text-zinc-900 leading-snug">
             Penilaian Presentasi Mahasiswa Kelas 5E PGSD
           </h2>
-          <p class="text-xs text-zinc-500 font-medium">
-            Mata Kuliah: <strong class="text-zinc-800">Bimbingan Konseling di SD</strong> • Dosen Pengampu: <strong class="text-zinc-800">Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.</strong>
+          <p class="text-xs text-zinc-600 leading-relaxed mt-1">
+            Formulir ini digunakan oleh mahasiswa untuk memberikan penilaian terhadap presentasi kelompok serta menyampaikan masukan evaluatif kepada setiap pemateri.
           </p>
         </div>
 
-        <p class="text-xs sm:text-sm text-zinc-600 leading-relaxed pt-0.5">
-          Formulir ini digunakan oleh seluruh mahasiswa audiens untuk memberikan apresiasi, evaluasi skor kelompok secara objektif, serta masukan konstruktif bagi rekan yang sedang mempresentasikan materi. Penilaian Anda berperan penting dalam mendorong iklim diskusi yang aktif dan bermakna di kelas.
-        </p>
-
-        <!-- Ringkasan Petunjuk Singkat -->
-        <div class="flex flex-wrap items-center gap-2 pt-1 border-t border-zinc-100 text-[11px] text-zinc-500">
-          <span class="inline-flex items-center gap-1 bg-zinc-50 border border-zinc-200 px-2.5 py-1 rounded-md">
-            <span>👤</span>
-            <span>Peran: Mahasiswa Audiens</span>
-          </span>
-          <span class="inline-flex items-center gap-1 bg-zinc-50 border border-zinc-200 px-2.5 py-1 rounded-md">
-            <span>⏱️</span>
-            <span>Estimasi: ~2 Menit</span>
-          </span>
-          <span class="inline-flex items-center gap-1 bg-zinc-50 border border-zinc-200 px-2.5 py-1 rounded-md">
-            <span>📋</span>
-            <span>4 Langkah Terstruktur</span>
-          </span>
+        <!-- Rincian Mata Kuliah & Dosen Pengampu -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-zinc-100 text-xs">
+          <div class="p-3 rounded-lg bg-zinc-50 border border-zinc-200/80">
+            <span class="text-zinc-400 block text-[11px] font-medium">Mata Kuliah:</span>
+            <span class="font-semibold text-zinc-900 mt-0.5 block" id="infoMatkul">Bimbingan Konseling di SD</span>
+          </div>
+          <div class="p-3 rounded-lg bg-zinc-50 border border-zinc-200/80">
+            <span class="text-zinc-400 block text-[11px] font-medium">Dosen Pengampu:</span>
+            <span class="font-semibold text-zinc-900 mt-0.5 block" id="infoDosen">Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.</span>
+          </div>
         </div>
       </div>
 
@@ -539,25 +507,52 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- TAB 2: DASHBOARD REKAPITULASI HASIL -->
+    <!-- TAB 2: DASHBOARD REKAPITULASI HASIL (LENGKAP: KELOMPOK & INDIVIDU) -->
     <!-- ========================================================================= -->
     <div id="viewRekap" class="space-y-5 hidden">
       <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5">
         
-        <div class="flex items-center justify-between border-b border-zinc-100 pb-3.5">
+        <!-- Header Rekap -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 pb-4">
           <div>
-            <h2 class="text-base sm:text-lg font-bold text-zinc-900">Rekapitulasi Penilaian Presentasi</h2>
-            <p class="text-xs text-zinc-500">Rata-rata skor kelompok, distribusi voting presentator, dan ulasan audiens.</p>
+            <h2 class="text-base sm:text-lg font-bold text-zinc-900">Rekapitulasi Hasil Penilaian</h2>
+            <p class="text-xs text-zinc-500">Laporan evaluasi performa per kelompok dan capaian ulasan per individu pemateri.</p>
           </div>
           <button 
             onclick="loadRekapData()" 
-            class="py-1.5 px-3 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 cursor-pointer"
+            class="self-start sm:self-auto py-1.5 px-3 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 cursor-pointer"
           >
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
             </svg>
-            <span>Segarkan</span>
+            <span>Segarkan Data</span>
           </button>
+        </div>
+
+        <!-- Sub-View Switcher (Kelompok vs Mahasiswa Individu) -->
+        <div class="grid grid-cols-2 p-1 bg-zinc-100 rounded-lg border border-zinc-200 text-xs font-semibold">
+          <button 
+            id="subTabKelompokBtn" 
+            onclick="switchRekapSubView('kelompok')" 
+            class="py-2 px-3 rounded-md bg-white text-zinc-900 shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <span>📊 Rekap Kelompok</span>
+          </button>
+          <button 
+            id="subTabIndividuBtn" 
+            onclick="switchRekapSubView('individu')" 
+            class="py-2 px-3 rounded-md text-zinc-500 hover:text-zinc-900 transition flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <span>👤 Rekap per Mahasiswa</span>
+          </button>
+        </div>
+
+        <!-- Filter Dropdown Bar -->
+        <div class="flex items-center justify-between gap-3 bg-zinc-50 p-3 rounded-lg border border-zinc-200 text-xs">
+          <label class="font-semibold text-zinc-700">Filter Kelompok:</label>
+          <select id="rekapGroupFilter" onchange="filterRekapDisplay()" class="text-xs font-medium px-3 py-1.5 rounded border border-zinc-300 bg-white focus:border-zinc-900 outline-none">
+            <option value="ALL">Semua Kelompok</option>
+          </select>
         </div>
 
         <!-- Loading State -->
@@ -569,20 +564,14 @@
           <p class="text-xs font-medium">Memuat data rekapitulasi...</p>
         </div>
 
-        <!-- Content Rekap -->
-        <div id="rekapContent" class="space-y-4 hidden">
-          <!-- Filter Kelompok -->
-          <div class="flex items-center justify-between gap-3 bg-zinc-50 p-3 rounded-lg border border-zinc-200 text-xs">
-            <label class="font-semibold text-zinc-700">Filter Kelompok:</label>
-            <select id="rekapGroupFilter" onchange="filterRekapDisplay()" class="text-xs font-medium px-3 py-1.5 rounded border border-zinc-300 bg-white focus:border-zinc-900 outline-none">
-              <option value="ALL">Semua Kelompok</option>
-            </select>
-          </div>
+        <!-- SUB-VIEW 1: REKAP KELOMPOK -->
+        <div id="rekapKelompokContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4 hidden">
+          <!-- Dynamic Kelompok Cards -->
+        </div>
 
-          <!-- Cards Grid -->
-          <div id="rekapCardsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <!-- Dynamic Rekap Cards -->
-          </div>
+        <!-- SUB-VIEW 2: REKAP INDIVIDU MAHASISWA -->
+        <div id="rekapIndividuContainer" class="space-y-3.5 hidden">
+          <!-- Dynamic Individual Student Cards -->
         </div>
 
         <!-- Empty State Rekap -->
@@ -602,7 +591,7 @@
   <footer class="w-full py-4 text-center text-xs text-zinc-400 border-t border-zinc-200 bg-white mt-auto">
     <div class="max-w-3xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
       <p>© 2026 PGSD Kelas 5E • FKIP Universitas Lambung Mangkurat</p>
-      <p class="font-mono text-[11px]">Peer-Assessment System</p>
+      <p class="font-mono text-[11px]">Sistem Penilaian Perkuliahan</p>
     </div>
   </footer>
 
@@ -637,8 +626,6 @@
     </div>
   </div>
 
-
-
   <!-- ========================================================================= -->
   <!-- 💻 SCRIPT LOGIC -->
   <!-- ========================================================================= -->
@@ -655,6 +642,7 @@
     let selectedGroupObj = null;
     let selectedBestPresenters = [];
     let currentRekapData = null;
+    let currentRekapSubView = "kelompok";
     let isEmailValidState = false;
 
     const stepMetadata = {
@@ -726,11 +714,18 @@
     function renderConfigHeader() {
       const title = appConfig["Judul_Form"] || "Penilaian Presentasi PGSD 5E";
       const matkul = appConfig["Mata_Kuliah"] || "Bimbingan Konseling di SD";
+      const dosen = appConfig["Dosen_Pengampu"] || "Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.";
       const sesi = appConfig["Sesi_Minggu_Aktif"] || "Minggu 1";
 
       document.getElementById("navTitle").textContent = title;
       document.getElementById("navSubtitle").textContent = `${matkul} • FKIP ULM`;
       document.getElementById("badgeSesiTopText").textContent = `Sesi: ${sesi}`;
+      
+      // Update Academic Card
+      const infoMatkulEl = document.getElementById("infoMatkul");
+      const infoDosenEl = document.getElementById("infoDosen");
+      if (infoMatkulEl) infoMatkulEl.textContent = matkul;
+      if (infoDosenEl) infoDosenEl.textContent = dosen;
 
       const minVal = parseInt(appConfig["Nilai_Kelompok_Min"] || 50);
       const maxVal = parseInt(appConfig["Nilai_Kelompok_Max"] || 100);
@@ -1193,14 +1188,19 @@
       }
     }
 
+    // =========================================================================
+    // 📊 REKAPITULASI DATA LOGIC (KELOMPOK & INDIVIDU PEMATERI)
+    // =========================================================================
     async function loadRekapData() {
       const loading = document.getElementById("rekapLoading");
-      const content = document.getElementById("rekapContent");
       const empty = document.getElementById("rekapEmpty");
+      const kelompokBox = document.getElementById("rekapKelompokContainer");
+      const individuBox = document.getElementById("rekapIndividuContainer");
 
       loading.classList.remove("hidden");
-      content.classList.add("hidden");
       empty.classList.add("hidden");
+      kelompokBox.classList.add("hidden");
+      individuBox.classList.add("hidden");
 
       const apiUrl = getApiUrl();
 
@@ -1214,9 +1214,8 @@
           if (!res.summary || res.summary.length === 0) {
             empty.classList.remove("hidden");
           } else {
-            content.classList.remove("hidden");
             populateRekapFilter(res.summary);
-            renderRekapCards(res.summary, res.isPublicReviewVisible);
+            renderBothRekapViews();
           }
         } else {
           showToast("Gagal memuat rekap: " + res.error, "error");
@@ -1224,6 +1223,26 @@
       } catch (err) {
         loading.classList.add("hidden");
         showToast("Koneksi rekap error: " + err, "error");
+      }
+    }
+
+    function switchRekapSubView(sub) {
+      currentRekapSubView = sub;
+      const btnK = document.getElementById("subTabKelompokBtn");
+      const btnI = document.getElementById("subTabIndividuBtn");
+      const boxK = document.getElementById("rekapKelompokContainer");
+      const boxI = document.getElementById("rekapIndividuContainer");
+
+      if (sub === 'kelompok') {
+        btnK.className = "py-2 px-3 rounded-md bg-white text-zinc-900 shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer";
+        btnI.className = "py-2 px-3 rounded-md text-zinc-500 hover:text-zinc-900 transition flex items-center justify-center gap-1.5 cursor-pointer";
+        boxK.classList.remove("hidden");
+        boxI.classList.add("hidden");
+      } else {
+        btnI.className = "py-2 px-3 rounded-md bg-white text-zinc-900 shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer";
+        btnK.className = "py-2 px-3 rounded-md text-zinc-500 hover:text-zinc-900 transition flex items-center justify-center gap-1.5 cursor-pointer";
+        boxI.classList.remove("hidden");
+        boxK.classList.add("hidden");
       }
     }
 
@@ -1239,16 +1258,26 @@
     }
 
     function filterRekapDisplay() {
-      if (!currentRekapData) return;
-      const filterVal = document.getElementById("rekapGroupFilter").value;
-      const list = filterVal === "ALL" 
-        ? currentRekapData.summary 
-        : currentRekapData.summary.filter(i => i.kelompok === filterVal);
-      renderRekapCards(list, currentRekapData.isPublicReviewVisible);
+      renderBothRekapViews();
     }
 
-    function renderRekapCards(summaryList, isPublicReviewVisible) {
-      const container = document.getElementById("rekapCardsContainer");
+    function renderBothRekapViews() {
+      if (!currentRekapData) return;
+      const filterVal = document.getElementById("rekapGroupFilter").value;
+      const summaryList = filterVal === "ALL" 
+        ? currentRekapData.summary 
+        : currentRekapData.summary.filter(i => i.kelompok === filterVal);
+
+      renderRekapKelompok(summaryList, currentRekapData.isPublicReviewVisible);
+      renderRekapIndividu(summaryList, currentRekapData.isPublicReviewVisible);
+
+      // Set Active Box based on SubTab
+      switchRekapSubView(currentRekapSubView);
+    }
+
+    // 1. Render Rekap Kelompok View
+    function renderRekapKelompok(summaryList, isPublicReviewVisible) {
+      const container = document.getElementById("rekapKelompokContainer");
       container.innerHTML = "";
 
       summaryList.forEach(grp => {
@@ -1263,42 +1292,6 @@
               <span class="font-mono font-semibold text-zinc-700 bg-zinc-200/70 px-2 py-0.5 rounded text-[11px]">${p.votes} Suara</span>
             </div>
           `).join("");
-        }
-
-        let reviewsHtml = "";
-        if (!isPublicReviewVisible) {
-          reviewsHtml = `
-            <div class="bg-zinc-50 border border-zinc-200 rounded p-3 text-xs text-zinc-600">
-              Ulasan kualitatif disembunyikan oleh Dosen/Admin.
-            </div>
-          `;
-        } else {
-          const evalMembers = Object.keys(grp.evaluasiList || {});
-          if (evalMembers.length === 0) {
-            reviewsHtml = `<p class="text-xs text-zinc-400 italic">Belum ada ulasan tertulis.</p>`;
-          } else {
-            reviewsHtml = evalMembers.map(mName => {
-              const ulasanArr = grp.evaluasiList[mName];
-              const listItems = ulasanArr.map(u => `
-                <li class="bg-zinc-50 p-2.5 rounded border border-zinc-100 text-xs text-zinc-700 space-y-1">
-                  <p class="leading-relaxed text-zinc-800">"${u.ulasan}"</p>
-                  <span class="text-[10px] text-zinc-400 block text-right">— ${u.penilai}</span>
-                </li>
-              `).join("");
-
-              return `
-                <div class="space-y-1.5">
-                  <div class="text-xs font-semibold text-zinc-800 flex items-center justify-between">
-                    <span>${mName}</span>
-                    <span class="text-[10px] font-mono text-zinc-400">${ulasanArr.length} Ulasan</span>
-                  </div>
-                  <ul class="space-y-1.5 max-h-48 overflow-y-auto custom-scrollbar">
-                    ${listItems}
-                  </ul>
-                </div>
-              `;
-            }).join("<div class='border-t border-zinc-100 my-2.5'></div>");
-          }
         }
 
         card.innerHTML = `
@@ -1320,22 +1313,93 @@
           </div>
 
           <div>
-            <h5 class="text-xs font-semibold text-zinc-700 mb-2">Suara Presentator Terbaik:</h5>
+            <h5 class="text-xs font-semibold text-zinc-700 mb-2">Peringkat Suara Pemateri Terbaik:</h5>
             <div class="space-y-1.5">
               ${presentersHtml}
-            </div>
-          </div>
-
-          <div class="border-t border-zinc-100 pt-3">
-            <h5 class="text-xs font-semibold text-zinc-700 mb-2">Ulasan Pemateri:</h5>
-            <div class="space-y-2">
-              ${reviewsHtml}
             </div>
           </div>
         `;
 
         container.appendChild(card);
       });
+    }
+
+    // 2. Render Rekap Individu Mahasiswa View
+    function renderRekapIndividu(summaryList, isPublicReviewVisible) {
+      const container = document.getElementById("rekapIndividuContainer");
+      container.innerHTML = "";
+
+      let hasStudents = false;
+
+      summaryList.forEach(grp => {
+        const evalMap = grp.evaluasiList || {};
+        const voteMap = grp.votePresentator || {};
+        const studentNames = Object.keys(evalMap);
+
+        // Ambil list mahasiswa dari grup
+        studentNames.forEach(sName => {
+          hasStudents = true;
+          const ulasanList = evalMap[sName] || [];
+          const votesCount = voteMap[sName] || 0;
+
+          const card = document.createElement("div");
+          card.className = "bg-white rounded-xl border border-zinc-200 p-4 sm:p-5 space-y-3 shadow-xs";
+
+          let reviewsContent = "";
+          if (!isPublicReviewVisible) {
+            reviewsContent = `<div class="bg-zinc-50 border border-zinc-200 rounded p-2.5 text-xs text-zinc-500">Ulasan kualitatif disembunyikan oleh Dosen.</div>`;
+          } else if (ulasanList.length === 0) {
+            reviewsContent = `<p class="text-xs text-zinc-400 italic">Belum ada catatan ulasan tertulis.</p>`;
+          } else {
+            const listItems = ulasanList.map(u => `
+              <li class="bg-zinc-50 p-2.5 rounded border border-zinc-100 text-xs text-zinc-700 space-y-1">
+                <p class="leading-relaxed text-zinc-800">"${u.ulasan}"</p>
+                <span class="text-[10px] text-zinc-400 block text-right">— ${u.penilai}</span>
+              </li>
+            `).join("");
+
+            reviewsContent = `
+              <ul class="space-y-1.5 max-h-48 overflow-y-auto custom-scrollbar">
+                ${listItems}
+              </ul>
+            `;
+          }
+
+          card.innerHTML = `
+            <div class="flex items-center justify-between gap-3 border-b border-zinc-100 pb-2.5">
+              <div>
+                <h4 class="font-bold text-zinc-900 text-xs sm:text-sm flex items-center gap-1.5">
+                  <span>${sName}</span>
+                </h4>
+                <span class="text-[11px] text-zinc-500 font-medium">${grp.kelompok} • ${grp.sesi}</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="text-[11px] font-mono font-bold bg-zinc-100 text-zinc-800 px-2.5 py-1 rounded border border-zinc-200">
+                  ${votesCount} Suara Vote
+                </span>
+                <span class="text-[11px] font-mono font-medium bg-zinc-50 text-zinc-600 px-2.5 py-1 rounded border border-zinc-200">
+                  ${ulasanList.length} Masukan
+                </span>
+              </div>
+            </div>
+
+            <div class="space-y-1.5">
+              <h5 class="text-[11px] font-semibold text-zinc-600">Catatan Masukan & Evaluasi Audiens:</h5>
+              ${reviewsContent}
+            </div>
+          `;
+
+          container.appendChild(card);
+        });
+      });
+
+      if (!hasStudents) {
+        container.innerHTML = `
+          <div class="p-6 text-center text-xs text-zinc-400 bg-zinc-50 border border-zinc-200 rounded-xl">
+            Belum ada ulasan individu untuk kelompok yang dipilih.
+          </div>
+        `;
+      }
     }
 
     function showToast(message, type = "info") {
@@ -1362,8 +1426,6 @@
         toast.classList.add("hidden");
       }, 3500);
     }
-
-
 
     function mockLoadData() {
       appConfig = {
