@@ -57,11 +57,17 @@ function doGet(e) {
 
   // 2. Endpoint Ambil Data Rekapitulasi Nilai
   if (action === "getRecapData") {
-    const data = getRecapData();
+    const data = getCachedRecapData();
     return createJsonResponse(data);
   }
 
-  // 3. Fallback Info
+  // 3. Endpoint Admin: Ambil Semua Data Master & Config
+  if (action === "adminGetFullData") {
+    const data = adminGetFullData();
+    return createJsonResponse(data);
+  }
+
+  // 4. Fallback Info
   return createJsonResponse({
     status: "API Online",
     spreadsheetId: SPREADSHEET_ID,
@@ -95,6 +101,14 @@ function doPost(e) {
       result = getCachedInitialData();
     } else if (action === "getRecapData") {
       result = getCachedRecapData();
+    } else if (action === "adminGetFullData") {
+      result = adminGetFullData();
+    } else if (action === "adminSaveMasterData") {
+      result = adminSaveMasterData(payload);
+    } else if (action === "adminSaveConfig") {
+      result = adminSaveConfig(payload);
+    } else if (action === "adminResetResponses") {
+      result = adminResetResponses(payload);
     }
 
     return createJsonResponse(result);
@@ -665,4 +679,212 @@ function formatHeaderRange(range, bgColor, fontColor) {
     .setFontWeight("bold")
     .setHorizontalAlignment("center")
     .setVerticalAlignment("middle");
+}
+
+/**
+ * ==============================================================================
+ * 🔐 ADMIN BACKEND CONTROLLERS (DATA & CONFIG MANAGEMENT)
+ * ==============================================================================
+ */
+
+/**
+ * Mengambil Seluruh Data Master (Aktif/Nonaktif) & Konfigurasi untuk Admin
+ */
+function adminGetFullData() {
+  try {
+    const ss = getSpreadsheet();
+    const config = getConfigMap(ss);
+    let masterSheet = ss.getSheetByName(SHEET_MASTER);
+    let responsSheet = ss.getSheetByName(SHEET_RESPONS);
+
+    if (!masterSheet) {
+      initAllSheets(ss);
+      masterSheet = ss.getSheetByName(SHEET_MASTER);
+    }
+
+    const masterData = masterSheet.getLastRow() > 0 ? masterSheet.getDataRange().getValues() : [];
+    const groupsMap = {};
+
+    for (let i = 1; i < masterData.length; i++) {
+      const row = masterData[i];
+      const kelompok = String(row[0] || "").trim();
+      const sesi = String(row[1] || "Minggu 1").trim();
+      const nim = String(row[2] || "").trim();
+      const nama = String(row[3] || "").trim();
+      const status = String(row[4] || "AKTIF").trim().toUpperCase();
+
+      if (!kelompok) continue;
+
+      if (!groupsMap[kelompok]) {
+        groupsMap[kelompok] = {
+          name: kelompok,
+          sesi: sesi,
+          status: status, // status kelompok ditentukan oleh anggotanya
+          members: []
+        };
+      }
+
+      if (nama) {
+        groupsMap[kelompok].members.push({
+          name: nama,
+          nim: nim,
+          status: status
+        });
+      }
+    }
+
+    const groupList = Object.keys(groupsMap).map(k => groupsMap[k]);
+    const totalResponses = responsSheet && responsSheet.getLastRow() > 1 ? responsSheet.getLastRow() - 1 : 0;
+
+    return {
+      success: true,
+      config: config,
+      groups: groupList,
+      totalResponses: totalResponses
+    };
+  } catch (err) {
+    return { success: false, error: err.toString() };
+  }
+}
+
+/**
+ * Menyimpan Seluruh Data Master Kelompok & Mahasiswa secara Atomik
+ */
+function adminSaveMasterData(payload) {
+  try {
+    const lock = LockService.getScriptLock();
+    lock.waitLock(10000);
+
+    const ss = getSpreadsheet();
+    let masterSheet = ss.getSheetByName(SHEET_MASTER);
+    if (!masterSheet) {
+      initAllSheets(ss);
+      masterSheet = ss.getSheetByName(SHEET_MASTER);
+    }
+
+    const groups = payload.groups || [];
+    const rowsToWrite = [];
+
+    groups.forEach(grp => {
+      const groupName = String(grp.name || "").trim();
+      const sesi = String(grp.sesi || "Minggu 1").trim();
+      const groupStatus = String(grp.status || "AKTIF").trim().toUpperCase();
+      const members = grp.members || [];
+
+      if (!groupName) return;
+
+      if (members.length === 0) {
+        // Simpan kelompok meski belum ada anggota
+        rowsToWrite.push([groupName, sesi, "-", "-", groupStatus]);
+      } else {
+        members.forEach(m => {
+          const mName = String(m.name || "").trim();
+          const mNim = String(m.nim || "").trim();
+          const mStatus = String(m.status || groupStatus).trim().toUpperCase();
+          if (mName) {
+            rowsToWrite.push([groupName, sesi, mNim, mName, mStatus]);
+          }
+        });
+      }
+    });
+
+    // Bersihkan isi sheet lama (kecuali header baris 1)
+    if (masterSheet.getLastRow() > 1) {
+      masterSheet.getRange(2, 1, masterSheet.getLastRow() - 1, 5).clearContent();
+    }
+
+    // Tulis baris baru jika ada
+    if (rowsToWrite.length > 0) {
+      masterSheet.getRange(2, 1, rowsToWrite.length, 5).setValues(rowsToWrite);
+    }
+
+    lock.releaseLock();
+    clearApiCache();
+
+    return {
+      success: true,
+      message: `Berhasil memperbarui data ${groups.length} kelompok (${rowsToWrite.length} baris data).`
+    };
+  } catch (err) {
+    return { success: false, error: "Gagal menyimpan data master: " + err.toString() };
+  }
+}
+
+/**
+ * Menyimpan Konfigurasi Sistem Perkuliahan ke CONFIG_APP
+ */
+function adminSaveConfig(payload) {
+  try {
+    const lock = LockService.getScriptLock();
+    lock.waitLock(10000);
+
+    const ss = getSpreadsheet();
+    let configSheet = ss.getSheetByName(SHEET_CONFIG);
+    if (!configSheet) {
+      initAllSheets(ss);
+      configSheet = ss.getSheetByName(SHEET_CONFIG);
+    }
+
+    const newConfig = payload.config || {};
+    const configData = configSheet.getDataRange().getValues();
+    const existingKeys = {};
+
+    for (let i = 1; i < configData.length; i++) {
+      const key = String(configData[i][0] || "").trim();
+      if (key) {
+        existingKeys[key] = i + 1; // Baris 1-based
+      }
+    }
+
+    for (let key in newConfig) {
+      const val = String(newConfig[key] || "").trim();
+      if (existingKeys[key]) {
+        configSheet.getRange(existingKeys[key], 2).setValue(val);
+      } else {
+        configSheet.appendRow([key, val, "Pengaturan Tambahan"]);
+      }
+    }
+
+    lock.releaseLock();
+    clearApiCache();
+
+    return {
+      success: true,
+      message: "Konfigurasi sistem perkuliahan berhasil disimpan!"
+    };
+  } catch (err) {
+    return { success: false, error: "Gagal menyimpan konfigurasi: " + err.toString() };
+  }
+}
+
+/**
+ * Mereset / Menghapus Seluruh Respons Penilaian
+ */
+function adminResetResponses(payload) {
+  try {
+    const lock = LockService.getScriptLock();
+    lock.waitLock(10000);
+
+    const ss = getSpreadsheet();
+    let responsSheet = ss.getSheetByName(SHEET_RESPONS);
+    let rekapSheet = ss.getSheetByName(SHEET_REKAP);
+
+    if (responsSheet && responsSheet.getLastRow() > 1) {
+      responsSheet.getRange(2, 1, responsSheet.getLastRow() - 1, responsSheet.getLastColumn()).clearContent();
+    }
+
+    if (rekapSheet && rekapSheet.getLastRow() > 1) {
+      rekapSheet.getRange(2, 1, rekapSheet.getLastRow() - 1, rekapSheet.getLastColumn()).clearContent();
+    }
+
+    lock.releaseLock();
+    clearApiCache();
+
+    return {
+      success: true,
+      message: "Seluruh respons penilaian berhasil dibersihkan."
+    };
+  } catch (err) {
+    return { success: false, error: "Gagal reset respons: " + err.toString() };
+  }
 }

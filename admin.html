@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-  <title>Admin Panel • Penilaian PGSD 5E</title>
+  <title>Portal Admin • Penilaian PGSD 5E</title>
   
   <!-- Tailwind CSS & Google Fonts -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -26,11 +26,11 @@
 
   <style>
     .fade-enter {
-      animation: fadeEnter 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation: fadeEnter 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     @keyframes fadeEnter {
-      from { opacity: 0; transform: scale(0.98); }
-      to { opacity: 1; transform: scale(1); }
+      from { opacity: 0; transform: scale(0.98) translateY(4px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
     }
     .shake {
       animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
@@ -41,6 +41,14 @@
       30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
       40%, 60% { transform: translate3d(4px, 0, 0); }
     }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: #d4d4d8;
+      border-radius: 9999px;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col bg-zinc-50 font-sans antialiased text-zinc-900">
@@ -48,7 +56,7 @@
   <!-- ========================================================================= -->
   <!-- 🔒 AUTHENTICATION / LOGIN SCREEN -->
   <!-- ========================================================================= -->
-  <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4 bg-zinc-100/70">
+  <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4 bg-zinc-100/80">
     <div id="loginCard" class="w-full max-w-sm bg-white rounded-2xl border border-zinc-200 p-6 sm:p-8 shadow-sm space-y-6 fade-enter">
       
       <!-- Lock Header -->
@@ -58,8 +66,8 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
           </svg>
         </div>
-        <h1 class="text-lg font-bold text-zinc-900">Portal Admin</h1>
-        <p class="text-xs text-zinc-500">Masukkan kata sandi pengelola untuk mengakses konfigurasi sistem.</p>
+        <h1 class="text-lg font-bold text-zinc-900">Portal Pengelola</h1>
+        <p class="text-xs text-zinc-500">Masukkan kata sandi admin untuk mengakses panel manajemen data & konfigurasi.</p>
       </div>
 
       <!-- Password Form -->
@@ -74,7 +82,7 @@
             placeholder="••••••••" 
             class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-sm focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 outline-none transition bg-white placeholder-zinc-300"
           >
-          <p id="loginErrorMsg" class="text-[11px] text-rose-600 font-medium hidden">Kata sandi tidak sesuai. Silakan coba lagi.</p>
+          <p id="loginErrorMsg" class="text-[11px] text-rose-600 font-medium hidden">Kata sandi salah. Silakan coba lagi.</p>
         </div>
 
         <button 
@@ -98,34 +106,66 @@
   <div id="adminDashboard" class="min-h-screen flex flex-col hidden">
     
     <!-- Top Header -->
-    <header class="bg-white border-b border-zinc-200 sticky top-0 z-30">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
+    <header class="bg-zinc-950 text-white border-b border-zinc-800 sticky top-0 z-30 shadow-md">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+        
         <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-lg bg-zinc-900 text-white flex items-center justify-center font-bold text-xs tracking-wider">
+          <div class="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-100 flex items-center justify-center font-bold text-xs">
             ⚙️
           </div>
           <div>
-            <h1 class="font-bold text-sm text-zinc-900">Admin Dashboard</h1>
-            <p class="text-[11px] text-zinc-500">Penilaian Presentasi PGSD 5E</p>
+            <div class="flex items-center gap-2">
+              <h1 class="font-bold text-xs sm:text-sm text-zinc-100">Admin Control Panel</h1>
+              <span class="px-1.5 py-0.2 rounded text-[10px] font-mono font-semibold bg-zinc-800 text-emerald-400 border border-zinc-700">Live</span>
+            </div>
+            <p class="text-[11px] text-zinc-400">PGSD 5E • FKIP Universitas Lambung Mangkurat</p>
           </div>
         </div>
 
         <div class="flex items-center gap-2">
-          <a href="/" target="_blank" class="px-3 py-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-medium transition flex items-center gap-1.5">
+          <a href="/" target="_blank" class="px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs font-medium transition flex items-center gap-1.5">
             <span>Buka Website</span>
             <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
             </svg>
           </a>
-          <button onclick="handleLogout()" class="px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-xs font-medium transition cursor-pointer">
+          <button onclick="handleLogout()" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium transition cursor-pointer">
             Keluar
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Main Navigation 3 Tabs -->
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 pb-2.5 pt-0.5">
+        <div class="grid grid-cols-3 p-1 bg-zinc-900 rounded-lg border border-zinc-800 text-xs font-semibold">
+          <button 
+            id="adminTabBtn_data" 
+            onclick="switchAdminTab('data')" 
+            class="py-1.5 px-2 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate"
+          >
+            <span>📋 Data Kelompok</span>
+          </button>
+          <button 
+            id="adminTabBtn_config" 
+            onclick="switchAdminTab('config')" 
+            class="py-1.5 px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate"
+          >
+            <span>⚙️ Konfigurasi</span>
+          </button>
+          <button 
+            id="adminTabBtn_system" 
+            onclick="switchAdminTab('system')" 
+            class="py-1.5 px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate"
+          >
+            <span>🔒 Sistem & Keamanan</span>
           </button>
         </div>
       </div>
     </header>
 
     <!-- Main Admin Content -->
-    <main class="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
 
       <!-- Toast Alert -->
       <div id="adminToast" class="hidden p-4 rounded-xl border text-xs font-medium flex items-center gap-2.5 transition-all">
@@ -133,143 +173,413 @@
         <span id="adminToastMsg" class="flex-1"></span>
       </div>
 
-      <!-- CARD 1: BACKEND REST API CONFIGURATION -->
-      <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5">
-        <div class="border-b border-zinc-100 pb-3.5 flex items-center justify-between gap-2">
-          <div>
-            <h2 class="text-base font-bold text-zinc-900">Konfigurasi URL Backend API</h2>
-            <p class="text-xs text-zinc-500 mt-0.5">URL Google Apps Script Web App yang menerima & menyimpan data ke Spreadsheet.</p>
+      <!-- ===================================================================== -->
+      <!-- TAB 1: 📋 MANAJEMEN DATA KELOMPOK & MAHASISWA -->
+      <!-- ===================================================================== -->
+      <div id="adminView_data" class="space-y-5 fade-enter">
+        
+        <!-- Action Toolbar -->
+        <div class="bg-white rounded-xl border border-zinc-200 p-4 sm:p-5 shadow-xs space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h2 class="text-base font-bold text-zinc-900">Manajemen Kelompok & Anggota</h2>
+              <p class="text-xs text-zinc-500 mt-0.5">Kelola susunan kelompok, anggota mahasiswa, sesi tampil, dan status aktif.</p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <button 
+                type="button" 
+                onclick="openAddGroupModal()" 
+                class="px-3.5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center gap-1.5 shadow-xs"
+              >
+                <span>+ Tambah Kelompok</span>
+              </button>
+              <button 
+                type="button" 
+                onclick="saveAllMasterDataToBackend()" 
+                id="btnSaveMasterData" 
+                class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center gap-1.5 shadow-xs"
+              >
+                <span>💾 Simpan Perubahan ke Spreadsheet</span>
+              </button>
+            </div>
           </div>
-          <span class="text-[11px] font-mono font-medium px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
-            Terhubung
-          </span>
+
+          <!-- Search & Sesi Filter Bar -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-zinc-100">
+            <div class="sm:col-span-2 relative">
+              <input 
+                type="text" 
+                id="searchMasterInput" 
+                placeholder="🔍 Cari kelompok, nama mahasiswa, atau NIM..." 
+                oninput="filterMasterDataDisplay()" 
+                class="w-full pl-9 pr-3.5 py-2 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none bg-white placeholder-zinc-400"
+              >
+              <div class="absolute left-3 top-2.5 text-zinc-400">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+              </div>
+            </div>
+            
+            <div>
+              <select 
+                id="filterMasterSesiSelect" 
+                onchange="filterMasterDataDisplay()" 
+                class="w-full px-3 py-2 rounded-lg border border-zinc-300 text-xs font-medium bg-white focus:border-zinc-900 outline-none"
+              >
+                <option value="ALL">Semua Sesi Minggu</option>
+              </select>
+            </div>
+          </div>
         </div>
 
-        <div class="space-y-4">
-          <div class="space-y-1.5">
-            <label class="block text-xs font-semibold text-zinc-700">Google Apps Script Exec URL</label>
-            <div class="flex flex-col sm:flex-row gap-2">
-              <input 
-                type="url" 
-                id="inputApiUrl" 
-                placeholder="https://script.google.com/macros/s/.../exec" 
-                class="flex-1 px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs font-mono focus:border-zinc-900 outline-none bg-white"
-              >
-              <div class="flex gap-2">
-                <button 
-                  type="button" 
-                  onclick="testConnectionLive()" 
-                  id="btnTestConnection"
-                  class="px-4 py-2.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center gap-1.5 whitespace-nowrap"
+        <!-- Group List Container -->
+        <div id="masterGroupsListContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Dynamic Editable Group Cards -->
+        </div>
+
+        <!-- Empty Master Groups -->
+        <div id="emptyMasterGroups" class="hidden p-8 text-center bg-white rounded-xl border border-zinc-200 space-y-2">
+          <p class="text-sm font-semibold text-zinc-800">Tidak ada data kelompok.</p>
+          <p class="text-xs text-zinc-500">Klik tombol '+ Tambah Kelompok' di atas untuk membuat kelompok baru.</p>
+        </div>
+
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- TAB 2: ⚙️ KONFIGURASI PERKULIAHAN -->
+      <!-- ===================================================================== -->
+      <div id="adminView_config" class="space-y-5 fade-enter hidden">
+        <form onsubmit="handleSaveConfigForm(event)" class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-6">
+          
+          <div class="flex items-center justify-between border-b border-zinc-100 pb-4">
+            <div>
+              <h2 class="text-base font-bold text-zinc-900">Konfigurasi Parameter Perkuliahan</h2>
+              <p class="text-xs text-zinc-500 mt-0.5">Atur sesi aktif, rentang penilaian, identitas mata kuliah, dan aturan form.</p>
+            </div>
+            <button 
+              type="submit" 
+              class="px-5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 cursor-pointer shadow-xs"
+            >
+              Simpan Konfigurasi
+            </button>
+          </div>
+
+          <!-- Section A: Sesi & Identitas Perkuliahan -->
+          <div class="space-y-4">
+            <h3 class="text-xs font-bold text-zinc-400 uppercase tracking-wider font-mono">1. Sesi & Identitas Mata Kuliah</h3>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div class="space-y-1.5">
+                <label class="block font-semibold text-zinc-700">Sesi Minggu Aktif <span class="text-rose-500">*</span></label>
+                <input 
+                  type="text" 
+                  id="cfg_Sesi_Minggu_Aktif" 
+                  required 
+                  placeholder="Contoh: Minggu 1 (atau SEMUA)" 
+                  class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none"
                 >
-                  <span>⚡ Uji Koneksi</span>
-                </button>
-                <button 
-                  type="button" 
-                  onclick="saveApiUrl()" 
-                  class="px-5 py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 cursor-pointer shadow-xs whitespace-nowrap"
+                <p class="text-[11px] text-zinc-400">Hanya kelompok dengan sesi ini yang dapat dipilih mahasiswa di form.</p>
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="block font-semibold text-zinc-700">Judul Formulir <span class="text-rose-500">*</span></label>
+                <input 
+                  type="text" 
+                  id="cfg_Judul_Form" 
+                  required 
+                  placeholder="Penilaian Presentasi PGSD 5E" 
+                  class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none"
                 >
-                  Simpan Perubahan
-                </button>
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="block font-semibold text-zinc-700">Nama Mata Kuliah <span class="text-rose-500">*</span></label>
+                <input 
+                  type="text" 
+                  id="cfg_Mata_Kuliah" 
+                  required 
+                  placeholder="Bimbingan Konseling di SD" 
+                  class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none"
+                >
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="block font-semibold text-zinc-700">Dosen Pengampu <span class="text-rose-500">*</span></label>
+                <input 
+                  type="text" 
+                  id="cfg_Dosen_Pengampu" 
+                  required 
+                  placeholder="Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd." 
+                  class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none"
+                >
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="block font-semibold text-zinc-700">Kelas</label>
+                <input 
+                  type="text" 
+                  id="cfg_Kelas" 
+                  placeholder="5E" 
+                  class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none"
+                >
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="block font-semibold text-zinc-700">Program Studi / Jurusan</label>
+                <input 
+                  type="text" 
+                  id="cfg_Jurusan" 
+                  placeholder="PGSD" 
+                  class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none"
+                >
               </div>
             </div>
           </div>
 
-          <!-- Live Ping Results -->
-          <div id="pingResultBox" class="hidden p-4 rounded-lg bg-zinc-50 border border-zinc-200 text-xs space-y-1.5 font-mono">
-            <div class="flex items-center justify-between">
-              <span class="font-bold text-zinc-800">Status Endpoint:</span>
-              <span id="pingStatusText" class="font-bold text-emerald-600">Online 200 OK</span>
+          <!-- Section B: Batasan Nilai & Formulir -->
+          <div class="space-y-4 pt-4 border-t border-zinc-100">
+            <h3 class="text-xs font-bold text-zinc-400 uppercase tracking-wider font-mono">2. Batasan Skor & Formulir</h3>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div class="space-y-1.5">
+                <label class="block font-semibold text-zinc-700">Nilai Kelompok Minimal</label>
+                <input 
+                  type="number" 
+                  id="cfg_Nilai_Kelompok_Min" 
+                  required 
+                  value="50" 
+                  class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none font-mono"
+                >
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="block font-semibold text-zinc-700">Nilai Kelompok Maksimal</label>
+                <input 
+                  type="number" 
+                  id="cfg_Nilai_Kelompok_Max" 
+                  required 
+                  value="100" 
+                  class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none font-mono"
+                >
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="block font-semibold text-zinc-700">Maksimal Pilihan Presentator Terbaik</label>
+                <input 
+                  type="number" 
+                  id="cfg_Maksimal_Pilihan_Presentator_Terbaik" 
+                  required 
+                  value="2" 
+                  class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none font-mono"
+                >
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="block font-semibold text-zinc-700">Maksimal Karakter Evaluasi</label>
+                <input 
+                  type="number" 
+                  id="cfg_Maksimal_Karakter_Evaluasi" 
+                  required 
+                  value="500" 
+                  class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none font-mono"
+                >
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="block font-semibold text-zinc-700">Tampilkan Ulasan Kualitatif ke Publik</label>
+                <select 
+                  id="cfg_Tampilkan_Ulasan_Publik" 
+                  class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs font-medium bg-white focus:border-zinc-900 outline-none"
+                >
+                  <option value="AKTIF">AKTIF (Dapat dilihat mahasiswa di Rekap)</option>
+                  <option value="NONAKTIF">NONAKTIF (Disembunyikan, hanya skor yang tampil)</option>
+                </select>
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="block font-semibold text-zinc-700">Domain Email Institusi Wajib</label>
+                <input 
+                  type="text" 
+                  id="cfg_Domain_Email_Wajib" 
+                  placeholder="mhs.ulm.ac.id, ulm.ac.id" 
+                  class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none font-mono"
+                >
+                <p class="text-[11px] text-zinc-400">Pisahkan dengan koma jika lebih dari satu domain.</p>
+              </div>
             </div>
-            <div class="text-[11px] text-zinc-500 flex items-center justify-between">
-              <span>Waktu Respon (Latency):</span>
-              <span id="pingLatencyText" class="font-bold text-zinc-700">-</span>
-            </div>
-            <div class="text-[11px] text-zinc-500 flex items-center justify-between">
-              <span>Kelompok Aktif Terbaca:</span>
-              <span id="pingGroupsCount" class="font-bold text-zinc-700">-</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- CARD 2: QUICK ACTIONS & DATABASE -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        
-        <!-- Google Sheet Link -->
-        <div class="bg-white rounded-xl border border-zinc-200 p-5 shadow-xs flex flex-col justify-between space-y-4">
-          <div>
-            <div class="text-xs font-semibold text-zinc-400 uppercase font-mono">Database Spreadsheet</div>
-            <h3 class="text-sm font-bold text-zinc-900 mt-1">Google Spreadsheet Penilaian</h3>
-            <p class="text-xs text-zinc-500 mt-0.5">Buka file spreadsheet untuk melihat seluruh respons penilaian dan master data kelompok.</p>
           </div>
 
-          <a 
-            href="https://docs.google.com/spreadsheets/d/1D7nQcVEbmOKjgcJ6LzKeeDQPQxhAIiCELRC9eP9w7WU/edit" 
-            target="_blank" 
-            class="w-full py-2.5 px-4 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-semibold transition flex items-center justify-center gap-2"
-          >
-            <span>📊 Buka di Google Sheets</span>
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-            </svg>
-          </a>
-        </div>
-
-        <!-- Purge Cache Action -->
-        <div class="bg-white rounded-xl border border-zinc-200 p-5 shadow-xs flex flex-col justify-between space-y-4">
-          <div>
-            <div class="text-xs font-semibold text-zinc-400 uppercase font-mono">Cache Control</div>
-            <h3 class="text-sm font-bold text-zinc-900 mt-1">Hapus & Segarkan Cache Lokal</h3>
-            <p class="text-xs text-zinc-500 mt-0.5">Gunakan tombol ini jika Anda baru saja mengubah nama kelompok atau konfigurasi di Spreadsheet.</p>
-          </div>
-
-          <button 
-            type="button" 
-            onclick="purgeLocalCache()" 
-            class="w-full py-2.5 px-4 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-2"
-          >
-            <span>🔄 Segarkan Cache Sekarang</span>
-          </button>
-        </div>
-
-      </div>
-
-      <!-- CARD 3: SECURITY & PASSWORD CHANGE -->
-      <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-4">
-        <div class="border-b border-zinc-100 pb-3">
-          <h2 class="text-sm font-bold text-zinc-900">Keamanan Akses Admin</h2>
-          <p class="text-xs text-zinc-500 mt-0.5">Ubah kata sandi untuk melindungi halaman admin ini.</p>
-        </div>
-
-        <form onsubmit="handleChangePassword(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg">
-          <div class="space-y-1">
-            <label class="block text-xs font-semibold text-zinc-700">Kata Sandi Baru</label>
-            <input 
-              type="password" 
-              id="inputNewPassword" 
-              required 
-              minlength="4" 
-              placeholder="Minimal 4 karakter" 
-              class="w-full px-3 py-2 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none"
-            >
-          </div>
-          <div class="flex items-end">
+          <div class="pt-4 border-t border-zinc-100 flex justify-end">
             <button 
               type="submit" 
-              class="w-full py-2 px-4 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-semibold transition cursor-pointer"
+              class="px-6 py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 cursor-pointer shadow-xs"
             >
-              Simpan Sandi Baru
+              Simpan Semua Konfigurasi
             </button>
           </div>
+
         </form>
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- TAB 3: 🔒 SISTEM, DATABASE & KEAMANAN -->
+      <!-- ===================================================================== -->
+      <div id="adminView_system" class="space-y-5 fade-enter hidden">
+        
+        <!-- CARD 1: BACKEND REST API CONFIGURATION -->
+        <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5">
+          <div class="border-b border-zinc-100 pb-3.5 flex items-center justify-between gap-2">
+            <div>
+              <h2 class="text-base font-bold text-zinc-900">Konfigurasi URL Backend API</h2>
+              <p class="text-xs text-zinc-500 mt-0.5">URL Google Apps Script Web App yang menerima & menyimpan data ke Spreadsheet.</p>
+            </div>
+            <span class="text-[11px] font-mono font-medium px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+              Endpoint
+            </span>
+          </div>
+
+          <div class="space-y-4">
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-zinc-700">Google Apps Script Exec URL</label>
+              <div class="flex flex-col sm:flex-row gap-2">
+                <input 
+                  type="url" 
+                  id="inputApiUrl" 
+                  placeholder="https://script.google.com/macros/s/.../exec" 
+                  class="flex-1 px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs font-mono focus:border-zinc-900 outline-none bg-white"
+                >
+                <div class="flex gap-2">
+                  <button 
+                    type="button" 
+                    onclick="testConnectionLive()" 
+                    id="btnTestConnection"
+                    class="px-4 py-2.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center gap-1.5 whitespace-nowrap"
+                  >
+                    <span>⚡ Uji Koneksi</span>
+                  </button>
+                  <button 
+                    type="button" 
+                    onclick="saveApiUrl()" 
+                    class="px-5 py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 cursor-pointer shadow-xs whitespace-nowrap"
+                  >
+                    Simpan URL
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Live Ping Results -->
+            <div id="pingResultBox" class="hidden p-4 rounded-lg bg-zinc-50 border border-zinc-200 text-xs space-y-1.5 font-mono">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-zinc-800">Status Endpoint:</span>
+                <span id="pingStatusText" class="font-bold text-emerald-600">Online 200 OK</span>
+              </div>
+              <div class="text-[11px] text-zinc-500 flex items-center justify-between">
+                <span>Waktu Respon (Latency):</span>
+                <span id="pingLatencyText" class="font-bold text-zinc-700">-</span>
+              </div>
+              <div class="text-[11px] text-zinc-500 flex items-center justify-between">
+                <span>Kelompok Aktif Terbaca:</span>
+                <span id="pingGroupsCount" class="font-bold text-zinc-700">-</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 2: RESPONS & DATABASE ACTIONS -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          
+          <!-- Database Link & Reset -->
+          <div class="bg-white rounded-xl border border-zinc-200 p-5 shadow-xs flex flex-col justify-between space-y-4">
+            <div>
+              <div class="text-xs font-semibold text-zinc-400 uppercase font-mono">Data Respons Masuk</div>
+              <div class="flex items-center justify-between mt-1">
+                <h3 class="text-sm font-bold text-zinc-900">Total Respons: <span id="labelTotalResponses" class="font-mono text-emerald-600">0 Data</span></h3>
+              </div>
+              <p class="text-xs text-zinc-500 mt-1">Buka Google Sheets untuk melihat raw respons atau kosongkan data respons jika memulai sesi baru.</p>
+            </div>
+
+            <div class="space-y-2 pt-2 border-t border-zinc-100">
+              <a 
+                href="https://docs.google.com/spreadsheets/d/1D7nQcVEbmOKjgcJ6LzKeeDQPQxhAIiCELRC9eP9w7WU/edit" 
+                target="_blank" 
+                class="w-full py-2 px-3 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-semibold transition flex items-center justify-center gap-1.5"
+              >
+                <span>📊 Buka Google Spreadsheet</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                </svg>
+              </a>
+              <button 
+                type="button" 
+                onclick="openResetResponsesConfirmModal()" 
+                class="w-full py-2 px-3 rounded-lg border border-rose-200 hover:bg-rose-50 text-rose-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <span>🗑️ Reset Data Respons Penilaian</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Purge Cache Action -->
+          <div class="bg-white rounded-xl border border-zinc-200 p-5 shadow-xs flex flex-col justify-between space-y-4">
+            <div>
+              <div class="text-xs font-semibold text-zinc-400 uppercase font-mono">Cache & Sinkronisasi</div>
+              <h3 class="text-sm font-bold text-zinc-900 mt-1">Segarkan Cache Sistem</h3>
+              <p class="text-xs text-zinc-500 mt-1">Hapus seluruh cache lokal browser dan tarik data terbaru dari Google Sheets secara langsung.</p>
+            </div>
+
+            <div class="pt-2 border-t border-zinc-100">
+              <button 
+                type="button" 
+                onclick="purgeLocalCache()" 
+                class="w-full py-2 px-4 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <span>🔄 Hapus & Segarkan Cache</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- CARD 3: SECURITY & PASSWORD CHANGE -->
+        <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-4">
+          <div class="border-b border-zinc-100 pb-3">
+            <h2 class="text-sm font-bold text-zinc-900">Keamanan Akses Kata Sandi Admin</h2>
+            <p class="text-xs text-zinc-500 mt-0.5">Ubah kata sandi untuk melindungi halaman admin ini.</p>
+          </div>
+
+          <form onsubmit="handleChangePassword(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg">
+            <div class="space-y-1">
+              <label class="block text-xs font-semibold text-zinc-700">Kata Sandi Baru</label>
+              <input 
+                type="password" 
+                id="inputNewPassword" 
+                required 
+                minlength="4" 
+                placeholder="Minimal 4 karakter" 
+                class="w-full px-3 py-2 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none"
+              >
+            </div>
+            <div class="flex items-end">
+              <button 
+                type="submit" 
+                class="w-full py-2 px-4 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition cursor-pointer"
+              >
+                Simpan Sandi Baru
+              </button>
+            </div>
+          </form>
+        </div>
+
       </div>
 
     </main>
 
     <!-- Admin Footer -->
     <footer class="w-full py-4 text-center text-xs text-zinc-400 border-t border-zinc-200 bg-white mt-auto">
-      <div class="max-w-4xl mx-auto px-4 flex items-center justify-between">
+      <div class="max-w-5xl mx-auto px-4 flex items-center justify-between">
         <p>© 2026 PGSD Kelas 5E • FKIP ULM</p>
         <p class="font-mono text-[11px]">Admin Control Panel</p>
       </div>
@@ -278,11 +588,152 @@
   </div>
 
   <!-- ========================================================================= -->
+  <!-- ➕ MODAL: TAMBAH / EDIT KELOMPOK -->
+  <!-- ========================================================================= -->
+  <div id="groupModal" class="hidden fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-md w-full p-5 sm:p-6 space-y-4 shadow-xl border border-zinc-200 fade-enter">
+      <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
+        <h3 class="text-sm font-bold text-zinc-900" id="groupModalTitle">Tambah Kelompok Baru</h3>
+        <button type="button" onclick="closeGroupModal()" class="w-7 h-7 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center text-sm font-bold cursor-pointer">✕</button>
+      </div>
+
+      <form onsubmit="handleSaveGroupModal(event)" class="space-y-3.5 text-xs">
+        <input type="hidden" id="groupModalEditIndex" value="-1">
+        
+        <div class="space-y-1">
+          <label class="block font-semibold text-zinc-700">Nama Kelompok <span class="text-rose-500">*</span></label>
+          <input 
+            type="text" 
+            id="groupModalName" 
+            required 
+            placeholder="Contoh: Kelompok 1" 
+            class="w-full px-3 py-2 rounded-lg border border-zinc-300 focus:border-zinc-900 outline-none"
+          >
+        </div>
+
+        <div class="space-y-1">
+          <label class="block font-semibold text-zinc-700">Sesi Tampil <span class="text-rose-500">*</span></label>
+          <input 
+            type="text" 
+            id="groupModalSesi" 
+            required 
+            placeholder="Contoh: Minggu 1" 
+            class="w-full px-3 py-2 rounded-lg border border-zinc-300 focus:border-zinc-900 outline-none"
+          >
+        </div>
+
+        <div class="space-y-1">
+          <label class="block font-semibold text-zinc-700">Status Keaktifan</label>
+          <select id="groupModalStatus" class="w-full px-3 py-2 rounded-lg border border-zinc-300 bg-white focus:border-zinc-900 outline-none font-medium">
+            <option value="AKTIF">AKTIF (Dapat dipilih mahasiswa)</option>
+            <option value="NONAKTIF">NONAKTIF (Disembunyikan)</option>
+          </select>
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2 border-t border-zinc-100">
+          <button type="button" onclick="closeGroupModal()" class="px-3.5 py-2 rounded-lg border border-zinc-200 text-zinc-700 hover:bg-zinc-50 font-medium">Batal</button>
+          <button type="submit" class="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white font-semibold shadow-xs">Simpan Kelompok</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- ➕ MODAL: TAMBAH / EDIT MAHASISWA (ANGGOTA) -->
+  <!-- ========================================================================= -->
+  <div id="memberModal" class="hidden fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-md w-full p-5 sm:p-6 space-y-4 shadow-xl border border-zinc-200 fade-enter">
+      <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
+        <div>
+          <h3 class="text-sm font-bold text-zinc-900" id="memberModalTitle">Tambah Anggota Mahasiswa</h3>
+          <p class="text-[11px] text-zinc-500" id="memberModalGroupName">Kelompok 1</p>
+        </div>
+        <button type="button" onclick="closeMemberModal()" class="w-7 h-7 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center text-sm font-bold cursor-pointer">✕</button>
+      </div>
+
+      <form onsubmit="handleSaveMemberModal(event)" class="space-y-3.5 text-xs">
+        <input type="hidden" id="memberModalGroupIndex" value="-1">
+        <input type="hidden" id="memberModalMemberIndex" value="-1">
+        
+        <div class="space-y-1">
+          <label class="block font-semibold text-zinc-700">Nama Lengkap Mahasiswa <span class="text-rose-500">*</span></label>
+          <input 
+            type="text" 
+            id="memberModalName" 
+            required 
+            placeholder="Contoh: Ahmad Fauzi" 
+            class="w-full px-3 py-2 rounded-lg border border-zinc-300 focus:border-zinc-900 outline-none"
+          >
+        </div>
+
+        <div class="space-y-1">
+          <label class="block font-semibold text-zinc-700">NIM Mahasiswa</label>
+          <input 
+            type="text" 
+            id="memberModalNim" 
+            placeholder="Contoh: 221012310001" 
+            class="w-full px-3 py-2 rounded-lg border border-zinc-300 focus:border-zinc-900 outline-none font-mono"
+          >
+        </div>
+
+        <div class="space-y-1">
+          <label class="block font-semibold text-zinc-700">Status Anggota</label>
+          <select id="memberModalStatus" class="w-full px-3 py-2 rounded-lg border border-zinc-300 bg-white focus:border-zinc-900 outline-none font-medium">
+            <option value="AKTIF">AKTIF</option>
+            <option value="NONAKTIF">NONAKTIF</option>
+          </select>
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2 border-t border-zinc-100">
+          <button type="button" onclick="closeMemberModal()" class="px-3.5 py-2 rounded-lg border border-zinc-200 text-zinc-700 hover:bg-zinc-50 font-medium">Batal</button>
+          <button type="submit" class="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white font-semibold shadow-xs">Simpan Anggota</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- ⚠️ MODAL: KONFIRMASI RESET RESPONS -->
+  <!-- ========================================================================= -->
+  <div id="resetConfirmModal" class="hidden fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-sm w-full p-6 text-center space-y-4 shadow-xl border border-zinc-200 fade-enter">
+      <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto text-xl font-bold border border-rose-200">
+        ⚠️
+      </div>
+      <div>
+        <h3 class="text-base font-bold text-zinc-900">Reset Seluruh Respons?</h3>
+        <p class="text-xs text-zinc-500 leading-relaxed mt-1">
+          Tindakan ini akan mengosongkan seluruh data penilaian mahasiswa yang telah masuk di Spreadsheet. Tindakan ini tidak dapat dibatalkan.
+        </p>
+      </div>
+      <div class="pt-2 flex flex-col gap-2">
+        <button 
+          onclick="executeResetResponses()" 
+          id="btnExecuteReset"
+          class="w-full py-2.5 px-4 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold transition active:scale-98 cursor-pointer shadow-xs"
+        >
+          Ya, Kosongkan Data Respons
+        </button>
+        <button 
+          onclick="closeResetResponsesConfirmModal()" 
+          class="w-full py-2 px-4 rounded-lg border border-zinc-200 text-zinc-700 hover:bg-zinc-50 text-xs font-medium transition cursor-pointer"
+        >
+          Batal
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
   <!-- 💻 JAVASCRIPT APP LOGIC -->
   <!-- ========================================================================= -->
   <script>
     const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycby9JWeXZVkmnx2suT2eS5yk-sS39v-avHsaA4OV-D7fjcvsTGfawtQaCoxHcH90HjiRTg/exec";
     const DEFAULT_ADMIN_PASS = "admin5e";
+
+    let adminMasterGroups = [];
+    let adminAppConfig = {};
+    let currentAdminTab = 'data';
 
     function getAdminPassword() {
       return localStorage.getItem("PGSD_ADMIN_PASS") || DEFAULT_ADMIN_PASS;
@@ -321,7 +772,7 @@
       document.getElementById("loginScreen").classList.add("hidden");
       document.getElementById("adminDashboard").classList.remove("hidden");
       document.getElementById("inputApiUrl").value = getApiUrl();
-      testConnectionLive();
+      fetchAdminFullData();
     }
 
     function handleLogout() {
@@ -329,12 +780,458 @@
       window.location.reload();
     }
 
+    // Switch Admin Tabs
+    function switchAdminTab(tabKey) {
+      currentAdminTab = tabKey;
+      const tabs = ['data', 'config', 'system'];
+      
+      tabs.forEach(t => {
+        const view = document.getElementById(`adminView_${t}`);
+        const btn = document.getElementById(`adminTabBtn_${t}`);
+        
+        if (t === tabKey) {
+          view.classList.remove("hidden");
+          btn.className = "py-1.5 px-2 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate font-bold";
+        } else {
+          view.classList.add("hidden");
+          btn.className = "py-1.5 px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate";
+        }
+      });
+    }
+
+    // =========================================================================
+    // 🌐 FETCH ALL DATA FROM BACKEND FOR ADMIN
+    // =========================================================================
+    async function fetchAdminFullData() {
+      const apiUrl = getApiUrl();
+      try {
+        const response = await fetch(`${apiUrl}?action=adminGetFullData`);
+        const res = await response.json();
+
+        if (res.success) {
+          adminMasterGroups = res.groups || [];
+          adminAppConfig = res.config || {};
+          document.getElementById("labelTotalResponses").textContent = `${res.totalResponses || 0} Data`;
+          
+          renderMasterGroups();
+          populateConfigFormValues();
+          populateMasterSesiFilter();
+        } else {
+          showAdminToast("Gagal mengambil data dari Google Sheets: " + res.error, "error");
+        }
+      } catch (err) {
+        showAdminToast("Gagal terhubung ke API backend: " + err, "error");
+      }
+    }
+
+    // =========================================================================
+    // 📋 TAB 1 LOGIC: DATA KELOMPOK & MAHASISWA
+    // =========================================================================
+    function renderMasterGroups() {
+      const container = document.getElementById("masterGroupsListContainer");
+      const emptyEl = document.getElementById("emptyMasterGroups");
+      container.innerHTML = "";
+
+      const query = (document.getElementById("searchMasterInput")?.value || "").trim().toLowerCase();
+      const sesiFilter = document.getElementById("filterMasterSesiSelect")?.value || "ALL";
+
+      let visibleCount = 0;
+
+      adminMasterGroups.forEach((grp, gIdx) => {
+        const gName = grp.name || "";
+        const gSesi = grp.sesi || "Minggu 1";
+        const gStatus = grp.status || "AKTIF";
+        const members = grp.members || [];
+
+        // Match Search Filter
+        let isMatch = false;
+        if (!query) isMatch = true;
+        else if (gName.toLowerCase().includes(query) || gSesi.toLowerCase().includes(query)) isMatch = true;
+        else {
+          const hasMember = members.some(m => m.name.toLowerCase().includes(query) || (m.nim || "").toLowerCase().includes(query));
+          if (hasMember) isMatch = true;
+        }
+
+        if (sesiFilter !== "ALL" && gSesi !== sesiFilter) {
+          isMatch = false;
+        }
+
+        if (!isMatch) return;
+        visibleCount++;
+
+        const card = document.createElement("div");
+        card.className = "bg-white rounded-xl border border-zinc-200 p-4 sm:p-5 space-y-3.5 shadow-xs flex flex-col justify-between";
+
+        const memberRows = members.map((m, mIdx) => `
+          <div class="flex items-center justify-between gap-2 p-2 rounded-lg bg-zinc-50 border border-zinc-200/80 text-xs">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-1.5">
+                <span class="font-semibold text-zinc-900 truncate">${m.name}</span>
+                ${m.status === 'NONAKTIF' ? '<span class="text-[9px] bg-rose-100 text-rose-700 px-1 rounded font-mono">Nonaktif</span>' : ''}
+              </div>
+              <p class="text-[10px] text-zinc-400 font-mono">${m.nim || 'NIM -'}</p>
+            </div>
+            <div class="flex items-center gap-1 flex-shrink-0">
+              <button 
+                type="button" 
+                onclick="openEditMemberModal(${gIdx}, ${mIdx})" 
+                title="Edit Mahasiswa" 
+                class="p-1 rounded hover:bg-zinc-200 text-zinc-600 text-xs transition cursor-pointer"
+              >
+                ✏️
+              </button>
+              <button 
+                type="button" 
+                onclick="deleteMember(${gIdx}, ${mIdx})" 
+                title="Hapus Mahasiswa" 
+                class="p-1 rounded hover:bg-rose-100 text-rose-600 text-xs transition cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        `).join("");
+
+        card.innerHTML = `
+          <div class="space-y-3">
+            <!-- Group Card Header -->
+            <div class="flex items-start justify-between gap-2 border-b border-zinc-100 pb-3">
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="font-bold text-sm text-zinc-900">${gName}</h3>
+                  <span class="text-[10px] font-mono font-medium px-2 py-0.5 rounded ${gStatus === 'AKTIF' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-zinc-100 text-zinc-500 border border-zinc-200'}">
+                    ${gStatus}
+                  </span>
+                </div>
+                <span class="text-xs text-zinc-500 font-medium">${gSesi} • ${members.length} Anggota</span>
+              </div>
+
+              <!-- Group Card Header Actions -->
+              <div class="flex items-center gap-1">
+                <button 
+                  type="button" 
+                  onclick="openEditGroupModal(${gIdx})" 
+                  title="Edit Kelompok" 
+                  class="p-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-100 text-zinc-700 text-xs transition cursor-pointer"
+                >
+                  ✏️ Edit
+                </button>
+                <button 
+                  type="button" 
+                  onclick="deleteGroup(${gIdx})" 
+                  title="Hapus Kelompok" 
+                  class="p-1.5 rounded-lg border border-rose-200 hover:bg-rose-50 text-rose-600 text-xs transition cursor-pointer"
+                >
+                  🗑️
+                </button>
+              </div>
+            </div>
+
+            <!-- Members List -->
+            <div class="space-y-1.5 max-h-52 overflow-y-auto custom-scrollbar pr-1">
+              ${members.length > 0 ? memberRows : '<p class="text-xs text-zinc-400 italic p-3 text-center bg-zinc-50 rounded-lg">Belum ada anggota mahasiswa.</p>'}
+            </div>
+          </div>
+
+          <!-- Group Card Footer Action -->
+          <div class="pt-2 border-t border-zinc-100">
+            <button 
+              type="button" 
+              onclick="openAddMemberModal(${gIdx})" 
+              class="w-full py-1.5 px-3 rounded-lg border border-dashed border-zinc-300 hover:border-zinc-900 text-zinc-700 text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <span>+ Tambah Anggota</span>
+            </button>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+
+      if (visibleCount === 0) {
+        emptyEl.classList.remove("hidden");
+      } else {
+        emptyEl.classList.add("hidden");
+      }
+    }
+
+    function filterMasterDataDisplay() {
+      renderMasterGroups();
+    }
+
+    function populateMasterSesiFilter() {
+      const select = document.getElementById("filterMasterSesiSelect");
+      const currentVal = select.value;
+      select.innerHTML = '<option value="ALL">Semua Sesi Minggu</option>';
+      
+      const sesiSet = new Set();
+      adminMasterGroups.forEach(g => {
+        if (g.sesi) sesiSet.add(g.sesi);
+      });
+
+      sesiSet.forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = s;
+        opt.textContent = `Sesi: ${s}`;
+        select.appendChild(opt);
+      });
+
+      select.value = currentVal;
+    }
+
+    // Modal Kelompok Actions
+    function openAddGroupModal() {
+      document.getElementById("groupModalTitle").textContent = "Tambah Kelompok Baru";
+      document.getElementById("groupModalEditIndex").value = "-1";
+      document.getElementById("groupModalName").value = `Kelompok ${adminMasterGroups.length + 1}`;
+      document.getElementById("groupModalSesi").value = adminAppConfig["Sesi_Minggu_Aktif"] || "Minggu 1";
+      document.getElementById("groupModalStatus").value = "AKTIF";
+      document.getElementById("groupModal").classList.remove("hidden");
+    }
+
+    function openEditGroupModal(gIdx) {
+      const grp = adminMasterGroups[gIdx];
+      if (!grp) return;
+
+      document.getElementById("groupModalTitle").textContent = "Edit Data Kelompok";
+      document.getElementById("groupModalEditIndex").value = gIdx;
+      document.getElementById("groupModalName").value = grp.name;
+      document.getElementById("groupModalSesi").value = grp.sesi;
+      document.getElementById("groupModalStatus").value = grp.status || "AKTIF";
+      document.getElementById("groupModal").classList.remove("hidden");
+    }
+
+    function closeGroupModal() {
+      document.getElementById("groupModal").classList.add("hidden");
+    }
+
+    function handleSaveGroupModal(e) {
+      e.preventDefault();
+      const editIdx = parseInt(document.getElementById("groupModalEditIndex").value);
+      const name = document.getElementById("groupModalName").value.trim();
+      const sesi = document.getElementById("groupModalSesi").value.trim();
+      const status = document.getElementById("groupModalStatus").value;
+
+      if (!name) return;
+
+      if (editIdx >= 0) {
+        adminMasterGroups[editIdx].name = name;
+        adminMasterGroups[editIdx].sesi = sesi;
+        adminMasterGroups[editIdx].status = status;
+        showAdminToast(`Kelompok '${name}' berhasil diperbarui. Klik 'Simpan ke Spreadsheet' untuk menerapkan.`, "info");
+      } else {
+        adminMasterGroups.push({
+          name: name,
+          sesi: sesi,
+          status: status,
+          members: []
+        });
+        showAdminToast(`Kelompok '${name}' berhasil ditambahkan. Klik 'Simpan ke Spreadsheet' untuk menerapkan.`, "info");
+      }
+
+      closeGroupModal();
+      renderMasterGroups();
+      populateMasterSesiFilter();
+    }
+
+    function deleteGroup(gIdx) {
+      const grp = adminMasterGroups[gIdx];
+      if (!grp) return;
+
+      if (confirm(`Apakah Anda yakin ingin menghapus '${grp.name}' beserta seluruh ${grp.members.length} anggotanya?`)) {
+        adminMasterGroups.splice(gIdx, 1);
+        renderMasterGroups();
+        populateMasterSesiFilter();
+        showAdminToast(`Kelompok '${grp.name}' dihapus dari daftar lokal. Klik 'Simpan ke Spreadsheet' untuk menerapkan.`, "warning");
+      }
+    }
+
+    // Modal Member Actions
+    function openAddMemberModal(gIdx) {
+      const grp = adminMasterGroups[gIdx];
+      if (!grp) return;
+
+      document.getElementById("memberModalTitle").textContent = "Tambah Anggota Mahasiswa";
+      document.getElementById("memberModalGroupName").textContent = `Untuk ${grp.name} (${grp.sesi})`;
+      document.getElementById("memberModalGroupIndex").value = gIdx;
+      document.getElementById("memberModalMemberIndex").value = "-1";
+      document.getElementById("memberModalName").value = "";
+      document.getElementById("memberModalNim").value = "";
+      document.getElementById("memberModalStatus").value = "AKTIF";
+      document.getElementById("memberModal").classList.remove("hidden");
+    }
+
+    function openEditMemberModal(gIdx, mIdx) {
+      const grp = adminMasterGroups[gIdx];
+      if (!grp || !grp.members[mIdx]) return;
+      const mem = grp.members[mIdx];
+
+      document.getElementById("memberModalTitle").textContent = "Edit Data Mahasiswa";
+      document.getElementById("memberModalGroupName").textContent = `Untuk ${grp.name} (${grp.sesi})`;
+      document.getElementById("memberModalGroupIndex").value = gIdx;
+      document.getElementById("memberModalMemberIndex").value = mIdx;
+      document.getElementById("memberModalName").value = mem.name;
+      document.getElementById("memberModalNim").value = mem.nim || "";
+      document.getElementById("memberModalStatus").value = mem.status || "AKTIF";
+      document.getElementById("memberModal").classList.remove("hidden");
+    }
+
+    function closeMemberModal() {
+      document.getElementById("memberModal").classList.add("hidden");
+    }
+
+    function handleSaveMemberModal(e) {
+      e.preventDefault();
+      const gIdx = parseInt(document.getElementById("memberModalGroupIndex").value);
+      const mIdx = parseInt(document.getElementById("memberModalMemberIndex").value);
+      const name = document.getElementById("memberModalName").value.trim();
+      const nim = document.getElementById("memberModalNim").value.trim();
+      const status = document.getElementById("memberModalStatus").value;
+
+      if (!name || gIdx < 0 || !adminMasterGroups[gIdx]) return;
+
+      if (mIdx >= 0) {
+        adminMasterGroups[gIdx].members[mIdx] = { name, nim, status };
+        showAdminToast(`Data '${name}' diperbarui.`, "info");
+      } else {
+        adminMasterGroups[gIdx].members.push({ name, nim, status });
+        showAdminToast(`'${name}' ditambahkan ke ${adminMasterGroups[gIdx].name}.`, "info");
+      }
+
+      closeMemberModal();
+      renderMasterGroups();
+    }
+
+    function deleteMember(gIdx, mIdx) {
+      const grp = adminMasterGroups[gIdx];
+      if (!grp || !grp.members[mIdx]) return;
+
+      const mem = grp.members[mIdx];
+      if (confirm(`Hapus anggota '${mem.name}' dari ${grp.name}?`)) {
+        grp.members.splice(mIdx, 1);
+        renderMasterGroups();
+        showAdminToast(`'${mem.name}' dihapus dari ${grp.name}.`, "warning");
+      }
+    }
+
+    // Save All Master Groups to Backend
+    async function saveAllMasterDataToBackend() {
+      const btn = document.getElementById("btnSaveMasterData");
+      btn.disabled = true;
+      btn.innerHTML = `<span>⏳ Menyimpan ke Google Sheets...</span>`;
+
+      const apiUrl = getApiUrl();
+      const payload = {
+        action: "adminSaveMasterData",
+        groups: adminMasterGroups
+      };
+
+      try {
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+
+        const res = await response.json();
+        btn.disabled = false;
+        btn.innerHTML = `<span>💾 Simpan Perubahan ke Spreadsheet</span>`;
+
+        if (res.success) {
+          // Bersihkan cache lokal browser
+          localStorage.removeItem("PGSD_CACHE_GROUPS");
+          localStorage.removeItem("PGSD_CACHE_CONFIG");
+          showAdminToast(res.message || "Data master berhasil disimpan ke Spreadsheet!", "success");
+        } else {
+          showAdminToast(res.error || "Gagal menyimpan data master.", "error");
+        }
+      } catch (err) {
+        btn.disabled = false;
+        btn.innerHTML = `<span>💾 Simpan Perubahan ke Spreadsheet</span>`;
+        showAdminToast("Gagal terhubung ke API: " + err, "error");
+      }
+    }
+
+    // =========================================================================
+    // ⚙️ TAB 2 LOGIC: KONFIGURASI PERKULIAHAN
+    // =========================================================================
+    function populateConfigFormValues() {
+      const keys = [
+        "Sesi_Minggu_Aktif",
+        "Judul_Form",
+        "Mata_Kuliah",
+        "Dosen_Pengampu",
+        "Kelas",
+        "Jurusan",
+        "Nilai_Kelompok_Min",
+        "Nilai_Kelompok_Max",
+        "Maksimal_Pilihan_Presentator_Terbaik",
+        "Maksimal_Karakter_Evaluasi",
+        "Tampilkan_Ulasan_Publik",
+        "Domain_Email_Wajib"
+      ];
+
+      keys.forEach(k => {
+        const el = document.getElementById(`cfg_${k}`);
+        if (el) {
+          el.value = adminAppConfig[k] !== undefined ? adminAppConfig[k] : "";
+        }
+      });
+    }
+
+    async function handleSaveConfigForm(e) {
+      e.preventDefault();
+
+      const newConfig = {
+        "Sesi_Minggu_Aktif": document.getElementById("cfg_Sesi_Minggu_Aktif").value.trim(),
+        "Judul_Form": document.getElementById("cfg_Judul_Form").value.trim(),
+        "Mata_Kuliah": document.getElementById("cfg_Mata_Kuliah").value.trim(),
+        "Dosen_Pengampu": document.getElementById("cfg_Dosen_Pengampu").value.trim(),
+        "Kelas": document.getElementById("cfg_Kelas").value.trim(),
+        "Jurusan": document.getElementById("cfg_Jurusan").value.trim(),
+        "Nilai_Kelompok_Min": document.getElementById("cfg_Nilai_Kelompok_Min").value.trim(),
+        "Nilai_Kelompok_Max": document.getElementById("cfg_Nilai_Kelompok_Max").value.trim(),
+        "Maksimal_Pilihan_Presentator_Terbaik": document.getElementById("cfg_Maksimal_Pilihan_Presentator_Terbaik").value.trim(),
+        "Maksimal_Karakter_Evaluasi": document.getElementById("cfg_Maksimal_Karakter_Evaluasi").value.trim(),
+        "Tampilkan_Ulasan_Publik": document.getElementById("cfg_Tampilkan_Ulasan_Publik").value.trim(),
+        "Domain_Email_Wajib": document.getElementById("cfg_Domain_Email_Wajib").value.trim()
+      };
+
+      const apiUrl = getApiUrl();
+      const payload = {
+        action: "adminSaveConfig",
+        config: newConfig
+      };
+
+      try {
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+
+        const res = await response.json();
+        if (res.success) {
+          adminAppConfig = newConfig;
+          localStorage.removeItem("PGSD_CACHE_CONFIG");
+          showAdminToast("Konfigurasi sistem perkuliahan berhasil disimpan ke Spreadsheet!", "success");
+        } else {
+          showAdminToast(res.error || "Gagal menyimpan konfigurasi.", "error");
+        }
+      } catch (err) {
+        showAdminToast("Koneksi gagal: " + err, "error");
+      }
+    }
+
+    // =========================================================================
+    // 🔒 TAB 3 LOGIC: SISTEM & KEAMANAN
+    // =========================================================================
     function saveApiUrl() {
       const val = document.getElementById("inputApiUrl").value.trim();
       if (val) {
         localStorage.setItem("PGSD_API_URL", val);
         showAdminToast("URL API berhasil disimpan dan aktif!", "success");
-        testConnectionLive();
+        fetchAdminFullData();
       }
     }
 
@@ -353,7 +1250,7 @@
       const startTime = performance.now();
 
       try {
-        const response = await fetch(`${apiUrl}?action=getInitialData`);
+        const response = await fetch(`${apiUrl}?action=adminGetFullData`);
         const result = await response.json();
         const endTime = performance.now();
         const latency = Math.round(endTime - startTime);
@@ -365,7 +1262,7 @@
           statusText.textContent = "Online 200 OK";
           statusText.className = "font-bold text-emerald-600 font-mono";
           latencyText.textContent = `${latency} ms`;
-          groupsCount.textContent = `${(result.groups || []).length} Kelompok Aktif`;
+          groupsCount.textContent = `${(result.groups || []).length} Kelompok Terbaca`;
           showAdminToast(`Koneksi API Berhasil! (${latency} ms)`, "success");
         } else {
           statusText.textContent = "Error: " + (result.error || "Gagal");
@@ -385,8 +1282,9 @@
     function purgeLocalCache() {
       localStorage.removeItem("PGSD_CACHE_GROUPS");
       localStorage.removeItem("PGSD_CACHE_CONFIG");
-      showAdminToast("Cache lokal telah dibersihkan. Memperbarui data dari spreadsheet...", "success");
-      testConnectionLive();
+      localStorage.removeItem("PGSD_CACHE_REKAP");
+      showAdminToast("Seluruh cache lokal browser telah dibersihkan.", "success");
+      fetchAdminFullData();
     }
 
     function handleChangePassword(e) {
@@ -398,6 +1296,49 @@
         showAdminToast("Kata sandi admin berhasil diperbarui!", "success");
       } else {
         showAdminToast("Kata sandi minimal 4 karakter!", "warning");
+      }
+    }
+
+    // Modal Reset Responses
+    function openResetResponsesConfirmModal() {
+      document.getElementById("resetConfirmModal").classList.remove("hidden");
+    }
+
+    function closeResetResponsesConfirmModal() {
+      document.getElementById("resetConfirmModal").classList.add("hidden");
+    }
+
+    async function executeResetResponses() {
+      const btn = document.getElementById("btnExecuteReset");
+      btn.disabled = true;
+      btn.textContent = "Sedang Mengosongkan Data...";
+
+      const apiUrl = getApiUrl();
+      const payload = { action: "adminResetResponses" };
+
+      try {
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+
+        const res = await response.json();
+        btn.disabled = false;
+        btn.textContent = "Ya, Kosongkan Data Respons";
+        closeResetResponsesConfirmModal();
+
+        if (res.success) {
+          purgeLocalCache();
+          showAdminToast("Data respons penilaian berhasil dikosongkan.", "success");
+        } else {
+          showAdminToast(res.error || "Gagal mengosongkan data respons.", "error");
+        }
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = "Ya, Kosongkan Data Respons";
+        closeResetResponsesConfirmModal();
+        showAdminToast("Koneksi gagal: " + err, "error");
       }
     }
 
@@ -415,15 +1356,18 @@
       } else if (type === "error") {
         toast.classList.add("bg-rose-50", "text-rose-800", "border-rose-200");
         icon.textContent = "✕";
-      } else {
+      } else if (type === "warning") {
         toast.classList.add("bg-amber-50", "text-amber-800", "border-amber-200");
         icon.textContent = "!";
+      } else {
+        toast.classList.add("bg-blue-50", "text-blue-800", "border-blue-200");
+        icon.textContent = "ℹ️";
       }
 
       toast.classList.remove("hidden");
       setTimeout(() => {
         toast.classList.add("hidden");
-      }, 4000);
+      }, 4500);
     }
   </script>
 </body>
