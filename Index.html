@@ -555,6 +555,32 @@
           </select>
         </div>
 
+        <!-- Search Bar & Controls for Mahasiswa Individu View -->
+        <div id="individuSearchControlBox" class="space-y-2 hidden">
+          <div class="relative">
+            <input 
+              type="text" 
+              id="searchMahasiswaInput" 
+              placeholder="🔍 Cari nama pemateri atau NIM mahasiswa..." 
+              oninput="filterMahasiswaSearch()" 
+              class="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 outline-none transition bg-white placeholder-zinc-400 shadow-2xs"
+            >
+            <div class="absolute left-3 top-3 text-zinc-400">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="flex items-center justify-between text-[11px] text-zinc-500 px-1 pt-0.5">
+            <span id="studentCountLabel" class="font-medium">Menampilkan 0 Mahasiswa</span>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="toggleAllAccordions(true)" class="hover:text-zinc-900 font-semibold cursor-pointer underline">Buka Semua</button>
+              <span>•</span>
+              <button type="button" onclick="toggleAllAccordions(false)" class="hover:text-zinc-900 font-semibold cursor-pointer underline">Tutup Semua</button>
+            </div>
+          </div>
+        </div>
+
         <!-- Loading State -->
         <div id="rekapLoading" class="py-12 text-center text-zinc-500 space-y-2">
           <svg class="animate-spin h-6 w-6 text-zinc-900 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -569,9 +595,9 @@
           <!-- Dynamic Kelompok Cards -->
         </div>
 
-        <!-- SUB-VIEW 2: REKAP INDIVIDU MAHASISWA -->
-        <div id="rekapIndividuContainer" class="space-y-3.5 hidden">
-          <!-- Dynamic Individual Student Cards -->
+        <!-- SUB-VIEW 2: REKAP INDIVIDU MAHASISWA (ACCORDION) -->
+        <div id="rekapIndividuContainer" class="space-y-3 hidden">
+          <!-- Dynamic Individual Student Accordion Cards -->
         </div>
 
         <!-- Empty State Rekap -->
@@ -594,6 +620,45 @@
       <p class="font-mono text-[11px]">Sistem Penilaian Perkuliahan</p>
     </div>
   </footer>
+
+  <!-- ========================================================================= -->
+  <!-- ℹ️ MODAL INFORMASI KELOMPOK (INFO OVERLAY) -->
+  <!-- ========================================================================= -->
+  <div id="groupInfoModal" class="hidden fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-sm w-full p-5 space-y-4 shadow-xl border border-zinc-200 step-fade">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="w-6 h-6 rounded-md bg-zinc-900 text-white flex items-center justify-center text-xs font-bold font-mono">i</span>
+          <div>
+            <h3 class="text-sm font-bold text-zinc-900" id="infoModalGroupName">Informasi Kelompok</h3>
+            <p class="text-[11px] text-zinc-500" id="infoModalGroupSesi">Sesi: Minggu 1</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeGroupInfoModal()" class="w-7 h-7 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center text-sm font-bold cursor-pointer transition">✕</button>
+      </div>
+
+      <!-- Member List -->
+      <div class="space-y-2">
+        <div class="text-xs font-semibold text-zinc-700 flex items-center justify-between">
+          <span>Daftar Anggota Kelompok:</span>
+          <span id="infoModalMemberCount" class="text-[11px] text-zinc-400 font-mono">0 Anggota</span>
+        </div>
+        <ul id="infoModalMemberList" class="space-y-1.5 max-h-60 overflow-y-auto custom-scrollbar">
+          <!-- Dynamic Members Loaded Here -->
+        </ul>
+      </div>
+
+      <!-- Action -->
+      <div class="pt-2 border-t border-zinc-100">
+        <button type="button" onclick="closeGroupInfoModal()" class="w-full py-2 px-4 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-semibold transition cursor-pointer">
+          Tutup Informasi
+        </button>
+      </div>
+
+    </div>
+  </div>
 
   <!-- ========================================================================= -->
   <!-- 🏆 SUCCESS MODAL -->
@@ -1196,11 +1261,13 @@
       const empty = document.getElementById("rekapEmpty");
       const kelompokBox = document.getElementById("rekapKelompokContainer");
       const individuBox = document.getElementById("rekapIndividuContainer");
+      const searchBox = document.getElementById("individuSearchControlBox");
 
       loading.classList.remove("hidden");
       empty.classList.add("hidden");
       kelompokBox.classList.add("hidden");
       individuBox.classList.add("hidden");
+      if (searchBox) searchBox.classList.add("hidden");
 
       const apiUrl = getApiUrl();
 
@@ -1232,17 +1299,21 @@
       const btnI = document.getElementById("subTabIndividuBtn");
       const boxK = document.getElementById("rekapKelompokContainer");
       const boxI = document.getElementById("rekapIndividuContainer");
+      const searchBox = document.getElementById("individuSearchControlBox");
 
       if (sub === 'kelompok') {
         btnK.className = "py-2 px-3 rounded-md bg-white text-zinc-900 shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer";
         btnI.className = "py-2 px-3 rounded-md text-zinc-500 hover:text-zinc-900 transition flex items-center justify-center gap-1.5 cursor-pointer";
         boxK.classList.remove("hidden");
         boxI.classList.add("hidden");
+        if (searchBox) searchBox.classList.add("hidden");
       } else {
         btnI.className = "py-2 px-3 rounded-md bg-white text-zinc-900 shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer";
         btnK.className = "py-2 px-3 rounded-md text-zinc-500 hover:text-zinc-900 transition flex items-center justify-center gap-1.5 cursor-pointer";
         boxI.classList.remove("hidden");
         boxK.classList.add("hidden");
+        if (searchBox) searchBox.classList.remove("hidden");
+        filterMahasiswaSearch();
       }
     }
 
@@ -1275,7 +1346,7 @@
       switchRekapSubView(currentRekapSubView);
     }
 
-    // 1. Render Rekap Kelompok View
+    // 1. Render Rekap Kelompok View (With Info Button "i")
     function renderRekapKelompok(summaryList, isPublicReviewVisible) {
       const container = document.getElementById("rekapKelompokContainer");
       container.innerHTML = "";
@@ -1297,7 +1368,17 @@
         card.innerHTML = `
           <div class="flex items-center justify-between gap-3 border-b border-zinc-100 pb-3">
             <div>
-              <h4 class="font-bold text-zinc-900 text-sm sm:text-base">${grp.kelompok}</h4>
+              <div class="flex items-center gap-1.5">
+                <h4 class="font-bold text-zinc-900 text-sm sm:text-base">${grp.kelompok}</h4>
+                <button 
+                  type="button" 
+                  onclick="openGroupInfoModal('${grp.kelompok}')" 
+                  title="Lihat Anggota Kelompok" 
+                  class="w-5 h-5 rounded-full bg-zinc-100 hover:bg-zinc-900 hover:text-white text-zinc-600 border border-zinc-300 text-[11px] font-bold inline-flex items-center justify-center transition cursor-pointer flex-shrink-0"
+                >
+                  i
+                </button>
+              </div>
               <span class="text-[11px] text-zinc-500 font-medium">${grp.sesi}</span>
             </div>
             <div class="flex items-center gap-2">
@@ -1324,26 +1405,36 @@
       });
     }
 
-    // 2. Render Rekap Individu Mahasiswa View
+    // 2. Render Rekap Individu Mahasiswa (Accordion & Searchable)
     function renderRekapIndividu(summaryList, isPublicReviewVisible) {
       const container = document.getElementById("rekapIndividuContainer");
       container.innerHTML = "";
 
-      let hasStudents = false;
+      let cardIndex = 0;
+      const memberNimMap = {};
+      groupsData.forEach(g => {
+        (g.members || []).forEach(m => {
+          memberNimMap[m.name] = m.nim || "";
+        });
+      });
 
       summaryList.forEach(grp => {
         const evalMap = grp.evaluasiList || {};
         const voteMap = grp.votePresentator || {};
         const studentNames = Object.keys(evalMap);
 
-        // Ambil list mahasiswa dari grup
         studentNames.forEach(sName => {
-          hasStudents = true;
+          cardIndex++;
+          const cardId = `studentCard_${cardIndex}`;
           const ulasanList = evalMap[sName] || [];
           const votesCount = voteMap[sName] || 0;
+          const sNim = memberNimMap[sName] || "";
 
           const card = document.createElement("div");
-          card.className = "bg-white rounded-xl border border-zinc-200 p-4 sm:p-5 space-y-3 shadow-xs";
+          card.id = cardId;
+          card.className = "student-card bg-white rounded-xl border border-zinc-200 shadow-xs overflow-hidden transition-all";
+          card.setAttribute("data-name", sName.toLowerCase());
+          card.setAttribute("data-nim", sNim.toLowerCase());
 
           let reviewsContent = "";
           if (!isPublicReviewVisible) {
@@ -1352,39 +1443,55 @@
             reviewsContent = `<p class="text-xs text-zinc-400 italic">Belum ada catatan ulasan tertulis.</p>`;
           } else {
             const listItems = ulasanList.map(u => `
-              <li class="bg-zinc-50 p-2.5 rounded border border-zinc-100 text-xs text-zinc-700 space-y-1">
+              <li class="bg-white p-3 rounded-lg border border-zinc-200 text-xs text-zinc-700 space-y-1.5 shadow-2xs">
                 <p class="leading-relaxed text-zinc-800">"${u.ulasan}"</p>
-                <span class="text-[10px] text-zinc-400 block text-right">— ${u.penilai}</span>
+                <div class="flex items-center justify-between text-[10px] text-zinc-400 pt-1 border-t border-zinc-100">
+                  <span class="font-medium text-zinc-500">Penilai: ${u.penilai}</span>
+                  <span class="font-mono">${grp.sesi}</span>
+                </div>
               </li>
             `).join("");
 
             reviewsContent = `
-              <ul class="space-y-1.5 max-h-48 overflow-y-auto custom-scrollbar">
+              <ul class="space-y-2 max-h-56 overflow-y-auto custom-scrollbar">
                 ${listItems}
               </ul>
             `;
           }
 
           card.innerHTML = `
-            <div class="flex items-center justify-between gap-3 border-b border-zinc-100 pb-2.5">
-              <div>
-                <h4 class="font-bold text-zinc-900 text-xs sm:text-sm flex items-center gap-1.5">
-                  <span>${sName}</span>
-                </h4>
-                <span class="text-[11px] text-zinc-500 font-medium">${grp.kelompok} • ${grp.sesi}</span>
+            <!-- Clickable Accordion Header (Default Collapsed) -->
+            <div 
+              onclick="toggleAccordion('${cardId}')" 
+              class="p-3.5 sm:p-4 flex items-center justify-between gap-3 cursor-pointer hover:bg-zinc-50/80 transition select-none"
+            >
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2">
+                  <h4 class="font-bold text-zinc-900 text-xs sm:text-sm truncate">${sName}</h4>
+                  ${sNim ? `<span class="text-[10px] font-mono text-zinc-400 bg-zinc-100 px-1.5 py-0.2 rounded">${sNim}</span>` : ''}
+                </div>
+                <p class="text-[11px] text-zinc-500 truncate mt-0.5">${grp.kelompok} • ${grp.sesi}</p>
               </div>
-              <div class="flex items-center gap-1.5">
-                <span class="text-[11px] font-mono font-bold bg-zinc-100 text-zinc-800 px-2.5 py-1 rounded border border-zinc-200">
-                  ${votesCount} Suara Vote
+              
+              <div class="flex items-center gap-2 flex-shrink-0">
+                <span class="text-[11px] font-mono font-bold bg-zinc-100 text-zinc-800 px-2 py-0.5 rounded border border-zinc-200">
+                  ${votesCount} Suara
                 </span>
-                <span class="text-[11px] font-mono font-medium bg-zinc-50 text-zinc-600 px-2.5 py-1 rounded border border-zinc-200">
+                <span class="text-[11px] font-mono font-medium bg-zinc-50 text-zinc-600 px-2 py-0.5 rounded border border-zinc-200">
                   ${ulasanList.length} Masukan
+                </span>
+                <span id="chevron_${cardId}" class="text-zinc-400 text-xs transition-transform duration-200 transform inline-block font-mono">
+                  ▼
                 </span>
               </div>
             </div>
 
-            <div class="space-y-1.5">
-              <h5 class="text-[11px] font-semibold text-zinc-600">Catatan Masukan & Evaluasi Audiens:</h5>
+            <!-- Collapsible Review Content (Default Hidden) -->
+            <div id="content_${cardId}" class="hidden border-t border-zinc-100 p-4 bg-zinc-50/60 space-y-2.5">
+              <h5 class="text-[11px] font-semibold text-zinc-600 flex items-center justify-between">
+                <span>Catatan Masukan & Evaluasi Audiens:</span>
+                <span class="text-[10px] font-mono text-zinc-400">${ulasanList.length} Respons</span>
+              </h5>
               ${reviewsContent}
             </div>
           `;
@@ -1393,13 +1500,111 @@
         });
       });
 
-      if (!hasStudents) {
-        container.innerHTML = `
-          <div class="p-6 text-center text-xs text-zinc-400 bg-zinc-50 border border-zinc-200 rounded-xl">
-            Belum ada ulasan individu untuk kelompok yang dipilih.
-          </div>
-        `;
+      filterMahasiswaSearch();
+    }
+
+    // Toggle Single Accordion
+    function toggleAccordion(cardId) {
+      const content = document.getElementById(`content_${cardId}`);
+      const chevron = document.getElementById(`chevron_${cardId}`);
+      if (!content) return;
+
+      const isHidden = content.classList.contains("hidden");
+      if (isHidden) {
+        content.classList.remove("hidden");
+        if (chevron) chevron.textContent = "▲";
+      } else {
+        content.classList.add("hidden");
+        if (chevron) chevron.textContent = "▼";
       }
+    }
+
+    // Toggle All Accordions
+    function toggleAllAccordions(shouldOpen) {
+      document.querySelectorAll(".student-card").forEach(card => {
+        const cardId = card.id;
+        const content = document.getElementById(`content_${cardId}`);
+        const chevron = document.getElementById(`chevron_${cardId}`);
+        if (content) {
+          if (shouldOpen) {
+            content.classList.remove("hidden");
+            if (chevron) chevron.textContent = "▲";
+          } else {
+            content.classList.add("hidden");
+            if (chevron) chevron.textContent = "▼";
+          }
+        }
+      });
+    }
+
+    // Search Mahasiswa Filter
+    function filterMahasiswaSearch() {
+      const query = (document.getElementById("searchMahasiswaInput")?.value || "").trim().toLowerCase();
+      const cards = document.querySelectorAll(".student-card");
+      let visibleCount = 0;
+
+      cards.forEach(card => {
+        const name = card.getAttribute("data-name") || "";
+        const nim = card.getAttribute("data-nim") || "";
+        const match = !query || name.includes(query) || nim.includes(query);
+
+        if (match) {
+          card.classList.remove("hidden");
+          visibleCount++;
+        } else {
+          card.classList.add("hidden");
+        }
+      });
+
+      const countLabel = document.getElementById("studentCountLabel");
+      if (countLabel) {
+        countLabel.textContent = `Menampilkan ${visibleCount} dari ${cards.length} Mahasiswa`;
+      }
+    }
+
+    // Modal Informasi Kelompok
+    function openGroupInfoModal(groupName) {
+      const modal = document.getElementById("groupInfoModal");
+      const titleEl = document.getElementById("infoModalGroupName");
+      const sesiEl = document.getElementById("infoModalGroupSesi");
+      const listEl = document.getElementById("infoModalMemberList");
+      const countEl = document.getElementById("infoModalMemberCount");
+
+      titleEl.textContent = groupName;
+      listEl.innerHTML = "";
+
+      const foundGroup = groupsData.find(g => g.name === groupName);
+      if (foundGroup) {
+        sesiEl.textContent = `Sesi: ${foundGroup.sesi || 'Minggu 1'}`;
+        countEl.textContent = `${(foundGroup.members || []).length} Anggota`;
+
+        (foundGroup.members || []).forEach((m, idx) => {
+          const li = document.createElement("li");
+          li.className = "flex items-center justify-between p-2.5 rounded-lg bg-zinc-50 border border-zinc-200 text-xs";
+          li.innerHTML = `
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="w-5 h-5 rounded bg-zinc-200 text-zinc-700 font-mono font-bold text-[10px] flex items-center justify-center flex-shrink-0">
+                ${idx + 1}
+              </span>
+              <span class="font-medium text-zinc-900 truncate">${m.name}</span>
+            </div>
+            <span class="text-[11px] font-mono text-zinc-500 bg-white px-2 py-0.5 rounded border border-zinc-200 flex-shrink-0">
+              ${m.nim || 'NIM -'}
+            </span>
+          `;
+          listEl.appendChild(li);
+        });
+      } else {
+        sesiEl.textContent = "Data tidak ditemukan";
+        countEl.textContent = "0 Anggota";
+        listEl.innerHTML = `<li class="text-xs text-zinc-400 italic p-3 text-center">Data anggota tidak ditemukan.</li>`;
+      }
+
+      modal.classList.remove("hidden");
+    }
+
+    function closeGroupInfoModal() {
+      document.getElementById("groupInfoModal").classList.add("hidden");
     }
 
     function showToast(message, type = "info") {
