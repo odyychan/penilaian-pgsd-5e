@@ -2638,47 +2638,65 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       // HTML Template
       let html = `
         <!-- KOP SURAT RESMI FKIP ULM -->
-        <div class="border-b-2 border-zinc-900 pb-3 mb-4 text-center font-serif">
-          <h4 class="text-[11px] font-bold tracking-wider uppercase text-zinc-700 leading-tight">KEMENTERIAN PENDIDIKAN TINGGI, SAINS, DAN TEKNOLOGI</h4>
-          <h3 class="text-sm font-bold tracking-wide uppercase text-zinc-900 leading-tight mt-0.5">UNIVERSITAS LAMBUNG MANGKURAT</h3>
-          <h3 class="text-xs font-bold tracking-wide uppercase text-zinc-800 leading-tight">FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN</h3>
-          <p class="text-[11px] font-bold text-zinc-800 mt-0.5">PROGRAM STUDI PENDIDIKAN GURU SEKOLAH DASAR (PGSD) - KELAS ${kelas}</p>
-          <p class="text-[9px] text-zinc-500 italic mt-0.5">Jl. Brigjen H. Hasan Basry, Kayu Tangi, Banjarmasin, Kalimantan Selatan 70123</p>
+        <div class="text-center font-serif border-b-[3px] border-zinc-950 pb-1.5 mb-1 text-zinc-950">
+          <h4 class="text-xs font-bold tracking-wider uppercase leading-tight">KEMENTERIAN PENDIDIKAN TINGGI, SAINS, DAN TEKNOLOGI</h4>
+          <h3 class="text-sm sm:text-base font-extrabold tracking-wide uppercase leading-tight mt-0.5">UNIVERSITAS LAMBUNG MANGKURAT</h3>
+          <h3 class="text-xs font-bold tracking-wide uppercase leading-tight">FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN</h3>
+          <p class="text-xs font-bold uppercase text-zinc-900 mt-0.5">PROGRAM STUDI PENDIDIKAN GURU SEKOLAH DASAR (PGSD) - KELAS ${kelas}</p>
+          <p class="text-[10px] text-zinc-600 italic mt-0.5">Jl. Brigjen H. Hasan Basry, Kayu Tangi, Banjarmasin, Kalimantan Selatan 70123 • Laman: fkip.ulm.ac.id</p>
         </div>
+        <div class="border-b border-zinc-950 mb-4"></div>
 
-        <!-- JUDUL LAPORAN -->
-        <div class="text-center my-4 space-y-1">
-          <h2 class="text-sm sm:text-base font-bold uppercase tracking-wide text-zinc-900 border-b border-zinc-300 pb-1 inline-block">
+        <!-- JUDUL LAPORAN & METADATA -->
+        <div class="text-center mb-4 space-y-2">
+          <h2 class="text-xs sm:text-sm font-extrabold uppercase tracking-wide text-zinc-950 border-b border-zinc-400 pb-1 inline-block">
             LAPORAN REKAPITULASI HASIL PENILAIAN PRESENTASI
           </h2>
-          <div class="grid grid-cols-2 gap-2 text-[11px] text-left pt-2 max-w-xl mx-auto border-t border-zinc-100">
-            <div>
-              <p>Mata Kuliah : <strong>${matkul}</strong></p>
-              <p>Dosen Pengampu : <strong>${dosen}</strong></p>
-            </div>
-            <div>
-              <p>Kelas / Semester : <strong>${kelas} / Genap 2025/2026</strong></p>
-              <p>Cakupan Sesi : <strong>${selectedSesi === 'ALL' ? 'Semua Sesi Presentasi' : selectedSesi}</strong></p>
-            </div>
-          </div>
+          
+          <table class="w-full text-xs text-left" style="border: none !important; margin-top: 6px;">
+            <tr style="border: none !important;">
+              <td style="border: none !important; width: 50%; padding: 2px 4px; vertical-align: top;">
+                <div style="display: flex; gap: 6px;">
+                  <span style="width: 110px; font-weight: 600; color: #374151;">Mata Kuliah</span>
+                  <span style="font-weight: 700; color: #111827;">: ${matkul}</span>
+                </div>
+                <div style="display: flex; gap: 6px; margin-top: 4px;">
+                  <span style="width: 110px; font-weight: 600; color: #374151;">Dosen Pengampu</span>
+                  <span style="font-weight: 700; color: #111827;">: ${dosen}</span>
+                </div>
+              </td>
+              <td style="border: none !important; width: 50%; padding: 2px 4px; vertical-align: top;">
+                <div style="display: flex; gap: 6px;">
+                  <span style="width: 110px; font-weight: 600; color: #374151;">Kelas / Semester</span>
+                  <span style="font-weight: 700; color: #111827;">: ${kelas} / Genap (2025/2026)</span>
+                </div>
+                <div style="display: flex; gap: 6px; margin-top: 4px;">
+                  <span style="width: 110px; font-weight: 600; color: #374151;">Cakupan Sesi</span>
+                  <span style="font-weight: 700; color: #111827;">: ${selectedSesi === 'ALL' ? 'Semua Sesi Presentasi' : selectedSesi}</span>
+                </div>
+              </td>
+            </tr>
+          </table>
         </div>
 
         <!-- 1. TABEL REKAPITULASI NILAI KELOMPOK -->
-        <div class="my-4 space-y-2">
-          <h4 class="font-bold text-xs uppercase tracking-wider text-zinc-900 flex items-center gap-1.5">
+        <div class="my-4 space-y-1.5 print-avoid-break">
+          <h4 class="font-bold text-xs uppercase tracking-wider text-zinc-950 flex items-center justify-between">
             <span>A. Rekapitulasi Nilai & Peringkat Performa Kelompok</span>
+            <span class="text-[10px] font-normal font-mono text-zinc-500">Skala Penilaian: 0 - 100</span>
           </h4>
+          
           <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse border border-zinc-400 text-[11px]">
+            <table class="w-full text-left border-collapse text-xs border border-zinc-900" style="border: 1px solid #18181b;">
               <thead>
-                <tr class="bg-zinc-100 text-zinc-900 font-bold border-b border-zinc-400 text-center">
-                  <th class="p-2 border border-zinc-400 w-10">Rank</th>
-                  <th class="p-2 border border-zinc-400 text-left">Kelompok</th>
-                  <th class="p-2 border border-zinc-400 w-24">Sesi</th>
-                  <th class="p-2 border border-zinc-400 w-20">Jml Penilai</th>
-                  <th class="p-2 border border-zinc-400 w-24">Nilai Rata-Rata</th>
-                  <th class="p-2 border border-zinc-400 text-left">Top Presentator Terfavorit</th>
-                  <th class="p-2 border border-zinc-400 w-24">Predikat</th>
+                <tr style="background-color: #f4f4f5; text-align: center; font-weight: bold; border-bottom: 1.5px solid #18181b;">
+                  <th style="padding: 6px 4px; border: 1px solid #18181b; width: 38px;">Rank</th>
+                  <th style="padding: 6px 8px; border: 1px solid #18181b; text-align: left;">Kelompok Presentasi</th>
+                  <th style="padding: 6px 6px; border: 1px solid #18181b; width: 75px;">Sesi</th>
+                  <th style="padding: 6px 6px; border: 1px solid #18181b; width: 70px;">Penilai</th>
+                  <th style="padding: 6px 6px; border: 1px solid #18181b; width: 80px;">Rata-Rata</th>
+                  <th style="padding: 6px 8px; border: 1px solid #18181b; text-align: left;">Top Presentator Terfavorit</th>
+                  <th style="padding: 6px 6px; border: 1px solid #18181b; width: 90px;">Predikat</th>
                 </tr>
               </thead>
               <tbody>
@@ -2687,7 +2705,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       if (summaryList.length === 0) {
         html += `
           <tr>
-            <td colspan="7" class="p-4 text-center text-zinc-400 italic border border-zinc-300">
+            <td colspan="7" style="padding: 12px; text-align: center; color: #6b7280; font-style: italic; border: 1px solid #18181b;">
               Tidak ada data penilaian yang sesuai dengan kriteria filter.
             </td>
           </tr>
@@ -2709,25 +2727,25 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
             : "-";
 
           html += `
-            <tr class="border-b border-zinc-300 ${idx % 2 === 0 ? 'bg-white' : 'bg-zinc-50/50'}">
-              <td class="p-2 border border-zinc-300 text-center font-bold font-mono">#${idx + 1}</td>
-              <td class="p-2 border border-zinc-300 font-semibold text-zinc-900">${g.kelompok}</td>
-              <td class="p-2 border border-zinc-300 text-center">${g.sesi || 'Minggu 1'}</td>
-              <td class="p-2 border border-zinc-300 text-center font-mono">${g.totalPenilai || 0}</td>
-              <td class="p-2 border border-zinc-300 text-center font-bold font-mono text-zinc-900">${g.totalPenilai > 0 ? g.rataRata : '-'}</td>
-              <td class="p-2 border border-zinc-300 text-zinc-700 text-[10px]">${topPresentersText}</td>
-              <td class="p-2 border border-zinc-300 text-center font-medium">${predikat}</td>
+            <tr style="border-bottom: 1px solid #18181b; ${idx % 2 === 0 ? 'background-color: #ffffff;' : 'background-color: #fafafa;'}">
+              <td style="padding: 6px 4px; border: 1px solid #18181b; text-align: center; font-weight: bold; font-family: monospace;">#${idx + 1}</td>
+              <td style="padding: 6px 8px; border: 1px solid #18181b; font-weight: bold; color: #000;">${g.kelompok}</td>
+              <td style="padding: 6px 6px; border: 1px solid #18181b; text-align: center;">${g.sesi || 'Minggu 1'}</td>
+              <td style="padding: 6px 6px; border: 1px solid #18181b; text-align: center; font-family: monospace;">${g.totalPenilai || 0}</td>
+              <td style="padding: 6px 6px; border: 1px solid #18181b; text-align: center; font-weight: bold; font-family: monospace; color: #000; font-size: 12px;">${g.totalPenilai > 0 ? g.rataRata : '-'}</td>
+              <td style="padding: 6px 8px; border: 1px solid #18181b; color: #374151; font-size: 11px;">${topPresentersText}</td>
+              <td style="padding: 6px 6px; border: 1px solid #18181b; text-align: center; font-weight: 500;">${predikat}</td>
             </tr>
           `;
         });
 
         // Summary Row
         html += `
-          <tr class="bg-zinc-100 font-bold border-t-2 border-zinc-400 text-center">
-            <td colspan="3" class="p-2 border border-zinc-400 text-right">Rata-Rata Keseluruhan:</td>
-            <td class="p-2 border border-zinc-400 font-mono">${totalAllPenilai} Respons</td>
-            <td class="p-2 border border-zinc-400 font-mono text-zinc-950">${avgClassScore}</td>
-            <td colspan="2" class="p-2 border border-zinc-400 text-left text-zinc-600 text-[10px]">Total ${summaryList.length} Kelompok Terdaftar</td>
+          <tr style="background-color: #f4f4f5; font-weight: bold; border-top: 1.5px solid #18181b; text-align: center;">
+            <td colspan="3" style="padding: 7px 8px; text-align: right; border: 1px solid #18181b;">Rata-Rata Keseluruhan Kelas:</td>
+            <td style="padding: 7px 6px; border: 1px solid #18181b; font-family: monospace;">${totalAllPenilai} Mhs</td>
+            <td style="padding: 7px 6px; border: 1px solid #18181b; font-family: monospace; font-size: 13px; color: #000;">${avgClassScore}</td>
+            <td colspan="2" style="padding: 7px 8px; text-align: left; border: 1px solid #18181b; font-size: 10px; color: #374151;">Total ${summaryList.length} Kelompok Terdaftar</td>
           </tr>
         `;
       }
@@ -2744,7 +2762,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         let hasAnyReviews = false;
         let reviewHtml = `
           <div class="my-5 space-y-3">
-            <h4 class="font-bold text-xs uppercase tracking-wider text-zinc-900">
+            <h4 class="font-bold text-xs uppercase tracking-wider text-zinc-950">
               B. Rangkuman Catatan Evaluasi Masukan Mahasiswa
             </h4>
         `;
@@ -2756,22 +2774,23 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           if (studentKeys.length > 0) {
             hasAnyReviews = true;
             reviewHtml += `
-              <div class="p-3 rounded border border-zinc-300 bg-zinc-50/50 space-y-2 mb-3">
-                <div class="font-bold text-[11px] text-zinc-900 border-b border-zinc-200 pb-1">
-                  ${g.kelompok} (${g.sesi || 'Minggu 1'})
+              <div class="print-card print-avoid-break p-3.5 rounded-lg border border-zinc-400 bg-zinc-50/40 space-y-2 mb-3.5" style="page-break-inside: avoid; break-inside: avoid;">
+                <div class="font-bold text-xs text-zinc-950 border-b border-zinc-300 pb-1.5 flex items-center justify-between">
+                  <span class="text-xs sm:text-sm font-extrabold">${g.kelompok}</span>
+                  <span class="text-[10px] font-medium font-mono text-zinc-600 bg-zinc-200/80 px-2 py-0.5 rounded">${g.sesi || 'Minggu 1'}</span>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[10px]">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs pt-1">
             `;
 
             studentKeys.forEach(name => {
               const reviews = evalList[name] || [];
               if (reviews.length > 0) {
                 reviewHtml += `
-                  <div class="p-2 rounded bg-white border border-zinc-200 space-y-1">
-                    <span class="font-semibold text-zinc-900 block">• ${name} (${reviews.length} Masukan):</span>
-                    <ul class="list-disc list-inside space-y-0.5 text-zinc-600 pl-1">
-                      ${reviews.slice(0, 3).map(r => `<li class="italic leading-snug">"${r.ulasan}"</li>`).join("")}
-                      ${reviews.length > 3 ? `<li class="text-zinc-400 text-[9px]">...dan ${reviews.length - 3} catatan lainnya.</li>` : ''}
+                  <div class="p-2.5 rounded bg-white border border-zinc-200 space-y-1 shadow-2xs">
+                    <span class="font-bold text-zinc-900 block text-xs">• ${name} <span class="text-[10px] font-normal text-zinc-500">(${reviews.length} masukan)</span>:</span>
+                    <ul class="list-disc list-inside space-y-1 text-zinc-700 pl-1 text-[11px]">
+                      ${reviews.slice(0, 3).map(r => `<li class="italic leading-relaxed">"${r.ulasan}"</li>`).join("")}
+                      ${reviews.length > 3 ? `<li class="text-zinc-400 text-[10px]">...dan ${reviews.length - 3} catatan lainnya.</li>` : ''}
                     </ul>
                   </div>
                 `;
@@ -2793,21 +2812,22 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
       // LEMBAR TANDA TANGAN / PENGESAHAN RESMI DOSEN
       html += `
-        <div class="pt-8 mt-6 border-t border-zinc-300 flex justify-between items-start text-[11px]">
+        <div class="print-signature print-avoid-break pt-6 mt-6 border-t border-zinc-300 flex justify-between items-start text-xs" style="page-break-inside: avoid; break-inside: avoid;">
           <div class="space-y-1 text-zinc-500 text-[10px]">
             <p>Dokumen ini dihasilkan secara otomatis oleh:</p>
-            <p class="font-medium text-zinc-700">Portal Pengelola PGSD Kelas 5E</p>
+            <p class="font-semibold text-zinc-800">Portal Pengelola PGSD Kelas 5E</p>
             <p>Universitas Lambung Mangkurat</p>
+            <p class="text-zinc-400 font-mono text-[9px] pt-1">Waktu Cetak: ${printDateStr}</p>
           </div>
 
           <div class="text-center w-64 space-y-1">
-            <p>Banjarmasin, ${printDateStr}</p>
-            <p class="font-semibold text-zinc-800">Dosen Pengampu Mata Kuliah,</p>
-            <div class="h-16 flex items-center justify-center">
+            <p class="text-xs">Banjarmasin, ${printDateStr}</p>
+            <p class="font-bold text-zinc-900">Dosen Pengampu Mata Kuliah,</p>
+            <div style="height: 60px; display: flex; align-items: center; justify-content: center;">
               <span class="text-[10px] text-zinc-300 italic">(Tanda Tangan & Cap)</span>
             </div>
-            <p class="font-bold underline text-zinc-950">${dosen}</p>
-            <p class="text-[10px] text-zinc-600">NIP. 19830514 200812 2 003</p>
+            <p class="font-extrabold underline text-zinc-950 text-xs">${dosen}</p>
+            <p class="text-[10px] text-zinc-700 font-mono">NIP. 19830514 200812 2 003</p>
           </div>
         </div>
       `;
