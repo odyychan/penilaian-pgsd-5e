@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" class="h-full bg-slate-900 selection:bg-indigo-500 selection:text-white">
+<html lang="id" class="h-full bg-zinc-50 text-zinc-900 selection:bg-zinc-900 selection:text-white">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
@@ -9,36 +9,32 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   
   <script>
     tailwind.config = {
       theme: {
         extend: {
           fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-            display: ['"Outfit"', 'sans-serif'],
+            sans: ['"Plus Jakarta Sans"', '"Inter"', 'sans-serif'],
             mono: ['"JetBrains Mono"', 'monospace'],
           },
           colors: {
             brand: {
-              50: '#eef2ff',
-              100: '#e0e7ff',
-              200: '#c7d2fe',
-              300: '#a5b4fc',
-              400: '#818cf8',
-              500: '#6366f1',
-              600: '#4f46e5',
-              700: '#4338ca',
-              800: '#3730a3',
-              900: '#312e81',
-              950: '#1e1b4b',
+              50: '#f4f4f5',
+              100: '#e4e4e7',
+              200: '#d4d4d8',
+              500: '#71717a',
+              900: '#18181b',
+              950: '#09090b',
+            },
+            accent: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
             }
-          },
-          boxShadow: {
-            'glow-indigo': '0 0 25px -5px rgba(99, 102, 241, 0.35)',
-            'card': '0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -2px rgba(0, 0, 0, 0.02)',
-            'card-hover': '0 12px 30px -4px rgba(79, 70, 229, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.04)',
           }
         }
       }
@@ -46,224 +42,205 @@
   </script>
 
   <style>
-    /* Fluid background gradients */
-    .bg-mesh {
-      background-color: #f8fafc;
-      background-image: 
-        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
-        radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.08) 0px, transparent 50%),
-        radial-gradient(at 50% 100%, rgba(224, 231, 255, 0.4) 0px, transparent 50%);
-    }
-
-    /* Custom range slider styling */
+    /* Custom Range Slider */
     input[type=range] {
       -webkit-appearance: none;
       background: transparent;
     }
     input[type=range]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      height: 26px;
-      width: 26px;
+      height: 22px;
+      width: 22px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      background: #18181b;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.45);
-      border: 3px solid #ffffff;
-      margin-top: -9px;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      border: 2px solid #ffffff;
+      margin-top: -8px;
+      transition: transform 0.15s ease, background-color 0.15s ease;
     }
     input[type=range]::-webkit-slider-thumb:hover, 
     input[type=range]::-webkit-slider-thumb:active {
       transform: scale(1.15);
-      box-shadow: 0 6px 16px rgba(79, 70, 229, 0.6);
+      background: #2563eb;
     }
     input[type=range]::-webkit-slider-runnable-track {
       width: 100%;
-      height: 8px;
+      height: 6px;
       cursor: pointer;
-      background: #e2e8f0;
+      background: #e4e4e7;
       border-radius: 9999px;
     }
 
     /* Scrollbar */
     .custom-scrollbar::-webkit-scrollbar {
-      width: 5px;
-      height: 5px;
+      width: 4px;
+      height: 4px;
     }
     .custom-scrollbar::-webkit-scrollbar-thumb {
-      background-color: #cbd5e1;
+      background-color: #d4d4d8;
       border-radius: 9999px;
     }
 
-    /* Step transitions */
-    .step-enter {
-      animation: stepEnter 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    /* Step Fade In */
+    .step-fade {
+      animation: stepFade 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
-    @keyframes stepEnter {
-      from { opacity: 0; transform: translateX(12px); }
-      to { opacity: 1; transform: translateX(0); }
+    @keyframes stepFade {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col bg-mesh text-slate-800 font-sans antialiased">
+<body class="min-h-screen flex flex-col bg-zinc-50 font-sans antialiased text-zinc-900">
 
   <!-- ========================================================================= -->
-  <!-- 🌟 HEADER / TOP APP BAR -->
+  <!-- 🧭 MINIMALIST HEADER -->
   <!-- ========================================================================= -->
-  <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-xl border-b border-slate-800/80 text-white shadow-lg shadow-slate-950/20">
-    <div class="w-full max-w-4xl mx-auto px-3.5 sm:px-6 py-2.5 sm:py-3.5">
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-zinc-200">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
       
-      <div class="flex items-center justify-between gap-3">
-        
-        <!-- Logo & Branding -->
-        <div class="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
-          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-500 flex-shrink-0 flex items-center justify-center font-bold text-lg sm:text-xl shadow-glow-indigo text-white">
-            🎓
-          </div>
-          <div class="min-w-0">
-            <div class="flex items-center gap-1.5 sm:gap-2">
-              <h1 class="font-display font-extrabold text-xs sm:text-sm md:text-base tracking-tight leading-tight truncate text-white" id="navTitle">
-                Penilaian Presentasi PGSD 5E
-              </h1>
-              <span class="hidden xs:inline-block px-2 py-0.5 rounded-md bg-indigo-500/20 border border-indigo-400/30 text-[10px] font-mono font-bold text-indigo-300">
-                2026
-              </span>
-            </div>
-            <p class="text-[10px] sm:text-xs text-slate-400 truncate flex items-center gap-1" id="navSubtitle">
-              <span>Bimbingan Konseling di SD</span>
-              <span>•</span>
-              <span class="text-indigo-400 font-medium">FKIP ULM</span>
-            </p>
-          </div>
+      <!-- Brand & Title -->
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-8 h-8 rounded-lg bg-zinc-900 text-white flex items-center justify-center font-bold text-xs tracking-wider flex-shrink-0">
+          5E
         </div>
-
-        <!-- Sesi Pill & Settings -->
-        <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-          <div class="px-2.5 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold bg-indigo-950/80 border border-indigo-700/60 text-indigo-300 shadow-inner flex items-center gap-1.5" id="badgeSesiTop">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span id="badgeSesiTopText">Sesi: Minggu 1</span>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <h1 class="font-bold text-xs sm:text-sm text-zinc-900 truncate" id="navTitle">
+              Penilaian Presentasi PGSD 5E
+            </h1>
+            <span class="hidden xs:inline-block px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-zinc-100 text-zinc-600 border border-zinc-200">
+              2026
+            </span>
           </div>
-
-          <button 
-            type="button" 
-            onclick="openApiConfigModal()" 
-            title="Pengaturan URL API Spreadsheet" 
-            class="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition active:scale-95 cursor-pointer text-xs"
-          >
-            ⚙️
-          </button>
+          <p class="text-[11px] text-zinc-500 truncate" id="navSubtitle">
+            Bimbingan Konseling di SD • FKIP ULM
+          </p>
         </div>
-
       </div>
 
-      <!-- Segmented Navigation (Tabs) -->
-      <div class="mt-2.5 sm:mt-3 grid grid-cols-2 gap-1.5 p-1 bg-slate-950/80 rounded-2xl border border-slate-800 text-xs font-bold">
+      <!-- Controls & Status -->
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-100 border border-zinc-200 text-zinc-700 text-[11px] font-medium" id="badgeSesiTop">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          <span id="badgeSesiTopText">Sesi: Minggu 1</span>
+        </div>
+
+        <button 
+          type="button" 
+          onclick="openApiConfigModal()" 
+          title="Pengaturan URL API" 
+          class="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition text-xs cursor-pointer"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Minimal View Switcher -->
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 pb-2.5">
+      <div class="grid grid-cols-2 p-0.5 bg-zinc-100 rounded-lg border border-zinc-200 text-xs font-semibold">
         <button 
           id="tabFormBtn" 
           onclick="switchTab('form')" 
-          class="py-2 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-md shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer"
+          class="py-1.5 px-3 rounded-md bg-white text-zinc-900 shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
         >
-          <span class="text-sm">📝</span>
-          <span class="font-display font-bold">Form Penilaian</span>
+          <span>Formulir Penilaian</span>
         </button>
         <button 
           id="tabRekapBtn" 
           onclick="switchTab('rekap')" 
-          class="py-2 px-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer"
+          class="py-1.5 px-3 rounded-md text-zinc-500 hover:text-zinc-900 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
         >
-          <span class="text-sm">📊</span>
-          <span class="font-display font-bold">Dashboard Rekap</span>
+          <span>Rekapitulasi Hasil</span>
         </button>
       </div>
-
     </div>
   </header>
 
   <!-- ========================================================================= -->
-  <!-- 📱 MAIN CONTAINER (Step Wizard Layout) -->
+  <!-- 📄 MAIN CONTAINER -->
   <!-- ========================================================================= -->
-  <main class="flex-1 w-full max-w-4xl mx-auto px-3.5 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
+  <main class="flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 py-5 sm:py-7 space-y-6">
 
     <!-- FLOATING TOAST NOTIFICATION -->
-    <div id="toast" class="hidden fixed bottom-5 left-3.5 right-3.5 sm:left-auto sm:right-6 sm:max-w-md z-50 p-4 rounded-2xl shadow-2xl text-xs sm:text-sm font-semibold flex items-center gap-3 transition-all duration-300 border backdrop-blur-md">
-      <span id="toastIcon" class="text-xl flex-shrink-0"></span>
-      <span id="toastMsg" class="flex-1 leading-snug font-medium"></span>
+    <div id="toast" class="hidden fixed bottom-5 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-sm z-50 p-3.5 rounded-xl shadow-lg text-xs font-medium flex items-center gap-2.5 transition-all border">
+      <span id="toastIcon" class="font-bold"></span>
+      <span id="toastMsg" class="flex-1 leading-snug"></span>
     </div>
 
     <!-- ========================================================================= -->
-    <!-- TAB 1: FORM PENILAIAN (STEP-BY-STEP WIZARD) -->
+    <!-- TAB 1: FORM PENILAIAN (MODERN-MINIMALIST MULTI-STEP) -->
     <!-- ========================================================================= -->
-    <div id="viewForm" class="space-y-4 sm:space-y-5">
+    <div id="viewForm" class="space-y-5">
 
-      <!-- STEP PROGRESS INDICATOR -->
-      <div class="bg-white rounded-2xl sm:rounded-3xl shadow-card border border-slate-200/80 p-3.5 sm:p-5">
-        
-        <!-- Progress Bar & Labels -->
-        <div class="flex items-center justify-between mb-2 sm:mb-3">
+      <!-- STEP INDICATOR BAR -->
+      <div class="bg-white rounded-xl border border-zinc-200 p-4 sm:p-5 shadow-xs space-y-3">
+        <div class="flex items-center justify-between text-xs">
           <div class="flex items-center gap-2">
-            <span id="stepNumberBadge" class="w-6 h-6 rounded-full bg-indigo-600 text-white font-display font-extrabold text-xs flex items-center justify-center shadow-xs">
-              1
+            <span id="stepNumberBadge" class="font-mono text-xs font-bold px-2 py-0.5 rounded bg-zinc-900 text-white">
+              01/04
             </span>
-            <span id="stepTitleLabel" class="font-display font-bold text-xs sm:text-sm text-slate-900">
-              Langkah 1: Identitas Penilai
+            <span id="stepTitleLabel" class="font-semibold text-zinc-800">
+              Identitas Penilai
             </span>
           </div>
-          <span id="stepPercentLabel" class="text-[11px] sm:text-xs font-mono font-extrabold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-100">
-            25% Selesai
+          <span id="stepPercentLabel" class="font-mono text-[11px] text-zinc-500">
+            25%
           </span>
         </div>
 
-        <!-- Progress Track -->
-        <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200/60">
-          <div id="progressBarFill" class="h-full bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 rounded-full transition-all duration-500 ease-out" style="width: 25%;"></div>
+        <!-- Progress Line -->
+        <div class="w-full h-1.5 bg-zinc-100 rounded-full overflow-hidden">
+          <div id="progressBarFill" class="h-full bg-zinc-900 rounded-full transition-all duration-300 ease-out" style="width: 25%;"></div>
         </div>
 
-        <!-- Step Pill Steps (Visual Step Indicator) -->
-        <div class="grid grid-cols-4 gap-1.5 mt-3 pt-2.5 border-t border-slate-100 text-center">
-          <button type="button" onclick="goToStep(1)" id="stepTab_1" class="py-1 px-1 rounded-lg text-[10px] sm:text-xs font-bold transition-all text-indigo-700 bg-indigo-50 border border-indigo-200">
+        <!-- Step Navigation Tabs -->
+        <div class="grid grid-cols-4 gap-1.5 pt-1 text-center">
+          <button type="button" onclick="goToStep(1)" id="stepTab_1" class="py-1 px-1 rounded text-[11px] font-medium transition text-zinc-900 bg-zinc-100 border border-zinc-300">
             1. Identitas
           </button>
-          <button type="button" onclick="goToStep(2)" id="stepTab_2" class="py-1 px-1 rounded-lg text-[10px] sm:text-xs font-bold transition-all text-slate-400 bg-slate-50 border border-slate-200">
+          <button type="button" onclick="goToStep(2)" id="stepTab_2" class="py-1 px-1 rounded text-[11px] font-medium transition text-zinc-400 bg-zinc-50 border border-transparent">
             2. Kelompok
           </button>
-          <button type="button" onclick="goToStep(3)" id="stepTab_3" class="py-1 px-1 rounded-lg text-[10px] sm:text-xs font-bold transition-all text-slate-400 bg-slate-50 border border-slate-200">
-            3. Skor & Vote
+          <button type="button" onclick="goToStep(3)" id="stepTab_3" class="py-1 px-1 rounded text-[11px] font-medium transition text-zinc-400 bg-zinc-50 border border-transparent">
+            3. Penilaian
           </button>
-          <button type="button" onclick="goToStep(4)" id="stepTab_4" class="py-1 px-1 rounded-lg text-[10px] sm:text-xs font-bold transition-all text-slate-400 bg-slate-50 border border-slate-200">
+          <button type="button" onclick="goToStep(4)" id="stepTab_4" class="py-1 px-1 rounded text-[11px] font-medium transition text-zinc-400 bg-zinc-50 border border-transparent">
             4. Evaluasi
           </button>
         </div>
-
       </div>
 
-      <!-- FORM WIZARD STEPS -->
-      <form id="assessmentForm" onsubmit="handleFinalSubmit(event)" class="space-y-4">
+      <!-- FORM CONTAINER -->
+      <form id="assessmentForm" onsubmit="handleFinalSubmit(event)" class="space-y-5">
 
         <!-- =================================================================== -->
-        <!-- STEP 1: IDENTITAS PENILAI -->
+        <!-- SECTION 1: IDENTITAS PENILAI -->
         <!-- =================================================================== -->
-        <div id="stepSection_1" class="step-enter space-y-4">
-          
-          <div class="bg-white rounded-2xl sm:rounded-3xl shadow-card border border-slate-200/80 p-4 sm:p-6 lg:p-7 space-y-4 sm:space-y-5">
+        <div id="stepSection_1" class="step-fade space-y-4">
+          <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5">
             
-            <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
-              <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 font-display font-extrabold text-sm flex items-center justify-center flex-shrink-0">
-                1
+            <div class="border-b border-zinc-100 pb-3.5">
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-xs font-bold text-zinc-400">SECTION 01</span>
+                <span class="text-zinc-300">•</span>
+                <span class="text-xs font-semibold text-zinc-700">Wajib Diisi</span>
               </div>
-              <div>
-                <h3 class="text-sm sm:text-base md:text-lg font-display font-bold text-slate-900 leading-tight">
-                  Identitas Penilai (Mahasiswa Audiens)
-                </h3>
-                <p class="text-[10px] sm:text-xs text-slate-400">Verifikasi email mahasiswa ULM & nama lengkap Anda</p>
-              </div>
+              <h2 class="text-base sm:text-lg font-bold text-zinc-900 mt-1">Identitas Penilai</h2>
+              <p class="text-xs text-zinc-500 mt-0.5">Masukkan identitas akun mahasiswa ULM Anda untuk verifikasi presensi.</p>
             </div>
 
-            <!-- Email Input -->
+            <!-- Email Field -->
             <div class="space-y-1.5">
-              <label class="block text-xs sm:text-sm font-bold text-slate-800">
+              <label class="block text-xs font-semibold text-zinc-700">
                 Email Mahasiswa ULM <span class="text-rose-500">*</span>
               </label>
-
               <div class="relative">
                 <input 
                   type="email" 
@@ -271,22 +248,20 @@
                   required 
                   inputmode="email"
                   placeholder="nama.nim@mhs.ulm.ac.id" 
-                  class="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl border border-slate-300 text-xs sm:text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition bg-slate-50/50 focus:bg-white"
+                  class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 outline-none transition bg-white placeholder-zinc-400"
                   oninput="validateEmailLive(this.value)"
                 >
-                <div id="emailCheckIcon" class="absolute right-3 top-2.5 sm:top-3 hidden">
-                  <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center justify-center shadow-xs">✓</span>
+                <div id="emailCheckIcon" class="absolute right-3 top-2.5 hidden">
+                  <span class="text-emerald-600 font-bold text-xs">✓ Valid</span>
                 </div>
               </div>
-              <p id="emailValidationMsg" class="text-[10px] sm:text-xs font-semibold hidden"></p>
-              <p class="text-[10px] sm:text-[11px] text-slate-400">
-                Wajib domain <code class="bg-slate-100 text-indigo-700 px-1.5 py-0.5 rounded font-mono font-bold">@mhs.ulm.ac.id</code> / <code class="bg-slate-100 text-indigo-700 px-1.5 py-0.5 rounded font-mono font-bold">@ulm.ac.id</code>
-              </p>
+              <p id="emailValidationMsg" class="text-[11px] font-medium hidden"></p>
+              <p class="text-[11px] text-zinc-400">Gunakan akun berakhiran <code class="font-mono text-zinc-700">@mhs.ulm.ac.id</code> atau <code class="font-mono text-zinc-700">@ulm.ac.id</code></p>
             </div>
 
-            <!-- Nama Lengkap Input -->
+            <!-- Nama Lengkap Field -->
             <div class="space-y-1.5">
-              <label class="block text-xs sm:text-sm font-bold text-slate-800">
+              <label class="block text-xs font-semibold text-zinc-700">
                 Nama Lengkap Penilai <span class="text-rose-500">*</span>
               </label>
               <input 
@@ -295,150 +270,133 @@
                 required 
                 autocapitalize="words"
                 placeholder="Tuliskan nama lengkap Anda..." 
-                class="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl border border-slate-300 text-xs sm:text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition bg-slate-50/50 focus:bg-white"
+                class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 outline-none transition bg-white placeholder-zinc-400"
               >
             </div>
 
-            <!-- Hint Box -->
-            <div class="p-3 rounded-2xl bg-indigo-50/70 border border-indigo-200/70 text-[11px] sm:text-xs text-indigo-900 leading-relaxed">
-              💡 Pastikan data email & nama lengkap benar agar skor dan evaluasi Anda tercatat sah di presensi dosen.
-            </div>
-
           </div>
 
-          <!-- Wizard Navigation Step 1 -->
-          <div class="flex items-center justify-end pt-1">
+          <!-- Section 1 Actions -->
+          <div class="flex items-center justify-end">
             <button 
               type="button" 
               onclick="nextFromStep1()" 
-              class="w-full sm:w-auto px-6 py-3.5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-display font-extrabold text-xs sm:text-sm shadow-md shadow-indigo-600/30 active:scale-98 transition flex items-center justify-center gap-2 cursor-pointer"
+              class="w-full sm:w-auto px-6 py-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 flex items-center justify-center gap-2 cursor-pointer shadow-xs"
             >
-              <span>Lanjut ke Pilih Kelompok</span>
-              <span class="text-base">➔</span>
+              <span>Lanjut ke Pemilihan Kelompok</span>
+              <span>→</span>
             </button>
           </div>
-
         </div>
 
         <!-- =================================================================== -->
-        <!-- STEP 2: PILIH KELOMPOK -->
+        <!-- SECTION 2: PILIH KELOMPOK -->
         <!-- =================================================================== -->
-        <div id="stepSection_2" class="step-enter space-y-4 hidden">
-          
-          <div class="bg-white rounded-2xl sm:rounded-3xl shadow-card border border-slate-200/80 p-4 sm:p-6 lg:p-7 space-y-4 sm:space-y-5">
+        <div id="stepSection_2" class="step-fade space-y-4 hidden">
+          <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5">
             
-            <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 font-display font-extrabold text-sm flex items-center justify-center flex-shrink-0">
-                  2
+            <div class="flex items-center justify-between border-b border-zinc-100 pb-3.5">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-mono text-xs font-bold text-zinc-400">SECTION 02</span>
+                  <span class="text-zinc-300">•</span>
+                  <span class="text-xs font-semibold text-zinc-700">Pilih 1 Kelompok</span>
                 </div>
-                <div>
-                  <h3 class="text-sm sm:text-base md:text-lg font-display font-bold text-slate-900 leading-tight">
-                    Pilih Kelompok yang Dinilai <span class="text-rose-500">*</span>
-                  </h3>
-                  <p class="text-[10px] sm:text-xs text-slate-400">Pilih salah satu kelompok yang sedang tampil presentasi</p>
-                </div>
+                <h2 class="text-base sm:text-lg font-bold text-zinc-900 mt-1">Kelompok yang Dinilai</h2>
+                <p class="text-xs text-zinc-500 mt-0.5">Pilih salah satu kelompok yang sedang presentasi di depan kelas.</p>
               </div>
-              
-              <div class="flex items-center gap-2">
-                <button type="button" onclick="fetchInitialFormData(true)" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer" title="Refresh data kelompok">
-                  <span>🔄</span>
-                  <span class="hidden sm:inline">Refresh</span>
-                </button>
-                <span class="text-[10px] sm:text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100 flex-shrink-0">
-                  Pilih 1
-                </span>
-              </div>
+
+              <button type="button" onclick="fetchInitialFormData(true)" class="p-2 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-600 text-xs transition cursor-pointer" title="Perbarui data">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+              </button>
             </div>
 
-            <!-- Loading Groups -->
-            <div id="groupsLoading" class="py-10 text-center text-xs text-slate-500 flex flex-col items-center justify-center gap-2">
-              <svg class="animate-spin h-7 w-7 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <!-- Loading State -->
+            <div id="groupsLoading" class="py-10 text-center text-xs text-zinc-500 flex flex-col items-center justify-center gap-2">
+              <svg class="animate-spin h-5 w-5 text-zinc-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
               </svg>
-              <span class="font-bold text-slate-600">Menghubungkan ke Google Sheets...</span>
+              <span>Memuat daftar kelompok...</span>
             </div>
 
-            <!-- Radio Cards Grid -->
-            <div id="groupsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 hidden">
+            <!-- Group Cards -->
+            <div id="groupsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 hidden">
               <!-- Dynamic Group Cards -->
             </div>
 
             <!-- Empty State -->
-            <div id="groupsEmpty" class="hidden p-6 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs sm:text-sm text-center space-y-2">
-              <p>Tidak ada kelompok aktif yang ditemukan.</p>
-              <button type="button" onclick="fetchInitialFormData(true)" class="px-3 py-1.5 rounded-xl bg-amber-200 text-amber-900 font-bold text-xs">Coba Muat Ulang</button>
+            <div id="groupsEmpty" class="hidden p-6 rounded-lg bg-zinc-50 border border-zinc-200 text-center text-xs text-zinc-600 space-y-2">
+              <p>Belum ada kelompok aktif yang terdaftar.</p>
+              <button type="button" onclick="fetchInitialFormData(true)" class="px-3 py-1.5 rounded bg-zinc-900 text-white font-medium text-xs">Coba Lagi</button>
             </div>
 
           </div>
 
-          <!-- Wizard Navigation Step 2 -->
-          <div class="flex items-center justify-between gap-3 pt-1">
+          <!-- Section 2 Actions -->
+          <div class="flex items-center justify-between gap-3">
             <button 
               type="button" 
               onclick="goToStep(1)" 
-              class="px-5 py-3.5 rounded-xl sm:rounded-2xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-display font-bold text-xs sm:text-sm active:scale-98 transition flex items-center gap-2 cursor-pointer"
+              class="px-5 py-3 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer"
             >
-              <span>⬅</span>
-              <span>Kembali</span>
+              ← Kembali
             </button>
             <button 
               type="button" 
               onclick="nextFromStep2()" 
-              class="flex-1 sm:flex-none px-6 py-3.5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-display font-extrabold text-xs sm:text-sm shadow-md shadow-indigo-600/30 active:scale-98 transition flex items-center justify-center gap-2 cursor-pointer"
+              class="flex-1 sm:flex-none px-6 py-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 flex items-center justify-center gap-2 cursor-pointer shadow-xs"
             >
-              <span>Lanjut ke Skor & Vote</span>
-              <span class="text-base">➔</span>
+              <span>Lanjut ke Penilaian Skor</span>
+              <span>→</span>
             </button>
           </div>
-
         </div>
 
         <!-- =================================================================== -->
-        <!-- STEP 3: SKOR KELOMPOK & PRESENTATOR TERBAIK -->
+        <!-- SECTION 3: PENILAIAN SKOR & VOTING -->
         <!-- =================================================================== -->
-        <div id="stepSection_3" class="step-enter space-y-4 hidden">
+        <div id="stepSection_3" class="step-fade space-y-4 hidden">
           
-          <!-- 3A: Nilai Kelompok -->
-          <div class="bg-white rounded-2xl sm:rounded-3xl shadow-card border border-slate-200/80 p-4 sm:p-6 lg:p-7 space-y-4 sm:space-y-5">
-            
-            <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 font-display font-extrabold text-sm flex items-center justify-center flex-shrink-0">
-                  3A
+          <!-- 3A: Skor Presentasi -->
+          <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5">
+            <div class="flex items-center justify-between border-b border-zinc-100 pb-3.5">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-mono text-xs font-bold text-zinc-400">SECTION 03</span>
+                  <span class="text-zinc-300">•</span>
+                  <span class="text-xs font-semibold text-zinc-700">Skor Kelompok</span>
                 </div>
-                <div>
-                  <h3 class="text-sm sm:text-base md:text-lg font-display font-bold text-slate-900 leading-tight">
-                    Nilai Presentasi Kelompok <span class="text-rose-500">*</span>
-                  </h3>
-                  <p class="text-[10px] sm:text-xs text-slate-400">Skor penguasaan materi & kekompakan kelompok</p>
-                </div>
+                <h2 class="text-base sm:text-lg font-bold text-zinc-900 mt-1">Nilai Presentasi Kelompok</h2>
+                <p class="text-xs text-zinc-500 mt-0.5">Penilaian keseluruhan penguasaan materi, media, dan kekompakan.</p>
               </div>
-              <span id="scoreGradeBadge" class="text-xs sm:text-sm font-display font-extrabold px-3 py-1 rounded-xl bg-emerald-100 text-emerald-800 shadow-xs">
+
+              <span id="scoreGradeBadge" class="text-xs font-semibold px-2.5 py-1 rounded bg-zinc-100 text-zinc-800 border border-zinc-200">
                 Sangat Baik (A)
               </span>
             </div>
 
-            <!-- Score Selector Box -->
-            <div class="bg-slate-50/80 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-200 space-y-3.5">
+            <!-- Score Selector Component -->
+            <div class="p-4 sm:p-5 rounded-lg bg-zinc-50 border border-zinc-200/80 space-y-4">
               
-              <!-- Quick Chips -->
+              <!-- Quick Select Chips -->
               <div class="flex flex-wrap items-center gap-1.5">
-                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">Pilih Cepat:</span>
-                <button type="button" onclick="setScoreValue(70)" class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 active:scale-95 transition cursor-pointer shadow-xs">70</button>
-                <button type="button" onclick="setScoreValue(75)" class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 active:scale-95 transition cursor-pointer shadow-xs">75</button>
-                <button type="button" onclick="setScoreValue(80)" class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 active:scale-95 transition cursor-pointer shadow-xs">80</button>
-                <button type="button" onclick="setScoreValue(85)" class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 active:scale-95 transition cursor-pointer shadow-xs">85</button>
-                <button type="button" onclick="setScoreValue(90)" class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 active:scale-95 transition cursor-pointer shadow-xs">90</button>
-                <button type="button" onclick="setScoreValue(95)" class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 active:scale-95 transition cursor-pointer shadow-xs">95</button>
-                <button type="button" onclick="setScoreValue(100)" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs active:scale-95 transition cursor-pointer shadow-md shadow-indigo-600/30">100</button>
+                <span class="text-[11px] font-semibold text-zinc-400 mr-1">Preset:</span>
+                <button type="button" onclick="setScoreValue(70)" class="px-2.5 py-1 rounded bg-white hover:bg-zinc-100 border border-zinc-200 text-xs font-semibold text-zinc-700 transition cursor-pointer">70</button>
+                <button type="button" onclick="setScoreValue(75)" class="px-2.5 py-1 rounded bg-white hover:bg-zinc-100 border border-zinc-200 text-xs font-semibold text-zinc-700 transition cursor-pointer">75</button>
+                <button type="button" onclick="setScoreValue(80)" class="px-2.5 py-1 rounded bg-white hover:bg-zinc-100 border border-zinc-200 text-xs font-semibold text-zinc-700 transition cursor-pointer">80</button>
+                <button type="button" onclick="setScoreValue(85)" class="px-2.5 py-1 rounded bg-white hover:bg-zinc-100 border border-zinc-200 text-xs font-semibold text-zinc-700 transition cursor-pointer">85</button>
+                <button type="button" onclick="setScoreValue(90)" class="px-2.5 py-1 rounded bg-white hover:bg-zinc-100 border border-zinc-200 text-xs font-semibold text-zinc-700 transition cursor-pointer">90</button>
+                <button type="button" onclick="setScoreValue(95)" class="px-2.5 py-1 rounded bg-white hover:bg-zinc-100 border border-zinc-200 text-xs font-semibold text-zinc-700 transition cursor-pointer">95</button>
+                <button type="button" onclick="setScoreValue(100)" class="px-2.5 py-1 rounded bg-zinc-900 hover:bg-zinc-800 text-white font-semibold text-xs transition cursor-pointer">100</button>
               </div>
 
-              <!-- Slider + Number -->
+              <!-- Slider + Counter -->
               <div class="flex flex-col sm:flex-row items-center gap-4 pt-1">
                 <div class="w-full flex-1 space-y-1.5">
-                  <div class="flex justify-between text-[11px] font-mono text-slate-400 font-bold px-1">
+                  <div class="flex justify-between text-[11px] font-mono text-zinc-400">
                     <span id="sliderMinLabel">Min: 50</span>
                     <span id="sliderMaxLabel">Max: 100</span>
                   </div>
@@ -449,14 +407,13 @@
                     max="100" 
                     value="85" 
                     step="1"
-                    class="w-full accent-indigo-600 cursor-pointer h-2.5 bg-slate-200 rounded-lg appearance-none"
+                    class="w-full cursor-pointer h-2 bg-zinc-200 rounded-lg appearance-none"
                     oninput="syncScore(this.value, 'slider')"
                   >
                 </div>
 
-                <!-- Number Box -->
-                <div class="flex items-center gap-2 bg-white border-2 border-indigo-200 p-1.5 rounded-2xl shadow-sm flex-shrink-0">
-                  <button type="button" onclick="adjustScore(-1)" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-90 text-slate-700 font-extrabold text-base flex items-center justify-center transition cursor-pointer">−</button>
+                <div class="flex items-center gap-1 bg-white border border-zinc-300 p-1 rounded-lg flex-shrink-0">
+                  <button type="button" onclick="adjustScore(-1)" class="w-7 h-7 rounded hover:bg-zinc-100 text-zinc-700 font-bold text-sm flex items-center justify-center transition cursor-pointer">−</button>
                   <input 
                     type="number" 
                     id="inputNilaiNumber" 
@@ -464,10 +421,10 @@
                     max="100" 
                     value="85" 
                     required 
-                    class="w-12 text-center font-display font-black text-xl text-indigo-700 outline-none"
+                    class="w-12 text-center font-bold text-base text-zinc-900 outline-none"
                     oninput="syncScore(this.value, 'number')"
                   >
-                  <button type="button" onclick="adjustScore(1)" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-90 text-slate-700 font-extrabold text-base flex items-center justify-center transition cursor-pointer">+</button>
+                  <button type="button" onclick="adjustScore(1)" class="w-7 h-7 rounded hover:bg-zinc-100 text-zinc-700 font-bold text-sm flex items-center justify-center transition cursor-pointer">+</button>
                 </div>
               </div>
 
@@ -475,174 +432,162 @@
           </div>
 
           <!-- 3B: Presentator Terbaik -->
-          <div class="bg-white rounded-2xl sm:rounded-3xl shadow-card border border-slate-200/80 p-4 sm:p-6 lg:p-7 space-y-4 sm:space-y-5">
-            
-            <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 font-display font-extrabold text-sm flex items-center justify-center flex-shrink-0">
-                  3B
+          <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5">
+            <div class="flex items-center justify-between border-b border-zinc-100 pb-3.5">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-mono text-xs font-bold text-zinc-400">SECTION 03B</span>
+                  <span class="text-zinc-300">•</span>
+                  <span class="text-xs font-semibold text-zinc-700">Maks. 2 Orang</span>
                 </div>
-                <div>
-                  <h3 class="text-sm sm:text-base md:text-lg font-display font-bold text-slate-900 leading-tight">
-                    Presentator Terbaik <span class="text-rose-500">*</span>
-                  </h3>
-                  <p class="text-[10px] sm:text-xs text-slate-400">Pilih 1 s.d 2 orang pemateri dengan performa terbaik</p>
-                </div>
+                <h2 class="text-base sm:text-lg font-bold text-zinc-900 mt-1">Presentator Terbaik</h2>
+                <p class="text-xs text-zinc-500 mt-0.5">Pilih pemateri dengan artikulasi, penguasaan, atau performa terbaik.</p>
               </div>
-              <span id="bestPresenterCountBadge" class="text-xs sm:text-sm font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-3 py-1 rounded-full flex-shrink-0">
-                0 / 2 Terpilih
+
+              <span id="bestPresenterCountBadge" class="text-xs font-mono font-semibold bg-zinc-100 text-zinc-700 border border-zinc-200 px-2.5 py-1 rounded">
+                0/2 Terpilih
               </span>
             </div>
 
             <!-- List Presenter -->
-            <div id="bestPresenterList" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div id="bestPresenterList" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <!-- Dynamic Presenters -->
             </div>
-
           </div>
 
-          <!-- Wizard Navigation Step 3 -->
-          <div class="flex items-center justify-between gap-3 pt-1">
+          <!-- Section 3 Actions -->
+          <div class="flex items-center justify-between gap-3">
             <button 
               type="button" 
               onclick="goToStep(2)" 
-              class="px-5 py-3.5 rounded-xl sm:rounded-2xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-display font-bold text-xs sm:text-sm active:scale-98 transition flex items-center gap-2 cursor-pointer"
+              class="px-5 py-3 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer"
             >
-              <span>⬅</span>
-              <span>Kembali</span>
+              ← Kembali
             </button>
             <button 
               type="button" 
               onclick="nextFromStep3()" 
-              class="flex-1 sm:flex-none px-6 py-3.5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-display font-extrabold text-xs sm:text-sm shadow-md shadow-indigo-600/30 active:scale-98 transition flex items-center justify-center gap-2 cursor-pointer"
+              class="flex-1 sm:flex-none px-6 py-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 flex items-center justify-center gap-2 cursor-pointer shadow-xs"
             >
               <span>Lanjut ke Evaluasi Masukan</span>
-              <span class="text-base">➔</span>
+              <span>→</span>
             </button>
           </div>
-
         </div>
 
         <!-- =================================================================== -->
-        <!-- STEP 4: EVALUASI PEMATERI & KIRIM -->
+        <!-- SECTION 4: EVALUASI MASUKAN & KIRIM -->
         <!-- =================================================================== -->
-        <div id="stepSection_4" class="step-enter space-y-4 hidden">
-          
-          <div class="bg-white rounded-2xl sm:rounded-3xl shadow-card border border-slate-200/80 p-4 sm:p-6 lg:p-7 space-y-4 sm:space-y-5">
+        <div id="stepSection_4" class="step-fade space-y-4 hidden">
+          <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5">
             
-            <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
-              <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 font-display font-extrabold text-sm flex items-center justify-center flex-shrink-0">
-                4
+            <div class="border-b border-zinc-100 pb-3.5">
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-xs font-bold text-zinc-400">SECTION 04</span>
+                <span class="text-zinc-300">•</span>
+                <span class="text-xs font-semibold text-zinc-700">Ulasan Konstruktif</span>
               </div>
-              <div>
-                <h3 class="text-sm sm:text-base md:text-lg font-display font-bold text-slate-900 leading-tight">
-                  Evaluasi Kualitatif Tiap Pemateri <span class="text-rose-500">*</span>
-                </h3>
-                <p class="text-[10px] sm:text-xs text-slate-400">Tuliskan ulasan masukan yang membangun untuk setiap anggota kelompok</p>
-              </div>
+              <h2 class="text-base sm:text-lg font-bold text-zinc-900 mt-1">Evaluasi Kualitatif Tiap Pemateri</h2>
+              <p class="text-xs text-zinc-500 mt-0.5">Tuliskan masukan dan tanggapan objektif untuk setiap anggota kelompok.</p>
             </div>
 
             <!-- List Textarea Dynamic Inputs -->
-            <div id="evaluationInputsContainer" class="space-y-3.5 sm:space-y-4">
+            <div id="evaluationInputsContainer" class="space-y-4">
               <!-- Dynamic Member Feedback Textareas -->
             </div>
 
-            <!-- Summary Box Before Submit -->
-            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 text-xs text-slate-700">
-              <h5 class="font-display font-bold text-slate-900">📋 Ringkasan Penilaian Anda:</h5>
-              <div class="grid grid-cols-2 gap-2 text-[11px] pt-1">
-                <div>Penilai: <strong id="summaryPenilai" class="text-slate-900">-</strong></div>
-                <div>Kelompok: <strong id="summaryKelompok" class="text-slate-900">-</strong></div>
-                <div>Skor Kelompok: <strong id="summarySkor" class="text-indigo-700 font-bold">-</strong></div>
-                <div>Presentator Terbaik: <strong id="summaryPresentator" class="text-indigo-700 font-bold">-</strong></div>
+            <!-- Summary Review Box -->
+            <div class="p-4 rounded-lg bg-zinc-50 border border-zinc-200 space-y-2 text-xs text-zinc-600">
+              <div class="font-semibold text-zinc-900 text-xs uppercase tracking-wider font-mono">Ringkasan Penilaian:</div>
+              <div class="grid grid-cols-2 gap-2 text-xs pt-1">
+                <div>Penilai: <span id="summaryPenilai" class="font-semibold text-zinc-900">-</span></div>
+                <div>Kelompok: <span id="summaryKelompok" class="font-semibold text-zinc-900">-</span></div>
+                <div>Nilai Presentasi: <span id="summarySkor" class="font-mono font-bold text-zinc-900">-</span></div>
+                <div>Presentator Terbaik: <span id="summaryPresentator" class="font-semibold text-zinc-900">-</span></div>
               </div>
             </div>
 
           </div>
 
-          <!-- Wizard Navigation Step 4 (Final Submit) -->
-          <div class="flex items-center justify-between gap-3 pt-1">
+          <!-- Section 4 Actions -->
+          <div class="flex items-center justify-between gap-3">
             <button 
               type="button" 
               onclick="goToStep(3)" 
-              class="px-5 py-4 rounded-xl sm:rounded-2xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-display font-bold text-xs sm:text-sm active:scale-98 transition flex items-center gap-2 cursor-pointer"
+              class="px-5 py-3.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer"
             >
-              <span>⬅</span>
-              <span>Kembali</span>
+              ← Kembali
             </button>
             <button 
               type="submit" 
               id="submitBtn" 
-              class="flex-1 sm:flex-none px-8 py-4 rounded-xl sm:rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-700 hover:to-indigo-700 text-white font-display font-black text-xs sm:text-sm sm:text-base shadow-xl shadow-emerald-600/30 active:scale-98 transition flex items-center justify-center gap-2 cursor-pointer"
+              class="flex-1 sm:flex-none px-8 py-3.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white font-semibold text-xs sm:text-sm shadow-sm active:scale-98 transition flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>🚀 Kirim Penilaian Sekarang</span>
+              <span>Kirim Penilaian</span>
               <span id="submitSpinner" class="hidden">
-                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
                 </svg>
               </span>
             </button>
           </div>
-
         </div>
 
       </form>
     </div>
 
     <!-- ========================================================================= -->
-    <!-- TAB 2: DASHBOARD REKAP HASIL -->
+    <!-- TAB 2: DASHBOARD REKAPITULASI HASIL -->
     <!-- ========================================================================= -->
-    <div id="viewRekap" class="space-y-4 sm:space-y-6 hidden">
-      <div class="bg-white rounded-2xl sm:rounded-3xl shadow-card border border-slate-200/80 p-4 sm:p-6 lg:p-7 space-y-4 sm:space-y-5">
+    <div id="viewRekap" class="space-y-5 hidden">
+      <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5">
         
-        <div class="flex items-center justify-between gap-3 border-b border-slate-100 pb-4">
+        <div class="flex items-center justify-between border-b border-zinc-100 pb-3.5">
           <div>
-            <h2 class="text-base sm:text-xl font-display font-extrabold text-slate-900">📊 Rekapitulasi Penilaian Presentasi</h2>
-            <p class="text-xs text-slate-500">Ringkasan rata-rata skor, perolehan suara presentator, dan masukan audiens</p>
+            <h2 class="text-base sm:text-lg font-bold text-zinc-900">Rekapitulasi Penilaian Presentasi</h2>
+            <p class="text-xs text-zinc-500">Rata-rata skor kelompok, distribusi voting presentator, dan ulasan audiens.</p>
           </div>
           <button 
             onclick="loadRekapData()" 
-            class="py-2 px-3.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold flex items-center gap-2 transition active:scale-95 cursor-pointer shadow-xs"
+            class="py-1.5 px-3 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 cursor-pointer"
           >
-            <span>🔄</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
             <span>Segarkan</span>
           </button>
         </div>
 
-        <!-- Loading Rekap -->
-        <div id="rekapLoading" class="py-12 text-center text-slate-500 space-y-3">
-          <svg class="animate-spin h-8 w-8 text-indigo-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <!-- Loading State -->
+        <div id="rekapLoading" class="py-12 text-center text-zinc-500 space-y-2">
+          <svg class="animate-spin h-6 w-6 text-zinc-900 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
           </svg>
-          <p class="text-xs sm:text-sm font-bold text-slate-600">Menghitung rekapitulasi data dari Google Sheets...</p>
+          <p class="text-xs font-medium">Memuat data rekapitulasi...</p>
         </div>
 
         <!-- Content Rekap -->
         <div id="rekapContent" class="space-y-4 hidden">
           <!-- Filter Kelompok -->
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
-            <div class="flex items-center gap-2">
-              <span class="text-sm">🔍</span>
-              <label class="text-xs font-bold text-slate-700">Filter Kelompok:</label>
-            </div>
-            <select id="rekapGroupFilter" onchange="filterRekapDisplay()" class="text-xs font-bold px-3 py-2 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-indigo-500 outline-none">
+          <div class="flex items-center justify-between gap-3 bg-zinc-50 p-3 rounded-lg border border-zinc-200 text-xs">
+            <label class="font-semibold text-zinc-700">Filter Kelompok:</label>
+            <select id="rekapGroupFilter" onchange="filterRekapDisplay()" class="text-xs font-medium px-3 py-1.5 rounded border border-zinc-300 bg-white focus:border-zinc-900 outline-none">
               <option value="ALL">Semua Kelompok</option>
             </select>
           </div>
 
-          <!-- Rekap Cards Grid -->
-          <div id="rekapCardsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <!-- Cards Grid -->
+          <div id="rekapCardsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <!-- Dynamic Rekap Cards -->
           </div>
         </div>
 
         <!-- Empty State Rekap -->
-        <div id="rekapEmpty" class="hidden py-12 text-center text-slate-500 space-y-2">
-          <div class="text-4xl">📋</div>
-          <h4 class="font-display font-bold text-slate-800 text-sm sm:text-base">Belum Ada Data Penilaian Masuk</h4>
-          <p class="text-xs text-slate-400">Data nilai akan otomatis dihitung di sini setelah mahasiswa mengirimkan respons.</p>
+        <div id="rekapEmpty" class="hidden py-12 text-center text-zinc-500 space-y-1">
+          <p class="font-semibold text-zinc-800 text-sm">Belum Ada Data Penilaian</p>
+          <p class="text-xs text-zinc-400">Data hasil penilaian akan muncul otomatis setelah mahasiswa mengirimkan respons.</p>
         </div>
 
       </div>
@@ -651,76 +596,72 @@
   </main>
 
   <!-- ========================================================================= -->
-  <!-- 🦶 PINNED FOOTER -->
+  <!-- 🦶 MINIMAL FOOTER -->
   <!-- ========================================================================= -->
-  <footer class="w-full py-5 text-center text-xs text-slate-400 border-t border-slate-200/80 bg-white/50 backdrop-blur-sm mt-auto flex-shrink-0">
-    <div class="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-      <p class="font-medium">© 2026 PGSD Kelas 5E • FKIP Universitas Lambung Mangkurat</p>
-      <p class="text-[11px] text-slate-400 font-mono">Peer-Assessment System</p>
+  <footer class="w-full py-4 text-center text-xs text-zinc-400 border-t border-zinc-200 bg-white mt-auto">
+    <div class="max-w-3xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p>© 2026 PGSD Kelas 5E • FKIP Universitas Lambung Mangkurat</p>
+      <p class="font-mono text-[11px]">Peer-Assessment System</p>
     </div>
   </footer>
 
   <!-- ========================================================================= -->
-  <!-- 🏆 SUCCESS MODAL POPUP -->
+  <!-- 🏆 SUCCESS MODAL -->
   <!-- ========================================================================= -->
-  <div id="successModal" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl slide-up border border-slate-100">
-      <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto text-3xl font-extrabold shadow-inner">
+  <div id="successModal" class="hidden fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-sm w-full p-6 text-center space-y-4 shadow-xl border border-zinc-200">
+      <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-xl font-bold border border-emerald-200">
         ✓
       </div>
       <div>
-        <h3 class="text-lg font-display font-extrabold text-slate-900">Penilaian Berhasil Dikirim!</h3>
-        <p class="text-xs text-slate-600 leading-relaxed mt-1.5" id="successModalMsg">
-          Terima kasih atas partisipasi Anda. Data nilai dan ulasan telah tersimpan aman di Google Sheets.
+        <h3 class="text-base font-bold text-zinc-900">Penilaian Berhasil Dikirim</h3>
+        <p class="text-xs text-zinc-500 leading-relaxed mt-1" id="successModalMsg">
+          Data penilaian Anda telah tersimpan secara aman di Google Sheets.
         </p>
       </div>
       <div class="pt-2 flex flex-col gap-2">
         <button 
           onclick="resetFormAndCloseModal()" 
-          class="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition active:scale-98 shadow-md shadow-indigo-600/30 cursor-pointer"
+          class="w-full py-2.5 px-4 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 cursor-pointer"
         >
-          ➕ Nilai Kelompok Lainnya
+          Nilai Kelompok Lainnya
         </button>
         <button 
           onclick="closeModalAndGoToRekap()" 
-          class="w-full py-2.5 px-4 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold transition active:scale-98 cursor-pointer"
+          class="w-full py-2 px-4 rounded-lg border border-zinc-200 text-zinc-700 hover:bg-zinc-50 text-xs font-medium transition cursor-pointer"
         >
-          📊 Buka Dashboard Rekap
+          Lihat Rekapitulasi
         </button>
       </div>
     </div>
   </div>
 
   <!-- ========================================================================= -->
-  <!-- ⚙️ API CONFIGURATION MODAL -->
+  <!-- ⚙️ API CONFIG MODAL -->
   <!-- ========================================================================= -->
-  <div id="apiModal" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl slide-up border border-slate-100">
-      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-        <h3 class="text-sm sm:text-base font-display font-extrabold text-slate-900">⚙️ Pengaturan URL Backend API</h3>
-        <button type="button" onclick="closeApiConfigModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+  <div id="apiModal" class="hidden fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-md w-full p-5 space-y-4 shadow-xl border border-zinc-200">
+      <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
+        <h3 class="text-sm font-bold text-zinc-900">Pengaturan URL API Spreadsheet</h3>
+        <button type="button" onclick="closeApiConfigModal()" class="text-zinc-400 hover:text-zinc-600 font-bold">✕</button>
       </div>
-      <p class="text-xs text-slate-600 leading-relaxed">
-        URL Google Apps Script Web App yang terhubung ke Google Spreadsheet Anda:
-      </p>
       <input 
         type="url" 
         id="inputApiUrl" 
         placeholder="https://script.google.com/macros/s/.../exec" 
-        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-mono focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50 focus:bg-white"
+        class="w-full px-3 py-2 rounded-lg border border-zinc-300 text-xs font-mono focus:border-zinc-900 outline-none"
       >
-      <div class="flex items-center justify-end gap-2 pt-2">
-        <button type="button" onclick="closeApiConfigModal()" class="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Batal</button>
-        <button type="button" onclick="saveApiUrl()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-xs">Simpan & Muat Ulang</button>
+      <div class="flex items-center justify-end gap-2 pt-1">
+        <button type="button" onclick="closeApiConfigModal()" class="px-3 py-1.5 rounded text-xs text-zinc-600 hover:bg-zinc-100">Batal</button>
+        <button type="button" onclick="saveApiUrl()" class="px-3.5 py-1.5 rounded bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold">Simpan</button>
       </div>
     </div>
   </div>
 
   <!-- ========================================================================= -->
-  <!-- 💻 JAVASCRIPT APP LOGIC (ULTRA-FAST WITH LOCAL CACHE) -->
+  <!-- 💻 SCRIPT LOGIC -->
   <!-- ========================================================================= -->
   <script>
-    // URL Backend Google Apps Script aktif
     const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycby9JWeXZVkmnx2suT2eS5yk-sS39v-avHsaA4OV-D7fjcvsTGfawtQaCoxHcH90HjiRTg/exec";
     
     function getApiUrl() {
@@ -736,18 +677,15 @@
     let isEmailValidState = false;
 
     const stepMetadata = {
-      1: { title: "Langkah 1: Identitas Penilai", percent: 25 },
-      2: { title: "Langkah 2: Pilih Kelompok Tampil", percent: 50 },
-      3: { title: "Langkah 3: Skor Nilai & Presentator Terbaik", percent: 75 },
-      4: { title: "Langkah 4: Evaluasi Masukan Pemateri", percent: 100 }
+      1: { badge: "01/04", title: "Identitas Penilai", percent: 25 },
+      2: { badge: "02/04", title: "Pilih Kelompok Tampil", percent: 50 },
+      3: { badge: "03/04", title: "Skor Nilai & Presentator", percent: 75 },
+      4: { badge: "04/04", title: "Evaluasi Masukan Pemateri", percent: 100 }
     };
 
     document.addEventListener("DOMContentLoaded", function() {
-      // 1. Instan baca cache lokal agar layar tidak loading sama sekali (0ms)
       loadLocalCache();
       updateStepUI(1);
-
-      // 2. Ambil data terbaru di background dari Google Sheets
       fetchInitialFormData(false);
     });
 
@@ -761,7 +699,6 @@
           renderConfigHeader();
           renderGroupOptions();
         } else {
-          // Mock data instant fallback
           mockLoadData();
         }
       } catch (e) {
@@ -778,7 +715,6 @@
         document.getElementById("groupsContainer").classList.add("hidden");
       }
 
-      // Timeout 4.5 detik untuk menjamin browser tidak stuck jika sinyal lambat
       const fetchWithTimeout = (url, ms = 4500) => {
         return Promise.race([
           fetch(url),
@@ -794,7 +730,6 @@
           appConfig = result.config || {};
           groupsData = result.groups || [];
           
-          // Simpan ke Cache Lokal
           localStorage.setItem("PGSD_CACHE_GROUPS", JSON.stringify(groupsData));
           localStorage.setItem("PGSD_CACHE_CONFIG", JSON.stringify(appConfig));
 
@@ -802,21 +737,18 @@
           renderGroupOptions();
         }
       } catch (err) {
-        console.warn("Sinkronisasi latar belakang Google Sheets:", err);
-        // Tetap gunakan data cache / mock yang sudah tampil tanpa mengganggu user
         renderConfigHeader();
         renderGroupOptions();
       }
     }
 
     function renderConfigHeader() {
-      const title = appConfig["Judul_Form"] || "PENILAIAN PRESENTASI KELAS 5E PGSD 2026";
+      const title = appConfig["Judul_Form"] || "Penilaian Presentasi PGSD 5E";
       const matkul = appConfig["Mata_Kuliah"] || "Bimbingan Konseling di SD";
-      const dosen = appConfig["Dosen_Pengampu"] || "Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.";
       const sesi = appConfig["Sesi_Minggu_Aktif"] || "Minggu 1";
 
       document.getElementById("navTitle").textContent = title;
-      document.getElementById("navSubtitle").textContent = matkul;
+      document.getElementById("navSubtitle").textContent = `${matkul} • FKIP ULM`;
       document.getElementById("badgeSesiTopText").textContent = `Sesi: ${sesi}`;
 
       const minVal = parseInt(appConfig["Nilai_Kelompok_Min"] || 50);
@@ -851,29 +783,29 @@
         const isCurrentlySelected = selectedGroupObj && selectedGroupObj.name === grp.name;
         const card = document.createElement("label");
         card.id = `groupCard_${idx}`;
-        card.className = `group-card flex flex-col justify-between p-4 rounded-2xl border-2 cursor-pointer transition-all shadow-card hover:shadow-card-hover active:scale-[0.99] ${
+        card.className = `group-card flex flex-col justify-between p-3.5 sm:p-4 rounded-lg border cursor-pointer transition-all ${
           isCurrentlySelected 
-            ? 'border-indigo-600 bg-indigo-50/30 ring-2 ring-indigo-500/20' 
-            : 'border-slate-200/90 hover:border-indigo-500 bg-white hover:bg-indigo-50/20'
+            ? 'border-zinc-900 bg-zinc-50 shadow-xs' 
+            : 'border-zinc-200 hover:border-zinc-400 bg-white'
         }`;
         
         const memberPills = grp.members.map(m => `
-          <span class="inline-block bg-slate-100 hover:bg-indigo-100/70 text-slate-700 text-[10px] sm:text-[11px] font-medium px-2 py-0.5 rounded-md truncate max-w-full">
+          <span class="inline-block bg-zinc-100 text-zinc-700 text-[10px] font-medium px-1.5 py-0.5 rounded truncate">
             ${m.name}
           </span>
         `).join(" ");
 
         card.innerHTML = `
-          <div class="flex items-start justify-between gap-2">
-            <div class="flex items-center gap-2.5 min-w-0">
-              <input type="radio" name="selectedGroup" value="${grp.name}" ${isCurrentlySelected ? 'checked' : ''} class="accent-indigo-600 h-4 w-4 text-indigo-600 flex-shrink-0 mt-0.5" onchange="onSelectGroup('${grp.name}', ${idx})">
-              <span class="font-display font-extrabold text-slate-900 text-sm sm:text-base group-hover:text-indigo-900 truncate">${grp.name}</span>
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0">
+              <input type="radio" name="selectedGroup" value="${grp.name}" ${isCurrentlySelected ? 'checked' : ''} class="accent-zinc-900 h-4 w-4" onchange="onSelectGroup('${grp.name}', ${idx})">
+              <span class="font-bold text-zinc-900 text-xs sm:text-sm truncate">${grp.name}</span>
             </div>
-            <span class="text-[10px] bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full font-bold flex-shrink-0">
+            <span class="text-[10px] font-mono text-zinc-500 bg-zinc-100 px-1.5 py-0.5 rounded">
               ${grp.members.length} Pemateri
             </span>
           </div>
-          <div class="flex flex-wrap gap-1 mt-2.5 pt-2 border-t border-slate-100">
+          <div class="flex flex-wrap gap-1 mt-2.5 pt-2 border-t border-zinc-100">
             ${memberPills}
           </div>
         `;
@@ -883,13 +815,11 @@
 
     function onSelectGroup(groupName, idx) {
       document.querySelectorAll(".group-card").forEach(c => {
-        c.classList.remove("border-indigo-600", "bg-indigo-50/30", "shadow-card-hover", "ring-2", "ring-indigo-500/20");
-        c.classList.add("border-slate-200/90");
+        c.className = "group-card flex flex-col justify-between p-3.5 sm:p-4 rounded-lg border border-zinc-200 hover:border-zinc-400 bg-white cursor-pointer transition-all";
       });
       const activeCard = document.getElementById(`groupCard_${idx}`);
       if (activeCard) {
-        activeCard.classList.remove("border-slate-200/90");
-        activeCard.classList.add("border-indigo-600", "bg-indigo-50/30", "shadow-card-hover", "ring-2", "ring-indigo-500/20");
+        activeCard.className = "group-card flex flex-col justify-between p-3.5 sm:p-4 rounded-lg border border-zinc-900 bg-zinc-50 shadow-xs cursor-pointer transition-all";
       }
 
       selectedGroupObj = groupsData.find(g => g.name === groupName);
@@ -904,12 +834,12 @@
       selectedGroupObj.members.forEach((member, mIdx) => {
         const item = document.createElement("label");
         item.id = `bestPresCard_${mIdx}`;
-        item.className = "flex items-center p-3.5 rounded-2xl border border-slate-200 hover:border-indigo-400 bg-slate-50/70 hover:bg-white cursor-pointer transition text-xs active:scale-98 shadow-xs";
+        item.className = "flex items-center p-3 rounded-lg border border-zinc-200 hover:border-zinc-400 bg-white cursor-pointer transition text-xs";
         item.innerHTML = `
-          <input type="checkbox" value="${member.name}" class="accent-indigo-600 h-4 w-4 rounded flex-shrink-0" onchange="handleBestPresenterChange(this, ${mIdx})">
-          <div class="ml-3 min-w-0 flex-1 flex items-center justify-between gap-2">
-            <span class="font-bold text-slate-800 text-xs sm:text-sm truncate">${member.name}</span>
-            <span class="text-[10px] text-slate-400 font-mono bg-white border border-slate-200 px-2 py-0.5 rounded-md flex-shrink-0">${member.nim || 'NIM -'}</span>
+          <input type="checkbox" value="${member.name}" class="accent-zinc-900 h-4 w-4 rounded flex-shrink-0" onchange="handleBestPresenterChange(this, ${mIdx})">
+          <div class="ml-2.5 min-w-0 flex-1 flex items-center justify-between gap-2">
+            <span class="font-medium text-zinc-900 truncate">${member.name}</span>
+            <span class="text-[10px] text-zinc-400 font-mono">${member.nim || 'NIM -'}</span>
           </div>
         `;
         bestList.appendChild(item);
@@ -922,13 +852,13 @@
 
       selectedGroupObj.members.forEach((member, eIdx) => {
         const box = document.createElement("div");
-        box.className = "p-4 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-2";
+        box.className = "p-3.5 sm:p-4 rounded-lg bg-zinc-50 border border-zinc-200 space-y-2";
         box.innerHTML = `
           <div class="flex items-center justify-between gap-2">
-            <span class="font-display font-extrabold text-slate-800 text-xs sm:text-sm truncate">
-              👤 ${eIdx + 1}. ${member.name} <span class="text-[10px] font-normal text-slate-500 font-mono">(${member.nim || 'NIM -'})</span>
+            <span class="font-semibold text-zinc-800 text-xs sm:text-sm truncate">
+              ${eIdx + 1}. ${member.name} <span class="text-[10px] font-normal text-zinc-500 font-mono">(${member.nim || 'NIM -'})</span>
             </span>
-            <span id="charCount_${eIdx}" class="text-[10px] text-slate-400 font-mono font-bold flex-shrink-0">0 / ${maxChars}</span>
+            <span id="charCount_${eIdx}" class="text-[10px] text-zinc-400 font-mono">0/${maxChars}</span>
           </div>
           <textarea 
             id="evalText_${eIdx}" 
@@ -936,8 +866,8 @@
             required 
             rows="2" 
             maxlength="${maxChars}" 
-            placeholder="Tuliskan evaluasi & masukan konstruktif untuk ${member.name}..." 
-            class="w-full p-3 rounded-xl border border-slate-300 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none bg-white transition leading-relaxed"
+            placeholder="Tuliskan masukan evaluasi untuk ${member.name}..." 
+            class="w-full p-2.5 rounded-lg border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 outline-none bg-white transition leading-relaxed placeholder-zinc-400"
             oninput="updateCharCounter(this, 'charCount_${eIdx}', ${maxChars})"
           ></textarea>
         `;
@@ -945,33 +875,28 @@
       });
     }
 
-    // =========================================================================
-    // 🧭 STEP WIZARD NAVIGATION & VALIDATION LOGIC
-    // =========================================================================
+    // Navigation Step
     function updateStepUI(step) {
       currentStep = step;
-
-      // Update Header Text & Bar
       const meta = stepMetadata[step];
-      document.getElementById("stepNumberBadge").textContent = step;
+      document.getElementById("stepNumberBadge").textContent = meta.badge;
       document.getElementById("stepTitleLabel").textContent = meta.title;
-      document.getElementById("stepPercentLabel").textContent = `${meta.percent}% Selesai`;
+      document.getElementById("stepPercentLabel").textContent = `${meta.percent}%`;
       document.getElementById("progressBarFill").style.width = `${meta.percent}%`;
 
-      // Show/Hide Sections
       for (let i = 1; i <= 4; i++) {
         const sec = document.getElementById(`stepSection_${i}`);
         const tabBtn = document.getElementById(`stepTab_${i}`);
         
         if (i === step) {
           sec.classList.remove("hidden");
-          tabBtn.className = "py-1 px-1 rounded-lg text-[10px] sm:text-xs font-bold transition-all text-indigo-700 bg-indigo-50 border border-indigo-300 shadow-xs";
+          tabBtn.className = "py-1 px-1 rounded text-[11px] font-medium transition text-zinc-900 bg-zinc-100 border border-zinc-300";
         } else {
           sec.classList.add("hidden");
           if (i < step) {
-            tabBtn.className = "py-1 px-1 rounded-lg text-[10px] sm:text-xs font-bold transition-all text-emerald-700 bg-emerald-50 border border-emerald-200 cursor-pointer";
+            tabBtn.className = "py-1 px-1 rounded text-[11px] font-medium transition text-emerald-700 bg-emerald-50 border border-emerald-200 cursor-pointer";
           } else {
-            tabBtn.className = "py-1 px-1 rounded-lg text-[10px] sm:text-xs font-bold transition-all text-slate-400 bg-slate-50 border border-slate-200";
+            tabBtn.className = "py-1 px-1 rounded text-[11px] font-medium transition text-zinc-400 bg-zinc-50 border border-transparent";
           }
         }
       }
@@ -981,7 +906,6 @@
 
     function goToStep(targetStep) {
       if (targetStep === currentStep) return;
-
       if (targetStep > currentStep) {
         if (currentStep === 1) nextFromStep1();
         else if (currentStep === 2) nextFromStep2();
@@ -1000,32 +924,28 @@
         document.getElementById("inputEmail").focus();
         return;
       }
-
       if (!nama) {
-        showToast("Tuliskan nama lengkap Anda terlebih dahulu!", "warning");
+        showToast("Nama penilai wajib diisi!", "warning");
         document.getElementById("inputNama").focus();
         return;
       }
-
       updateStepUI(2);
     }
 
     function nextFromStep2() {
       if (!selectedGroupObj) {
-        showToast("Pilih salah satu kelompok yang tampil di atas!", "warning");
+        showToast("Pilih salah satu kelompok yang dinilai!", "warning");
         return;
       }
-
       updateStepUI(3);
     }
 
     function nextFromStep3() {
       if (selectedBestPresenters.length === 0) {
-        showToast("Pilih minimal 1 orang sebagai presentator terbaik!", "warning");
+        showToast("Pilih minimal 1 orang presentator terbaik!", "warning");
         return;
       }
 
-      // Update Summary Info for Step 4
       document.getElementById("summaryPenilai").textContent = document.getElementById("inputNama").value.trim();
       document.getElementById("summaryKelompok").textContent = selectedGroupObj.name;
       document.getElementById("summarySkor").textContent = document.getElementById("inputNilaiNumber").value;
@@ -1034,9 +954,7 @@
       updateStepUI(4);
     }
 
-    // =========================================================================
-    // 🎛️ SCORE & VOTE CONTROLLERS
-    // =========================================================================
+    // Score & Presenter Logic
     function setScoreValue(val) {
       document.getElementById("inputNilaiSlider").value = val;
       document.getElementById("inputNilaiNumber").value = val;
@@ -1067,16 +985,16 @@
       const badge = document.getElementById("scoreGradeBadge");
       if (v >= 85) {
         badge.textContent = "Sangat Baik (A)";
-        badge.className = "text-xs sm:text-sm font-display font-extrabold px-3 py-1 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-300/80 shadow-xs";
+        badge.className = "text-xs font-semibold px-2.5 py-1 rounded bg-emerald-50 text-emerald-800 border border-emerald-200";
       } else if (v >= 75) {
         badge.textContent = "Baik (B+)";
-        badge.className = "text-xs sm:text-sm font-display font-extrabold px-3 py-1 rounded-xl bg-indigo-100 text-indigo-800 border border-indigo-300/80 shadow-xs";
+        badge.className = "text-xs font-semibold px-2.5 py-1 rounded bg-blue-50 text-blue-800 border border-blue-200";
       } else if (v >= 65) {
         badge.textContent = "Cukup (B)";
-        badge.className = "text-xs sm:text-sm font-display font-extrabold px-3 py-1 rounded-xl bg-amber-100 text-amber-800 border border-amber-300/80 shadow-xs";
+        badge.className = "text-xs font-semibold px-2.5 py-1 rounded bg-amber-50 text-amber-800 border border-amber-200";
       } else {
-        badge.textContent = "Perlu Bimbingan";
-        badge.className = "text-xs sm:text-sm font-display font-extrabold px-3 py-1 rounded-xl bg-rose-100 text-rose-800 border border-rose-300/80 shadow-xs";
+        badge.textContent = "Kurang";
+        badge.className = "text-xs font-semibold px-2.5 py-1 rounded bg-rose-50 text-rose-800 border border-rose-200";
       }
     }
 
@@ -1088,14 +1006,14 @@
       if (checkbox.checked) {
         if (selectedBestPresenters.length >= maxAllowed) {
           checkbox.checked = false;
-          showToast(`Maksimal hanya boleh memilih ${maxAllowed} orang presentator!`, "warning");
+          showToast(`Maksimal hanya boleh memilih ${maxAllowed} orang!`, "warning");
           return;
         }
         selectedBestPresenters.push(val);
-        if (card) card.classList.add("border-indigo-500", "bg-indigo-50/50", "ring-1", "ring-indigo-500");
+        if (card) card.className = "flex items-center p-3 rounded-lg border border-zinc-900 bg-zinc-50 cursor-pointer transition text-xs shadow-2xs";
       } else {
         selectedBestPresenters = selectedBestPresenters.filter(name => name !== val);
-        if (card) card.classList.remove("border-indigo-500", "bg-indigo-50/50", "ring-1", "ring-indigo-500");
+        if (card) card.className = "flex items-center p-3 rounded-lg border border-zinc-200 hover:border-zinc-400 bg-white cursor-pointer transition text-xs";
       }
       updateBestPresenterBadge();
     }
@@ -1103,23 +1021,18 @@
     function updateBestPresenterBadge() {
       const maxAllowed = parseInt(appConfig["Maksimal_Pilihan_Presentator_Terbaik"] || 2);
       const badge = document.getElementById("bestPresenterCountBadge");
-      badge.textContent = `${selectedBestPresenters.length} / ${maxAllowed} Terpilih`;
-      if (selectedBestPresenters.length > 0) {
-        badge.className = "text-xs sm:text-sm font-bold bg-indigo-600 text-white px-3 py-1 rounded-full shadow-sm";
-      } else {
-        badge.className = "text-xs sm:text-sm font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-3 py-1 rounded-full";
-      }
+      badge.textContent = `${selectedBestPresenters.length}/${maxAllowed} Terpilih`;
     }
 
     function updateCharCounter(textarea, counterId, maxChars) {
       const len = textarea.value.length;
       const counterEl = document.getElementById(counterId);
       if (counterEl) {
-        counterEl.textContent = `${len} / ${maxChars}`;
+        counterEl.textContent = `${len}/${maxChars}`;
         if (len >= maxChars) {
-          counterEl.className = "text-[10px] text-rose-600 font-mono font-extrabold flex-shrink-0";
+          counterEl.className = "text-[10px] text-rose-600 font-mono font-bold";
         } else {
-          counterEl.className = "text-[10px] text-slate-400 font-mono font-bold flex-shrink-0";
+          counterEl.className = "text-[10px] text-zinc-400 font-mono";
         }
       }
     }
@@ -1133,19 +1046,17 @@
       if (!cleanEmail) {
         msgEl.classList.add("hidden");
         iconEl.classList.add("hidden");
-        emailInput.classList.remove("border-rose-500", "border-emerald-500", "border-amber-400");
+        emailInput.className = "w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 outline-none transition bg-white";
         isEmailValidState = false;
         return false;
       }
 
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       if (!emailRegex.test(cleanEmail)) {
-        msgEl.textContent = "⚠️ Format email belum lengkap.";
-        msgEl.className = "text-[10px] sm:text-xs mt-1 text-amber-600 font-semibold";
+        msgEl.textContent = "Format email belum lengkap";
+        msgEl.className = "text-[11px] text-amber-600 font-medium";
         msgEl.classList.remove("hidden");
         iconEl.classList.add("hidden");
-        emailInput.classList.add("border-amber-400");
-        emailInput.classList.remove("border-emerald-500", "border-rose-500");
         isEmailValidState = false;
         return false;
       }
@@ -1162,29 +1073,22 @@
       }
 
       if (!isDomainMatch) {
-        msgEl.textContent = `❌ Wajib domain resmi ULM (@mhs.ulm.ac.id / @ulm.ac.id)`;
-        msgEl.className = "text-[10px] sm:text-xs mt-1 text-rose-600 font-semibold";
+        msgEl.textContent = "Wajib menggunakan domain @mhs.ulm.ac.id / @ulm.ac.id";
+        msgEl.className = "text-[11px] text-rose-600 font-medium";
         msgEl.classList.remove("hidden");
         iconEl.classList.add("hidden");
-        emailInput.classList.add("border-rose-500");
-        emailInput.classList.remove("border-emerald-500", "border-amber-400");
+        emailInput.className = "w-full px-3.5 py-2.5 rounded-lg border border-rose-400 text-xs sm:text-sm focus:border-rose-600 outline-none transition bg-white";
         isEmailValidState = false;
         return false;
       }
 
-      msgEl.textContent = "✅ Alamat email resmi ULM valid.";
-      msgEl.className = "text-[10px] sm:text-xs mt-1 text-emerald-600 font-semibold";
-      msgEl.classList.remove("hidden");
+      msgEl.classList.add("hidden");
       iconEl.classList.remove("hidden");
-      emailInput.classList.remove("border-rose-500", "border-amber-400");
-      emailInput.classList.add("border-emerald-500");
+      emailInput.className = "w-full px-3.5 py-2.5 rounded-lg border border-emerald-400 text-xs sm:text-sm focus:border-emerald-600 outline-none transition bg-white";
       isEmailValidState = true;
       return true;
     }
 
-    // =========================================================================
-    // 🚀 FINAL FORM SUBMISSION (STEP 4 -> API)
-    // =========================================================================
     async function handleFinalSubmit(e) {
       e.preventDefault();
 
@@ -1197,13 +1101,11 @@
         updateStepUI(1);
         return;
       }
-
       if (!selectedGroupObj) {
         showToast("Pilih kelompok yang dinilai!", "warning");
         updateStepUI(2);
         return;
       }
-
       if (selectedBestPresenters.length === 0) {
         showToast("Pilih minimal 1 orang presentator terbaik!", "warning");
         updateStepUI(3);
@@ -1278,8 +1180,7 @@
       const radioChecked = document.querySelector("input[name='selectedGroup']:checked");
       if (radioChecked) radioChecked.checked = false;
       document.querySelectorAll(".group-card").forEach(c => {
-        c.classList.remove("border-indigo-600", "bg-indigo-50/30", "shadow-card-hover", "ring-2", "ring-indigo-500/20");
-        c.classList.add("border-slate-200/90");
+        c.className = "group-card flex flex-col justify-between p-3.5 sm:p-4 rounded-lg border border-zinc-200 hover:border-zinc-400 bg-white cursor-pointer transition-all";
       });
       selectedGroupObj = null;
       selectedBestPresenters = [];
@@ -1300,13 +1201,13 @@
       if (tab === 'form') {
         viewForm.classList.remove("hidden");
         viewRekap.classList.add("hidden");
-        tabFormBtn.className = "py-2 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-md shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer";
-        tabRekapBtn.className = "py-2 px-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer";
+        tabFormBtn.className = "py-1.5 px-3 rounded-md bg-white text-zinc-900 shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer";
+        tabRekapBtn.className = "py-1.5 px-3 rounded-md text-zinc-500 hover:text-zinc-900 transition-all flex items-center justify-center gap-1.5 cursor-pointer";
       } else {
         viewForm.classList.add("hidden");
         viewRekap.classList.remove("hidden");
-        tabRekapBtn.className = "py-2 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-md shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer";
-        tabFormBtn.className = "py-2 px-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer";
+        tabRekapBtn.className = "py-1.5 px-3 rounded-md bg-white text-zinc-900 shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer";
+        tabFormBtn.className = "py-1.5 px-3 rounded-md text-zinc-500 hover:text-zinc-900 transition-all flex items-center justify-center gap-1.5 cursor-pointer";
         loadRekapData();
       }
     }
@@ -1371,14 +1272,14 @@
 
       summaryList.forEach(grp => {
         const card = document.createElement("div");
-        card.className = "bg-white rounded-3xl border border-slate-200 p-5 sm:p-6 space-y-4 shadow-card hover:shadow-card-hover transition-all";
+        card.className = "bg-white rounded-xl border border-zinc-200 p-4 sm:p-5 space-y-4 shadow-xs";
 
-        let presentersHtml = `<p class="text-xs text-slate-400 italic">Belum ada suara.</p>`;
+        let presentersHtml = `<p class="text-xs text-zinc-400 italic">Belum ada suara.</p>`;
         if (grp.rankedPresenters && grp.rankedPresenters.length > 0) {
           presentersHtml = grp.rankedPresenters.map((p, idx) => `
-            <div class="flex items-center justify-between text-xs sm:text-sm bg-slate-50 hover:bg-indigo-50/50 px-3.5 py-2.5 rounded-xl border border-slate-100 transition shadow-2xs">
-              <span class="font-bold text-slate-800 truncate">${idx === 0 ? '🥇 ' : (idx === 1 ? '🥈 ' : '🥉 ')} ${p.name}</span>
-              <span class="font-mono font-extrabold text-indigo-700 bg-indigo-100/80 px-2.5 py-0.5 rounded-full flex-shrink-0">${p.votes} Suara</span>
+            <div class="flex items-center justify-between text-xs bg-zinc-50 px-3 py-2 rounded border border-zinc-100">
+              <span class="font-medium text-zinc-800 truncate">${idx === 0 ? '#1 ' : (idx === 1 ? '#2 ' : '#3 ')} ${p.name}</span>
+              <span class="font-mono font-semibold text-zinc-700 bg-zinc-200/70 px-2 py-0.5 rounded text-[11px]">${p.votes} Suara</span>
             </div>
           `).join("");
         }
@@ -1386,68 +1287,67 @@
         let reviewsHtml = "";
         if (!isPublicReviewVisible) {
           reviewsHtml = `
-            <div class="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 text-xs text-amber-800 flex items-center gap-2.5">
-              <span class="text-base">🔒</span>
-              <span>Ulasan kualitatif disembunyikan oleh Dosen/Admin.</span>
+            <div class="bg-zinc-50 border border-zinc-200 rounded p-3 text-xs text-zinc-600">
+              Ulasan kualitatif disembunyikan oleh Dosen/Admin.
             </div>
           `;
         } else {
           const evalMembers = Object.keys(grp.evaluasiList || {});
           if (evalMembers.length === 0) {
-            reviewsHtml = `<p class="text-xs text-slate-400 italic">Belum ada ulasan tertulis.</p>`;
+            reviewsHtml = `<p class="text-xs text-zinc-400 italic">Belum ada ulasan tertulis.</p>`;
           } else {
             reviewsHtml = evalMembers.map(mName => {
               const ulasanArr = grp.evaluasiList[mName];
               const listItems = ulasanArr.map(u => `
-                <li class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs text-slate-700 space-y-1 shadow-2xs">
-                  <p class="italic leading-relaxed text-slate-800">"${u.ulasan}"</p>
-                  <span class="text-[10px] text-slate-400 font-medium block text-right">— ${u.penilai}</span>
+                <li class="bg-zinc-50 p-2.5 rounded border border-zinc-100 text-xs text-zinc-700 space-y-1">
+                  <p class="leading-relaxed text-zinc-800">"${u.ulasan}"</p>
+                  <span class="text-[10px] text-zinc-400 block text-right">— ${u.penilai}</span>
                 </li>
               `).join("");
 
               return `
-                <div class="space-y-2">
-                  <h5 class="text-xs sm:text-sm font-display font-bold text-slate-800 flex items-center justify-between">
-                    <span>👤 ${mName}</span>
-                    <span class="text-[10px] bg-slate-200 px-2 py-0.5 rounded-full font-bold font-mono">${ulasanArr.length} Ulasan</span>
-                  </h5>
-                  <ul class="space-y-2 max-h-52 overflow-y-auto custom-scrollbar">
+                <div class="space-y-1.5">
+                  <div class="text-xs font-semibold text-zinc-800 flex items-center justify-between">
+                    <span>${mName}</span>
+                    <span class="text-[10px] font-mono text-zinc-400">${ulasanArr.length} Ulasan</span>
+                  </div>
+                  <ul class="space-y-1.5 max-h-48 overflow-y-auto custom-scrollbar">
                     ${listItems}
                   </ul>
                 </div>
               `;
-            }).join("<div class='border-t border-slate-200/80 my-3'></div>");
+            }).join("<div class='border-t border-zinc-100 my-2.5'></div>");
           }
         }
 
         card.innerHTML = `
-          <div class="flex items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
+          <div class="flex items-center justify-between gap-3 border-b border-zinc-100 pb-3">
             <div>
-              <h4 class="font-display font-extrabold text-slate-900 text-base sm:text-lg">${grp.kelompok}</h4>
-              <span class="text-xs text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">${grp.sesi}</span>
+              <h4 class="font-bold text-zinc-900 text-sm sm:text-base">${grp.kelompok}</h4>
+              <span class="text-[11px] text-zinc-500 font-medium">${grp.sesi}</span>
             </div>
             <div class="flex items-center gap-2">
-              <div class="text-right bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-2xl">
-                <span class="block text-[9px] uppercase font-bold text-indigo-600">Rata-Rata</span>
-                <span class="text-base sm:text-lg font-display font-black text-indigo-950">${grp.rataRataSkor}</span>
+              <div class="text-right bg-zinc-100 px-2.5 py-1 rounded">
+                <span class="block text-[9px] uppercase font-bold text-zinc-500">Rata-Rata</span>
+                <span class="text-sm font-mono font-bold text-zinc-900">${grp.rataRataSkor}</span>
               </div>
-              <div class="text-right bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-2xl">
-                <span class="block text-[9px] uppercase font-bold text-slate-500">Penilai</span>
-                <span class="text-base sm:text-lg font-display font-black text-slate-800">${grp.totalPenilai}</span>
+              <div class="text-right bg-zinc-100 px-2.5 py-1 rounded">
+                <span class="block text-[9px] uppercase font-bold text-zinc-500">Penilai</span>
+                <span class="text-sm font-mono font-bold text-zinc-900">${grp.totalPenilai}</span>
               </div>
             </div>
           </div>
 
           <div>
-            <h5 class="text-xs font-bold text-slate-700 mb-2">🏆 Perolehan Suara Presentator Terbaik:</h5>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <h5 class="text-xs font-semibold text-zinc-700 mb-2">Suara Presentator Terbaik:</h5>
+            <div class="space-y-1.5">
               ${presentersHtml}
             </div>
           </div>
 
-          <div class="border-t border-slate-100 pt-3">
-            <h5 class="text-xs font-bold text-slate-700 mb-2">💬 Tanggapan & Evaluasi Pemateri:</h5>
-            <div class="space-y-3">
+          <div class="border-t border-zinc-100 pt-3">
+            <h5 class="text-xs font-semibold text-zinc-700 mb-2">Ulasan Pemateri:</h5>
+            <div class="space-y-2">
               ${reviewsHtml}
             </div>
           </div>
@@ -1463,23 +1363,23 @@
       const msg = document.getElementById("toastMsg");
 
       msg.textContent = message;
-      toast.className = "fixed bottom-5 left-3.5 right-3.5 sm:left-auto sm:right-6 sm:max-w-md z-50 p-4 rounded-2xl shadow-2xl text-xs sm:text-sm font-semibold flex items-center gap-3 transition-all duration-300 slide-up border backdrop-blur-md";
+      toast.className = "fixed bottom-5 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-sm z-50 p-3.5 rounded-xl shadow-lg text-xs font-medium flex items-center gap-2.5 transition-all border step-fade";
 
       if (type === "error") {
-        toast.classList.add("bg-rose-600/95", "text-white", "border-rose-700", "shadow-rose-900/30");
+        toast.classList.add("bg-zinc-900", "text-rose-400", "border-rose-900");
         icon.textContent = "✕";
       } else if (type === "warning") {
-        toast.classList.add("bg-amber-500/95", "text-white", "border-amber-600", "shadow-amber-900/30");
-        icon.textContent = "⚠️";
+        toast.classList.add("bg-zinc-900", "text-amber-400", "border-amber-900");
+        icon.textContent = "!";
       } else {
-        toast.classList.add("bg-emerald-600/95", "text-white", "border-emerald-700", "shadow-emerald-900/30");
+        toast.classList.add("bg-zinc-900", "text-emerald-400", "border-emerald-900");
         icon.textContent = "✓";
       }
 
       toast.classList.remove("hidden");
       setTimeout(() => {
         toast.classList.add("hidden");
-      }, 4000);
+      }, 3500);
     }
 
     function openApiConfigModal() {
@@ -1496,14 +1396,14 @@
       if (val) {
         localStorage.setItem("PGSD_API_URL", val);
         closeApiConfigModal();
-        showToast("URL API berhasil disimpan! Memuat ulang data...", "success");
+        showToast("URL API berhasil disimpan", "success");
         fetchInitialFormData(true);
       }
     }
 
     function mockLoadData() {
       appConfig = {
-        "Judul_Form": "PENILAIAN PRESENTASI KELAS 5E PGSD 2026",
+        "Judul_Form": "Penilaian Presentasi PGSD 5E",
         "Mata_Kuliah": "Bimbingan Konseling di SD",
         "Dosen_Pengampu": "Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.",
         "Kelas": "5E",
