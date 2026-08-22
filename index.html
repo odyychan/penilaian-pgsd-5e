@@ -76,9 +76,16 @@
 
     /* Print Report Styling */
     @media print {
-      /* Sembunyikan seluruh UI web, header, footer, tabs, dan overlay modal */
-      header, footer, nav, #viewForm, #viewRekap, #toastContainer, #printRekapModal, #groupInfoModal, #studentReviewModal, #successModal, .no-print {
+      /* Sembunyikan seluruh UI web, header, footer, tabs, toast/notifikasi, dan overlay modal */
+      header, footer, nav, #viewForm, #viewRekap, #toast, #toastContainer, #floatingToastContainer, .toast, [id*="toast"], [class*="toast"], #printRekapModal, #groupInfoModal, #studentReviewModal, #successModal, .no-print {
         display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        height: 0 !important;
+        width: 0 !important;
+        position: absolute !important;
+        top: -9999px !important;
+        left: -9999px !important;
       }
       
       html, body {
@@ -131,7 +138,7 @@
 
       @page {
         size: A4 portrait;
-        margin: 8mm 12mm 8mm 12mm;
+        margin: 4mm 10mm 6mm 10mm;
       }
     }
   </style>
@@ -2644,35 +2651,35 @@
         <div class="border-b border-zinc-950 mb-4"></div>
 
         <!-- JUDUL LAPORAN & METADATA -->
-        <div class="text-center mb-4 space-y-2">
+        <div class="text-center mb-3 space-y-2">
           <h2 class="text-xs sm:text-sm font-extrabold uppercase tracking-wide text-zinc-950 border-b border-zinc-400 pb-1 inline-block">
             LAPORAN REKAPITULASI HASIL PENILAIAN PRESENTASI
           </h2>
           
-          <table class="w-full text-xs text-left" style="border: none !important; border-collapse: collapse; margin-top: 8px; width: 100%;">
+          <table class="w-full text-xs text-left" style="border: none !important; border-collapse: collapse; margin-top: 6px; width: 100%;">
             <tbody>
               <tr style="border: none !important;">
-                <td style="border: none !important; padding: 2px 0; width: 110px; font-weight: 600; color: #374151; white-space: nowrap; vertical-align: middle;">Mata Kuliah</td>
-                <td style="border: none !important; padding: 2px 2px; width: 12px; text-align: center; font-weight: 700; color: #111827; vertical-align: middle;">:</td>
-                <td style="border: none !important; padding: 2px 16px 2px 0; font-weight: 700; color: #111827; vertical-align: middle; width: 38%;">${matkul}</td>
-                <td style="border: none !important; padding: 2px 0; width: 110px; font-weight: 600; color: #374151; white-space: nowrap; vertical-align: middle;">Kelas / Semester</td>
-                <td style="border: none !important; padding: 2px 2px; width: 12px; text-align: center; font-weight: 700; color: #111827; vertical-align: middle;">:</td>
-                <td style="border: none !important; padding: 2px 0; font-weight: 700; color: #111827; vertical-align: middle;">${kelas} / Genap (2025/2026)</td>
+                <td style="border: none !important; padding: 2px 0; width: 125px; min-width: 125px; font-weight: 600; color: #374151; white-space: nowrap; vertical-align: top;">Mata Kuliah</td>
+                <td style="border: none !important; padding: 2px 2px; width: 12px; text-align: center; font-weight: 700; color: #111827; vertical-align: top;">:</td>
+                <td style="border: none !important; padding: 2px 14px 2px 0; font-weight: 700; color: #111827; vertical-align: top; width: 38%;">${matkul}</td>
+                <td style="border: none !important; padding: 2px 0; width: 125px; min-width: 125px; font-weight: 600; color: #374151; white-space: nowrap; vertical-align: top;">Kelas / Semester</td>
+                <td style="border: none !important; padding: 2px 2px; width: 12px; text-align: center; font-weight: 700; color: #111827; vertical-align: top;">:</td>
+                <td style="border: none !important; padding: 2px 0; font-weight: 700; color: #111827; vertical-align: top;">${kelas} / Genap (2025/2026)</td>
               </tr>
               <tr style="border: none !important;">
-                <td style="border: none !important; padding: 2px 0; width: 110px; font-weight: 600; color: #374151; white-space: nowrap; vertical-align: middle;">Dosen Pengampu</td>
-                <td style="border: none !important; padding: 2px 2px; width: 12px; text-align: center; font-weight: 700; color: #111827; vertical-align: middle;">:</td>
-                <td style="border: none !important; padding: 2px 16px 2px 0; font-weight: 700; color: #111827; vertical-align: middle;">${dosen}</td>
-                <td style="border: none !important; padding: 2px 0; width: 110px; font-weight: 600; color: #374151; white-space: nowrap; vertical-align: middle;">Cakupan Sesi</td>
-                <td style="border: none !important; padding: 2px 2px; width: 12px; text-align: center; font-weight: 700; color: #111827; vertical-align: middle;">:</td>
-                <td style="border: none !important; padding: 2px 0; font-weight: 700; color: #111827; vertical-align: middle;">${selectedSesi === 'ALL' ? 'Semua Sesi Presentasi' : selectedSesi}</td>
+                <td style="border: none !important; padding: 2px 0; width: 125px; min-width: 125px; font-weight: 600; color: #374151; white-space: nowrap; vertical-align: top;">Dosen Pengampu</td>
+                <td style="border: none !important; padding: 2px 2px; width: 12px; text-align: center; font-weight: 700; color: #111827; vertical-align: top;">:</td>
+                <td style="border: none !important; padding: 2px 14px 2px 0; font-weight: 700; color: #111827; vertical-align: top;">${dosen}</td>
+                <td style="border: none !important; padding: 2px 0; width: 125px; min-width: 125px; font-weight: 600; color: #374151; white-space: nowrap; vertical-align: top;">Cakupan Sesi</td>
+                <td style="border: none !important; padding: 2px 2px; width: 12px; text-align: center; font-weight: 700; color: #111827; vertical-align: top;">:</td>
+                <td style="border: none !important; padding: 2px 0; font-weight: 700; color: #111827; vertical-align: top;">${selectedSesi === 'ALL' ? 'Semua Sesi Presentasi' : selectedSesi}</td>
               </tr>
             </tbody>
           </table>
         </div>
 
         <!-- 1. TABEL REKAPITULASI NILAI KELOMPOK -->
-        <div class="my-4 space-y-1.5 print-avoid-break">
+        <div class="my-3 space-y-1.5 print-avoid-break">
           <h4 class="font-bold text-xs uppercase tracking-wider text-zinc-950 flex items-center justify-between">
             <span>A. Rekapitulasi Nilai & Peringkat Performa Kelompok</span>
             <span class="text-[10px] font-normal font-mono text-zinc-500">Skala Penilaian: 0 - 100</span>
@@ -2755,7 +2762,7 @@
       // 2. BAGIAN EVALUASI KUALITATIF JIKA DICENTANG
       if (includeReviews && summaryList.length > 0) {
         html += `
-          <div class="my-5 space-y-3">
+          <div class="my-4 space-y-2.5">
             <h4 class="font-bold text-xs uppercase tracking-wider text-zinc-950">
               B. Rangkuman Catatan Evaluasi Masukan Mahasiswa
             </h4>
@@ -2767,7 +2774,7 @@
 
           if (studentKeys.length > 0) {
             html += `
-              <div class="print-card print-avoid-break p-3.5 rounded-lg border border-zinc-400 bg-zinc-50/40 space-y-2 mb-3.5" style="page-break-inside: avoid; break-inside: avoid;">
+              <div class="print-card print-avoid-break p-3.5 rounded-lg border border-zinc-400 bg-zinc-50/40 space-y-2 mb-3" style="page-break-inside: avoid; break-inside: avoid;">
                 <div class="font-bold text-xs text-zinc-950 border-b border-zinc-300 pb-1.5 flex items-center justify-between">
                   <span class="text-xs sm:text-sm font-extrabold">${g.kelompok}</span>
                   <span class="text-[10px] font-medium font-mono text-zinc-600 bg-zinc-200/80 px-2 py-0.5 rounded">${g.sesi || 'Minggu 1'}</span>
@@ -2802,7 +2809,7 @@
 
       // LEMBAR TANDA TANGAN / PENGESAHAN RESMI DOSEN
       html += `
-        <div class="print-signature print-avoid-break pt-6 mt-6 border-t border-zinc-300 flex justify-between items-start text-xs" style="page-break-inside: avoid; break-inside: avoid;">
+        <div class="print-signature print-avoid-break pt-5 mt-5 border-t border-zinc-300 flex justify-between items-start text-xs" style="page-break-inside: avoid; break-inside: avoid;">
           <div class="space-y-1 text-zinc-500 text-[10px]">
             <p>Dokumen ini dihasilkan secara otomatis oleh:</p>
             <p class="font-semibold text-zinc-800">Sistem Peer-Assessment PGSD Kelas 5E</p>
@@ -2813,7 +2820,7 @@
           <div class="text-center w-64 space-y-1">
             <p class="text-xs">Banjarmasin, ${printDateStr}</p>
             <p class="font-bold text-zinc-900">Dosen Pengampu Mata Kuliah,</p>
-            <div style="height: 60px; display: flex; align-items: center; justify-content: center;">
+            <div style="height: 55px; display: flex; align-items: center; justify-content: center;">
               <span class="text-[10px] text-zinc-300 italic">(Tanda Tangan & Cap)</span>
             </div>
             <p class="font-extrabold underline text-zinc-950 text-xs">${dosen}</p>
@@ -2826,6 +2833,8 @@
     }
 
     function executeBrowserPrint() {
+      const toastEl = document.getElementById("toast");
+      if (toastEl) toastEl.classList.add("hidden");
       renderPrintPreviewContent();
       const previewEl = document.getElementById("printableReportArea");
       const printRoot = document.getElementById("printDocumentRoot");
