@@ -107,7 +107,7 @@
       <div class="flex items-center gap-2 flex-shrink-0">
         <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-[11px] font-medium" id="badgeSesiTop">
           <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span id="badgeSesiTopText">Sesi: Minggu 1</span>
+          <span id="badgeSesiTopText">Minggu 1</span>
         </div>
       </div>
 
@@ -764,12 +764,16 @@
       loadLocalCache();
       updateStepUI(1);
       fetchInitialFormData(false);
+      // Pre-fetch rekap data secara diam-diam di background agar instan saat dibuka
+      setTimeout(() => loadRekapData(true), 400);
     });
 
     function loadLocalCache() {
       try {
         const cachedGroups = localStorage.getItem("PGSD_CACHE_GROUPS");
         const cachedConfig = localStorage.getItem("PGSD_CACHE_CONFIG");
+        const cachedRekap = localStorage.getItem("PGSD_CACHE_REKAP");
+
         if (cachedGroups && cachedConfig) {
           appConfig = JSON.parse(cachedConfig);
           groupsData = JSON.parse(cachedGroups);
@@ -777,6 +781,14 @@
           renderGroupOptions();
         } else {
           mockLoadData();
+        }
+
+        if (cachedRekap) {
+          currentRekapData = JSON.parse(cachedRekap);
+          if (currentRekapData && currentRekapData.summary) {
+            populateRekapFilter(currentRekapData.summary);
+            renderBothRekapViews();
+          }
         }
       } catch (e) {
         mockLoadData();
@@ -827,7 +839,7 @@
 
       document.getElementById("navTitle").textContent = title;
       document.getElementById("navSubtitle").textContent = `${matkul} • FKIP ULM`;
-      document.getElementById("badgeSesiTopText").textContent = `Sesi: ${sesi}`;
+      document.getElementById("badgeSesiTopText").textContent = sesi;
       
       // Update Academic Card
       const infoMatkulEl = document.getElementById("infoMatkul");
@@ -1299,18 +1311,22 @@
     // =========================================================================
     // 📊 REKAPITULASI DATA LOGIC (KELOMPOK & INDIVIDU PEMATERI)
     // =========================================================================
-    async function loadRekapData() {
+    async function loadRekapData(isSilent = false) {
       const loading = document.getElementById("rekapLoading");
       const empty = document.getElementById("rekapEmpty");
       const kelompokBox = document.getElementById("rekapKelompokContainer");
       const individuBox = document.getElementById("rekapIndividuContainer");
       const searchBox = document.getElementById("individuSearchControlBox");
 
-      loading.classList.remove("hidden");
-      empty.classList.add("hidden");
-      kelompokBox.classList.add("hidden");
-      individuBox.classList.add("hidden");
-      if (searchBox) searchBox.classList.add("hidden");
+      const hasLocalData = currentRekapData && currentRekapData.summary && currentRekapData.summary.length > 0;
+
+      if (!hasLocalData && !isSilent) {
+        loading.classList.remove("hidden");
+        empty.classList.add("hidden");
+        kelompokBox.classList.add("hidden");
+        individuBox.classList.add("hidden");
+        if (searchBox) searchBox.classList.add("hidden");
+      }
 
       const apiUrl = getApiUrl();
 
@@ -1321,18 +1337,21 @@
         loading.classList.add("hidden");
         if (res.success) {
           currentRekapData = res;
+          localStorage.setItem("PGSD_CACHE_REKAP", JSON.stringify(res));
+
           if (!res.summary || res.summary.length === 0) {
-            empty.classList.remove("hidden");
+            if (!hasLocalData) empty.classList.remove("hidden");
           } else {
+            empty.classList.add("hidden");
             populateRekapFilter(res.summary);
             renderBothRekapViews();
           }
         } else {
-          showToast("Gagal memuat rekap: " + res.error, "error");
+          if (!isSilent) showToast("Gagal memuat rekap: " + res.error, "error");
         }
       } catch (err) {
         loading.classList.add("hidden");
-        showToast("Koneksi rekap error: " + err, "error");
+        if (!isSilent) showToast("Koneksi rekap error: " + err, "error");
       }
     }
 

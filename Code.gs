@@ -94,7 +94,7 @@ function doPost(e) {
     } else if (action === "getInitialData") {
       result = getCachedInitialData();
     } else if (action === "getRecapData") {
-      result = getRecapData();
+      result = getCachedRecapData();
     }
 
     return createJsonResponse(result);
@@ -137,12 +137,34 @@ function getCachedInitialData() {
 }
 
 /**
+ * Ambil Data Rekapitulasi dengan Cache (Sangat Cepat)
+ */
+function getCachedRecapData() {
+  const cache = CacheService.getScriptCache();
+  const cached = cache.get("REKAP_DATA_CACHE_V2");
+  if (cached) {
+    try {
+      return JSON.parse(cached);
+    } catch (e) {}
+  }
+
+  const liveData = getRecapData();
+  if (liveData && liveData.success) {
+    try {
+      cache.put("REKAP_DATA_CACHE_V2", JSON.stringify(liveData), 120); // cache 2 menit
+    } catch (e) {}
+  }
+  return liveData;
+}
+
+/**
  * Reset Cache saat Ada Perubahan Data
  */
 function clearApiCache() {
   try {
     const cache = CacheService.getScriptCache();
     cache.remove("INIT_FORM_DATA_V2");
+    cache.remove("REKAP_DATA_CACHE_V2");
   } catch (e) {}
 }
 
