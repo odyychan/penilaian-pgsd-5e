@@ -567,6 +567,46 @@
           </select>
         </div>
 
+        <!-- 📊 MODERN MINIMALIST VISUAL LEADERBOARD CHART (OVERVIEW RINGKASAN PERFORMA) -->
+        <div id="rekapChartOverviewCard" class="hidden bg-zinc-950 text-white rounded-2xl border border-zinc-800 p-4 sm:p-6 shadow-md space-y-4 sm:space-y-5 fade-enter">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-800/80 pb-3">
+            <div class="flex items-center gap-2">
+              <span class="p-1.5 rounded-lg bg-zinc-800 text-emerald-400 text-xs flex-shrink-0">📈</span>
+              <div>
+                <h3 class="font-bold text-xs sm:text-sm text-zinc-100">Leaderboard & Peringkat Performa</h3>
+                <p class="text-[10px] sm:text-[11px] text-zinc-400">Ringkasan skor rata-rata nilai kelompok dan perolehan suara presentator terfavorit.</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 self-start sm:self-auto flex-shrink-0">
+              <span id="chartTotalEvaluatorBadge" class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-zinc-800 text-emerald-400 border border-zinc-700">0 Penilai Terdata</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            <!-- Chart 1: Peringkat Skor Rata-rata Kelompok -->
+            <div class="space-y-3">
+              <div class="flex items-center justify-between text-[11px] font-mono text-zinc-400 uppercase tracking-wider">
+                <span>🏆 Peringkat Nilai Kelompok</span>
+                <span>Rata-rata Skor</span>
+              </div>
+              <div id="groupLeaderboardChartBars" class="space-y-2.5">
+                <!-- Dynamic Horizontal Group Bars -->
+              </div>
+            </div>
+
+            <!-- Chart 2: Top Presentator Pilihan Audiens -->
+            <div class="space-y-3 pt-4 lg:pt-0 border-t lg:border-t-0 lg:border-l lg:pl-6 border-zinc-800/80">
+              <div class="flex items-center justify-between text-[11px] font-mono text-zinc-400 uppercase tracking-wider">
+                <span>⭐ Top Presentator Terfavorit</span>
+                <span>Perolehan Suara</span>
+              </div>
+              <div id="presenterLeaderboardChartBars" class="space-y-2.5">
+                <!-- Dynamic Presenter Bars -->
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Search Bar & Controls for Mahasiswa Individu View -->
         <div id="individuSearchControlBox" class="space-y-2 hidden">
           <div class="relative">
@@ -1572,6 +1612,141 @@
       renderBothRekapViews();
     }
 
+    // 📈 RENDER MODERN MINIMALIST VISUAL LEADERBOARD CHART (OVERVIEW)
+    function renderModernRekapCharts(summaryList) {
+      const chartCard = document.getElementById("rekapChartOverviewCard");
+      const groupContainer = document.getElementById("groupLeaderboardChartBars");
+      const presenterContainer = document.getElementById("presenterLeaderboardChartBars");
+      const evaluatorBadge = document.getElementById("chartTotalEvaluatorBadge");
+
+      if (!chartCard || !groupContainer || !presenterContainer) return;
+
+      if (!summaryList || summaryList.length === 0) {
+        chartCard.classList.add("hidden");
+        return;
+      }
+
+      chartCard.classList.remove("hidden");
+      groupContainer.innerHTML = "";
+      presenterContainer.innerHTML = "";
+
+      // 1. Group Leaderboard Sorting
+      const sortedGroups = [...summaryList].sort((a, b) => {
+        const scoreA = parseFloat(a.rataRataSkor) || 0;
+        const scoreB = parseFloat(b.rataRataSkor) || 0;
+        return scoreB - scoreA;
+      });
+
+      let totalEvaluations = 0;
+      sortedGroups.forEach(g => {
+        totalEvaluations += parseInt(g.totalPenilai) || 0;
+      });
+      if (evaluatorBadge) {
+        evaluatorBadge.textContent = `${totalEvaluations} Penilai Terdata`;
+      }
+
+      sortedGroups.forEach((grp, idx) => {
+        const score = parseFloat(grp.rataRataSkor) || 0;
+        const pct = Math.min(100, Math.max(0, score));
+
+        let rankBadge = "";
+        let barColor = "bg-gradient-to-r from-emerald-500 to-teal-400";
+        if (idx === 0) {
+          rankBadge = `<span class="px-1.5 py-0.2 rounded font-mono text-[10px] font-bold bg-amber-950/70 text-amber-300 border border-amber-800 flex-shrink-0">🥇 #1</span>`;
+          barColor = "bg-gradient-to-r from-amber-500 via-emerald-400 to-teal-300";
+        } else if (idx === 1) {
+          rankBadge = `<span class="px-1.5 py-0.2 rounded font-mono text-[10px] font-bold bg-zinc-800 text-zinc-200 border border-zinc-700 flex-shrink-0">🥈 #2</span>`;
+        } else if (idx === 2) {
+          rankBadge = `<span class="px-1.5 py-0.2 rounded font-mono text-[10px] font-bold bg-amber-950/40 text-amber-600 border border-amber-900 flex-shrink-0">🥉 #3</span>`;
+        } else {
+          rankBadge = `<span class="px-1.5 py-0.2 rounded font-mono text-[10px] font-bold bg-zinc-900 text-zinc-400 border border-zinc-800 flex-shrink-0">#${idx + 1}</span>`;
+          barColor = "bg-gradient-to-r from-zinc-600 to-zinc-400";
+        }
+
+        const barRow = document.createElement("div");
+        barRow.className = "space-y-1";
+        barRow.innerHTML = `
+          <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center gap-1.5 min-w-0">
+              ${rankBadge}
+              <span class="font-semibold text-zinc-200 truncate max-w-[130px] sm:max-w-[190px]">${grp.kelompok}</span>
+              <span class="text-[10px] text-zinc-500 hidden sm:inline font-mono">(${grp.sesi})</span>
+            </div>
+            <div class="flex items-center gap-1.5 flex-shrink-0">
+              <span class="font-mono font-bold text-emerald-400 text-xs">${grp.rataRataSkor}</span>
+              <span class="text-[10px] text-zinc-500 font-mono">(${grp.totalPenilai} penilai)</span>
+            </div>
+          </div>
+          <div class="w-full h-2 rounded-full bg-zinc-900 overflow-hidden border border-zinc-800/80">
+            <div class="h-full ${barColor} rounded-full transition-all duration-700 ease-out" style="width: ${pct}%"></div>
+          </div>
+        `;
+        groupContainer.appendChild(barRow);
+      });
+
+      // 2. Presenter Leaderboard Aggregation
+      const presenterMap = {};
+      summaryList.forEach(grp => {
+        const votes = grp.votePresentator || {};
+        Object.keys(votes).forEach(pName => {
+          if (!presenterMap[pName]) {
+            presenterMap[pName] = {
+              name: pName,
+              group: grp.kelompok,
+              sesi: grp.sesi,
+              votes: 0
+            };
+          }
+          presenterMap[pName].votes += parseInt(votes[pName]) || 0;
+        });
+      });
+
+      const sortedPresenters = Object.values(presenterMap).filter(p => p.votes > 0).sort((a, b) => b.votes - a.votes);
+      const topPresenters = sortedPresenters.slice(0, 5);
+
+      if (topPresenters.length === 0) {
+        presenterContainer.innerHTML = `<p class="text-xs text-zinc-500 italic p-3 text-center bg-zinc-900/50 rounded-lg border border-zinc-900">Belum ada suara presentator yang masuk.</p>`;
+      } else {
+        const maxVotes = topPresenters[0]?.votes || 1;
+        topPresenters.forEach((pres, pIdx) => {
+          const pct = Math.min(100, Math.max(12, (pres.votes / maxVotes) * 100));
+          let pRankBadge = "";
+          let barGradient = "bg-gradient-to-r from-blue-500 to-indigo-400";
+
+          if (pIdx === 0) {
+            pRankBadge = `<span class="px-1.5 py-0.2 rounded font-mono text-[10px] font-bold bg-amber-950/70 text-amber-300 border border-amber-800 flex-shrink-0">⭐ #1</span>`;
+            barGradient = "bg-gradient-to-r from-amber-500 to-amber-300";
+          } else if (pIdx === 1) {
+            pRankBadge = `<span class="px-1.5 py-0.2 rounded font-mono text-[10px] font-bold bg-zinc-800 text-zinc-200 border border-zinc-700 flex-shrink-0">#2</span>`;
+          } else if (pIdx === 2) {
+            pRankBadge = `<span class="px-1.5 py-0.2 rounded font-mono text-[10px] font-bold bg-zinc-800 text-zinc-300 border border-zinc-700 flex-shrink-0">#3</span>`;
+          } else {
+            pRankBadge = `<span class="px-1.5 py-0.2 rounded font-mono text-[10px] font-bold bg-zinc-900 text-zinc-500 border border-zinc-800 flex-shrink-0">#${pIdx + 1}</span>`;
+            barGradient = "bg-gradient-to-r from-zinc-700 to-zinc-500";
+          }
+
+          const presRow = document.createElement("div");
+          presRow.className = "space-y-1";
+          presRow.innerHTML = `
+            <div class="flex items-center justify-between text-xs">
+              <div class="flex items-center gap-1.5 min-w-0">
+                ${pRankBadge}
+                <span class="font-semibold text-zinc-200 truncate max-w-[130px] sm:max-w-[190px]">${pres.name}</span>
+                <span class="text-[10px] text-zinc-500 font-mono truncate hidden sm:inline">(${pres.group})</span>
+              </div>
+              <div class="flex items-center gap-1.5 flex-shrink-0">
+                <span class="font-mono font-bold text-amber-300 text-xs">${pres.votes} Suara</span>
+              </div>
+            </div>
+            <div class="w-full h-2 rounded-full bg-zinc-900 overflow-hidden border border-zinc-800/80">
+              <div class="h-full ${barGradient} rounded-full transition-all duration-700 ease-out" style="width: ${pct}%"></div>
+            </div>
+          `;
+          presenterContainer.appendChild(presRow);
+        });
+      }
+    }
+
     function renderBothRekapViews() {
       if (!currentRekapData) return;
       const filterVal = document.getElementById("rekapGroupFilter").value;
@@ -1579,6 +1754,7 @@
         ? currentRekapData.summary 
         : currentRekapData.summary.filter(i => i.kelompok === filterVal);
 
+      renderModernRekapCharts(summaryList);
       renderRekapKelompok(summaryList, currentRekapData.isPublicReviewVisible);
       renderRekapIndividu(summaryList, currentRekapData.isPublicReviewVisible);
 

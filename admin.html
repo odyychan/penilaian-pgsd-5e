@@ -229,10 +229,10 @@
     </header>
 
     <!-- Main Admin Content -->
-    <main class="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
+    <main class="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-6 py-3 sm:py-5 flex flex-col gap-2.5 sm:gap-4">
 
       <!-- ⚡ QUICK SESSI CONTROL WIDGET (PENENTUAN SESI MINGGU AKTIF OLEH ADMIN - SINGLE SOURCE OF TRUTH) -->
-      <div class="bg-white rounded-xl border border-zinc-200 p-4 sm:p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
+      <div class="bg-white rounded-xl border border-zinc-200 p-3.5 sm:p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-4">
         <div class="space-y-1">
           <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0"></span>
@@ -278,10 +278,10 @@
       <!-- ===================================================================== -->
       <!-- TAB 1: 📋 MANAJEMEN DATA KELOMPOK & MAHASISWA -->
       <!-- ===================================================================== -->
-      <div id="adminView_data" class="space-y-4 sm:space-y-5 fade-enter">
+      <div id="adminView_data" class="flex flex-col gap-2.5 sm:gap-4 fade-enter">
         
         <!-- Action Toolbar -->
-        <div class="bg-white rounded-xl border border-zinc-200 p-4 sm:p-5 shadow-xs space-y-3.5 sm:space-y-4">
+        <div class="bg-white rounded-xl border border-zinc-200 p-3.5 sm:p-5 shadow-xs space-y-3 sm:space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h2 class="text-sm sm:text-base font-bold text-zinc-900">Manajemen Kelompok & Anggota</h2>
@@ -338,7 +338,7 @@
         </div>
 
         <!-- Group List Container -->
-        <div id="masterGroupsListContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-3.5 sm:gap-4">
+        <div id="masterGroupsListContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
           <!-- Dynamic Editable Group Cards -->
         </div>
 
@@ -353,7 +353,7 @@
       <!-- ===================================================================== -->
       <!-- TAB 2: ⚙️ KONFIGURASI PERKULIAHAN (AUTO-SAVE) -->
       <!-- ===================================================================== -->
-      <div id="adminView_config" class="space-y-4 sm:space-y-5 fade-enter hidden">
+      <div id="adminView_config" class="flex flex-col gap-2.5 sm:gap-4 fade-enter hidden">
         <form id="formConfigParameters" onsubmit="event.preventDefault()" class="bg-white rounded-xl border border-zinc-200 p-4 sm:p-7 shadow-xs space-y-5 sm:space-y-6">
           
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 pb-3.5">
@@ -524,10 +524,10 @@
       <!-- ===================================================================== -->
       <!-- TAB 3: 📝 DATA RESPONS PENILAIAN & RESET PER PENGIRIMAN -->
       <!-- ===================================================================== -->
-      <div id="adminView_responses" class="space-y-4 sm:space-y-5 fade-enter hidden">
+      <div id="adminView_responses" class="flex flex-col gap-2.5 sm:gap-4 fade-enter hidden">
         
         <!-- Action & Filter Bar for Responses -->
-        <div class="bg-white rounded-xl border border-zinc-200 p-4 sm:p-5 shadow-xs space-y-3.5 sm:space-y-4">
+        <div class="bg-white rounded-xl border border-zinc-200 p-3.5 sm:p-5 shadow-xs space-y-3 sm:space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h2 class="text-sm sm:text-base font-bold text-zinc-900">Data Respons & Pengiriman Mahasiswa</h2>
@@ -630,7 +630,7 @@
       <!-- ===================================================================== -->
       <!-- TAB 4: 🔒 SISTEM, DATABASE & KEAMANAN -->
       <!-- ===================================================================== -->
-      <div id="adminView_system" class="space-y-4 sm:space-y-5 fade-enter hidden">
+      <div id="adminView_system" class="flex flex-col gap-2.5 sm:gap-4 fade-enter hidden">
         
         <!-- CARD 1: BACKEND REST API CONFIGURATION -->
         <div class="bg-white rounded-xl border border-zinc-200 p-4 sm:p-7 shadow-xs space-y-4 sm:space-y-5">
