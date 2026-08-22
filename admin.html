@@ -78,29 +78,50 @@
 
     /* Print Report Styling */
     @media print {
-      body * {
-        visibility: hidden !important;
+      /* Sembunyikan seluruh UI web, header, footer, tabs, login, dan overlay modal */
+      header, footer, nav, #loginScreen, #adminDashboard, #toastContainer, #printRekapModal, #groupModal, #memberModal, #batchGroupModal, #deleteConfirmModal, #responseDetailModal, #resetDataModal, .no-print {
+        display: none !important;
       }
-      #printableReportArea, #printableReportArea * {
+      
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        font-family: Arial, Helvetica, sans-serif !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      #printDocumentRoot {
+        display: block !important;
         visibility: visible !important;
-      }
-      #printableReportArea {
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
         width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
         background: #ffffff !important;
         color: #000000 !important;
-        display: block !important;
       }
-      .no-print {
-        display: none !important;
+
+      #printDocumentRoot * {
+        visibility: visible !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
+
+      table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+      }
+
+      tr, .print-avoid-break {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+      }
+
       @page {
         size: A4 portrait;
-        margin: 10mm 15mm;
+        margin: 12mm 15mm 15mm 15mm;
       }
     }
   </style>
@@ -1157,6 +1178,9 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
     </div>
   </div>
+
+  <!-- Isolated Dedicated Root for Clean Browser Print -->
+  <div id="printDocumentRoot" class="hidden"></div>
 
   <!-- ========================================================================= -->
   <!-- 💻 JAVASCRIPT APP LOGIC: AUTO-SAVE & OFFLINE RESILIENT ENGINE -->
@@ -2793,7 +2817,14 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
     function executeAdminBrowserPrint() {
       renderAdminPrintPreviewContent();
-      window.print();
+      const previewEl = document.getElementById("printableReportArea");
+      const printRoot = document.getElementById("printDocumentRoot");
+      if (previewEl && printRoot) {
+        printRoot.innerHTML = previewEl.innerHTML;
+      }
+      setTimeout(() => {
+        window.print();
+      }, 50);
     }
   </script>
 </body>
