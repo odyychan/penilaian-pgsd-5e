@@ -221,25 +221,20 @@
       <form id="assessmentForm" onsubmit="handleFinalSubmit(event)" class="space-y-5">
 
         <!-- =================================================================== -->
-        <!-- SECTION 1: IDENTITAS PENILAI -->
+        <!-- 1: IDENTITAS PENILAI -->
         <!-- =================================================================== -->
         <div id="stepSection_1" class="step-fade space-y-4">
           <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5">
             
             <div class="border-b border-zinc-100 pb-3.5">
-              <div class="flex items-center gap-2">
-                <span class="font-mono text-xs font-bold text-zinc-400">SECTION 01</span>
-                <span class="text-zinc-300">•</span>
-                <span class="text-xs font-semibold text-zinc-700">Wajib Diisi</span>
-              </div>
-              <h2 class="text-base sm:text-lg font-bold text-zinc-900 mt-1">Identitas Penilai</h2>
-              <p class="text-xs text-zinc-500 mt-0.5">Masukkan identitas akun mahasiswa ULM Anda untuk verifikasi presensi.</p>
+              <h2 class="text-base sm:text-lg font-bold text-zinc-900">Identitas Penilai</h2>
+              <p class="text-xs text-zinc-500 mt-0.5">Masukkan identitas akun mahasiswa Anda untuk verifikasi presensi.</p>
             </div>
 
             <!-- Email Field -->
             <div class="space-y-1.5">
               <label class="block text-xs font-semibold text-zinc-700">
-                Email Mahasiswa ULM <span class="text-rose-500">*</span>
+                Email Mahasiswa <span class="text-rose-500">*</span>
               </label>
               <div class="relative">
                 <input 
@@ -247,7 +242,7 @@
                   id="inputEmail" 
                   required 
                   inputmode="email"
-                  placeholder="nama.nim@mhs.ulm.ac.id" 
+                  placeholder="nama.nim@email.ac.id" 
                   class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 outline-none transition bg-white placeholder-zinc-400"
                   oninput="validateEmailLive(this.value)"
                 >
@@ -256,7 +251,6 @@
                 </div>
               </div>
               <p id="emailValidationMsg" class="text-[11px] font-medium hidden"></p>
-              <p class="text-[11px] text-zinc-400">Gunakan akun berakhiran <code class="font-mono text-zinc-700">@mhs.ulm.ac.id</code> atau <code class="font-mono text-zinc-700">@ulm.ac.id</code></p>
             </div>
 
             <!-- Nama Lengkap Field -->
@@ -290,19 +284,14 @@
         </div>
 
         <!-- =================================================================== -->
-        <!-- SECTION 2: PILIH KELOMPOK -->
+        <!-- 2: PILIH KELOMPOK -->
         <!-- =================================================================== -->
         <div id="stepSection_2" class="step-fade space-y-4 hidden">
           <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5">
             
             <div class="flex items-center justify-between border-b border-zinc-100 pb-3.5">
               <div>
-                <div class="flex items-center gap-2">
-                  <span class="font-mono text-xs font-bold text-zinc-400">SECTION 02</span>
-                  <span class="text-zinc-300">•</span>
-                  <span class="text-xs font-semibold text-zinc-700">Pilih 1 Kelompok</span>
-                </div>
-                <h2 class="text-base sm:text-lg font-bold text-zinc-900 mt-1">Kelompok yang Dinilai</h2>
+                <h2 class="text-base sm:text-lg font-bold text-zinc-900">Kelompok yang Dinilai</h2>
                 <p class="text-xs text-zinc-500 mt-0.5">Pilih salah satu kelompok yang sedang presentasi di depan kelas.</p>
               </div>
 
@@ -356,7 +345,7 @@
         </div>
 
         <!-- =================================================================== -->
-        <!-- SECTION 3: PENILAIAN SKOR & VOTING -->
+        <!-- 3: PENILAIAN SKOR & VOTING -->
         <!-- =================================================================== -->
         <div id="stepSection_3" class="step-fade space-y-4 hidden">
           
@@ -364,12 +353,7 @@
           <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5">
             <div class="flex items-center justify-between border-b border-zinc-100 pb-3.5">
               <div>
-                <div class="flex items-center gap-2">
-                  <span class="font-mono text-xs font-bold text-zinc-400">SECTION 03</span>
-                  <span class="text-zinc-300">•</span>
-                  <span class="text-xs font-semibold text-zinc-700">Skor Kelompok</span>
-                </div>
-                <h2 class="text-base sm:text-lg font-bold text-zinc-900 mt-1">Nilai Presentasi Kelompok</h2>
+                <h2 class="text-base sm:text-lg font-bold text-zinc-900">Nilai Presentasi Kelompok</h2>
                 <p class="text-xs text-zinc-500 mt-0.5">Penilaian keseluruhan penguasaan materi, media, dan kekompakan.</p>
               </div>
 
@@ -435,13 +419,8 @@
           <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5">
             <div class="flex items-center justify-between border-b border-zinc-100 pb-3.5">
               <div>
-                <div class="flex items-center gap-2">
-                  <span class="font-mono text-xs font-bold text-zinc-400">SECTION 03B</span>
-                  <span class="text-zinc-300">•</span>
-                  <span class="text-xs font-semibold text-zinc-700">Maks. 2 Orang</span>
-                </div>
-                <h2 class="text-base sm:text-lg font-bold text-zinc-900 mt-1">Presentator Terbaik</h2>
-                <p class="text-xs text-zinc-500 mt-0.5">Pilih pemateri dengan artikulasi, penguasaan, atau performa terbaik.</p>
+                <h2 class="text-base sm:text-lg font-bold text-zinc-900">Presentator Terbaik</h2>
+                <p class="text-xs text-zinc-500 mt-0.5">Pilih maksimal 2 pemateri dengan performa terbaik.</p>
               </div>
 
               <span id="bestPresenterCountBadge" class="text-xs font-mono font-semibold bg-zinc-100 text-zinc-700 border border-zinc-200 px-2.5 py-1 rounded">
@@ -476,18 +455,13 @@
         </div>
 
         <!-- =================================================================== -->
-        <!-- SECTION 4: EVALUASI MASUKAN & KIRIM -->
+        <!-- 4: EVALUASI MASUKAN & KIRIM -->
         <!-- =================================================================== -->
         <div id="stepSection_4" class="step-fade space-y-4 hidden">
           <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5">
             
             <div class="border-b border-zinc-100 pb-3.5">
-              <div class="flex items-center gap-2">
-                <span class="font-mono text-xs font-bold text-zinc-400">SECTION 04</span>
-                <span class="text-zinc-300">•</span>
-                <span class="text-xs font-semibold text-zinc-700">Ulasan Konstruktif</span>
-              </div>
-              <h2 class="text-base sm:text-lg font-bold text-zinc-900 mt-1">Evaluasi Kualitatif Tiap Pemateri</h2>
+              <h2 class="text-base sm:text-lg font-bold text-zinc-900">Evaluasi Kualitatif Tiap Pemateri</h2>
               <p class="text-xs text-zinc-500 mt-0.5">Tuliskan masukan dan tanggapan objektif untuk setiap anggota kelompok.</p>
             </div>
 
@@ -920,7 +894,7 @@
       const nama = document.getElementById("inputNama").value.trim();
 
       if (!validateEmailLive(email)) {
-        showToast("Masukkan email @mhs.ulm.ac.id yang valid!", "error");
+        showToast("Masukkan alamat email mahasiswa yang valid!", "error");
         document.getElementById("inputEmail").focus();
         return;
       }
@@ -1073,7 +1047,7 @@
       }
 
       if (!isDomainMatch) {
-        msgEl.textContent = "Wajib menggunakan domain @mhs.ulm.ac.id / @ulm.ac.id";
+        msgEl.textContent = "Alamat email tidak dikenali atau bukan akun resmi.";
         msgEl.className = "text-[11px] text-rose-600 font-medium";
         msgEl.classList.remove("hidden");
         iconEl.classList.add("hidden");
