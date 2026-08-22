@@ -1163,6 +1163,16 @@
       document.getElementById("loginScreen").classList.add("hidden");
       document.getElementById("adminDashboard").classList.remove("hidden");
       document.getElementById("inputApiUrl").value = getApiUrl();
+      
+      // Pulihkan Posisi Tab Admin Aktif saat Refresh
+      const hash = (window.location.hash || "").replace("#", "").toLowerCase();
+      const validTabs = ['data', 'config', 'responses', 'system'];
+      const savedTab = validTabs.includes(hash) ? hash : (localStorage.getItem("PGSD_ADMIN_ACTIVE_TAB") || "data");
+      
+      if (validTabs.includes(savedTab)) {
+        switchAdminTab(savedTab, false);
+      }
+
       fetchAdminFullData();
       
       // Process any pending sync queue left over from earlier session
@@ -1178,8 +1188,18 @@
     }
 
     // Switch Admin Tabs (4 Tabs)
-    function switchAdminTab(tabKey) {
+    function switchAdminTab(tabKey, updateHash = true) {
       currentAdminTab = tabKey;
+      localStorage.setItem("PGSD_ADMIN_ACTIVE_TAB", tabKey);
+      
+      if (updateHash) {
+        try {
+          history.replaceState(null, null, `#${tabKey}`);
+        } catch(e) {
+          window.location.hash = tabKey;
+        }
+      }
+
       const tabs = ['data', 'config', 'responses', 'system'];
       
       tabs.forEach(t => {
