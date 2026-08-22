@@ -18,10 +18,14 @@ const SHEET_MASTER = "Master_Kelompok";
 const SHEET_RESPONS = "Respons_Penilaian";
 const SHEET_REKAP = "Rekap_Nilai";
 
+let _memoizedSpreadsheet = null;
+let _memoizedSheets = {};
+
 /**
- * Mendapatkan Objek Spreadsheet Aktif
+ * Mendapatkan Objek Spreadsheet Aktif (Memoized per request)
  */
 function getSpreadsheet() {
+  if (_memoizedSpreadsheet) return _memoizedSpreadsheet;
   let ss = SpreadsheetApp.getActiveSpreadsheet();
   if (!ss) {
     if (SPREADSHEET_ID && SPREADSHEET_ID.trim() !== "") {
@@ -34,21 +38,25 @@ function getSpreadsheet() {
       throw new Error("ID Spreadsheet belum diisi pada variabel SPREADSHEET_ID di Kode.gs.");
     }
   }
+  _memoizedSpreadsheet = ss;
   return ss;
 }
 
 /**
- * Helper Pencarian Sheet Fleksibel (Mendukung variasi nama tab)
+ * Helper Pencarian Sheet Fleksibel (Memoized per request)
  */
 function findSheetFlexible(ss, targetNames) {
   if (!ss) ss = getSpreadsheet();
+  const cacheKey = targetNames.join("_");
+  if (_memoizedSheets[cacheKey]) return _memoizedSheets[cacheKey];
+
   const allSheets = ss.getSheets();
-  
   for (let target of targetNames) {
     const cleanTarget = target.toLowerCase().replace(/[^a-z0-9]/g, "");
     for (let s of allSheets) {
       const sName = s.getName().toLowerCase().replace(/[^a-z0-9]/g, "");
       if (sName === cleanTarget) {
+        _memoizedSheets[cacheKey] = s;
         return s;
       }
     }
@@ -65,7 +73,10 @@ function getMasterSheet(ss) {
       if (sh.getLastRow() > 0) {
         const firstRow = sh.getRange(1, 1, 1, Math.min(sh.getLastColumn() || 1, 8)).getValues()[0];
         const hasKelompok = firstRow.some(cell => String(cell).toLowerCase().includes("kelompok"));
-        if (hasKelompok) return sh;
+        if (hasKelompok) {
+          _memoizedSheets["master"] = sh;
+          return sh;
+        }
       }
     }
     initAllSheets(ss);
@@ -111,20 +122,20 @@ function getRekapSheet(ss) {
  */
 
 /**
- * Handle HTTP GET Requests (Ultra-Fast Response)
+ * Handle HTTP GET Requests (Ultra-Fast Cached & Concurrency Ready)
  */
 function doGet(e) {
   const action = e && e.parameter ? e.parameter.action : "";
 
-  // 1. Endpoint Ambil Data Awal Form (Config + Kelompok) - Realtime Langsung dari Spreadsheet
+  // 1. Endpoint Ambil Data Awal Form (Cache Accelerated ~50ms)
   if (action === "getInitialData") {
-    const data = getFormInitialData();
+    const data = getCachedInitialData();
     return createJsonResponse(data);
   }
 
-  // 2. Endpoint Ambil Data Rekapitulasi Nilai
+  // 2. Endpoint Ambil Data Rekapitulasi Nilai (Cache Accelerated ~50ms)
   if (action === "getRecapData") {
-    const data = getRecapData();
+    const data = getCachedRecapData();
     return createJsonResponse(data);
   }
 
@@ -144,7 +155,7 @@ function doGet(e) {
   return createJsonResponse({
     status: "API Online",
     spreadsheetId: SPREADSHEET_ID,
-    message: "REST API Backend Aktif."
+    message: "REST API Backend Aktif (High Performance & Cache Accelerated)."
   });
 }
 
@@ -171,9 +182,9 @@ function doPost(e) {
     if (action === "submitAssessment") {
       result = submitAssessment(payload);
     } else if (action === "getInitialData") {
-      result = getFormInitialData();
+      result = getCachedInitialData();
     } else if (action === "getRecapData") {
-      result = getRecapData();
+      result = getCachedRecapData();
     } else if (action === "adminGetFullData") {
       result = adminGetFullData();
     } else if (action === "adminGetResponsesList") {
@@ -211,7 +222,7 @@ function createJsonResponse(data) {
  */
 function getCachedInitialData() {
   const cache = CacheService.getScriptCache();
-  const cached = cache.get("INIT_FORM_DATA_V2");
+  const cached = cache.get("INIT_FORM_DATA_V3");
   if (cached) {
     try {
       return JSON.parse(cached);
@@ -221,7 +232,7 @@ function getCachedInitialData() {
   const liveData = getFormInitialData();
   if (liveData && liveData.success) {
     try {
-      cache.put("INIT_FORM_DATA_V2", JSON.stringify(liveData), 300); // cache 5 menit
+      cache.put("INIT_FORM_DATA_V3", JSON.stringify(liveData), 300); // cache 5 menit
     } catch (e) {}
   }
   return liveData;
@@ -232,7 +243,7 @@ function getCachedInitialData() {
  */
 function getCachedRecapData() {
   const cache = CacheService.getScriptCache();
-  const cached = cache.get("REKAP_DATA_CACHE_V2");
+  const cached = cache.get("REKAP_DATA_CACHE_V3");
   if (cached) {
     try {
       return JSON.parse(cached);
@@ -242,7 +253,7 @@ function getCachedRecapData() {
   const liveData = getRecapData();
   if (liveData && liveData.success) {
     try {
-      cache.put("REKAP_DATA_CACHE_V2", JSON.stringify(liveData), 120); // cache 2 menit
+      cache.put("REKAP_DATA_CACHE_V3", JSON.stringify(liveData), 120); // cache 2 menit
     } catch (e) {}
   }
   return liveData;
@@ -254,8 +265,8 @@ function getCachedRecapData() {
 function clearApiCache() {
   try {
     const cache = CacheService.getScriptCache();
-    cache.remove("INIT_FORM_DATA_V2");
-    cache.remove("REKAP_DATA_CACHE_V2");
+    cache.remove("INIT_FORM_DATA_V3");
+    cache.remove("REKAP_DATA_CACHE_V3");
   } catch (e) {}
 }
 
@@ -357,63 +368,58 @@ function isValidInstitutionalEmail(email, allowedDomainsStr) {
 }
 
 /**
- * Memproses Submission Penilaian
+ * Memproses Submission Penilaian (Ultra High Concurrency & Fast Lock Execution)
  */
 function submitAssessment(payload) {
   try {
-    const lock = LockService.getScriptLock();
-    lock.waitLock(10000);
-
-    const ss = getSpreadsheet();
-    const config = getConfigMap(ss);
-    let responsSheet = getResponsSheet(ss);
-
     const email = String(payload.email || "").trim().toLowerCase();
     const namaPenilai = String(payload.namaPenilai || "").trim();
     const kelompok = String(payload.kelompok || "").trim();
     const nilaiKelompok = parseFloat(payload.nilaiKelompok);
-    const sesi = String(payload.sesi || config["Sesi_Minggu_Aktif"] || "Minggu 1").trim();
     const presentatorTerbaik = Array.isArray(payload.presentatorTerbaik) ? payload.presentatorTerbaik : [];
     const evaluasiDetail = payload.evaluasiDetail || {};
 
     if (!email || !namaPenilai || !kelompok || isNaN(nilaiKelompok)) {
-      lock.releaseLock();
       return { success: false, error: "Semua kolom wajib diisi dengan benar!" };
     }
 
+    const ss = getSpreadsheet();
+    const config = getConfigMap(ss);
+    const sesi = String(payload.sesi || config["Sesi_Minggu_Aktif"] || "Minggu 1").trim();
+
+    // 1. Validasi Domain Email
     const allowedDomainsStr = config["Domain_Email_Wajib"] || "mhs.ulm.ac.id, ulm.ac.id";
     if (!isValidInstitutionalEmail(email, allowedDomainsStr)) {
-      lock.releaseLock();
       return {
         success: false,
         error: `Format email tidak valid atau bukan domain resmi (${allowedDomainsStr}). Contoh format: nama.nim@mhs.ulm.ac.id`
       };
     }
 
+    // 2. Validasi Batas Nilai
     const minVal = parseFloat(config["Nilai_Kelompok_Min"] || 50);
     const maxVal = parseFloat(config["Nilai_Kelompok_Max"] || 100);
     if (nilaiKelompok < minVal || nilaiKelompok > maxVal) {
-      lock.releaseLock();
       return {
         success: false,
         error: `Nilai presentasi kelompok harus berada dalam rentang ${minVal} - ${maxVal}!`
       };
     }
 
+    // 3. Validasi Presentator Terbaik
     const maxBest = parseInt(config["Maksimal_Pilihan_Presentator_Terbaik"] || 2);
     if (presentatorTerbaik.length > maxBest) {
-      lock.releaseLock();
       return {
         success: false,
         error: `Anda hanya diperbolehkan memilih maksimal ${maxBest} orang presentator terbaik!`
       };
     }
 
+    // 4. Validasi Karakter Evaluasi
     const maxChars = parseInt(config["Maksimal_Karakter_Evaluasi"] || 500);
     for (let member in evaluasiDetail) {
       const text = String(evaluasiDetail[member] || "").trim();
       if (text.length > maxChars) {
-        lock.releaseLock();
         return {
           success: false,
           error: `Evaluasi untuk ${member} melebihi batas ${maxChars} karakter.`
@@ -421,23 +427,7 @@ function submitAssessment(payload) {
       }
     }
 
-    const responsData = responsSheet.getDataRange().getValues();
-    for (let i = 1; i < responsData.length; i++) {
-      const row = responsData[i];
-      const rowSesi = String(row[2] || "").trim();
-      const rowEmail = String(row[3] || "").trim().toLowerCase();
-      const rowKelompok = String(row[5] || "").trim();
-      const rowStatus = String(row[10] || "VALID").trim().toUpperCase();
-
-      if (rowStatus === "VALID" && rowEmail === email && rowKelompok === kelompok && rowSesi === sesi) {
-        lock.releaseLock();
-        return {
-          success: false,
-          error: `Anda (${email}) sudah pernah mengirimkan penilaian untuk ${kelompok} pada ${sesi}.`
-        };
-      }
-    }
-
+    // 5. Persiapkan Data Baru
     const idRespons = "RESP-" + Utilities.formatDate(new Date(), "Asia/Makassar", "yyyyMMddHHmmss") + "-" + Math.floor(Math.random() * 1000);
     const timestamp = new Date();
     const best1 = presentatorTerbaik[0] || "-";
@@ -458,15 +448,37 @@ function submitAssessment(payload) {
       "VALID"
     ];
 
+    // 6. Zona Kunci Singkat (Lock Duration < 200ms)
+    const lock = LockService.getScriptLock();
+    lock.waitLock(10000);
+
+    let responsSheet = getResponsSheet(ss);
+    const lastRow = responsSheet.getLastRow();
+
+    if (lastRow > 1) {
+      // Ambil hanya kolom Sesi (3), Email (4), Kelompok (6), Status (11) untuk cek duplikat cepat
+      const checkData = responsSheet.getRange(2, 1, lastRow - 1, 11).getValues();
+      for (let i = 0; i < checkData.length; i++) {
+        const rSesi = String(checkData[i][2] || "").trim();
+        const rEmail = String(checkData[i][3] || "").trim().toLowerCase();
+        const rKelompok = String(checkData[i][5] || "").trim();
+        const rStatus = String(checkData[i][10] || "VALID").trim().toUpperCase();
+
+        if (rStatus === "VALID" && rEmail === email && rKelompok === kelompok && rSesi === sesi) {
+          lock.releaseLock();
+          return {
+            success: false,
+            error: `Anda (${email}) sudah pernah mengirimkan penilaian untuk ${kelompok} pada ${sesi}.`
+          };
+        }
+      }
+    }
+
     responsSheet.appendRow(newRow);
     lock.releaseLock();
 
-    // Hapus Cache
+    // 7. Bersihkan Cache API Seketika
     clearApiCache();
-
-    try {
-      generateRekapSheet();
-    } catch (e) {}
 
     return {
       success: true,

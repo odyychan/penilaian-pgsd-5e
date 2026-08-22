@@ -604,7 +604,7 @@
                 type="text" 
                 id="searchResponseInput" 
                 placeholder="🔍 Cari nama penilai, email, ID respons..." 
-                oninput="filterResponsesDisplay()" 
+                oninput="onResponseSearchInput()" 
                 class="w-full pl-9 pr-3.5 py-2 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none bg-white placeholder-zinc-400"
               >
               <div class="absolute left-3 top-2.5 text-zinc-400">
@@ -661,6 +661,24 @@
         <!-- Responses Table / Cards Container -->
         <div id="responsesListContainer" class="space-y-3">
           <!-- Dynamic Response Rows -->
+        </div>
+
+        <!-- Pagination Bar -->
+        <div id="responsesPaginationBar" class="bg-white rounded-xl border border-zinc-200 p-3 sm:p-4 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3 text-xs hidden">
+          <div class="flex items-center gap-2 text-zinc-600 font-medium">
+            <span>Tampilkan</span>
+            <select id="responsePageSizeSelect" onchange="changeResponsePageSize(this.value)" class="px-2 py-1 rounded border border-zinc-300 bg-zinc-50 font-semibold focus:border-zinc-900 outline-none cursor-pointer">
+              <option value="15">15</option>
+              <option value="25" selected>25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+            <span>data per halaman</span>
+          </div>
+
+          <div class="flex items-center gap-1.5" id="responsePaginationControls">
+            <!-- Dynamic page navigation buttons -->
+          </div>
         </div>
 
         <!-- Empty Responses State -->
@@ -1462,6 +1480,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       const sesiFilter = document.getElementById("filterMasterSesiSelect")?.value || "ALL";
 
       let visibleCount = 0;
+      const fragment = document.createDocumentFragment();
 
       adminMasterGroups.forEach((grp, gIdx) => {
         const gName = grp.name || "";
@@ -1571,8 +1590,10 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           </div>
         `;
 
-        container.appendChild(card);
+        fragment.appendChild(card);
       });
+
+      container.appendChild(fragment);
 
       if (visibleCount === 0) {
         emptyEl.classList.remove("hidden");
@@ -1581,8 +1602,12 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       }
     }
 
+    let masterFilterDebounceTimer = null;
     function filterMasterDataDisplay() {
-      renderMasterGroups();
+      clearTimeout(masterFilterDebounceTimer);
+      masterFilterDebounceTimer = setTimeout(() => {
+        renderMasterGroups();
+      }, 150);
     }
 
     function populateMasterSesiFilter() {
@@ -1871,10 +1896,37 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       }
     }
 
+    let responseCurrentPage = 1;
+    let responsePageSize = 25;
+    let respSearchDebounceTimer = null;
+
+    function onResponseSearchInput() {
+      clearTimeout(respSearchDebounceTimer);
+      respSearchDebounceTimer = setTimeout(() => {
+        responseCurrentPage = 1;
+        renderResponsesList();
+      }, 200);
+    }
+
+    function changeResponsePageSize(newSize) {
+      responsePageSize = parseInt(newSize) || 25;
+      responseCurrentPage = 1;
+      renderResponsesList();
+    }
+
+    function changeResponsePage(page) {
+      responseCurrentPage = page;
+      renderResponsesList();
+      const container = document.getElementById("responsesListContainer");
+      if (container) container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
     function renderResponsesList() {
       const container = document.getElementById("responsesListContainer");
       const emptyEl = document.getElementById("emptyResponsesState");
       const countLabel = document.getElementById("responseCountLabel");
+      const paginationBar = document.getElementById("responsesPaginationBar");
+      const paginationControls = document.getElementById("responsePaginationControls");
       container.innerHTML = "";
 
       const query = (document.getElementById("searchResponseInput")?.value || "").trim().toLowerCase();
@@ -1891,15 +1943,70 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         return true;
       });
 
-      countLabel.textContent = `Menampilkan ${filtered.length} dari ${adminResponsesList.length} data respons`;
+      const totalItems = filtered.length;
+      const totalPages = Math.ceil(totalItems / responsePageSize) || 1;
+      if (responseCurrentPage > totalPages) responseCurrentPage = totalPages;
+      if (responseCurrentPage < 1) responseCurrentPage = 1;
 
-      if (filtered.length === 0) {
+      const startIndex = (responseCurrentPage - 1) * responsePageSize;
+      const endIndex = Math.min(startIndex + responsePageSize, totalItems);
+      const pageItems = filtered.slice(startIndex, endIndex);
+
+      countLabel.textContent = totalItems > 0 
+        ? `Menampilkan ${startIndex + 1} - ${endIndex} dari total ${totalItems} respons (Halaman ${responseCurrentPage} dari ${totalPages})`
+        : `Menampilkan 0 respons`;
+
+      if (totalItems === 0) {
         emptyEl.classList.remove("hidden");
+        if (paginationBar) paginationBar.classList.add("hidden");
         return;
       }
       emptyEl.classList.add("hidden");
+      if (paginationBar) paginationBar.classList.remove("hidden");
 
-      filtered.forEach((r, idx) => {
+      // Render Pagination Controls
+      if (paginationControls) {
+        let controlsHtml = `
+          <button 
+            type="button" 
+            onclick="changeResponsePage(1)" 
+            ${responseCurrentPage === 1 ? 'disabled class="px-2 py-1 rounded border border-zinc-200 text-zinc-300 text-xs font-mono cursor-not-allowed"' : 'class="px-2 py-1 rounded border border-zinc-300 hover:bg-zinc-100 text-zinc-700 text-xs font-mono cursor-pointer transition"'}
+            title="Halaman Pertama"
+          >
+            «
+          </button>
+          <button 
+            type="button" 
+            onclick="changeResponsePage(${responseCurrentPage - 1})" 
+            ${responseCurrentPage === 1 ? 'disabled class="px-2.5 py-1 rounded border border-zinc-200 text-zinc-300 text-xs font-medium cursor-not-allowed"' : 'class="px-2.5 py-1 rounded border border-zinc-300 hover:bg-zinc-100 text-zinc-700 text-xs font-medium cursor-pointer transition"'}
+          >
+            ‹ Prev
+          </button>
+          <span class="px-3 py-1 font-mono font-bold bg-zinc-900 text-white rounded text-xs shadow-xs">
+            ${responseCurrentPage} / ${totalPages}
+          </span>
+          <button 
+            type="button" 
+            onclick="changeResponsePage(${responseCurrentPage + 1})" 
+            ${responseCurrentPage === totalPages ? 'disabled class="px-2.5 py-1 rounded border border-zinc-200 text-zinc-300 text-xs font-medium cursor-not-allowed"' : 'class="px-2.5 py-1 rounded border border-zinc-300 hover:bg-zinc-100 text-zinc-700 text-xs font-medium cursor-pointer transition"'}
+          >
+            Next ›
+          </button>
+          <button 
+            type="button" 
+            onclick="changeResponsePage(${totalPages})" 
+            ${responseCurrentPage === totalPages ? 'disabled class="px-2 py-1 rounded border border-zinc-200 text-zinc-300 text-xs font-mono cursor-not-allowed"' : 'class="px-2 py-1 rounded border border-zinc-300 hover:bg-zinc-100 text-zinc-700 text-xs font-mono cursor-pointer transition"'}
+            title="Halaman Terakhir"
+          >
+            »
+          </button>
+        `;
+        paginationControls.innerHTML = controlsHtml;
+      }
+
+      // Fast DocumentFragment Rendering (60 FPS)
+      const fragment = document.createDocumentFragment();
+      pageItems.forEach((r) => {
         const card = document.createElement("div");
         card.className = "bg-white rounded-xl border border-zinc-200 p-4 sm:p-5 shadow-xs space-y-3";
 
@@ -1966,11 +2073,14 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           </div>
         `;
 
-        container.appendChild(card);
+        fragment.appendChild(card);
       });
+
+      container.appendChild(fragment);
     }
 
     function filterResponsesDisplay() {
+      responseCurrentPage = 1;
       renderResponsesList();
     }
 

@@ -1140,6 +1140,8 @@
       container.classList.remove("hidden");
       container.innerHTML = "";
 
+      const fragment = document.createDocumentFragment();
+
       groupsData.forEach((grp, idx) => {
         const isCurrentlySelected = selectedGroupObj && selectedGroupObj.name === grp.name;
         const card = document.createElement("label");
@@ -1170,8 +1172,10 @@
             ${memberPills}
           </div>
         `;
-        container.appendChild(card);
+        fragment.appendChild(card);
       });
+
+      container.appendChild(fragment);
     }
 
     function onSelectGroup(groupName, idx) {
@@ -1688,35 +1692,103 @@
       spinner.classList.remove("hidden");
 
       const apiUrl = getApiUrl();
+      const fetchWithTimeout = (url, opts, ms = 12000) => {
+        return Promise.race([
+          fetch(url, opts),
+          new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), ms))
+        ]);
+      };
 
       try {
-        const response = await fetch(apiUrl, {
+        const response = await fetchWithTimeout(apiUrl, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(payload)
-        });
+        }, 12000);
 
         const res = await response.json();
         submitBtn.disabled = false;
         spinner.classList.add("hidden");
 
-        if (res.success) {
+        if (res && res.success) {
           // Bersihkan draf otomatis karena sudah resmi terkirim
           localStorage.removeItem("PGSD_FORM_DRAFT");
           showSuccessModal(payload.kelompok);
         } else {
-          showToast(res.error, "error");
+          showToast(res?.error || "Gagal mengirim penilaian.", "error");
         }
       } catch (err) {
         submitBtn.disabled = false;
         spinner.classList.add("hidden");
-        showToast("Gagal mengirim data ke Google Sheets: " + err, "error");
+        
+        // Simpan ke antrean pengiriman lokal agar data mahasiswa tidak hilang
+        savePendingSubmission(payload);
+        localStorage.removeItem("PGSD_FORM_DRAFT");
+        showSuccessModal(payload.kelompok, true);
       }
     }
 
-    function showSuccessModal(kelompokName) {
-      document.getElementById("successModalMsg").textContent = 
-        `Penilaian Anda untuk ${kelompokName} telah berhasil disimpan ke Google Sheets.`;
+    function getPendingSubmissions() {
+      try {
+        return JSON.parse(localStorage.getItem("PGSD_PENDING_SUBMISSIONS") || "[]");
+      } catch(e) {
+        return [];
+      }
+    }
+
+    function savePendingSubmission(payload) {
+      let pending = getPendingSubmissions();
+      // Hindari duplikasi payload kelompok yang sama
+      pending = pending.filter(p => !(p.payload.email === payload.email && p.payload.kelompok === payload.kelompok && p.payload.sesi === payload.sesi));
+      pending.push({ payload, timestamp: Date.now() });
+      localStorage.setItem("PGSD_PENDING_SUBMISSIONS", JSON.stringify(pending));
+    }
+
+    async function processPendingSubmissions() {
+      const pending = getPendingSubmissions();
+      if (pending.length === 0 || !navigator.onLine) return;
+
+      const apiUrl = getApiUrl();
+      const remaining = [];
+
+      for (let item of pending) {
+        try {
+          const res = await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(item.payload)
+          });
+          const data = await res.json();
+          if (!data.success && !data.error?.includes("sudah pernah mengirimkan")) {
+            remaining.push(item);
+          }
+        } catch(e) {
+          remaining.push(item);
+        }
+      }
+
+      if (remaining.length === 0) {
+        localStorage.removeItem("PGSD_PENDING_SUBMISSIONS");
+        showToast("✓ Seluruh data penilaian tersimpan offline berhasil dikirim ke Spreadsheet!", "success");
+      } else {
+        localStorage.setItem("PGSD_PENDING_SUBMISSIONS", JSON.stringify(remaining));
+      }
+    }
+
+    window.addEventListener("online", function() {
+      processPendingSubmissions();
+    });
+
+    function showSuccessModal(kelompokName, isOfflineQueued = false) {
+      const msgEl = document.getElementById("successModalMsg");
+      if (isOfflineQueued) {
+        msgEl.innerHTML = `
+          <span class="text-amber-600 font-bold block mb-1">⚠️ Tersimpan di Browser (Mode Offline)</span>
+          Koneksi internet Anda sedang lambat / terputus. Penilaian untuk <strong>${kelompokName}</strong> telah tersimpan aman dan akan otomatis dikirim ke Google Sheets begitu koneksi terhubung kembali.
+        `;
+      } else {
+        msgEl.textContent = `Penilaian Anda untuk ${kelompokName} telah berhasil disimpan ke Google Sheets.`;
+      }
       document.getElementById("successModal").classList.remove("hidden");
     }
 
@@ -2037,6 +2109,7 @@
     function renderRekapKelompok(summaryList, isPublicReviewVisible) {
       const container = document.getElementById("rekapKelompokContainer");
       container.innerHTML = "";
+      const fragment = document.createDocumentFragment();
 
       summaryList.forEach(grp => {
         const card = document.createElement("div");
@@ -2090,14 +2163,17 @@
           </div>
         `;
 
-        container.appendChild(card);
+        fragment.appendChild(card);
       });
+
+      container.appendChild(fragment);
     }
 
     // 2. Render Rekap Individu Mahasiswa (Non-Truncate Name, Top 3 Reviews + Modal Selengkapnya)
     function renderRekapIndividu(summaryList, isPublicReviewVisible) {
       const container = document.getElementById("rekapIndividuContainer");
       container.innerHTML = "";
+      const fragment = document.createDocumentFragment();
 
       let cardIndex = 0;
       const memberNimMap = {};
@@ -2211,10 +2287,11 @@
             </div>
           `;
 
-          container.appendChild(card);
+          fragment.appendChild(card);
         });
       });
 
+      container.appendChild(fragment);
       filterMahasiswaSearch();
     }
 
