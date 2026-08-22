@@ -124,7 +124,7 @@
 
         <div class="flex items-center gap-2">
           <a href="/" target="_blank" class="px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs font-medium transition flex items-center gap-1.5">
-            <span>Buka Website</span>
+            <span>Buka Form</span>
             <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
             </svg>
@@ -136,29 +136,36 @@
 
       </div>
 
-      <!-- Main Navigation 3 Tabs -->
+      <!-- Main Navigation 4 Tabs -->
       <div class="max-w-5xl mx-auto px-4 sm:px-6 pb-2.5 pt-0.5">
-        <div class="grid grid-cols-3 p-1 bg-zinc-900 rounded-lg border border-zinc-800 text-xs font-semibold">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-1 p-1 bg-zinc-900 rounded-lg border border-zinc-800 text-xs font-semibold">
           <button 
             id="adminTabBtn_data" 
             onclick="switchAdminTab('data')" 
-            class="py-1.5 px-2 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate"
+            class="py-1.5 px-2 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition flex items-center justify-center gap-1 cursor-pointer text-center truncate"
           >
-            <span>📋 Data Kelompok</span>
+            <span>📋 Kelompok</span>
           </button>
           <button 
             id="adminTabBtn_config" 
             onclick="switchAdminTab('config')" 
-            class="py-1.5 px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate"
+            class="py-1.5 px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1 cursor-pointer text-center truncate"
           >
             <span>⚙️ Konfigurasi</span>
           </button>
           <button 
+            id="adminTabBtn_responses" 
+            onclick="switchAdminTab('responses')" 
+            class="py-1.5 px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1 cursor-pointer text-center truncate"
+          >
+            <span>📝 Data Respons</span>
+          </button>
+          <button 
             id="adminTabBtn_system" 
             onclick="switchAdminTab('system')" 
-            class="py-1.5 px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate"
+            class="py-1.5 px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1 cursor-pointer text-center truncate"
           >
-            <span>🔒 Sistem & Keamanan</span>
+            <span>🔒 Sistem</span>
           </button>
         </div>
       </div>
@@ -200,7 +207,7 @@
                 id="btnSaveMasterData" 
                 class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center gap-1.5 shadow-xs"
               >
-                <span>💾 Simpan Perubahan ke Spreadsheet</span>
+                <span>💾 Simpan ke Spreadsheet</span>
               </button>
             </div>
           </div>
@@ -256,7 +263,7 @@
           <div class="flex items-center justify-between border-b border-zinc-100 pb-4">
             <div>
               <h2 class="text-base font-bold text-zinc-900">Konfigurasi Parameter Perkuliahan</h2>
-              <p class="text-xs text-zinc-500 mt-0.5">Atur sesi aktif, rentang penilaian, identitas mata kuliah, dan aturan form.</p>
+              <p class="text-xs text-zinc-500 mt-0.5">Atur sesi aktif (Minggu 1 - 16), rentang penilaian, identitas mata kuliah, dan aturan form.</p>
             </div>
             <button 
               type="submit" 
@@ -273,14 +280,30 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div class="space-y-1.5">
                 <label class="block font-semibold text-zinc-700">Sesi Minggu Aktif <span class="text-rose-500">*</span></label>
-                <input 
-                  type="text" 
+                <select 
                   id="cfg_Sesi_Minggu_Aktif" 
                   required 
-                  placeholder="Contoh: Minggu 1 (atau SEMUA)" 
-                  class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none"
+                  class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs font-semibold bg-white focus:border-zinc-900 outline-none"
                 >
-                <p class="text-[11px] text-zinc-400">Hanya kelompok dengan sesi ini yang dapat dipilih mahasiswa di form.</p>
+                  <option value="Minggu 1">Minggu 1</option>
+                  <option value="Minggu 2">Minggu 2</option>
+                  <option value="Minggu 3">Minggu 3</option>
+                  <option value="Minggu 4">Minggu 4</option>
+                  <option value="Minggu 5">Minggu 5</option>
+                  <option value="Minggu 6">Minggu 6</option>
+                  <option value="Minggu 7">Minggu 7</option>
+                  <option value="Minggu 8">Minggu 8</option>
+                  <option value="Minggu 9">Minggu 9</option>
+                  <option value="Minggu 10">Minggu 10</option>
+                  <option value="Minggu 11">Minggu 11</option>
+                  <option value="Minggu 12">Minggu 12</option>
+                  <option value="Minggu 13">Minggu 13</option>
+                  <option value="Minggu 14">Minggu 14</option>
+                  <option value="Minggu 15">Minggu 15</option>
+                  <option value="Minggu 16">Minggu 16</option>
+                  <option value="SEMUA">SEMUA (Tampilkan Semua Kelompok)</option>
+                </select>
+                <p class="text-[11px] text-zinc-400">Hanya kelompok dengan sesi minggu ini yang tampil di pilihan form mahasiswa.</p>
               </div>
 
               <div class="space-y-1.5">
@@ -424,7 +447,113 @@
       </div>
 
       <!-- ===================================================================== -->
-      <!-- TAB 3: 🔒 SISTEM, DATABASE & KEAMANAN -->
+      <!-- TAB 3: 📝 DATA RESPONS PENILAIAN & RESET PER PENGIRIMAN -->
+      <!-- ===================================================================== -->
+      <div id="adminView_responses" class="space-y-5 fade-enter hidden">
+        
+        <!-- Action & Filter Bar for Responses -->
+        <div class="bg-white rounded-xl border border-zinc-200 p-4 sm:p-5 shadow-xs space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h2 class="text-base font-bold text-zinc-900">Data Respons & Pengiriman Mahasiswa</h2>
+              <p class="text-xs text-zinc-500 mt-0.5">Kelola jawaban masuk, pantau skor, dan reset/hapus data pengiriman yang salah.</p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button 
+                type="button" 
+                onclick="fetchAdminResponsesList()" 
+                id="btnRefreshResponses"
+                class="px-3.5 py-2 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center gap-1.5 shadow-xs"
+              >
+                <span>🔄 Segarkan Data</span>
+              </button>
+              <a 
+                href="https://docs.google.com/spreadsheets/d/1D7nQcVEbmOKjgcJ6LzKeeDQPQxhAIiCELRC9eP9w7WU/edit" 
+                target="_blank" 
+                class="px-3.5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition flex items-center gap-1.5 shadow-xs"
+              >
+                <span>📊 Google Sheets</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Multi Filter Bar -->
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-2.5 pt-2 border-t border-zinc-100">
+            <div class="sm:col-span-2 relative">
+              <input 
+                type="text" 
+                id="searchResponseInput" 
+                placeholder="🔍 Cari nama penilai, email, ID respons..." 
+                oninput="filterResponsesDisplay()" 
+                class="w-full pl-9 pr-3.5 py-2 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none bg-white placeholder-zinc-400"
+              >
+              <div class="absolute left-3 top-2.5 text-zinc-400">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+              </div>
+            </div>
+
+            <div>
+              <select 
+                id="filterResponseGroupSelect" 
+                onchange="filterResponsesDisplay()" 
+                class="w-full px-3 py-2 rounded-lg border border-zinc-300 text-xs font-medium bg-white focus:border-zinc-900 outline-none"
+              >
+                <option value="ALL">Semua Kelompok</option>
+              </select>
+            </div>
+
+            <div>
+              <select 
+                id="filterResponseSesiSelect" 
+                onchange="filterResponsesDisplay()" 
+                class="w-full px-3 py-2 rounded-lg border border-zinc-300 text-xs font-medium bg-white focus:border-zinc-900 outline-none"
+              >
+                <option value="ALL">Semua Sesi Minggu</option>
+                <option value="Minggu 1">Minggu 1</option>
+                <option value="Minggu 2">Minggu 2</option>
+                <option value="Minggu 3">Minggu 3</option>
+                <option value="Minggu 4">Minggu 4</option>
+                <option value="Minggu 5">Minggu 5</option>
+                <option value="Minggu 6">Minggu 6</option>
+                <option value="Minggu 7">Minggu 7</option>
+                <option value="Minggu 8">Minggu 8</option>
+                <option value="Minggu 9">Minggu 9</option>
+                <option value="Minggu 10">Minggu 10</option>
+                <option value="Minggu 11">Minggu 11</option>
+                <option value="Minggu 12">Minggu 12</option>
+                <option value="Minggu 13">Minggu 13</option>
+                <option value="Minggu 14">Minggu 14</option>
+                <option value="Minggu 15">Minggu 15</option>
+                <option value="Minggu 16">Minggu 16</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Counter info -->
+          <div class="flex items-center justify-between text-xs text-zinc-500 pt-1">
+            <span id="responseCountLabel">Menampilkan 0 respons</span>
+            <span class="text-[11px] text-zinc-400 italic">Klik tombol 'Hapus/Reset' pada baris untuk membatalkan pengiriman</span>
+          </div>
+        </div>
+
+        <!-- Responses Table / Cards Container -->
+        <div id="responsesListContainer" class="space-y-3">
+          <!-- Dynamic Response Rows -->
+        </div>
+
+        <!-- Empty Responses State -->
+        <div id="emptyResponsesState" class="hidden p-8 text-center bg-white rounded-xl border border-zinc-200 space-y-2">
+          <p class="text-sm font-semibold text-zinc-800">Belum ada respons penilaian yang cocok.</p>
+          <p class="text-xs text-zinc-500">Data penilaian akan otomatis muncul di sini begitu mahasiswa mengirim formulir.</p>
+        </div>
+
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- TAB 4: 🔒 SISTEM, DATABASE & KEAMANAN -->
       <!-- ===================================================================== -->
       <div id="adminView_system" class="space-y-5 fade-enter hidden">
         
@@ -488,36 +617,26 @@
           </div>
         </div>
 
-        <!-- CARD 2: RESPONS & DATABASE ACTIONS -->
+        <!-- CARD 2: DATABASE & MASS RESET -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           
-          <!-- Database Link & Reset -->
+          <!-- Database Link & Reset All -->
           <div class="bg-white rounded-xl border border-zinc-200 p-5 shadow-xs flex flex-col justify-between space-y-4">
             <div>
               <div class="text-xs font-semibold text-zinc-400 uppercase font-mono">Data Respons Masuk</div>
               <div class="flex items-center justify-between mt-1">
                 <h3 class="text-sm font-bold text-zinc-900">Total Respons: <span id="labelTotalResponses" class="font-mono text-emerald-600">0 Data</span></h3>
               </div>
-              <p class="text-xs text-zinc-500 mt-1">Buka Google Sheets untuk melihat raw respons atau kosongkan data respons jika memulai sesi baru.</p>
+              <p class="text-xs text-zinc-500 mt-1">Kosongkan seluruh data respons penilaian sekaligus jika memulai tahun ajaran atau sesi baru.</p>
             </div>
 
             <div class="space-y-2 pt-2 border-t border-zinc-100">
-              <a 
-                href="https://docs.google.com/spreadsheets/d/1D7nQcVEbmOKjgcJ6LzKeeDQPQxhAIiCELRC9eP9w7WU/edit" 
-                target="_blank" 
-                class="w-full py-2 px-3 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-semibold transition flex items-center justify-center gap-1.5"
-              >
-                <span>📊 Buka Google Spreadsheet</span>
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                </svg>
-              </a>
               <button 
                 type="button" 
                 onclick="openResetResponsesConfirmModal()" 
                 class="w-full py-2 px-3 rounded-lg border border-rose-200 hover:bg-rose-50 text-rose-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5"
               >
-                <span>🗑️ Reset Data Respons Penilaian</span>
+                <span>🗑️ Kosongkan Seluruh Respons</span>
               </button>
             </div>
           </div>
@@ -613,13 +732,24 @@
 
         <div class="space-y-1">
           <label class="block font-semibold text-zinc-700">Sesi Tampil <span class="text-rose-500">*</span></label>
-          <input 
-            type="text" 
-            id="groupModalSesi" 
-            required 
-            placeholder="Contoh: Minggu 1" 
-            class="w-full px-3 py-2 rounded-lg border border-zinc-300 focus:border-zinc-900 outline-none"
-          >
+          <select id="groupModalSesi" class="w-full px-3 py-2 rounded-lg border border-zinc-300 bg-white focus:border-zinc-900 outline-none font-semibold">
+            <option value="Minggu 1">Minggu 1</option>
+            <option value="Minggu 2">Minggu 2</option>
+            <option value="Minggu 3">Minggu 3</option>
+            <option value="Minggu 4">Minggu 4</option>
+            <option value="Minggu 5">Minggu 5</option>
+            <option value="Minggu 6">Minggu 6</option>
+            <option value="Minggu 7">Minggu 7</option>
+            <option value="Minggu 8">Minggu 8</option>
+            <option value="Minggu 9">Minggu 9</option>
+            <option value="Minggu 10">Minggu 10</option>
+            <option value="Minggu 11">Minggu 11</option>
+            <option value="Minggu 12">Minggu 12</option>
+            <option value="Minggu 13">Minggu 13</option>
+            <option value="Minggu 14">Minggu 14</option>
+            <option value="Minggu 15">Minggu 15</option>
+            <option value="Minggu 16">Minggu 16</option>
+          </select>
         </div>
 
         <div class="space-y-1">
@@ -693,7 +823,30 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- ⚠️ MODAL: KONFIRMASI RESET RESPONS -->
+  <!-- 👁️ MODAL: DETAIL ULASAN KUALITATIF RESPONS -->
+  <!-- ========================================================================= -->
+  <div id="responseDetailModal" class="hidden fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-lg w-full p-5 sm:p-6 space-y-4 shadow-xl border border-zinc-200 fade-enter">
+      <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
+        <div>
+          <h3 class="text-sm font-bold text-zinc-900">Catatan Masukan Penilai</h3>
+          <p class="text-[11px] text-zinc-500" id="responseDetailMeta">Penilai • Kelompok</p>
+        </div>
+        <button type="button" onclick="closeResponseDetailModal()" class="w-7 h-7 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center text-sm font-bold cursor-pointer">✕</button>
+      </div>
+
+      <div id="responseDetailList" class="space-y-3 max-h-72 overflow-y-auto custom-scrollbar pr-1 text-xs">
+        <!-- List of qualitative notes per student -->
+      </div>
+
+      <div class="pt-2 flex justify-end border-t border-zinc-100">
+        <button type="button" onclick="closeResponseDetailModal()" class="px-4 py-2 rounded-lg bg-zinc-900 text-white text-xs font-semibold">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- ⚠️ MODAL: KONFIRMASI RESET SELURUH RESPONS -->
   <!-- ========================================================================= -->
   <div id="resetConfirmModal" class="hidden fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white rounded-xl max-w-sm w-full p-6 text-center space-y-4 shadow-xl border border-zinc-200 fade-enter">
@@ -701,9 +854,9 @@
         ⚠️
       </div>
       <div>
-        <h3 class="text-base font-bold text-zinc-900">Reset Seluruh Respons?</h3>
+        <h3 class="text-base font-bold text-zinc-900">Kosongkan Seluruh Respons?</h3>
         <p class="text-xs text-zinc-500 leading-relaxed mt-1">
-          Tindakan ini akan mengosongkan seluruh data penilaian mahasiswa yang telah masuk di Spreadsheet. Tindakan ini tidak dapat dibatalkan.
+          Tindakan ini akan menghapus seluruh data pengiriman penilaian di Google Spreadsheet. Tindakan ini tidak dapat dibatalkan.
         </p>
       </div>
       <div class="pt-2 flex flex-col gap-2">
@@ -712,7 +865,7 @@
           id="btnExecuteReset"
           class="w-full py-2.5 px-4 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold transition active:scale-98 cursor-pointer shadow-xs"
         >
-          Ya, Kosongkan Data Respons
+          Ya, Kosongkan Semua Data
         </button>
         <button 
           onclick="closeResetResponsesConfirmModal()" 
@@ -733,6 +886,7 @@
 
     let adminMasterGroups = [];
     let adminAppConfig = {};
+    let adminResponsesList = [];
     let currentAdminTab = 'data';
 
     function getAdminPassword() {
@@ -780,10 +934,10 @@
       window.location.reload();
     }
 
-    // Switch Admin Tabs
+    // Switch Admin Tabs (4 Tabs)
     function switchAdminTab(tabKey) {
       currentAdminTab = tabKey;
-      const tabs = ['data', 'config', 'system'];
+      const tabs = ['data', 'config', 'responses', 'system'];
       
       tabs.forEach(t => {
         const view = document.getElementById(`adminView_${t}`);
@@ -791,12 +945,16 @@
         
         if (t === tabKey) {
           view.classList.remove("hidden");
-          btn.className = "py-1.5 px-2 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate font-bold";
+          btn.className = "py-1.5 px-2 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition flex items-center justify-center gap-1 cursor-pointer text-center truncate font-bold";
         } else {
           view.classList.add("hidden");
-          btn.className = "py-1.5 px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate";
+          btn.className = "py-1.5 px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1 cursor-pointer text-center truncate";
         }
       });
+
+      if (tabKey === 'responses' && adminResponsesList.length === 0) {
+        fetchAdminResponsesList();
+      }
     }
 
     // =========================================================================
@@ -805,7 +963,7 @@
     async function fetchAdminFullData() {
       const apiUrl = getApiUrl();
       try {
-        const response = await fetch(`${apiUrl}?action=adminGetFullData`);
+        const response = await fetch(`${apiUrl}?action=adminGetFullData&_t=${Date.now()}`);
         const res = await response.json();
 
         if (res.success) {
@@ -816,6 +974,7 @@
           renderMasterGroups();
           populateConfigFormValues();
           populateMasterSesiFilter();
+          populateResponseGroupFilter();
         } else {
           showAdminToast("Gagal mengambil data dari Google Sheets: " + res.error, "error");
         }
@@ -1032,6 +1191,7 @@
       closeGroupModal();
       renderMasterGroups();
       populateMasterSesiFilter();
+      populateResponseGroupFilter();
     }
 
     function deleteGroup(gIdx) {
@@ -1042,6 +1202,7 @@
         adminMasterGroups.splice(gIdx, 1);
         renderMasterGroups();
         populateMasterSesiFilter();
+        populateResponseGroupFilter();
         showAdminToast(`Kelompok '${grp.name}' dihapus dari daftar lokal. Klik 'Simpan ke Spreadsheet' untuk menerapkan.`, "warning");
       }
     }
@@ -1094,7 +1255,7 @@
         adminMasterGroups[gIdx].members[mIdx] = { name, nim, status };
         showAdminToast(`Data '${name}' diperbarui.`, "info");
       } else {
-        adminMasterGroups[gIdx].members.push({ name, nim, status });
+        adminMasterGroups.push ? adminMasterGroups[gIdx].members.push({ name, nim, status }) : null;
         showAdminToast(`'${name}' ditambahkan ke ${adminMasterGroups[gIdx].name}.`, "info");
       }
 
@@ -1135,10 +1296,9 @@
 
         const res = await response.json();
         btn.disabled = false;
-        btn.innerHTML = `<span>💾 Simpan Perubahan ke Spreadsheet</span>`;
+        btn.innerHTML = `<span>💾 Simpan ke Spreadsheet</span>`;
 
         if (res.success) {
-          // Bersihkan cache lokal browser
           localStorage.removeItem("PGSD_CACHE_GROUPS");
           localStorage.removeItem("PGSD_CACHE_CONFIG");
           showAdminToast(res.message || "Data master berhasil disimpan ke Spreadsheet!", "success");
@@ -1147,7 +1307,7 @@
         }
       } catch (err) {
         btn.disabled = false;
-        btn.innerHTML = `<span>💾 Simpan Perubahan ke Spreadsheet</span>`;
+        btn.innerHTML = `<span>💾 Simpan ke Spreadsheet</span>`;
         showAdminToast("Gagal terhubung ke API: " + err, "error");
       }
     }
@@ -1224,7 +1384,240 @@
     }
 
     // =========================================================================
-    // 🔒 TAB 3 LOGIC: SISTEM & KEAMANAN
+    // 📝 TAB 3 LOGIC: DATA RESPONS PENILAIAN & RESET PER PENGIRIMAN
+    // =========================================================================
+    function populateResponseGroupFilter() {
+      const select = document.getElementById("filterResponseGroupSelect");
+      if (!select) return;
+      const cur = select.value;
+      select.innerHTML = '<option value="ALL">Semua Kelompok</option>';
+
+      const groupSet = new Set();
+      adminMasterGroups.forEach(g => groupSet.add(g.name));
+      adminResponsesList.forEach(r => groupSet.add(r.kelompok));
+
+      groupSet.forEach(gName => {
+        if (gName) {
+          const opt = document.createElement("option");
+          opt.value = gName;
+          opt.textContent = gName;
+          select.appendChild(opt);
+        }
+      });
+      select.value = cur || "ALL";
+    }
+
+    async function fetchAdminResponsesList() {
+      const btn = document.getElementById("btnRefreshResponses");
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<span>⏳ Memuat...</span>`;
+      }
+
+      const apiUrl = getApiUrl();
+      try {
+        const response = await fetch(`${apiUrl}?action=adminGetResponsesList&_t=${Date.now()}`);
+        const res = await response.json();
+
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = `<span>🔄 Segarkan Data</span>`;
+        }
+
+        if (res.success) {
+          adminResponsesList = res.responses || [];
+          document.getElementById("labelTotalResponses").textContent = `${adminResponsesList.length} Data`;
+          populateResponseGroupFilter();
+          renderResponsesList();
+          showAdminToast(`Berhasil memuat ${adminResponsesList.length} data respons.`, "info");
+        } else {
+          showAdminToast("Gagal memuat daftar respons: " + res.error, "error");
+        }
+      } catch (err) {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = `<span>🔄 Segarkan Data</span>`;
+        }
+        showAdminToast("Koneksi respons error: " + err, "error");
+      }
+    }
+
+    function renderResponsesList() {
+      const container = document.getElementById("responsesListContainer");
+      const emptyEl = document.getElementById("emptyResponsesState");
+      const countLabel = document.getElementById("responseCountLabel");
+      container.innerHTML = "";
+
+      const query = (document.getElementById("searchResponseInput")?.value || "").trim().toLowerCase();
+      const groupFilter = document.getElementById("filterResponseGroupSelect")?.value || "ALL";
+      const sesiFilter = document.getElementById("filterResponseSesiSelect")?.value || "ALL";
+
+      let filtered = adminResponsesList.filter(item => {
+        if (groupFilter !== "ALL" && item.kelompok !== groupFilter) return false;
+        if (sesiFilter !== "ALL" && item.sesi !== sesiFilter) return false;
+        if (query) {
+          const str = `${item.idRespons} ${item.namaPenilai} ${item.email} ${item.kelompok} ${item.sesi}`.toLowerCase();
+          if (!str.includes(query)) return false;
+        }
+        return true;
+      });
+
+      countLabel.textContent = `Menampilkan ${filtered.length} dari ${adminResponsesList.length} data respons`;
+
+      if (filtered.length === 0) {
+        emptyEl.classList.remove("hidden");
+        return;
+      }
+      emptyEl.classList.add("hidden");
+
+      filtered.forEach((r, idx) => {
+        const card = document.createElement("div");
+        card.className = "bg-white rounded-xl border border-zinc-200 p-4 sm:p-5 shadow-xs space-y-3";
+
+        let evalNotesCount = 0;
+        try {
+          const evalObj = JSON.parse(r.evaluasiDetail || "{}");
+          evalNotesCount = Object.keys(evalObj).filter(k => (evalObj[k] || "").trim().length > 0).length;
+        } catch (e) {}
+
+        card.innerHTML = `
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-100 pb-3">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-zinc-100 text-zinc-700 border border-zinc-200">
+                ${r.idRespons}
+              </span>
+              <span class="text-xs text-zinc-500 font-mono">${r.timestamp}</span>
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-zinc-900 text-white">
+                ${r.sesi}
+              </span>
+            </div>
+
+            <!-- Single Delete / Reset Action Button -->
+            <button 
+              type="button" 
+              onclick="deleteSingleResponse('${r.idRespons}', '${r.namaPenilai}', '${r.kelompok}')" 
+              class="px-3 py-1.5 rounded-lg border border-rose-200 hover:bg-rose-50 text-rose-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 self-start sm:self-auto"
+            >
+              <span>🗑️ Hapus / Reset Respons Ini</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            
+            <!-- Col 1: Penilai -->
+            <div class="space-y-1 bg-zinc-50 p-2.5 rounded-lg border border-zinc-200/70">
+              <span class="text-[10px] font-semibold text-zinc-400 uppercase font-mono">Identitas Penilai</span>
+              <p class="font-bold text-zinc-900">${r.namaPenilai}</p>
+              <p class="text-[11px] text-zinc-500 font-mono truncate">${r.email}</p>
+            </div>
+
+            <!-- Col 2: Kelompok & Nilai -->
+            <div class="space-y-1 bg-zinc-50 p-2.5 rounded-lg border border-zinc-200/70">
+              <span class="text-[10px] font-semibold text-zinc-400 uppercase font-mono">Kelompok Dinilai & Skor</span>
+              <p class="font-bold text-zinc-900">${r.kelompok}</p>
+              <p class="text-xs font-mono font-bold text-emerald-600">Nilai: ${r.nilaiKelompok} / 100</p>
+            </div>
+
+            <!-- Col 3: Presentator Terbaik & Ulasan -->
+            <div class="space-y-1 bg-zinc-50 p-2.5 rounded-lg border border-zinc-200/70 flex flex-col justify-between">
+              <div>
+                <span class="text-[10px] font-semibold text-zinc-400 uppercase font-mono">Presentator Terbaik</span>
+                <p class="font-medium text-zinc-800 truncate">${r.best1 || '-'}${r.best2 && r.best2 !== '-' ? ', ' + r.best2 : ''}</p>
+              </div>
+
+              <button 
+                type="button" 
+                onclick="viewResponseNotesDetail('${encodeURIComponent(r.namaPenilai)}', '${encodeURIComponent(r.kelompok)}', '${encodeURIComponent(r.evaluasiDetail)}')" 
+                class="mt-1 text-[11px] font-semibold text-zinc-700 hover:text-zinc-950 underline self-start cursor-pointer"
+              >
+                Lihat Catatan Evaluasi (${evalNotesCount} ulasan) →
+              </button>
+            </div>
+
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    function filterResponsesDisplay() {
+      renderResponsesList();
+    }
+
+    function viewResponseNotesDetail(encodedName, encodedGroup, encodedEval) {
+      const name = decodeURIComponent(encodedName);
+      const group = decodeURIComponent(encodedGroup);
+      const evalDetail = decodeURIComponent(encodedEval);
+
+      document.getElementById("responseDetailMeta").textContent = `Penilai: ${name} • Kelompok: ${group}`;
+      const listContainer = document.getElementById("responseDetailList");
+      listContainer.innerHTML = "";
+
+      try {
+        const obj = JSON.parse(evalDetail || "{}");
+        const keys = Object.keys(obj);
+        if (keys.length === 0) {
+          listContainer.innerHTML = `<p class="text-xs text-zinc-400 italic p-3 text-center bg-zinc-50 rounded-lg">Tidak ada catatan evaluasi.</p>`;
+        } else {
+          keys.forEach(k => {
+            const ulasan = obj[k] || "-";
+            const row = document.createElement("div");
+            row.className = "p-3 bg-zinc-50 border border-zinc-200/80 rounded-lg space-y-1";
+            row.innerHTML = `
+              <p class="font-bold text-zinc-900">${k}</p>
+              <p class="text-zinc-600 leading-relaxed italic">"${ulasan}"</p>
+            `;
+            listContainer.appendChild(row);
+          });
+        }
+      } catch (e) {
+        listContainer.innerHTML = `<p class="text-xs text-zinc-400 italic p-3 text-center">Format data ulasan rusak.</p>`;
+      }
+
+      document.getElementById("responseDetailModal").classList.remove("hidden");
+    }
+
+    function closeResponseDetailModal() {
+      document.getElementById("responseDetailModal").classList.add("hidden");
+    }
+
+    async function deleteSingleResponse(idRespons, penilaiName, kelompokName) {
+      if (!confirm(`Hapus dan reset pengiriman penilaian '${idRespons}' oleh ${penilaiName} untuk ${kelompokName}?\n\nTindakan ini akan mengizinkan mahasiswa tersebut mengisi ulang penilaian.`)) {
+        return;
+      }
+
+      const apiUrl = getApiUrl();
+      const payload = {
+        action: "adminDeleteSingleResponse",
+        idRespons: idRespons
+      };
+
+      try {
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+
+        const res = await response.json();
+        if (res.success) {
+          localStorage.removeItem("PGSD_CACHE_REKAP");
+          showAdminToast(res.message || `Respons '${idRespons}' berhasil dihapus!`, "success");
+          // Hapus dari state lokal
+          adminResponsesList = adminResponsesList.filter(r => r.idRespons !== idRespons);
+          document.getElementById("labelTotalResponses").textContent = `${adminResponsesList.length} Data`;
+          renderResponsesList();
+        } else {
+          showAdminToast(res.error || "Gagal menghapus respons.", "error");
+        }
+      } catch (err) {
+        showAdminToast("Koneksi gagal: " + err, "error");
+      }
+    }
+
+    // =========================================================================
+    // 🔒 TAB 4 LOGIC: SISTEM & KEAMANAN
     // =========================================================================
     function saveApiUrl() {
       const val = document.getElementById("inputApiUrl").value.trim();
@@ -1250,7 +1643,7 @@
       const startTime = performance.now();
 
       try {
-        const response = await fetch(`${apiUrl}?action=adminGetFullData`);
+        const response = await fetch(`${apiUrl}?action=adminGetFullData&_t=${Date.now()}`);
         const result = await response.json();
         const endTime = performance.now();
         const latency = Math.round(endTime - startTime);
@@ -1325,18 +1718,21 @@
 
         const res = await response.json();
         btn.disabled = false;
-        btn.textContent = "Ya, Kosongkan Data Respons";
+        btn.textContent = "Ya, Kosongkan Semua Data";
         closeResetResponsesConfirmModal();
 
         if (res.success) {
           purgeLocalCache();
+          adminResponsesList = [];
+          renderResponsesList();
+          document.getElementById("labelTotalResponses").textContent = "0 Data";
           showAdminToast("Data respons penilaian berhasil dikosongkan.", "success");
         } else {
           showAdminToast(res.error || "Gagal mengosongkan data respons.", "error");
         }
       } catch (err) {
         btn.disabled = false;
-        btn.textContent = "Ya, Kosongkan Data Respons";
+        btn.textContent = "Ya, Kosongkan Semua Data";
         closeResetResponsesConfirmModal();
         showAdminToast("Koneksi gagal: " + err, "error");
       }

@@ -49,15 +49,15 @@ function getSpreadsheet() {
 function doGet(e) {
   const action = e && e.parameter ? e.parameter.action : "";
 
-  // 1. Endpoint Ambil Data Awal Form (Config + Kelompok)
+  // 1. Endpoint Ambil Data Awal Form (Config + Kelompok) - Realtime Langsung dari Spreadsheet
   if (action === "getInitialData") {
-    const data = getCachedInitialData();
+    const data = getFormInitialData();
     return createJsonResponse(data);
   }
 
   // 2. Endpoint Ambil Data Rekapitulasi Nilai
   if (action === "getRecapData") {
-    const data = getCachedRecapData();
+    const data = getRecapData();
     return createJsonResponse(data);
   }
 
@@ -67,7 +67,13 @@ function doGet(e) {
     return createJsonResponse(data);
   }
 
-  // 4. Fallback Info
+  // 4. Endpoint Admin: Ambil Seluruh Daftar Respons Penilaian
+  if (action === "adminGetResponsesList") {
+    const data = adminGetResponsesList();
+    return createJsonResponse(data);
+  }
+
+  // 5. Fallback Info
   return createJsonResponse({
     status: "API Online",
     spreadsheetId: SPREADSHEET_ID,
@@ -98,15 +104,19 @@ function doPost(e) {
     if (action === "submitAssessment") {
       result = submitAssessment(payload);
     } else if (action === "getInitialData") {
-      result = getCachedInitialData();
+      result = getFormInitialData();
     } else if (action === "getRecapData") {
-      result = getCachedRecapData();
+      result = getRecapData();
     } else if (action === "adminGetFullData") {
       result = adminGetFullData();
+    } else if (action === "adminGetResponsesList") {
+      result = adminGetResponsesList();
     } else if (action === "adminSaveMasterData") {
       result = adminSaveMasterData(payload);
     } else if (action === "adminSaveConfig") {
       result = adminSaveConfig(payload);
+    } else if (action === "adminDeleteSingleResponse") {
+      result = adminDeleteSingleResponse(payload);
     } else if (action === "adminResetResponses") {
       result = adminResetResponses(payload);
     }
@@ -230,12 +240,13 @@ function getFormInitialData() {
       const sesi = String(row[1] || "").trim();
       const nim = String(row[2] || "").trim();
       const nama = String(row[3] || "").trim();
-      const status = String(row[4] || "").trim().toUpperCase();
+      const status = String(row[4] || "AKTIF").trim().toUpperCase();
 
       if (!kelompok || !nama) continue;
-      if (status !== "AKTIF") continue;
+      if (status === "NONAKTIF") continue;
 
-      if (sesiAktif !== "SEMUA" && sesiAktif !== "" && sesi.toUpperCase() !== sesiAktif) {
+      const sesiRow = sesi.trim().toUpperCase();
+      if (sesiAktif !== "SEMUA" && sesiAktif !== "" && sesiRow !== sesiAktif) {
         continue;
       }
 
@@ -886,5 +897,122 @@ function adminResetResponses(payload) {
     };
   } catch (err) {
     return { success: false, error: "Gagal reset respons: " + err.toString() };
+  }
+}
+
+/**
+ * Mengambil Seluruh Daftar Respons Penilaian untuk Admin (Tabel Filterable)
+ */
+function adminGetResponsesList() {
+  try {
+    const ss = getSpreadsheet();
+    let responsSheet = ss.getSheetByName(SHEET_RESPONS);
+
+    if (!responsSheet || responsSheet.getLastRow() <= 1) {
+      return { success: true, responses: [] };
+    }
+
+    const data = responsSheet.getDataRange().getValues();
+    const responses = [];
+
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      const idRespons = String(row[0] || ("RESP-ROW-" + (i + 1))).trim();
+      const rawDate = row[1];
+      let formattedDate = "-";
+      if (rawDate instanceof Date) {
+        formattedDate = Utilities.formatDate(rawDate, "Asia/Makassar", "dd MMM yyyy HH:mm:ss");
+      } else if (rawDate) {
+        formattedDate = String(rawDate);
+      }
+
+      const sesi = String(row[2] || "").trim();
+      const email = String(row[3] || "").trim();
+      const namaPenilai = String(row[4] || "").trim();
+      const kelompok = String(row[5] || "").trim();
+      const nilaiKelompok = row[6] !== undefined ? row[6] : "-";
+      const best1 = String(row[7] || "-").trim();
+      const best2 = String(row[8] || "-").trim();
+      const evaluasiJsonStr = String(row[9] || "{}").trim();
+      const status = String(row[10] || "VALID").trim().toUpperCase();
+
+      if (!email && !namaPenilai && !kelompok) continue;
+
+      responses.push({
+        rowIndex: i + 1,
+        idRespons: idRespons,
+        timestamp: formattedDate,
+        sesi: sesi,
+        email: email,
+        namaPenilai: namaPenilai,
+        kelompok: kelompok,
+        nilaiKelompok: nilaiKelompok,
+        best1: best1,
+        best2: best2,
+        evaluasiDetail: evaluasiJsonStr,
+        status: status
+      });
+    }
+
+    // Urutkan dari yang paling baru (Newest first)
+    return {
+      success: true,
+      responses: responses.reverse()
+    };
+  } catch (err) {
+    return { success: false, error: "Gagal mengambil daftar respons: " + err.toString() };
+  }
+}
+
+/**
+ * Menghapus / Mereset 1 Respons Penilaian Tertentu
+ */
+function adminDeleteSingleResponse(payload) {
+  try {
+    const lock = LockService.getScriptLock();
+    lock.waitLock(10000);
+
+    const ss = getSpreadsheet();
+    let responsSheet = ss.getSheetByName(SHEET_RESPONS);
+
+    if (!responsSheet || responsSheet.getLastRow() <= 1) {
+      lock.releaseLock();
+      return { success: false, error: "Data respons kosong." };
+    }
+
+    const idTarget = String(payload.idRespons || "").trim();
+    const data = responsSheet.getDataRange().getValues();
+    let targetRow = -1;
+
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][0] || "").trim() === idTarget) {
+        targetRow = i + 1; // 1-based row
+        break;
+      }
+    }
+
+    if (targetRow === -1 && payload.rowIndex) {
+      targetRow = parseInt(payload.rowIndex);
+    }
+
+    if (targetRow > 1 && targetRow <= responsSheet.getLastRow()) {
+      responsSheet.deleteRow(targetRow);
+      lock.releaseLock();
+      clearApiCache();
+
+      try {
+        generateRekapSheet();
+      } catch (e) {}
+
+      return {
+        success: true,
+        message: `Respons ID '${idTarget}' berhasil dihapus dan rekap nilai otomatis diperbarui.`
+      };
+    } else {
+      lock.releaseLock();
+      return { success: false, error: "Data respons tidak ditemukan di spreadsheet." };
+    }
+  } catch (err) {
+    return { success: false, error: "Gagal menghapus respons: " + err.toString() };
   }
 }

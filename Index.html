@@ -804,7 +804,7 @@
         document.getElementById("groupsContainer").classList.add("hidden");
       }
 
-      const fetchWithTimeout = (url, ms = 4500) => {
+      const fetchWithTimeout = (url, ms = 7000) => {
         return Promise.race([
           fetch(url),
           new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), ms))
@@ -812,10 +812,10 @@
       };
 
       try {
-        const response = await fetchWithTimeout(`${apiUrl}?action=getInitialData`, 4500);
+        const response = await fetchWithTimeout(`${apiUrl}?action=getInitialData&_t=${Date.now()}`, 7000);
         const result = await response.json();
 
-        if (result.success && result.groups && result.groups.length > 0) {
+        if (result && result.success) {
           appConfig = result.config || {};
           groupsData = result.groups || [];
           
