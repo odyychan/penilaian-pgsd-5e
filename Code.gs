@@ -1,6 +1,6 @@
 /**
  * ==============================================================================
- * BACKEND REST API - SISTEM PENILAIAN PRESENTASI PGSD KELAS 5E
+ * BACKEND REST API - SISTEM PENILAIAN PRESENTASI PGSD KELAS 5E (ULTRA FAST)
  * Spreadsheet ID: 1D7nQcVEbmOKjgcJ6LzKeeDQPQxhAIiCELRC9eP9w7WU
  * Mata Kuliah: Bimbingan Konseling di SD
  * Dosen Pengampu: Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.
@@ -28,7 +28,7 @@ function getSpreadsheet() {
       try {
         ss = SpreadsheetApp.openById(SPREADSHEET_ID.trim());
       } catch (e) {
-        throw new Error("Gagal membuka spreadsheet dengan ID '" + SPREADSHEET_ID + "'. Pastikan ID benar dan akun Google Anda memiliki akses.");
+        throw new Error("Gagal membuka spreadsheet dengan ID '" + SPREADSHEET_ID + "'.");
       }
     } else {
       throw new Error("ID Spreadsheet belum diisi pada variabel SPREADSHEET_ID di Kode.gs.");
@@ -39,19 +39,19 @@ function getSpreadsheet() {
 
 /**
  * ==============================================================================
- * 🌐 REST API ENDPOINTS (GET & POST) UNTUK NETLIFY & WEB FRONTEND
+ * 🌐 REST API ENDPOINTS (GET & POST) DENGAN CACHE ACCELERATION
  * ==============================================================================
  */
 
 /**
- * Handle HTTP GET Requests dari Netlify / Browser
+ * Handle HTTP GET Requests (Ultra-Fast Response)
  */
 function doGet(e) {
   const action = e && e.parameter ? e.parameter.action : "";
 
   // 1. Endpoint Ambil Data Awal Form (Config + Kelompok)
   if (action === "getInitialData") {
-    const data = getFormInitialData();
+    const data = getCachedInitialData();
     return createJsonResponse(data);
   }
 
@@ -61,32 +61,16 @@ function doGet(e) {
     return createJsonResponse(data);
   }
 
-  // 3. Fallback jika dibuka langsung di browser
-  try {
-    let template = HtmlService.createTemplateFromFile("index");
-    return template.evaluate()
-      .setTitle("Penilaian Presentasi Kelas 5E PGSD 2026")
-      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
-      .addMetaTag("viewport", "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no");
-  } catch (err1) {
-    try {
-      let template2 = HtmlService.createTemplateFromFile("Index");
-      return template2.evaluate()
-        .setTitle("Penilaian Presentasi Kelas 5E PGSD 2026")
-        .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
-        .addMetaTag("viewport", "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no");
-    } catch (err2) {
-      return createJsonResponse({
-        status: "API Online",
-        spreadsheetId: SPREADSHEET_ID,
-        message: "REST API Backend Aktif. Silakan gunakan parameter ?action=getInitialData atau ?action=getRecapData."
-      });
-    }
-  }
+  // 3. Fallback Info
+  return createJsonResponse({
+    status: "API Online",
+    spreadsheetId: SPREADSHEET_ID,
+    message: "REST API Backend Aktif."
+  });
 }
 
 /**
- * Handle HTTP POST Requests dari Netlify Frontend
+ * Handle HTTP POST Requests dari Frontend
  */
 function doPost(e) {
   try {
@@ -108,7 +92,7 @@ function doPost(e) {
     if (action === "submitAssessment") {
       result = submitAssessment(payload);
     } else if (action === "getInitialData") {
-      result = getFormInitialData();
+      result = getCachedInitialData();
     } else if (action === "getRecapData") {
       result = getRecapData();
     }
@@ -118,13 +102,13 @@ function doPost(e) {
   } catch (err) {
     return createJsonResponse({
       success: false,
-      error: "Terjadi kesalahan pada Server POST: " + err.toString()
+      error: "Terjadi kesalahan server: " + err.toString()
     });
   }
 }
 
 /**
- * Helper Membuat JSON Output dengan Header CORS
+ * Helper Membuat JSON Output dengan CORS
  */
 function createJsonResponse(data) {
   return ContentService.createTextOutput(JSON.stringify(data))
@@ -132,10 +116,424 @@ function createJsonResponse(data) {
 }
 
 /**
- * ==============================================================================
- * ⚙️ LOGIKA DATABASE SPREADSHEET
- * ==============================================================================
+ * Ambil Data Awal dengan Cache (Merespons dalam hitungan milidetik)
  */
+function getCachedInitialData() {
+  const cache = CacheService.getScriptCache();
+  const cached = cache.get("INIT_FORM_DATA_V2");
+  if (cached) {
+    try {
+      return JSON.parse(cached);
+    } catch (e) {}
+  }
+
+  const liveData = getFormInitialData();
+  if (liveData && liveData.success) {
+    try {
+      cache.put("INIT_FORM_DATA_V2", JSON.stringify(liveData), 300); // cache 5 menit
+    } catch (e) {}
+  }
+  return liveData;
+}
+
+/**
+ * Reset Cache saat Ada Perubahan Data
+ */
+function clearApiCache() {
+  try {
+    const cache = CacheService.getScriptCache();
+    cache.remove("INIT_FORM_DATA_V2");
+  } catch (e) {}
+}
+
+/**
+ * Mengambil Data Konfigurasi Spreadsheet
+ */
+function getConfigMap(ss) {
+  if (!ss) ss = getSpreadsheet();
+  let sheet = ss.getSheetByName(SHEET_CONFIG);
+  if (!sheet || sheet.getLastRow() === 0) {
+    initAllSheets(ss);
+    sheet = ss.getSheetByName(SHEET_CONFIG);
+  }
+  
+  const data = sheet.getDataRange().getValues();
+  const config = {};
+  for (let i = 1; i < data.length; i++) {
+    const key = String(data[i][0] || "").trim();
+    const val = String(data[i][1] || "").trim();
+    if (key) {
+      config[key] = val;
+    }
+  }
+  return config;
+}
+
+/**
+ * Mengambil Data Awal Form (Langsung & Cepat)
+ */
+function getFormInitialData() {
+  try {
+    const ss = getSpreadsheet();
+    const config = getConfigMap(ss);
+    let masterSheet = ss.getSheetByName(SHEET_MASTER);
+
+    if (!masterSheet || masterSheet.getLastRow() === 0) {
+      initAllSheets(ss);
+      masterSheet = ss.getSheetByName(SHEET_MASTER);
+    }
+
+    const masterData = masterSheet.getDataRange().getValues();
+    const sesiAktif = (config["Sesi_Minggu_Aktif"] || "").trim().toUpperCase();
+
+    const groupsMap = {};
+
+    for (let i = 1; i < masterData.length; i++) {
+      const row = masterData[i];
+      const kelompok = String(row[0] || "").trim();
+      const sesi = String(row[1] || "").trim();
+      const nim = String(row[2] || "").trim();
+      const nama = String(row[3] || "").trim();
+      const status = String(row[4] || "").trim().toUpperCase();
+
+      if (!kelompok || !nama) continue;
+      if (status !== "AKTIF") continue;
+
+      if (sesiAktif !== "SEMUA" && sesiAktif !== "" && sesi.toUpperCase() !== sesiAktif) {
+        continue;
+      }
+
+      if (!groupsMap[kelompok]) {
+        groupsMap[kelompok] = {
+          name: kelompok,
+          sesi: sesi,
+          members: []
+        };
+      }
+
+      groupsMap[kelompok].members.push({
+        nim: nim,
+        name: nama
+      });
+    }
+
+    const groupList = Object.keys(groupsMap).map(k => groupsMap[k]);
+
+    return {
+      success: true,
+      config: config,
+      groups: groupList,
+      loggedInEmail: ""
+    };
+  } catch (err) {
+    return { success: false, error: err.toString() };
+  }
+}
+
+/**
+ * Validasi Institutional Email
+ */
+function isValidInstitutionalEmail(email, allowedDomainsStr) {
+  if (!email) return false;
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!emailRegex.test(email)) return false;
+
+  const allowedDomains = (allowedDomainsStr || "mhs.ulm.ac.id, ulm.ac.id")
+    .split(",")
+    .map(d => d.trim().toLowerCase())
+    .filter(Boolean);
+
+  for (let d of allowedDomains) {
+    if (email.endsWith("@" + d) || email.endsWith("." + d)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Memproses Submission Penilaian
+ */
+function submitAssessment(payload) {
+  try {
+    const lock = LockService.getScriptLock();
+    lock.waitLock(10000);
+
+    const ss = getSpreadsheet();
+    const config = getConfigMap(ss);
+    let responsSheet = ss.getSheetByName(SHEET_RESPONS);
+
+    if (!responsSheet || responsSheet.getLastRow() === 0) {
+      initAllSheets(ss);
+      responsSheet = ss.getSheetByName(SHEET_RESPONS);
+    }
+
+    const email = String(payload.email || "").trim().toLowerCase();
+    const namaPenilai = String(payload.namaPenilai || "").trim();
+    const kelompok = String(payload.kelompok || "").trim();
+    const nilaiKelompok = parseFloat(payload.nilaiKelompok);
+    const sesi = String(payload.sesi || config["Sesi_Minggu_Aktif"] || "Minggu 1").trim();
+    const presentatorTerbaik = Array.isArray(payload.presentatorTerbaik) ? payload.presentatorTerbaik : [];
+    const evaluasiDetail = payload.evaluasiDetail || {};
+
+    if (!email || !namaPenilai || !kelompok || isNaN(nilaiKelompok)) {
+      lock.releaseLock();
+      return { success: false, error: "Semua kolom wajib diisi dengan benar!" };
+    }
+
+    const allowedDomainsStr = config["Domain_Email_Wajib"] || "mhs.ulm.ac.id, ulm.ac.id";
+    if (!isValidInstitutionalEmail(email, allowedDomainsStr)) {
+      lock.releaseLock();
+      return {
+        success: false,
+        error: `Format email tidak valid atau bukan domain resmi (${allowedDomainsStr}). Contoh format: nama.nim@mhs.ulm.ac.id`
+      };
+    }
+
+    const minVal = parseFloat(config["Nilai_Kelompok_Min"] || 50);
+    const maxVal = parseFloat(config["Nilai_Kelompok_Max"] || 100);
+    if (nilaiKelompok < minVal || nilaiKelompok > maxVal) {
+      lock.releaseLock();
+      return {
+        success: false,
+        error: `Nilai presentasi kelompok harus berada dalam rentang ${minVal} - ${maxVal}!`
+      };
+    }
+
+    const maxBest = parseInt(config["Maksimal_Pilihan_Presentator_Terbaik"] || 2);
+    if (presentatorTerbaik.length > maxBest) {
+      lock.releaseLock();
+      return {
+        success: false,
+        error: `Anda hanya diperbolehkan memilih maksimal ${maxBest} orang presentator terbaik!`
+      };
+    }
+
+    const maxChars = parseInt(config["Maksimal_Karakter_Evaluasi"] || 500);
+    for (let member in evaluasiDetail) {
+      const text = String(evaluasiDetail[member] || "").trim();
+      if (text.length > maxChars) {
+        lock.releaseLock();
+        return {
+          success: false,
+          error: `Evaluasi untuk ${member} melebihi batas ${maxChars} karakter.`
+        };
+      }
+    }
+
+    const responsData = responsSheet.getDataRange().getValues();
+    for (let i = 1; i < responsData.length; i++) {
+      const row = responsData[i];
+      const rowSesi = String(row[2] || "").trim();
+      const rowEmail = String(row[3] || "").trim().toLowerCase();
+      const rowKelompok = String(row[5] || "").trim();
+      const rowStatus = String(row[10] || "VALID").trim().toUpperCase();
+
+      if (rowStatus === "VALID" && rowEmail === email && rowKelompok === kelompok && rowSesi === sesi) {
+        lock.releaseLock();
+        return {
+          success: false,
+          error: `Anda (${email}) sudah pernah mengirimkan penilaian untuk ${kelompok} pada ${sesi}.`
+        };
+      }
+    }
+
+    const idRespons = "RESP-" + Utilities.formatDate(new Date(), "Asia/Makassar", "yyyyMMddHHmmss") + "-" + Math.floor(Math.random() * 1000);
+    const timestamp = new Date();
+    const best1 = presentatorTerbaik[0] || "-";
+    const best2 = presentatorTerbaik[1] || "-";
+    const evaluasiJson = JSON.stringify(evaluasiDetail);
+
+    const newRow = [
+      idRespons,
+      timestamp,
+      sesi,
+      email,
+      namaPenilai,
+      kelompok,
+      nilaiKelompok,
+      best1,
+      best2,
+      evaluasiJson,
+      "VALID"
+    ];
+
+    responsSheet.appendRow(newRow);
+    lock.releaseLock();
+
+    // Hapus Cache
+    clearApiCache();
+
+    try {
+      generateRekapSheet();
+    } catch (e) {}
+
+    return {
+      success: true,
+      message: `Penilaian untuk ${kelompok} berhasil disimpan! Terima kasih.`
+    };
+  } catch (err) {
+    return { success: false, error: "Terjadi kesalahan server: " + err.toString() };
+  }
+}
+
+/**
+ * Mengambil Rekap Nilai
+ */
+function getRecapData() {
+  try {
+    const ss = getSpreadsheet();
+    const config = getConfigMap(ss);
+    let responsSheet = ss.getSheetByName(SHEET_RESPONS);
+    let masterSheet = ss.getSheetByName(SHEET_MASTER);
+
+    if (!responsSheet || !masterSheet) {
+      initAllSheets(ss);
+      responsSheet = ss.getSheetByName(SHEET_RESPONS);
+      masterSheet = ss.getSheetByName(SHEET_MASTER);
+    }
+
+    const isPublicReviewVisible = (config["Tampilkan_Ulasan_Publik"] || "AKTIF").trim().toUpperCase() === "AKTIF";
+    const responsData = responsSheet.getLastRow() > 0 ? responsSheet.getDataRange().getValues() : [];
+    const masterData = masterSheet.getLastRow() > 0 ? masterSheet.getDataRange().getValues() : [];
+
+    const groupMembersMap = {};
+    for (let i = 1; i < masterData.length; i++) {
+      const g = String(masterData[i][0] || "").trim();
+      const n = String(masterData[i][3] || "").trim();
+      const nim = String(masterData[i][2] || "").trim();
+      if (g && n) {
+        if (!groupMembersMap[g]) groupMembersMap[g] = [];
+        groupMembersMap[g].push({ name: n, nim: nim });
+      }
+    }
+
+    const rekapByGroup = {};
+
+    for (let i = 1; i < responsData.length; i++) {
+      const row = responsData[i];
+      const sesi = String(row[2] || "").trim();
+      const namaPenilai = String(row[4] || "").trim();
+      const kelompok = String(row[5] || "").trim();
+      const nilaiKelompok = parseFloat(row[6]);
+      const best1 = String(row[7] || "").trim();
+      const best2 = String(row[8] || "").trim();
+      const evaluasiJsonStr = String(row[9] || "{}").trim();
+      const status = String(row[10] || "VALID").trim().toUpperCase();
+
+      if (status !== "VALID" || !kelompok || isNaN(nilaiKelompok)) continue;
+
+      if (!rekapByGroup[kelompok]) {
+        rekapByGroup[kelompok] = {
+          kelompok: kelompok,
+          sesi: sesi,
+          totalPenilai: 0,
+          totalSkor: 0,
+          rataRataSkor: 0,
+          votePresentator: {},
+          evaluasiList: {}
+        };
+      }
+
+      const item = rekapByGroup[kelompok];
+      item.totalPenilai += 1;
+      item.totalSkor += nilaiKelompok;
+
+      if (best1 && best1 !== "-") {
+        item.votePresentator[best1] = (item.votePresentator[best1] || 0) + 1;
+      }
+      if (best2 && best2 !== "-") {
+        item.votePresentator[best2] = (item.votePresentator[best2] || 0) + 1;
+      }
+
+      try {
+        const evalObj = JSON.parse(evaluasiJsonStr);
+        for (let m in evalObj) {
+          const ulasan = String(evalObj[m] || "").trim();
+          if (ulasan) {
+            if (!item.evaluasiList[m]) item.evaluasiList[m] = [];
+            item.evaluasiList[m].push({
+              penilai: namaPenilai,
+              ulasan: ulasan
+            });
+          }
+        }
+      } catch (e) {}
+    }
+
+    const summaryList = Object.keys(rekapByGroup).map(k => {
+      const g = rekapByGroup[k];
+      g.rataRataSkor = g.totalPenilai > 0 ? (g.totalSkor / g.totalPenilai).toFixed(2) : "0.00";
+      
+      const voteArray = Object.keys(g.votePresentator).map(vName => ({
+        name: vName,
+        votes: g.votePresentator[vName]
+      })).sort((a, b) => b.votes - a.votes);
+
+      g.rankedPresenters = voteArray;
+
+      if (!isPublicReviewVisible) {
+        g.evaluasiList = {};
+      }
+
+      return g;
+    });
+
+    return {
+      success: true,
+      isPublicReviewVisible: isPublicReviewVisible,
+      config: config,
+      summary: summaryList,
+      groupMembersMap: groupMembersMap
+    };
+  } catch (err) {
+    return { success: false, error: err.toString() };
+  }
+}
+
+/**
+ * Menuliskan Rekap ke Sheet
+ */
+function generateRekapSheet() {
+  const ss = getSpreadsheet();
+  let sheetRekap = ss.getSheetByName(SHEET_REKAP);
+  if (!sheetRekap) {
+    sheetRekap = ss.insertSheet(SHEET_REKAP);
+  }
+  sheetRekap.clear();
+
+  const rekapResult = getRecapData();
+  if (!rekapResult.success) return;
+
+  const headers = [
+    ["Kelompok", "Sesi_Minggu", "Jumlah_Penilai", "Rata_Rata_Nilai", "Presentator_Terbaik_Terbanyak"]
+  ];
+
+  const rows = [];
+  rekapResult.summary.forEach(item => {
+    let topPresenter = "-";
+    if (item.rankedPresenters && item.rankedPresenters.length > 0) {
+      topPresenter = item.rankedPresenters.map(p => `${p.name} (${p.votes} suara)`).join(", ");
+    }
+    rows.push([
+      item.kelompok,
+      item.sesi,
+      item.totalPenilai,
+      item.rataRataSkor,
+      topPresenter
+    ]);
+  });
+
+  sheetRekap.getRange(1, 1, 1, 5).setValues(headers);
+  formatHeaderRange(sheetRekap.getRange(1, 1, 1, 5), "#1E40AF", "#FFFFFF");
+
+  if (rows.length > 0) {
+    sheetRekap.getRange(2, 1, rows.length, 5).setValues(rows);
+    sheetRekap.getRange(2, 4, rows.length, 1).setNumberFormat("0.00");
+  }
+
+  sheetRekap.autoResizeColumns(1, 5);
+}
 
 /**
  * Inisialisasi Seluruh Tab Spreadsheet
@@ -237,18 +635,7 @@ function initAllSheets(ss) {
 }
 
 /**
- * Setup Manual via Menu Apps Script
- */
-function setupSpreadsheet() {
-  const ss = getSpreadsheet();
-  initAllSheets(ss);
-  generateRekapSheet();
-  Logger.log("✅ Setup Spreadsheet Berhasil di: " + ss.getUrl());
-  return "Setup spreadsheet berhasil diselesaikan!";
-}
-
-/**
- * Format Header
+ * Format Header Range
  */
 function formatHeaderRange(range, bgColor, fontColor) {
   range.setBackground(bgColor)
@@ -256,419 +643,4 @@ function formatHeaderRange(range, bgColor, fontColor) {
     .setFontWeight("bold")
     .setHorizontalAlignment("center")
     .setVerticalAlignment("middle");
-}
-
-/**
- * Menu Spreadsheet
- */
-function onOpen() {
-  try {
-    const ui = SpreadsheetApp.getUi();
-    ui.createMenu("🎓 Menu Penilaian PGSD")
-      .addItem("⚙️ Setup / Inisialisasi Sheet Otomatis", "setupSpreadsheet")
-      .addItem("🔄 Sinkronkan Data Rekap Nilai", "generateRekapSheet")
-      .addToUi();
-  } catch (e) {
-    // Standalone
-  }
-}
-
-/**
- * Mengambil Konfigurasi
- */
-function getConfigMap() {
-  const ss = getSpreadsheet();
-  let sheet = ss.getSheetByName(SHEET_CONFIG);
-  if (!sheet || sheet.getLastRow() === 0) {
-    initAllSheets(ss);
-    sheet = ss.getSheetByName(SHEET_CONFIG);
-  }
-  
-  const data = sheet.getDataRange().getValues();
-  const config = {};
-  for (let i = 1; i < data.length; i++) {
-    const key = String(data[i][0] || "").trim();
-    const val = String(data[i][1] || "").trim();
-    if (key) {
-      config[key] = val;
-    }
-  }
-  return config;
-}
-
-/**
- * Mengambil Data Awal Form
- */
-function getFormInitialData() {
-  try {
-    const config = getConfigMap();
-    const ss = getSpreadsheet();
-    let masterSheet = ss.getSheetByName(SHEET_MASTER);
-
-    if (!masterSheet || masterSheet.getLastRow() === 0) {
-      initAllSheets(ss);
-      masterSheet = ss.getSheetByName(SHEET_MASTER);
-    }
-
-    const masterData = masterSheet.getDataRange().getValues();
-    const sesiAktif = (config["Sesi_Minggu_Aktif"] || "").trim().toUpperCase();
-
-    let loggedInEmail = "";
-    try {
-      const activeUser = Session.getActiveUser().getEmail();
-      if (activeUser && activeUser.trim() !== "") {
-        loggedInEmail = activeUser.trim().toLowerCase();
-      }
-    } catch (e) {
-      loggedInEmail = "";
-    }
-
-    const groupsMap = {};
-
-    for (let i = 1; i < masterData.length; i++) {
-      const row = masterData[i];
-      const kelompok = String(row[0] || "").trim();
-      const sesi = String(row[1] || "").trim();
-      const nim = String(row[2] || "").trim();
-      const nama = String(row[3] || "").trim();
-      const status = String(row[4] || "").trim().toUpperCase();
-
-      if (!kelompok || !nama) continue;
-      if (status !== "AKTIF") continue;
-
-      if (sesiAktif !== "SEMUA" && sesiAktif !== "" && sesi.toUpperCase() !== sesiAktif) {
-        continue;
-      }
-
-      if (!groupsMap[kelompok]) {
-        groupsMap[kelompok] = {
-          name: kelompok,
-          sesi: sesi,
-          members: []
-        };
-      }
-
-      groupsMap[kelompok].members.push({
-        nim: nim,
-        name: nama
-      });
-    }
-
-    const groupList = Object.keys(groupsMap).map(k => groupsMap[k]);
-
-    return {
-      success: true,
-      config: config,
-      groups: groupList,
-      loggedInEmail: loggedInEmail
-    };
-  } catch (err) {
-    return { success: false, error: err.toString() };
-  }
-}
-
-/**
- * Validasi Format Email
- */
-function isValidInstitutionalEmail(email, allowedDomainsStr) {
-  if (!email) return false;
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  if (!emailRegex.test(email)) return false;
-
-  const allowedDomains = (allowedDomainsStr || "mhs.ulm.ac.id, ulm.ac.id")
-    .split(",")
-    .map(d => d.trim().toLowerCase())
-    .filter(Boolean);
-
-  for (let d of allowedDomains) {
-    if (email.endsWith("@" + d) || email.endsWith("." + d)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/**
- * Memproses Submission Penilaian
- */
-function submitAssessment(payload) {
-  try {
-    const lock = LockService.getScriptLock();
-    lock.waitLock(10000);
-
-    const config = getConfigMap();
-    const ss = getSpreadsheet();
-    let responsSheet = ss.getSheetByName(SHEET_RESPONS);
-
-    if (!responsSheet || responsSheet.getLastRow() === 0) {
-      initAllSheets(ss);
-      responsSheet = ss.getSheetByName(SHEET_RESPONS);
-    }
-
-    const email = String(payload.email || "").trim().toLowerCase();
-    const namaPenilai = String(payload.namaPenilai || "").trim();
-    const kelompok = String(payload.kelompok || "").trim();
-    const nilaiKelompok = parseFloat(payload.nilaiKelompok);
-    const sesi = String(payload.sesi || config["Sesi_Minggu_Aktif"] || "Minggu 1").trim();
-    const presentatorTerbaik = Array.isArray(payload.presentatorTerbaik) ? payload.presentatorTerbaik : [];
-    const evaluasiDetail = payload.evaluasiDetail || {};
-
-    if (!email || !namaPenilai || !kelompok || isNaN(nilaiKelompok)) {
-      lock.releaseLock();
-      return { success: false, error: "Semua kolom wajib diisi dengan benar!" };
-    }
-
-    const allowedDomainsStr = config["Domain_Email_Wajib"] || "mhs.ulm.ac.id, ulm.ac.id";
-    if (!isValidInstitutionalEmail(email, allowedDomainsStr)) {
-      lock.releaseLock();
-      return {
-        success: false,
-        error: `Format email tidak valid atau bukan domain resmi (${allowedDomainsStr}). Contoh format: nama.nim@mhs.ulm.ac.id`
-      };
-    }
-
-    const minVal = parseFloat(config["Nilai_Kelompok_Min"] || 50);
-    const maxVal = parseFloat(config["Nilai_Kelompok_Max"] || 100);
-    if (nilaiKelompok < minVal || nilaiKelompok > maxVal) {
-      lock.releaseLock();
-      return {
-        success: false,
-        error: `Nilai presentasi kelompok harus berada dalam rentang ${minVal} - ${maxVal}!`
-      };
-    }
-
-    const maxBest = parseInt(config["Maksimal_Pilihan_Presentator_Terbaik"] || 2);
-    if (presentatorTerbaik.length > maxBest) {
-      lock.releaseLock();
-      return {
-        success: false,
-        error: `Anda hanya diperbolehkan memilih maksimal ${maxBest} orang presentator terbaik!`
-      };
-    }
-
-    const maxChars = parseInt(config["Maksimal_Karakter_Evaluasi"] || 500);
-    for (let member in evaluasiDetail) {
-      const text = String(evaluasiDetail[member] || "").trim();
-      if (text.length > maxChars) {
-        lock.releaseLock();
-        return {
-          success: false,
-          error: `Evaluasi untuk ${member} melebihi batas ${maxChars} karakter (Panjang saat ini: ${text.length} karakter).`
-        };
-      }
-    }
-
-    const responsData = responsSheet.getDataRange().getValues();
-    for (let i = 1; i < responsData.length; i++) {
-      const row = responsData[i];
-      const rowSesi = String(row[2] || "").trim();
-      const rowEmail = String(row[3] || "").trim().toLowerCase();
-      const rowKelompok = String(row[5] || "").trim();
-      const rowStatus = String(row[10] || "VALID").trim().toUpperCase();
-
-      if (rowStatus === "VALID" && rowEmail === email && rowKelompok === kelompok && rowSesi === sesi) {
-        lock.releaseLock();
-        return {
-          success: false,
-          error: `Anda (${email}) sudah pernah mengirimkan penilaian untuk ${kelompok} pada ${sesi}.\nHubungi Admin/Dosen jika membutuhkan reset status penilaian.`
-        };
-      }
-    }
-
-    const idRespons = "RESP-" + Utilities.formatDate(new Date(), "Asia/Makassar", "yyyyMMddHHmmss") + "-" + Math.floor(Math.random() * 1000);
-    const timestamp = new Date();
-    const best1 = presentatorTerbaik[0] || "-";
-    const best2 = presentatorTerbaik[1] || "-";
-    const evaluasiJson = JSON.stringify(evaluasiDetail);
-
-    const newRow = [
-      idRespons,
-      timestamp,
-      sesi,
-      email,
-      namaPenilai,
-      kelompok,
-      nilaiKelompok,
-      best1,
-      best2,
-      evaluasiJson,
-      "VALID"
-    ];
-
-    responsSheet.appendRow(newRow);
-    lock.releaseLock();
-
-    try {
-      generateRekapSheet();
-    } catch (e) {
-      console.warn("Gagal update rekap langsung: " + e.message);
-    }
-
-    return {
-      success: true,
-      message: `Penilaian untuk ${kelompok} berhasil disimpan! Terima kasih atas partisipasi Anda.`
-    };
-  } catch (err) {
-    return { success: false, error: "Terjadi kesalahan server: " + err.toString() };
-  }
-}
-
-/**
- * Mengambil Rekap Nilai
- */
-function getRecapData() {
-  try {
-    const config = getConfigMap();
-    const ss = getSpreadsheet();
-    let responsSheet = ss.getSheetByName(SHEET_RESPONS);
-    let masterSheet = ss.getSheetByName(SHEET_MASTER);
-
-    if (!responsSheet || !masterSheet) {
-      initAllSheets(ss);
-      responsSheet = ss.getSheetByName(SHEET_RESPONS);
-      masterSheet = ss.getSheetByName(SHEET_MASTER);
-    }
-
-    const isPublicReviewVisible = (config["Tampilkan_Ulasan_Publik"] || "AKTIF").trim().toUpperCase() === "AKTIF";
-    const responsData = responsSheet.getLastRow() > 0 ? responsSheet.getDataRange().getValues() : [];
-    const masterData = masterSheet.getLastRow() > 0 ? masterSheet.getDataRange().getValues() : [];
-
-    const groupMembersMap = {};
-    for (let i = 1; i < masterData.length; i++) {
-      const g = String(masterData[i][0] || "").trim();
-      const n = String(masterData[i][3] || "").trim();
-      const nim = String(masterData[i][2] || "").trim();
-      if (g && n) {
-        if (!groupMembersMap[g]) groupMembersMap[g] = [];
-        groupMembersMap[g].push({ name: n, nim: nim });
-      }
-    }
-
-    const rekapByGroup = {};
-
-    for (let i = 1; i < responsData.length; i++) {
-      const row = responsData[i];
-      const sesi = String(row[2] || "").trim();
-      const namaPenilai = String(row[4] || "").trim();
-      const kelompok = String(row[5] || "").trim();
-      const nilaiKelompok = parseFloat(row[6]);
-      const best1 = String(row[7] || "").trim();
-      const best2 = String(row[8] || "").trim();
-      const evaluasiJsonStr = String(row[9] || "{}").trim();
-      const status = String(row[10] || "VALID").trim().toUpperCase();
-
-      if (status !== "VALID" || !kelompok || isNaN(nilaiKelompok)) continue;
-
-      if (!rekapByGroup[kelompok]) {
-        rekapByGroup[kelompok] = {
-          kelompok: kelompok,
-          sesi: sesi,
-          totalPenilai: 0,
-          totalSkor: 0,
-          rataRataSkor: 0,
-          votePresentator: {},
-          evaluasiList: {}
-        };
-      }
-
-      const item = rekapByGroup[kelompok];
-      item.totalPenilai += 1;
-      item.totalSkor += nilaiKelompok;
-
-      if (best1 && best1 !== "-") {
-        item.votePresentator[best1] = (item.votePresentator[best1] || 0) + 1;
-      }
-      if (best2 && best2 !== "-") {
-        item.votePresentator[best2] = (item.votePresentator[best2] || 0) + 1;
-      }
-
-      try {
-        const evalObj = JSON.parse(evaluasiJsonStr);
-        for (let m in evalObj) {
-          const ulasan = String(evalObj[m] || "").trim();
-          if (ulasan) {
-            if (!item.evaluasiList[m]) item.evaluasiList[m] = [];
-            item.evaluasiList[m].push({
-              penilai: namaPenilai,
-              ulasan: ulasan
-            });
-          }
-        }
-      } catch (e) {
-        // Abaikan parse error
-      }
-    }
-
-    const summaryList = Object.keys(rekapByGroup).map(k => {
-      const g = rekapByGroup[k];
-      g.rataRataSkor = g.totalPenilai > 0 ? (g.totalSkor / g.totalPenilai).toFixed(2) : "0.00";
-      
-      const voteArray = Object.keys(g.votePresentator).map(vName => ({
-        name: vName,
-        votes: g.votePresentator[vName]
-      })).sort((a, b) => b.votes - a.votes);
-
-      g.rankedPresenters = voteArray;
-
-      if (!isPublicReviewVisible) {
-        g.evaluasiList = {};
-      }
-
-      return g;
-    });
-
-    return {
-      success: true,
-      isPublicReviewVisible: isPublicReviewVisible,
-      config: config,
-      summary: summaryList,
-      groupMembersMap: groupMembersMap
-    };
-  } catch (err) {
-    return { success: false, error: err.toString() };
-  }
-}
-
-/**
- * Menuliskan Rekap ke Sheet
- */
-function generateRekapSheet() {
-  const ss = getSpreadsheet();
-  let sheetRekap = ss.getSheetByName(SHEET_REKAP);
-  if (!sheetRekap) {
-    sheetRekap = ss.insertSheet(SHEET_REKAP);
-  }
-  sheetRekap.clear();
-
-  const rekapResult = getRecapData();
-  if (!rekapResult.success) return;
-
-  const headers = [
-    ["Kelompok", "Sesi_Minggu", "Jumlah_Penilai", "Rata_Rata_Nilai", "Presentator_Terbaik_Terbanyak"]
-  ];
-
-  const rows = [];
-  rekapResult.summary.forEach(item => {
-    let topPresenter = "-";
-    if (item.rankedPresenters && item.rankedPresenters.length > 0) {
-      topPresenter = item.rankedPresenters.map(p => `${p.name} (${p.votes} suara)`).join(", ");
-    }
-    rows.push([
-      item.kelompok,
-      item.sesi,
-      item.totalPenilai,
-      item.rataRataSkor,
-      topPresenter
-    ]);
-  });
-
-  sheetRekap.getRange(1, 1, 1, 5).setValues(headers);
-  formatHeaderRange(sheetRekap.getRange(1, 1, 1, 5), "#1E40AF", "#FFFFFF");
-
-  if (rows.length > 0) {
-    sheetRekap.getRange(2, 1, rows.length, 5).setValues(rows);
-    sheetRekap.getRange(2, 4, rows.length, 1).setNumberFormat("0.00");
-  }
-
-  sheetRekap.autoResizeColumns(1, 5);
 }
