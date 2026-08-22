@@ -542,9 +542,52 @@
     </div>
 
     <!-- ========================================================================= -->
+    <!-- ========================================================================= -->
     <!-- TAB 2: DASHBOARD REKAPITULASI HASIL (LENGKAP: KELOMPOK & INDIVIDU) -->
     <!-- ========================================================================= -->
     <div id="viewRekap" class="space-y-5 hidden">
+
+      <!-- 📊 1. MODERN MINIMALIST VISUAL LEADERBOARD CHART (OVERVIEW DI ATAS / SEBELUM REKAPITULASI HASIL) -->
+      <div id="rekapChartOverviewCard" class="hidden bg-zinc-950 text-white rounded-2xl border border-zinc-800 p-4 sm:p-6 shadow-md space-y-4 sm:space-y-5 fade-enter">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-800/80 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="p-1.5 rounded-lg bg-zinc-800 text-emerald-400 text-xs flex-shrink-0">📈</span>
+            <div>
+              <h3 class="font-bold text-xs sm:text-sm text-zinc-100">Leaderboard & Peringkat Performa</h3>
+              <p class="text-[10px] sm:text-[11px] text-zinc-400">Peringkat performa nilai kelompok dan perolehan suara presentator terfavorit (Top 10 & Scrollable).</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-1.5 self-start sm:self-auto flex-shrink-0">
+            <span id="chartTotalEvaluatorBadge" class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-zinc-800 text-emerald-400 border border-zinc-700">0 Penilai Terdata</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          <!-- Chart 1: Peringkat Skor Rata-rata Kelompok (Max 10 Items Height, Scrollable) -->
+          <div class="space-y-3">
+            <div class="flex items-center justify-between text-[11px] font-mono text-zinc-400 uppercase tracking-wider">
+              <span>🏆 Peringkat Nilai Kelompok</span>
+              <span>Rata-rata Skor</span>
+            </div>
+            <div id="groupLeaderboardChartBars" class="space-y-2.5 max-h-[385px] overflow-y-auto custom-scrollbar pr-1.5">
+              <!-- Dynamic Horizontal Group Bars -->
+            </div>
+          </div>
+
+          <!-- Chart 2: Top Presentator Pilihan Audiens (Max 10 Items Height, Scrollable) -->
+          <div class="space-y-3 pt-4 lg:pt-0 border-t lg:border-t-0 lg:border-l lg:pl-6 border-zinc-800/80">
+            <div class="flex items-center justify-between text-[11px] font-mono text-zinc-400 uppercase tracking-wider">
+              <span>⭐ Top Presentator Terfavorit</span>
+              <span>Perolehan Suara</span>
+            </div>
+            <div id="presenterLeaderboardChartBars" class="space-y-2.5 max-h-[385px] overflow-y-auto custom-scrollbar pr-1.5">
+              <!-- Dynamic Presenter Bars -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. DETAIL REKAPITULASI HASIL PENILAIAN CARD -->
       <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5">
         
         <!-- Header Rekap -->
@@ -588,46 +631,6 @@
           <select id="rekapGroupFilter" onchange="filterRekapDisplay()" class="text-xs font-medium px-3 py-1.5 rounded border border-zinc-300 bg-white focus:border-zinc-900 outline-none">
             <option value="ALL">Semua Kelompok</option>
           </select>
-        </div>
-
-        <!-- 📊 MODERN MINIMALIST VISUAL LEADERBOARD CHART (OVERVIEW RINGKASAN PERFORMA) -->
-        <div id="rekapChartOverviewCard" class="hidden bg-zinc-950 text-white rounded-2xl border border-zinc-800 p-4 sm:p-6 shadow-md space-y-4 sm:space-y-5 fade-enter">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-800/80 pb-3">
-            <div class="flex items-center gap-2">
-              <span class="p-1.5 rounded-lg bg-zinc-800 text-emerald-400 text-xs flex-shrink-0">📈</span>
-              <div>
-                <h3 class="font-bold text-xs sm:text-sm text-zinc-100">Leaderboard & Peringkat Performa</h3>
-                <p class="text-[10px] sm:text-[11px] text-zinc-400">Ringkasan skor rata-rata nilai kelompok dan perolehan suara presentator terfavorit.</p>
-              </div>
-            </div>
-            <div class="flex items-center gap-1.5 self-start sm:self-auto flex-shrink-0">
-              <span id="chartTotalEvaluatorBadge" class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-zinc-800 text-emerald-400 border border-zinc-700">0 Penilai Terdata</span>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-            <!-- Chart 1: Peringkat Skor Rata-rata Kelompok -->
-            <div class="space-y-3">
-              <div class="flex items-center justify-between text-[11px] font-mono text-zinc-400 uppercase tracking-wider">
-                <span>🏆 Peringkat Nilai Kelompok</span>
-                <span>Rata-rata Skor</span>
-              </div>
-              <div id="groupLeaderboardChartBars" class="space-y-2.5">
-                <!-- Dynamic Horizontal Group Bars -->
-              </div>
-            </div>
-
-            <!-- Chart 2: Top Presentator Pilihan Audiens -->
-            <div class="space-y-3 pt-4 lg:pt-0 border-t lg:border-t-0 lg:border-l lg:pl-6 border-zinc-800/80">
-              <div class="flex items-center justify-between text-[11px] font-mono text-zinc-400 uppercase tracking-wider">
-                <span>⭐ Top Presentator Terfavorit</span>
-                <span>Perolehan Suara</span>
-              </div>
-              <div id="presenterLeaderboardChartBars" class="space-y-2.5">
-                <!-- Dynamic Presenter Bars -->
-              </div>
-            </div>
-          </div>
         </div>
 
         <!-- Search Bar & Controls for Mahasiswa Individu View -->
@@ -1751,7 +1754,7 @@
       });
 
       const sortedPresenters = Object.values(presenterMap).filter(p => p.votes > 0).sort((a, b) => b.votes - a.votes);
-      const topPresenters = sortedPresenters.slice(0, 5);
+      const topPresenters = sortedPresenters;
 
       if (topPresenters.length === 0) {
         presenterContainer.innerHTML = `<p class="text-xs text-zinc-500 italic p-3 text-center bg-zinc-900/50 rounded-lg border border-zinc-900">Belum ada suara presentator yang masuk.</p>`;
