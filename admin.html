@@ -510,9 +510,49 @@
             </div>
           </div>
 
+          <!-- Section: Kredit Pembuat Web -->
+          <div class="space-y-3.5 sm:space-y-4 pt-4 border-t border-zinc-100">
+            <div>
+              <h3 class="text-[11px] sm:text-xs font-bold text-zinc-400 uppercase tracking-wider font-mono">2. Kredit Pembuat Web</h3>
+              <p class="text-[11px] text-zinc-400 mt-1">Nama Anda akan ditampilkan di footer halaman utama &amp; admin.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4 text-xs">
+              <div class="space-y-1.5">
+                <label class="block font-semibold text-zinc-700">Label / Prefix</label>
+                <select
+                  id="cfg_Pembuat_Web_Prefix"
+                  onchange="handleConfigInputAutoSave(true)"
+                  class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs font-medium bg-white focus:border-zinc-900 outline-none cursor-pointer"
+                >
+                  <option value="Dibuat oleh">Dibuat oleh</option>
+                  <option value="Dikembangkan oleh">Dikembangkan oleh</option>
+                  <option value="By">By</option>
+                </select>
+              </div>
+
+              <div class="space-y-1.5 sm:col-span-2">
+                <label class="block font-semibold text-zinc-700">Nama Pembuat Web</label>
+                <input
+                  type="text"
+                  id="cfg_Pembuat_Web_Nama"
+                  oninput="handleConfigInputAutoSave()"
+                  placeholder="Nama Anda"
+                  class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none"
+                >
+                <p class="text-[11px] text-zinc-400">Kosongkan jika tidak ingin ditampilkan.</p>
+              </div>
+            </div>
+
+            <!-- Preview -->
+            <div id="pembuatPreviewWrap" class="hidden px-3.5 py-2.5 rounded-lg bg-zinc-50 border border-zinc-200 text-xs text-zinc-500 italic">
+              Preview footer: <span id="pembuatPreview" class="font-medium text-zinc-700 not-italic"></span>
+            </div>
+          </div>
+
           <!-- Section B: Batasan Nilai & Formulir -->
           <div class="space-y-3.5 sm:space-y-4 pt-4 border-t border-zinc-100">
-            <h3 class="text-[11px] sm:text-xs font-bold text-zinc-400 uppercase tracking-wider font-mono">2. Batasan Skor & Formulir</h3>
+            <h3 class="text-[11px] sm:text-xs font-bold text-zinc-400 uppercase tracking-wider font-mono">3. Batasan Skor & Formulir</h3>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 text-xs">
               <div class="space-y-1.5">
@@ -876,7 +916,11 @@
     <!-- Admin Footer -->
     <footer class="w-full py-4 text-xs text-zinc-500 border-t border-zinc-200 bg-white mt-auto">
       <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
-        <p>© 2026 PGSD <a href="/admin" class="font-bold text-emerald-700 hover:text-emerald-800 transition cursor-pointer no-underline">Kelas 5E</a></p>
+        <div class="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-2">
+          <p>© 2026 PGSD <a href="/admin" class="font-bold text-emerald-700 hover:text-emerald-800 transition cursor-pointer no-underline">Kelas 5E</a></p>
+          <span id="adminFooterPembuatSep" class="hidden text-zinc-300">/</span>
+          <span id="adminFooterPembuat" class="hidden text-zinc-400 italic"></span>
+        </div>
         <p class="font-medium text-zinc-500">FKIP Universitas Lambung Mangkurat</p>
       </div>
     </footer>
@@ -1826,6 +1870,20 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       if (select) select.value = cleanSesi;
     }
 
+    function updateAdminFooterPembuat(prefix, nama) {
+      const el = document.getElementById("adminFooterPembuat");
+      const sep = document.getElementById("adminFooterPembuatSep");
+      if (!el) return;
+      if (nama) {
+        el.textContent = `${prefix} ${nama}`;
+        el.classList.remove("hidden");
+        if (sep) sep.classList.remove("hidden");
+      } else {
+        el.classList.add("hidden");
+        if (sep) sep.classList.add("hidden");
+      }
+    }
+
     function handleQuickSessionChange(newSesi) {
       adminAppConfig["Sesi_Minggu_Aktif"] = newSesi;
       updateQuickSessionUI(newSesi);
@@ -1845,7 +1903,9 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         "Maksimal_Pilihan_Presentator_Terbaik",
         "Maksimal_Karakter_Evaluasi",
         "Tampilkan_Ulasan_Publik",
-        "Domain_Email_Wajib"
+        "Domain_Email_Wajib",
+        "Pembuat_Web_Prefix",
+        "Pembuat_Web_Nama"
       ];
 
       keys.forEach(k => {
@@ -1856,7 +1916,23 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       });
 
       updateQuickSessionUI(adminAppConfig["Sesi_Minggu_Aktif"] || "Minggu 1");
+
+      // Tampilkan preview & footer kredit saat data sudah dimuat
+      const pembuatNama   = (adminAppConfig["Pembuat_Web_Nama"]   || "").trim();
+      const pembuatPrefix = (adminAppConfig["Pembuat_Web_Prefix"] || "Dibuat oleh").trim();
+      const previewWrap   = document.getElementById("pembuatPreviewWrap");
+      const previewText   = document.getElementById("pembuatPreview");
+      if (previewWrap && previewText) {
+        if (pembuatNama) {
+          previewText.textContent = `${pembuatPrefix} ${pembuatNama}`;
+          previewWrap.classList.remove("hidden");
+        } else {
+          previewWrap.classList.add("hidden");
+        }
+      }
+      updateAdminFooterPembuat(pembuatPrefix, pembuatNama);
     }
+
 
     function handleConfigInputAutoSave(isImmediate) {
       if (configDebounceTimer) clearTimeout(configDebounceTimer);
@@ -1875,10 +1951,30 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         adminAppConfig["Maksimal_Karakter_Evaluasi"] = (document.getElementById("cfg_Maksimal_Karakter_Evaluasi")?.value || "500").trim();
         adminAppConfig["Tampilkan_Ulasan_Publik"] = document.getElementById("cfg_Tampilkan_Ulasan_Publik")?.value || "AKTIF";
         adminAppConfig["Domain_Email_Wajib"] = (document.getElementById("cfg_Domain_Email_Wajib")?.value || "").trim();
+        adminAppConfig["Pembuat_Web_Prefix"] = (document.getElementById("cfg_Pembuat_Web_Prefix")?.value || "Dibuat oleh").trim();
+        adminAppConfig["Pembuat_Web_Nama"]   = (document.getElementById("cfg_Pembuat_Web_Nama")?.value   || "").trim();
+
+        // Update live preview footer kredit
+        const pembuatNama   = adminAppConfig["Pembuat_Web_Nama"];
+        const pembuatPrefix = adminAppConfig["Pembuat_Web_Prefix"] || "Dibuat oleh";
+        const previewWrap   = document.getElementById("pembuatPreviewWrap");
+        const previewText   = document.getElementById("pembuatPreview");
+        if (previewWrap && previewText) {
+          if (pembuatNama) {
+            previewText.textContent = `${pembuatPrefix} ${pembuatNama}`;
+            previewWrap.classList.remove("hidden");
+          } else {
+            previewWrap.classList.add("hidden");
+          }
+        }
+
+        // Update footer admin langsung
+        updateAdminFooterPembuat(pembuatPrefix, pembuatNama);
 
         triggerAutoSaveConfig();
       }, delay);
     }
+
 
     // =========================================================================
     // 📝 TAB 3 LOGIC: DATA RESPONS PENILAIAN & RESET PER PENGIRIMAN
