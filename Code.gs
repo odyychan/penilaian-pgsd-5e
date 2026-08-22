@@ -12,7 +12,7 @@
 // ==============================================================================
 const SPREADSHEET_ID = "1D7nQcVEbmOKjgcJ6LzKeeDQPQxhAIiCELRC9eP9w7WU";
 
-// Nama Tab Spreadsheet
+// Nama Tab Spreadsheet Default
 const SHEET_CONFIG = "Konfigurasi";
 const SHEET_MASTER = "Master_Kelompok";
 const SHEET_RESPONS = "Respons_Penilaian";
@@ -35,6 +35,73 @@ function getSpreadsheet() {
     }
   }
   return ss;
+}
+
+/**
+ * Helper Pencarian Sheet Fleksibel (Mendukung variasi nama tab)
+ */
+function findSheetFlexible(ss, targetNames) {
+  if (!ss) ss = getSpreadsheet();
+  const allSheets = ss.getSheets();
+  
+  for (let target of targetNames) {
+    const cleanTarget = target.toLowerCase().replace(/[^a-z0-9]/g, "");
+    for (let s of allSheets) {
+      const sName = s.getName().toLowerCase().replace(/[^a-z0-9]/g, "");
+      if (sName === cleanTarget) {
+        return s;
+      }
+    }
+  }
+  return null;
+}
+
+function getMasterSheet(ss) {
+  if (!ss) ss = getSpreadsheet();
+  let s = findSheetFlexible(ss, ["Master_Kelompok", "Master Kelompok", "DATA_KELOMPOK_PGSD_5E", "Data_Kelompok", "Data Kelompok", "Kelompok", "Data Penilaian"]);
+  if (!s) {
+    const sheets = ss.getSheets();
+    for (let sh of sheets) {
+      if (sh.getLastRow() > 0) {
+        const firstRow = sh.getRange(1, 1, 1, Math.min(sh.getLastColumn() || 1, 8)).getValues()[0];
+        const hasKelompok = firstRow.some(cell => String(cell).toLowerCase().includes("kelompok"));
+        if (hasKelompok) return sh;
+      }
+    }
+    initAllSheets(ss);
+    s = ss.getSheetByName(SHEET_MASTER);
+  }
+  return s;
+}
+
+function getConfigSheet(ss) {
+  if (!ss) ss = getSpreadsheet();
+  let s = findSheetFlexible(ss, ["Konfigurasi", "Config", "CONFIG_APP", "Pengaturan", "Setting"]);
+  if (!s) {
+    initAllSheets(ss);
+    s = ss.getSheetByName(SHEET_CONFIG);
+  }
+  return s;
+}
+
+function getResponsSheet(ss) {
+  if (!ss) ss = getSpreadsheet();
+  let s = findSheetFlexible(ss, ["Respons_Penilaian", "Respons Penilaian", "RESPONS_PENILAIAN", "Responses", "Jawaban Formulir 1", "Respons"]);
+  if (!s) {
+    initAllSheets(ss);
+    s = ss.getSheetByName(SHEET_RESPONS);
+  }
+  return s;
+}
+
+function getRekapSheet(ss) {
+  if (!ss) ss = getSpreadsheet();
+  let s = findSheetFlexible(ss, ["Rekap_Nilai", "Rekap Nilai", "REKAP_NILAI", "Rekapitulasi"]);
+  if (!s) {
+    initAllSheets(ss);
+    s = ss.getSheetByName(SHEET_REKAP);
+  }
+  return s;
 }
 
 /**
@@ -197,11 +264,7 @@ function clearApiCache() {
  */
 function getConfigMap(ss) {
   if (!ss) ss = getSpreadsheet();
-  let sheet = ss.getSheetByName(SHEET_CONFIG);
-  if (!sheet || sheet.getLastRow() === 0) {
-    initAllSheets(ss);
-    sheet = ss.getSheetByName(SHEET_CONFIG);
-  }
+  let sheet = getConfigSheet(ss);
   
   const data = sheet.getDataRange().getValues();
   const config = {};
@@ -222,12 +285,7 @@ function getFormInitialData() {
   try {
     const ss = getSpreadsheet();
     const config = getConfigMap(ss);
-    let masterSheet = ss.getSheetByName(SHEET_MASTER);
-
-    if (!masterSheet || masterSheet.getLastRow() === 0) {
-      initAllSheets(ss);
-      masterSheet = ss.getSheetByName(SHEET_MASTER);
-    }
+    let masterSheet = getMasterSheet(ss);
 
     const masterData = masterSheet.getDataRange().getValues();
     const sesiAktif = (config["Sesi_Minggu_Aktif"] || "").trim().toUpperCase();
@@ -308,12 +366,7 @@ function submitAssessment(payload) {
 
     const ss = getSpreadsheet();
     const config = getConfigMap(ss);
-    let responsSheet = ss.getSheetByName(SHEET_RESPONS);
-
-    if (!responsSheet || responsSheet.getLastRow() === 0) {
-      initAllSheets(ss);
-      responsSheet = ss.getSheetByName(SHEET_RESPONS);
-    }
+    let responsSheet = getResponsSheet(ss);
 
     const email = String(payload.email || "").trim().toLowerCase();
     const namaPenilai = String(payload.namaPenilai || "").trim();
@@ -431,14 +484,8 @@ function getRecapData() {
   try {
     const ss = getSpreadsheet();
     const config = getConfigMap(ss);
-    let responsSheet = ss.getSheetByName(SHEET_RESPONS);
-    let masterSheet = ss.getSheetByName(SHEET_MASTER);
-
-    if (!responsSheet || !masterSheet) {
-      initAllSheets(ss);
-      responsSheet = ss.getSheetByName(SHEET_RESPONS);
-      masterSheet = ss.getSheetByName(SHEET_MASTER);
-    }
+    let responsSheet = getResponsSheet(ss);
+    let masterSheet = getMasterSheet(ss);
 
     const isPublicReviewVisible = (config["Tampilkan_Ulasan_Publik"] || "AKTIF").trim().toUpperCase() === "AKTIF";
     const responsData = responsSheet.getLastRow() > 0 ? responsSheet.getDataRange().getValues() : [];
@@ -705,13 +752,8 @@ function adminGetFullData() {
   try {
     const ss = getSpreadsheet();
     const config = getConfigMap(ss);
-    let masterSheet = ss.getSheetByName(SHEET_MASTER);
-    let responsSheet = ss.getSheetByName(SHEET_RESPONS);
-
-    if (!masterSheet) {
-      initAllSheets(ss);
-      masterSheet = ss.getSheetByName(SHEET_MASTER);
-    }
+    let masterSheet = getMasterSheet(ss);
+    let responsSheet = getResponsSheet(ss);
 
     const masterData = masterSheet.getLastRow() > 0 ? masterSheet.getDataRange().getValues() : [];
     const groupsMap = {};
@@ -767,11 +809,7 @@ function adminSaveMasterData(payload) {
     lock.waitLock(10000);
 
     const ss = getSpreadsheet();
-    let masterSheet = ss.getSheetByName(SHEET_MASTER);
-    if (!masterSheet) {
-      initAllSheets(ss);
-      masterSheet = ss.getSheetByName(SHEET_MASTER);
-    }
+    let masterSheet = getMasterSheet(ss);
 
     const groups = payload.groups || [];
     const rowsToWrite = [];
@@ -830,11 +868,7 @@ function adminSaveConfig(payload) {
     lock.waitLock(10000);
 
     const ss = getSpreadsheet();
-    let configSheet = ss.getSheetByName(SHEET_CONFIG);
-    if (!configSheet) {
-      initAllSheets(ss);
-      configSheet = ss.getSheetByName(SHEET_CONFIG);
-    }
+    let configSheet = getConfigSheet(ss);
 
     const newConfig = payload.config || {};
     const configData = configSheet.getDataRange().getValues();
@@ -877,8 +911,8 @@ function adminResetResponses(payload) {
     lock.waitLock(10000);
 
     const ss = getSpreadsheet();
-    let responsSheet = ss.getSheetByName(SHEET_RESPONS);
-    let rekapSheet = ss.getSheetByName(SHEET_REKAP);
+    let responsSheet = getResponsSheet(ss);
+    let rekapSheet = getRekapSheet(ss);
 
     if (responsSheet && responsSheet.getLastRow() > 1) {
       responsSheet.getRange(2, 1, responsSheet.getLastRow() - 1, responsSheet.getLastColumn()).clearContent();
@@ -906,7 +940,7 @@ function adminResetResponses(payload) {
 function adminGetResponsesList() {
   try {
     const ss = getSpreadsheet();
-    let responsSheet = ss.getSheetByName(SHEET_RESPONS);
+    let responsSheet = getResponsSheet(ss);
 
     if (!responsSheet || responsSheet.getLastRow() <= 1) {
       return { success: true, responses: [] };
@@ -973,7 +1007,7 @@ function adminDeleteSingleResponse(payload) {
     lock.waitLock(10000);
 
     const ss = getSpreadsheet();
-    let responsSheet = ss.getSheetByName(SHEET_RESPONS);
+    let responsSheet = getResponsSheet(ss);
 
     if (!responsSheet || responsSheet.getLastRow() <= 1) {
       lock.releaseLock();
