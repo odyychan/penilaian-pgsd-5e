@@ -95,55 +95,55 @@
 <body class="min-h-screen flex flex-col bg-zinc-50 font-sans antialiased text-zinc-900">
 
   <!-- ========================================================================= -->
-  <!-- 🧭 MINIMALIST HEADER -->
+  <!-- 🧭 DISTINCT CONTRAST HEADER -->
   <!-- ========================================================================= -->
-  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-zinc-200">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
+  <header class="sticky top-0 z-40 bg-zinc-950 text-white border-b border-zinc-800 shadow-md">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
       
       <!-- Brand & Title -->
       <div class="flex items-center gap-3 min-w-0">
-        <div class="w-8 h-8 rounded-lg bg-zinc-900 text-white flex items-center justify-center font-bold text-xs tracking-wider flex-shrink-0">
+        <div class="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-100 flex items-center justify-center font-bold text-xs tracking-wider flex-shrink-0">
           5E
         </div>
         <div class="min-w-0">
           <div class="flex items-center gap-2">
-            <h1 class="font-bold text-xs sm:text-sm text-zinc-900 truncate" id="navTitle">
+            <h1 class="font-bold text-xs sm:text-sm text-zinc-100 truncate" id="navTitle">
               Penilaian Presentasi PGSD 5E
             </h1>
-            <span class="hidden xs:inline-block px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-zinc-100 text-zinc-600 border border-zinc-200">
+            <span class="hidden xs:inline-block px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-zinc-800 text-zinc-300 border border-zinc-700">
               2026
             </span>
           </div>
-          <p class="text-[11px] text-zinc-500 truncate" id="navSubtitle">
+          <p class="text-[11px] text-zinc-400 truncate" id="navSubtitle">
             Bimbingan Konseling di SD • FKIP ULM
           </p>
         </div>
       </div>
 
-      <!-- Controls & Status -->
+      <!-- Sesi Pill -->
       <div class="flex items-center gap-2 flex-shrink-0">
-        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-100 border border-zinc-200 text-zinc-700 text-[11px] font-medium" id="badgeSesiTop">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-[11px] font-medium" id="badgeSesiTop">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
           <span id="badgeSesiTopText">Sesi: Minggu 1</span>
         </div>
       </div>
 
     </div>
 
-    <!-- Minimal View Switcher -->
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 pb-2.5">
-      <div class="grid grid-cols-2 p-0.5 bg-zinc-100 rounded-lg border border-zinc-200 text-xs font-semibold">
+    <!-- Minimal View Switcher (Dark Nav Tabs) -->
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 pb-2.5 pt-0.5">
+      <div class="grid grid-cols-2 p-1 bg-zinc-900 rounded-lg border border-zinc-800 text-xs font-semibold">
         <button 
           id="tabFormBtn" 
           onclick="switchTab('form')" 
-          class="py-1.5 px-3 rounded-md bg-white text-zinc-900 shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+          class="py-1.5 px-3 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
         >
           <span>Formulir Penilaian</span>
         </button>
         <button 
           id="tabRekapBtn" 
           onclick="switchTab('rekap')" 
-          class="py-1.5 px-3 rounded-md text-zinc-500 hover:text-zinc-900 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+          class="py-1.5 px-3 rounded-md text-zinc-400 hover:text-zinc-100 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
         >
           <span>Rekapitulasi Hasil</span>
         </button>
@@ -166,6 +166,45 @@
     <!-- TAB 1: FORM PENILAIAN (MODERN-MINIMALIST MULTI-STEP) -->
     <!-- ========================================================================= -->
     <div id="viewForm" class="space-y-5">
+
+      <!-- DESKRIPSI PENGANTAR FORMULIR (FORMAL & ENGAGING) -->
+      <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-6 shadow-xs space-y-3.5">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-zinc-100 text-zinc-700 border border-zinc-200">
+              Peer-Assessment
+            </span>
+            <span class="text-xs text-zinc-400">•</span>
+            <span class="text-xs text-zinc-500 font-medium">Evaluasi Kinerja Rekan Sejawat</span>
+          </div>
+          <h2 class="text-base sm:text-lg font-bold text-zinc-900 leading-snug">
+            Penilaian Presentasi Mahasiswa Kelas 5E PGSD
+          </h2>
+          <p class="text-xs text-zinc-500 font-medium">
+            Mata Kuliah: <strong class="text-zinc-800">Bimbingan Konseling di SD</strong> • Dosen Pengampu: <strong class="text-zinc-800">Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.</strong>
+          </p>
+        </div>
+
+        <p class="text-xs sm:text-sm text-zinc-600 leading-relaxed pt-0.5">
+          Formulir ini digunakan oleh seluruh mahasiswa audiens untuk memberikan apresiasi, evaluasi skor kelompok secara objektif, serta masukan konstruktif bagi rekan yang sedang mempresentasikan materi. Penilaian Anda berperan penting dalam mendorong iklim diskusi yang aktif dan bermakna di kelas.
+        </p>
+
+        <!-- Ringkasan Petunjuk Singkat -->
+        <div class="flex flex-wrap items-center gap-2 pt-1 border-t border-zinc-100 text-[11px] text-zinc-500">
+          <span class="inline-flex items-center gap-1 bg-zinc-50 border border-zinc-200 px-2.5 py-1 rounded-md">
+            <span>👤</span>
+            <span>Peran: Mahasiswa Audiens</span>
+          </span>
+          <span class="inline-flex items-center gap-1 bg-zinc-50 border border-zinc-200 px-2.5 py-1 rounded-md">
+            <span>⏱️</span>
+            <span>Estimasi: ~2 Menit</span>
+          </span>
+          <span class="inline-flex items-center gap-1 bg-zinc-50 border border-zinc-200 px-2.5 py-1 rounded-md">
+            <span>📋</span>
+            <span>4 Langkah Terstruktur</span>
+          </span>
+        </div>
+      </div>
 
       <!-- STEP INDICATOR BAR -->
       <div class="bg-white rounded-xl border border-zinc-200 p-4 sm:p-5 shadow-xs space-y-3">
@@ -1143,13 +1182,13 @@
       if (tab === 'form') {
         viewForm.classList.remove("hidden");
         viewRekap.classList.add("hidden");
-        tabFormBtn.className = "py-1.5 px-3 rounded-md bg-white text-zinc-900 shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer";
-        tabRekapBtn.className = "py-1.5 px-3 rounded-md text-zinc-500 hover:text-zinc-900 transition-all flex items-center justify-center gap-1.5 cursor-pointer";
+        tabFormBtn.className = "py-1.5 px-3 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer";
+        tabRekapBtn.className = "py-1.5 px-3 rounded-md text-zinc-400 hover:text-zinc-100 transition-all flex items-center justify-center gap-1.5 cursor-pointer";
       } else {
         viewForm.classList.add("hidden");
         viewRekap.classList.remove("hidden");
-        tabRekapBtn.className = "py-1.5 px-3 rounded-md bg-white text-zinc-900 shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer";
-        tabFormBtn.className = "py-1.5 px-3 rounded-md text-zinc-500 hover:text-zinc-900 transition-all flex items-center justify-center gap-1.5 cursor-pointer";
+        tabRekapBtn.className = "py-1.5 px-3 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer";
+        tabFormBtn.className = "py-1.5 px-3 rounded-md text-zinc-400 hover:text-zinc-100 transition-all flex items-center justify-center gap-1.5 cursor-pointer";
         loadRekapData();
       }
     }
