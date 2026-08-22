@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full bg-zinc-50 text-zinc-900 selection:bg-zinc-900 selection:text-white">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>Admin Panel • Penilaian PGSD 5E</title>
+  
+  <!-- Tailwind CSS & Google Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '"Inter"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .fade-enter {
+      animation: fadeEnter 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes fadeEnter {
+      from { opacity: 0; transform: scale(0.98); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .shake {
+      animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+    @keyframes shake {
+      10%, 90% { transform: translate3d(-1px, 0, 0); }
+      20%, 80% { transform: translate3d(2px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+      40%, 60% { transform: translate3d(4px, 0, 0); }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-zinc-50 font-sans antialiased text-zinc-900">
+
+  <!-- ========================================================================= -->
+  <!-- 🔒 AUTHENTICATION / LOGIN SCREEN -->
+  <!-- ========================================================================= -->
+  <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4 bg-zinc-100/70">
+    <div id="loginCard" class="w-full max-w-sm bg-white rounded-2xl border border-zinc-200 p-6 sm:p-8 shadow-sm space-y-6 fade-enter">
+      
+      <!-- Lock Header -->
+      <div class="text-center space-y-2">
+        <div class="w-12 h-12 bg-zinc-900 text-white rounded-xl flex items-center justify-center mx-auto text-xl font-bold">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+          </svg>
+        </div>
+        <h1 class="text-lg font-bold text-zinc-900">Portal Admin</h1>
+        <p class="text-xs text-zinc-500">Masukkan kata sandi pengelola untuk mengakses konfigurasi sistem.</p>
+      </div>
+
+      <!-- Password Form -->
+      <form onsubmit="handleLogin(event)" class="space-y-4">
+        <div class="space-y-1.5">
+          <label class="block text-xs font-semibold text-zinc-700">Kata Sandi Admin</label>
+          <input 
+            type="password" 
+            id="inputPassword" 
+            required 
+            autofocus
+            placeholder="••••••••" 
+            class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-sm focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 outline-none transition bg-white placeholder-zinc-300"
+          >
+          <p id="loginErrorMsg" class="text-[11px] text-rose-600 font-medium hidden">Kata sandi tidak sesuai. Silakan coba lagi.</p>
+        </div>
+
+        <button 
+          type="submit" 
+          class="w-full py-2.5 px-4 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 cursor-pointer shadow-xs"
+        >
+          Buka Panel Admin
+        </button>
+      </form>
+
+      <div class="text-center pt-2 border-t border-zinc-100">
+        <a href="/" class="text-xs text-zinc-400 hover:text-zinc-700 transition">← Kembali ke Form Penilaian</a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 🎛️ DASHBOARD ADMIN (HIDDEN BY DEFAULT) -->
+  <!-- ========================================================================= -->
+  <div id="adminDashboard" class="min-h-screen flex flex-col hidden">
+    
+    <!-- Top Header -->
+    <header class="bg-white border-b border-zinc-200 sticky top-0 z-30">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-zinc-900 text-white flex items-center justify-center font-bold text-xs tracking-wider">
+            ⚙️
+          </div>
+          <div>
+            <h1 class="font-bold text-sm text-zinc-900">Admin Dashboard</h1>
+            <p class="text-[11px] text-zinc-500">Penilaian Presentasi PGSD 5E</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <a href="/" target="_blank" class="px-3 py-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-medium transition flex items-center gap-1.5">
+            <span>Buka Website</span>
+            <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+            </svg>
+          </a>
+          <button onclick="handleLogout()" class="px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-xs font-medium transition cursor-pointer">
+            Keluar
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Admin Content -->
+    <main class="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+      <!-- Toast Alert -->
+      <div id="adminToast" class="hidden p-4 rounded-xl border text-xs font-medium flex items-center gap-2.5 transition-all">
+        <span id="adminToastIcon" class="font-bold"></span>
+        <span id="adminToastMsg" class="flex-1"></span>
+      </div>
+
+      <!-- CARD 1: BACKEND REST API CONFIGURATION -->
+      <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5">
+        <div class="border-b border-zinc-100 pb-3.5 flex items-center justify-between gap-2">
+          <div>
+            <h2 class="text-base font-bold text-zinc-900">Konfigurasi URL Backend API</h2>
+            <p class="text-xs text-zinc-500 mt-0.5">URL Google Apps Script Web App yang menerima & menyimpan data ke Spreadsheet.</p>
+          </div>
+          <span class="text-[11px] font-mono font-medium px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+            Terhubung
+          </span>
+        </div>
+
+        <div class="space-y-4">
+          <div class="space-y-1.5">
+            <label class="block text-xs font-semibold text-zinc-700">Google Apps Script Exec URL</label>
+            <div class="flex flex-col sm:flex-row gap-2">
+              <input 
+                type="url" 
+                id="inputApiUrl" 
+                placeholder="https://script.google.com/macros/s/.../exec" 
+                class="flex-1 px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs font-mono focus:border-zinc-900 outline-none bg-white"
+              >
+              <div class="flex gap-2">
+                <button 
+                  type="button" 
+                  onclick="testConnectionLive()" 
+                  id="btnTestConnection"
+                  class="px-4 py-2.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center gap-1.5 whitespace-nowrap"
+                >
+                  <span>⚡ Uji Koneksi</span>
+                </button>
+                <button 
+                  type="button" 
+                  onclick="saveApiUrl()" 
+                  class="px-5 py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 cursor-pointer shadow-xs whitespace-nowrap"
+                >
+                  Simpan Perubahan
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Ping Results -->
+          <div id="pingResultBox" class="hidden p-4 rounded-lg bg-zinc-50 border border-zinc-200 text-xs space-y-1.5 font-mono">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-zinc-800">Status Endpoint:</span>
+              <span id="pingStatusText" class="font-bold text-emerald-600">Online 200 OK</span>
+            </div>
+            <div class="text-[11px] text-zinc-500 flex items-center justify-between">
+              <span>Waktu Respon (Latency):</span>
+              <span id="pingLatencyText" class="font-bold text-zinc-700">-</span>
+            </div>
+            <div class="text-[11px] text-zinc-500 flex items-center justify-between">
+              <span>Kelompok Aktif Terbaca:</span>
+              <span id="pingGroupsCount" class="font-bold text-zinc-700">-</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 2: QUICK ACTIONS & DATABASE -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        
+        <!-- Google Sheet Link -->
+        <div class="bg-white rounded-xl border border-zinc-200 p-5 shadow-xs flex flex-col justify-between space-y-4">
+          <div>
+            <div class="text-xs font-semibold text-zinc-400 uppercase font-mono">Database Spreadsheet</div>
+            <h3 class="text-sm font-bold text-zinc-900 mt-1">Google Spreadsheet Penilaian</h3>
+            <p class="text-xs text-zinc-500 mt-0.5">Buka file spreadsheet untuk melihat seluruh respons penilaian dan master data kelompok.</p>
+          </div>
+
+          <a 
+            href="https://docs.google.com/spreadsheets/d/1D7nQcVEbmOKjgcJ6LzKeeDQPQxhAIiCELRC9eP9w7WU/edit" 
+            target="_blank" 
+            class="w-full py-2.5 px-4 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-semibold transition flex items-center justify-center gap-2"
+          >
+            <span>📊 Buka di Google Sheets</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+            </svg>
+          </a>
+        </div>
+
+        <!-- Purge Cache Action -->
+        <div class="bg-white rounded-xl border border-zinc-200 p-5 shadow-xs flex flex-col justify-between space-y-4">
+          <div>
+            <div class="text-xs font-semibold text-zinc-400 uppercase font-mono">Cache Control</div>
+            <h3 class="text-sm font-bold text-zinc-900 mt-1">Hapus & Segarkan Cache Lokal</h3>
+            <p class="text-xs text-zinc-500 mt-0.5">Gunakan tombol ini jika Anda baru saja mengubah nama kelompok atau konfigurasi di Spreadsheet.</p>
+          </div>
+
+          <button 
+            type="button" 
+            onclick="purgeLocalCache()" 
+            class="w-full py-2.5 px-4 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-2"
+          >
+            <span>🔄 Segarkan Cache Sekarang</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- CARD 3: SECURITY & PASSWORD CHANGE -->
+      <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-4">
+        <div class="border-b border-zinc-100 pb-3">
+          <h2 class="text-sm font-bold text-zinc-900">Keamanan Akses Admin</h2>
+          <p class="text-xs text-zinc-500 mt-0.5">Ubah kata sandi untuk melindungi halaman admin ini.</p>
+        </div>
+
+        <form onsubmit="handleChangePassword(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg">
+          <div class="space-y-1">
+            <label class="block text-xs font-semibold text-zinc-700">Kata Sandi Baru</label>
+            <input 
+              type="password" 
+              id="inputNewPassword" 
+              required 
+              minlength="4" 
+              placeholder="Minimal 4 karakter" 
+              class="w-full px-3 py-2 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none"
+            >
+          </div>
+          <div class="flex items-end">
+            <button 
+              type="submit" 
+              class="w-full py-2 px-4 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-semibold transition cursor-pointer"
+            >
+              Simpan Sandi Baru
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </main>
+
+    <!-- Admin Footer -->
+    <footer class="w-full py-4 text-center text-xs text-zinc-400 border-t border-zinc-200 bg-white mt-auto">
+      <div class="max-w-4xl mx-auto px-4 flex items-center justify-between">
+        <p>© 2026 PGSD Kelas 5E • FKIP ULM</p>
+        <p class="font-mono text-[11px]">Admin Control Panel</p>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 💻 JAVASCRIPT APP LOGIC -->
+  <!-- ========================================================================= -->
+  <script>
+    const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycby9JWeXZVkmnx2suT2eS5yk-sS39v-avHsaA4OV-D7fjcvsTGfawtQaCoxHcH90HjiRTg/exec";
+    const DEFAULT_ADMIN_PASS = "admin5e";
+
+    function getAdminPassword() {
+      return localStorage.getItem("PGSD_ADMIN_PASS") || DEFAULT_ADMIN_PASS;
+    }
+
+    function getApiUrl() {
+      return localStorage.getItem("PGSD_API_URL") || DEFAULT_API_URL;
+    }
+
+    // Check Session Auth on Load
+    document.addEventListener("DOMContentLoaded", function() {
+      const isAuth = sessionStorage.getItem("PGSD_ADMIN_AUTH");
+      if (isAuth === "true") {
+        showDashboard();
+      }
+    });
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const enteredPass = document.getElementById("inputPassword").value;
+      const validPass = getAdminPassword();
+
+      if (enteredPass === validPass) {
+        sessionStorage.setItem("PGSD_ADMIN_AUTH", "true");
+        showDashboard();
+      } else {
+        const card = document.getElementById("loginCard");
+        const errMsg = document.getElementById("loginErrorMsg");
+        errMsg.classList.remove("hidden");
+        card.classList.add("shake");
+        setTimeout(() => card.classList.remove("shake"), 500);
+      }
+    }
+
+    function showDashboard() {
+      document.getElementById("loginScreen").classList.add("hidden");
+      document.getElementById("adminDashboard").classList.remove("hidden");
+      document.getElementById("inputApiUrl").value = getApiUrl();
+      testConnectionLive();
+    }
+
+    function handleLogout() {
+      sessionStorage.removeItem("PGSD_ADMIN_AUTH");
+      window.location.reload();
+    }
+
+    function saveApiUrl() {
+      const val = document.getElementById("inputApiUrl").value.trim();
+      if (val) {
+        localStorage.setItem("PGSD_API_URL", val);
+        showAdminToast("URL API berhasil disimpan dan aktif!", "success");
+        testConnectionLive();
+      }
+    }
+
+    async function testConnectionLive() {
+      const apiUrl = document.getElementById("inputApiUrl").value.trim() || getApiUrl();
+      const box = document.getElementById("pingResultBox");
+      const statusText = document.getElementById("pingStatusText");
+      const latencyText = document.getElementById("pingLatencyText");
+      const groupsCount = document.getElementById("pingGroupsCount");
+      const btn = document.getElementById("btnTestConnection");
+
+      btn.disabled = true;
+      btn.innerHTML = `<span>⏳ Menguji...</span>`;
+      box.classList.remove("hidden");
+
+      const startTime = performance.now();
+
+      try {
+        const response = await fetch(`${apiUrl}?action=getInitialData`);
+        const result = await response.json();
+        const endTime = performance.now();
+        const latency = Math.round(endTime - startTime);
+
+        btn.disabled = false;
+        btn.innerHTML = `<span>⚡ Uji Koneksi</span>`;
+
+        if (result.success) {
+          statusText.textContent = "Online 200 OK";
+          statusText.className = "font-bold text-emerald-600 font-mono";
+          latencyText.textContent = `${latency} ms`;
+          groupsCount.textContent = `${(result.groups || []).length} Kelompok Aktif`;
+          showAdminToast(`Koneksi API Berhasil! (${latency} ms)`, "success");
+        } else {
+          statusText.textContent = "Error: " + (result.error || "Gagal");
+          statusText.className = "font-bold text-rose-600 font-mono";
+        }
+      } catch (err) {
+        btn.disabled = false;
+        btn.innerHTML = `<span>⚡ Uji Koneksi</span>`;
+        statusText.textContent = "Offline / Connection Failed";
+        statusText.className = "font-bold text-rose-600 font-mono";
+        latencyText.textContent = "-";
+        groupsCount.textContent = "-";
+        showAdminToast("Gagal menghubungi Google Apps Script: " + err, "error");
+      }
+    }
+
+    function purgeLocalCache() {
+      localStorage.removeItem("PGSD_CACHE_GROUPS");
+      localStorage.removeItem("PGSD_CACHE_CONFIG");
+      showAdminToast("Cache lokal telah dibersihkan. Memperbarui data dari spreadsheet...", "success");
+      testConnectionLive();
+    }
+
+    function handleChangePassword(e) {
+      e.preventDefault();
+      const newPass = document.getElementById("inputNewPassword").value.trim();
+      if (newPass.length >= 4) {
+        localStorage.setItem("PGSD_ADMIN_PASS", newPass);
+        document.getElementById("inputNewPassword").value = "";
+        showAdminToast("Kata sandi admin berhasil diperbarui!", "success");
+      } else {
+        showAdminToast("Kata sandi minimal 4 karakter!", "warning");
+      }
+    }
+
+    function showAdminToast(msg, type = "info") {
+      const toast = document.getElementById("adminToast");
+      const icon = document.getElementById("adminToastIcon");
+      const text = document.getElementById("adminToastMsg");
+
+      text.textContent = msg;
+      toast.className = "p-4 rounded-xl border text-xs font-medium flex items-center gap-2.5 transition-all";
+
+      if (type === "success") {
+        toast.classList.add("bg-emerald-50", "text-emerald-800", "border-emerald-200");
+        icon.textContent = "✓";
+      } else if (type === "error") {
+        toast.classList.add("bg-rose-50", "text-rose-800", "border-rose-200");
+        icon.textContent = "✕";
+      } else {
+        toast.classList.add("bg-amber-50", "text-amber-800", "border-amber-200");
+        icon.textContent = "!";
+      }
+
+      toast.classList.remove("hidden");
+      setTimeout(() => {
+        toast.classList.add("hidden");
+      }, 4000);
+    }
+  </script>
+</body>
+</html>
