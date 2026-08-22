@@ -630,7 +630,11 @@
       <!-- Modal Header -->
       <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
         <div class="flex items-center gap-2">
-          <span class="w-6 h-6 rounded-md bg-zinc-900 text-white flex items-center justify-center text-xs font-bold font-mono">i</span>
+          <div class="w-7 h-7 rounded-lg bg-zinc-900 text-white flex items-center justify-center text-xs font-bold">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
           <div>
             <h3 class="text-sm font-bold text-zinc-900" id="infoModalGroupName">Informasi Kelompok</h3>
             <p class="text-[11px] text-zinc-500" id="infoModalGroupSesi">Sesi: Minggu 1</p>
@@ -654,6 +658,45 @@
       <div class="pt-2 border-t border-zinc-100">
         <button type="button" onclick="closeGroupInfoModal()" class="w-full py-2 px-4 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-semibold transition cursor-pointer">
           Tutup Informasi
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 👤 MODAL DETAIL SEMUA MASUKAN MAHASISWA (FULL REVIEW OVERLAY) -->
+  <!-- ========================================================================= -->
+  <div id="studentReviewModal" class="hidden fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-lg w-full p-5 sm:p-6 space-y-4 shadow-xl border border-zinc-200 step-fade max-h-[88vh] flex flex-col">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-zinc-100 pb-3 flex-shrink-0">
+        <div class="min-w-0 pr-2">
+          <div class="flex flex-wrap items-center gap-2">
+            <h3 class="text-sm sm:text-base font-bold text-zinc-900 leading-snug break-words" id="reviewModalStudentName">Nama Mahasiswa</h3>
+            <span class="text-[10px] font-mono text-zinc-500 bg-zinc-100 border border-zinc-200 px-1.5 py-0.5 rounded flex-shrink-0" id="reviewModalStudentNim">NIM</span>
+          </div>
+          <p class="text-[11px] text-zinc-500 mt-0.5" id="reviewModalGroupInfo">Kelompok 1 • Minggu 1</p>
+        </div>
+        <button type="button" onclick="closeStudentReviewModal()" class="w-7 h-7 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center text-sm font-bold cursor-pointer transition flex-shrink-0">✕</button>
+      </div>
+
+      <!-- Modal Reviews List (Scrollable) -->
+      <div class="space-y-2 flex-1 overflow-y-auto custom-scrollbar pr-1">
+        <div class="text-xs font-semibold text-zinc-700 flex items-center justify-between sticky top-0 bg-white py-1">
+          <span>Seluruh Catatan Evaluasi Audiens:</span>
+          <span id="reviewModalReviewCount" class="text-[11px] text-zinc-500 font-mono">0 Masukan</span>
+        </div>
+        <ul id="reviewModalReviewsList" class="space-y-2.5 pt-1">
+          <!-- Dynamic All Reviews -->
+        </ul>
+      </div>
+
+      <!-- Modal Action -->
+      <div class="pt-2 border-t border-zinc-100 flex-shrink-0">
+        <button type="button" onclick="closeStudentReviewModal()" class="w-full py-2.5 px-4 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition cursor-pointer shadow-xs">
+          Tutup Jendela Ulasan
         </button>
       </div>
 
@@ -1346,7 +1389,7 @@
       switchRekapSubView(currentRekapSubView);
     }
 
-    // 1. Render Rekap Kelompok View (With Info Button "i")
+    // 1. Render Rekap Kelompok View (With Refined SVG Info Button "i")
     function renderRekapKelompok(summaryList, isPublicReviewVisible) {
       const container = document.getElementById("rekapKelompokContainer");
       container.innerHTML = "";
@@ -1368,15 +1411,17 @@
         card.innerHTML = `
           <div class="flex items-center justify-between gap-3 border-b border-zinc-100 pb-3">
             <div>
-              <div class="flex items-center gap-1.5">
+              <div class="flex items-center gap-2">
                 <h4 class="font-bold text-zinc-900 text-sm sm:text-base">${grp.kelompok}</h4>
                 <button 
                   type="button" 
                   onclick="openGroupInfoModal('${grp.kelompok}')" 
-                  title="Lihat Anggota Kelompok" 
-                  class="w-5 h-5 rounded-full bg-zinc-100 hover:bg-zinc-900 hover:text-white text-zinc-600 border border-zinc-300 text-[11px] font-bold inline-flex items-center justify-center transition cursor-pointer flex-shrink-0"
+                  title="Detail Anggota Kelompok" 
+                  class="p-1 rounded-md bg-zinc-100 hover:bg-zinc-900 hover:text-white text-zinc-600 border border-zinc-200 text-xs transition cursor-pointer flex items-center justify-center flex-shrink-0"
                 >
-                  i
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
                 </button>
               </div>
               <span class="text-[11px] text-zinc-500 font-medium">${grp.sesi}</span>
@@ -1405,7 +1450,7 @@
       });
     }
 
-    // 2. Render Rekap Individu Mahasiswa (Accordion & Searchable)
+    // 2. Render Rekap Individu Mahasiswa (Non-Truncate Name, Top 3 Reviews + Modal Selengkapnya)
     function renderRekapIndividu(summaryList, isPublicReviewVisible) {
       const container = document.getElementById("rekapIndividuContainer");
       container.innerHTML = "";
@@ -1442,7 +1487,9 @@
           } else if (ulasanList.length === 0) {
             reviewsContent = `<p class="text-xs text-zinc-400 italic">Belum ada catatan ulasan tertulis.</p>`;
           } else {
-            const listItems = ulasanList.map(u => `
+            // Tampilkan maksimal 3 ulasan teratas
+            const top3Reviews = ulasanList.slice(0, 3);
+            const listItems = top3Reviews.map(u => `
               <li class="bg-white p-3 rounded-lg border border-zinc-200 text-xs text-zinc-700 space-y-1.5 shadow-2xs">
                 <p class="leading-relaxed text-zinc-800">"${u.ulasan}"</p>
                 <div class="flex items-center justify-between text-[10px] text-zinc-400 pt-1 border-t border-zinc-100">
@@ -1452,45 +1499,69 @@
               </li>
             `).join("");
 
+            let seeMoreBtn = "";
+            if (ulasanList.length > 3) {
+              const safeName = sName.replace(/'/g, "\\'");
+              const safeNim = sNim.replace(/'/g, "\\'");
+              const safeGroup = grp.kelompok.replace(/'/g, "\\'");
+              const safeSesi = grp.sesi.replace(/'/g, "\\'");
+
+              seeMoreBtn = `
+                <div class="pt-2 text-center">
+                  <button 
+                    type="button" 
+                    onclick="event.stopPropagation(); openStudentReviewModal('${safeName}', '${safeNim}', '${safeGroup}', '${safeSesi}')" 
+                    class="w-full py-2 px-3 rounded-lg bg-white hover:bg-zinc-100 border border-zinc-200 text-zinc-800 text-xs font-semibold transition cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
+                  >
+                    <span>Lihat Selengkapnya (${ulasanList.length} Masukan)</span>
+                    <span>→</span>
+                  </button>
+                </div>
+              `;
+            }
+
             reviewsContent = `
-              <ul class="space-y-2 max-h-56 overflow-y-auto custom-scrollbar">
+              <ul class="space-y-2">
                 ${listItems}
               </ul>
+              ${seeMoreBtn}
             `;
           }
 
           card.innerHTML = `
-            <!-- Clickable Accordion Header (Default Collapsed) -->
+            <!-- Clickable Accordion Header (Non-Truncate Full Name, Default Collapsed) -->
             <div 
               onclick="toggleAccordion('${cardId}')" 
-              class="p-3.5 sm:p-4 flex items-center justify-between gap-3 cursor-pointer hover:bg-zinc-50/80 transition select-none"
+              class="p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 cursor-pointer hover:bg-zinc-50/80 transition select-none"
             >
               <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-2">
-                  <h4 class="font-bold text-zinc-900 text-xs sm:text-sm truncate">${sName}</h4>
-                  ${sNim ? `<span class="text-[10px] font-mono text-zinc-400 bg-zinc-100 px-1.5 py-0.2 rounded">${sNim}</span>` : ''}
+                <div class="flex flex-wrap items-center gap-2">
+                  <h4 class="font-bold text-zinc-900 text-xs sm:text-sm leading-snug break-words">${sName}</h4>
+                  ${sNim ? `<span class="text-[10px] font-mono text-zinc-500 bg-zinc-100 border border-zinc-200 px-1.5 py-0.5 rounded flex-shrink-0">${sNim}</span>` : ''}
                 </div>
-                <p class="text-[11px] text-zinc-500 truncate mt-0.5">${grp.kelompok} • ${grp.sesi}</p>
+                <p class="text-[11px] text-zinc-500 mt-0.5">${grp.kelompok} • ${grp.sesi}</p>
               </div>
               
-              <div class="flex items-center gap-2 flex-shrink-0">
-                <span class="text-[11px] font-mono font-bold bg-zinc-100 text-zinc-800 px-2 py-0.5 rounded border border-zinc-200">
-                  ${votesCount} Suara
-                </span>
-                <span class="text-[11px] font-mono font-medium bg-zinc-50 text-zinc-600 px-2 py-0.5 rounded border border-zinc-200">
-                  ${ulasanList.length} Masukan
-                </span>
-                <span id="chevron_${cardId}" class="text-zinc-400 text-xs transition-transform duration-200 transform inline-block font-mono">
+              <div class="flex items-center justify-between sm:justify-end gap-2 flex-shrink-0 pt-1 sm:pt-0 border-t sm:border-t-0 border-zinc-100">
+                <div class="flex items-center gap-1.5">
+                  <span class="text-[11px] font-mono font-bold bg-zinc-100 text-zinc-800 px-2 py-0.5 rounded border border-zinc-200">
+                    ${votesCount} Suara
+                  </span>
+                  <span class="text-[11px] font-mono font-medium bg-zinc-50 text-zinc-600 px-2 py-0.5 rounded border border-zinc-200">
+                    ${ulasanList.length} Masukan
+                  </span>
+                </div>
+                <span id="chevron_${cardId}" class="text-zinc-400 text-xs transition-transform duration-200 transform inline-block font-mono pl-1">
                   ▼
                 </span>
               </div>
             </div>
 
-            <!-- Collapsible Review Content (Default Hidden) -->
+            <!-- Collapsible Review Content (Top 3 Reviews) -->
             <div id="content_${cardId}" class="hidden border-t border-zinc-100 p-4 bg-zinc-50/60 space-y-2.5">
               <h5 class="text-[11px] font-semibold text-zinc-600 flex items-center justify-between">
-                <span>Catatan Masukan & Evaluasi Audiens:</span>
-                <span class="text-[10px] font-mono text-zinc-400">${ulasanList.length} Respons</span>
+                <span>Catatan Masukan Audiens (3 Teratas):</span>
+                <span class="text-[10px] font-mono text-zinc-400">Total: ${ulasanList.length} Respons</span>
               </h5>
               ${reviewsContent}
             </div>
@@ -1605,6 +1676,57 @@
 
     function closeGroupInfoModal() {
       document.getElementById("groupInfoModal").classList.add("hidden");
+    }
+
+    // Modal Detail Seluruh Masukan Mahasiswa
+    function openStudentReviewModal(studentName, studentNim, groupName, groupSesi) {
+      const modal = document.getElementById("studentReviewModal");
+      const nameEl = document.getElementById("reviewModalStudentName");
+      const nimEl = document.getElementById("reviewModalStudentNim");
+      const groupEl = document.getElementById("reviewModalGroupInfo");
+      const countEl = document.getElementById("reviewModalReviewCount");
+      const listEl = document.getElementById("reviewModalReviewsList");
+
+      nameEl.textContent = studentName;
+      nimEl.textContent = studentNim || "NIM Tidak Terdata";
+      groupEl.textContent = `${groupName} • ${groupSesi}`;
+      listEl.innerHTML = "";
+
+      let allReviews = [];
+      if (currentRekapData && currentRekapData.summary) {
+        const foundGrp = currentRekapData.summary.find(g => g.kelompok === groupName);
+        if (foundGrp && foundGrp.evaluasiList && foundGrp.evaluasiList[studentName]) {
+          allReviews = foundGrp.evaluasiList[studentName];
+        }
+      }
+
+      countEl.textContent = `${allReviews.length} Masukan`;
+
+      if (allReviews.length === 0) {
+        listEl.innerHTML = `<li class="text-xs text-zinc-400 italic p-4 text-center bg-zinc-50 border border-zinc-200 rounded-lg">Belum ada catatan masukan tertulis untuk pemateri ini.</li>`;
+      } else {
+        allReviews.forEach((u, idx) => {
+          const li = document.createElement("li");
+          li.className = "bg-white p-3.5 rounded-lg border border-zinc-200 text-xs text-zinc-700 space-y-1.5 shadow-2xs";
+          li.innerHTML = `
+            <div class="flex items-center justify-between text-[10px] text-zinc-400 font-mono">
+              <span>#${idx + 1} Catatan Audiens</span>
+              <span>${groupSesi}</span>
+            </div>
+            <p class="leading-relaxed text-zinc-900 font-medium">"${u.ulasan}"</p>
+            <div class="text-[10px] text-zinc-500 pt-1 border-t border-zinc-100 text-right">
+              Penilai: <strong class="text-zinc-700">${u.penilai}</strong>
+            </div>
+          `;
+          listEl.appendChild(li);
+        });
+      }
+
+      modal.classList.remove("hidden");
+    }
+
+    function closeStudentReviewModal() {
+      document.getElementById("studentReviewModal").classList.add("hidden");
     }
 
     function showToast(message, type = "info") {
