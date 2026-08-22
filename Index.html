@@ -81,7 +81,7 @@
   <!-- 🧭 DISTINCT CONTRAST HEADER -->
   <!-- ========================================================================= -->
   <header class="sticky top-0 z-40 bg-zinc-950 text-white border-b border-zinc-800 shadow-md">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
       
       <!-- Brand & Title -->
       <div class="flex items-center gap-3 min-w-0">
@@ -114,7 +114,7 @@
     </div>
 
     <!-- Minimal View Switcher (Dark Nav Tabs) -->
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 pb-2.5 pt-0.5">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 pb-2.5 pt-0.5">
       <div class="grid grid-cols-2 p-1 bg-zinc-900 rounded-lg border border-zinc-800 text-xs font-semibold">
         <button 
           id="tabFormBtn" 
@@ -137,7 +137,7 @@
   <!-- ========================================================================= -->
   <!-- 📄 MAIN CONTAINER -->
   <!-- ========================================================================= -->
-  <main class="flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 py-5 sm:py-7 space-y-6">
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-5 sm:py-7 space-y-6">
 
     <!-- FLOATING TOAST NOTIFICATION -->
     <div id="toast" class="hidden fixed bottom-5 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-sm z-50 p-3.5 rounded-xl shadow-lg text-xs font-medium flex items-center gap-2.5 transition-all border">
@@ -151,7 +151,7 @@
     <div id="viewForm" class="space-y-5">
 
       <!-- INFORMASI FORMULIR & IDENTITAS AKADEMIK -->
-      <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-6 shadow-xs space-y-4">
+      <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-4">
         <div>
           <h2 class="text-base sm:text-lg font-bold text-zinc-900 leading-snug">
             Penilaian Presentasi Mahasiswa Kelas 5E PGSD
@@ -161,15 +161,23 @@
           </p>
         </div>
 
-        <!-- Rincian Mata Kuliah & Dosen Pengampu -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-zinc-100 text-xs">
+        <!-- Rincian Mata Kuliah, Dosen, Kelas & Jurusan -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-3 border-t border-zinc-100 text-xs">
           <div class="p-3 rounded-lg bg-zinc-50 border border-zinc-200/80">
             <span class="text-zinc-400 block text-[11px] font-medium">Mata Kuliah:</span>
-            <span class="font-semibold text-zinc-900 mt-0.5 block" id="infoMatkul">Bimbingan Konseling di SD</span>
+            <span class="font-semibold text-zinc-900 mt-0.5 block truncate" id="infoMatkul">Bimbingan Konseling di SD</span>
           </div>
           <div class="p-3 rounded-lg bg-zinc-50 border border-zinc-200/80">
             <span class="text-zinc-400 block text-[11px] font-medium">Dosen Pengampu:</span>
-            <span class="font-semibold text-zinc-900 mt-0.5 block" id="infoDosen">Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.</span>
+            <span class="font-semibold text-zinc-900 mt-0.5 block truncate" id="infoDosen">Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.</span>
+          </div>
+          <div class="p-3 rounded-lg bg-zinc-50 border border-zinc-200/80">
+            <span class="text-zinc-400 block text-[11px] font-medium">Kelas:</span>
+            <span class="font-semibold text-zinc-900 mt-0.5 block truncate" id="infoKelas">5E</span>
+          </div>
+          <div class="p-3 rounded-lg bg-zinc-50 border border-zinc-200/80">
+            <span class="text-zinc-400 block text-[11px] font-medium">Program Studi:</span>
+            <span class="font-semibold text-zinc-900 mt-0.5 block truncate" id="infoJurusan">PGSD</span>
           </div>
         </div>
       </div>
@@ -197,16 +205,16 @@
 
         <!-- Step Navigation Tabs -->
         <div class="grid grid-cols-4 gap-1.5 pt-1 text-center">
-          <button type="button" onclick="goToStep(1)" id="stepTab_1" class="py-1 px-1 rounded text-[11px] font-medium transition text-zinc-900 bg-zinc-100 border border-zinc-300">
+          <button type="button" onclick="goToStep(1)" id="stepTab_1" class="py-1.5 px-1 rounded text-[11px] font-medium transition text-zinc-900 bg-zinc-100 border border-zinc-300">
             1. Identitas
           </button>
-          <button type="button" onclick="goToStep(2)" id="stepTab_2" class="py-1 px-1 rounded text-[11px] font-medium transition text-zinc-400 bg-zinc-50 border border-transparent">
+          <button type="button" onclick="goToStep(2)" id="stepTab_2" class="py-1.5 px-1 rounded text-[11px] font-medium transition text-zinc-400 bg-zinc-50 border border-transparent">
             2. Kelompok
           </button>
-          <button type="button" onclick="goToStep(3)" id="stepTab_3" class="py-1 px-1 rounded text-[11px] font-medium transition text-zinc-400 bg-zinc-50 border border-transparent">
+          <button type="button" onclick="goToStep(3)" id="stepTab_3" class="py-1.5 px-1 rounded text-[11px] font-medium transition text-zinc-400 bg-zinc-50 border border-transparent">
             3. Penilaian
           </button>
-          <button type="button" onclick="goToStep(4)" id="stepTab_4" class="py-1 px-1 rounded text-[11px] font-medium transition text-zinc-400 bg-zinc-50 border border-transparent">
+          <button type="button" onclick="goToStep(4)" id="stepTab_4" class="py-1.5 px-1 rounded text-[11px] font-medium transition text-zinc-400 bg-zinc-50 border border-transparent">
             4. Evaluasi
           </button>
         </div>
@@ -237,42 +245,45 @@
               </div>
             </div>
 
-            <!-- Email Field -->
-            <div class="space-y-1.5">
-              <label class="block text-xs font-semibold text-zinc-700">
-                Email Mahasiswa <span class="text-rose-500">*</span>
-              </label>
-              <div class="relative">
-                <input 
-                  type="email" 
-                  id="inputEmail" 
-                  required 
-                  inputmode="email"
-                  placeholder="nama.nim@email.ac.id" 
-                  class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 outline-none transition bg-white placeholder-zinc-400"
-                  oninput="validateEmailLive(this.value); saveFormDraft();"
-                >
-                <div id="emailCheckIcon" class="absolute right-3 top-2.5 hidden">
-                  <span class="text-emerald-600 font-bold text-xs">✓ Valid</span>
+            <!-- Responsive 2-Column Inputs on Tablet/Laptop -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Email Field -->
+              <div class="space-y-1.5">
+                <label class="block text-xs font-semibold text-zinc-700">
+                  Email Mahasiswa <span class="text-rose-500">*</span>
+                </label>
+                <div class="relative">
+                  <input 
+                    type="email" 
+                    id="inputEmail" 
+                    required 
+                    inputmode="email"
+                    placeholder="nama.nim@email.ac.id" 
+                    class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 outline-none transition bg-white placeholder-zinc-400"
+                    oninput="validateEmailLive(this.value); saveFormDraft();"
+                  >
+                  <div id="emailCheckIcon" class="absolute right-3 top-2.5 hidden">
+                    <span class="text-emerald-600 font-bold text-xs">✓ Valid</span>
+                  </div>
                 </div>
+                <p id="emailValidationMsg" class="text-[11px] font-medium hidden"></p>
               </div>
-              <p id="emailValidationMsg" class="text-[11px] font-medium hidden"></p>
-            </div>
 
-            <!-- Nama Lengkap Field -->
-            <div class="space-y-1.5">
-              <label class="block text-xs font-semibold text-zinc-700">
-                Nama Lengkap Penilai <span class="text-rose-500">*</span>
-              </label>
-              <input 
-                type="text" 
-                id="inputNama" 
-                required 
-                autocapitalize="words"
-                placeholder="Tuliskan nama lengkap Anda..." 
-                class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 outline-none transition bg-white placeholder-zinc-400"
-                oninput="saveFormDraft();"
-              >
+              <!-- Nama Lengkap Field -->
+              <div class="space-y-1.5">
+                <label class="block text-xs font-semibold text-zinc-700">
+                  Nama Lengkap Penilai <span class="text-rose-500">*</span>
+                </label>
+                <input 
+                  type="text" 
+                  id="inputNama" 
+                  required 
+                  autocapitalize="words"
+                  placeholder="Tuliskan nama lengkap Anda..." 
+                  class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 outline-none transition bg-white placeholder-zinc-400"
+                  oninput="saveFormDraft();"
+                >
+              </div>
             </div>
 
           </div>
@@ -318,8 +329,8 @@
               <span>Memuat daftar kelompok...</span>
             </div>
 
-            <!-- Group Cards -->
-            <div id="groupsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 hidden">
+            <!-- Group Cards (Responsive 3-Column on Laptop/Wide) -->
+            <div id="groupsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 hidden">
               <!-- Dynamic Group Cards -->
             </div>
 
@@ -422,7 +433,7 @@
             </div>
           </div>
 
-          <!-- 3B: Presentator Terbaik -->
+          <!-- 3B: Presentator Terbaik (Responsive 3-Column Grid on Laptop) -->
           <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5">
             <div class="flex items-center justify-between border-b border-zinc-100 pb-3.5">
               <div>
@@ -436,7 +447,7 @@
             </div>
 
             <!-- List Presenter -->
-            <div id="bestPresenterList" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div id="bestPresenterList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
               <!-- Dynamic Presenters -->
             </div>
           </div>
@@ -472,19 +483,31 @@
               <p class="text-xs text-zinc-500 mt-0.5">Tuliskan masukan dan tanggapan objektif untuk setiap anggota kelompok.</p>
             </div>
 
-            <!-- List Textarea Dynamic Inputs -->
-            <div id="evaluationInputsContainer" class="space-y-4">
+            <!-- List Textarea Dynamic Inputs (Responsive 2-Column Grid on Laptop) -->
+            <div id="evaluationInputsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <!-- Dynamic Member Feedback Textareas -->
             </div>
 
             <!-- Summary Review Box -->
-            <div class="p-4 rounded-lg bg-zinc-50 border border-zinc-200 space-y-2 text-xs text-zinc-600">
+            <div class="p-4 sm:p-5 rounded-xl bg-zinc-50 border border-zinc-200/80 space-y-2 text-xs text-zinc-600">
               <div class="font-semibold text-zinc-900 text-xs uppercase tracking-wider font-mono">Ringkasan Penilaian:</div>
-              <div class="grid grid-cols-2 gap-2 text-xs pt-1">
-                <div>Penilai: <span id="summaryPenilai" class="font-semibold text-zinc-900">-</span></div>
-                <div>Kelompok: <span id="summaryKelompok" class="font-semibold text-zinc-900">-</span></div>
-                <div>Nilai Presentasi: <span id="summarySkor" class="font-mono font-bold text-zinc-900">-</span></div>
-                <div>Presentator Terbaik: <span id="summaryPresentator" class="font-semibold text-zinc-900">-</span></div>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs pt-1">
+                <div class="bg-white p-2.5 rounded-lg border border-zinc-200/60">
+                  <span class="text-[10px] text-zinc-400 block font-mono">PENILAI</span>
+                  <span id="summaryPenilai" class="font-semibold text-zinc-900 truncate block mt-0.5">-</span>
+                </div>
+                <div class="bg-white p-2.5 rounded-lg border border-zinc-200/60">
+                  <span class="text-[10px] text-zinc-400 block font-mono">KELOMPOK</span>
+                  <span id="summaryKelompok" class="font-semibold text-zinc-900 truncate block mt-0.5">-</span>
+                </div>
+                <div class="bg-white p-2.5 rounded-lg border border-zinc-200/60">
+                  <span class="text-[10px] text-zinc-400 block font-mono">SKOR AKHIR</span>
+                  <span id="summarySkor" class="font-mono font-bold text-zinc-900 text-sm block mt-0.5">-</span>
+                </div>
+                <div class="bg-white p-2.5 rounded-lg border border-zinc-200/60">
+                  <span class="text-[10px] text-zinc-400 block font-mono">PRESENTATOR</span>
+                  <span id="summaryPresentator" class="font-semibold text-zinc-900 truncate block mt-0.5">-</span>
+                </div>
               </div>
             </div>
 
@@ -642,13 +665,13 @@
           <p class="text-xs font-medium">Memuat data rekapitulasi...</p>
         </div>
 
-        <!-- SUB-VIEW 1: REKAP KELOMPOK -->
-        <div id="rekapKelompokContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4 hidden">
+        <!-- SUB-VIEW 1: REKAP KELOMPOK (Responsive 3-Column on Laptop) -->
+        <div id="rekapKelompokContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 hidden">
           <!-- Dynamic Kelompok Cards -->
         </div>
 
-        <!-- SUB-VIEW 2: REKAP INDIVIDU MAHASISWA (ACCORDION) -->
-        <div id="rekapIndividuContainer" class="space-y-3 hidden">
+        <!-- SUB-VIEW 2: REKAP INDIVIDU MAHASISWA (Responsive 2-Column on Laptop) -->
+        <div id="rekapIndividuContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-3.5 hidden">
           <!-- Dynamic Individual Student Accordion Cards -->
         </div>
 
@@ -667,7 +690,7 @@
   <!-- 🦶 MINIMAL FOOTER -->
   <!-- ========================================================================= -->
   <footer class="w-full py-4 text-center text-xs text-zinc-400 border-t border-zinc-200 bg-white mt-auto">
-    <div class="max-w-3xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2">
       <p>© 2026 PGSD Kelas 5E • FKIP Universitas Lambung Mangkurat</p>
       <p class="font-mono text-[11px]">Sistem Penilaian Perkuliahan</p>
     </div>
@@ -901,8 +924,12 @@
       // Update Academic Card
       const infoMatkulEl = document.getElementById("infoMatkul");
       const infoDosenEl = document.getElementById("infoDosen");
+      const infoKelasEl = document.getElementById("infoKelas");
+      const infoJurusanEl = document.getElementById("infoJurusan");
       if (infoMatkulEl) infoMatkulEl.textContent = matkul;
       if (infoDosenEl) infoDosenEl.textContent = dosen;
+      if (infoKelasEl) infoKelasEl.textContent = appConfig["Kelas"] || "5E";
+      if (infoJurusanEl) infoJurusanEl.textContent = appConfig["Jurusan"] || "PGSD";
 
       const minVal = parseInt(appConfig["Nilai_Kelompok_Min"] || 50);
       const maxVal = parseInt(appConfig["Nilai_Kelompok_Max"] || 100);
