@@ -818,7 +818,7 @@
     <!-- Admin Footer -->
     <footer class="w-full py-4 text-xs text-zinc-500 border-t border-zinc-200 bg-white mt-auto">
       <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
-        <p>© 2026 PGSD <a href="/admin" class="hover:text-zinc-950 underline font-semibold transition cursor-pointer text-zinc-700">Kelas 5E</a></p>
+        <p>© 2026 PGSD <a href="/admin" class="font-bold text-emerald-700 hover:text-emerald-800 transition cursor-pointer no-underline">Kelas 5E</a></p>
         <p class="font-medium text-zinc-500">FKIP Universitas Lambung Mangkurat</p>
       </div>
     </footer>
@@ -1021,12 +1021,12 @@
           <span class="font-mono text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded text-[10px]">1 Baris = 1 Mahasiswa</span>
         </div>
         <p class="text-[11px] text-zinc-600">
-          Gunakan pemisah <strong>Garis Tegak (|)</strong> atau <strong>Tab (salinan kolom Excel)</strong>:
+          Gunakan pemisah <strong>Garis Miring (/)</strong> atau <strong>Tab (salinan kolom Excel)</strong>:
         </p>
         <div class="bg-zinc-900 text-zinc-200 font-mono text-[10.5px] p-2.5 rounded-lg overflow-x-auto select-all leading-relaxed">
-Kelompok 1 | Minggu 1 | 2310125110001 | Ahmad Fauzi<br>
-Kelompok 1 | Minggu 1 | 2310125110002 | Siti Nurhaliza<br>
-Kelompok 2 | Minggu 1 | 2310125110003 | Budi Santoso
+Kelompok 1 / Minggu 1 / 2310125110001 / Ahmad Fauzi<br>
+Kelompok 1 / Minggu 1 / 2310125110002 / Siti Nurhaliza<br>
+Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         </div>
       </div>
 
@@ -1049,7 +1049,7 @@ Kelompok 2 | Minggu 1 | 2310125110003 | Budi Santoso
         <textarea 
           id="batchInputText" 
           rows="6" 
-          placeholder="Kelompok 1 | Minggu 1 | 2310125110001 | Ahmad Fauzi&#10;Kelompok 1 | Minggu 1 | 2310125110002 | Siti Nurhaliza&#10;Kelompok 2 | Minggu 1 | 2310125110003 | Budi Santoso"
+          placeholder="Kelompok 1 / Minggu 1 / 2310125110001 / Ahmad Fauzi&#10;Kelompok 1 / Minggu 1 / 2310125110002 / Siti Nurhaliza&#10;Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso"
           oninput="parseBatchInputLive()"
           class="w-full flex-1 p-3 rounded-xl border border-zinc-300 text-xs font-mono focus:border-zinc-900 outline-none transition bg-white custom-scrollbar resize-none placeholder-zinc-400 leading-relaxed"
         ></textarea>
@@ -2256,9 +2256,11 @@ Kelompok 2 | Minggu 1 | 2310125110003 | Budi Santoso
         let line = rawLine.trim();
         if (!line) return;
 
-        // Mendukung pemisah Garis Tegak (|) atau Tab (\t) atau Koma (,)
+        // Mendukung pemisah Garis Miring (/), Tab (\t), Garis Tegak (|), atau Koma (,)
         let parts = [];
-        if (line.includes("\t")) {
+        if (line.includes("/")) {
+          parts = line.split("/").map(s => s.trim());
+        } else if (line.includes("\t")) {
           parts = line.split("\t").map(s => s.trim());
         } else if (line.includes("|")) {
           parts = line.split("|").map(s => s.trim());

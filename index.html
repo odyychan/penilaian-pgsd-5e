@@ -804,7 +804,7 @@
   <!-- ========================================================================= -->
   <footer class="w-full py-4 text-xs text-zinc-500 border-t border-zinc-200 bg-white mt-auto">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
-      <p>© 2026 PGSD <a href="/admin" class="hover:text-zinc-950 underline font-semibold transition cursor-pointer text-zinc-700">Kelas 5E</a></p>
+      <p>© 2026 PGSD <a href="/admin" class="font-bold text-emerald-700 hover:text-emerald-800 transition cursor-pointer no-underline">Kelas 5E</a></p>
       <p class="font-medium text-zinc-500">FKIP Universitas Lambung Mangkurat</p>
     </div>
   </footer>
@@ -1783,42 +1783,61 @@
       const searchBox = document.getElementById("individuSearchControlBox");
       const chartOverviewCard = document.getElementById("rekapChartOverviewCard");
 
-      if (!isSilent) {
-        loading.classList.remove("hidden");
-        empty.classList.add("hidden");
-        kelompokBox.classList.add("hidden");
-        individuBox.classList.add("hidden");
+      const hasLocalData = currentRekapData && currentRekapData.summary && currentRekapData.summary.length > 0;
+
+      if (!hasLocalData && !isSilent) {
+        if (loading) loading.classList.remove("hidden");
+        if (empty) empty.classList.add("hidden");
+        if (kelompokBox) kelompokBox.classList.add("hidden");
+        if (individuBox) individuBox.classList.add("hidden");
         if (searchBox) searchBox.classList.add("hidden");
         if (chartOverviewCard) chartOverviewCard.classList.add("hidden");
+      } else if (hasLocalData) {
+        if (loading) loading.classList.add("hidden");
+        if (empty) empty.classList.add("hidden");
+        populateRekapFilter(currentRekapData.summary);
+        renderBothRekapViews();
       }
 
       const apiUrl = getApiUrl();
 
       try {
-        const response = await fetch(`${apiUrl}?action=getRecapData`);
+        const fetchWithTimeout = (url, ms = 8000) => {
+          return Promise.race([
+            fetch(url),
+            new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), ms))
+          ]);
+        };
+
+        const response = await fetchWithTimeout(`${apiUrl}?action=getRecapData&_t=${Date.now()}`, 8000);
         const res = await response.json();
 
-        loading.classList.add("hidden");
-        if (res.success) {
+        if (loading) loading.classList.add("hidden");
+        if (res && res.success) {
           currentRekapData = res;
           localStorage.setItem("PGSD_CACHE_REKAP", JSON.stringify(res));
 
           if (!res.summary || res.summary.length === 0) {
-            empty.classList.remove("hidden");
+            if (empty) empty.classList.remove("hidden");
             if (chartOverviewCard) chartOverviewCard.classList.add("hidden");
-            kelompokBox.classList.add("hidden");
-            individuBox.classList.add("hidden");
+            if (kelompokBox) kelompokBox.classList.add("hidden");
+            if (individuBox) individuBox.classList.add("hidden");
           } else {
-            empty.classList.add("hidden");
+            if (empty) empty.classList.add("hidden");
             populateRekapFilter(res.summary);
             renderBothRekapViews();
           }
         } else {
-          if (!isSilent) showToast("Gagal memuat rekap: " + res.error, "error");
+          if (!hasLocalData && empty) empty.classList.remove("hidden");
+          if (!isSilent) showToast("Info rekap: " + (res?.error || "Gagal memuat rekap"), "warning");
         }
       } catch (err) {
-        loading.classList.add("hidden");
-        if (!isSilent) showToast("Koneksi rekap error: " + err, "error");
+        if (loading) loading.classList.add("hidden");
+        if (!hasLocalData) {
+          if (empty) empty.classList.remove("hidden");
+        } else {
+          renderBothRekapViews();
+        }
       }
     }
 
@@ -2417,6 +2436,10 @@
         }
       ];
 
+      renderConfigHeader();
+      renderGroupOptions();
+    }
+
     // =========================================================================
     // 🖨️ FITUR CETAK REKAP HASIL LAPORAN RESMI (PRINT & PDF)
     // =========================================================================
@@ -2484,11 +2507,17 @@
       // Hitung Rata-Rata Keseluruhan
       let totalAllScore = 0;
       let totalAllPenilai = 0;
+      let evaluatedCount = 0;
       summaryList.forEach(g => {
-        totalAllScore += (parseFloat(g.rataRata) || 0);
-        totalAllPenilai += (parseInt(g.totalPenilai) || 0);
+        const s = parseFloat(g.rataRataSkor || g.rataRata || 0);
+        const p = parseInt(g.totalPenilai) || 0;
+        if (p > 0) {
+          totalAllScore += s;
+          totalAllPenilai += p;
+          evaluatedCount++;
+        }
       });
-      const avgClassScore = summaryList.length > 0 ? (totalAllScore / summaryList.length).toFixed(2) : "0.00";
+      const avgClassScore = evaluatedCount > 0 ? (totalAllScore / evaluatedCount).toFixed(2) : "0.00";
 
       // HTML Template
       let html = `
@@ -2549,17 +2578,21 @@
         `;
       } else {
         // Sort by average score descending
-        const sorted = [...summaryList].sort((a, b) => parseFloat(b.rataRata || 0) - parseFloat(a.rataRata || 0));
+        const sorted = [...summaryList].sort((a, b) => parseFloat(b.rataRataSkor || b.rataRata || 0) - parseFloat(a.rataRataSkor || a.rataRata || 0));
         sorted.forEach((g, idx) => {
-          const scoreNum = parseFloat(g.rataRata || 0);
-          let predikat = "Memuaskan";
-          if (scoreNum >= 85) predikat = "Sangat Baik (A)";
-          else if (scoreNum >= 75) predikat = "Baik (B+)";
-          else if (scoreNum >= 65) predikat = "Cukup (B)";
-          else predikat = "Kurang (C)";
+          const scoreNum = parseFloat(g.rataRataSkor || g.rataRata || 0);
+          const totalP = parseInt(g.totalPenilai) || 0;
+          let predikat = "-";
+          if (totalP > 0) {
+            if (scoreNum >= 85) predikat = "Sangat Baik (A)";
+            else if (scoreNum >= 75) predikat = "Baik (B+)";
+            else if (scoreNum >= 65) predikat = "Cukup (B)";
+            else predikat = "Kurang (C)";
+          }
 
-          const topPresentersText = (g.topPresentator && g.topPresentator.length > 0)
-            ? g.topPresentator.map(p => `${p.name} (${p.votes} Suara)`).join(", ")
+          const presenters = g.rankedPresenters || g.topPresentator || [];
+          const topPresentersText = (presenters.length > 0)
+            ? presenters.map(p => `${p.name} (${p.votes} Suara)`).join(", ")
             : "-";
 
           html += `
@@ -2567,8 +2600,8 @@
               <td class="p-2 border border-zinc-300 text-center font-bold font-mono">#${idx + 1}</td>
               <td class="p-2 border border-zinc-300 font-semibold text-zinc-900">${g.kelompok}</td>
               <td class="p-2 border border-zinc-300 text-center">${g.sesi || 'Minggu 1'}</td>
-              <td class="p-2 border border-zinc-300 text-center font-mono">${g.totalPenilai || 0}</td>
-              <td class="p-2 border border-zinc-300 text-center font-bold font-mono text-zinc-900">${parseFloat(g.rataRata || 0).toFixed(2)}</td>
+              <td class="p-2 border border-zinc-300 text-center font-mono">${totalP}</td>
+              <td class="p-2 border border-zinc-300 text-center font-bold font-mono text-zinc-900">${totalP > 0 ? scoreNum.toFixed(2) : '-'}</td>
               <td class="p-2 border border-zinc-300 text-zinc-700 text-[10px]">${topPresentersText}</td>
               <td class="p-2 border border-zinc-300 text-center font-medium">${predikat}</td>
             </tr>
