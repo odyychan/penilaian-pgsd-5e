@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.68] - 2026-08-23
+
+### 📝 Penyederhanaan Teks Ringkasan Jumlah Kelompok dan Mahasiswa
+- **Penyederhanaan Redaksi Sel Ringkasan (*Summary Label Simplification*):**
+  - Mengubah teks ringkasan menjadi pola ringkas formal: *"Total X Kelompok (Y Mahasiswa)"* (misal: *Total 2 Kelompok (7 Mahasiswa)*).
+  - Mengoptimalkan ruang sel tabel agar lebih proporsional, padat, dan rapi.
+- **Sinkronisasi Dwikanal:**
+  - Diterapkan pada `index.html` dan `admin.html`.
+
+---
+
 ## [2.1.67] - 2026-08-23
 
 ### 🎓 Standardisasi Skala Predikat Nilai Huruf Akademik Resmi
