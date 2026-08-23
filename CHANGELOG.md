@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.45] - 2026-08-23
+
+### 📄 Penerapan Footer Resmi Minimalis & Penyelarasan Lembar Pengesahan Dosen
+- **Redesain Footer Dokumen Cetak Minimalis & Kompak:**
+  - Memindahkan teks generasi sistem dari samping tanda tangan menjadi **footer resmi minimalis** di dasar dokumen dengan garis pemisah putus-putus (*dashed hairline border*) yang elegan.
+  - Kalimat disesuaikan secara profesional: `Dokumen ini diterbitkan secara otomatis oleh Sistem Peer-Assessment PGSD Kelas 5E • Universitas Lambung Mangkurat` dengan metadata `Waktu Cetak: [Tanggal]` di sisi kanan.
+  - Memastikan footer tidak tumpang tindih (*zero conflict*), tidak terpotong, dan tidak memicu penambahan halaman baru.
+- **Penyelarasan Blok Pengesahan Tanda Tangan Dosen:**
+  - Kotak tanda tangan dosen kini berdiri mandiri dan rata kanan (*right-aligned*) mengikuti kaidah format dokumen resmi akademik dinas FKIP ULM.
+
+---
+
 ## [2.1.44] - 2026-08-23
 
 ### 🖨️ Presisi 100% Identik Antara Pratinjau Layar & Hasil Dokumen Cetak / PDF Fisik
