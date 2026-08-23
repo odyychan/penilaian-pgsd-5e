@@ -1571,6 +1571,40 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       }
     }
 
+    let adminRealtimeTimer = null;
+
+    function initAdminRealtimeSync() {
+      if (adminRealtimeTimer) clearInterval(adminRealtimeTimer);
+      adminRealtimeTimer = setInterval(() => {
+        if (document.visibilityState === 'visible' && navigator.onLine && !isSyncingQueue) {
+          const currentTab = localStorage.getItem("PGSD_ADMIN_ACTIVE_TAB") || "data";
+          if (currentTab === 'responses') {
+            fetchAdminResponsesList(true);
+          }
+        }
+      }, 25000);
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible" && navigator.onLine && !isSyncingQueue) {
+          const currentTab = localStorage.getItem("PGSD_ADMIN_ACTIVE_TAB") || "data";
+          if (currentTab === 'responses') {
+            fetchAdminResponsesList(true);
+          } else if (currentTab === 'data') {
+            fetchAdminFullData();
+          }
+        }
+      });
+
+      window.addEventListener("focus", () => {
+        if (navigator.onLine && !isSyncingQueue) {
+          const currentTab = localStorage.getItem("PGSD_ADMIN_ACTIVE_TAB") || "data";
+          if (currentTab === 'responses') {
+            fetchAdminResponsesList(true);
+          }
+        }
+      });
+    }
+
     function showDashboard() {
       document.getElementById("loginScreen").classList.add("hidden");
       document.getElementById("adminDashboard").classList.remove("hidden");
@@ -1586,6 +1620,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       }
 
       fetchAdminFullData();
+      initAdminRealtimeSync();
       
       // Process any pending sync queue left over from earlier session
       const q = getPendingSyncQueue();
@@ -2135,9 +2170,9 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       select.value = cur || "ALL";
     }
 
-    async function fetchAdminResponsesList() {
+    async function fetchAdminResponsesList(isSilent = false) {
       const btn = document.getElementById("btnRefreshResponses");
-      if (btn) {
+      if (!isSilent && btn) {
         btn.disabled = true;
         btn.innerHTML = `
           <svg class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2152,7 +2187,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         const response = await fetch(`${apiUrl}?action=adminGetResponsesList&_t=${Date.now()}`);
         const res = await response.json();
 
-        if (btn) {
+        if (!isSilent && btn) {
           btn.disabled = false;
           btn.innerHTML = `
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2167,12 +2202,12 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           document.getElementById("labelTotalResponses").textContent = `${adminResponsesList.length} Data`;
           populateResponseGroupFilter();
           renderResponsesList();
-          showAdminToast(`Berhasil memuat ${adminResponsesList.length} data respons.`, "info");
+          if (!isSilent) showAdminToast(`Berhasil memuat ${adminResponsesList.length} data respons.`, "info");
         } else {
-          showAdminToast("Gagal memuat daftar respons: " + res.error, "error");
+          if (!isSilent) showAdminToast("Gagal memuat daftar respons: " + res.error, "error");
         }
       } catch (err) {
-        if (btn) {
+        if (!isSilent && btn) {
           btn.disabled = false;
           btn.innerHTML = `
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2181,7 +2216,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
             <span>Segarkan Data</span>
           `;
         }
-        showAdminToast("Koneksi respons error: " + err, "error");
+        if (!isSilent) showAdminToast("Koneksi respons error: " + err, "error");
       }
     }
 

@@ -4,6 +4,22 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.37] - 2026-08-23
+
+### 🔄 Sinkronisasi 2 Arah Real-Time (Two-Way Realtime Engine)
+- **Mesin Sinkronisasi Latar Belakang (Smart Heartbeat):**
+  - Mengimplementasikan heartbeat sinkronisasi otomatis (setiap 20 detik saat halaman aktif) untuk mengambil dan memperbarui status rekapitulasi, matriks presensi, dan log respons secara *live* tanpa mengganggu interaksi pengguna atau mereset form.
+  - Menambahkan sinkronisasi berkala untuk mendeteksi perubahan konfigurasi sesi aktif atau master kelompok dari Admin secara otomatis.
+- **Sinkronisasi Instan Pasca-Kirim (Post-Submit Instant Invalidation):**
+  - Saat mahasiswa menyelesaikan submit penilaian, cache lokal langsung diinvalidasi dan data rekapitulasi/presensi terbaru langsung diperbarui di latar belakang.
+- **Reaktivitas Multi-Tab & Multi-Perangkat (Focus, Visibility & Storage Events):**
+  - Mengaktifkan pendengar `visibilitychange` dan `window.focus` sehingga saat pengguna membuka kembali tab atau membuka kunci smartphone, data langsung disinkronkan secara instan.
+  - Memanfaatkan event `storage` untuk sinkronisasi instan antar-tab browser di perangkat yang sama.
+- **Admin Live Polling & Auto-Refresh:**
+  - Panel Admin kini secara otomatis menyegarkan data daftar respons dan statistik keterisian secara berkala tanpa memerlukan klik manual tombol "Segarkan".
+
+---
+
 ## [2.1.36] - 2026-08-23
 
 ### 🎨 Desain Highlight Header Soft Minimalis (Emerald Pastel Accent)

@@ -1476,7 +1476,67 @@
       
       // Pre-fetch rekap data secara diam-diam di background agar instan saat dibuka
       setTimeout(() => loadRekapData(true), 400);
+
+      // Inisialisasi Sinkronisasi Real-Time 2 Arah
+      initRealtimeSyncEngine();
     });
+
+    // =========================================================================
+    // TWO-WAY REAL-TIME SYNCHRONIZATION ENGINE
+    // =========================================================================
+    let realtimeHeartbeatTimer = null;
+    let lastConfigSyncTimestamp = Date.now();
+
+    function initRealtimeSyncEngine() {
+      // 1. Periodic Background Heartbeat (Near Realtime Sync)
+      if (realtimeHeartbeatTimer) clearInterval(realtimeHeartbeatTimer);
+      realtimeHeartbeatTimer = setInterval(() => {
+        if (document.visibilityState === 'visible' && navigator.onLine) {
+          const currentTab = localStorage.getItem("PGSD_ACTIVE_MAIN_TAB") || "form";
+          // Jika pengguna sedang membuka Rekapitulasi / Presensi, update otomatis data live
+          if (currentTab === 'rekap') {
+            loadRekapData(true);
+          }
+          // Periodik cek perubahan Konfigurasi / Sesi Aktif oleh Admin (setiap 60s)
+          if (Date.now() - lastConfigSyncTimestamp > 60000) {
+            lastConfigSyncTimestamp = Date.now();
+            fetchInitialFormData(false);
+          }
+        }
+      }, 20000); // 20 detik interval
+
+      // 2. Tab Visibility & Window Focus Sync (Instant on app revisit / unlock)
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible" && navigator.onLine) {
+          const currentTab = localStorage.getItem("PGSD_ACTIVE_MAIN_TAB") || "form";
+          fetchInitialFormData(false);
+          if (currentTab === 'rekap') {
+            loadRekapData(true);
+          }
+        }
+      });
+
+      window.addEventListener("focus", () => {
+        if (navigator.onLine) {
+          const currentTab = localStorage.getItem("PGSD_ACTIVE_MAIN_TAB") || "form";
+          if (currentTab === 'rekap') {
+            loadRekapData(true);
+          }
+        }
+      });
+
+      // 3. Cross-Tab / Cross-Window Realtime Broadcast Listener
+      window.addEventListener("storage", (e) => {
+        if (e.key === "PGSD_LAST_SUBMISSION_EVENT") {
+          loadRekapData(true);
+        } else if (e.key === "PGSD_CACHE_CONFIG") {
+          try {
+            appConfig = JSON.parse(e.newValue || "{}");
+            renderConfigHeader();
+          } catch(err) {}
+        }
+      });
+    }
 
     function loadLocalCache() {
       try {
@@ -2512,6 +2572,11 @@
         if (res && res.success) {
           // Bersihkan draf otomatis karena sudah resmi terkirim
           localStorage.removeItem("PGSD_FORM_DRAFT");
+          localStorage.removeItem("PGSD_CACHE_REKAP");
+          localStorage.setItem("PGSD_LAST_SUBMISSION_EVENT", Date.now().toString());
+          
+          // Segarkan data rekapitulasi & presensi secara instan di background
+          loadRekapData(true);
           showSuccessModal(payload.kelompok);
         } else {
           showToast(res?.error || "Gagal mengirim penilaian.", "error");
@@ -2569,6 +2634,7 @@
       if (remaining.length === 0) {
         localStorage.removeItem("PGSD_PENDING_SUBMISSIONS");
         showToast("Seluruh data penilaian offline berhasil dikirim ke Spreadsheet.", "success");
+        loadRekapData(true);
       } else {
         localStorage.setItem("PGSD_PENDING_SUBMISSIONS", JSON.stringify(remaining));
       }
@@ -2576,6 +2642,8 @@
 
     window.addEventListener("online", function() {
       processPendingSubmissions();
+      fetchInitialFormData(false);
+      loadRekapData(true);
     });
 
     function showSuccessModal(kelompokName, isOfflineQueued = false) {
@@ -2609,6 +2677,7 @@
     function closeModalAndGoToRekap() {
       resetFormAndCloseModal();
       switchTab('rekap');
+      loadRekapData(true);
     }
 
     function switchTab(tab, updateHash = true) {
