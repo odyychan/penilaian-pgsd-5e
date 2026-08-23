@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.36] - 2026-08-23
+
+### 🎨 Desain Highlight Header Soft Minimalis (Emerald Pastel Accent)
+- **Transformasi Visual Header Kelompok Aktif:**
+  - Menggantikan background hitam pekat (`bg-zinc-900 text-white`) dengan tema pastel mint/emerald yang lembut (`bg-emerald-50/80` dengan aksen garis bawah `border-b-2 border-b-emerald-500`).
+  - Menyematkan badge pil sesi yang elegan (`bg-emerald-100/90 text-emerald-800 border border-emerald-200/60`) dengan dot indikator hijau segar.
+  - Memberikan harmoni visual menyeluruh yang estetik, tidak membuat mata lelah, dan tetap menonjolkan kelompok yang sedang aktif/tampil secara jelas.
+
+---
+
 ## [2.1.35] - 2026-08-23
 
 ### 🎯 Standardisasi Label Status Presensi (Zero Inconsistency)

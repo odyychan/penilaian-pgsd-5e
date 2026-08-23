@@ -3207,10 +3207,13 @@
             const isHighlighted = g.sesi && g.sesi.toLowerCase() === activeSesi.toLowerCase();
             if (isHighlighted) {
               headersHtml += `
-                <th class="sticky top-0 z-30 px-1.5 sm:px-2 py-1.5 text-center min-w-[65px] sm:min-w-[85px] border-r border-zinc-200 bg-zinc-900 text-white font-bold whitespace-nowrap">
+                <th class="sticky top-0 z-30 px-1.5 sm:px-2 py-1.5 text-center min-w-[65px] sm:min-w-[85px] border-r border-zinc-200 bg-emerald-50/80 border-b-2 border-b-emerald-500 whitespace-nowrap shadow-2xs">
                   <div class="flex flex-col items-center">
-                    <span class="text-[10px] sm:text-xs tracking-tight">${g.name}</span>
-                    <span class="text-[8px] sm:text-[9px] text-emerald-400 font-mono font-medium leading-none mt-0.5">${g.sesi || 'Sesi Aktif'} • Tampil</span>
+                    <span class="text-[10.5px] sm:text-xs font-bold text-emerald-950 tracking-tight">${g.name}</span>
+                    <span class="inline-flex items-center gap-1 text-[8px] sm:text-[9px] font-semibold text-emerald-800 bg-emerald-100/90 px-1.5 py-0.5 rounded-full mt-0.5 leading-none border border-emerald-200/60">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      ${g.sesi || 'Sesi Aktif'} • Tampil
+                    </span>
                   </div>
                 </th>
               `;
@@ -3237,10 +3240,13 @@
             <th class="sticky top-0 md:sticky md:left-0 md:z-40 bg-zinc-100/95 px-1 sm:px-2 py-1.5 w-7 sm:w-9 text-center border-r border-zinc-200 font-mono text-[10px] sm:text-[11px] text-zinc-500 whitespace-nowrap">#</th>
             <th class="sticky top-0 md:sticky md:left-9 md:z-40 bg-zinc-100/95 px-2 sm:px-3 py-1.5 min-w-[130px] sm:min-w-[160px] max-w-[180px] sm:max-w-[220px] text-left border-r border-zinc-200 shadow-2xs font-semibold text-[11px] sm:text-xs text-zinc-700 whitespace-nowrap">Mahasiswa &amp; NIM</th>
             <th class="sticky top-0 z-30 bg-zinc-100/95 px-2 sm:px-3 py-1.5 text-center min-w-[65px] sm:min-w-[85px] border-r border-zinc-200 text-[10px] sm:text-xs font-semibold text-zinc-600 whitespace-nowrap">Kel. Asal</th>
-            <th class="sticky top-0 z-30 px-2 sm:px-3 py-1.5 text-center min-w-[110px] sm:min-w-[130px] border-r border-zinc-200 bg-zinc-900 text-white font-bold whitespace-nowrap">
+            <th class="sticky top-0 z-30 px-2 sm:px-3 py-1.5 text-center min-w-[110px] sm:min-w-[130px] border-r border-zinc-200 bg-emerald-50/80 border-b-2 border-b-emerald-500 whitespace-nowrap shadow-2xs">
               <div class="flex flex-col items-center">
-                <span class="text-[10.5px] sm:text-xs tracking-tight">Status • ${singleTargetPresenter}</span>
-                <span class="text-[8px] sm:text-[9px] text-emerald-400 font-mono font-medium leading-none mt-0.5">${singlePresenterSesi ? singlePresenterSesi + ' • ' : ''}Target</span>
+                <span class="text-[10.5px] sm:text-xs font-bold text-emerald-950 tracking-tight">Status • ${singleTargetPresenter}</span>
+                <span class="inline-flex items-center gap-1 text-[8px] sm:text-[9px] font-semibold text-emerald-800 bg-emerald-100/90 px-1.5 py-0.5 rounded-full mt-0.5 leading-none border border-emerald-200/60">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  ${singlePresenterSesi ? singlePresenterSesi + ' • ' : ''}Target
+                </span>
               </div>
             </th>
           `;
