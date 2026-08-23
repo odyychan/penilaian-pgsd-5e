@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.53] - 2026-08-23
+
+### 📐 Optimalisasi Spasi Before Poin A & Poin B (6pt Spacing)
+- **Peningkatan Jarak Before Poin A (*Rekapitulasi Nilai & Peringkat Performa Kelompok*):**
+  - Meningkatkan jarak *before* menjadi `6pt` (`margin-top: 6pt; margin-bottom: 8px;`) setelah tabel metadata laporan.
+- **Peningkatan Jarak Before Poin B (*Rangkuman Catatan Evaluasi Masukan Mahasiswa*):**
+  - Meningkatkan jarak *before* menjadi `6pt` (`margin-top: 6pt; margin-bottom: 6px;`) setelah tabel ringkasan nilai kelompok.
+- **Sinkronisasi Dwikanal (*Client & Admin Portal*):**
+  - Menerapkan spasi 6pt yang konsisten pada `index.html` dan `admin.html`.
+
+---
+
 ## [2.1.52] - 2026-08-23
 
 ### 📏 Presisi Spasi Tipografi Dokumen Resmi (*Official Typography Spacing*)
