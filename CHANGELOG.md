@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.64] - 2026-08-23
+
+### 🏛️ Penerapan Font Times New Roman pada Seluruh Komponen Tabel A
+- **Harmonisasi Tipografi Tabel Utama (*Full Table A Typography Standardization*):**
+  - Mengubah seluruh tipografi **Tabel Rekapitulasi Nilai & Peringkat Performa Kelompok** (Poin A) menjadi keluarga huruf `'Times New Roman', Times, serif`:
+    - Seluruh baris header kolom `<th>` (*Rank, Kelompok Presentasi, Sesi, Penilai, Rata-Rata, Presentator Terbaik, Predikat*)
+    - Seluruh sel data baris `<td>` (nomor peringkat, nama kelompok, sesi, penilai, nilai rata-rata, presentator terbaik, predikat)
+    - Seluruh sel pada baris ringkasan kelas (*Rata-Rata Keseluruhan Kelas, Nilai Rata-Rata, Total Kelompok & Mahasiswa Terdaftar*)
+  - Menghilangkan font monospace pada kolom data tabel untuk menjaga kesatuan tipografi dinas formal.
+- **Sinkronisasi Dwikanal:**
+  - Diterapkan pada `index.html` dan `admin.html`.
+
+---
+
 ## [2.1.63] - 2026-08-23
 
 ### 👥 Integrasi Dinamis Jumlah Mahasiswa pada Ringkasan Kelompok

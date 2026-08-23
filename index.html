@@ -4488,25 +4488,25 @@
               </div>
               
               <div class="overflow-x-auto" style="overflow: visible;">
-                <table class="w-full text-left text-xs" style="table-layout: fixed; width: 100%; border-collapse: collapse; border: 1.5px solid #000000; box-sizing: border-box;">
+                <table class="w-full text-left text-xs" style="table-layout: fixed; width: 100%; border-collapse: collapse; border: 1.5px solid #000000; box-sizing: border-box; font-family: 'Times New Roman', Times, serif;">
                   <thead>
-                    <tr style="background-color: #f3f4f6; text-align: center; font-weight: bold; border-bottom: 1.5px solid #000000;">
-                      <th style="padding: 5px 2px; border: 1px solid #000000; width: 6%; text-align: center; vertical-align: middle; font-size: 11px;">Rank</th>
-                      <th style="padding: 5px 4px; border: 1px solid #000000; text-align: center; vertical-align: middle; width: 19%; font-size: 11px;">Kelompok Presentasi</th>
-                      <th style="padding: 5px 3px; border: 1px solid #000000; width: 10%; text-align: center; vertical-align: middle; font-size: 11px;">Sesi</th>
-                      <th style="padding: 5px 3px; border: 1px solid #000000; width: 9%; text-align: center; vertical-align: middle; font-size: 11px;">Penilai</th>
-                      <th style="padding: 5px 3px; border: 1px solid #000000; width: 11%; text-align: center; vertical-align: middle; font-size: 11px;">Rata-Rata</th>
-                      <th style="padding: 5px 4px; border: 1px solid #000000; text-align: center; vertical-align: middle; width: 31%; font-size: 11px; word-break: break-word;">Presentator Terbaik</th>
-                      <th style="padding: 5px 3px; border: 1px solid #000000; width: 14%; text-align: center; vertical-align: middle; font-size: 11px;">Predikat</th>
+                    <tr style="background-color: #f3f4f6; text-align: center; font-weight: bold; border-bottom: 1.5px solid #000000; font-family: 'Times New Roman', Times, serif;">
+                      <th style="padding: 5px 2px; border: 1px solid #000000; width: 6%; text-align: center; vertical-align: middle; font-size: 11.5px; font-family: 'Times New Roman', Times, serif;">Rank</th>
+                      <th style="padding: 5px 4px; border: 1px solid #000000; text-align: center; vertical-align: middle; width: 19%; font-size: 11.5px; font-family: 'Times New Roman', Times, serif;">Kelompok Presentasi</th>
+                      <th style="padding: 5px 3px; border: 1px solid #000000; width: 10%; text-align: center; vertical-align: middle; font-size: 11.5px; font-family: 'Times New Roman', Times, serif;">Sesi</th>
+                      <th style="padding: 5px 3px; border: 1px solid #000000; width: 9%; text-align: center; vertical-align: middle; font-size: 11.5px; font-family: 'Times New Roman', Times, serif;">Penilai</th>
+                      <th style="padding: 5px 3px; border: 1px solid #000000; width: 11%; text-align: center; vertical-align: middle; font-size: 11.5px; font-family: 'Times New Roman', Times, serif;">Rata-Rata</th>
+                      <th style="padding: 5px 4px; border: 1px solid #000000; text-align: center; vertical-align: middle; width: 31%; font-size: 11.5px; font-family: 'Times New Roman', Times, serif; word-break: break-word;">Presentator Terbaik</th>
+                      <th style="padding: 5px 3px; border: 1px solid #000000; width: 14%; text-align: center; vertical-align: middle; font-size: 11.5px; font-family: 'Times New Roman', Times, serif;">Predikat</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody style="font-family: 'Times New Roman', Times, serif;">
       `;
 
       if (summaryList.length === 0) {
         html += `
           <tr>
-            <td colspan="7" style="padding: 10px; text-align: center; color: #6b7280; font-style: italic; border: 1px solid #000000;">
+            <td colspan="7" style="padding: 10px; text-align: center; color: #6b7280; font-style: italic; border: 1px solid #000000; font-family: 'Times New Roman', Times, serif;">
               Tidak ada data penilaian yang sesuai dengan kriteria filter.
             </td>
           </tr>
@@ -4531,24 +4531,24 @@
             : "-";
 
           html += `
-            <tr style="border-bottom: 1px solid #000000; ${idx % 2 === 0 ? 'background-color: #ffffff;' : 'background-color: #fafafa;'}">
-              <td style="padding: 4.5px 2px; border: 1px solid #000000; text-align: center; font-weight: bold; font-family: monospace; font-size: 11px;">#${idx + 1}</td>
-              <td style="padding: 4.5px 5px; border: 1px solid #000000; font-weight: bold; color: #000000; font-size: 11px; word-break: break-word;">${g.kelompok}</td>
-              <td style="padding: 4.5px 3px; border: 1px solid #000000; text-align: center; font-size: 11px;">${g.sesi || 'Minggu 1'}</td>
-              <td style="padding: 4.5px 3px; border: 1px solid #000000; text-align: center; font-family: monospace; font-size: 11px;">${totalP}</td>
-              <td style="padding: 4.5px 3px; border: 1px solid #000000; text-align: center; font-weight: bold; font-family: monospace; color: #000000; font-size: 11px;">${totalP > 0 ? scoreNum.toFixed(2) : '-'}</td>
-              <td style="padding: 4.5px 5px; border: 1px solid #000000; color: #000000; font-size: 11px; word-break: break-word; overflow-wrap: break-word; line-height: 1.25;">${topPresentersText}</td>
-              <td style="padding: 4.5px 3px; border: 1px solid #000000; text-align: center; font-weight: 600; font-size: 11px;">${predikat}</td>
+            <tr style="border-bottom: 1px solid #000000; font-family: 'Times New Roman', Times, serif; ${idx % 2 === 0 ? 'background-color: #ffffff;' : 'background-color: #fafafa;'}">
+              <td style="padding: 4.5px 2px; border: 1px solid #000000; text-align: center; font-weight: bold; font-family: 'Times New Roman', Times, serif; font-size: 11.5px;">#${idx + 1}</td>
+              <td style="padding: 4.5px 5px; border: 1px solid #000000; font-weight: bold; color: #000000; font-size: 11.5px; font-family: 'Times New Roman', Times, serif; word-break: break-word;">${g.kelompok}</td>
+              <td style="padding: 4.5px 3px; border: 1px solid #000000; text-align: center; font-size: 11.5px; font-family: 'Times New Roman', Times, serif;">${g.sesi || 'Minggu 1'}</td>
+              <td style="padding: 4.5px 3px; border: 1px solid #000000; text-align: center; font-family: 'Times New Roman', Times, serif; font-size: 11.5px;">${totalP}</td>
+              <td style="padding: 4.5px 3px; border: 1px solid #000000; text-align: center; font-weight: bold; font-family: 'Times New Roman', Times, serif; color: #000000; font-size: 11.5px;">${totalP > 0 ? scoreNum.toFixed(2) : '-'}</td>
+              <td style="padding: 4.5px 5px; border: 1px solid #000000; color: #000000; font-size: 11px; font-family: 'Times New Roman', Times, serif; word-break: break-word; overflow-wrap: break-word; line-height: 1.25;">${topPresentersText}</td>
+              <td style="padding: 4.5px 3px; border: 1px solid #000000; text-align: center; font-weight: 600; font-size: 11.5px; font-family: 'Times New Roman', Times, serif;">${predikat}</td>
             </tr>
           `;
         });
 
         // Summary Row
         html += `
-          <tr style="background-color: #f3f4f6; font-weight: bold; border-top: 1.5px solid #000000; text-align: center;">
-            <td colspan="4" style="padding: 5px 6px; text-align: center; vertical-align: middle; border: 1px solid #000000; font-size: 11px;">Rata-Rata Keseluruhan Kelas</td>
-            <td style="padding: 5px 4px; border: 1px solid #000000; font-family: monospace; font-size: 11.5px; color: #000000; text-align: center; vertical-align: middle;">${avgClassScore}</td>
-            <td colspan="2" style="padding: 5px 6px; text-align: center; vertical-align: middle; border: 1px solid #000000; font-size: 10.5px; color: #374151;">Total ${summaryList.length} Kelompok Terdaftar dengan ${totalMahasiswa} Mahasiswa</td>
+          <tr style="background-color: #f3f4f6; font-weight: bold; border-top: 1.5px solid #000000; text-align: center; font-family: 'Times New Roman', Times, serif;">
+            <td colspan="4" style="padding: 5px 6px; text-align: center; vertical-align: middle; border: 1px solid #000000; font-size: 11.5px; font-family: 'Times New Roman', Times, serif;">Rata-Rata Keseluruhan Kelas</td>
+            <td style="padding: 5px 4px; border: 1px solid #000000; font-family: 'Times New Roman', Times, serif; font-size: 12px; color: #000000; text-align: center; vertical-align: middle;">${avgClassScore}</td>
+            <td colspan="2" style="padding: 5px 6px; text-align: center; vertical-align: middle; border: 1px solid #000000; font-size: 11px; font-family: 'Times New Roman', Times, serif; color: #000000;">Total ${summaryList.length} Kelompok Terdaftar dengan ${totalMahasiswa} Mahasiswa</td>
           </tr>
         `;
       }
