@@ -853,12 +853,44 @@
           </button>
         </div>
 
-        <!-- Filter Bar 1: Filter Kelompok (Untuk Kelompok & Pemateri) -->
-        <div id="rekapGroupFilterBox" class="flex items-center justify-between gap-3 bg-zinc-50 p-3 rounded-xl border border-zinc-200 text-xs">
-          <label class="font-semibold text-zinc-700">Filter Kelompok:</label>
-          <select id="rekapGroupFilter" onchange="filterRekapDisplay()" class="text-xs font-medium px-3 py-1.5 rounded-lg border border-zinc-300 bg-white focus:border-zinc-900 outline-none">
-            <option value="ALL">Semua Kelompok</option>
-          </select>
+        <!-- Filter Bar 1: Role Filter (Mahasiswa Default) + Filter Kelompok -->
+        <div id="rekapGroupFilterBox" class="space-y-2.5">
+
+          <!-- Role Filter Pills -->
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider whitespace-nowrap">Sumber Data:</span>
+            <div class="flex gap-1.5 flex-wrap" id="rekapRoleFilterPills">
+              <button 
+                type="button"
+                id="rolePillMhs"
+                onclick="switchRekapRoleFilter('mhs')"
+                class="px-3 py-1 rounded-full text-[11px] font-semibold border transition cursor-pointer bg-zinc-900 text-white border-zinc-900"
+                title="Hanya penilaian dari Mahasiswa terdaftar"
+              >🎓 Mahasiswa Terdaftar</button>
+              <button 
+                type="button"
+                id="rolePillOther"
+                onclick="switchRekapRoleFilter('other')"
+                class="px-3 py-1 rounded-full text-[11px] font-semibold border transition cursor-pointer bg-white text-zinc-600 border-zinc-300 hover:border-zinc-900 hover:text-zinc-900"
+                title="Hanya penilaian dari Dosen & Tamu/Lainnya"
+              >👨‍🏫 Dosen & Lainnya</button>
+              <button 
+                type="button"
+                id="rolePillAll"
+                onclick="switchRekapRoleFilter('all')"
+                class="px-3 py-1 rounded-full text-[11px] font-semibold border transition cursor-pointer bg-white text-zinc-600 border-zinc-300 hover:border-zinc-900 hover:text-zinc-900"
+                title="Gabungan semua peran penilai"
+              >🌐 Semua Penilai</button>
+            </div>
+          </div>
+
+          <!-- Kelompok Filter -->
+          <div class="flex items-center justify-between gap-3 bg-zinc-50 px-3 py-2 rounded-lg border border-zinc-200 text-xs">
+            <label class="font-semibold text-zinc-600 whitespace-nowrap">Filter Kelompok:</label>
+            <select id="rekapGroupFilter" onchange="filterRekapDisplay()" class="text-xs font-medium px-3 py-1.5 rounded-lg border border-zinc-300 bg-white focus:border-zinc-900 outline-none flex-1 max-w-[180px] sm:max-w-none">
+              <option value="ALL">Semua Kelompok</option>
+            </select>
+          </div>
         </div>
 
         <!-- Filter Bar 2: Kontrol Presensi Pengisian Mahasiswa (Khusus Sub-Tab Status Pengisian) -->
@@ -1243,7 +1275,9 @@
     let selectedBestPresenters = [];
     let currentRekapData = null;
     let currentRekapSubView = "kelompok";
+    let currentRekapRoleFilter = "mhs"; // 'mhs' | 'other' | 'all'
     let isEmailValidState = false;
+
 
     const stepMetadata = {
       1: { badge: "01/04", title: "Identitas Penilai", percent: 25 },
@@ -2492,14 +2526,24 @@
       }
     }
 
-    function populateRekapFilter(summaryList) {
+    function populateRekapFilter(summaryListParam) {
       const select = document.getElementById("rekapGroupFilter");
       if (!select) return;
+      // Gunakan active summary (sesuai role filter) sebagai sumber kelompok
+      const activeSummary = (typeof getActiveRekapSummary === 'function' && currentRekapData)
+        ? getActiveRekapSummary()
+        : (summaryListParam || []);
+      // Kumpulkan semua kelompok unik dari summary ALL agar filter kelompok selalu lengkap
+      const allKelompok = new Set(
+        [...(currentRekapData?.summary || []), ...(currentRekapData?.summaryMhs || [])]
+          .map(i => i.kelompok)
+      );
       select.innerHTML = '<option value="ALL">Semua Kelompok</option>';
-      summaryList.forEach(item => {
+      Array.from(allKelompok).sort().forEach(kelompok => {
+        const grp = (currentRekapData?.summary || []).find(i => i.kelompok === kelompok);
         const opt = document.createElement("option");
-        opt.value = item.kelompok;
-        opt.textContent = `${item.kelompok} (${item.sesi})`;
+        opt.value = kelompok;
+        opt.textContent = `${kelompok}${grp ? ' (' + grp.sesi + ')' : ''}`;
         select.appendChild(opt);
       });
     }
@@ -2911,12 +2955,57 @@
       }
     }
 
+    // === Helper: Ambil summary sesuai role filter aktif ===
+    function getActiveRekapSummary() {
+      if (!currentRekapData) return [];
+      let base;
+      if (currentRekapRoleFilter === 'mhs') {
+        // Mahasiswa terdaftar saja — gunakan summaryMhs jika tersedia, fallback ke summary filter Mahasiswa
+        base = currentRekapData.summaryMhs 
+          || (currentRekapData.summary || []).map(g => {
+              // Fallback: filter manual dari evaluators jika summaryMhs belum ada (backend lama)
+              const mhsEvals = (g.evaluators || []).filter(e => (e.peran || 'Mahasiswa') === 'Mahasiswa');
+              return { ...g, totalPenilai: mhsEvals.length };
+            });
+      } else if (currentRekapRoleFilter === 'other') {
+        // Dosen & Lainnya saja — hitung dari summary (all) dikurangi Mahasiswa
+        base = (currentRekapData.summary || []).map(g => {
+          const otherEvals = (g.evaluators || []).filter(e => (e.peran || 'Mahasiswa') !== 'Mahasiswa');
+          return { ...g, totalPenilai: otherEvals.length, evaluators: otherEvals };
+        }).filter(g => g.totalPenilai > 0);
+      } else {
+        // Semua penilai
+        base = currentRekapData.summary || [];
+      }
+      return base || [];
+    }
+
+    // === Switch Role Filter Rekap ===
+    function switchRekapRoleFilter(role) {
+      currentRekapRoleFilter = role;
+      // Update pill style
+      const pills = { mhs: 'rolePillMhs', other: 'rolePillOther', all: 'rolePillAll' };
+      const activeClass = 'bg-zinc-900 text-white border-zinc-900';
+      const inactiveClass = 'bg-white text-zinc-600 border-zinc-300 hover:border-zinc-900 hover:text-zinc-900';
+      Object.keys(pills).forEach(k => {
+        const pill = document.getElementById(pills[k]);
+        if (!pill) return;
+        if (k === role) {
+          pill.className = pill.className.replace(inactiveClass, '').replace(activeClass, '').trim() + ' ' + activeClass;
+        } else {
+          pill.className = pill.className.replace(activeClass, '').replace(inactiveClass, '').trim() + ' ' + inactiveClass;
+        }
+      });
+      renderBothRekapViews();
+    }
+
     function renderBothRekapViews() {
       if (!currentRekapData) return;
       const filterVal = document.getElementById("rekapGroupFilter")?.value || "ALL";
-      const summaryList = filterVal === "ALL" 
-        ? currentRekapData.summary 
-        : currentRekapData.summary.filter(i => i.kelompok === filterVal);
+      const activeBase = getActiveRekapSummary();
+      const summaryList = filterVal === "ALL"
+        ? activeBase
+        : activeBase.filter(i => i.kelompok === filterVal);
 
       renderModernRekapCharts(summaryList);
       renderRekapKelompok(summaryList, currentRekapData.isPublicReviewVisible);
@@ -2964,6 +3053,7 @@
                 </button>
               </div>
               <span class="text-[11px] text-zinc-500 font-medium whitespace-nowrap block mt-0.5">${grp.sesi}</span>
+              <span class="text-[10px] font-medium mt-0.5 block ${currentRekapRoleFilter === 'mhs' ? 'text-emerald-700' : currentRekapRoleFilter === 'other' ? 'text-purple-700' : 'text-blue-700'}">${currentRekapRoleFilter === 'mhs' ? '🎓 Mahasiswa Terdaftar' : currentRekapRoleFilter === 'other' ? '👨‍🏫 Dosen & Lainnya' : '🌐 Semua Penilai'}</span>
             </div>
             <div class="flex items-center gap-2 flex-shrink-0">
               <div class="text-center bg-zinc-100 px-2.5 py-1 rounded min-w-[58px]">

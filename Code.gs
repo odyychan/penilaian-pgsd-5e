@@ -594,7 +594,24 @@ function getRecapData() {
     }
     // ==================================================================================
 
-    const rekapByGroup = {};
+    // Agregasi rekap: dua pass — Mahasiswa saja vs semua peran
+    const rekapByGroupMhs = {}; // Mahasiswa terdaftar saja
+    const rekapByGroupAll = {}; // Semua peran (Mahasiswa + Dosen + Lainnya)
+
+    function initGroupEntry(map, kelompok, sesi) {
+      if (!map[kelompok]) {
+        map[kelompok] = {
+          kelompok: kelompok,
+          sesi: sesi,
+          totalPenilai: 0,
+          totalSkor: 0,
+          rataRataSkor: 0,
+          votePresentator: {},
+          evaluasiList: {},
+          evaluators: []
+        };
+      }
+    }
 
     for (let i = 1; i < responsData.length; i++) {
       const row = responsData[i];
@@ -606,96 +623,92 @@ function getRecapData() {
       const best2 = String(row[8] || "").trim();
       const evaluasiJsonStr = String(row[9] || "{}").trim();
       const status = String(row[10] || "VALID").trim().toUpperCase();
-
-      if (status !== "VALID" || !kelompok || isNaN(nilaiKelompok)) continue;
-
-      if (!rekapByGroup[kelompok]) {
-        rekapByGroup[kelompok] = {
-          kelompok: kelompok,
-          sesi: sesi,
-          totalPenilai: 0,
-          totalSkor: 0,
-          rataRataSkor: 0,
-          votePresentator: {},
-          evaluasiList: {},
-          evaluators: []
-        };
-      }
-
       const peran = String(row[11] || "Mahasiswa").trim();
       const nimPenilai = String(row[12] || "-").trim();
 
-      const item = rekapByGroup[kelompok];
-      item.totalPenilai += 1;
-      item.totalSkor += nilaiKelompok;
-      if (namaPenilai) {
-        const alreadyInList = item.evaluators.some(e => (typeof e === 'object' ? e.name : e) === namaPenilai);
-        if (!alreadyInList) {
-          item.evaluators.push({
-            name: namaPenilai,
-            nim: nimPenilai,
-            peran: peran,
-            sesi: sesi
-          });
-        }
-      }
+      if (status !== "VALID" || !kelompok || isNaN(nilaiKelompok)) continue;
 
-      if (best1 && best1 !== "-") {
-        item.votePresentator[best1] = (item.votePresentator[best1] || 0) + 1;
-      }
-      if (best2 && best2 !== "-") {
-        item.votePresentator[best2] = (item.votePresentator[best2] || 0) + 1;
-      }
+      const isMhs = peran === "Mahasiswa";
+      const evaluatorObj = { name: namaPenilai, nim: nimPenilai, peran: peran, sesi: sesi };
 
+      // === Agregasi Semua Peran ===
+      initGroupEntry(rekapByGroupAll, kelompok, sesi);
+      const itemAll = rekapByGroupAll[kelompok];
+      itemAll.totalPenilai += 1;
+      itemAll.totalSkor += nilaiKelompok;
+      if (namaPenilai && !itemAll.evaluators.some(e => (typeof e === 'object' ? e.name : e) === namaPenilai)) {
+        itemAll.evaluators.push(evaluatorObj);
+      }
+      if (best1 && best1 !== "-") itemAll.votePresentator[best1] = (itemAll.votePresentator[best1] || 0) + 1;
+      if (best2 && best2 !== "-") itemAll.votePresentator[best2] = (itemAll.votePresentator[best2] || 0) + 1;
       try {
         const evalObj = JSON.parse(evaluasiJsonStr);
         for (let m in evalObj) {
           const ulasan = String(evalObj[m] || "").trim();
           if (ulasan) {
-            if (!item.evaluasiList[m]) item.evaluasiList[m] = [];
-            item.evaluasiList[m].push({
-              penilai: namaPenilai,
-              ulasan: ulasan
-            });
+            if (!itemAll.evaluasiList[m]) itemAll.evaluasiList[m] = [];
+            itemAll.evaluasiList[m].push({ penilai: namaPenilai, ulasan: ulasan });
           }
         }
       } catch (e) {}
+
+      // === Agregasi Mahasiswa Saja ===
+      if (isMhs) {
+        initGroupEntry(rekapByGroupMhs, kelompok, sesi);
+        const itemMhs = rekapByGroupMhs[kelompok];
+        itemMhs.totalPenilai += 1;
+        itemMhs.totalSkor += nilaiKelompok;
+        if (namaPenilai && !itemMhs.evaluators.some(e => (typeof e === 'object' ? e.name : e) === namaPenilai)) {
+          itemMhs.evaluators.push(evaluatorObj);
+        }
+        if (best1 && best1 !== "-") itemMhs.votePresentator[best1] = (itemMhs.votePresentator[best1] || 0) + 1;
+        if (best2 && best2 !== "-") itemMhs.votePresentator[best2] = (itemMhs.votePresentator[best2] || 0) + 1;
+        try {
+          const evalObj2 = JSON.parse(evaluasiJsonStr);
+          for (let m in evalObj2) {
+            const ulasan = String(evalObj2[m] || "").trim();
+            if (ulasan) {
+              if (!itemMhs.evaluasiList[m]) itemMhs.evaluasiList[m] = [];
+              itemMhs.evaluasiList[m].push({ penilai: namaPenilai, ulasan: ulasan });
+            }
+          }
+        } catch (e) {}
+      }
     }
 
-    const summaryList = Object.keys(rekapByGroup).map(k => {
-      const g = rekapByGroup[k];
-      g.rataRataSkor = g.totalPenilai > 0 ? (g.totalSkor / g.totalPenilai).toFixed(2) : "0.00";
-      
-      const voteArray = Object.keys(g.votePresentator).map(vName => ({
-        name: vName,
-        votes: g.votePresentator[vName]
-      })).sort((a, b) => b.votes - a.votes);
+    function buildSummaryFromMap(rekapMap) {
+      return Object.keys(rekapMap).map(k => {
+        const g = rekapMap[k];
+        g.rataRataSkor = g.totalPenilai > 0 ? (g.totalSkor / g.totalPenilai).toFixed(2) : "0.00";
+        g.rankedPresenters = Object.keys(g.votePresentator)
+          .map(vName => ({ name: vName, votes: g.votePresentator[vName] }))
+          .sort((a, b) => b.votes - a.votes);
+        if (!isPublicReviewVisible) g.evaluasiList = {};
+        return g;
+      });
+    }
 
-      g.rankedPresenters = voteArray;
-
-      if (!isPublicReviewVisible) {
-        g.evaluasiList = {};
-      }
-
-      return g;
-    });
+    const summaryAll = buildSummaryFromMap(rekapByGroupAll);
+    const summaryMhs = buildSummaryFromMap(rekapByGroupMhs);
 
     return {
       success: true,
       isPublicReviewVisible: isPublicReviewVisible,
       config: config,
-      summary: summaryList,
+      summary: summaryAll,        // Semua peran (backward-compatible)
+      summaryMhs: summaryMhs,     // Mahasiswa terdaftar saja (DEFAULT tampilan rekap)
       groupMembersMap: groupMembersMap,
       // === DATA PRESENSI PRESISI TINGGI ===
-      submittedNims: Array.from(submittedNimSet),         // NIM mahasiswa yang sudah submit
-      submittedNames: Array.from(submittedNameSet),       // Nama fallback
-      nimToKelompokMap: nimToKelompokMap,                // nim -> [kelompok...]
-      nameToKelompokMap: nameToKelompokMap               // namaLower -> [kelompok...]
+      submittedNims: Array.from(submittedNimSet),
+      submittedNames: Array.from(submittedNameSet),
+      nimToKelompokMap: nimToKelompokMap,
+      nameToKelompokMap: nameToKelompokMap
     };
   } catch (err) {
     return { success: false, error: err.toString() };
   }
 }
+
 
 /**
  * Menuliskan Rekap ke Sheet

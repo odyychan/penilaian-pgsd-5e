@@ -4,7 +4,26 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.19] - 2026-08-23
+
+### 🎓 Filter Peran Penilai di Rekapitulasi Hasil Penilaian
+- **Default Sumber Data: Mahasiswa Terdaftar:**
+  - Seluruh perhitungan rekapitulasi (rata-rata nilai, jumlah penilai, peringkat presentator, ulasan individu) kini secara default hanya berasal dari respons berperan **Mahasiswa terdaftar**, bukan campuran semua peran.
+- **Backend: Agregasi Terpisah Per Peran (`Code.gs`):**
+  - `getRecapData()` kini menghasilkan dua set data terpisah: `summaryMhs` (Mahasiswa saja) dan `summary` (semua peran, untuk backward-compatibility), diproses dalam satu iterasi data yang efisien.
+- **Frontend: Role Filter Pills di Rekap:**
+  - Menambahkan tiga pill filter sumber data di atas area rekapitulasi:
+    - **🎓 Mahasiswa Terdaftar** (default aktif, ditandai hitam)
+    - **👨‍🏫 Dosen & Lainnya** (hanya penilaian non-mahasiswa)
+    - **🌐 Semua Penilai** (gabungan semua peran)
+  - Switching antar pill langsung me-refresh seluruh tampilan rekap (kelompok, pemateri, chart) tanpa request ulang ke backend.
+  - Badge label sumber data muncul di setiap kartu kelompok (hijau untuk Mahasiswa, ungu untuk Dosen, biru untuk Semua).
+- **Filter Kelompok:** Dropdown kelompok kini menampilkan semua kelompok dari semua sumber data.
+
+---
+
 ## [2.1.18] - 2026-08-23
+
 
 ### 🔄 Sinkronisasi Status Pengisian 100% Real-Time 2-Way (Presisi Tinggi)
 - **Single Source of Truth — Backend ke Frontend:**
