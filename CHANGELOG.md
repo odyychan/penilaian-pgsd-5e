@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.52] - 2026-08-23
+
+### 📏 Presisi Spasi Tipografi Dokumen Resmi (*Official Typography Spacing*)
+- **Jarak Before Judul Laporan (*Report Title Heading*):**
+  - Menerapkan jarak *before* tepat `6pt` (`margin: 6pt auto 6px auto;`) pada judul utama *"LAPORAN REKAPITULASI HASIL PENILAIAN PRESENTASI"*.
+- **Jarak Before Seksi A & Seksi B (*Section Headers Before Spacing*):**
+  - Menetapkan jarak *before* tepat `4pt` pada judul *"A. Rekapitulasi Nilai & Peringkat Performa Kelompok"* dan *"B. Rangkuman Catatan Evaluasi Masukan Mahasiswa"*.
+- **Jarak Before Lembar Pengesahan (*Signature Block Before Spacing*):**
+  - Menetapkan jarak *before* tepat `12pt` (`margin-top: 12pt;`) pada blok tanggal kota dan tanda tangan dosen pengampu (*"Banjarmasin, 23 Agustus 2026"*).
+- **Sinkronisasi Dwikanal (*Dual-Engine Sync*):**
+  - Menerapkan ukuran spasi yang identik pada modul cetak mahasiswa (`index.html`) dan portal pengelola admin (`admin.html`).
+
+---
+
 ## [2.1.51] - 2026-08-23
 
 ### 📑 Penanganan Komprehensif Multi-Page Document & Proteksi Page-Break Presisi
