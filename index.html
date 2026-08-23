@@ -155,7 +155,7 @@
   <!-- 🧭 DISTINCT CONTRAST HEADER -->
   <!-- ========================================================================= -->
   <header class="sticky top-0 z-40 bg-zinc-950 text-white border-b border-zinc-800 shadow-md">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
       
       <!-- Brand & Title -->
       <div class="flex items-center gap-3 min-w-0">
@@ -188,7 +188,7 @@
     </div>
 
     <!-- Minimal View Switcher (Dark Nav Tabs) -->
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 pb-2.5 pt-0.5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-2.5 pt-0.5">
       <div class="grid grid-cols-2 p-1 bg-zinc-900 rounded-lg border border-zinc-800 text-xs font-semibold">
         <button 
           id="tabFormBtn" 
@@ -211,7 +211,7 @@
   <!-- ========================================================================= -->
   <!-- 📄 MAIN CONTAINER -->
   <!-- ========================================================================= -->
-  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-5 sm:py-7 space-y-6">
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7 space-y-6">
 
     <!-- FLOATING TOAST NOTIFICATION -->
     <div id="toast" class="hidden fixed bottom-5 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-sm z-50 p-3.5 rounded-xl shadow-lg text-xs font-medium flex items-center gap-2.5 transition-all border">
@@ -828,10 +828,10 @@
         </div>
 
         <!-- Container Rekap 1: KELOMPOK -->
-        <div id="rekapKelompokContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        <div id="rekapKelompokContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"></div>
 
         <!-- Container Rekap 2: INDIVIDU PEMATERI -->
-        <div id="rekapIndividuContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-4 hidden"></div>
+        <div id="rekapIndividuContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 hidden"></div>
 
         <!-- Empty State -->
         <div id="rekapEmpty" class="hidden py-14 text-center space-y-2">
@@ -849,7 +849,7 @@
   <!-- 🦶 MINIMAL FOOTER -->
   <!-- ========================================================================= -->
   <footer class="w-full py-4 text-xs text-zinc-500 border-t border-zinc-200 bg-white mt-auto">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
       <div class="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-2">
         <p>© 2026 PGSD <a href="/admin" class="font-bold text-emerald-700 hover:text-emerald-800 transition cursor-pointer no-underline">Kelas 5E</a></p>
         <span id="footerPembuatSep" class="hidden text-zinc-300">/</span>
@@ -2200,18 +2200,18 @@
         let presentersHtml = `<p class="text-xs text-zinc-400 italic">Belum ada suara.</p>`;
         if (grp.rankedPresenters && grp.rankedPresenters.length > 0) {
           presentersHtml = grp.rankedPresenters.map((p, idx) => `
-            <div class="flex items-center justify-between text-xs bg-zinc-50 px-3 py-2 rounded border border-zinc-100">
-              <span class="font-medium text-zinc-800 truncate">${idx === 0 ? '#1 ' : (idx === 1 ? '#2 ' : '#3 ')} ${p.name}</span>
-              <span class="font-mono font-semibold text-zinc-700 bg-zinc-200/70 px-2 py-0.5 rounded text-[11px]">${p.votes} Suara</span>
+            <div class="flex items-center justify-between gap-2 text-xs bg-zinc-50 hover:bg-zinc-100/70 px-3 py-2 rounded-lg border border-zinc-100 transition">
+              <span class="font-medium text-zinc-800 truncate flex-1">${idx === 0 ? '#1 ' : (idx === 1 ? '#2 ' : '#3 ')} ${p.name}</span>
+              <span class="font-mono font-semibold text-zinc-700 bg-zinc-200/80 px-2 py-0.5 rounded text-[11px] whitespace-nowrap flex-shrink-0">${p.votes} Suara</span>
             </div>
           `).join("");
         }
 
         card.innerHTML = `
-          <div class="flex items-center justify-between gap-3 border-b border-zinc-100 pb-3">
-            <div>
-              <div class="flex items-center gap-2">
-                <h4 class="font-bold text-zinc-900 text-sm sm:text-base">${grp.kelompok}</h4>
+          <div class="flex items-start sm:items-center justify-between gap-3 border-b border-zinc-100 pb-3">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h4 class="font-bold text-zinc-900 text-sm sm:text-base whitespace-nowrap">${grp.kelompok}</h4>
                 <button 
                   type="button" 
                   onclick="openGroupInfoModal('${grp.kelompok}')" 
@@ -2223,16 +2223,16 @@
                   </svg>
                 </button>
               </div>
-              <span class="text-[11px] text-zinc-500 font-medium">${grp.sesi}</span>
+              <span class="text-[11px] text-zinc-500 font-medium whitespace-nowrap block mt-0.5">${grp.sesi}</span>
             </div>
-            <div class="flex items-center gap-2">
-              <div class="text-right bg-zinc-100 px-2.5 py-1 rounded">
-                <span class="block text-[9px] uppercase font-bold text-zinc-500">Rata-Rata</span>
-                <span class="text-sm font-mono font-bold text-zinc-900">${grp.rataRataSkor}</span>
+            <div class="flex items-center gap-2 flex-shrink-0">
+              <div class="text-center bg-zinc-100 px-2.5 py-1 rounded min-w-[58px]">
+                <span class="block text-[9px] uppercase font-bold text-zinc-500 whitespace-nowrap tracking-tight">RATA-RATA</span>
+                <span class="text-sm font-mono font-bold text-zinc-900 block leading-tight">${grp.rataRataSkor}</span>
               </div>
-              <div class="text-right bg-zinc-100 px-2.5 py-1 rounded">
-                <span class="block text-[9px] uppercase font-bold text-zinc-500">Penilai</span>
-                <span class="text-sm font-mono font-bold text-zinc-900">${grp.totalPenilai}</span>
+              <div class="text-center bg-zinc-100 px-2.5 py-1 rounded min-w-[50px]">
+                <span class="block text-[9px] uppercase font-bold text-zinc-500 whitespace-nowrap tracking-tight">PENILAI</span>
+                <span class="text-sm font-mono font-bold text-zinc-900 block leading-tight">${grp.totalPenilai}</span>
               </div>
             </div>
           </div>
