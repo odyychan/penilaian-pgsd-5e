@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.47] - 2026-08-23
+
+### 📌 Penataan Posisi Footer Presisi di Dasar Dokumen (Anchored Page-Bottom)
+- **Struktur Flex Kolom Halaman Penuh (`print-page-wrapper`):**
+  - Mengisolasi seluruh isi laporan (Kop, tabel evaluasi, dan tanda tangan dosen) dalam kontainer atas fleksibel (`flex: 1 0 auto`), dan menambatkan footer dokumen di bagian paling dasar lembar A4 (`margin-top: auto`).
+  - Menjamin footer berada di posisi terbawah kertas (*true bottom margin*) seperti dokumen cetak formal profesional, bukan mengambang sembarangan di bawah tanda tangan.
+- **Sinkronisasi & Panduan Opsi Cetak Browser ("Headers & footers"):**
+  - Menyediakan panduan jelas pada bilah bawah modal cetak untuk mengosongkan centang *"Headers and footers"* di jendela browser guna menghasilkan cetakan bersih tanpa URL atau penanggalan browser ganda.
+  - Memastikan batas margin aman (`8mm 10mm`) sehingga jika opsi tersebut dicentang sekalipun oleh pengguna, tidak terjadi tumpang tindih (*zero collision*).
+
+---
+
 ## [2.1.46] - 2026-08-23
 
 ### 🏛️ Integrasi Penuh Logo Resmi ULM (Favicon, Tab Icon, PWA, Header & Portal Login)
