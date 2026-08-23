@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.15] - 2026-08-23
+
+### 🔒 Kontrol Pengisian Manual & Tombol Format Email Khusus Mahasiswa
+- **Penetapan Pengisian Email Manual Secara Default:**
+  - Menghapus pengisian otomatis (*auto-fill*) email saat penginputan NIM untuk mencegah asumsi format email yang tidak diinginkan.
+- **Tombol Pintas Format Email Mahasiswa (`⚡ Gunakan Format NIM`):**
+  - Menambahkan tombol pintas manual khusus bagi mahasiswa untuk mengisikan format baku `NIM@mhs.ulm.ac.id` ke dalam field email dengan satu klik hanya jika diinginkan pengguna.
+- **Pengosongan Baku Form Dosen & Penilai Tamu:**
+  - Memastikan form identitas untuk peran **Dosen** dan **Lainnya / Tamu** selalu berstatus kosong (*clean form*) secara default tanpa auto-fill teks dummy/nama pengampu, serta menyembunyikan tombol pintas format email NIM.
+
+---
+
 ## [2.1.14] - 2026-08-23
 
 ### 🎯 Dropdown Peran Penilai & Dynamic Section Rendering

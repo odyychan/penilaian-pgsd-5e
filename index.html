@@ -456,9 +456,20 @@
 
                 <!-- Email Field -->
                 <div class="space-y-1.5">
-                  <label class="block text-xs font-semibold text-zinc-700">
-                    Email Penilai <span class="text-rose-500">*</span>
-                  </label>
+                  <div class="flex items-center justify-between">
+                    <label class="block text-xs font-semibold text-zinc-700">
+                      Email Penilai <span class="text-rose-500">*</span>
+                    </label>
+                    <button 
+                      type="button" 
+                      id="btnFillNimEmail" 
+                      onclick="fillNimEmailFormat()" 
+                      class="hidden text-[10px] font-mono font-semibold text-zinc-700 hover:text-zinc-950 bg-zinc-100 hover:bg-zinc-200 px-2 py-0.5 rounded border border-zinc-300 transition cursor-pointer flex items-center gap-1"
+                      title="Isi email otomatis dengan format NIM@mhs.ulm.ac.id"
+                    >
+                      <span>⚡ Gunakan Format NIM</span>
+                    </button>
+                  </div>
                   <div class="relative">
                     <input 
                       type="email" 
@@ -1556,6 +1567,21 @@
     // =========================================================================
     let currentEvaluatorRole = 'Mahasiswa'; // 'Mahasiswa' | 'Dosen' | 'Lainnya'
 
+    function fillNimEmailFormat() {
+      const cleanNim = (document.getElementById("inputNim")?.value || "").trim();
+      if (!cleanNim) {
+        showToast("Masukkan NIM Anda terlebih dahulu!", "warning");
+        return;
+      }
+      const inputEmail = document.getElementById("inputEmail");
+      if (inputEmail) {
+        inputEmail.value = `${cleanNim}@mhs.ulm.ac.id`;
+        validateEmailLive(inputEmail.value);
+        saveFormDraft();
+        showToast("✓ Format email NIM berhasil diisi.", "success");
+      }
+    }
+
     function onRoleChange(role) {
       currentEvaluatorRole = role || 'Mahasiswa';
 
@@ -1567,6 +1593,7 @@
       const nimContainer = document.getElementById("nimContainer");
       const identityFieldsContainer = document.getElementById("identityFieldsContainer");
       const autoFillNotice = document.getElementById("namaAutoFillNotice");
+      const btnFillNimEmail = document.getElementById("btnFillNimEmail");
       const inputNama = document.getElementById("inputNama");
       const inputEmail = document.getElementById("inputEmail");
       const step1Subtitle = document.getElementById("step1Subtitle");
@@ -1574,6 +1601,7 @@
       if (!role) {
         if (nimContainer) nimContainer.classList.add("hidden");
         if (identityFieldsContainer) identityFieldsContainer.classList.add("hidden");
+        if (btnFillNimEmail) btnFillNimEmail.classList.add("hidden");
         if (step1Subtitle) step1Subtitle.textContent = "Pilih peran penilai Anda terlebih dahulu untuk memulai pengisian identitas.";
         return;
       }
@@ -1584,39 +1612,35 @@
         if (nimContainer) nimContainer.classList.remove("hidden");
         if (step1Subtitle) step1Subtitle.textContent = "Masukkan NIM Anda untuk verifikasi otomatis data mahasiswa.";
         if (inputNama) inputNama.placeholder = "Tuliskan nama lengkap Anda...";
-        if (inputEmail) inputEmail.placeholder = "nama.nim@mhs.ulm.ac.id";
+        if (inputEmail) inputEmail.placeholder = "contoh: 221012310001@mhs.ulm.ac.id";
         
         const currentNim = document.getElementById("inputNim")?.value || "";
         if (currentNim) {
           validateNimLive(currentNim);
+        } else {
+          if (btnFillNimEmail) btnFillNimEmail.classList.add("hidden");
         }
       } else if (role === 'Dosen') {
         if (nimContainer) nimContainer.classList.add("hidden");
         if (autoFillNotice) autoFillNotice.classList.add("hidden");
+        if (btnFillNimEmail) btnFillNimEmail.classList.add("hidden");
         if (step1Subtitle) step1Subtitle.textContent = "Masukkan nama dan email dosen pengampu / penguji.";
         if (inputNama) {
-          if (!inputNama.value || inputNama.value.trim().toLowerCase().includes("ahmad") || inputNama.value.trim().toLowerCase().includes("siti")) {
-            inputNama.value = "Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.";
-          }
-          inputNama.placeholder = "Dr. ... / Nama Dosen Pengampu";
+          inputNama.placeholder = "Tuliskan nama lengkap Dosen beserta gelar...";
         }
         if (inputEmail) {
-          if (!inputEmail.value) inputEmail.value = "ririanti@ulm.ac.id";
-          inputEmail.placeholder = "dosen@ulm.ac.id";
-          validateEmailLive(inputEmail.value);
+          inputEmail.placeholder = "email.dosen@ulm.ac.id";
         }
       } else if (role === 'Lainnya') {
         if (nimContainer) nimContainer.classList.add("hidden");
         if (autoFillNotice) autoFillNotice.classList.add("hidden");
+        if (btnFillNimEmail) btnFillNimEmail.classList.add("hidden");
         if (step1Subtitle) step1Subtitle.textContent = "Masukkan nama dan email penilai tamu / umum.";
         if (inputNama) {
-          if (inputNama.value.includes("Dr. Ririanti")) inputNama.value = "";
-          inputNama.placeholder = "Nama Lengkap Penilai Tamu";
+          inputNama.placeholder = "Tuliskan nama lengkap penilai tamu...";
         }
         if (inputEmail) {
-          if (inputEmail.value.includes("ririanti@")) inputEmail.value = "";
-          inputEmail.placeholder = "nama@email.com";
-          validateEmailLive(inputEmail.value);
+          inputEmail.placeholder = "email.penilai@domain.com";
         }
       }
       saveFormDraft();
@@ -1628,13 +1652,14 @@
       const iconEl = document.getElementById("nimStatusIcon");
       const feedbackBox = document.getElementById("nimFeedbackBox");
       const autoFillNotice = document.getElementById("namaAutoFillNotice");
+      const btnFillNimEmail = document.getElementById("btnFillNimEmail");
       const inputNama = document.getElementById("inputNama");
-      const inputEmail = document.getElementById("inputEmail");
 
       if (!cleanNim) {
         if (iconEl) iconEl.classList.add("hidden");
         if (feedbackBox) feedbackBox.classList.add("hidden");
         if (autoFillNotice) autoFillNotice.classList.add("hidden");
+        if (btnFillNimEmail) btnFillNimEmail.classList.add("hidden");
         if (nimInput) nimInput.className = "w-full pl-3.5 pr-16 py-2.5 rounded-lg border border-zinc-300 text-xs sm:text-sm font-mono focus:border-zinc-900 outline-none transition bg-white placeholder-zinc-400";
         return false;
       }
@@ -1672,23 +1697,22 @@
           feedbackBox.classList.remove("hidden");
         }
 
-        // Auto-fill nama mahasiswa (dapat diedit manual sesuai permintaan pengguna)
+        // Auto-fill nama mahasiswa (tetap dapat disunting manual)
         if (inputNama) {
           inputNama.value = foundStudent.name;
         }
         if (autoFillNotice) autoFillNotice.classList.remove("hidden");
-
-        // Suggest institutional email if empty
-        if (inputEmail && !inputEmail.value) {
-          const cleanNameSlug = foundStudent.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-          inputEmail.value = `${cleanNameSlug.slice(0, 10)}.${cleanNim}@mhs.ulm.ac.id`;
-          validateEmailLive(inputEmail.value);
+        
+        // Tampilkan tombol khusus jika ingin mengisi format NIM@mhs.ulm.ac.id
+        if (btnFillNimEmail) {
+          btnFillNimEmail.classList.remove("hidden");
         }
 
         return true;
       } else {
         if (iconEl) iconEl.classList.add("hidden");
         if (autoFillNotice) autoFillNotice.classList.add("hidden");
+        if (btnFillNimEmail) btnFillNimEmail.classList.add("hidden");
 
         if (cleanNim.length >= 6) {
           if (nimInput) nimInput.className = "w-full pl-3.5 pr-16 py-2.5 rounded-lg border border-amber-400 text-xs sm:text-sm font-mono focus:border-amber-600 outline-none transition bg-amber-50/20";
