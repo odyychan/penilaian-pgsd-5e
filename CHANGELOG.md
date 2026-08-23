@@ -4,6 +4,19 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.27] - 2026-08-23
+
+### 🎯 Integrasi Filter Sesi / Minggu pada Status Pengisian Presensi Penilaian
+- **Filter Berbasis Sesi / Pertemuan (Session-Scoped Evaluation Target):**
+  - Menambahkan dropdown **`Sesi / Minggu:`** pada bar kontrol tabel Status Pengisian Penilaian.
+  - Memungkinkan penilai atau pengelola membatasi target evaluasi hanya pada kelompok yang tampil di sesi tertentu (misalnya: *Minggu 1* hanya Kelompok 1 dan 2 dari total 10 kelompok di kelas).
+- **Kalkulasi Beban Penilaian Realistis Sesuai Jadwal Tampil:**
+  - Mahasiswa yang telah menyelesaikan penilaian untuk kelompok yang tampil di sesi terpilih (misal 2 kelompok) langsung dinilai **`✓ Lengkap (2/2)`** untuk sesi tersebut, tanpa terbebani kelompok pada minggu-minggu berikutnya.
+- **Kaskade Sinkronisasi Dropdown Filter:**
+  - Pilihan pada dropdown *Presentator* menyesuaikan secara dinamis hanya menampilkan kelompok yang terdaftar pada sesi/minggu yang dipilih.
+
+---
+
 ## [2.1.26] - 2026-08-23
 
 ### 📊 Rombak Total Sistem Tabel Status Pengisian Penilaian (Multi-Kelompok & Anti-Konflik)
