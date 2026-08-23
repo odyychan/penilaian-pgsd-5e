@@ -4,6 +4,23 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.38] - 2026-08-23
+
+### 🧊 Pembekuan Kolom Identitas Mahasiswa & Penguncian Kelompok Dinilai Dinamis
+- **Pembersihan Istilah Presensi & Standardisasi Label Status:**
+  - Mengubah label sub-tab navigasi dari *Status Presensi* menjadi **Status**.
+  - Mengubah judul tabel dari *Matriks Presensi Penilaian* menjadi **Matriks Keterisian Penilaian** / **Status Penilaian • [Kelompok]**, mengeliminasi kerancuan istilah karena tabel ini merupakan matriks keterisian evaluasi tugas.
+  - Memperbarui subtitle dan filter label menjadi ringkas dan konsisten (*Status*, *Kelompok Penyaji*, *Kelompok Asal*).
+- **Pembekuan Kolom Mahasiswa & NIM (Frozen Sticky Columns):**
+  - Kolom nomor urut `#` dan **Mahasiswa & NIM** kini dibekukan secara permanen (*sticky frozen column*) di semua ukuran layar (desktop, tablet, dan smartphone).
+  - Latar belakang sel sticky dibuat 100% solid (*opaque isolation*) dengan bayangan pemisah (*subtle drop-shadow*), sehingga saat tabel digeser horizontal, nama mahasiswa tetap terlihat jelas dan sel lainnya meluncur di belakangnya tanpa tumpang tindih (*zero text bleeding*).
+- **Penguncian Kelompok yang Sudah Dinilai (Evaluated Group Locking & Auto 2-Way Sync):**
+  - Pada formulir Step 2 (Pilih Kelompok Yang Dinilai), jika mahasiswa telah mengirimkan penilaian untuk kelompok tertentu, kartu kelompok tersebut otomatis dibekukan (*disabled*) dengan badge hijau **"Sudah Dinilai • Terkunci"**.
+  - Anggota penyaji kelompok yang bersangkutan juga otomatis dibekukan dengan badge **"Kelompok Anda (Penyaji)"** untuk mencegah evaluasi diri sendiri.
+  - Jika admin menghapus rekam jejak penilaian mahasiswa di panel admin, mesin sinkronisasi 2 arah *real-time* otomatis membuka kembali (*unlock*) pilihan kelompok tersebut secara instan tanpa perlu reload.
+
+---
+
 ## [2.1.37] - 2026-08-23
 
 ### 🔄 Sinkronisasi 2 Arah Real-Time (Two-Way Realtime Engine)

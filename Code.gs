@@ -575,7 +575,7 @@ function getRecapData() {
       if (status !== "VALID") continue;
 
       const peran = String(row[11] || "Mahasiswa").trim();
-      if (peran !== "Mahasiswa") continue; // Hanya mahasiswa yang masuk presensi
+      if (peran !== "Mahasiswa") continue; // Hanya mahasiswa yang masuk matriks evaluasi keterisian
 
       const nim = String(row[12] || "").trim().toLowerCase();
       const namaLower = String(row[4] || "").trim().toLowerCase();
@@ -698,7 +698,7 @@ function getRecapData() {
       summary: summaryAll,        // Semua peran (backward-compatible)
       summaryMhs: summaryMhs,     // Mahasiswa terdaftar saja (DEFAULT tampilan rekap)
       groupMembersMap: groupMembersMap,
-      // === DATA PRESENSI PRESISI TINGGI ===
+      // === DATA STATUS KETERISIAN PRESISI TINGGI ===
       submittedNims: Array.from(submittedNimSet),
       submittedNames: Array.from(submittedNameSet),
       nimToKelompokMap: nimToKelompokMap,
