@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.39] - 2026-08-23
+
+### ✨ Penyempurnaan Tipografi & Redaksi Minimalis Profesional pada Visual Chart
+- **Pembersihan Redaksi Teks Visual Leaderboard:**
+  - Mengubah judul kartu ikhtisar dari *Leaderboard & Peringkat Performa* menjadi **Ikhtisar Peringkat & Performa**.
+  - Mengeliminasi instruksi teknis / embel-embel generik `(Top 10 & Scrollable)` pada subtitle dan menggantinya dengan deskripsi profesional yang ringkas: *"Nilai rata-rata kelompok dan perolehan suara presentator terbaik."*
+  - Menyelaraskan sub-header grafik individu menjadi **Presentator Terbaik**.
+
+---
+
 ## [2.1.38] - 2026-08-23
 
 ### 🧊 Pembekuan Kolom Identitas Mahasiswa & Penguncian Kelompok Dinilai Dinamis
