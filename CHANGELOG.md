@@ -4,6 +4,19 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.33] - 2026-08-23
+
+### 📱 Presisi Responsivitas Mobile-S/M/L & Eliminasi Kolisi Kolom
+- **Eliminasi Tumpang Tindih Kolom Mobile (Zero Overlap):**
+  - Mengubah perilaku sticky freeze tabel menjadi `md:sticky` sehingga pada layar smartphone (Mobile-S 320px, Mobile-M 375px, Mobile-L 425px), tabel melakukan *smooth horizontal scroll* secara alami tanpa terjadi tabrakan/tumpang tindih antara kolom nama dan kolom status.
+  - Menambahkan petunjuk geser tabel (*horizontal scroll cue*) yang elegan di header tabel pada mode mobile.
+- **Penyempurnaan Tata Letak Header Kartu Tabel:**
+  - Header judul kartu status presensi disesuaikan secara responsif (`flex-col sm:flex-row`) agar judul, subtitle, dan badge hitungan mahasiswa tetap utuh dan terbaca tanpa terpotong di layar terkecil (320px).
+- **Format Teks & Padding Rapi:**
+  - Menerapkan `whitespace-nowrap` pada seluruh sel dan header agar nama mahasiswa dan status penilaian tidak terpotong menjadi baris berantakan saat digeser.
+
+---
+
 ## [2.1.32] - 2026-08-23
 
 ### 🏷️ Penyesuaian Label "Kelompok Penyaji" & Default Pilihan "Semua"
