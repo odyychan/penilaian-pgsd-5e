@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.73] - 2026-08-23
+
+### 📊 Sinkronisasi Status & Label Minimalis Matriks Keterisian Penilaian
+- **Label Minimalis Bebas Pengisian (`Bebas`):**
+  - Menambahkan *badge* status minimalis `Bebas` pada sel tabel penilaian bagi anggota kelompok penyaji yang tampil di sesi yang sama saat pengaturan `Kewajiban Menilai bagi Kelompok Penyaji` diset ke `BEBAS_PENUH_DI_SESINYA`.
+  - Mengeliminasi ketidakkonsistenan tampilan tanda silang merah (`✕`) pada sesama kelompok penyaji ketika aturan bebas pengisian aktif.
+- **Kalkulasi Kepatuhan Presisi & Konsistensi Status Akhir:**
+  - Status akhir kolom kanan (`Selesai (Penyaji)`) kini 100% konsisten dengan sel evaluasi pada sesi minggu berjalan.
+  - Saat sesi aktif tertentu dipilih (misal: `Minggu 1`), kelompok di luar sesi aktif otomatis berstatus netral (`-`), dan anggota penyaji di sesi tersebut berstatus `Selesai (Penyaji)` secara akurat.
+- **Legenda / Keterangan Simbol Tabel Minimalis (*Table Legend*):**
+  - Menambahkan bar keterangan minimalis di bawah tabel matriks (`Penyaji`, `Bebas`, `✓ Sudah Menilai`, `✕ Belum Menilai`, `- Di Luar Sesi Aktif`).
+
+---
+
 ## [2.1.72] - 2026-08-23
 
 ### 🎯 Restrukturisasi Mode Eksklusif Penghapusan Respons (Per Kelompok vs Per Sesi)
