@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.42] - 2026-08-23
+
+### 🎯 Perbaikan Margin Atas & Optimalisasi 1 Halaman Penuh Dokumen Cetak
+- **Eliminasi Penumpukan Margin Atas (@page margin-top 0mm):**
+  - Mengatur `@page { margin: 0mm 8mm 6mm 8mm; }` untuk mencegah browser Chrome menggandakan margin atas bawaan (*default browser print margin*), sehingga tidak ada celah kosong lebar di bagian atas dan Kop Surat langsung bertengger rapi di puncak halaman.
+  - Memastikan dokumen laporan resmi A4 selalu pas tercetak dalam **1 halaman penuh (*1 page fit*)** tanpa terpotong atau loncat ke halaman kedua saat menggunakan setting *Margins: Default*.
+  - Menyesuaikan padding canvas pratinjau (`padding: 24px 30px`) agar tampilan modal pratinjau dan hasil cetak PDF 100% konsisten dan proporsional.
+
+---
+
 ## [2.1.41] - 2026-08-23
 
 ### 📑 Harmonisasi Proporsi Kop Surat & Redaksi Ulasan Evaluasi Mahasiswa
