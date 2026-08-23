@@ -4,7 +4,24 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.23] - 2026-08-23
+
+### 📋 Rombak Total Sistem Filter Status Pengisian Presensi
+- **Filter Berbasis Presentator, Kelompok Asal, dan Status Pengisian:**
+  - Merombak total filter bar pada tab **Status Pengisian Presensi** menjadi 3 parameter:
+    1. **Presentator:** Memilih kelompok tampil yang dinilai (*Semua Presentator*, *Kelompok 1*, *Kelompok 2*, dst.) untuk mengecek presensi penilaian terhadap kelompok tersebut secara spesifik.
+    2. **Kelompok Asal:** Memfilter mahasiswa berdasarkan kelompok asalnya di kelas.
+    3. **Status Pengisian:** Menyaring berdasarkan status `Semua Status`, `✓ Sudah Mengisi Form`, atau `⏳ Belum Mengisi Form`.
+- **Kalkulasi Statistik & Badges Dinamis:**
+  - Badges *Total Mahasiswa*, *Sudah Mengisi Form*, dan *Belum Mengisi Form* langsung menghitung persentase secara dinamis dan presisi sesuai kombinasi filter Presentator dan Kelompok Asal yang dipilih.
+- **Tabel Presensi Responsif & Informatif:**
+  - Kolom tabel disesuaikan menjadi: `#`, `Nama Mahasiswa`, `NIM`, `Kelompok Asal`, `Kelompok Dinilai`, dan `Status Pengisian`.
+  - Kolom *Kelompok Dinilai* menyajikan badge kelompok mana saja yang telah dinilai oleh mahasiswa yang bersangkutan.
+
+---
+
 ## [2.1.22] - 2026-08-23
+
 
 ### 🧹 De-duplikasi Antarmuka Tombol Reset Draf
 - **Pembersihan Tombol Reset Draf Header Formulir:**

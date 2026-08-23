@@ -946,19 +946,19 @@
         <div id="presensiControlBox" class="space-y-3 p-3.5 bg-zinc-50 rounded-xl border border-zinc-200 text-xs hidden">
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             <div>
-              <label class="block font-semibold text-zinc-700 mb-1 text-[11px]">Sesi / Minggu:</label>
-              <select id="presensiSesiFilter" onchange="filterPresensiDisplay()" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-medium focus:border-zinc-900 outline-none">
-                <option value="ALL">Semua Sesi</option>
+              <label for="presensiPresentatorFilter" class="block font-semibold text-zinc-700 mb-1 text-[11px]">Presentator:</label>
+              <select id="presensiPresentatorFilter" onchange="filterPresensiDisplay()" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-medium focus:border-zinc-900 outline-none">
+                <option value="ALL">Semua Presentator</option>
               </select>
             </div>
             <div>
-              <label class="block font-semibold text-zinc-700 mb-1 text-[11px]">Kelompok Asal:</label>
+              <label for="presensiGroupFilter" class="block font-semibold text-zinc-700 mb-1 text-[11px]">Kelompok Asal:</label>
               <select id="presensiGroupFilter" onchange="filterPresensiDisplay()" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-medium focus:border-zinc-900 outline-none">
-                <option value="ALL">Semua Kelompok</option>
+                <option value="ALL">Semua Kelompok Asal</option>
               </select>
             </div>
             <div>
-              <label class="block font-semibold text-zinc-700 mb-1 text-[11px]">Status Pengisian:</label>
+              <label for="presensiStatusFilter" class="block font-semibold text-zinc-700 mb-1 text-[11px]">Status Pengisian:</label>
               <select id="presensiStatusFilter" onchange="filterPresensiDisplay()" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-medium focus:border-zinc-900 outline-none">
                 <option value="ALL">Semua Status (Sudah & Belum)</option>
                 <option value="SUDAH">✓ Sudah Mengisi Form</option>
@@ -1064,8 +1064,8 @@
                     <th class="py-2.5 px-3">Nama Mahasiswa</th>
                     <th class="py-2.5 px-3 w-32">NIM</th>
                     <th class="py-2.5 px-3 w-36">Kelompok Asal</th>
-                    <th class="py-2.5 px-3 w-28 text-center">Sesi</th>
-                    <th class="py-2.5 px-3 w-40 text-center">Status Form</th>
+                    <th class="py-2.5 px-3 w-44">Kelompok Dinilai</th>
+                    <th class="py-2.5 px-3 w-36 text-center">Status Pengisian</th>
                   </tr>
                 </thead>
                 <tbody id="presensiTableBody" class="divide-y divide-zinc-100">
@@ -2561,6 +2561,7 @@
           } else {
             if (empty) empty.classList.add("hidden");
             populateRekapFilter(res.summary);
+            populatePresensiFilters();
             renderBothRekapViews();
           }
         } else {
@@ -2690,43 +2691,38 @@
     }
 
     function populatePresensiFilters() {
-      const sesiSelect = document.getElementById("presensiSesiFilter");
+      const presSelect = document.getElementById("presensiPresentatorFilter");
       const grpSelect = document.getElementById("presensiGroupFilter");
 
-      if (!sesiSelect || !grpSelect) return;
+      if (!presSelect || !grpSelect) return;
 
-      const currentSesi = sesiSelect.value || "ALL";
+      const currentPres = presSelect.value || "ALL";
       const currentGrp = grpSelect.value || "ALL";
 
-      const sessions = new Set();
-      const groups = new Set();
+      // 1. Kumpulkan seluruh kelompok Presentator (yang dinilai)
+      const presentators = new Set();
+      (currentRekapData?.summary || []).forEach(g => { if (g.kelompok) presentators.add(g.kelompok.trim()); });
+      (currentRekapData?.summaryMhs || []).forEach(g => { if (g.kelompok) presentators.add(g.kelompok.trim()); });
+      (groupsData || []).forEach(g => { if (g.name) presentators.add(g.name.trim()); });
 
-      (allStudentsData || []).forEach(s => {
-        if (s.sesi) sessions.add(s.sesi.trim());
-        if (s.kelompok) groups.add(s.kelompok.trim());
-      });
+      // 2. Kumpulkan seluruh Kelompok Asal Mahasiswa di kelas
+      const originGroups = new Set();
+      (allStudentsData || []).forEach(s => { if (s.kelompok) originGroups.add(s.kelompok.trim()); });
+      (groupsData || []).forEach(g => { if (g.name) originGroups.add(g.name.trim()); });
 
-      (groupsData || []).forEach(g => {
-        if (g.sesi) sessions.add(g.sesi.trim());
-        if (g.name) groups.add(g.name.trim());
-      });
-
-      (currentRekapData?.summary || []).forEach(g => {
-        if (g.sesi) sessions.add(g.sesi.trim());
-        if (g.kelompok) groups.add(g.kelompok.trim());
-      });
-
-      sesiSelect.innerHTML = '<option value="ALL">Semua Sesi (Keseluruhan)</option>';
-      Array.from(sessions).sort().forEach(s => {
+      // Populate Presentator Dropdown
+      presSelect.innerHTML = '<option value="ALL">Semua Presentator</option>';
+      Array.from(presentators).sort().forEach(p => {
         const opt = document.createElement("option");
-        opt.value = s;
-        opt.textContent = s;
-        if (s === currentSesi) opt.selected = true;
-        sesiSelect.appendChild(opt);
+        opt.value = p;
+        opt.textContent = p;
+        if (p === currentPres) opt.selected = true;
+        presSelect.appendChild(opt);
       });
 
-      grpSelect.innerHTML = '<option value="ALL">Semua Kelompok</option>';
-      Array.from(groups).sort().forEach(g => {
+      // Populate Kelompok Asal Dropdown
+      grpSelect.innerHTML = '<option value="ALL">Semua Kelompok Asal</option>';
+      Array.from(originGroups).sort().forEach(g => {
         const opt = document.createElement("option");
         opt.value = g;
         opt.textContent = g;
@@ -2751,14 +2747,12 @@
 
       if (!tableBody) return;
 
-      const sesiFilter = document.getElementById("presensiSesiFilter")?.value || "ALL";
+      const presentatorFilter = document.getElementById("presensiPresentatorFilter")?.value || "ALL";
       const grpFilter = document.getElementById("presensiGroupFilter")?.value || "ALL";
       const statusFilter = document.getElementById("presensiStatusFilter")?.value || "ALL";
       const searchQuery = (document.getElementById("presensiSearchInput")?.value || "").trim().toLowerCase();
 
       // === SUMBER KEBENARAN TUNGGAL (Single Source of Truth) ===
-      // Gunakan submittedNims & submittedNames dari backend (data sheet langsung)
-      // Bukan dari evaluators[] yang bisa double-count atau salah scope
       const submittedNimSet = new Set(
         (currentRekapData?.submittedNims || []).map(n => String(n).trim().toLowerCase())
       );
@@ -2768,7 +2762,7 @@
       const nimToKelompokMap = currentRekapData?.nimToKelompokMap || {};
       const nameToKelompokMap = currentRekapData?.nameToKelompokMap || {};
 
-      // Fallback: jika backend belum di-deploy dengan field baru, gunakan evaluators[]
+      // Fallback jika backend lama
       const hasNewFields = currentRekapData?.submittedNims !== undefined;
       if (!hasNewFields && currentRekapData?.summary) {
         currentRekapData.summary.forEach(g => {
@@ -2783,74 +2777,75 @@
         });
       }
 
-      // 1. Kumpulkan seluruh mahasiswa dari SEMUA kelompok (gunakan allStudentsData jika ada)
+      // 1. Kumpulkan seluruh mahasiswa dari SEMUA kelompok (unik)
       const allClassStudents = [];
       const seenNimInRoster = new Set();
 
-      // Prioritas: allStudentsData (master roster real-time dari backend)
       if (allStudentsData && allStudentsData.length > 0) {
         allStudentsData.forEach(s => {
           const nim = String(s.nim || "").trim();
           const name = String(s.name || "").trim();
           const grp = String(s.kelompok || "").trim();
-          const sesi = String(s.sesi || "Minggu 1").trim();
           if (!name) return;
           const key = nim ? nim.toLowerCase() : name.toLowerCase() + "|" + grp;
           if (seenNimInRoster.has(key)) return;
           seenNimInRoster.add(key);
-          allClassStudents.push({ name, nim, kelompok: grp, sesi });
+          allClassStudents.push({ name, nim, kelompok: grp });
         });
       } else if (groupsData && groupsData.length > 0) {
-        // Fallback ke groupsData
         groupsData.forEach(g => {
           (g.members || []).forEach(m => {
             const name = String(m.name || "").trim();
             const nim = String(m.nim || "").trim();
             const grp = String(g.name || "").trim();
-            const sesi = String(g.sesi || "Minggu 1").trim();
             if (!name) return;
             const key = nim ? nim.toLowerCase() : name.toLowerCase() + "|" + grp;
             if (seenNimInRoster.has(key)) return;
             seenNimInRoster.add(key);
-            allClassStudents.push({ name, nim, kelompok: grp, sesi });
+            allClassStudents.push({ name, nim, kelompok: grp });
           });
         });
       }
 
-      // 2. Tentukan status setiap mahasiswa secara presisi
+      // 2. Tentukan status setiap mahasiswa secara presisi berdasarkan filter Presentator
       const studentPresensiList = allClassStudents.map(student => {
         const normNim = String(student.nim || "").trim().toLowerCase();
         const normName = String(student.name || "").trim().toLowerCase();
 
-        // Prioritas: cek NIM dulu (unik & presisi), baru fallback nama
-        let hasFilled = false;
         let filledKelompok = [];
-
-        if (normNim && normNim !== "-" && submittedNimSet.has(normNim)) {
-          hasFilled = true;
-          filledKelompok = nimToKelompokMap[normNim] || [];
+        if (normNim && normNim !== "-" && nimToKelompokMap[normNim]) {
+          filledKelompok = nimToKelompokMap[normNim];
+        } else if (nameToKelompokMap[normName]) {
+          filledKelompok = nameToKelompokMap[normName];
+        } else if (normNim && normNim !== "-" && submittedNimSet.has(normNim)) {
+          filledKelompok = ["Sudah Submit"];
         } else if (submittedNameSet.has(normName)) {
-          hasFilled = true;
-          filledKelompok = nameToKelompokMap[normName] || [];
+          filledKelompok = ["Sudah Submit"];
+        }
+
+        let hasFilled = false;
+        if (presentatorFilter === "ALL") {
+          hasFilled = filledKelompok.length > 0;
+        } else {
+          hasFilled = filledKelompok.some(k => k.toLowerCase() === presentatorFilter.toLowerCase());
         }
 
         return {
           name: student.name,
           nim: student.nim || "-",
           kelompok: student.kelompok,
-          sesi: student.sesi,
           hasFilled,
           filledKelompok
         };
       });
 
-      // 3. Statistik berdasarkan filter sesi/kelompok
+      // 3. Filter berdasarkan Kelompok Asal
       const baseScopeList = studentPresensiList.filter(s => {
-        if (sesiFilter !== "ALL" && s.sesi !== sesiFilter) return false;
         if (grpFilter !== "ALL" && s.kelompok !== grpFilter) return false;
         return true;
       });
 
+      // 4. Hitung Statistik & Badges
       const totalStudents = baseScopeList.length;
       const totalSudah = baseScopeList.filter(s => s.hasFilled).length;
       const totalBelum = totalStudents - totalSudah;
@@ -2861,7 +2856,7 @@
       if (sudahMhsBadge) sudahMhsBadge.textContent = `${totalSudah} (${pctSudah}%)`;
       if (belumMhsBadge) belumMhsBadge.textContent = `${totalBelum} (${pctBelum}%)`;
 
-      // 4. Filter tabel
+      // 5. Filter Tabel berdasarkan Status & Kata Kunci Pencarian
       const filteredList = baseScopeList.filter(s => {
         if (statusFilter === "SUDAH" && !s.hasFilled) return false;
         if (statusFilter === "BELUM" && s.hasFilled) return false;
@@ -2892,16 +2887,15 @@
             ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300"><span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>Sudah Mengisi</span>`
             : `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-900 border border-amber-300"><span class="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse"></span>Belum Mengisi</span>`;
 
-          const kelompokNilaiLabel = s.hasFilled && s.filledKelompok.length > 0
-            ? `<span class="block text-[10px] text-emerald-700 font-mono mt-0.5">menilai: ${s.filledKelompok.join(', ')}</span>`
-            : '';
+          const kelompokDinilaiCell = s.filledKelompok.length > 0
+            ? s.filledKelompok.map(k => `<span class="inline-block px-2 py-0.5 rounded bg-zinc-100 border border-zinc-200 text-zinc-700 text-[11px] font-medium mr-1 mb-0.5">${k}</span>`).join("")
+            : `<span class="text-zinc-400 italic text-[11px]">-</span>`;
 
           return `
             <tr class="hover:bg-zinc-50/80 transition text-zinc-800 ${idx % 2 === 1 ? 'bg-zinc-50/40' : ''}">
               <td class="py-3 px-3 text-center font-mono text-zinc-400 text-[11px]">${idx + 1}</td>
               <td class="py-3 px-3 font-semibold text-zinc-900">
                 ${s.name}
-                ${kelompokNilaiLabel}
               </td>
               <td class="py-3 px-3 font-mono text-zinc-500 text-[11px]">
                 ${s.nim}
@@ -2909,8 +2903,8 @@
               <td class="py-3 px-3">
                 <span class="px-2 py-0.5 rounded bg-zinc-100 border border-zinc-200 text-zinc-700 text-[11px] font-medium whitespace-nowrap">${s.kelompok}</span>
               </td>
-              <td class="py-3 px-3 text-center font-mono text-zinc-500 text-[11px]">
-                ${s.sesi}
+              <td class="py-3 px-3">
+                ${kelompokDinilaiCell}
               </td>
               <td class="py-3 px-3 text-center">
                 ${statusBadge}
@@ -2920,7 +2914,7 @@
         }).join("");
       }
 
-      // 5. Render Dosen & Guest section (dari evaluators[] saja — bukan presensi mahasiswa)
+      // 6. Render Dosen & Guest section (dari evaluators[] saja — bukan presensi mahasiswa)
       const dosenGuestEvaluators = [];
       if (currentRekapData?.summary) {
         currentRekapData.summary.forEach(g => {
