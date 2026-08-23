@@ -4,6 +4,19 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.54] - 2026-08-23
+
+### 📐 Eliminasi Margin Collapse & Perbaikan Spasi Before Poin A & B
+- **Akar Masalah (*Margin Collapsing Issue Fixed*):**
+  - Mengatasi efek *CSS margin-collapsing* yang sebelumnya menyebabkan jarak *before* Poin A dan Poin B menyusut dan tampak menempel rapat pada batas tabel di atasnya.
+- **Penerapan Padding & Margin Spasial Eksplisit:**
+  - Menetapkan ruang pemisah sebelum Poin A sebesar $16\text{px}$ (`margin-top: 14px; padding-top: 2px;`) sehingga memiliki batas visual yang tegas dari blok metadata mata kuliah.
+  - Menetapkan ruang pemisah sebelum Poin B sebesar $18\text{px}$ (`margin-top: 16px; padding-top: 2px;`) sehingga memiliki jarak napas yang jelas dan terpisah dari garis tepi bawah Tabel A.
+- **Sinkronisasi Dwikanal:**
+  - Diperbarui pada `index.html` dan `admin.html`.
+
+---
+
 ## [2.1.53] - 2026-08-23
 
 ### 📐 Optimalisasi Spasi Before Poin A & Poin B (6pt Spacing)
