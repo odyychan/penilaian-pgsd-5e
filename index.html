@@ -379,9 +379,6 @@
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span>Draf Tersimpan</span>
                   </span>
-                  <button type="button" id="topResetDraftBtn" onclick="clearFormDraftManually()" title="Hapus Draf Isian" class="hidden text-[10px] text-zinc-400 hover:text-rose-600 transition underline cursor-pointer">
-                    Reset Draf
-                  </button>
                 </div>
               </div>
 
@@ -2064,11 +2061,6 @@
           btn.classList.add("hidden");
         }
       });
-      const topResetBtn = document.getElementById("topResetDraftBtn");
-      if (topResetBtn) {
-        if (hasData) topResetBtn.classList.remove("hidden");
-        else topResetBtn.classList.add("hidden");
-      }
       const indicator = document.getElementById("autoSaveIndicator");
       if (indicator && !hasData) {
         indicator.classList.add("hidden");

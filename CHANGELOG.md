@@ -4,7 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.22] - 2026-08-23
+
+### 🧹 De-duplikasi Antarmuka Tombol Reset Draf
+- **Pembersihan Tombol Reset Draf Header Formulir:**
+  - Menghapus tombol link teks *Reset Draf* pada header kartu Langkah 1 (*Identitas Penilai*) untuk mengeliminasi redundansi visual.
+  - Seluruh fungsi pengosongan draf kini terpusat secara konsisten dan ergonomis pada tombol **`🗑️ Reset Draf`** di action bar bawah setiap langkah navigasi formulir (Langkah 1 s.d. 4).
+
+---
+
 ## [2.1.21] - 2026-08-23
+
 
 ### 🔓 Rekapitulasi Hasil Independen dari Sesi Aktif (Full Filter-Driven)
 - **Pelepasan Keterikatan Rekapitulasi dari Sesi Aktif:**
