@@ -154,7 +154,7 @@
 <body class="min-h-screen flex flex-col bg-zinc-50 font-sans antialiased text-zinc-900 relative">
 
   <!-- ========================================================================= -->
-  <!-- 🔔 FLOATING TOAST OVERLAY CONTAINER (SELALU MELAYANG DI ATAS SEMUA KONTEN) -->
+  <!-- FLOATING TOAST OVERLAY CONTAINER (SELALU MELAYANG DI ATAS SEMUA KONTEN) -->
   <!-- ========================================================================= -->
   <div id="floatingToastContainer" class="fixed top-4 right-4 left-4 sm:left-auto sm:right-5 sm:top-5 z-[9999] flex flex-col gap-2.5 max-w-sm sm:max-w-md pointer-events-none items-end">
     <!-- Dynamic floating toasts pop in here -->
@@ -163,7 +163,11 @@
   <!-- Floating Offline / Sync Warning Banner (Fixed Overlay at Bottom) -->
   <div id="offlineSyncBanner" class="hidden fixed bottom-4 right-4 left-4 sm:left-auto sm:max-w-md z-[9990] p-3.5 sm:p-4 bg-zinc-950/95 text-white border border-amber-500/50 shadow-2xl backdrop-blur-md rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs fade-enter">
     <div class="flex items-start sm:items-center gap-2.5 min-w-0">
-      <span class="text-base flex-shrink-0">⚠️</span>
+      <div class="w-6 h-6 rounded-md bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center flex-shrink-0">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+      </div>
       <div class="min-w-0">
         <p class="font-bold text-amber-300">Koneksi Internet Terputus / Lambat</p>
         <p class="text-zinc-300 text-[11px] mt-0.5">Perubahan tersimpan aman di browser & akan otomatis dikirim saat online.</p>
@@ -174,12 +178,15 @@
       onclick="processPendingSyncQueue()" 
       class="w-full sm:w-auto px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-zinc-950 font-bold rounded-lg shadow-xs flex-shrink-0 cursor-pointer flex items-center justify-center gap-1.5 transition active:scale-98 text-xs whitespace-nowrap"
     >
-      <span>🔄 Kirim Sekarang</span>
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+      </svg>
+      <span>Kirim Sekarang</span>
     </button>
   </div>
 
   <!-- ========================================================================= -->
-  <!-- 🔒 AUTHENTICATION / LOGIN SCREEN -->
+  <!-- AUTHENTICATION / LOGIN SCREEN -->
   <!-- ========================================================================= -->
   <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4 bg-zinc-100/80">
     <div id="loginCard" class="w-full max-w-sm bg-white rounded-2xl border border-zinc-200 p-6 sm:p-8 shadow-sm space-y-6 fade-enter">
@@ -226,7 +233,7 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- 🎛️ DASHBOARD ADMIN (HIDDEN BY DEFAULT) -->
+  <!-- DASHBOARD ADMIN (HIDDEN BY DEFAULT) -->
   <!-- ========================================================================= -->
   <div id="adminDashboard" class="min-h-screen flex flex-col hidden">
     
@@ -236,7 +243,10 @@
         
         <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
           <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-100 flex items-center justify-center font-bold text-xs flex-shrink-0">
-            ⚙️
+            <svg class="w-4 h-4 text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
           </div>
           <div class="min-w-0">
             <div class="flex items-center gap-1.5 sm:gap-2">
@@ -273,30 +283,43 @@
           <button 
             id="adminTabBtn_data" 
             onclick="switchAdminTab('data')" 
-            class="py-2 px-1.5 sm:px-2 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition flex items-center justify-center gap-1 cursor-pointer text-center truncate"
+            class="py-2 px-1.5 sm:px-2 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate"
           >
-            <span>📋 Kelompok</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+            <span>Kelompok</span>
           </button>
           <button 
             id="adminTabBtn_config" 
             onclick="switchAdminTab('config')" 
-            class="py-2 px-1.5 sm:px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1 cursor-pointer text-center truncate"
+            class="py-2 px-1.5 sm:px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate"
           >
-            <span>⚙️ Konfigurasi</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            <span>Konfigurasi</span>
           </button>
           <button 
             id="adminTabBtn_responses" 
             onclick="switchAdminTab('responses')" 
-            class="py-2 px-1.5 sm:px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1 cursor-pointer text-center truncate"
+            class="py-2 px-1.5 sm:px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate"
           >
-            <span>📝 Respons</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+            </svg>
+            <span>Respons</span>
           </button>
           <button 
             id="adminTabBtn_system" 
             onclick="switchAdminTab('system')" 
-            class="py-2 px-1.5 sm:px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1 cursor-pointer text-center truncate"
+            class="py-2 px-1.5 sm:px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate"
           >
-            <span>🔒 Sistem</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            </svg>
+            <span>Sistem</span>
           </button>
         </div>
       </div>
@@ -305,7 +328,7 @@
     <!-- Main Admin Content -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-5 flex flex-col gap-2.5 sm:gap-4">
 
-      <!-- ⚡ QUICK SESSI CONTROL WIDGET (PENENTUAN SESI MINGGU AKTIF OLEH ADMIN - SINGLE SOURCE OF TRUTH) -->
+      <!-- QUICK SESSI CONTROL WIDGET (PENENTUAN SESI MINGGU AKTIF OLEH ADMIN - SINGLE SOURCE OF TRUTH) -->
       <div class="bg-white rounded-xl border border-zinc-200 p-3.5 sm:p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-4">
         <div class="space-y-1">
           <div class="flex items-center gap-2">
@@ -343,14 +366,17 @@
             <option value="SEMUA">SEMUA (Tampilkan Semua Kelompok)</option>
           </select>
 
-          <span class="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-1.5 rounded border border-emerald-200 text-center font-medium">
-            ⚡ Auto-Save
+          <span class="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-1.5 rounded border border-emerald-200 text-center font-medium flex items-center justify-center gap-1">
+            <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+            <span>Auto-Save</span>
           </span>
         </div>
       </div>
 
       <!-- ===================================================================== -->
-      <!-- TAB 1: 📋 MANAJEMEN DATA KELOMPOK & MAHASISWA -->
+      <!-- TAB 1: MANAJEMEN DATA KELOMPOK & MAHASISWA -->
       <!-- ===================================================================== -->
       <div id="adminView_data" class="flex flex-col gap-2.5 sm:gap-4 fade-enter">
         
@@ -369,7 +395,10 @@
                 class="w-full sm:w-auto px-3.5 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
                 title="Impor atau Input Massal Kelompok dan Mahasiswa"
               >
-                <span>📥 Input Massal (Batch)</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                </svg>
+                <span>Input Massal (Batch)</span>
               </button>
               <button 
                 type="button" 
@@ -385,7 +414,10 @@
                 title="Tarik data terbaru langsung dari Google Spreadsheet"
                 class="w-full sm:w-auto px-3.5 py-2 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
               >
-                <span>🔄 Segarkan</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                <span>Segarkan</span>
               </button>
             </div>
           </div>
@@ -396,7 +428,7 @@
               <input 
                 type="text" 
                 id="searchMasterInput" 
-                placeholder="🔍 Cari kelompok, nama mahasiswa, atau NIM..." 
+                placeholder="Cari kelompok, nama mahasiswa, atau NIM..." 
                 oninput="filterMasterDataDisplay()" 
                 class="w-full pl-9 pr-3.5 py-2 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none bg-white placeholder-zinc-400"
               >
@@ -433,7 +465,7 @@
       </div>
 
       <!-- ===================================================================== -->
-      <!-- TAB 2: ⚙️ KONFIGURASI PERKULIAHAN (AUTO-SAVE) -->
+      <!-- TAB 2: KONFIGURASI PERKULIAHAN (AUTO-SAVE) -->
       <!-- ===================================================================== -->
       <div id="adminView_config" class="flex flex-col gap-2.5 sm:gap-4 fade-enter hidden">
         <form id="formConfigParameters" onsubmit="event.preventDefault()" class="bg-white rounded-xl border border-zinc-200 p-4 sm:p-7 shadow-xs space-y-5 sm:space-y-6">
@@ -616,35 +648,175 @@
                   onchange="handleConfigInputAutoSave(true)"
                   class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs font-medium bg-white focus:border-zinc-900 outline-none cursor-pointer"
                 >
-                  <option value="AKTIF">AKTIF (Dapat dilihat mahasiswa di Rekap)</option>
-                  <option value="NONAKTIF">NONAKTIF (Disembunyikan, hanya skor yang tampil)</option>
-                </select>
-              </div>
-
-              <div class="space-y-1.5">
-                <label class="block font-semibold text-zinc-700">Domain Email Institusi Wajib</label>
-                <input 
-                  type="text" 
-                  id="cfg_Domain_Email_Wajib" 
-                  oninput="handleConfigInputAutoSave()"
-                  placeholder="mhs.ulm.ac.id, ulm.ac.id" 
-                  class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none font-mono"
-                >
-                <p class="text-[11px] text-zinc-400">Pisahkan dengan koma jika lebih dari satu domain.</p>
-              </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+            
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-zinc-700">Nama Formulir / Judul Web</label>
+              <input 
+                type="text" 
+                name="Judul_Form" 
+                id="cfg_Judul_Form"
+                onchange="handleConfigFieldChange(this)"
+                class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none bg-white font-medium"
+              >
             </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-zinc-700">Mata Kuliah</label>
+              <input 
+                type="text" 
+                name="Mata_Kuliah" 
+                id="cfg_Mata_Kuliah"
+                onchange="handleConfigFieldChange(this)"
+                class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none bg-white font-medium"
+              >
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-zinc-700">Dosen Pengampu</label>
+              <input 
+                type="text" 
+                name="Dosen_Pengampu" 
+                id="cfg_Dosen_Pengampu"
+                onchange="handleConfigFieldChange(this)"
+                class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none bg-white font-medium"
+              >
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-zinc-700">Kelas</label>
+              <input 
+                type="text" 
+                name="Kelas" 
+                id="cfg_Kelas"
+                onchange="handleConfigFieldChange(this)"
+                class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none bg-white font-medium"
+              >
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-zinc-700">Jurusan / Program Studi</label>
+              <input 
+                type="text" 
+                name="Jurusan" 
+                id="cfg_Jurusan"
+                onchange="handleConfigFieldChange(this)"
+                class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none bg-white font-medium"
+              >
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-zinc-700">Domain Email Wajib Mahasiswa</label>
+              <input 
+                type="text" 
+                name="Domain_Email_Wajib" 
+                id="cfg_Domain_Email_Wajib"
+                placeholder="mhs.ulm.ac.id, ulm.ac.id"
+                onchange="handleConfigFieldChange(this)"
+                class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none bg-white font-medium font-mono"
+              >
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-zinc-700">Nilai Kelompok Minimal</label>
+              <input 
+                type="number" 
+                name="Nilai_Kelompok_Min" 
+                id="cfg_Nilai_Kelompok_Min"
+                min="0" 
+                max="100" 
+                onchange="handleConfigFieldChange(this)"
+                class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none bg-white font-medium font-mono"
+              >
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-zinc-700">Nilai Kelompok Maksimal</label>
+              <input 
+                type="number" 
+                name="Nilai_Kelompok_Max" 
+                id="cfg_Nilai_Kelompok_Max"
+                min="0" 
+                max="100" 
+                onchange="handleConfigFieldChange(this)"
+                class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none bg-white font-medium font-mono"
+              >
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-zinc-700">Maksimal Karakter Evaluasi Kualitatif</label>
+              <input 
+                type="number" 
+                name="Maksimal_Karakter_Evaluasi" 
+                id="cfg_Maksimal_Karakter_Evaluasi"
+                min="50" 
+                max="2000" 
+                onchange="handleConfigFieldChange(this)"
+                class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none bg-white font-medium font-mono"
+              >
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-zinc-700">Maksimal Pilihan Presentator Terbaik</label>
+              <select 
+                name="Maksimal_Pilihan_Presentator_Terbaik" 
+                id="cfg_Maksimal_Pilihan_Presentator_Terbaik"
+                onchange="handleConfigFieldChange(this)"
+                class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none bg-white font-medium cursor-pointer font-mono"
+              >
+                <option value="1">1 Orang</option>
+                <option value="2">2 Orang</option>
+                <option value="3">3 Orang</option>
+                <option value="4">4 Orang</option>
+                <option value="5">5 Orang</option>
+              </select>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-zinc-700">Publikasi Ulasan Rekapitulasi</label>
+              <select 
+                name="Tampilkan_Ulasan_Publik" 
+                id="cfg_Tampilkan_Ulasan_Publik"
+                onchange="handleConfigFieldChange(this)"
+                class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none bg-white font-medium cursor-pointer"
+              >
+                <option value="AKTIF">AKTIF (Dapat dilihat audiens pada rekapitulasi)</option>
+                <option value="NONAKTIF">NONAKTIF (Disembunyikan dari audiens)</option>
+              </select>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-zinc-700">Nama Pembuat / Pengembang Web</label>
+              <input 
+                type="text" 
+                name="Nama_Pembuat" 
+                id="cfg_Nama_Pembuat"
+                placeholder="Contoh: Muhammad Ali Rida"
+                onchange="handleConfigFieldChange(this)"
+                class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none bg-white font-medium"
+              >
+            </div>
+
           </div>
 
-          <div class="pt-4 border-t border-zinc-100 flex items-center justify-between text-xs text-zinc-400">
-            <span>💾 Data otomatis dikirim ke Google Sheets setelah Anda mengetik / memilih opsi.</span>
-            <span id="configSyncStatusMini" class="font-mono text-emerald-600 font-semibold">🟢 Tersinkron</span>
+          <div class="p-3 bg-zinc-50 rounded-lg border border-zinc-200 text-xs text-zinc-500 flex items-center justify-between">
+            <span class="flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span>Data otomatis dikirim ke Google Sheets setelah Anda mengetik / memilih opsi.</span>
+            </span>
+            <span id="configSyncStatusMini" class="font-mono text-emerald-600 font-semibold flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              <span>Tersinkron</span>
+            </span>
           </div>
 
         </form>
       </div>
 
       <!-- ===================================================================== -->
-      <!-- TAB 3: 📝 DATA RESPONS PENILAIAN & RESET PER PENGIRIMAN -->
+      <!-- TAB 3: DATA RESPONS PENILAIAN & RESET PER PENGIRIMAN -->
       <!-- ===================================================================== -->
       <div id="adminView_responses" class="flex flex-col gap-2.5 sm:gap-4 fade-enter hidden">
         
@@ -663,7 +835,10 @@
                 class="flex-1 sm:flex-none px-3.5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
                 title="Cetak Laporan Rekapitulasi Resmi"
               >
-                <span>🖨️ Cetak Rekap</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                </svg>
+                <span>Cetak Rekap</span>
               </button>
               <button 
                 type="button" 
@@ -671,14 +846,20 @@
                 id="btnRefreshResponses"
                 class="flex-1 sm:flex-none px-3.5 py-2 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
               >
-                <span>🔄 Segarkan</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                <span>Segarkan</span>
               </button>
               <a 
                 href="https://docs.google.com/spreadsheets/d/1D7nQcVEbmOKjgcJ6LzKeeDQPQxhAIiCELRC9eP9w7WU/edit" 
                 target="_blank" 
                 class="flex-1 sm:flex-none px-3.5 py-2 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-800 text-xs font-semibold transition flex items-center justify-center gap-1.5 shadow-xs"
               >
-                <span>📊 Google Sheets</span>
+                <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                </svg>
+                <span>Google Sheets</span>
               </a>
             </div>
           </div>
@@ -689,7 +870,7 @@
               <input 
                 type="text" 
                 id="searchResponseInput" 
-                placeholder="🔍 Cari nama penilai, email, ID respons..." 
+                placeholder="Cari nama penilai, email, ID respons..." 
                 oninput="onResponseSearchInput()" 
                 class="w-full pl-9 pr-3.5 py-2 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none bg-white placeholder-zinc-400"
               >
@@ -776,7 +957,7 @@
       </div>
 
       <!-- ===================================================================== -->
-      <!-- TAB 4: 🔒 SISTEM, DATABASE & KEAMANAN -->
+      <!-- TAB 4: SISTEM, DATABASE & KEAMANAN -->
       <!-- ===================================================================== -->
       <div id="adminView_system" class="flex flex-col gap-2.5 sm:gap-4 fade-enter hidden">
         
@@ -809,7 +990,10 @@
                     id="btnTestConnection"
                     class="px-3.5 sm:px-4 py-2.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap"
                   >
-                    <span>⚡ Uji Koneksi</span>
+                    <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    <span>Uji Koneksi</span>
                   </button>
                   <button 
                     type="button" 
@@ -859,7 +1043,10 @@
                 onclick="openResetResponsesConfirmModal()" 
                 class="w-full py-2 px-3 rounded-lg border border-rose-200 hover:bg-rose-50 text-rose-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5"
               >
-                <span>🗑️ Kosongkan Seluruh Respons</span>
+                <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+                <span>Kosongkan Seluruh Respons</span>
               </button>
             </div>
           </div>
@@ -878,7 +1065,10 @@
                 onclick="purgeLocalCache()" 
                 class="w-full py-2 px-4 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5"
               >
-                <span>🔄 Hapus & Segarkan Cache</span>
+                <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                <span>Hapus & Segarkan Cache</span>
               </button>
             </div>
           </div>
@@ -934,13 +1124,17 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- ➕ MODAL: TAMBAH / EDIT KELOMPOK -->
+  <!-- MODAL: TAMBAH / EDIT KELOMPOK -->
   <!-- ========================================================================= -->
   <div id="groupModal" class="hidden fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
     <div class="bg-white rounded-xl max-w-md w-full p-4 sm:p-6 space-y-4 shadow-xl border border-zinc-200 fade-enter max-h-[90vh] overflow-y-auto custom-scrollbar">
       <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
         <h3 class="text-sm font-bold text-zinc-900" id="groupModalTitle">Tambah Kelompok Baru</h3>
-        <button type="button" onclick="closeGroupModal()" class="w-7 h-7 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center text-sm font-bold cursor-pointer">✕</button>
+        <button type="button" onclick="closeGroupModal()" class="w-7 h-7 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center cursor-pointer transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
       </div>
 
       <form onsubmit="handleSaveGroupModal(event)" class="space-y-3.5 text-xs">
@@ -996,7 +1190,7 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- ➕ MODAL: TAMBAH / EDIT MAHASISWA (ANGGOTA) -->
+  <!-- MODAL: TAMBAH / EDIT MAHASISWA (ANGGOTA) -->
   <!-- ========================================================================= -->
   <div id="memberModal" class="hidden fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
     <div class="bg-white rounded-xl max-w-md w-full p-4 sm:p-6 space-y-4 shadow-xl border border-zinc-200 fade-enter max-h-[90vh] overflow-y-auto custom-scrollbar">
@@ -1005,7 +1199,11 @@
           <h3 class="text-sm font-bold text-zinc-900" id="memberModalTitle">Tambah Anggota Mahasiswa</h3>
           <p class="text-[11px] text-zinc-500" id="memberModalGroupName">Kelompok 1</p>
         </div>
-        <button type="button" onclick="closeMemberModal()" class="w-7 h-7 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center text-sm font-bold cursor-pointer">✕</button>
+        <button type="button" onclick="closeMemberModal()" class="w-7 h-7 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center cursor-pointer transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
       </div>
 
       <form onsubmit="handleSaveMemberModal(event)" class="space-y-3.5 text-xs">
@@ -1050,7 +1248,7 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- 👁️ MODAL: DETAIL ULASAN KUALITATIF RESPONS -->
+  <!-- MODAL: DETAIL ULASAN KUALITATIF RESPONS -->
   <!-- ========================================================================= -->
   <div id="responseDetailModal" class="hidden fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
     <div class="bg-white rounded-xl max-w-lg w-full p-4 sm:p-6 space-y-4 shadow-xl border border-zinc-200 fade-enter max-h-[90vh] overflow-y-auto custom-scrollbar">
@@ -1059,7 +1257,11 @@
           <h3 class="text-sm font-bold text-zinc-900">Catatan Masukan Penilai</h3>
           <p class="text-[11px] text-zinc-500" id="responseDetailMeta">Penilai • Kelompok</p>
         </div>
-        <button type="button" onclick="closeResponseDetailModal()" class="w-7 h-7 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center text-sm font-bold cursor-pointer">✕</button>
+        <button type="button" onclick="closeResponseDetailModal()" class="w-7 h-7 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center cursor-pointer transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
       </div>
 
       <div id="responseDetailList" class="space-y-3 max-h-72 overflow-y-auto custom-scrollbar pr-1 text-xs">
@@ -1073,12 +1275,14 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- ⚠️ MODAL: KONFIRMASI RESET SELURUH RESPONS -->
+  <!-- MODAL: KONFIRMASI RESET SELURUH RESPONS -->
   <!-- ========================================================================= -->
   <div id="resetConfirmModal" class="hidden fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
     <div class="bg-white rounded-xl max-w-sm w-full p-5 sm:p-6 text-center space-y-4 shadow-xl border border-zinc-200 fade-enter max-h-[90vh] overflow-y-auto">
-      <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto text-xl font-bold border border-rose-200">
-        ⚠️
+      <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto border border-rose-200">
+        <svg class="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
       </div>
       <div>
         <h3 class="text-sm sm:text-base font-bold text-zinc-900">Kosongkan Seluruh Respons?</h3>
@@ -1105,27 +1309,40 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- 📥 MODAL: BATCH / INPUT MASSAL KELOMPOK & MAHASISWA -->
+  <!-- MODAL: BATCH / INPUT MASSAL KELOMPOK & MAHASISWA -->
   <!-- ========================================================================= -->
   <div id="batchGroupModal" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 no-print">
     <div class="bg-white rounded-2xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl border border-zinc-200 flex flex-col max-h-[92vh] space-y-4">
       
       <!-- Modal Header -->
       <div class="flex items-center justify-between border-b border-zinc-100 pb-3 flex-shrink-0">
-        <div class="flex items-center gap-2">
-          <span class="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 text-base">📥</span>
+        <div class="flex items-center gap-2.5">
+          <div class="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+            </svg>
+          </div>
           <div>
             <h3 class="text-sm sm:text-base font-bold text-zinc-900 leading-tight">Input Massal (Batch) Kelompok & Mahasiswa</h3>
             <p class="text-[11px] text-zinc-500">Salin & tempel daftar kelompok, mahasiswa, dan NIM secara cepat dari Spreadsheet/Excel.</p>
           </div>
         </div>
-        <button type="button" onclick="closeBatchGroupModal()" class="w-8 h-8 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center text-sm font-bold cursor-pointer transition">✕</button>
+        <button type="button" onclick="closeBatchGroupModal()" class="w-8 h-8 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center cursor-pointer transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
       </div>
 
       <!-- Format Guide -->
       <div class="bg-zinc-50 p-3 rounded-xl border border-zinc-200 text-xs text-zinc-700 space-y-1.5 flex-shrink-0">
         <div class="font-bold flex items-center justify-between text-[11px] text-zinc-800">
-          <span>💡 Format Input yang Didukung:</span>
+          <span class="flex items-center gap-1">
+            <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>Format Input yang Didukung:</span>
+          </span>
           <span class="font-mono text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded text-[10px]">1 Baris = 1 Mahasiswa</span>
         </div>
         <p class="text-[11px] text-zinc-600">
@@ -1178,9 +1395,12 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           type="button" 
           id="btnSubmitBatch" 
           onclick="submitBatchGroups()" 
-          class="px-5 py-2.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold shadow-xs flex items-center gap-2 transition active:scale-98 cursor-pointer disabled:opacity-50"
+          class="px-5 py-2.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold shadow-xs flex items-center gap-1.5 transition active:scale-98 cursor-pointer disabled:opacity-50"
         >
-          <span>💾 Simpan Data Massal</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          <span>Simpan Data Massal</span>
         </button>
       </div>
 
@@ -1188,7 +1408,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
   </div>
 
   <!-- ========================================================================= -->
-  <!-- 🖨️ MODAL CETAK LAPORAN REKAPITULASI RESMI (ADMIN PRINT PREVIEW) -->
+  <!-- MODAL CETAK LAPORAN REKAPITULASI RESMI (ADMIN PRINT PREVIEW) -->
   <!-- ========================================================================= -->
   <div id="printRekapModal" class="hidden fixed inset-0 z-50 bg-zinc-950/75 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 no-print">
     <div class="bg-white rounded-2xl max-w-5xl w-full p-4 sm:p-5 shadow-2xl border border-zinc-200 flex flex-col max-h-[95vh] space-y-3">
@@ -1196,7 +1416,11 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       <!-- Modal Header -->
       <div class="flex items-center justify-between border-b border-zinc-100 pb-2.5 flex-shrink-0 gap-2">
         <div class="flex items-center gap-2 min-w-0">
-          <span class="p-1.5 rounded-lg bg-zinc-100 text-base shrink-0">🖨️</span>
+          <div class="p-1.5 rounded-lg bg-zinc-100 text-zinc-700 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+            </svg>
+          </div>
           <div class="truncate">
             <h3 class="text-xs sm:text-base font-bold text-zinc-900 leading-tight truncate">Cetak Dokumen Rekapitulasi</h3>
             <p class="text-[10px] sm:text-[11px] text-zinc-500 truncate">Format Laporan Resmi A4 / PDF dengan Pengesahan.</p>
@@ -1212,7 +1436,11 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
             <button type="button" onclick="resetAdminPrintZoom()" title="Reset Skala Otomatis" class="text-[10px] font-semibold text-zinc-600 hover:text-zinc-900 px-1.5 py-0.5 rounded hover:bg-white transition cursor-pointer">Fit</button>
           </div>
 
-          <button type="button" onclick="closeAdminPrintModal()" class="w-8 h-8 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center text-sm font-bold cursor-pointer transition">✕</button>
+          <button type="button" onclick="closeAdminPrintModal()" class="w-8 h-8 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center cursor-pointer transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
         </div>
       </div>
 
@@ -1253,7 +1481,10 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
             Tutup
           </button>
           <button type="button" onclick="executeAdminBrowserPrint()" class="flex-1 sm:flex-none min-h-[40px] px-4 sm:px-5 py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-xs transition active:scale-98 cursor-pointer">
-            <span>🖨️ Cetak / Simpan PDF</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+            </svg>
+            <span>Cetak / Simpan PDF</span>
           </button>
         </div>
       </div>
@@ -1265,7 +1496,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
   <div id="printDocumentRoot" class="hidden"></div>
 
   <!-- ========================================================================= -->
-  <!-- 💻 JAVASCRIPT APP LOGIC: AUTO-SAVE & OFFLINE RESILIENT ENGINE -->
+  <!-- JAVASCRIPT APP LOGIC: AUTO-SAVE & OFFLINE RESILIENT ENGINE -->
   <!-- ========================================================================= -->
   <script>
     const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycby9JWeXZVkmnx2suT2eS5yk-sS39v-avHsaA4OV-D7fjcvsTGfawtQaCoxHcH90HjiRTg/exec";
@@ -1287,7 +1518,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }
 
     // =========================================================================
-    // 🛡️ SYNC STATE & OFFLINE RECOVERY ENGINE
+    // SYNC STATE & OFFLINE RECOVERY ENGINE
     // =========================================================================
     function setSyncState(state, customText) {
       const badge = document.getElementById("cloudSyncBadge");
@@ -1304,8 +1535,8 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         dot.className = "w-2 h-2 rounded-full bg-amber-400 animate-ping flex-shrink-0";
         text.textContent = customText || "Menyimpan...";
         if (miniConfig) {
-          miniConfig.className = "font-mono text-amber-600 font-semibold";
-          miniConfig.textContent = "⏳ Menyimpan...";
+          miniConfig.className = "font-mono text-amber-600 font-semibold flex items-center gap-1";
+          miniConfig.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span><span>Menyimpan...</span>';
         }
       } else if (state === 'synced') {
         badge.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-950/60 text-emerald-400 border border-emerald-800/80 transition-all";
@@ -1313,8 +1544,8 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         text.textContent = customText || "Tersinkronisasi";
         if (banner) banner.classList.add("hidden");
         if (miniConfig) {
-          miniConfig.className = "font-mono text-emerald-600 font-semibold";
-          miniConfig.textContent = "🟢 Tersinkron";
+          miniConfig.className = "font-mono text-emerald-600 font-semibold flex items-center gap-1";
+          miniConfig.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span><span>Tersinkron</span>';
         }
       } else if (state === 'offline' || state === 'error') {
         badge.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-rose-950/60 text-rose-300 border border-rose-800/80 transition-all";
@@ -1322,8 +1553,8 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         text.textContent = customText || (state === 'offline' ? "Terputus (Offline)" : "Gagal Kirim");
         if (banner) banner.classList.remove("hidden");
         if (miniConfig) {
-          miniConfig.className = "font-mono text-rose-600 font-semibold";
-          miniConfig.textContent = "🔴 Belum Tersinkron";
+          miniConfig.className = "font-mono text-rose-600 font-semibold flex items-center gap-1";
+          miniConfig.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span><span>Belum Tersinkron</span>';
         }
       }
     }
@@ -1445,7 +1676,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }, 20000);
 
     // =========================================================================
-    // 🔑 AUTHENTICATION & INITIALIZATION
+    // AUTHENTICATION & INITIALIZATION
     // =========================================================================
     document.addEventListener("DOMContentLoaded", function() {
       const isAuth = sessionStorage.getItem("PGSD_ADMIN_AUTH");
@@ -1503,15 +1734,6 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     function switchAdminTab(tabKey, updateHash = true) {
       currentAdminTab = tabKey;
       localStorage.setItem("PGSD_ADMIN_ACTIVE_TAB", tabKey);
-      
-      if (updateHash) {
-        try {
-          history.replaceState(null, null, `#${tabKey}`);
-        } catch(e) {
-          window.location.hash = tabKey;
-        }
-      }
-
       const tabs = ['data', 'config', 'responses', 'system'];
       
       tabs.forEach(t => {
@@ -1520,10 +1742,10 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         
         if (t === tabKey) {
           view.classList.remove("hidden");
-          btn.className = "py-2 px-1.5 sm:px-2 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition flex items-center justify-center gap-1 cursor-pointer text-center truncate font-bold";
+          btn.className = "py-2 px-1.5 sm:px-2 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate font-bold";
         } else {
           view.classList.add("hidden");
-          btn.className = "py-2 px-1.5 sm:px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1 cursor-pointer text-center truncate";
+          btn.className = "py-2 px-1.5 sm:px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate";
         }
       });
 
@@ -1533,13 +1755,18 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }
 
     // =========================================================================
-    // 🌐 FETCH ALL DATA FROM BACKEND FOR ADMIN
+    // FETCH ALL DATA FROM BACKEND FOR ADMIN
     // =========================================================================
     async function fetchAdminFullData() {
       const refreshBtn = document.getElementById("btnRefreshMasterData");
       if (refreshBtn) {
         refreshBtn.disabled = true;
-        refreshBtn.innerHTML = `<span>⏳ Memuat...</span>`;
+        refreshBtn.innerHTML = `
+          <svg class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          <span>Memuat...</span>
+        `;
       }
 
       const apiUrl = getApiUrl();
@@ -1549,7 +1776,12 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
         if (refreshBtn) {
           refreshBtn.disabled = false;
-          refreshBtn.innerHTML = `<span>🔄 Segarkan</span>`;
+          refreshBtn.innerHTML = `
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            <span>Segarkan</span>
+          `;
         }
 
         if (res.success) {
@@ -1568,14 +1800,19 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       } catch (err) {
         if (refreshBtn) {
           refreshBtn.disabled = false;
-          refreshBtn.innerHTML = `<span>🔄 Segarkan</span>`;
+          refreshBtn.innerHTML = `
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            <span>Segarkan</span>
+          `;
         }
         showAdminToast("Gagal terhubung ke API backend: " + err, "error");
       }
     }
 
     // =========================================================================
-    // 📋 TAB 1 LOGIC: DATA KELOMPOK & MAHASISWA (AUTO-SAVE)
+    // TAB 1 LOGIC: DATA KELOMPOK & MAHASISWA (AUTO-SAVE)
     // =========================================================================
     function renderMasterGroups() {
       const container = document.getElementById("masterGroupsListContainer");
@@ -1627,17 +1864,21 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
                 type="button" 
                 onclick="openEditMemberModal(${gIdx}, ${mIdx})" 
                 title="Edit Mahasiswa" 
-                class="p-1.5 rounded hover:bg-zinc-200 text-zinc-600 text-xs transition cursor-pointer"
+                class="p-1.5 rounded hover:bg-zinc-200 text-zinc-600 transition cursor-pointer"
               >
-                ✏️
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                </svg>
               </button>
               <button 
                 type="button" 
                 onclick="deleteMember(${gIdx}, ${mIdx})" 
                 title="Hapus Mahasiswa" 
-                class="p-1.5 rounded hover:bg-rose-100 text-rose-600 text-xs transition cursor-pointer"
+                class="p-1.5 rounded hover:bg-rose-100 text-rose-600 transition cursor-pointer"
               >
-                ✕
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
               </button>
             </div>
           </div>
@@ -1663,17 +1904,22 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
                   type="button" 
                   onclick="openEditGroupModal(${gIdx})" 
                   title="Edit Kelompok" 
-                  class="px-2 py-1 sm:px-2.5 sm:py-1 rounded-lg border border-zinc-200 hover:bg-zinc-100 text-zinc-700 text-[11px] sm:text-xs font-medium transition cursor-pointer"
+                  class="px-2 py-1 sm:px-2.5 sm:py-1 rounded-lg border border-zinc-200 hover:bg-zinc-100 text-zinc-700 text-[11px] sm:text-xs font-medium transition cursor-pointer flex items-center gap-1"
                 >
-                  ✏️ Edit
+                  <svg class="w-3 h-3 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                  </svg>
+                  <span>Edit</span>
                 </button>
                 <button 
                   type="button" 
                   onclick="deleteGroup(${gIdx})" 
                   title="Hapus Kelompok" 
-                  class="p-1 sm:px-2 sm:py-1 rounded-lg border border-rose-200 hover:bg-rose-50 text-rose-600 text-xs transition cursor-pointer"
+                  class="p-1 sm:px-2 sm:py-1 rounded-lg border border-rose-200 hover:bg-rose-50 text-rose-600 text-xs transition cursor-pointer flex items-center justify-center"
                 >
-                  🗑️
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                  </svg>
                 </button>
               </div>
             </div>
@@ -1879,7 +2125,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }
 
     // =========================================================================
-    // ⚙️ TAB 2 LOGIC: KONFIGURASI PERKULIAHAN & QUICK SESSION (AUTO-SAVE)
+    // TAB 2 LOGIC: KONFIGURASI PERKULIAHAN & QUICK SESSION (AUTO-SAVE)
     // =========================================================================
     function updateQuickSessionUI(sesi) {
       const label = document.getElementById("quickActiveSessionLabel");
@@ -1994,9 +2240,8 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       }, delay);
     }
 
-
     // =========================================================================
-    // 📝 TAB 3 LOGIC: DATA RESPONS PENILAIAN & RESET PER PENGIRIMAN
+    // TAB 3 LOGIC: DATA RESPONS PENILAIAN & RESET PER PENGIRIMAN
     // =========================================================================
     function populateResponseGroupFilter() {
       const select = document.getElementById("filterResponseGroupSelect");
@@ -2023,7 +2268,12 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       const btn = document.getElementById("btnRefreshResponses");
       if (btn) {
         btn.disabled = true;
-        btn.innerHTML = `<span>⏳ Memuat...</span>`;
+        btn.innerHTML = `
+          <svg class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          <span>Memuat...</span>
+        `;
       }
 
       const apiUrl = getApiUrl();
@@ -2033,7 +2283,12 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
         if (btn) {
           btn.disabled = false;
-          btn.innerHTML = `<span>🔄 Segarkan Data</span>`;
+          btn.innerHTML = `
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            <span>Segarkan Data</span>
+          `;
         }
 
         if (res.success) {
@@ -2048,7 +2303,12 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       } catch (err) {
         if (btn) {
           btn.disabled = false;
-          btn.innerHTML = `<span>🔄 Segarkan Data</span>`;
+          btn.innerHTML = `
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            <span>Segarkan Data</span>
+          `;
         }
         showAdminToast("Koneksi respons error: " + err, "error");
       }
@@ -2192,7 +2452,10 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
               onclick="deleteSingleResponse('${r.idRespons}', '${r.namaPenilai}', '${r.kelompok}')" 
               class="w-full sm:w-auto px-3 py-1.5 rounded-lg border border-rose-200 hover:bg-rose-50 text-rose-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 self-stretch sm:self-auto"
             >
-              <span>🗑️ Hapus / Reset Respons Ini</span>
+              <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+              </svg>
+              <span>Hapus / Reset Respons</span>
             </button>
           </div>
 
@@ -2317,7 +2580,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }
 
     // =========================================================================
-    // 🔒 TAB 4 LOGIC: SISTEM & KEAMANAN
+    // TAB 4 LOGIC: SISTEM & KEAMANAN
     // =========================================================================
     function saveApiUrl() {
       const val = document.getElementById("inputApiUrl").value.trim();
@@ -2337,7 +2600,12 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       const btn = document.getElementById("btnTestConnection");
 
       btn.disabled = true;
-      btn.innerHTML = `<span>⏳ Menguji...</span>`;
+      btn.innerHTML = `
+        <svg class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+        </svg>
+        <span>Menguji...</span>
+      `;
       box.classList.remove("hidden");
 
       const startTime = performance.now();
@@ -2349,7 +2617,12 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         const latency = Math.round(endTime - startTime);
 
         btn.disabled = false;
-        btn.innerHTML = `<span>⚡ Uji Koneksi</span>`;
+        btn.innerHTML = `
+          <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+          </svg>
+          <span>Uji Koneksi</span>
+        `;
 
         if (result.success) {
           statusText.textContent = "Online 200 OK";
@@ -2363,7 +2636,12 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         }
       } catch (err) {
         btn.disabled = false;
-        btn.innerHTML = `<span>⚡ Uji Koneksi</span>`;
+        btn.innerHTML = `
+          <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+          </svg>
+          <span>Uji Koneksi</span>
+        `;
         statusText.textContent = "Offline / Connection Failed";
         statusText.className = "font-bold text-rose-600 font-mono";
         latencyText.textContent = "-";
@@ -2439,7 +2717,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }
 
     // =========================================================================
-    // 🔔 FLOATING TOAST OVERLAY CONTROLLER
+    // FLOATING TOAST OVERLAY CONTROLLER
     // =========================================================================
     function showAdminToast(msg, type = "info") {
       const container = document.getElementById("floatingToastContainer");
@@ -2450,21 +2728,42 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       toastEl.id = toastId;
       toastEl.className = "pointer-events-auto toast-enter flex items-start gap-3 p-3.5 sm:p-4 rounded-xl shadow-2xl backdrop-blur-md border text-xs font-medium transition-all max-w-sm sm:max-w-md w-full";
 
-      let iconHtml = "ℹ️";
+      let iconHtml = `
+        <div class="w-5 h-5 rounded-md bg-blue-500/20 text-blue-400 border border-blue-500/40 flex items-center justify-center shrink-0">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+      `;
       let borderBgClass = "bg-zinc-950/95 text-zinc-100 border-zinc-700 shadow-zinc-950/50";
 
       if (type === "success") {
-        iconHtml = `<span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center font-bold text-xs flex-shrink-0">✓</span>`;
+        iconHtml = `
+          <div class="w-5 h-5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center shrink-0">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+        `;
         borderBgClass = "bg-zinc-950/95 text-zinc-100 border-emerald-500/40 shadow-emerald-950/50";
       } else if (type === "error") {
-        iconHtml = `<span class="w-5 h-5 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/40 flex items-center justify-center font-bold text-xs flex-shrink-0">✕</span>`;
+        iconHtml = `
+          <div class="w-5 h-5 rounded-md bg-rose-500/20 text-rose-400 border border-rose-500/40 flex items-center justify-center shrink-0">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </div>
+        `;
         borderBgClass = "bg-zinc-950/95 text-zinc-100 border-rose-500/40 shadow-rose-950/50";
       } else if (type === "warning") {
-        iconHtml = `<span class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center justify-center font-bold text-xs flex-shrink-0">!</span>`;
+        iconHtml = `
+          <div class="w-5 h-5 rounded-md bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center justify-center shrink-0">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+          </div>
+        `;
         borderBgClass = "bg-zinc-950/95 text-zinc-100 border-amber-500/40 shadow-amber-950/50";
-      } else {
-        iconHtml = `<span class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/40 flex items-center justify-center font-bold text-xs flex-shrink-0">ℹ</span>`;
-        borderBgClass = "bg-zinc-950/95 text-zinc-100 border-blue-500/40 shadow-blue-950/50";
       }
 
       toastEl.className += ` ${borderBgClass}`;
@@ -2477,9 +2776,11 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           type="button" 
           onclick="dismissToast('${toastId}')" 
           title="Tutup Notifikasi"
-          class="text-zinc-400 hover:text-white transition p-1 -mr-1 -mt-1 rounded-md text-xs cursor-pointer flex-shrink-0"
+          class="text-zinc-400 hover:text-white transition p-1 -mr-1 -mt-1 rounded-md cursor-pointer flex-shrink-0"
         >
-          ✕
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
         </button>
       `;
 
@@ -2504,7 +2805,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }
 
     // =========================================================================
-    // 📥 FITUR BATCH / INPUT MASSAL KELOMPOK & MAHASISWA
+    // FITUR BATCH / INPUT MASSAL KELOMPOK & MAHASISWA
     // =========================================================================
     function openBatchGroupModal() {
       const modal = document.getElementById("batchGroupModal");
@@ -2597,11 +2898,11 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       statSummary.textContent = `Terdeteksi: ${parsedGroups.length} Kelompok, ${totalMembers} Mahasiswa`;
 
       if (parsedGroups.length > 0 && totalMembers > 0) {
-        statValid.textContent = `✓ Siap diimpor`;
+        statValid.textContent = `Siap diimpor`;
         statValid.className = "text-[10px] font-mono text-emerald-600 font-bold";
         btnSubmit.disabled = false;
       } else {
-        statValid.textContent = text.trim() ? "⚠️ Format data belum sesuai" : "Status: Menunggu input";
+        statValid.textContent = text.trim() ? "Format data belum sesuai" : "Status: Menunggu input";
         statValid.className = "text-[10px] font-mono text-zinc-500";
         btnSubmit.disabled = true;
       }
@@ -2645,7 +2946,8 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       showAdminToast(`Berhasil mengimpor massal data kelompok (${parsedGroups.length} kelompok). Menyinkronkan ke Spreadsheet...`, "success");
     }
 
-    // 🖨️ FITUR CETAK REKAP HASIL LAPORAN RESMI (ADMIN PRINT & PDF)
+    // =========================================================================
+    // FITUR CETAK REKAP HASIL LAPORAN RESMI (ADMIN PRINT & PDF)
     // =========================================================================
     function openAdminPrintModal() {
       const modal = document.getElementById("printRekapModal");
@@ -2667,19 +2969,19 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
       // Populate Kelompok Options
       groupSelect.innerHTML = '<option value="ALL">Semua Kelompok (Keseluruhan)</option>';
+      const availableGroups = new Set();
       if (adminMasterGroups && adminMasterGroups.length > 0) {
-        adminMasterGroups.forEach(g => {
-          groupSelect.innerHTML += `<option value="${g.name}">${g.name} (${g.sesi || 'Minggu 1'})</option>`;
-        });
+        adminMasterGroups.forEach(g => { if (g.name) availableGroups.add(g.name); });
       }
-
-      groupSelect.value = "ALL";
-      sesiSelect.value = "ALL";
+      if (adminResponsesList && adminResponsesList.length > 0) {
+        adminResponsesList.forEach(r => { if (r.kelompok) availableGroups.add(r.kelompok); });
+      }
+      Array.from(availableGroups).sort().forEach(g => {
+        groupSelect.innerHTML += `<option value="${g}">${g}</option>`;
+      });
 
       renderAdminPrintPreviewContent();
       modal.classList.remove("hidden");
-      const scrollCont = document.getElementById("adminPrintScrollContainer");
-      if (scrollCont) scrollCont.scrollTop = 0;
     }
 
     function closeAdminPrintModal() {
@@ -2688,14 +2990,6 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
     function renderAdminPrintPreviewContent() {
       const previewEl = document.getElementById("printableReportArea");
-      const selectedGroup = document.getElementById("adminPrintScopeGroupSelect")?.value || "ALL";
-      const selectedSesi = document.getElementById("adminPrintScopeSesiSelect")?.value || "ALL";
-      const includeReviews = document.getElementById("adminPrintIncludeReviews")?.checked ?? true;
-
-      const matkul = adminAppConfig["Mata_Kuliah"] || "Bimbingan Konseling di SD";
-      const dosen = adminAppConfig["Dosen_Pengampu"] || "Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.";
-      const kelas = adminAppConfig["Kelas"] || "5E";
-      const printDateStr = new Intl.DateTimeFormat('id-ID', { dateStyle: 'long' }).format(new Date());
 
       // Kalkulasi Ringkasan dari adminResponsesList & adminMasterGroups
       const groupSummaryMap = new Map();
@@ -2989,7 +3283,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       }, 20);
     }
 
-    // 🔍 VIRTUAL PAPER ADAPTIVE AUTO-FIT & ZOOM CONTROLLER (ADMIN)
+    // VIRTUAL PAPER ADAPTIVE AUTO-FIT & ZOOM CONTROLLER (ADMIN)
     let currentAdminPrintZoom = 1.0;
     let isAdminUserCustomZoom = false;
 

@@ -4,6 +4,21 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.25] - 2026-08-23
+
+### ✨ Audit Total Tampilan Menjadi Modern-Elegan-Minimalist & Eliminasi Emoji Menyeluruh
+- **De-emojifikasi Menyeluruh (Zero Raw Emojis):**
+  - Mengaudit dan mengganti 100% karakter emoji raw unicode di antarmuka publik (`index.html`) maupun portal pengelola (`admin.html`) dengan ikon **inline SVG (Lucide & Heroicons design standard)** yang scalable, tajam, dan konsisten di seluruh perangkat dan resolusi layar (Mobile, Tablet, Desktop, 4K Retina).
+- **Modernisasi Iconography & Tipografi Ranking:**
+  - **Leaderboard Visual Chart Overview:** Mengganti emoji piala/medali dengan badges ranking monokrom & aksen emas elegan bertipografi monospace (`#1`, `#2`, `#3`) serta SVG `trending-up`, `bar-chart`, dan `star`.
+  - **Action Buttons & Form Controls:** Tombol *Reset Draf*, *Isi Otomatis*, *Cetak Rekap*, *Input Massal*, *Segarkan*, dan *Hapus* kini dilengkapi inline SVG profesional.
+  - **Sub-Tabs Switcher & Status Badges:** Tab navigasi (*Kelompok*, *Pemateri*, *Status Pengisian*, *Konfigurasi*, *Sistem*) dan badge sinkronisasi realtime kini menggunakan indikator status dot SVG dan layout presisi.
+- **Penyempurnaan Modal Dialogs & Notifikasi Toast:**
+  - Seluruh modal dialog kini menggunakan icon SVG tutup silang (`X`), status konfirmasi (`emerald check`), dan peringatan (`amber alert`).
+  - Sistem toast notification melayang diperbarui dengan container badge SVG yang ramping dan modern.
+
+---
+
 ## [2.1.24] - 2026-08-23
 
 ### ✏️ Penyempurnaan Terminologi Header Tabel Status Pengisian
