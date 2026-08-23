@@ -1194,22 +1194,22 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     <div class="bg-white rounded-2xl max-w-5xl w-full p-4 sm:p-5 shadow-2xl border border-zinc-200 flex flex-col max-h-[95vh] space-y-3">
       
       <!-- Modal Header -->
-      <div class="flex items-center justify-between border-b border-zinc-100 pb-2.5 flex-shrink-0">
-        <div class="flex items-center gap-2">
-          <span class="p-1.5 rounded-lg bg-zinc-100 text-base">🖨️</span>
-          <div>
-            <h3 class="text-sm sm:text-base font-bold text-zinc-900 leading-tight">Cetak Dokumen Rekapitulasi Penilaian</h3>
-            <p class="text-[11px] text-zinc-500">Format Laporan Resmi Siap Cetak (A4 / PDF) Lengkap dengan Pengesahan Dosen.</p>
+      <div class="flex items-center justify-between border-b border-zinc-100 pb-2.5 flex-shrink-0 gap-2">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="p-1.5 rounded-lg bg-zinc-100 text-base shrink-0">🖨️</span>
+          <div class="truncate">
+            <h3 class="text-xs sm:text-base font-bold text-zinc-900 leading-tight truncate">Cetak Dokumen Rekapitulasi</h3>
+            <p class="text-[10px] sm:text-[11px] text-zinc-500 truncate">Format Laporan Resmi A4 / PDF dengan Pengesahan.</p>
           </div>
         </div>
         
-        <div class="flex items-center gap-3">
-          <!-- SIPENA-inspired Virtual Paper Zoom Control -->
-          <div class="hidden sm:flex items-center gap-1 bg-zinc-100 p-1 rounded-lg border border-zinc-200">
-            <button type="button" onclick="adjustAdminPrintZoom(-0.1)" title="Perkecil Pratinjau" class="w-6 h-6 rounded flex items-center justify-center text-xs font-bold text-zinc-600 hover:bg-white hover:text-zinc-950 transition cursor-pointer">−</button>
-            <span id="adminPrintZoomBadge" class="text-[11px] font-mono font-semibold text-zinc-700 px-1.5 min-w-[42px] text-center">100%</span>
-            <button type="button" onclick="adjustAdminPrintZoom(0.1)" title="Perbesar Pratinjau" class="w-6 h-6 rounded flex items-center justify-center text-xs font-bold text-zinc-600 hover:bg-white hover:text-zinc-950 transition cursor-pointer">+</button>
-            <button type="button" onclick="resetAdminPrintZoom()" title="Reset Skala 100%" class="text-[10px] font-semibold text-zinc-500 hover:text-zinc-900 px-1.5 py-0.5 rounded hover:bg-white transition cursor-pointer">Fit</button>
+        <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          <!-- SIPENA-inspired Virtual Paper Zoom Control (Mobile & Desktop Responsive) -->
+          <div class="flex items-center gap-0.5 sm:gap-1 bg-zinc-100 p-0.5 sm:p-1 rounded-lg border border-zinc-200">
+            <button type="button" onclick="adjustAdminPrintZoom(-0.1)" title="Perkecil Pratinjau" class="w-7 h-7 sm:w-6 sm:h-6 rounded flex items-center justify-center text-xs font-bold text-zinc-700 hover:bg-white hover:text-zinc-950 transition cursor-pointer active:scale-95">−</button>
+            <span id="adminPrintZoomBadge" class="text-[10px] sm:text-[11px] font-mono font-semibold text-zinc-800 px-1 min-w-[38px] sm:min-w-[42px] text-center">Fit</span>
+            <button type="button" onclick="adjustAdminPrintZoom(0.1)" title="Perbesar Pratinjau" class="w-7 h-7 sm:w-6 sm:h-6 rounded flex items-center justify-center text-xs font-bold text-zinc-700 hover:bg-white hover:text-zinc-950 transition cursor-pointer active:scale-95">+</button>
+            <button type="button" onclick="resetAdminPrintZoom()" title="Reset Skala Otomatis" class="text-[10px] font-semibold text-zinc-600 hover:text-zinc-900 px-1.5 py-0.5 rounded hover:bg-white transition cursor-pointer">Fit</button>
           </div>
 
           <button type="button" onclick="closeAdminPrintModal()" class="w-8 h-8 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center text-sm font-bold cursor-pointer transition">✕</button>
@@ -1217,41 +1217,43 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       </div>
 
       <!-- Print Filter Bar -->
-      <div class="p-3 bg-zinc-50 rounded-xl border border-zinc-200 grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs flex-shrink-0">
+      <div class="p-2 sm:p-3 bg-zinc-50 rounded-xl border border-zinc-200 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs flex-shrink-0">
         <div>
-          <label class="block font-semibold text-zinc-700 mb-1">Cakupan Kelompok:</label>
+          <label class="block font-semibold text-zinc-700 mb-1 text-[11px] sm:text-xs">Cakupan Kelompok:</label>
           <select id="adminPrintScopeGroupSelect" onchange="renderAdminPrintPreviewContent()" class="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-xs font-medium focus:border-zinc-900 outline-none">
             <option value="ALL">Semua Kelompok (Keseluruhan)</option>
           </select>
         </div>
         <div>
-          <label class="block font-semibold text-zinc-700 mb-1">Cakupan Sesi:</label>
+          <label class="block font-semibold text-zinc-700 mb-1 text-[11px] sm:text-xs">Cakupan Sesi:</label>
           <select id="adminPrintScopeSesiSelect" onchange="renderAdminPrintPreviewContent()" class="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-xs font-medium focus:border-zinc-900 outline-none">
             <option value="ALL">Semua Sesi</option>
           </select>
         </div>
-        <div class="flex items-center gap-2 pt-4 sm:pt-5">
+        <div class="flex items-center gap-2 pt-1 sm:pt-5">
           <input type="checkbox" id="adminPrintIncludeReviews" checked onchange="renderAdminPrintPreviewContent()" class="w-4 h-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900 cursor-pointer">
           <label for="adminPrintIncludeReviews" class="text-xs text-zinc-700 cursor-pointer font-medium">Sertakan Ulasan Evaluatif</label>
         </div>
       </div>
 
-      <!-- Printable Live Document Preview Container -->
-      <div id="adminPrintScrollContainer" class="flex-1 overflow-y-auto custom-scrollbar border border-zinc-300/80 rounded-xl p-2 sm:p-4 bg-zinc-600/15 shadow-inner">
-        <div id="printableReportArea" class="bg-white rounded-sm border border-zinc-300 shadow-md mx-auto text-zinc-900 text-xs w-full max-w-[760px]" style="background: #ffffff; color: #000000; box-sizing: border-box; padding: 18px 20px; min-height: 980px;">
-          <!-- Dynamic Official Report Generated Here -->
+      <!-- Printable Live Document Preview Container with Adaptive Mobile Auto-Fit -->
+      <div id="adminPrintScrollContainer" class="flex-1 overflow-auto custom-scrollbar border border-zinc-300/80 rounded-xl p-1.5 sm:p-4 bg-zinc-600/15 shadow-inner flex flex-col items-center">
+        <div id="adminPrintableReportWrapper" class="w-full flex justify-center items-start origin-top transition-all duration-150">
+          <div id="printableReportArea" class="bg-white rounded-sm border border-zinc-300 shadow-md text-zinc-900 text-xs w-[760px] min-w-[760px] max-w-[760px]" style="background: #ffffff; color: #000000; box-sizing: border-box; padding: 20px 24px; min-height: 980px; transform-origin: top center;">
+            <!-- Dynamic Official Report Generated Here -->
+          </div>
         </div>
       </div>
 
       <!-- Action Footer -->
-      <div class="flex items-center justify-between gap-3 pt-3 border-t border-zinc-100 flex-shrink-0">
-        <span class="text-[11px] text-zinc-400 hidden sm:inline">Gunakan opsi "Save as PDF" di dialog cetak browser untuk menyimpan file PDF.</span>
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-2 sm:pt-3 border-t border-zinc-100 flex-shrink-0">
+        <span class="text-[10px] sm:text-[11px] text-zinc-400 text-center sm:text-left">Gunakan opsi "Save as PDF" di browser untuk mengunduh laporan A4.</span>
         <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
-          <button type="button" onclick="closeAdminPrintModal()" class="px-4 py-2 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-medium transition cursor-pointer">
+          <button type="button" onclick="closeAdminPrintModal()" class="flex-1 sm:flex-none min-h-[40px] px-4 py-2 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-medium transition cursor-pointer">
             Tutup
           </button>
-          <button type="button" onclick="executeAdminBrowserPrint()" class="px-5 py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold flex items-center gap-2 shadow-xs transition active:scale-98 cursor-pointer">
-            <span>🖨️ Cetak Sekarang / Simpan PDF</span>
+          <button type="button" onclick="executeAdminBrowserPrint()" class="flex-1 sm:flex-none min-h-[40px] px-4 sm:px-5 py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-xs transition active:scale-98 cursor-pointer">
+            <span>🖨️ Cetak / Simpan PDF</span>
           </button>
         </div>
       </div>
@@ -2640,7 +2642,6 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       showAdminToast(`Berhasil mengimpor massal data kelompok (${parsedGroups.length} kelompok). Menyinkronkan ke Spreadsheet...`, "success");
     }
 
-    // =========================================================================
     // 🖨️ FITUR CETAK REKAP HASIL LAPORAN RESMI (ADMIN PRINT & PDF)
     // =========================================================================
     function openAdminPrintModal() {
@@ -2980,30 +2981,70 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       `;
 
       previewEl.innerHTML = html;
+      setTimeout(() => {
+        applyAdminPrintZoom();
+      }, 20);
+    }
+
+    // 🔍 VIRTUAL PAPER ADAPTIVE AUTO-FIT & ZOOM CONTROLLER (ADMIN)
+    let currentAdminPrintZoom = 1.0;
+    let isAdminUserCustomZoom = false;
+
+    function calcAdminAutoFitScale() {
+      const container = document.getElementById("adminPrintScrollContainer");
+      if (!container) return 1.0;
+      const availableWidth = container.clientWidth - (window.innerWidth < 640 ? 12 : 24);
+      if (availableWidth <= 0) return 1.0;
+      if (availableWidth < 760) {
+        return Math.max(0.30, Math.min(1.0, Math.round((availableWidth / 760) * 100) / 100));
+      }
+      return 1.0;
+    }
+
+    function adjustAdminPrintZoom(delta) {
+      isAdminUserCustomZoom = true;
+      currentAdminPrintZoom = Math.min(1.5, Math.max(0.30, Math.round((currentAdminPrintZoom + delta) * 10) / 10));
       applyAdminPrintZoom();
     }
 
-    // 🔍 VIRTUAL PAPER ZOOM / SCALE CONTROLLER (ADMIN)
-    let currentAdminPrintZoom = 1.0;
-    function adjustAdminPrintZoom(delta) {
-      currentAdminPrintZoom = Math.min(1.3, Math.max(0.6, Math.round((currentAdminPrintZoom + delta) * 10) / 10));
-      applyAdminPrintZoom();
-    }
     function resetAdminPrintZoom() {
-      currentAdminPrintZoom = 1.0;
+      isAdminUserCustomZoom = false;
+      currentAdminPrintZoom = calcAdminAutoFitScale();
       applyAdminPrintZoom();
     }
+
     function applyAdminPrintZoom() {
       const area = document.getElementById("printableReportArea");
+      const wrapper = document.getElementById("adminPrintableReportWrapper");
       const badge = document.getElementById("adminPrintZoomBadge");
+      
+      if (!isAdminUserCustomZoom) {
+        currentAdminPrintZoom = calcAdminAutoFitScale();
+      }
+
       if (area) {
         area.style.transform = `scale(${currentAdminPrintZoom})`;
         area.style.transformOrigin = "top center";
+        
+        // Match wrapper height to avoid giant whitespace or clipping on scaled preview
+        const baseHeight = area.offsetHeight || 1020;
+        if (wrapper && currentAdminPrintZoom < 1.0) {
+          wrapper.style.height = `${Math.ceil(baseHeight * currentAdminPrintZoom) + 16}px`;
+        } else if (wrapper) {
+          wrapper.style.height = "auto";
+        }
       }
+
       if (badge) {
-        badge.textContent = `${Math.round(currentAdminPrintZoom * 100)}%`;
+        badge.textContent = isAdminUserCustomZoom ? `${Math.round(currentAdminPrintZoom * 100)}%` : "Fit";
       }
     }
+
+    window.addEventListener("resize", () => {
+      if (!isAdminUserCustomZoom) {
+        applyAdminPrintZoom();
+      }
+    });
 
     function executeAdminBrowserPrint() {
       const toastCont = document.getElementById("floatingToastContainer");
