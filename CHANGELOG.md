@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.57] - 2026-08-23
+
+### 🏛️ Penerapan Font Times New Roman pada Judul Poin A & Poin B
+- **Harmonisasi Tipografi Judul Seksi (*Section Header Typography*):**
+  - Mengubah font pada judul seksi **Poin A** (*A. Rekapitulasi Nilai & Peringkat Performa Kelompok*) dan **Poin B** (*B. Rangkuman Catatan Evaluasi Masukan Mahasiswa*) menjadi keluarga huruf `'Times New Roman', Times, serif`.
+  - Ukuran ditetapkan pada $12\text{px}$ ($9\text{pt}$) dengan `font-weight: 800` (Bold) dan *letter-spacing* yang proporsional.
+- **Sinkronisasi Dwikanal:**
+  - Diterapkan secara identik pada lembar cetak mahasiswa (`index.html`) dan portal admin (`admin.html`).
+
+---
+
 ## [2.1.56] - 2026-08-23
 
 ### 🏛️ Penerapan Font Times New Roman pada Judul Laporan & Metadata
