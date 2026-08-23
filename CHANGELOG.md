@@ -4,6 +4,19 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.55] - 2026-08-23
+
+### 🎨 Pembersihan Kontainer Logo & Penyelarasan Transparansi Ikon
+- **Akar Masalah (*Root Cause Identified & Fixed*):**
+  - Gambar berkas `logo-ulm.png` dan `icon-192.png` sebenarnya sudah memiliki latar belakang transparan murni, namun kontainer pembungkus HTML pada kartu login admin dan navbar sebelumnya diberi kelas `bg-zinc-900 border border-zinc-800 rounded-2xl`, sehingga menghasilkan kotak hitam di belakang logo ULM.
+- **Pembersihan Kontainer Pembungkus:**
+  - Menghapus kelas `bg-zinc-900`, `border-zinc-800`, dan `rounded-2xl` pada pembungkus logo di halaman login admin ([admin.html](file:///e:/Data/GitHub/Project%20Dede/admin.html)), header admin, dan header navbar mahasiswa ([index.html](file:///e:/Data/GitHub/Project%20Dede/index.html)).
+  - Logo lambang ULM kini tampil murni dan elegan langsung di atas latar belakang halaman / kartu tanpa bingkai hitam.
+- **Optimasi Konfigurasi PWA (*Manifest Any Purpose*):**
+  - Menyesuaikan `purpose: "any"` pada `manifest.json` agar browser dan sistem operasi tidak memaksakan *background mask* hitam pada ikon aplikasi.
+
+---
+
 ## [2.1.54] - 2026-08-23
 
 ### 📐 Eliminasi Margin Collapse & Perbaikan Spasi Before Poin A & B
