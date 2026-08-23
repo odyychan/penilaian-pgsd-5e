@@ -197,6 +197,8 @@ function doPost(e) {
       result = adminSaveConfig(payload);
     } else if (action === "adminDeleteSingleResponse") {
       result = adminDeleteSingleResponse(payload);
+    } else if (action === "adminDeleteScopedResponses") {
+      result = adminDeleteScopedResponses(payload);
     } else if (action === "adminResetResponses") {
       result = adminResetResponses(payload);
     }
@@ -1178,3 +1180,68 @@ function adminDeleteSingleResponse(payload) {
     return { success: false, error: "Gagal menghapus respons: " + err.toString() };
   }
 }
+
+/**
+ * Menghapus Respons Berdasarkan Filter Kelompok Presentator dan/atau Sesi
+ */
+function adminDeleteScopedResponses(payload) {
+  try {
+    const lock = LockService.getScriptLock();
+    lock.waitLock(15000);
+
+    const ss = getSpreadsheet();
+    let responsSheet = getResponsSheet(ss);
+
+    if (!responsSheet || responsSheet.getLastRow() <= 1) {
+      lock.releaseLock();
+      return { success: false, error: "Data respons kosong." };
+    }
+
+    const targetKelompok = String(payload.kelompok || "ALL").trim();
+    const targetSesi = String(payload.sesi || "ALL").trim();
+
+    if (targetKelompok === "ALL" && targetSesi === "ALL") {
+      lock.releaseLock();
+      return { success: false, error: "Pilih setidaknya satu kelompok atau sesi spesifik untuk penghapusan bersyarat." };
+    }
+
+    const data = responsSheet.getDataRange().getValues();
+    let deletedCount = 0;
+
+    // Iterasi mundur dari baris terbawah agar indeks baris tidak bergeser saat deleteRow
+    for (let i = data.length - 1; i >= 1; i--) {
+      const rowSesi = String(data[i][2] || "").trim();
+      const rowKelompok = String(data[i][5] || "").trim();
+
+      let matchKelompok = (targetKelompok === "ALL") || (rowKelompok.toLowerCase() === targetKelompok.toLowerCase());
+      let matchSesi = (targetSesi === "ALL") || (rowSesi.toLowerCase() === targetSesi.toLowerCase());
+
+      if (matchKelompok && matchSesi) {
+        responsSheet.deleteRow(i + 1); // 1-based row index
+        deletedCount++;
+      }
+    }
+
+    lock.releaseLock();
+    clearApiCache();
+
+    if (deletedCount > 0) {
+      try {
+        generateRekapSheet();
+      } catch (e) {}
+    }
+
+    let targetDesc = [];
+    if (targetKelompok !== "ALL") targetDesc.push(`Kelompok '${targetKelompok}'`);
+    if (targetSesi !== "ALL") targetDesc.push(`Sesi '${targetSesi}'`);
+
+    return {
+      success: true,
+      deletedCount: deletedCount,
+      message: `${deletedCount} respons untuk ${targetDesc.join(" & ")} berhasil dihapus dan rekapitulasi diperbarui.`
+    };
+  } catch (err) {
+    return { success: false, error: "Gagal menghapus respons bersyarat: " + err.toString() };
+  }
+}
+

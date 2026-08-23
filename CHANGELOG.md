@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.71] - 2026-08-23
+
+### 🗑️ Fitur Penghapusan Respons Penilaian Bersyarat (Per Kelompok & Sesi)
+- **Modal Penghapusan Respons Terukur (*Scoped Response Deletion Engine*):**
+  - Menambahkan tombol aksi *"Hapus per Kelompok / Sesi"* pada bilah atas Tab Respons di portal admin.
+  - Menyediakan filter selektif untuk memilih target **Kelompok Presentator** dan/atau **Sesi Presentasi**.
+  - **Penghitung Dampak Langsung (*Live Impact Counter*):** Menghitung dan menampilkan jumlah baris respons yang cocok secara instan beserta ringkasan implikasi reset pengisian mahasiswa.
+  - **Konfirmasi Keamanan Berlapis:** Memerlukan input kata kunci konfirmasi `"HAPUS"` sebelum tombol eksekusi aktif guna mencegah kehilangan data tak disengaja.
+- **Backend Handler Baru (`Code.gs`):**
+  - Menambahkan endpoint `adminDeleteScopedResponses` dengan algoritma penghapusan mundur dari baris terbawah untuk menjamin integritas indeks spreadsheet.
+  - Otomatis memperbarui lembar rekapitulasi nilai (`generateRekapSheet()`) dan membersihkan cache sistem.
+
+---
+
 ## [2.1.70] - 2026-08-23
 
 ### 📑 Opsi Tampilkan/Sembunyikan Catatan Kaki (Footer Dokumen Cetak)
