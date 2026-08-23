@@ -4,6 +4,19 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.46] - 2026-08-23
+
+### 🏛️ Integrasi Penuh Logo Resmi ULM (Favicon, Tab Icon, PWA, Header & Portal Login)
+- **Konversi & Pembangkitan Multi-Resolusi Favicon / Tab Icon:**
+  - Menghasilkan file multi-resolution `favicon.ico` (16x16, 32x32, 48x48, 64x64) dan icon PNG teroptimasi (`favicon-16x16.png`, `favicon-32x32.png`, `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`) dari lambang resmi Universitas Lambung Mangkurat.
+  - Memastikan waktu muat kilat (*sub-millisecond load*) dengan kualitas gambar super tajam di seluruh resolusi retina & high-DPI browser.
+- **Penyelarasan Identitas Visual Web App:**
+  - Mengganti ikon kotak teks pada header `index.html` dengan lambang resmi ULM.
+  - Mengganti ikon gembok pada portal login admin (`admin.html`) dan ikon header dashboard admin dengan lambang resmi ULM.
+  - Menambahkan konfigurasi `manifest.json` PWA lengkap dengan metadata dan asset icon ULM.
+
+---
+
 ## [2.1.45] - 2026-08-23
 
 ### 📄 Penerapan Footer Resmi Minimalis & Penyelarasan Lembar Pengesahan Dosen
