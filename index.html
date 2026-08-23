@@ -385,27 +385,27 @@
                 </div>
               </div>
 
-              <!-- 1. Peran Penilai Switcher -->
-              <div class="space-y-2">
-                <label class="block text-xs font-bold uppercase tracking-wider text-zinc-700 font-mono">
+              <!-- 1. Peran Penilai Dropdown -->
+              <div class="space-y-1.5">
+                <label for="selectPeranPenilai" class="block text-xs font-bold uppercase tracking-wider text-zinc-700 font-mono">
                   Pilih Peran Penilai <span class="text-rose-500">*</span>
                 </label>
-                <div class="grid grid-cols-3 gap-2 p-1.5 bg-zinc-100 rounded-xl border border-zinc-200 text-xs font-semibold">
-                  <label id="roleOption_Mahasiswa" class="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-lg bg-white text-zinc-950 shadow-xs border border-zinc-300 cursor-pointer transition text-center">
-                    <input type="radio" name="peranPenilai" value="Mahasiswa" checked onchange="onRoleChange('Mahasiswa')" class="sr-only">
-                    <span class="text-sm">🎓</span>
-                    <span class="font-bold truncate">Mahasiswa</span>
-                  </label>
-                  <label id="roleOption_Dosen" class="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-lg text-zinc-500 hover:text-zinc-900 border border-transparent cursor-pointer transition text-center">
-                    <input type="radio" name="peranPenilai" value="Dosen" onchange="onRoleChange('Dosen')" class="sr-only">
-                    <span class="text-sm">👨‍🏫</span>
-                    <span class="font-bold truncate">Dosen</span>
-                  </label>
-                  <label id="roleOption_Lainnya" class="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-lg text-zinc-500 hover:text-zinc-900 border border-transparent cursor-pointer transition text-center">
-                    <input type="radio" name="peranPenilai" value="Lainnya" onchange="onRoleChange('Lainnya')" class="sr-only">
-                    <span class="text-sm">🌐</span>
-                    <span class="font-bold truncate">Lainnya / Tamu</span>
-                  </label>
+                <div class="relative">
+                  <select 
+                    id="selectPeranPenilai" 
+                    onchange="onRoleChange(this.value)" 
+                    class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs sm:text-sm font-semibold text-zinc-900 bg-white focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 outline-none transition cursor-pointer appearance-none pr-9 shadow-2xs"
+                  >
+                    <option value="" disabled>-- Pilih Peran Penilai Terlebih Dahulu --</option>
+                    <option value="Mahasiswa" selected>🎓 Mahasiswa (Anggota Kelas PGSD 5E)</option>
+                    <option value="Dosen">👨‍🏫 Dosen (Dosen Pengampu / Penguji)</option>
+                    <option value="Lainnya">🌐 Lainnya / Penilai Tamu</option>
+                  </select>
+                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                  </div>
                 </div>
               </div>
 
@@ -1557,27 +1557,28 @@
     let currentEvaluatorRole = 'Mahasiswa'; // 'Mahasiswa' | 'Dosen' | 'Lainnya'
 
     function onRoleChange(role) {
-      currentEvaluatorRole = role;
+      currentEvaluatorRole = role || 'Mahasiswa';
 
-      const optM = document.getElementById("roleOption_Mahasiswa");
-      const optD = document.getElementById("roleOption_Dosen");
-      const optL = document.getElementById("roleOption_Lainnya");
-
-      const activeClass = "flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-lg bg-white text-zinc-950 shadow-xs border border-zinc-300 cursor-pointer transition text-center font-bold";
-      const inactiveClass = "flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-lg text-zinc-500 hover:text-zinc-900 border border-transparent cursor-pointer transition text-center font-medium";
-
-      if (optM) optM.className = role === 'Mahasiswa' ? activeClass : inactiveClass;
-      if (optD) optD.className = role === 'Dosen' ? activeClass : inactiveClass;
-      if (optL) optL.className = role === 'Lainnya' ? activeClass : inactiveClass;
-
-      const radio = document.querySelector(`input[name="peranPenilai"][value="${role}"]`);
-      if (radio) radio.checked = true;
+      const selectEl = document.getElementById("selectPeranPenilai");
+      if (selectEl && role && selectEl.value !== role) {
+        selectEl.value = role;
+      }
 
       const nimContainer = document.getElementById("nimContainer");
+      const identityFieldsContainer = document.getElementById("identityFieldsContainer");
       const autoFillNotice = document.getElementById("namaAutoFillNotice");
       const inputNama = document.getElementById("inputNama");
       const inputEmail = document.getElementById("inputEmail");
       const step1Subtitle = document.getElementById("step1Subtitle");
+
+      if (!role) {
+        if (nimContainer) nimContainer.classList.add("hidden");
+        if (identityFieldsContainer) identityFieldsContainer.classList.add("hidden");
+        if (step1Subtitle) step1Subtitle.textContent = "Pilih peran penilai Anda terlebih dahulu untuk memulai pengisian identitas.";
+        return;
+      }
+
+      if (identityFieldsContainer) identityFieldsContainer.classList.remove("hidden");
 
       if (role === 'Mahasiswa') {
         if (nimContainer) nimContainer.classList.remove("hidden");

@@ -4,6 +4,19 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.14] - 2026-08-23
+
+### 🎯 Dropdown Peran Penilai & Dynamic Section Rendering
+- **Refactoring Pemilih Peran Menjadi Dropdown (`<select>`):**
+  - Mengubah antarmuka pemilih peran penilai di Langkah 1 (Identitas Penilai) dari bentuk tab/radio button menjadi elemen dropdown pilihan tunggal yang elegan, ringkas, dan mobile-friendly.
+- **Dynamic Section Rendering Berdasarkan Pilihan Dropdown:**
+  - **Mahasiswa:** Menampilkan kontainer penginputan NIM terlebih dahulu beserta validasi real-time database kelas dan auto-fill nama lengkap penilai.
+  - **Dosen & Lainnya/Tamu:** Menyembunyikan field NIM dan langsung menampilkan field input Nama Lengkap dan Email resmi.
+- **Sinkronisasi Draf Penyimpanan:**
+  - Nilai dropdown tersimpan dan dipulihkan secara otomatis melalui *auto-save local draft engine*.
+
+---
+
 ## [2.1.13] - 2026-08-23
 
 ### 🎓 Smart Role-Based Evaluator Identity, NIM Auto-Lookup & Precision Submission Presensi
