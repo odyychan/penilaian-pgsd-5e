@@ -4,6 +4,30 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.28] - 2026-08-23
+
+### 📋 Transformasi Tabel Status Presensi Menjadi Matriks Checklist Presisi & Frozen Column
+- **Tabel Matriks Checklist Kolom Dinamis:**
+  - Merombak total tabel daftar status pengisian menjadi matriks checklist modern dengan kolom spesifik untuk setiap kelompok penyaji target.
+  - Setiap cell kelompok dilengkapi badge status yang informatif dan elegan:
+    - `👤 Penyaji` (Ungu/Purple): Menandai anggota kelompok penyaji yang tampil di kelompok tersebut.
+    - `✓ Sudah` (Hijau/Emerald): Menandai bahwa mahasiswa telah menyelesaikan penilaian kelompok tersebut.
+    - `✕ Belum` (Merah/Rose): Menandai kelompok yang wajib dinilai pada sesi aktif namun belum dikerjakan.
+    - `-` (Abu-abu): Menandai kelompok yang dijadwalkan pada sesi lain.
+- **Frozen / Sticky Column Layout (Mobile & Desktop Friendly):**
+  - Kolom nomor urut `#` (`sticky left-0`) dan `Nama Mahasiswa & NIM` (`sticky left-10`) di-freeze di sisi kiri dengan shadow pembatas lembut, menjaga keterbacaan identitas mahasiswa saat pengguna melakukan scroll horizontal di perangkat layar sempit maupun lebar.
+  - Kolom `Status Kepatuhan` di-freeze di sisi kanan (`sticky right-0`).
+- **Highlight Sesi Aktif Minimalis & Kontras:**
+  - Header kelompok yang tampil pada sesi aktif/terpilih disorot dengan styling kontras gelap (`bg-zinc-900 text-white`) disertai badge status `● Sesi Ini • Tampil`.
+- **Logika Status Kelompok Penyaji Terkalibrasi (Aturan Presentator):**
+  - Anggota kelompok tampil tetap diwajibkan menilai kelompok penyaji lain di sesi yang sama (jika ada lebih dari 1 kelompok).
+  - Status akhir bagi anggota penyaji yang telah menilai kelompok lain diakui sebagai **`✓ Selesai (Penyaji)`** (Emerald), bukan dianggap belum mengisi.
+  - Jika belum menilai kelompok penyaji lainnya, status ditandai **`⏳ Belum Menilai (X/N)`** secara proporsional.
+- **Konfigurasi Fleksibel Pengaturan Admin:**
+  - Menambahkan pengaturan `Kewajiban Menilai bagi Anggota Penyaji` di panel Pengaturan Admin (`admin.html`) dengan opsi `Wajib Menilai Kelompok Lain` vs `Bebas Penuh di Sesinya`.
+
+---
+
 ## [2.1.27] - 2026-08-23
 
 ### 🎯 Integrasi Filter Sesi / Minggu pada Status Pengisian Presensi Penilaian
