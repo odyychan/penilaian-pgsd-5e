@@ -148,9 +148,15 @@
         box-sizing: border-box !important;
       }
 
+      .overflow-x-auto, #printDocumentRoot div {
+        overflow: visible !important;
+      }
+
       table {
         width: 100% !important;
         border-collapse: collapse !important;
+        table-layout: fixed !important;
+        box-sizing: border-box !important;
       }
 
       thead {
@@ -168,7 +174,7 @@
 
       @page {
         size: A4 portrait;
-        margin: 8mm 10mm 8mm 10mm;
+        margin: 8mm 12mm 8mm 12mm;
       }
     }
   </style>
@@ -1354,7 +1360,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       <!-- Printable Live Document Preview Container with Adaptive 2D Zoom Pan Scroll -->
       <div id="adminPrintScrollContainer" class="flex-1 overflow-auto custom-scrollbar border border-zinc-300/80 rounded-xl p-2 sm:p-4 bg-zinc-600/15 shadow-inner" style="touch-action: pan-x pan-y; -webkit-overflow-scrolling: touch;">
         <div id="adminPrintableReportWrapper" style="margin: 0 auto; position: relative; transition: width 0.12s ease, height 0.12s ease;">
-          <div id="printableReportArea" class="bg-white rounded-sm border border-zinc-300 shadow-md text-zinc-900 text-xs w-[794px] min-w-[794px] max-w-[794px]" style="background: #ffffff; color: #000000; box-sizing: border-box; padding: 30px 38px 30px 38px; min-height: 1123px; transform-origin: top left; position: absolute; top: 0; left: 0;">
+          <div id="printableReportArea" class="bg-white rounded-sm border border-zinc-300 shadow-md text-zinc-900 text-xs w-[794px] min-w-[794px] max-w-[794px]" style="background: #ffffff; color: #000000; box-sizing: border-box; padding: 30px 45px 30px 45px; min-height: 1123px; transform-origin: top left; position: absolute; top: 0; left: 0;">
             <!-- Dynamic Official Report Generated Here -->
           </div>
         </div>
@@ -3101,23 +3107,19 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
                 LAPORAN REKAPITULASI HASIL PENILAIAN PRESENTASI
               </h2>
               
-              <table style="width: 100%; border-collapse: collapse; border: none !important; margin-top: 2px; font-size: 11px; text-align: left;">
+              <table style="width: 100%; border-collapse: collapse; border: none !important; margin-top: 2px; font-size: 11px; text-align: left; table-layout: fixed;">
                 <tbody>
                   <tr style="border: none !important;">
-                    <td style="border: none !important; padding: 1.5px 0; width: 110px; font-weight: 600; color: #1f2937; vertical-align: top; white-space: nowrap;">Mata Kuliah</td>
-                    <td style="border: none !important; padding: 1.5px 4px; width: 10px; text-align: center; font-weight: 700; color: #000000; vertical-align: top;">:</td>
-                    <td style="border: none !important; padding: 1.5px 12px 1.5px 0; font-weight: 700; color: #000000; vertical-align: top; white-space: nowrap;">${matkul}</td>
-                    <td style="border: none !important; padding: 1.5px 0; width: 110px; font-weight: 600; color: #1f2937; vertical-align: top; white-space: nowrap;">Kelas / Semester</td>
-                    <td style="border: none !important; padding: 1.5px 4px; width: 10px; text-align: center; font-weight: 700; color: #000000; vertical-align: top;">:</td>
-                    <td style="border: none !important; padding: 1.5px 0; font-weight: 700; color: #000000; vertical-align: top; white-space: nowrap;">${kelas} / Genap (2025/2026)</td>
+                    <td style="border: none !important; padding: 1.5px 0; width: 15%; font-weight: 600; color: #1f2937; vertical-align: top;">Mata Kuliah</td>
+                    <td style="border: none !important; padding: 1.5px 6px 1.5px 0; width: 41%; font-weight: 700; color: #000000; vertical-align: top; word-break: break-word;">: ${matkul}</td>
+                    <td style="border: none !important; padding: 1.5px 0; width: 16%; font-weight: 600; color: #1f2937; vertical-align: top;">Kelas / Semester</td>
+                    <td style="border: none !important; padding: 1.5px 0; width: 28%; font-weight: 700; color: #000000; vertical-align: top; word-break: break-word;">: ${kelas} / Genap (2025/2026)</td>
                   </tr>
                   <tr style="border: none !important;">
-                    <td style="border: none !important; padding: 1.5px 0; width: 110px; font-weight: 600; color: #1f2937; vertical-align: top; white-space: nowrap;">Dosen Pengampu</td>
-                    <td style="border: none !important; padding: 1.5px 4px; width: 10px; text-align: center; font-weight: 700; color: #000000; vertical-align: top;">:</td>
-                    <td style="border: none !important; padding: 1.5px 12px 1.5px 0; font-weight: 700; color: #000000; vertical-align: top; white-space: nowrap;">${dosen}</td>
-                    <td style="border: none !important; padding: 1.5px 0; width: 110px; font-weight: 600; color: #1f2937; vertical-align: top; white-space: nowrap;">Cakupan Sesi</td>
-                    <td style="border: none !important; padding: 1.5px 4px; width: 10px; text-align: center; font-weight: 700; color: #000000; vertical-align: top;">:</td>
-                    <td style="border: none !important; padding: 1.5px 0; font-weight: 700; color: #000000; vertical-align: top; white-space: nowrap;">${selectedSesi === 'ALL' ? 'Semua Sesi Presentasi' : selectedSesi}</td>
+                    <td style="border: none !important; padding: 1.5px 0; width: 15%; font-weight: 600; color: #1f2937; vertical-align: top;">Dosen Pengampu</td>
+                    <td style="border: none !important; padding: 1.5px 6px 1.5px 0; width: 41%; font-weight: 700; color: #000000; vertical-align: top; word-break: break-word;">: ${dosen}</td>
+                    <td style="border: none !important; padding: 1.5px 0; width: 16%; font-weight: 600; color: #1f2937; vertical-align: top;">Cakupan Sesi</td>
+                    <td style="border: none !important; padding: 1.5px 0; width: 28%; font-weight: 700; color: #000000; vertical-align: top; word-break: break-word;">: ${selectedSesi === 'ALL' ? 'Semua Sesi Presentasi' : selectedSesi}</td>
                   </tr>
                 </tbody>
               </table>
@@ -3130,17 +3132,17 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
                 <span style="font-size: 10px; font-family: monospace; color: #4b5563;">Skala Penilaian: 0 - 100</span>
               </div>
               
-              <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-xs border border-zinc-950" style="border: 1.5px solid #000000; width: 100%;">
+              <div class="overflow-x-auto" style="overflow: visible;">
+                <table class="w-full text-left text-xs" style="table-layout: fixed; width: 100%; border-collapse: collapse; border: 1.5px solid #000000; box-sizing: border-box;">
                   <thead>
                     <tr style="background-color: #f3f4f6; text-align: center; font-weight: bold; border-bottom: 1.5px solid #000000;">
-                      <th style="padding: 5px 3px; border: 1px solid #000000; width: 40px; text-align: center; font-size: 11px;">Rank</th>
-                      <th style="padding: 5px 6px; border: 1px solid #000000; text-align: left; width: 135px; font-size: 11px;">Kelompok Presentasi</th>
-                      <th style="padding: 5px 4px; border: 1px solid #000000; width: 70px; text-align: center; font-size: 11px;">Sesi</th>
-                      <th style="padding: 5px 4px; border: 1px solid #000000; width: 60px; text-align: center; font-size: 11px;">Penilai</th>
-                      <th style="padding: 5px 4px; border: 1px solid #000000; width: 75px; text-align: center; font-size: 11px;">Rata-Rata</th>
-                      <th style="padding: 5px 6px; border: 1px solid #000000; text-align: left; font-size: 11px;">Presentator Terbaik</th>
-                      <th style="padding: 5px 4px; border: 1px solid #000000; width: 95px; text-align: center; font-size: 11px;">Predikat</th>
+                      <th style="padding: 5px 2px; border: 1px solid #000000; width: 6%; text-align: center; font-size: 11px;">Rank</th>
+                      <th style="padding: 5px 5px; border: 1px solid #000000; text-align: left; width: 19%; font-size: 11px;">Kelompok Presentasi</th>
+                      <th style="padding: 5px 3px; border: 1px solid #000000; width: 10%; text-align: center; font-size: 11px;">Sesi</th>
+                      <th style="padding: 5px 3px; border: 1px solid #000000; width: 9%; text-align: center; font-size: 11px;">Penilai</th>
+                      <th style="padding: 5px 3px; border: 1px solid #000000; width: 11%; text-align: center; font-size: 11px;">Rata-Rata</th>
+                      <th style="padding: 5px 5px; border: 1px solid #000000; text-align: left; width: 31%; font-size: 11px; word-break: break-word;">Presentator Terbaik</th>
+                      <th style="padding: 5px 3px; border: 1px solid #000000; width: 14%; text-align: center; font-size: 11px;">Predikat</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -3170,18 +3172,18 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
           const presenters = g.rankedPresenters || g.topPresentator || [];
           const topPresentersText = (presenters.length > 0)
-            ? presenters.map(p => `${p.name}&nbsp;(${p.votes}&nbsp;Suara)`).join(", ")
+            ? presenters.map(p => `${p.name} (${p.votes} Suara)`).join(", ")
             : "-";
 
           html += `
             <tr style="border-bottom: 1px solid #000000; ${idx % 2 === 0 ? 'background-color: #ffffff;' : 'background-color: #fafafa;'}">
-              <td style="padding: 4.5px 3px; border: 1px solid #000000; text-align: center; font-weight: bold; font-family: monospace; font-size: 11px;">#${idx + 1}</td>
-              <td style="padding: 4.5px 6px; border: 1px solid #000000; font-weight: bold; color: #000000; font-size: 11px;">${g.kelompok}</td>
-              <td style="padding: 4.5px 4px; border: 1px solid #000000; text-align: center; font-size: 11px;">${g.sesi || 'Minggu 1'}</td>
-              <td style="padding: 4.5px 4px; border: 1px solid #000000; text-align: center; font-family: monospace; font-size: 11px;">${totalP}</td>
-              <td style="padding: 4.5px 4px; border: 1px solid #000000; text-align: center; font-weight: bold; font-family: monospace; color: #000000; font-size: 11px;">${totalP > 0 ? scoreNum.toFixed(2) : '-'}</td>
-              <td style="padding: 4.5px 6px; border: 1px solid #000000; color: #000000; font-size: 11px;">${topPresentersText}</td>
-              <td style="padding: 4.5px 4px; border: 1px solid #000000; text-align: center; font-weight: 600; font-size: 11px;">${predikat}</td>
+              <td style="padding: 4.5px 2px; border: 1px solid #000000; text-align: center; font-weight: bold; font-family: monospace; font-size: 11px;">#${idx + 1}</td>
+              <td style="padding: 4.5px 5px; border: 1px solid #000000; font-weight: bold; color: #000000; font-size: 11px; word-break: break-word;">${g.kelompok}</td>
+              <td style="padding: 4.5px 3px; border: 1px solid #000000; text-align: center; font-size: 11px;">${g.sesi || 'Minggu 1'}</td>
+              <td style="padding: 4.5px 3px; border: 1px solid #000000; text-align: center; font-family: monospace; font-size: 11px;">${totalP}</td>
+              <td style="padding: 4.5px 3px; border: 1px solid #000000; text-align: center; font-weight: bold; font-family: monospace; color: #000000; font-size: 11px;">${totalP > 0 ? scoreNum.toFixed(2) : '-'}</td>
+              <td style="padding: 4.5px 5px; border: 1px solid #000000; color: #000000; font-size: 11px; word-break: break-word; overflow-wrap: break-word; line-height: 1.25;">${topPresentersText}</td>
+              <td style="padding: 4.5px 3px; border: 1px solid #000000; text-align: center; font-weight: 600; font-size: 11px;">${predikat}</td>
             </tr>
           `;
         });

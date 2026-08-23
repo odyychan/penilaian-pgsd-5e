@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.49] - 2026-08-23
+
+### 📐 Optimalisasi Batas Margin Kanan & Layout Tabel Cetak Presisi
+- **Pencegahan Pemotongan Garis Tepi Kanan (*Right Border Clipping Fix*):**
+  - Mengubah mode kalkulasi tabel cetak menjadi `table-layout: fixed` dengan alokasi lebar kolom proporsional berbasis persentase (Rank: 6%, Kelompok: 19%, Sesi: 10%, Penilai: 9%, Rata-Rata: 11%, Presentator Terbaik: 31%, Predikat: 14%).
+  - Menerapkan pembungkusan kata fleksibel (*word wrapping*) pada kolom *Presentator Terbaik* sehingga nama mahasiswa dan perolehan suara tidak memaksa tabel melebar melebihi batas kanvas kertas A4.
+  - Memastikan *overflow container* berstatus `visible` saat cetak agar tidak ada elemen tepi atau border luar yang terpotong oleh browser print rasterizer.
+- **Penyelarasan Margin Kertas A4 & Padding Preview:**
+  - Menetapkan margin cetak `@page` sebesar `8mm 12mm 8mm 12mm` dan padding area pratinjau modal sebesar `30px 45px` ($12\text{mm}$ ekuivalen), menjamin ruang napas tepi kanan yang proporsional dan 100% identik.
+- **Penataan Kolom Metadata Laporan (4-Kolom Fleksibel):**
+  - Menata distribusi kolom metadata (Mata Kuliah, Dosen Pengampu, Kelas/Semester, Cakupan Sesi) agar nama dosen pengampu bergelar lengkap tertata rapi dalam satu baris.
+
+---
+
 ## [2.1.48] - 2026-08-23
 
 ### 🔄 Penerapan Sistem Animatif Feedback & Fallback pada Seluruh Tombol Segarkan
