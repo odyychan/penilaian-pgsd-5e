@@ -30,7 +30,7 @@ Sistem ini adalah aplikasi **Web Peer-Assessment & Executive Leaderboard** moder
    - Halaman Formulir & Rekap: `https://penilaian-pgsd-5e.vercel.app/`
    - Portal Admin: `https://penilaian-pgsd-5e.vercel.app/admin`
 
-Setiap kali Anda melakukan `git push origin main`, Vercel dan Netlify akan secara otomatis mengompilasi dan memperbarui aplikasi secara realtime (*Continuous Deployment*)!
+Setiap kali Anda melakukan `git push origin main`, repository akan terbarui di GitHub. (Catatan: Auto-deployment Vercel dinonaktifkan untuk mode pengembangan lokal via `vercel.json`).
 
 ### Langkah Terakhir: Konfigurasi API Backend
 1. Buka file **[`Index.html`](file:///d:/Project%20Dede/Index.html)** dan **[`admin.html`](file:///d:/Project%20Dede/admin.html)**.
