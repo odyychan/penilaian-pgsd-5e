@@ -78,22 +78,28 @@
 
     /* Print Report Styling */
     @media print {
-      /* Sembunyikan seluruh UI web, header, footer, tabs, login, toast, dan overlay modal */
-      header, footer, nav, #loginScreen, #adminDashboard, #toast, #toastContainer, #floatingToastContainer, .toast, .toast-enter, .toast-exit, [id*="toast"], [class*="toast"], #printRekapModal, #groupModal, #memberModal, #batchGroupModal, #deleteConfirmModal, #responseDetailModal, #resetDataModal, .no-print {
+      /* Sembunyikan SEMUA elemen di body KECUALI #printDocumentRoot secara mutlak */
+      body > *:not(#printDocumentRoot) {
         display: none !important;
         visibility: hidden !important;
         opacity: 0 !important;
         height: 0 !important;
+        min-height: 0 !important;
+        max-height: 0 !important;
         width: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        overflow: hidden !important;
         position: absolute !important;
-        top: -9999px !important;
-        left: -9999px !important;
+        top: -99999px !important;
+        left: -99999px !important;
       }
       
       html, body {
         display: block !important;
         position: static !important;
-        min-height: auto !important;
+        min-height: 0 !important;
         height: auto !important;
         width: 100% !important;
         margin: 0 !important;
@@ -146,7 +152,7 @@
 
       @page {
         size: A4 portrait;
-        margin: 0mm 8mm 6mm 8mm;
+        margin: 8mm 10mm 8mm 10mm;
       }
     }
   </style>
@@ -2976,76 +2982,74 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       });
       const avgClassScore = evaluatedCount > 0 ? (totalAllScore / evaluatedCount).toFixed(2) : "0.00";
 
-      // HTML Template
-      let html = `
-        <!-- KOP SURAT RESMI DINAS FKIP ULM -->
+             <!-- KOP SURAT RESMI DINAS FKIP ULM -->
         <table style="width: 100%; border-collapse: collapse; border: none; margin: 0 0 2px 0; padding: 0; table-layout: fixed;">
           <tbody>
             <tr style="border: none;">
-              <td style="width: 88px; min-width: 88px; max-width: 88px; vertical-align: middle; text-align: center; border: none; padding: 0 8px 0 0;">
-                <img src="assets/logo-ulm.png" alt="Logo ULM" style="width: 82px; height: 82px; object-fit: contain; display: block; margin: 0 auto;" onerror="this.src='logo-ulm.png'" />
+              <td style="width: 82px; min-width: 82px; max-width: 82px; vertical-align: middle; text-align: center; border: none; padding: 0 6px 0 0;">
+                <img src="assets/logo-ulm.png" alt="Logo ULM" style="width: 76px; height: 76px; object-fit: contain; display: block; margin: 0 auto;" onerror="this.src='logo-ulm.png'" />
               </td>
               <td style="text-align: center; vertical-align: middle; border: none; padding: 0 2px; font-family: 'Times New Roman', Times, serif; color: #000000;">
-                <div style="font-size: 12.5px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; line-height: 1.2;">KEMENTERIAN PENDIDIKAN TINGGI, SAINS, DAN TEKNOLOGI</div>
-                <div style="font-size: 15.5px; font-weight: 900; letter-spacing: 0.03em; text-transform: uppercase; line-height: 1.25; margin-top: 1.5px;">UNIVERSITAS LAMBUNG MANGKURAT</div>
-                <div style="font-size: 13.5px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1.2; margin-top: 1.5px;">FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN</div>
-                <div style="font-size: 12.5px; font-weight: 700; text-transform: uppercase; line-height: 1.2; margin-top: 1px;">PROGRAM STUDI PENDIDIKAN GURU SEKOLAH DASAR (PGSD) - KELAS ${kelas}</div>
-                <div style="font-size: 9.5px; color: #374151; line-height: 1.2; margin-top: 3px; font-style: italic;">Jl. Brigjen H. Hasan Basry, Kayu Tangi, Banjarmasin, Kalimantan Selatan 70123 • Laman: fkip.ulm.ac.id</div>
+                <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; line-height: 1.2;">KEMENTERIAN PENDIDIKAN TINGGI, SAINS, DAN TEKNOLOGI</div>
+                <div style="font-size: 15px; font-weight: 900; letter-spacing: 0.03em; text-transform: uppercase; line-height: 1.22; margin-top: 1px;">UNIVERSITAS LAMBUNG MANGKURAT</div>
+                <div style="font-size: 13px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1.2; margin-top: 1px;">FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN</div>
+                <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; line-height: 1.2; margin-top: 1px;">PROGRAM STUDI PENDIDIKAN GURU SEKOLAH DASAR (PGSD) - KELAS ${kelas}</div>
+                <div style="font-size: 9px; color: #374151; line-height: 1.2; margin-top: 2.5px; font-style: italic;">Jl. Brigjen H. Hasan Basry, Kayu Tangi, Banjarmasin, Kalimantan Selatan 70123 • Laman: fkip.ulm.ac.id</div>
               </td>
-              <td style="width: 88px; min-width: 88px; max-width: 88px; border: none; padding: 0;"></td>
+              <td style="width: 82px; min-width: 82px; max-width: 82px; border: none; padding: 0;"></td>
             </tr>
           </tbody>
         </table>
 
         <!-- GARIS PEMBATAS KOP RESMI DINAS (DOUBLE LINE TEBAL & TIPIS) -->
-        <div style="border-top: 2.5px solid #000000; border-bottom: 0.75px solid #000000; height: 2px; margin: 3px 0 10px 0;"></div>
+        <div style="border-top: 2.5px solid #000000; border-bottom: 0.75px solid #000000; height: 2px; margin: 2px 0 8px 0;"></div>
 
         <!-- JUDUL LAPORAN & METADATA -->
-        <div style="text-align: center; margin-bottom: 12px;">
-          <h2 style="font-size: 13.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: #000000; border-bottom: 1.5px solid #000000; padding-bottom: 2.5px; display: inline-block; margin: 0 auto 8px auto;">
+        <div style="text-align: center; margin-bottom: 8px;">
+          <h2 style="font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em; color: #000000; border-bottom: 1.5px solid #000000; padding-bottom: 2px; display: inline-block; margin: 0 auto 6px auto;">
             LAPORAN REKAPITULASI HASIL PENILAIAN PRESENTASI
           </h2>
           
-          <table style="width: 100%; border-collapse: collapse; border: none !important; margin-top: 4px; font-size: 12px; text-align: left;">
+          <table style="width: 100%; border-collapse: collapse; border: none !important; margin-top: 2px; font-size: 11px; text-align: left;">
             <tbody>
               <tr style="border: none !important;">
-                <td style="border: none !important; padding: 2.5px 0; width: 120px; font-weight: 600; color: #1f2937; vertical-align: top; white-space: nowrap;">Mata Kuliah</td>
-                <td style="border: none !important; padding: 2.5px 4px; width: 10px; text-align: center; font-weight: 700; color: #000000; vertical-align: top;">:</td>
-                <td style="border: none !important; padding: 2.5px 16px 2.5px 0; font-weight: 700; color: #000000; vertical-align: top; white-space: nowrap;">${matkul}</td>
-                <td style="border: none !important; padding: 2.5px 0; width: 120px; font-weight: 600; color: #1f2937; vertical-align: top; white-space: nowrap;">Kelas / Semester</td>
-                <td style="border: none !important; padding: 2.5px 4px; width: 10px; text-align: center; font-weight: 700; color: #000000; vertical-align: top;">:</td>
-                <td style="border: none !important; padding: 2.5px 0; font-weight: 700; color: #000000; vertical-align: top; white-space: nowrap;">${kelas} / Genap (2025/2026)</td>
+                <td style="border: none !important; padding: 1.5px 0; width: 110px; font-weight: 600; color: #1f2937; vertical-align: top; white-space: nowrap;">Mata Kuliah</td>
+                <td style="border: none !important; padding: 1.5px 4px; width: 10px; text-align: center; font-weight: 700; color: #000000; vertical-align: top;">:</td>
+                <td style="border: none !important; padding: 1.5px 12px 1.5px 0; font-weight: 700; color: #000000; vertical-align: top; white-space: nowrap;">${matkul}</td>
+                <td style="border: none !important; padding: 1.5px 0; width: 110px; font-weight: 600; color: #1f2937; vertical-align: top; white-space: nowrap;">Kelas / Semester</td>
+                <td style="border: none !important; padding: 1.5px 4px; width: 10px; text-align: center; font-weight: 700; color: #000000; vertical-align: top;">:</td>
+                <td style="border: none !important; padding: 1.5px 0; font-weight: 700; color: #000000; vertical-align: top; white-space: nowrap;">${kelas} / Genap (2025/2026)</td>
               </tr>
               <tr style="border: none !important;">
-                <td style="border: none !important; padding: 2.5px 0; width: 120px; font-weight: 600; color: #1f2937; vertical-align: top; white-space: nowrap;">Dosen Pengampu</td>
-                <td style="border: none !important; padding: 2.5px 4px; width: 10px; text-align: center; font-weight: 700; color: #000000; vertical-align: top;">:</td>
-                <td style="border: none !important; padding: 2.5px 16px 2.5px 0; font-weight: 700; color: #000000; vertical-align: top; white-space: nowrap;">${dosen}</td>
-                <td style="border: none !important; padding: 2.5px 0; width: 120px; font-weight: 600; color: #1f2937; vertical-align: top; white-space: nowrap;">Cakupan Sesi</td>
-                <td style="border: none !important; padding: 2.5px 4px; width: 10px; text-align: center; font-weight: 700; color: #000000; vertical-align: top;">:</td>
-                <td style="border: none !important; padding: 2.5px 0; font-weight: 700; color: #000000; vertical-align: top; white-space: nowrap;">${selectedSesi === 'ALL' ? 'Semua Sesi Presentasi' : selectedSesi}</td>
+                <td style="border: none !important; padding: 1.5px 0; width: 110px; font-weight: 600; color: #1f2937; vertical-align: top; white-space: nowrap;">Dosen Pengampu</td>
+                <td style="border: none !important; padding: 1.5px 4px; width: 10px; text-align: center; font-weight: 700; color: #000000; vertical-align: top;">:</td>
+                <td style="border: none !important; padding: 1.5px 12px 1.5px 0; font-weight: 700; color: #000000; vertical-align: top; white-space: nowrap;">${dosen}</td>
+                <td style="border: none !important; padding: 1.5px 0; width: 110px; font-weight: 600; color: #1f2937; vertical-align: top; white-space: nowrap;">Cakupan Sesi</td>
+                <td style="border: none !important; padding: 1.5px 4px; width: 10px; text-align: center; font-weight: 700; color: #000000; vertical-align: top;">:</td>
+                <td style="border: none !important; padding: 1.5px 0; font-weight: 700; color: #000000; vertical-align: top; white-space: nowrap;">${selectedSesi === 'ALL' ? 'Semua Sesi Presentasi' : selectedSesi}</td>
               </tr>
             </tbody>
           </table>
         </div>
 
         <!-- 1. TABEL REKAPITULASI NILAI KELOMPOK -->
-        <div class="my-3 space-y-1.5 print-avoid-break">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
-            <span style="font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.03em; color: #000000;">A. Rekapitulasi Nilai & Peringkat Performa Kelompok</span>
-            <span style="font-size: 11px; font-family: monospace; color: #4b5563;">Skala Penilaian: 0 - 100</span>
+        <div class="my-2 space-y-1 print-avoid-break">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px;">
+            <span style="font-weight: 800; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.02em; color: #000000;">A. Rekapitulasi Nilai &amp; Peringkat Performa Kelompok</span>
+            <span style="font-size: 10px; font-family: monospace; color: #4b5563;">Skala Penilaian: 0 - 100</span>
           </div>
           
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-xs border border-zinc-950" style="border: 1.5px solid #000000; width: 100%;">
               <thead>
                 <tr style="background-color: #f3f4f6; text-align: center; font-weight: bold; border-bottom: 1.5px solid #000000;">
-                  <th style="padding: 6.5px 4px; border: 1px solid #000000; width: 44px; text-align: center; font-size: 12px;">Rank</th>
-                  <th style="padding: 6.5px 8px; border: 1px solid #000000; text-align: left; width: 140px; font-size: 12px;">Kelompok Presentasi</th>
-                  <th style="padding: 6.5px 6px; border: 1px solid #000000; width: 75px; text-align: center; font-size: 12px;">Sesi</th>
-                  <th style="padding: 6.5px 6px; border: 1px solid #000000; width: 65px; text-align: center; font-size: 12px;">Penilai</th>
-                  <th style="padding: 6.5px 6px; border: 1px solid #000000; width: 80px; text-align: center; font-size: 12px;">Rata-Rata</th>
-                  <th style="padding: 6.5px 8px; border: 1px solid #000000; text-align: left; font-size: 12px;">Presentator Terbaik</th>
-                  <th style="padding: 6.5px 6px; border: 1px solid #000000; width: 100px; text-align: center; font-size: 12px;">Predikat</th>
+                  <th style="padding: 5px 3px; border: 1px solid #000000; width: 40px; text-align: center; font-size: 11px;">Rank</th>
+                  <th style="padding: 5px 6px; border: 1px solid #000000; text-align: left; width: 135px; font-size: 11px;">Kelompok Presentasi</th>
+                  <th style="padding: 5px 4px; border: 1px solid #000000; width: 70px; text-align: center; font-size: 11px;">Sesi</th>
+                  <th style="padding: 5px 4px; border: 1px solid #000000; width: 60px; text-align: center; font-size: 11px;">Penilai</th>
+                  <th style="padding: 5px 4px; border: 1px solid #000000; width: 75px; text-align: center; font-size: 11px;">Rata-Rata</th>
+                  <th style="padding: 5px 6px; border: 1px solid #000000; text-align: left; font-size: 11px;">Presentator Terbaik</th>
+                  <th style="padding: 5px 4px; border: 1px solid #000000; width: 95px; text-align: center; font-size: 11px;">Predikat</th>
                 </tr>
               </thead>
               <tbody>
@@ -3054,7 +3058,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       if (summaryList.length === 0) {
         html += `
           <tr>
-            <td colspan="7" style="padding: 12px; text-align: center; color: #6b7280; font-style: italic; border: 1px solid #000000;">
+            <td colspan="7" style="padding: 10px; text-align: center; color: #6b7280; font-style: italic; border: 1px solid #000000;">
               Tidak ada data penilaian yang sesuai dengan kriteria filter.
             </td>
           </tr>
@@ -3080,13 +3084,13 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
           html += `
             <tr style="border-bottom: 1px solid #000000; ${idx % 2 === 0 ? 'background-color: #ffffff;' : 'background-color: #fafafa;'}">
-              <td style="padding: 6.5px 4px; border: 1px solid #000000; text-align: center; font-weight: bold; font-family: monospace; font-size: 12px;">#${idx + 1}</td>
-              <td style="padding: 6.5px 8px; border: 1px solid #000000; font-weight: bold; color: #000000; font-size: 12px;">${g.kelompok}</td>
-              <td style="padding: 6.5px 6px; border: 1px solid #000000; text-align: center; font-size: 12px;">${g.sesi || 'Minggu 1'}</td>
-              <td style="padding: 6.5px 6px; border: 1px solid #000000; text-align: center; font-family: monospace; font-size: 12px;">${totalP}</td>
-              <td style="padding: 6.5px 6px; border: 1px solid #000000; text-align: center; font-weight: bold; font-family: monospace; color: #000000; font-size: 12px;">${totalP > 0 ? scoreNum.toFixed(2) : '-'}</td>
-              <td style="padding: 6.5px 8px; border: 1px solid #000000; color: #000000; font-size: 12px;">${topPresentersText}</td>
-              <td style="padding: 6.5px 6px; border: 1px solid #000000; text-align: center; font-weight: 600; font-size: 12px;">${predikat}</td>
+              <td style="padding: 4.5px 3px; border: 1px solid #000000; text-align: center; font-weight: bold; font-family: monospace; font-size: 11px;">#${idx + 1}</td>
+              <td style="padding: 4.5px 6px; border: 1px solid #000000; font-weight: bold; color: #000000; font-size: 11px;">${g.kelompok}</td>
+              <td style="padding: 4.5px 4px; border: 1px solid #000000; text-align: center; font-size: 11px;">${g.sesi || 'Minggu 1'}</td>
+              <td style="padding: 4.5px 4px; border: 1px solid #000000; text-align: center; font-family: monospace; font-size: 11px;">${totalP}</td>
+              <td style="padding: 4.5px 4px; border: 1px solid #000000; text-align: center; font-weight: bold; font-family: monospace; color: #000000; font-size: 11px;">${totalP > 0 ? scoreNum.toFixed(2) : '-'}</td>
+              <td style="padding: 4.5px 6px; border: 1px solid #000000; color: #000000; font-size: 11px;">${topPresentersText}</td>
+              <td style="padding: 4.5px 4px; border: 1px solid #000000; text-align: center; font-weight: 600; font-size: 11px;">${predikat}</td>
             </tr>
           `;
         });
@@ -3094,10 +3098,10 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         // Summary Row
         html += `
           <tr style="background-color: #f3f4f6; font-weight: bold; border-top: 1.5px solid #000000; text-align: center;">
-            <td colspan="3" style="padding: 7px 8px; text-align: right; border: 1px solid #000000; font-size: 12px;">Rata-Rata Keseluruhan Kelas:</td>
-            <td style="padding: 7px 6px; border: 1px solid #000000; font-family: monospace; font-size: 12px;">${totalAllPenilai} Mhs</td>
-            <td style="padding: 7px 6px; border: 1px solid #000000; font-family: monospace; font-size: 12.5px; color: #000000;">${avgClassScore}</td>
-            <td colspan="2" style="padding: 7px 8px; text-align: left; border: 1px solid #000000; font-size: 11px; color: #374151;">Total ${summaryList.length} Kelompok Terdaftar</td>
+            <td colspan="3" style="padding: 5px 6px; text-align: right; border: 1px solid #000000; font-size: 11px;">Rata-Rata Keseluruhan Kelas:</td>
+            <td style="padding: 5px 4px; border: 1px solid #000000; font-family: monospace; font-size: 11px;">${totalAllPenilai} Mhs</td>
+            <td style="padding: 5px 4px; border: 1px solid #000000; font-family: monospace; font-size: 11.5px; color: #000000;">${avgClassScore}</td>
+            <td colspan="2" style="padding: 5px 6px; text-align: left; border: 1px solid #000000; font-size: 10.5px; color: #374151;">Total ${summaryList.length} Kelompok Terdaftar</td>
           </tr>
         `;
       }
@@ -3112,8 +3116,8 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       // 2. BAGIAN EVALUASI KUALITATIF JIKA DICENTANG
       if (includeReviews && summaryList.length > 0) {
         let reviewHtml = `
-          <div class="my-3 space-y-2">
-            <h4 class="font-bold uppercase tracking-wider text-zinc-950" style="font-size: 12px; font-weight: 800;">
+          <div class="my-2 space-y-1.5">
+            <h4 class="font-bold uppercase tracking-wider text-zinc-950" style="font-size: 11.5px; font-weight: 800; margin: 4px 0 3px 0;">
               B. Rangkuman Catatan Evaluasi Masukan Mahasiswa
             </h4>
         `;
@@ -3126,31 +3130,31 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           if (studentKeys.length > 0) {
             hasAnyReviews = true;
             reviewHtml += `
-              <div class="print-card print-avoid-break p-3 rounded-lg border border-zinc-400 bg-zinc-50/50 space-y-2 mb-3" style="page-break-inside: avoid; break-inside: avoid; border: 1px solid #9ca3af; border-radius: 6px; padding: 10px 12px;">
-                <div class="font-bold text-zinc-950 border-b border-zinc-300 pb-1.5 flex items-center justify-between" style="border-bottom: 1px solid #d1d5db; padding-bottom: 4px;">
-                  <span class="font-extrabold" style="font-size: 12.5px; font-weight: 800;">${g.kelompok}</span>
-                  <span class="font-medium font-mono text-zinc-700 bg-zinc-200/80 px-2 py-0.5 rounded" style="font-size: 10.5px;">${g.sesi || 'Minggu 1'}</span>
+              <div class="print-card print-avoid-break rounded border border-zinc-400 bg-zinc-50/50 space-y-1.5 mb-2" style="page-break-inside: avoid; break-inside: avoid; border: 1px solid #9ca3af; border-radius: 4px; padding: 7px 9px;">
+                <div class="font-bold text-zinc-950 border-b border-zinc-300 flex items-center justify-between" style="border-bottom: 1px solid #d1d5db; padding-bottom: 3px;">
+                  <span class="font-extrabold" style="font-size: 11.5px; font-weight: 800;">${g.kelompok}</span>
+                  <span class="font-medium font-mono text-zinc-700 bg-zinc-200/80 px-1.5 py-0.5 rounded" style="font-size: 10px;">${g.sesi || 'Minggu 1'}</span>
                 </div>
-                <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding-top: 4px;">
+                <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; padding-top: 3px;">
             `;
 
             studentKeys.forEach(name => {
               const reviews = evalList[name] || [];
               if (reviews.length > 0) {
                 reviewHtml += `
-                  <div class="p-2.5 rounded bg-white border border-zinc-200 shadow-2xs" style="page-break-inside: avoid; break-inside: avoid; border: 1px solid #e5e7eb; border-radius: 4px; padding: 8px 10px;">
-                    <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px dashed #e5e7eb; padding-bottom: 3px; margin-bottom: 5px;">
-                      <span style="font-size: 11.5px; font-weight: 700; color: #111827;">${name}</span>
-                      <span style="font-size: 10px; font-weight: 600; color: #4b5563; font-family: monospace; background: #f3f4f6; padding: 1px 6px; border-radius: 4px;">${reviews.length} Masukan</span>
+                  <div class="rounded bg-white border border-zinc-200 shadow-2xs" style="page-break-inside: avoid; break-inside: avoid; border: 1px solid #e5e7eb; border-radius: 4px; padding: 5px 7px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px dashed #e5e7eb; padding-bottom: 2px; margin-bottom: 3px;">
+                      <span style="font-size: 11px; font-weight: 700; color: #111827;">${name}</span>
+                      <span style="font-size: 9.5px; font-weight: 600; color: #4b5563; font-family: monospace; background: #f3f4f6; padding: 0.5px 4px; border-radius: 3px;">${reviews.length} Masukan</span>
                     </div>
-                    <ul style="list-style-type: disc; padding-left: 16px; margin: 0; font-size: 11px; line-height: 1.4; color: #1f2937;">
+                    <ul style="list-style-type: disc; padding-left: 14px; margin: 0; font-size: 10.5px; line-height: 1.3; color: #1f2937;">
                       ${reviews.slice(0, 4).map(r => `
-                        <li style="margin-bottom: 4px;">
+                        <li style="margin-bottom: 2px;">
                           <span style="font-style: italic; color: #111827;">"${r.ulasan}"</span>
-                          <span style="font-size: 9.5px; color: #4b5563; font-weight: 600; font-style: normal; margin-left: 4px;">— ${r.penilai || 'Penilai'}</span>
+                          <span style="font-size: 9px; color: #4b5563; font-weight: 600; font-style: normal; margin-left: 3px;">— ${r.penilai || 'Penilai'}</span>
                         </li>
                       `).join("")}
-                      ${reviews.length > 4 ? `<li style="list-style: none; font-size: 10px; color: #6b7280; font-style: italic; margin-top: 2px; padding-left: 0;">+ ${reviews.length - 4} catatan masukan lainnya...</li>` : ''}
+                      ${reviews.length > 4 ? `<li style="list-style: none; font-size: 9.5px; color: #6b7280; font-style: italic; margin-top: 1px; padding-left: 0;">+ ${reviews.length - 4} catatan masukan lainnya...</li>` : ''}
                     </ul>
                   </div>
                 `;
@@ -3172,24 +3176,24 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
       // LEMBAR TANDA TANGAN / PENGESAHAN RESMI DOSEN
       html += `
-        <div class="print-signature print-avoid-break pt-4 mt-4 border-t border-zinc-300 flex justify-between items-start text-xs" style="page-break-inside: avoid; break-inside: avoid; border-top: 1px solid #d1d5db; margin-top: 18px; padding-top: 12px;">
-          <div class="space-y-1 text-zinc-600" style="text-align: left; line-height: 1.45; font-size: 10px;">
+        <div class="print-signature print-avoid-break pt-2 mt-2.5 border-t border-zinc-300 flex justify-between items-start text-xs" style="page-break-inside: avoid; break-inside: avoid; border-top: 1px solid #d1d5db; margin-top: 10px; padding-top: 8px;">
+          <div class="space-y-0.5 text-zinc-600" style="text-align: left; line-height: 1.35; font-size: 9.5px;">
             <p style="margin: 0; color: #4b5563;">Dokumen ini dihasilkan secara otomatis oleh:</p>
-            <p style="margin: 2px 0 0 0; font-weight: 700; color: #000000; font-size: 11px;">Portal Pengelola PGSD Kelas 5E</p>
+            <p style="margin: 1px 0 0 0; font-weight: 700; color: #000000; font-size: 10.5px;">Portal Pengelola PGSD Kelas 5E</p>
             <p style="margin: 0; color: #374151;">Universitas Lambung Mangkurat</p>
-            <p style="margin: 4px 0 0 0; color: #4b5563; font-family: monospace; font-size: 10px;">Waktu Cetak: ${printDateStr}</p>
+            <p style="margin: 2px 0 0 0; color: #4b5563; font-family: monospace; font-size: 9.5px;">Waktu Cetak: ${printDateStr}</p>
           </div>
 
-          <div class="text-center space-y-1" style="min-width: 280px; max-width: 350px; margin-left: auto;">
-            <p class="text-xs" style="margin: 0; font-size: 12px; color: #000000;">Banjarmasin, ${printDateStr}</p>
-            <p class="font-bold text-zinc-900" style="margin: 2px 0 0 0; font-size: 12px; font-weight: 700; color: #000000;">Dosen Pengampu Mata Kuliah,</p>
-            <div style="height: 70px; display: flex; align-items: center; justify-content: center;">
-              <span style="font-size: 10px; color: #6b7280; font-style: italic;">(Tanda Tangan & Cap)</span>
+          <div class="text-center space-y-0.5" style="min-width: 260px; max-width: 320px; margin-left: auto;">
+            <p class="text-xs" style="margin: 0; font-size: 11px; color: #000000;">Banjarmasin, ${printDateStr}</p>
+            <p class="font-bold text-zinc-900" style="margin: 1.5px 0 0 0; font-size: 11px; font-weight: 700; color: #000000;">Dosen Pengampu Mata Kuliah,</p>
+            <div style="height: 48px; display: flex; align-items: center; justify-content: center;">
+              <span style="font-size: 9.5px; color: #6b7280; font-style: italic;">(Tanda Tangan &amp; Cap)</span>
             </div>
-            <div style="margin-top: 2px; padding-bottom: 2px; border-bottom: 1.5px solid #000000; display: inline-block; min-width: 220px; max-width: 100%;">
-              <span style="font-size: 12px; font-weight: 800; color: #000000; white-space: nowrap; letter-spacing: 0.01em;">${dosen}</span>
+            <div style="margin-top: 1px; padding-bottom: 1.5px; border-bottom: 1.5px solid #000000; display: inline-block; min-width: 210px; max-width: 100%;">
+              <span style="font-size: 11.5px; font-weight: 800; color: #000000; white-space: nowrap; letter-spacing: 0.01em;">${dosen}</span>
             </div>
-            <p class="font-mono" style="margin: 3px 0 0 0; font-size: 11px; color: #000000; font-weight: 600;">NIP. 19830514 200812 2 003</p>
+            <p class="font-mono" style="margin: 2px 0 0 0; font-size: 10.5px; color: #000000; font-weight: 600;">NIP. 19830514 200812 2 003</p>
           </div>
         </div>
       `;

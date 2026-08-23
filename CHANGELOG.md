@@ -4,6 +4,19 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.43] - 2026-08-23
+
+### 🎯 Isolasi Mutlak Mode Cetak & Konsistensi Margin Antar Halaman
+- **Isolasi Penuh Elemen DOM Saat Cetak (`body > *:not(#printDocumentRoot)`):**
+  - Menyembunyikan seluruh elemen induk dan sibling di dalam `body` (`main`, `header`, `nav`, `toast`) secara absolut saat mode cetak (`@media print`), menghilangkan celah/offset tersembunyi yang sebelumnya mendorong posisi Kop Surat ke bawah pada halaman pertama.
+  - Memastikan `#printDocumentRoot` menjadi satu-satunya elemen aktif di dalam `body` saat pencetakan berlangsung.
+- **Konsistensi Margin Cetak Bersih (@page 8mm):**
+  - Menerapkan `@page { size: A4 portrait; margin: 8mm 10mm 8mm 10mm; }` secara seragam untuk seluruh halaman fisik (baik halaman 1 maupun halaman 2), sehingga margin atas dan bawah memiliki proporsi simetris yang konsisten.
+- **Kepadatan Tipografi & Layout Pas 1 Halaman:**
+  - Mengoptimalkan densitas vertikal (Kop, tabel evaluasi, dan kotak tanda tangan dosen) sehingga rekapitulasi penilaian presentasi 2 kelompok pas dan tuntas dalam 1 halaman utuh A4 tanpa terpotong ke halaman berikutnya.
+
+---
+
 ## [2.1.42] - 2026-08-23
 
 ### 🎯 Perbaikan Margin Atas & Optimalisasi 1 Halaman Penuh Dokumen Cetak
