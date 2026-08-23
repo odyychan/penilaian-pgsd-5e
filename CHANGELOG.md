@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.65] - 2026-08-23
+
+### 🖋️ Pembersihan Placeholder & Perluasan Ruang Tanda Tangan Dosen
+- **Pembersihan Teks Lembar Pengesahan (*Signature Area Optimization*):**
+  - Menghapus teks placeholder *"(Tanda Tangan & Cap)"* agar lembar tanda tangan tampil murni dan formal tanpa teks bantuan visual.
+  - Memperluas tinggi ruang kosong (*signature blank space*) menjadi $62\text{px}$ untuk memberikan keleluasaan pembubuhan tanda tangan basah/elektronik dan cap stempel resmi institusi.
+- **Sinkronisasi Dwikanal:**
+  - Diterapkan pada `index.html` dan `admin.html`.
+
+---
+
 ## [2.1.64] - 2026-08-23
 
 ### 🏛️ Penerapan Font Times New Roman pada Seluruh Komponen Tabel A
