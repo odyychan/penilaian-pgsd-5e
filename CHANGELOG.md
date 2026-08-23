@@ -4,6 +4,22 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.61] - 2026-08-23
+
+### 🏛️ Penerapan Font Times New Roman pada Lembar Pengesahan Dosen
+- **Harmonisasi Tipografi Lembar Pengesahan (*Signature Block Typography*):**
+  - Mengubah seluruh baris teks pada lembar tanda tangan dan pengesahan resmi dosen pengampu menjadi keluarga huruf `'Times New Roman', Times, serif`:
+    - Kota & Tanggal Pengesahan (*Banjarmasin, 23 Agustus 2026*)
+    - Jabatan (*Dosen Pengampu Mata Kuliah,*)
+    - Label tanda tangan (*(Tanda Tangan & Cap)*)
+    - Nama Lengkap & Gelar (*Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.*)
+    - Nomor Induk Pegawai (*NIP. 19830514 200812 2 003*)
+  - Menjamin keselarasan formal 100% dari Kop Surat hingga lembar pengesahan akhir dokumen dinas.
+- **Sinkronisasi Dwikanal:**
+  - Diterapkan pada `index.html` dan `admin.html`.
+
+---
+
 ## [2.1.60] - 2026-08-23
 
 ### 🎯 Penyelarasan Rata Tengah Sel Total Kelompok Terdaftar
