@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.34] - 2026-08-23
+
+### 🔍 Tipografi Kompak & Optimasi Kerapatan Sel Mobile
+- **Font & Padding Kompak (Compact Table Typography):**
+  - Mengurangi ukuran font dan padding sel tabel secara proporsional (`text-[10.5px]` untuk nama mhs, `text-[8.5px]` untuk NIM, dan `py-1 px-1.5` untuk padding sel).
+  - Mengoptimalkan lebar minimum kolom (`#` 28px, `Mahasiswa & NIM` 120px, `Kel. Asal` 60px, kolom kelompok 65px) sehingga seluruh kolom utama dapat langsung muat di layar smartphone (320px–425px) tanpa terpotong berlebih.
+- **Badge & Ikon Skala Halus:**
+  - Lingkaran centang dan status badge berukuran ramping (`w-4 h-4` dengan ikon SVG `w-2.5 h-2.5` dan badge `text-[9.5px]`), menjaga keterbacaan tinggi dan kerapian estetis di semua perangkat.
+
+---
+
 ## [2.1.33] - 2026-08-23
 
 ### 📱 Presisi Responsivitas Mobile-S/M/L & Eliminasi Kolisi Kolom
