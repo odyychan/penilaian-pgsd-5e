@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.70] - 2026-08-23
+
+### 📑 Opsi Tampilkan/Sembunyikan Catatan Kaki (Footer Dokumen Cetak)
+- **Kontrol Visibilitas Footer (*Document Footer Visibility Toggle*):**
+  - Menambahkan checkbox *"Sertakan Catatan Kaki"* pada bilah filter cetak rekapitulasi.
+  - Jika dicentang (default: aktif): Catatan kaki resmi (*footer*) ditampilkan di bagian dasar kanvas A4 lengkap dengan informasi otomatisasi dan cap waktu cetak.
+  - Jika tidak dicentang: Catatan kaki dihapus secara bersih, dan struktur kanvas secara otomatis menyesuaikan (*responsive layout reflow*) tanpa merusak hierarki atau batas cetak.
+- **Sinkronisasi Dwikanal:**
+  - Diterapkan pada `index.html` dan `admin.html`.
+
+---
+
 ## [2.1.69] - 2026-08-23
 
 ### 🔘 Opsi Tampilkan/Sembunyikan Nama Pengirim Ulasan Evaluatif
