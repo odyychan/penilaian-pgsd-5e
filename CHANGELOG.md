@@ -4,7 +4,22 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.21] - 2026-08-23
+
+### 🔓 Rekapitulasi Hasil Independen dari Sesi Aktif (Full Filter-Driven)
+- **Pelepasan Keterikatan Rekapitulasi dari Sesi Aktif:**
+  - Seluruh bagian Dashboard Rekapitulasi Hasil (Visual Chart Leaderboard, Rekap Kelompok, Rekap Ulasan Pemateri, dan Rekap Presensi Status Pengisian) kini **tidak pernah terikat atau dibatasi oleh `Sesi_Minggu_Aktif`**.
+  - Rekapitulasi menyajikan data secara menyeluruh (*Semua Sesi*) sebagai default tampilan, dan hanya berubah berdasarkan pilihan filter interaktif pengguna.
+- **Filter Sesi & Kelompok Terpadu pada Rekap Kelompok & Pemateri:**
+  - Menambahkan dropdown **Filter Sesi / Minggu** berdampingan dengan **Filter Kelompok** pada bar kontrol rekap, memungkinkan pengguna memfilter data spesifik per minggu pertemuan secara eksplisit atau melihat keseluruhan.
+  - Dropdown filter kelompok menyesuaikan opsi secara otomatis dan dinamis berdasarkan sesi yang dipilih.
+- **Sinkronisasi Komprehensif Status Pengisian Presensi:**
+  - Filter sesi dan kelompok pada tabel presensi mengumpulkan seluruh sesi unik dari seluruh master data kelas (`allStudentsData`), `groupsData`, dan riwayat data `responsSheet` tanpa batasan sesi aktif.
+
+---
+
 ## [2.1.20] - 2026-08-23
+
 
 ### 🗑️ Penempatan Tombol Reset Draf di Sebelah Tombol Lanjut & Visibilitas Cerdas Lintas-Step
 - **Tombol Reset Draf di Setiap Langkah Navigasi (Step 1 s.d. Step 4):**

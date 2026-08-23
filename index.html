@@ -928,12 +928,20 @@
             </div>
           </div>
 
-          <!-- Kelompok Filter -->
-          <div class="flex items-center justify-between gap-3 bg-zinc-50 px-3 py-2 rounded-lg border border-zinc-200 text-xs">
-            <label class="font-semibold text-zinc-600 whitespace-nowrap">Filter Kelompok:</label>
-            <select id="rekapGroupFilter" onchange="filterRekapDisplay()" class="text-xs font-medium px-3 py-1.5 rounded-lg border border-zinc-300 bg-white focus:border-zinc-900 outline-none flex-1 max-w-[180px] sm:max-w-none">
-              <option value="ALL">Semua Kelompok</option>
-            </select>
+          <!-- Filter Sesi & Kelompok -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 bg-zinc-50 p-3 rounded-lg border border-zinc-200 text-xs">
+            <div class="flex items-center justify-between sm:justify-start gap-2">
+              <label for="rekapSesiFilter" class="font-semibold text-zinc-600 whitespace-nowrap">Sesi / Minggu:</label>
+              <select id="rekapSesiFilter" onchange="onRekapSesiFilterChange()" class="text-xs font-medium px-3 py-1.5 rounded-lg border border-zinc-300 bg-white focus:border-zinc-900 outline-none flex-1">
+                <option value="ALL">Semua Sesi (Keseluruhan)</option>
+              </select>
+            </div>
+            <div class="flex items-center justify-between sm:justify-start gap-2">
+              <label for="rekapGroupFilter" class="font-semibold text-zinc-600 whitespace-nowrap">Kelompok:</label>
+              <select id="rekapGroupFilter" onchange="filterRekapDisplay()" class="text-xs font-medium px-3 py-1.5 rounded-lg border border-zinc-300 bg-white focus:border-zinc-900 outline-none flex-1">
+                <option value="ALL">Semua Kelompok</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -2629,25 +2637,60 @@
     }
 
     function populateRekapFilter(summaryListParam) {
-      const select = document.getElementById("rekapGroupFilter");
-      if (!select) return;
-      // Gunakan active summary (sesuai role filter) sebagai sumber kelompok
-      const activeSummary = (typeof getActiveRekapSummary === 'function' && currentRekapData)
-        ? getActiveRekapSummary()
-        : (summaryListParam || []);
-      // Kumpulkan semua kelompok unik dari summary ALL agar filter kelompok selalu lengkap
-      const allKelompok = new Set(
-        [...(currentRekapData?.summary || []), ...(currentRekapData?.summaryMhs || [])]
-          .map(i => i.kelompok)
-      );
-      select.innerHTML = '<option value="ALL">Semua Kelompok</option>';
-      Array.from(allKelompok).sort().forEach(kelompok => {
-        const grp = (currentRekapData?.summary || []).find(i => i.kelompok === kelompok);
+      const sesiSelect = document.getElementById("rekapSesiFilter");
+      const groupSelect = document.getElementById("rekapGroupFilter");
+      if (!groupSelect) return;
+
+      const currentSesi = sesiSelect?.value || "ALL";
+      const currentGroup = groupSelect?.value || "ALL";
+
+      // 1. Kumpulkan seluruh sesi dari seluruh sumber (rekap summary, allStudents, groupsData)
+      const allSessions = new Set();
+      (currentRekapData?.summary || []).forEach(g => { if (g.sesi) allSessions.add(g.sesi.trim()); });
+      (currentRekapData?.summaryMhs || []).forEach(g => { if (g.sesi) allSessions.add(g.sesi.trim()); });
+      (allStudentsData || []).forEach(s => { if (s.sesi) allSessions.add(s.sesi.trim()); });
+      (groupsData || []).forEach(g => { if (g.sesi) allSessions.add(g.sesi.trim()); });
+
+      if (sesiSelect) {
+        sesiSelect.innerHTML = '<option value="ALL">Semua Sesi (Keseluruhan)</option>';
+        Array.from(allSessions).sort().forEach(s => {
+          const opt = document.createElement("option");
+          opt.value = s;
+          opt.textContent = s;
+          if (s === currentSesi) opt.selected = true;
+          sesiSelect.appendChild(opt);
+        });
+      }
+
+      // 2. Kumpulkan kelompok (jika filter sesi dipilih, tampilkan kelompok yang relevan atau semua)
+      const selectedSesiVal = sesiSelect?.value || "ALL";
+      const allKelompokMap = new Map(); // kelompok -> sesi
+
+      (currentRekapData?.summary || []).forEach(g => { if (g.kelompok) allKelompokMap.set(g.kelompok, g.sesi || ''); });
+      (currentRekapData?.summaryMhs || []).forEach(g => { if (g.kelompok) allKelompokMap.set(g.kelompok, g.sesi || ''); });
+      (groupsData || []).forEach(g => { if (g.name) allKelompokMap.set(g.name, g.sesi || ''); });
+      (allStudentsData || []).forEach(s => { if (s.kelompok) allKelompokMap.set(s.kelompok, s.sesi || ''); });
+
+      groupSelect.innerHTML = '<option value="ALL">Semua Kelompok</option>';
+      Array.from(allKelompokMap.keys()).sort().forEach(kelompok => {
+        const sesi = allKelompokMap.get(kelompok);
+        if (selectedSesiVal !== "ALL" && sesi && sesi.toLowerCase() !== selectedSesiVal.toLowerCase()) {
+          return; // Lewati kelompok yang berbeda sesi jika filter sesi spesifik aktif
+        }
         const opt = document.createElement("option");
         opt.value = kelompok;
-        opt.textContent = `${kelompok}${grp ? ' (' + grp.sesi + ')' : ''}`;
-        select.appendChild(opt);
+        opt.textContent = `${kelompok}${sesi ? ' (' + sesi + ')' : ''}`;
+        if (kelompok === currentGroup) opt.selected = true;
+        groupSelect.appendChild(opt);
       });
+    }
+
+    function onRekapSesiFilterChange() {
+      // Perbarui dropdown kelompok agar relevan dengan sesi terpilih
+      const groupSelect = document.getElementById("rekapGroupFilter");
+      if (groupSelect) groupSelect.value = "ALL";
+      populateRekapFilter();
+      renderBothRekapViews();
     }
 
     function filterRekapDisplay() {
@@ -2658,36 +2701,46 @@
       const sesiSelect = document.getElementById("presensiSesiFilter");
       const grpSelect = document.getElementById("presensiGroupFilter");
 
-      if (sesiSelect && grpSelect && groupsData && groupsData.length > 0) {
-        const currentSesi = sesiSelect.value || "ALL";
-        const currentGrp = grpSelect.value || "ALL";
+      if (!sesiSelect || !grpSelect) return;
 
-        const sessions = new Set();
-        const groups = new Set();
+      const currentSesi = sesiSelect.value || "ALL";
+      const currentGrp = grpSelect.value || "ALL";
 
-        groupsData.forEach(g => {
-          if (g.sesi) sessions.add(g.sesi);
-          if (g.name) groups.add(g.name);
-        });
+      const sessions = new Set();
+      const groups = new Set();
 
-        sesiSelect.innerHTML = '<option value="ALL">Semua Sesi (Keseluruhan)</option>';
-        Array.from(sessions).sort().forEach(s => {
-          const opt = document.createElement("option");
-          opt.value = s;
-          opt.textContent = s;
-          if (s === currentSesi) opt.selected = true;
-          sesiSelect.appendChild(opt);
-        });
+      (allStudentsData || []).forEach(s => {
+        if (s.sesi) sessions.add(s.sesi.trim());
+        if (s.kelompok) groups.add(s.kelompok.trim());
+      });
 
-        grpSelect.innerHTML = '<option value="ALL">Semua Kelompok</option>';
-        Array.from(groups).sort().forEach(g => {
-          const opt = document.createElement("option");
-          opt.value = g;
-          opt.textContent = g;
-          if (g === currentGrp) opt.selected = true;
-          grpSelect.appendChild(opt);
-        });
-      }
+      (groupsData || []).forEach(g => {
+        if (g.sesi) sessions.add(g.sesi.trim());
+        if (g.name) groups.add(g.name.trim());
+      });
+
+      (currentRekapData?.summary || []).forEach(g => {
+        if (g.sesi) sessions.add(g.sesi.trim());
+        if (g.kelompok) groups.add(g.kelompok.trim());
+      });
+
+      sesiSelect.innerHTML = '<option value="ALL">Semua Sesi (Keseluruhan)</option>';
+      Array.from(sessions).sort().forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = s;
+        opt.textContent = s;
+        if (s === currentSesi) opt.selected = true;
+        sesiSelect.appendChild(opt);
+      });
+
+      grpSelect.innerHTML = '<option value="ALL">Semua Kelompok</option>';
+      Array.from(groups).sort().forEach(g => {
+        const opt = document.createElement("option");
+        opt.value = g;
+        opt.textContent = g;
+        if (g === currentGrp) opt.selected = true;
+        grpSelect.appendChild(opt);
+      });
     }
 
     function filterPresensiDisplay() {
@@ -3103,11 +3156,17 @@
 
     function renderBothRekapViews() {
       if (!currentRekapData) return;
-      const filterVal = document.getElementById("rekapGroupFilter")?.value || "ALL";
+      const sesiFilter = document.getElementById("rekapSesiFilter")?.value || "ALL";
+      const groupFilter = document.getElementById("rekapGroupFilter")?.value || "ALL";
       const activeBase = getActiveRekapSummary();
-      const summaryList = filterVal === "ALL"
-        ? activeBase
-        : activeBase.filter(i => i.kelompok === filterVal);
+      
+      let summaryList = activeBase;
+      if (sesiFilter !== "ALL") {
+        summaryList = summaryList.filter(i => (i.sesi || "").trim().toLowerCase() === sesiFilter.trim().toLowerCase());
+      }
+      if (groupFilter !== "ALL") {
+        summaryList = summaryList.filter(i => i.kelompok === groupFilter);
+      }
 
       renderModernRekapCharts(summaryList);
       renderRekapKelompok(summaryList, currentRekapData.isPublicReviewVisible);
