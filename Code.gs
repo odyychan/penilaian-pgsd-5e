@@ -532,7 +532,7 @@ function submitAssessment(payload) {
 }
 
 /**
- * Mengambil Rekap Nilai
+ * Mengambil Rekap Nilai + Data Status Pengisian Presisi Tinggi
  */
 function getRecapData() {
   try {
@@ -542,9 +542,12 @@ function getRecapData() {
     let masterSheet = getMasterSheet(ss);
 
     const isPublicReviewVisible = (config["Tampilkan_Ulasan_Publik"] || "AKTIF").trim().toUpperCase() === "AKTIF";
+
+    // Batch read sekali untuk seluruh data respons dan master
     const responsData = responsSheet.getLastRow() > 0 ? responsSheet.getDataRange().getValues() : [];
     const masterData = masterSheet.getLastRow() > 0 ? masterSheet.getDataRange().getValues() : [];
 
+    // Build groupMembersMap dari sheet master
     const groupMembersMap = {};
     for (let i = 1; i < masterData.length; i++) {
       const g = String(masterData[i][0] || "").trim();
@@ -555,6 +558,41 @@ function getRecapData() {
         groupMembersMap[g].push({ name: n, nim: nim });
       }
     }
+
+    // === STATUS PENGISIAN: Build submitted NIM & Name sets dari respons sheet langsung ===
+    // Ini adalah sumber kebenaran tunggal (single source of truth) — bukan dari evaluators[]
+    // submittedNims: Set NIM mahasiswa (lowercase) yang punya respons VALID
+    // submittedNames: Set nama penilai (lowercase) mahasiswa yang punya respons VALID (fallback)
+    // submittedNimPerKelompok: Map<nim_lower, Set<kelompok>> — untuk cek apakah submit di kelompok mana
+    const submittedNimSet = new Set();
+    const submittedNameSet = new Set();
+    const nimToKelompokMap = {}; // nim_lower -> [kelompok, ...]
+    const nameToKelompokMap = {}; // namaLower -> [kelompok, ...]
+
+    for (let i = 1; i < responsData.length; i++) {
+      const row = responsData[i];
+      const status = String(row[10] || "VALID").trim().toUpperCase();
+      if (status !== "VALID") continue;
+
+      const peran = String(row[11] || "Mahasiswa").trim();
+      if (peran !== "Mahasiswa") continue; // Hanya mahasiswa yang masuk presensi
+
+      const nim = String(row[12] || "").trim().toLowerCase();
+      const namaLower = String(row[4] || "").trim().toLowerCase();
+      const kelompok = String(row[5] || "").trim();
+
+      if (nim && nim !== "-") {
+        submittedNimSet.add(nim);
+        if (!nimToKelompokMap[nim]) nimToKelompokMap[nim] = [];
+        if (!nimToKelompokMap[nim].includes(kelompok)) nimToKelompokMap[nim].push(kelompok);
+      }
+      if (namaLower) {
+        submittedNameSet.add(namaLower);
+        if (!nameToKelompokMap[namaLower]) nameToKelompokMap[namaLower] = [];
+        if (!nameToKelompokMap[namaLower].includes(kelompok)) nameToKelompokMap[namaLower].push(kelompok);
+      }
+    }
+    // ==================================================================================
 
     const rekapByGroup = {};
 
@@ -647,7 +685,12 @@ function getRecapData() {
       isPublicReviewVisible: isPublicReviewVisible,
       config: config,
       summary: summaryList,
-      groupMembersMap: groupMembersMap
+      groupMembersMap: groupMembersMap,
+      // === DATA PRESENSI PRESISI TINGGI ===
+      submittedNims: Array.from(submittedNimSet),         // NIM mahasiswa yang sudah submit
+      submittedNames: Array.from(submittedNameSet),       // Nama fallback
+      nimToKelompokMap: nimToKelompokMap,                // nim -> [kelompok...]
+      nameToKelompokMap: nameToKelompokMap               // namaLower -> [kelompok...]
     };
   } catch (err) {
     return { success: false, error: err.toString() };
@@ -657,6 +700,7 @@ function getRecapData() {
 /**
  * Menuliskan Rekap ke Sheet
  */
+
 function generateRekapSheet() {
   const ss = getSpreadsheet();
   let sheetRekap = ss.getSheetByName(SHEET_REKAP);

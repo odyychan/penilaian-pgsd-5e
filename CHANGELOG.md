@@ -4,7 +4,25 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.18] - 2026-08-23
+
+### 🔄 Sinkronisasi Status Pengisian 100% Real-Time 2-Way (Presisi Tinggi)
+- **Single Source of Truth — Backend ke Frontend:**
+  - `getRecapData()` di [`Code.gs`](file:///e:/Data/GitHub/Project%20Dede/Code.gs) kini mengembalikan field baru: `submittedNims` (Set NIM valid), `submittedNames` (Set nama valid), `nimToKelompokMap`, dan `nameToKelompokMap`, semua diekstrak **langsung dari sheet respons** — bukan dari `evaluators[]`.
+  - Eliminasi bug false-positive: `evaluasiList` (nama pemateri) tidak lagi dipakai sebagai proxy data penilai.
+- **Frontend `renderRekapPresensi()` Direfactor Sepenuhnya:**
+  - Status Sudah/Belum Mengisi kini dicocokkan via **NIM sebagai prioritas utama** (unik & presisi), lalu fallback nama hanya jika NIM tidak tersedia.
+  - Roster mahasiswa kini menggunakan `allStudentsData` (master real-time dari backend) sebagai prioritas, bukan hanya `groupsData`.
+  - Penghapusan duplikat roster via `seenNimInRoster` Set — mahasiswa yang sama tidak tampil dua kali walau ada di beberapa kelompok.
+  - Sub-info **"menilai: Kelompok X"** ditampilkan di bawah nama mahasiswa yang sudah mengisi, menunjukkan kelompok mana yang dinilai.
+  - Dosen & Tamu dirender dari `evaluators[]` secara terpisah — tidak mencampur dengan data presensi mahasiswa.
+- **Fallback Backward Compatible:**
+  - Jika backend lama (belum re-deploy) tidak mengembalikan `submittedNims`, frontend otomatis fallback ke `evaluators[]` untuk kompatibilitas.
+
+---
+
 ## [2.1.17] - 2026-08-23
+
 
 ### 🐛 Perbaikan Error Kritis Pengiriman Penilaian & Optimasi Kinerja Backend
 - **Fix Error `ReferenceError: sesi is not defined`:**

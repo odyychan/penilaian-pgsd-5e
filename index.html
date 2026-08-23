@@ -2565,100 +2565,95 @@
       const statusFilter = document.getElementById("presensiStatusFilter")?.value || "ALL";
       const searchQuery = (document.getElementById("presensiSearchInput")?.value || "").trim().toLowerCase();
 
-      // 1. Kumpulkan seluruh mahasiswa dari seluruh kelompok di groupsData
-      const allClassStudents = [];
-      if (groupsData && groupsData.length > 0) {
-        groupsData.forEach(g => {
-          (g.members || []).forEach(m => {
-            allClassStudents.push({
-              name: m.name || "",
-              nim: m.nim || "",
-              kelompok: g.name || "",
-              sesi: g.sesi || "Minggu 1"
-            });
+      // === SUMBER KEBENARAN TUNGGAL (Single Source of Truth) ===
+      // Gunakan submittedNims & submittedNames dari backend (data sheet langsung)
+      // Bukan dari evaluators[] yang bisa double-count atau salah scope
+      const submittedNimSet = new Set(
+        (currentRekapData?.submittedNims || []).map(n => String(n).trim().toLowerCase())
+      );
+      const submittedNameSet = new Set(
+        (currentRekapData?.submittedNames || []).map(n => String(n).trim().toLowerCase())
+      );
+      const nimToKelompokMap = currentRekapData?.nimToKelompokMap || {};
+      const nameToKelompokMap = currentRekapData?.nameToKelompokMap || {};
+
+      // Fallback: jika backend belum di-deploy dengan field baru, gunakan evaluators[]
+      const hasNewFields = currentRekapData?.submittedNims !== undefined;
+      if (!hasNewFields && currentRekapData?.summary) {
+        currentRekapData.summary.forEach(g => {
+          (g.evaluators || []).forEach(e => {
+            if (!e || typeof e !== 'object') return;
+            if ((e.peran || 'Mahasiswa') !== 'Mahasiswa') return;
+            const nim = String(e.nim || '').trim().toLowerCase();
+            const nama = String(e.name || '').trim().toLowerCase();
+            if (nim && nim !== '-') submittedNimSet.add(nim);
+            if (nama) submittedNameSet.add(nama);
           });
         });
       }
 
-      // 2. Kumpulkan evaluators map & penilai Dosen/Tamu
-      const submittedMhsNimMap = new Map(); // clean NIM -> count
-      const submittedMhsNameMap = new Map(); // clean lowercase name -> count
-      const dosenGuestEvaluators = [];
+      // 1. Kumpulkan seluruh mahasiswa dari SEMUA kelompok (gunakan allStudentsData jika ada)
+      const allClassStudents = [];
+      const seenNimInRoster = new Set();
 
-      if (currentRekapData && currentRekapData.summary) {
-        currentRekapData.summary.forEach(g => {
-          if (g.evaluators && Array.isArray(g.evaluators)) {
-            g.evaluators.forEach(e => {
-              if (!e || e === "Anonim") return;
-              
-              if (typeof e === 'object') {
-                const ePeran = e.peran || 'Mahasiswa';
-                const eName = (e.name || "").trim();
-                const eNim = (e.nim || "").trim();
-
-                if (ePeran === 'Mahasiswa') {
-                  if (eNim && eNim !== "-") {
-                    submittedMhsNimMap.set(eNim.toLowerCase(), (submittedMhsNimMap.get(eNim.toLowerCase()) || 0) + 1);
-                  }
-                  if (eName) {
-                    submittedMhsNameMap.set(eName.toLowerCase(), (submittedMhsNameMap.get(eName.toLowerCase()) || 0) + 1);
-                  }
-                } else {
-                  // Dosen atau Lainnya
-                  const exist = dosenGuestEvaluators.find(x => x.name === eName && x.kelompok === g.kelompok);
-                  if (!exist) {
-                    dosenGuestEvaluators.push({
-                      name: eName,
-                      peran: ePeran,
-                      kelompok: g.kelompok,
-                      sesi: e.sesi || g.sesi
-                    });
-                  }
-                }
-              } else if (typeof e === 'string') {
-                // Legacy string format
-                const norm = e.trim().toLowerCase();
-                submittedMhsNameMap.set(norm, (submittedMhsNameMap.get(norm) || 0) + 1);
-              }
-            });
-          }
-
-          if (g.evaluasiList) {
-            Object.keys(g.evaluasiList).forEach(mName => {
-              (g.evaluasiList[mName] || []).forEach(rev => {
-                if (rev.penilai && rev.penilai !== "Anonim") {
-                  const norm = rev.penilai.trim().toLowerCase();
-                  if (!submittedMhsNameMap.has(norm)) {
-                    submittedMhsNameMap.set(norm, 1);
-                  }
-                }
-              });
-            });
-          }
+      // Prioritas: allStudentsData (master roster real-time dari backend)
+      if (allStudentsData && allStudentsData.length > 0) {
+        allStudentsData.forEach(s => {
+          const nim = String(s.nim || "").trim();
+          const name = String(s.name || "").trim();
+          const grp = String(s.kelompok || "").trim();
+          const sesi = String(s.sesi || "Minggu 1").trim();
+          if (!name) return;
+          const key = nim ? nim.toLowerCase() : name.toLowerCase() + "|" + grp;
+          if (seenNimInRoster.has(key)) return;
+          seenNimInRoster.add(key);
+          allClassStudents.push({ name, nim, kelompok: grp, sesi });
+        });
+      } else if (groupsData && groupsData.length > 0) {
+        // Fallback ke groupsData
+        groupsData.forEach(g => {
+          (g.members || []).forEach(m => {
+            const name = String(m.name || "").trim();
+            const nim = String(m.nim || "").trim();
+            const grp = String(g.name || "").trim();
+            const sesi = String(g.sesi || "Minggu 1").trim();
+            if (!name) return;
+            const key = nim ? nim.toLowerCase() : name.toLowerCase() + "|" + grp;
+            if (seenNimInRoster.has(key)) return;
+            seenNimInRoster.add(key);
+            allClassStudents.push({ name, nim, kelompok: grp, sesi });
+          });
         });
       }
 
-      // 3. Mapping data presensi mahasiswa kelas
+      // 2. Tentukan status setiap mahasiswa secara presisi
       const studentPresensiList = allClassStudents.map(student => {
-        const normName = student.name.trim().toLowerCase();
-        const normNim = (student.nim || "").trim().toLowerCase();
-        
-        const hasFilledByNim = normNim && normNim !== "-" && submittedMhsNimMap.has(normNim);
-        const hasFilledByName = submittedMhsNameMap.has(normName);
-        const hasFilled = Boolean(hasFilledByNim || hasFilledByName);
-        const count = (normNim && submittedMhsNimMap.get(normNim)) || submittedMhsNameMap.get(normName) || 0;
+        const normNim = String(student.nim || "").trim().toLowerCase();
+        const normName = String(student.name || "").trim().toLowerCase();
+
+        // Prioritas: cek NIM dulu (unik & presisi), baru fallback nama
+        let hasFilled = false;
+        let filledKelompok = [];
+
+        if (normNim && normNim !== "-" && submittedNimSet.has(normNim)) {
+          hasFilled = true;
+          filledKelompok = nimToKelompokMap[normNim] || [];
+        } else if (submittedNameSet.has(normName)) {
+          hasFilled = true;
+          filledKelompok = nameToKelompokMap[normName] || [];
+        }
 
         return {
           name: student.name,
           nim: student.nim || "-",
           kelompok: student.kelompok,
           sesi: student.sesi,
-          hasFilled: hasFilled,
-          count: count
+          hasFilled,
+          filledKelompok
         };
       });
 
-      // Hitung statistik kelas keseluruhan (sesuai filter sesi/kelompok aktif)
+      // 3. Statistik berdasarkan filter sesi/kelompok
       const baseScopeList = studentPresensiList.filter(s => {
         if (sesiFilter !== "ALL" && s.sesi !== sesiFilter) return false;
         if (grpFilter !== "ALL" && s.kelompok !== grpFilter) return false;
@@ -2675,11 +2670,10 @@
       if (sudahMhsBadge) sudahMhsBadge.textContent = `${totalSudah} (${pctSudah}%)`;
       if (belumMhsBadge) belumMhsBadge.textContent = `${totalBelum} (${pctBelum}%)`;
 
-      // Filter daftar tabel berdasarkan statusFilter dan searchQuery
+      // 4. Filter tabel
       const filteredList = baseScopeList.filter(s => {
         if (statusFilter === "SUDAH" && !s.hasFilled) return false;
         if (statusFilter === "BELUM" && s.hasFilled) return false;
-
         if (searchQuery) {
           const matchName = s.name.toLowerCase().includes(searchQuery);
           const matchNim = s.nim.toLowerCase().includes(searchQuery);
@@ -2707,11 +2701,16 @@
             ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300"><span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>Sudah Mengisi</span>`
             : `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-900 border border-amber-300"><span class="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse"></span>Belum Mengisi</span>`;
 
+          const kelompokNilaiLabel = s.hasFilled && s.filledKelompok.length > 0
+            ? `<span class="block text-[10px] text-emerald-700 font-mono mt-0.5">menilai: ${s.filledKelompok.join(', ')}</span>`
+            : '';
+
           return `
             <tr class="hover:bg-zinc-50/80 transition text-zinc-800 ${idx % 2 === 1 ? 'bg-zinc-50/40' : ''}">
               <td class="py-3 px-3 text-center font-mono text-zinc-400 text-[11px]">${idx + 1}</td>
               <td class="py-3 px-3 font-semibold text-zinc-900">
                 ${s.name}
+                ${kelompokNilaiLabel}
               </td>
               <td class="py-3 px-3 font-mono text-zinc-500 text-[11px]">
                 ${s.nim}
@@ -2730,7 +2729,28 @@
         }).join("");
       }
 
-      // 4. Render Dosen & Guest section
+      // 5. Render Dosen & Guest section (dari evaluators[] saja — bukan presensi mahasiswa)
+      const dosenGuestEvaluators = [];
+      if (currentRekapData?.summary) {
+        currentRekapData.summary.forEach(g => {
+          (g.evaluators || []).forEach(e => {
+            if (!e || typeof e !== 'object') return;
+            const ePeran = e.peran || 'Mahasiswa';
+            if (ePeran === 'Mahasiswa') return;
+            const eName = (e.name || "").trim();
+            const exist = dosenGuestEvaluators.find(x => x.name === eName && x.kelompok === g.kelompok);
+            if (!exist) {
+              dosenGuestEvaluators.push({
+                name: eName,
+                peran: ePeran,
+                kelompok: g.kelompok,
+                sesi: e.sesi || g.sesi
+              });
+            }
+          });
+        });
+      }
+
       if (dosenGuestSection && dosenGuestListEl) {
         if (dosenGuestEvaluators.length > 0) {
           dosenGuestSection.classList.remove("hidden");
