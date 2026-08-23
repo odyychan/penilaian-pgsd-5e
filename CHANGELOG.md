@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.56] - 2026-08-23
+
+### 🏛️ Penerapan Font Times New Roman pada Judul Laporan & Metadata
+- **Harmonisasi Tipografi Naskah Dinas (*Official Document Typography*):**
+  - Mengubah jenis font pada judul *"LAPORAN REKAPITULASI HASIL PENILAIAN PRESENTASI"* dan blok metadata mata kuliah (*Mata Kuliah, Kelas/Semester, Dosen Pengampu, Cakupan Sesi*) menjadi keluarga huruf `'Times New Roman', Times, serif`.
+  - Menciptakan keselarasan visual yang anggun dan formal dengan Kop Surat resmi Kementerian & Universitas Lambung Mangkurat di bagian atas.
+- **Sinkronisasi Dwikanal:**
+  - Diterapkan secara identik pada modul cetak mahasiswa (`index.html`) dan portal pengelola admin (`admin.html`).
+
+---
+
 ## [2.1.55] - 2026-08-23
 
 ### 🎨 Pembersihan Kontainer Logo & Penyelarasan Transparansi Ikon
