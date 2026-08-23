@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.40] - 2026-08-23
+
+### 🖨️ Presisi Margin & Standardisasi Dokumen Cetak / PDF Resmi A4
+- **Standardisasi Margin Halaman (@page 10mm 12mm 10mm 12mm):**
+  - Menyelaraskan margin cetak standar akademik resmi A4 (`@page { margin: 10mm 12mm 10mm 12mm; }`) pada `index.html` dan `admin.html` agar tidak terjadi pergeseran atau perbedaan ruang tepi antara preview modal dengan dialog cetak browser.
+  - Memperbaiki padding lembar pratinjau (*virtual report canvas*) menjadi proporsional (`padding: 36px 44px`), sehingga tampilan layar dan hasil cetak PDF fisik memiliki rasio dan margin yang 100% simetris (*1:1 parity*).
+- **Penyelarasan Header Kolom:**
+  - Menyelaraskan header kolom tabel rekap cetak menjadi **Presentator Terbaik** agar konsisten di seluruh aplikasi.
+
+---
+
 ## [2.1.39] - 2026-08-23
 
 ### ✨ Penyempurnaan Tipografi & Redaksi Minimalis Profesional pada Visual Chart
