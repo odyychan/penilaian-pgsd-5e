@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.60] - 2026-08-23
+
+### 🎯 Penyelarasan Rata Tengah Sel Total Kelompok Terdaftar
+- **Penyelarasan Sel Ringkasan (*Summary Cell Center Alignment*):**
+  - Mengatur perataan `text-align: center; vertical-align: middle;` pada sel *"Total X Kelompok Terdaftar"* di baris ringkasan Tabel Rekapitulasi Nilai.
+  - Memastikan keselarasan dan simetri visual 100% pada seluruh kolom baris ringkasan tabel.
+- **Sinkronisasi Dwikanal:**
+  - Diterapkan pada `index.html` dan `admin.html`.
+
+---
+
 ## [2.1.59] - 2026-08-23
 
 ### 📊 Penyelarasan Teks & Rata Tengah Sel Rata-Rata Keseluruhan Kelas
