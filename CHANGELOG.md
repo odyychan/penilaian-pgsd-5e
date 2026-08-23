@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.41] - 2026-08-23
+
+### 📑 Harmonisasi Proporsi Kop Surat & Redaksi Ulasan Evaluasi Mahasiswa
+- **Pembersihan Tipografi Nama Pemateri di Bagian B:**
+  - Menghilangkan bullet (`•`) pada nama pemateri sehingga langsung menampilkan nama secara bersih dan minimalis (*e.g. Siti Nurhaliza*), dilengkapi badge jumlah masukan (*e.g. 2 Masukan*) di sisi kanan header kartu.
+  - Bullet (`•`) kini hanya disematkan pada setiap butir kutipan masukan/ulasan.
+- **Pencantuman Identitas Penilai (Author Attribution):**
+  - Setiap butir ulasan pada dokumen cetak kini dilengkapi nama mahasiswa pengirim ulasan (*e.g. "Penjelasan sangat runtut dan jelas" — Ahmad Fauzi*).
+- **Harmonisasi Proporsi Kop Surat & Logo ULM:**
+  - Menyeimbangkan ukuran logo ULM menjadi `82×82 px` dengan cell penyeimbang simetris `88px` di sisi kiri dan kanan, sehingga teks kementerian dan universitas berada tepat di tengah (*center-aligned balance*).
+  - Merapikan ketebalan garis ganda pembatas kop (*double-line border*) standar dinas resmi.
+
+---
+
 ## [2.1.40] - 2026-08-23
 
 ### 🖨️ Presisi Margin & Standardisasi Dokumen Cetak / PDF Resmi A4

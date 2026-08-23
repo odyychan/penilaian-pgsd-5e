@@ -2971,7 +2971,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         if (g.totalPenilai > 0) {
           totalAllScore += parseFloat(g.rataRata);
           totalAllPenilai += g.totalPenilai;
-          evaluatedCount++;
+      evaluatedCount++;
         }
       });
       const avgClassScore = evaluatedCount > 0 ? (totalAllScore / evaluatedCount).toFixed(2) : "0.00";
@@ -2982,23 +2982,23 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         <table style="width: 100%; border-collapse: collapse; border: none; margin: 0 0 2px 0; padding: 0; table-layout: fixed;">
           <tbody>
             <tr style="border: none;">
-              <td style="width: 80px; min-width: 80px; max-width: 80px; vertical-align: middle; text-align: center; border: none; padding: 0 6px 0 0;">
-                <img src="assets/logo-ulm.png" alt="Logo ULM" style="width: 76px; height: 76px; object-fit: contain; display: block; margin: 0 auto;" onerror="this.src='logo-ulm.png'" />
+              <td style="width: 88px; min-width: 88px; max-width: 88px; vertical-align: middle; text-align: center; border: none; padding: 0 8px 0 0;">
+                <img src="assets/logo-ulm.png" alt="Logo ULM" style="width: 82px; height: 82px; object-fit: contain; display: block; margin: 0 auto;" onerror="this.src='logo-ulm.png'" />
               </td>
-              <td style="text-align: center; vertical-align: middle; border: none; padding: 0 4px; font-family: 'Times New Roman', Times, serif; color: #000000;">
-                <div style="font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1.15;">KEMENTERIAN PENDIDIKAN TINGGI, SAINS, DAN TEKNOLOGI</div>
-                <div style="font-size: 16px; font-weight: 900; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1.2; margin-top: 2px;">UNIVERSITAS LAMBUNG MANGKURAT</div>
-                <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1.15; margin-top: 1.5px;">FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN</div>
-                <div style="font-size: 13px; font-weight: 700; text-transform: uppercase; line-height: 1.2; margin-top: 1.5px;">PROGRAM STUDI PENDIDIKAN GURU SEKOLAH DASAR (PGSD) - KELAS ${kelas}</div>
-                <div style="font-size: 10px; color: #374151; line-height: 1.2; margin-top: 2.5px; font-style: italic;">Jl. Brigjen H. Hasan Basry, Kayu Tangi, Banjarmasin, Kalimantan Selatan 70123 • Laman: fkip.ulm.ac.id</div>
+              <td style="text-align: center; vertical-align: middle; border: none; padding: 0 2px; font-family: 'Times New Roman', Times, serif; color: #000000;">
+                <div style="font-size: 12.5px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; line-height: 1.2;">KEMENTERIAN PENDIDIKAN TINGGI, SAINS, DAN TEKNOLOGI</div>
+                <div style="font-size: 15.5px; font-weight: 900; letter-spacing: 0.03em; text-transform: uppercase; line-height: 1.25; margin-top: 1.5px;">UNIVERSITAS LAMBUNG MANGKURAT</div>
+                <div style="font-size: 13.5px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1.2; margin-top: 1.5px;">FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN</div>
+                <div style="font-size: 12.5px; font-weight: 700; text-transform: uppercase; line-height: 1.2; margin-top: 1px;">PROGRAM STUDI PENDIDIKAN GURU SEKOLAH DASAR (PGSD) - KELAS ${kelas}</div>
+                <div style="font-size: 9.5px; color: #374151; line-height: 1.2; margin-top: 3px; font-style: italic;">Jl. Brigjen H. Hasan Basry, Kayu Tangi, Banjarmasin, Kalimantan Selatan 70123 • Laman: fkip.ulm.ac.id</div>
               </td>
-              <td style="width: 80px; min-width: 80px; max-width: 80px; border: none; padding: 0;"></td>
+              <td style="width: 88px; min-width: 88px; max-width: 88px; border: none; padding: 0;"></td>
             </tr>
           </tbody>
         </table>
 
         <!-- GARIS PEMBATAS KOP RESMI DINAS (DOUBLE LINE TEBAL & TIPIS) -->
-        <div style="border-top: 3px solid #000000; border-bottom: 1px solid #000000; height: 3.5px; margin: 3px 0 12px 0;"></div>
+        <div style="border-top: 2.5px solid #000000; border-bottom: 0.75px solid #000000; height: 2px; margin: 3px 0 10px 0;"></div>
 
         <!-- JUDUL LAPORAN & METADATA -->
         <div style="text-align: center; margin-bottom: 12px;">
@@ -3060,19 +3060,22 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           </tr>
         `;
       } else {
-        const sorted = [...summaryList].sort((a, b) => parseFloat(b.rataRata || 0) - parseFloat(a.rataRata || 0));
+        // Sort by average score descending
+        const sorted = [...summaryList].sort((a, b) => parseFloat(b.rataRataSkor || b.rataRata || 0) - parseFloat(a.rataRataSkor || a.rataRata || 0));
         sorted.forEach((g, idx) => {
-          const scoreNum = parseFloat(g.rataRata || 0);
+          const scoreNum = parseFloat(g.rataRataSkor || g.rataRata || 0);
+          const totalP = parseInt(g.totalPenilai) || 0;
           let predikat = "-";
-          if (g.totalPenilai > 0) {
+          if (totalP > 0) {
             if (scoreNum >= 85) predikat = "Sangat Baik (A)";
             else if (scoreNum >= 75) predikat = "Baik (B+)";
             else if (scoreNum >= 65) predikat = "Cukup (B)";
             else predikat = "Kurang (C)";
           }
 
-          const topPresentersText = (g.topPresentator && g.topPresentator.length > 0)
-            ? g.topPresentator.map(p => `${p.name}&nbsp;(${p.votes}&nbsp;Suara)`).join(", ")
+          const presenters = g.rankedPresenters || g.topPresentator || [];
+          const topPresentersText = (presenters.length > 0)
+            ? presenters.map(p => `${p.name}&nbsp;(${p.votes}&nbsp;Suara)`).join(", ")
             : "-";
 
           html += `
@@ -3080,8 +3083,8 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
               <td style="padding: 6.5px 4px; border: 1px solid #000000; text-align: center; font-weight: bold; font-family: monospace; font-size: 12px;">#${idx + 1}</td>
               <td style="padding: 6.5px 8px; border: 1px solid #000000; font-weight: bold; color: #000000; font-size: 12px;">${g.kelompok}</td>
               <td style="padding: 6.5px 6px; border: 1px solid #000000; text-align: center; font-size: 12px;">${g.sesi || 'Minggu 1'}</td>
-              <td style="padding: 6.5px 6px; border: 1px solid #000000; text-align: center; font-family: monospace; font-size: 12px;">${g.totalPenilai || 0}</td>
-              <td style="padding: 6.5px 6px; border: 1px solid #000000; text-align: center; font-weight: bold; font-family: monospace; color: #000000; font-size: 12px;">${g.totalPenilai > 0 ? g.rataRata : '-'}</td>
+              <td style="padding: 6.5px 6px; border: 1px solid #000000; text-align: center; font-family: monospace; font-size: 12px;">${totalP}</td>
+              <td style="padding: 6.5px 6px; border: 1px solid #000000; text-align: center; font-weight: bold; font-family: monospace; color: #000000; font-size: 12px;">${totalP > 0 ? scoreNum.toFixed(2) : '-'}</td>
               <td style="padding: 6.5px 8px; border: 1px solid #000000; color: #000000; font-size: 12px;">${topPresentersText}</td>
               <td style="padding: 6.5px 6px; border: 1px solid #000000; text-align: center; font-weight: 600; font-size: 12px;">${predikat}</td>
             </tr>
@@ -3108,13 +3111,13 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
       // 2. BAGIAN EVALUASI KUALITATIF JIKA DICENTANG
       if (includeReviews && summaryList.length > 0) {
-        let hasAnyReviews = false;
         let reviewHtml = `
           <div class="my-3 space-y-2">
             <h4 class="font-bold uppercase tracking-wider text-zinc-950" style="font-size: 12px; font-weight: 800;">
               B. Rangkuman Catatan Evaluasi Masukan Mahasiswa
             </h4>
         `;
+        let hasAnyReviews = false;
 
         summaryList.forEach(g => {
           const evalList = g.evaluasiList || {};
@@ -3135,11 +3138,19 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
               const reviews = evalList[name] || [];
               if (reviews.length > 0) {
                 reviewHtml += `
-                  <div class="p-2.5 rounded bg-white border border-zinc-200 space-y-1 shadow-2xs" style="page-break-inside: avoid; break-inside: avoid; border: 1px solid #e5e7eb; border-radius: 4px; padding: 8px 10px;">
-                    <span class="font-bold text-zinc-900 block" style="font-size: 12px; font-weight: 700;">• ${name} <span style="font-size: 11px; font-weight: normal; color: #6b7280;">(${reviews.length} masukan)</span>:</span>
-                    <ul class="list-disc list-inside space-y-1 text-zinc-800 pl-1" style="font-size: 12px; line-height: 1.35;">
-                      ${reviews.slice(0, 3).map(r => `<li class="italic leading-snug">"${r.ulasan}"</li>`).join("")}
-                      ${reviews.length > 3 ? `<li class="text-zinc-400" style="font-size: 10.5px;">...dan ${reviews.length - 3} catatan lainnya.</li>` : ''}
+                  <div class="p-2.5 rounded bg-white border border-zinc-200 shadow-2xs" style="page-break-inside: avoid; break-inside: avoid; border: 1px solid #e5e7eb; border-radius: 4px; padding: 8px 10px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px dashed #e5e7eb; padding-bottom: 3px; margin-bottom: 5px;">
+                      <span style="font-size: 11.5px; font-weight: 700; color: #111827;">${name}</span>
+                      <span style="font-size: 10px; font-weight: 600; color: #4b5563; font-family: monospace; background: #f3f4f6; padding: 1px 6px; border-radius: 4px;">${reviews.length} Masukan</span>
+                    </div>
+                    <ul style="list-style-type: disc; padding-left: 16px; margin: 0; font-size: 11px; line-height: 1.4; color: #1f2937;">
+                      ${reviews.slice(0, 4).map(r => `
+                        <li style="margin-bottom: 4px;">
+                          <span style="font-style: italic; color: #111827;">"${r.ulasan}"</span>
+                          <span style="font-size: 9.5px; color: #4b5563; font-weight: 600; font-style: normal; margin-left: 4px;">— ${r.penilai || 'Penilai'}</span>
+                        </li>
+                      `).join("")}
+                      ${reviews.length > 4 ? `<li style="list-style: none; font-size: 10px; color: #6b7280; font-style: italic; margin-top: 2px; padding-left: 0;">+ ${reviews.length - 4} catatan masukan lainnya...</li>` : ''}
                     </ul>
                   </div>
                 `;
