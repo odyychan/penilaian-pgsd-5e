@@ -996,22 +996,23 @@
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             <div>
               <label for="presensiPresentatorFilter" class="block font-semibold text-zinc-700 mb-1 text-[11px]">Presentator:</label>
-              <select id="presensiPresentatorFilter" onchange="filterPresensiDisplay()" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-medium focus:border-zinc-900 outline-none">
+              <select id="presensiPresentatorFilter" onchange="onPresensiPresentatorFilterChange()" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-medium focus:border-zinc-900 outline-none cursor-pointer">
                 <option value="ALL">Semua Presentator</option>
               </select>
             </div>
             <div>
               <label for="presensiGroupFilter" class="block font-semibold text-zinc-700 mb-1 text-[11px]">Kelompok Asal:</label>
-              <select id="presensiGroupFilter" onchange="filterPresensiDisplay()" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-medium focus:border-zinc-900 outline-none">
+              <select id="presensiGroupFilter" onchange="filterPresensiDisplay()" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-medium focus:border-zinc-900 outline-none cursor-pointer">
                 <option value="ALL">Semua Kelompok Asal</option>
               </select>
             </div>
             <div>
               <label for="presensiStatusFilter" class="block font-semibold text-zinc-700 mb-1 text-[11px]">Status Pengisian:</label>
-              <select id="presensiStatusFilter" onchange="filterPresensiDisplay()" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-medium focus:border-zinc-900 outline-none">
-                <option value="ALL">Semua Status (Sudah & Belum)</option>
-                <option value="SUDAH">Sudah Mengisi Form</option>
-                <option value="BELUM">Belum Mengisi Form</option>
+              <select id="presensiStatusFilter" onchange="filterPresensiDisplay()" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-medium focus:border-zinc-900 outline-none cursor-pointer">
+                <option value="ALL">Semua Status (Lengkap, Sebagian, Belum)</option>
+                <option value="LENGKAP">Lengkap (Semua Kelompok Dinilai)</option>
+                <option value="SEBAGIAN">Sebagian (Belum Lengkap)</option>
+                <option value="BELUM">Belum Mengisi (0 Kelompok)</option>
               </select>
             </div>
           </div>
@@ -1074,38 +1075,56 @@
 
         <!-- Container Rekap 3: STATUS PENGISIAN PRESENSI MAHASISWA -->
         <div id="rekapPresensiContainer" class="space-y-4 hidden">
-          <!-- Stat Summary Badges -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 flex items-center justify-between">
+          <!-- Stat Summary Badges (Responsive 4-Cards Grid) -->
+          <div id="presensiStatGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+            <!-- Card 1: Total -->
+            <div class="p-3 sm:p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 flex items-center justify-between">
               <div>
-                <span class="text-[11px] font-medium text-zinc-500 block">Total Mahasiswa Kelas</span>
-                <span id="presensiTotalMhs" class="text-base sm:text-lg font-bold font-mono text-zinc-900">0</span>
+                <span id="presensiCardTitle1" class="text-[10px] sm:text-[11px] font-medium text-zinc-500 block">Total Mahasiswa</span>
+                <span id="presensiTotalMhs" class="text-sm sm:text-base lg:text-lg font-bold font-mono text-zinc-900">0</span>
               </div>
-              <span class="p-2 rounded-lg bg-zinc-200/60 text-zinc-700 flex items-center justify-center">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <span class="p-1.5 sm:p-2 rounded-lg bg-zinc-200/60 text-zinc-700 shrink-0">
+                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                 </svg>
               </span>
             </div>
-            <div class="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200 flex items-center justify-between">
+
+            <!-- Card 2: Lengkap / Sudah -->
+            <div id="presensiCard2Box" class="p-3 sm:p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200 flex items-center justify-between">
               <div>
-                <span class="text-[11px] font-medium text-emerald-700 block">Sudah Mengisi Form</span>
-                <span id="presensiSudahMhs" class="text-base sm:text-lg font-bold font-mono text-emerald-800">0 (0%)</span>
+                <span id="presensiCardTitle2" class="text-[10px] sm:text-[11px] font-medium text-emerald-700 block">Lengkap (Semua Selesai)</span>
+                <span id="presensiSudahMhs" class="text-sm sm:text-base lg:text-lg font-bold font-mono text-emerald-800">0 (0%)</span>
               </div>
-              <span class="p-2 rounded-lg bg-emerald-200/60 text-emerald-800 flex items-center justify-center">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <span class="p-1.5 sm:p-2 rounded-lg bg-emerald-200/60 text-emerald-800 shrink-0">
+                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
                 </svg>
               </span>
             </div>
-            <div class="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 flex items-center justify-between">
+
+            <!-- Card 3: Sebagian / Belum Menilai -->
+            <div id="presensiCard3Box" class="p-3 sm:p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 flex items-center justify-between">
               <div>
-                <span class="text-[11px] font-medium text-amber-700 block">Belum Mengisi Form</span>
-                <span id="presensiBelumMhs" class="text-base sm:text-lg font-bold font-mono text-amber-800">0 (0%)</span>
+                <span id="presensiCardTitle3" class="text-[10px] sm:text-[11px] font-medium text-amber-700 block">Sebagian (Kurang)</span>
+                <span id="presensiSebagianMhs" class="text-sm sm:text-base lg:text-lg font-bold font-mono text-amber-800">0 (0%)</span>
               </div>
-              <span class="p-2 rounded-lg bg-amber-200/60 text-amber-800 flex items-center justify-center">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <span class="p-1.5 sm:p-2 rounded-lg bg-amber-200/60 text-amber-800 shrink-0">
+                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </span>
+            </div>
+
+            <!-- Card 4: Belum Mengisi / Penyaji -->
+            <div id="presensiCard4Box" class="p-3 sm:p-3.5 rounded-xl bg-rose-50/70 border border-rose-200 flex items-center justify-between">
+              <div>
+                <span id="presensiCardTitle4" class="text-[10px] sm:text-[11px] font-medium text-rose-700 block">Belum Mengisi</span>
+                <span id="presensiBelumMhs" class="text-sm sm:text-base lg:text-lg font-bold font-mono text-rose-800">0 (0%)</span>
+              </div>
+              <span id="presensiCard4Icon" class="p-1.5 sm:p-2 rounded-lg bg-rose-200/60 text-rose-800 shrink-0">
+                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
               </span>
             </div>
@@ -1113,20 +1132,22 @@
 
           <!-- Presensi Table Box -->
           <div class="bg-white rounded-xl border border-zinc-200 overflow-hidden shadow-2xs">
-            <div class="px-4 py-3 border-b border-zinc-200/80 bg-zinc-50/50 flex items-center justify-between">
-              <span class="font-bold text-xs text-zinc-900 uppercase tracking-wider font-mono">Daftar Status Pengisian Penilaian</span>
-              <span id="presensiFilterResultCount" class="text-[11px] font-mono text-zinc-500">0 Mahasiswa</span>
+            <div class="px-4 py-3 border-b border-zinc-200/80 bg-zinc-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <span class="font-bold text-xs text-zinc-900 uppercase tracking-wider font-mono">Daftar Status Pengisian Penilaian</span>
+                <p class="text-[11px] text-zinc-500 mt-0.5">Pantau kepatuhan dan rincian pengisian formulir peer-assessment tiap mahasiswa.</p>
+              </div>
+              <span id="presensiFilterResultCount" class="text-[11px] font-mono font-semibold px-2.5 py-1 rounded-md bg-white border border-zinc-200 text-zinc-700 self-start sm:self-auto">0 Mahasiswa</span>
             </div>
             <div class="overflow-x-auto">
               <table class="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr class="bg-zinc-100/70 border-b border-zinc-200 text-zinc-700 font-semibold">
-                    <th class="py-2.5 px-3 w-12 text-center">#</th>
-                    <th class="py-2.5 px-3">Nama Mahasiswa</th>
-                    <th class="py-2.5 px-3 w-32">NIM</th>
-                    <th class="py-2.5 px-3 w-36">Kelompok Asal</th>
-                    <th class="py-2.5 px-3 w-44">Kelompok Dinilai</th>
-                    <th class="py-2.5 px-3 w-36 text-center">Status Pengisian</th>
+                    <th class="py-2.5 px-3 w-10 text-center">#</th>
+                    <th class="py-2.5 px-3 min-w-[170px]">Mahasiswa & NIM</th>
+                    <th class="py-2.5 px-3 w-32">Kelompok Asal</th>
+                    <th class="py-2.5 px-3 min-w-[220px]">Rincian Penilaian Kelompok</th>
+                    <th class="py-2.5 px-3 w-40 text-center">Status Akhir</th>
                   </tr>
                 </thead>
                 <tbody id="presensiTableBody" class="divide-y divide-zinc-100">
@@ -2789,6 +2810,9 @@
       renderBothRekapViews();
     }
 
+    // =========================================================================
+    // KONTROL & FILTER TAB STATUS PENGISIAN PRESENSI MAHASISWA
+    // =========================================================================
     function populatePresensiFilters() {
       const presSelect = document.getElementById("presensiPresentatorFilter");
       const grpSelect = document.getElementById("presensiGroupFilter");
@@ -2809,9 +2833,13 @@
       (allStudentsData || []).forEach(s => { if (s.kelompok) originGroups.add(s.kelompok.trim()); });
       (groupsData || []).forEach(g => { if (g.name) originGroups.add(g.name.trim()); });
 
+      // Sort with natural sorting
+      const sortedPresentators = Array.from(presentators).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+      const sortedOriginGroups = Array.from(originGroups).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+
       // Populate Presentator Dropdown
-      presSelect.innerHTML = '<option value="ALL">Semua Presentator</option>';
-      Array.from(presentators).sort().forEach(p => {
+      presSelect.innerHTML = '<option value="ALL">Semua Presentator (Tinjauan Keseluruhan)</option>';
+      sortedPresentators.forEach(p => {
         const opt = document.createElement("option");
         opt.value = p;
         opt.textContent = p;
@@ -2821,13 +2849,54 @@
 
       // Populate Kelompok Asal Dropdown
       grpSelect.innerHTML = '<option value="ALL">Semua Kelompok Asal</option>';
-      Array.from(originGroups).sort().forEach(g => {
+      sortedOriginGroups.forEach(g => {
         const opt = document.createElement("option");
         opt.value = g;
         opt.textContent = g;
         if (g === currentGrp) opt.selected = true;
         grpSelect.appendChild(opt);
       });
+
+      updatePresensiStatusFilterOptions();
+    }
+
+    function updatePresensiStatusFilterOptions() {
+      const presSelect = document.getElementById("presensiPresentatorFilter");
+      const statusSelect = document.getElementById("presensiStatusFilter");
+      if (!statusSelect) return;
+      const currentVal = statusSelect.value;
+      const presVal = presSelect ? presSelect.value : "ALL";
+
+      if (presVal === "ALL") {
+        statusSelect.innerHTML = `
+          <option value="ALL">Semua Status (Lengkap, Sebagian, Belum)</option>
+          <option value="LENGKAP">Lengkap (Semua Kelompok Dinilai)</option>
+          <option value="SEBAGIAN">Sebagian (Belum Lengkap)</option>
+          <option value="BELUM">Belum Mengisi (0 Kelompok)</option>
+        `;
+        if (["ALL", "LENGKAP", "SEBAGIAN", "BELUM"].includes(currentVal)) {
+          statusSelect.value = currentVal;
+        } else {
+          statusSelect.value = "ALL";
+        }
+      } else {
+        statusSelect.innerHTML = `
+          <option value="ALL">Semua Status Mahasiswa</option>
+          <option value="SUDAH">Sudah Menilai ${presVal}</option>
+          <option value="BELUM">Belum Menilai ${presVal}</option>
+          <option value="PENYAJI">Anggota Penyaji (${presVal})</option>
+        `;
+        if (["ALL", "SUDAH", "BELUM", "PENYAJI"].includes(currentVal)) {
+          statusSelect.value = currentVal;
+        } else {
+          statusSelect.value = "ALL";
+        }
+      }
+    }
+
+    function onPresensiPresentatorFilterChange() {
+      updatePresensiStatusFilterOptions();
+      renderRekapPresensi();
     }
 
     function filterPresensiDisplay() {
@@ -2838,11 +2907,21 @@
       const tableBody = document.getElementById("presensiTableBody");
       const totalMhsBadge = document.getElementById("presensiTotalMhs");
       const sudahMhsBadge = document.getElementById("presensiSudahMhs");
+      const sebagianMhsBadge = document.getElementById("presensiSebagianMhs");
       const belumMhsBadge = document.getElementById("presensiBelumMhs");
       const countLabel = document.getElementById("presensiFilterResultCount");
       const dosenGuestSection = document.getElementById("dosenGuestPresensiSection");
       const dosenGuestListEl = document.getElementById("dosenGuestList");
       const dosenGuestBadge = document.getElementById("dosenGuestCountBadge");
+
+      // Card Header Titles & Icons
+      const cardTitle1 = document.getElementById("presensiCardTitle1");
+      const cardTitle2 = document.getElementById("presensiCardTitle2");
+      const cardTitle3 = document.getElementById("presensiCardTitle3");
+      const cardTitle4 = document.getElementById("presensiCardTitle4");
+      const card3Box = document.getElementById("presensiCard3Box");
+      const card4Box = document.getElementById("presensiCard4Box");
+      const card4Icon = document.getElementById("presensiCard4Icon");
 
       if (!tableBody) return;
 
@@ -2876,7 +2955,14 @@
         });
       }
 
-      // 1. Kumpulkan seluruh mahasiswa dari SEMUA kelompok (unik)
+      // 1. Kumpulkan seluruh kelompok Presentator yang ada
+      const allPresenterGroupsSet = new Set();
+      (currentRekapData?.summary || []).forEach(g => { if (g.kelompok) allPresenterGroupsSet.add(g.kelompok.trim()); });
+      (currentRekapData?.summaryMhs || []).forEach(g => { if (g.kelompok) allPresenterGroupsSet.add(g.kelompok.trim()); });
+      (groupsData || []).forEach(g => { if (g.name) allPresenterGroupsSet.add(g.name.trim()); });
+      const allPresenterGroups = Array.from(allPresenterGroupsSet).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+
+      // 2. Kumpulkan seluruh mahasiswa dari SEMUA kelompok (unik)
       const allClassStudents = [];
       const seenNimInRoster = new Set();
 
@@ -2886,10 +2972,10 @@
           const name = String(s.name || "").trim();
           const grp = String(s.kelompok || "").trim();
           if (!name) return;
-          const key = nim ? nim.toLowerCase() : name.toLowerCase() + "|" + grp;
+          const key = nim && nim !== "-" ? nim.toLowerCase() : name.toLowerCase() + "|" + grp;
           if (seenNimInRoster.has(key)) return;
           seenNimInRoster.add(key);
-          allClassStudents.push({ name, nim, kelompok: grp });
+          allClassStudents.push({ name, nim: nim || "-", kelompok: grp });
         });
       } else if (groupsData && groupsData.length > 0) {
         groupsData.forEach(g => {
@@ -2898,15 +2984,15 @@
             const nim = String(m.nim || "").trim();
             const grp = String(g.name || "").trim();
             if (!name) return;
-            const key = nim ? nim.toLowerCase() : name.toLowerCase() + "|" + grp;
+            const key = nim && nim !== "-" ? nim.toLowerCase() : name.toLowerCase() + "|" + grp;
             if (seenNimInRoster.has(key)) return;
             seenNimInRoster.add(key);
-            allClassStudents.push({ name, nim, kelompok: grp });
+            allClassStudents.push({ name, nim: nim || "-", kelompok: grp });
           });
         });
       }
 
-      // 2. Tentukan status setiap mahasiswa secara presisi berdasarkan filter Presentator
+      // 3. Tentukan status setiap mahasiswa secara presisi & multi-kelompok
       const studentPresensiList = allClassStudents.map(student => {
         const normNim = String(student.nim || "").trim().toLowerCase();
         const normName = String(student.name || "").trim().toLowerCase();
@@ -2917,53 +3003,132 @@
         } else if (nameToKelompokMap[normName]) {
           filledKelompok = nameToKelompokMap[normName];
         } else if (normNim && normNim !== "-" && submittedNimSet.has(normNim)) {
-          filledKelompok = ["Sudah Submit"];
+          filledKelompok = allPresenterGroups.length > 0 ? [allPresenterGroups[0]] : ["Kelompok 1"];
         } else if (submittedNameSet.has(normName)) {
-          filledKelompok = ["Sudah Submit"];
+          filledKelompok = allPresenterGroups.length > 0 ? [allPresenterGroups[0]] : ["Kelompok 1"];
         }
 
-        let hasFilled = false;
+        let statusCategory = "BELUM";
+        let filledCount = 0;
+        let totalTargets = 0;
+
         if (presentatorFilter === "ALL") {
-          hasFilled = filledKelompok.length > 0;
+          // Mode Semua Kelompok: Mahasiswa diharapkan menilai semua kelompok kecuali kelompoknya sendiri
+          const targetGroups = allPresenterGroups.filter(g => g.toLowerCase() !== (student.kelompok || "").toLowerCase());
+          totalTargets = targetGroups.length;
+
+          if (totalTargets === 0) {
+            statusCategory = "PENYAJI";
+          } else {
+            filledCount = targetGroups.filter(tg => filledKelompok.some(fk => fk.toLowerCase() === tg.toLowerCase())).length;
+            if (filledCount === totalTargets) {
+              statusCategory = "LENGKAP";
+            } else if (filledCount > 0) {
+              statusCategory = "SEBAGIAN";
+            } else {
+              statusCategory = "BELUM";
+            }
+          }
         } else {
-          hasFilled = filledKelompok.some(k => k.toLowerCase() === presentatorFilter.toLowerCase());
+          // Mode Kelompok Spesifik: Cek apakah mahasiswa ini adalah penyaji kelompok tersebut atau evaluator
+          const isPresenter = (student.kelompok || "").toLowerCase() === presentatorFilter.toLowerCase();
+          if (isPresenter) {
+            statusCategory = "PENYAJI";
+          } else {
+            const hasFilledThis = filledKelompok.some(fk => fk.toLowerCase() === presentatorFilter.toLowerCase());
+            statusCategory = hasFilledThis ? "SUDAH" : "BELUM";
+          }
         }
 
         return {
           name: student.name,
           nim: student.nim || "-",
           kelompok: student.kelompok,
-          hasFilled,
-          filledKelompok
+          filledKelompok,
+          statusCategory,
+          filledCount,
+          totalTargets
         };
       });
 
-      // 3. Filter berdasarkan Kelompok Asal
+      // 4. Filter berdasarkan Kelompok Asal
       const baseScopeList = studentPresensiList.filter(s => {
         if (grpFilter !== "ALL" && s.kelompok !== grpFilter) return false;
         return true;
       });
 
-      // 4. Hitung Statistik & Badges
+      // 5. Hitung Statistik & Perbarui Kartu Ringkasan
       const totalStudents = baseScopeList.length;
-      const totalSudah = baseScopeList.filter(s => s.hasFilled).length;
-      const totalBelum = totalStudents - totalSudah;
-      const pctSudah = totalStudents > 0 ? Math.round((totalSudah / totalStudents) * 100) : 0;
-      const pctBelum = totalStudents > 0 ? (100 - pctSudah) : 0;
 
-      if (totalMhsBadge) totalMhsBadge.textContent = `${totalStudents} Mahasiswa`;
-      if (sudahMhsBadge) sudahMhsBadge.textContent = `${totalSudah} (${pctSudah}%)`;
-      if (belumMhsBadge) belumMhsBadge.textContent = `${totalBelum} (${pctBelum}%)`;
+      if (presentatorFilter === "ALL") {
+        const countLengkap = baseScopeList.filter(s => s.statusCategory === "LENGKAP").length;
+        const countSebagian = baseScopeList.filter(s => s.statusCategory === "SEBAGIAN").length;
+        const countBelum = baseScopeList.filter(s => s.statusCategory === "BELUM").length;
+        const pctLengkap = totalStudents > 0 ? Math.round((countLengkap / totalStudents) * 100) : 0;
+        const pctSebagian = totalStudents > 0 ? Math.round((countSebagian / totalStudents) * 100) : 0;
+        const pctBelum = totalStudents > 0 ? Math.round((countBelum / totalStudents) * 100) : 0;
 
-      // 5. Filter Tabel berdasarkan Status & Kata Kunci Pencarian
+        if (cardTitle1) cardTitle1.textContent = "Total Mahasiswa";
+        if (cardTitle2) cardTitle2.textContent = "Lengkap (Semua Selesai)";
+        if (cardTitle3) cardTitle3.textContent = "Sebagian (Belum Lengkap)";
+        if (cardTitle4) cardTitle4.textContent = "Belum Mengisi (0 Kelompok)";
+
+        if (card4Box) {
+          card4Box.className = "p-3 sm:p-3.5 rounded-xl bg-rose-50/70 border border-rose-200 flex items-center justify-between";
+        }
+        if (card4Icon) {
+          card4Icon.className = "p-1.5 sm:p-2 rounded-lg bg-rose-200/60 text-rose-800 shrink-0";
+          card4Icon.innerHTML = `
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          `;
+        }
+
+        if (totalMhsBadge) totalMhsBadge.textContent = `${totalStudents} Mahasiswa`;
+        if (sudahMhsBadge) sudahMhsBadge.textContent = `${countLengkap} (${pctLengkap}%)`;
+        if (sebagianMhsBadge) sebagianMhsBadge.textContent = `${countSebagian} (${pctSebagian}%)`;
+        if (belumMhsBadge) belumMhsBadge.textContent = `${countBelum} (${pctBelum}%)`;
+      } else {
+        const countSudah = baseScopeList.filter(s => s.statusCategory === "SUDAH").length;
+        const countBelum = baseScopeList.filter(s => s.statusCategory === "BELUM").length;
+        const countPenyaji = baseScopeList.filter(s => s.statusCategory === "PENYAJI").length;
+        const totalWajibNilai = countSudah + countBelum;
+        const pctSudah = totalWajibNilai > 0 ? Math.round((countSudah / totalWajibNilai) * 100) : 0;
+        const pctBelum = totalWajibNilai > 0 ? (100 - pctSudah) : 0;
+
+        if (cardTitle1) cardTitle1.textContent = "Total Mahasiswa";
+        if (cardTitle2) cardTitle2.textContent = `Sudah Menilai ${presentatorFilter}`;
+        if (cardTitle3) cardTitle3.textContent = `Belum Menilai ${presentatorFilter}`;
+        if (cardTitle4) cardTitle4.textContent = `Kelompok Penyaji (${presentatorFilter})`;
+
+        if (card4Box) {
+          card4Box.className = "p-3 sm:p-3.5 rounded-xl bg-purple-50/70 border border-purple-200 flex items-center justify-between";
+        }
+        if (card4Icon) {
+          card4Icon.className = "p-1.5 sm:p-2 rounded-lg bg-purple-200/60 text-purple-800 shrink-0";
+          card4Icon.innerHTML = `
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+          `;
+        }
+
+        if (totalMhsBadge) totalMhsBadge.textContent = `${totalStudents} Mahasiswa`;
+        if (sudahMhsBadge) sudahMhsBadge.textContent = `${countSudah} (${pctSudah}%)`;
+        if (sebagianMhsBadge) sebagianMhsBadge.textContent = `${countBelum} (${pctBelum}%)`;
+        if (belumMhsBadge) belumMhsBadge.textContent = `${countPenyaji} Mahasiswa`;
+      }
+
+      // 6. Filter Tabel berdasarkan Status & Pencarian
       const filteredList = baseScopeList.filter(s => {
-        if (statusFilter === "SUDAH" && !s.hasFilled) return false;
-        if (statusFilter === "BELUM" && s.hasFilled) return false;
+        if (statusFilter !== "ALL" && s.statusCategory !== statusFilter) return false;
         if (searchQuery) {
           const matchName = s.name.toLowerCase().includes(searchQuery);
           const matchNim = s.nim.toLowerCase().includes(searchQuery);
           const matchGroup = s.kelompok.toLowerCase().includes(searchQuery);
-          if (!matchName && !matchNim && !matchGroup) return false;
+          const matchFilled = s.filledKelompok.some(k => k.toLowerCase().includes(searchQuery));
+          if (!matchName && !matchNim && !matchGroup && !matchFilled) return false;
         }
         return true;
       });
@@ -2975,38 +3140,149 @@
       if (filteredList.length === 0) {
         tableBody.innerHTML = `
           <tr>
-            <td colspan="6" class="py-8 text-center text-zinc-400 italic">
+            <td colspan="5" class="py-8 text-center text-zinc-400 italic">
               Tidak ada data mahasiswa yang sesuai dengan filter atau kata kunci pencarian.
             </td>
           </tr>
         `;
       } else {
         tableBody.innerHTML = filteredList.map((s, idx) => {
-          const statusBadge = s.hasFilled
-            ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300"><span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>Sudah Mengisi</span>`
-            : `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-900 border border-amber-300"><span class="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse"></span>Belum Mengisi</span>`;
+          let detailPillsHtml = "";
+          let finalStatusBadgeHtml = "";
 
-          const kelompokDinilaiCell = s.filledKelompok.length > 0
-            ? s.filledKelompok.map(k => `<span class="inline-block px-2 py-0.5 rounded bg-zinc-100 border border-zinc-200 text-zinc-700 text-[11px] font-medium mr-1 mb-0.5">${k}</span>`).join("")
-            : `<span class="text-zinc-400 italic text-[11px]">-</span>`;
+          if (presentatorFilter === "ALL") {
+            // Rincian Penilaian untuk Semua Kelompok
+            detailPillsHtml = allPresenterGroups.map(grpName => {
+              const isOwnGroup = (s.kelompok || "").toLowerCase() === grpName.toLowerCase();
+              const isFilled = s.filledKelompok.some(fk => fk.toLowerCase() === grpName.toLowerCase());
+
+              if (isOwnGroup) {
+                return `
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-50 border border-purple-200/80 text-purple-700 text-[11px] font-medium" title="${s.name} adalah anggota ${grpName}">
+                    <svg class="w-3 h-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    <span>${grpName} (Penyaji)</span>
+                  </span>
+                `;
+              } else if (isFilled) {
+                return `
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-semibold" title="Sudah menilai ${grpName}">
+                    <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span>${grpName}</span>
+                  </span>
+                `;
+              } else {
+                return `
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-700 text-[11px] font-medium" title="Belum menilai ${grpName}">
+                    <svg class="w-3 h-3 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    <span>${grpName} (Belum)</span>
+                  </span>
+                `;
+              }
+            }).join(" ");
+
+            // Status Akhir
+            if (s.statusCategory === "LENGKAP") {
+              finalStatusBadgeHtml = `
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                  <span>Lengkap (${s.filledCount}/${s.totalTargets})</span>
+                </span>
+              `;
+            } else if (s.statusCategory === "SEBAGIAN") {
+              finalStatusBadgeHtml = `
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs">
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                  <span>Sebagian (${s.filledCount}/${s.totalTargets})</span>
+                </span>
+              `;
+            } else if (s.statusCategory === "PENYAJI") {
+              finalStatusBadgeHtml = `
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-purple-100 text-purple-800 border border-purple-300 shadow-2xs">
+                  <span class="w-1.5 h-1.5 rounded-full bg-purple-600"></span>
+                  <span>Kelompok Penyaji</span>
+                </span>
+              `;
+            } else {
+              finalStatusBadgeHtml = `
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-300 shadow-2xs">
+                  <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                  <span>Belum Mengisi</span>
+                </span>
+              `;
+            }
+          } else {
+            // Mode Kelompok Spesifik
+            if (s.statusCategory === "PENYAJI") {
+              detailPillsHtml = `
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-purple-50 border border-purple-200 text-purple-700 text-[11px] font-medium">
+                  <svg class="w-3 h-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                  </svg>
+                  <span>Anggota ${presentatorFilter} (Penyaji Hari Ini)</span>
+                </span>
+              `;
+              finalStatusBadgeHtml = `
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-purple-100 text-purple-800 border border-purple-300 shadow-2xs">
+                  <span class="w-1.5 h-1.5 rounded-full bg-purple-600"></span>
+                  <span>Kelompok Penyaji</span>
+                </span>
+              `;
+            } else if (s.statusCategory === "SUDAH") {
+              detailPillsHtml = `
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-semibold">
+                  <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>Telah Menilai ${presentatorFilter}</span>
+                </span>
+              `;
+              finalStatusBadgeHtml = `
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                  <span>Sudah Menilai</span>
+                </span>
+              `;
+            } else {
+              detailPillsHtml = `
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-700 text-[11px] font-medium">
+                  <svg class="w-3 h-3 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                  <span>Belum Mengirim Nilai ${presentatorFilter}</span>
+                </span>
+              `;
+              finalStatusBadgeHtml = `
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-300 shadow-2xs">
+                  <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                  <span>Belum Menilai</span>
+                </span>
+              `;
+            }
+          }
 
           return `
             <tr class="hover:bg-zinc-50/80 transition text-zinc-800 ${idx % 2 === 1 ? 'bg-zinc-50/40' : ''}">
               <td class="py-3 px-3 text-center font-mono text-zinc-400 text-[11px]">${idx + 1}</td>
-              <td class="py-3 px-3 font-semibold text-zinc-900">
-                ${s.name}
-              </td>
-              <td class="py-3 px-3 font-mono text-zinc-500 text-[11px]">
-                ${s.nim}
+              <td class="py-3 px-3">
+                <div class="font-semibold text-zinc-900 leading-tight">${s.name}</div>
+                <div class="font-mono text-zinc-500 text-[11px] mt-0.5">${s.nim}</div>
               </td>
               <td class="py-3 px-3">
                 <span class="px-2 py-0.5 rounded bg-zinc-100 border border-zinc-200 text-zinc-700 text-[11px] font-medium whitespace-nowrap">${s.kelompok}</span>
               </td>
               <td class="py-3 px-3">
-                ${kelompokDinilaiCell}
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  ${detailPillsHtml}
+                </div>
               </td>
               <td class="py-3 px-3 text-center">
-                ${statusBadge}
+                ${finalStatusBadgeHtml}
               </td>
             </tr>
           `;

@@ -4,6 +4,24 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.26] - 2026-08-23
+
+### 📊 Rombak Total Sistem Tabel Status Pengisian Penilaian (Multi-Kelompok & Anti-Konflik)
+- **Deteksi & Rincian Pengisian Parsial (Multi-Target Kelompok):**
+  - Mengatasi konflik status pada evaluasi bertahap: Jika mahasiswa baru mengisi salah satu kelompok penyaji dan belum mengisi kelompok lainnya, sistem kini secara presisi mengklasifikasikan status sebagai **`Sebagian (1/N)`** alih-alih keliru menandai `Sudah Mengisi`.
+  - Kolom **Rincian Penilaian Kelompok** kini menampilkan badge status visual untuk setiap kelompok penyaji target:
+    - `✓ Kelompok X` (Hijau/Emerald) jika sudah dinilai.
+    - `✕ Kelompok Y (Belum)` (Merah/Rose) jika belum dinilai.
+    - `👤 Kelompok Z (Penyaji)` (Ungu/Purple) untuk anggota kelompok yang sedang tampil.
+- **Kategori Status Akhir Komprehensif & 4 Kartu Statistik Responsif:**
+  - Menghadirkan 4 kartu ringkasan dinamis:
+    1. **Mode Semua Presentator:** *Total Mahasiswa*, *Lengkap (Semua Selesai)*, *Sebagian (Belum Lengkap)*, dan *Belum Mengisi (0 Kelompok)*.
+    2. **Mode Presentator Tertentu:** *Total Mahasiswa*, *Sudah Menilai [Kelompok]*, *Belum Menilai [Kelompok]*, dan *Kelompok Penyaji*.
+- **Dropdown Filter Status Cerdas:**
+  - Pilihan opsi pada filter *Status Pengisian* beradaptasi secara dinamis sesuai mode penayangan (*Lengkap*, *Sebagian*, *Belum Mengisi* vs *Sudah Menilai*, *Belum Menilai*, *Kelompok Penyaji*).
+
+---
+
 ## [2.1.25] - 2026-08-23
 
 ### ✨ Audit Total Tampilan Menjadi Modern-Elegan-Minimalist & Eliminasi Emoji Menyeluruh
