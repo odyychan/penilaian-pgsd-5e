@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.44] - 2026-08-23
+
+### 🖨️ Presisi 100% Identik Antara Pratinjau Layar & Hasil Dokumen Cetak / PDF Fisik
+- **Sinkronisasi Rasio Fisik A4 1:1 (794px Canvas Parity):**
+  - Mengonfigurasi container pratinjau (`#printableReportArea`) dengan dimensi fisik A4 sesungguhnya pada 96 DPI (`width: 794px` / `210mm`, `padding: 30px 38px` / `8mm 10mm`), menghasilkan lebar konten efektif `718px` yang identik dengan area cetak A4 fisik.
+  - Memastikan *word wrap*, batas tabel (*table cell layout*), kotak kartu evaluasi masukan mahasiswa, dan lembar tanda tangan pengesahan tampil 100% presisi dan sama persis tanpa perbedaan sedikitpun antara modal pratinjau di layar dan hasil cetak PDF.
+- **Pengujian & Verifikasi Output Nyata (Automated PDF Rendering Test):**
+  - Dilakukan pengujian otomatis via Playwright untuk menghasilkan file PDF fisik asli (`official_report.pdf`), memverifikasi seluruh komponen selesai dalam 1 halaman utuh A4 (*single page fit*) dengan margin atas, bawah, kiri, dan kanan yang rapi dan konsisten.
+
+---
+
 ## [2.1.43] - 2026-08-23
 
 ### 🎯 Isolasi Mutlak Mode Cetak & Konsistensi Margin Antar Halaman
