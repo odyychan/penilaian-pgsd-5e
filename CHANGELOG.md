@@ -4,7 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.24] - 2026-08-23
+
+### ✏️ Penyempurnaan Terminologi Header Tabel Status Pengisian
+- **Pembaruan Teks Header Tabel:**
+  - Mengubah judul header tabel menjadi **`Daftar Status Pengisian Penilaian`** agar lebih presisi, profesional, dan sesuai dengan alur pengisian peer-assessment.
+
+---
+
 ## [2.1.23] - 2026-08-23
+
 
 ### 📋 Rombak Total Sistem Filter Status Pengisian Presensi
 - **Filter Berbasis Presentator, Kelompok Asal, dan Status Pengisian:**
