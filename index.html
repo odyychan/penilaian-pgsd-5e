@@ -920,8 +920,10 @@
             </button>
             <button 
               type="button"
+              id="btnRefreshRekap"
               onclick="loadRekapData()" 
               class="py-1.5 px-3 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 cursor-pointer shadow-2xs"
+              title="Segarkan Data Rekapitulasi dari Cloud"
             >
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
@@ -2837,6 +2839,53 @@
     // REKAPITULASI DATA LOGIC (KELOMPOK & INDIVIDU PEMATERI)
     // =========================================================================
     async function loadRekapData(isSilent = false) {
+      const btnRefresh = document.getElementById("btnRefreshRekap");
+      if (!isSilent && btnRefresh) {
+        btnRefresh.disabled = true;
+        btnRefresh.innerHTML = `
+          <svg class="w-3.5 h-3.5 text-zinc-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          <span class="text-zinc-600">Menyegarkan...</span>
+        `;
+      }
+
+      const restoreBtnDefault = () => {
+        if (btnRefresh) {
+          btnRefresh.disabled = false;
+          btnRefresh.innerHTML = `
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            <span>Segarkan</span>
+          `;
+        }
+      };
+
+      const setBtnSuccess = () => {
+        if (btnRefresh) {
+          btnRefresh.innerHTML = `
+            <svg class="w-3.5 h-3.5 text-emerald-600 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span class="text-emerald-700 font-bold">Tersinkron</span>
+          `;
+          setTimeout(restoreBtnDefault, 1600);
+        }
+      };
+
+      const setBtnFallback = () => {
+        if (btnRefresh) {
+          btnRefresh.innerHTML = `
+            <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+            <span class="text-amber-700 font-bold">Mode Offline</span>
+          `;
+          setTimeout(restoreBtnDefault, 2000);
+        }
+      };
+
       const loading = document.getElementById("rekapLoading");
       const empty = document.getElementById("rekapEmpty");
       const kelompokBox = document.getElementById("rekapKelompokContainer");
@@ -2888,14 +2937,25 @@
             populatePresensiFilters();
             renderBothRekapViews();
           }
+          if (!isSilent) {
+            setBtnSuccess();
+            showToast("Data rekapitulasi berhasil diperbarui dari server cloud.", "success");
+          }
         } else {
           if (!hasLocalData && empty) empty.classList.remove("hidden");
-          if (!isSilent) showToast("Info rekap: " + (res?.error || "Gagal memuat rekap"), "warning");
+          if (!isSilent) {
+            setBtnFallback();
+            showToast("Gagal memperbarui rekap: " + (res?.error || "Respon server tidak valid"), "warning");
+          }
         }
       } catch (err) {
         if (loading) loading.classList.add("hidden");
         if (!hasLocalData && empty) {
           empty.classList.remove("hidden");
+        }
+        if (!isSilent) {
+          setBtnFallback();
+          showToast("Koneksi cloud terputus/lambat. Menampilkan data tersimpan di perangkat.", "warning");
         }
       }
     }
@@ -4173,27 +4233,30 @@
       document.getElementById("studentReviewModal").classList.add("hidden");
     }
 
+    let toastTimer = null;
     function showToast(message, type = "info") {
       const toast = document.getElementById("toast");
       const icon = document.getElementById("toastIcon");
       const msg = document.getElementById("toastMsg");
 
+      if (toastTimer) clearTimeout(toastTimer);
+
       msg.textContent = message;
-      toast.className = "fixed bottom-5 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-sm z-50 p-3.5 rounded-xl shadow-lg text-xs font-medium flex items-center gap-2.5 transition-all border step-fade";
+      toast.className = "fixed bottom-5 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-sm z-[9999] p-3.5 rounded-xl shadow-2xl text-xs font-medium flex items-center gap-2.5 transition-all border step-fade";
 
       if (type === "error") {
-        toast.classList.add("bg-zinc-900", "text-rose-400", "border-rose-900");
+        toast.classList.add("bg-zinc-950", "text-rose-300", "border-rose-800/80");
         icon.innerHTML = `<svg class="w-4 h-4 text-rose-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>`;
       } else if (type === "warning") {
-        toast.classList.add("bg-zinc-900", "text-amber-400", "border-amber-900");
+        toast.classList.add("bg-zinc-950", "text-amber-300", "border-amber-800/80");
         icon.innerHTML = `<svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>`;
       } else {
-        toast.classList.add("bg-zinc-900", "text-emerald-400", "border-emerald-900");
+        toast.classList.add("bg-zinc-950", "text-emerald-300", "border-emerald-800/80");
         icon.innerHTML = `<svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>`;
       }
 
       toast.classList.remove("hidden");
-      setTimeout(() => {
+      toastTimer = setTimeout(() => {
         toast.classList.add("hidden");
       }, 3500);
     }

@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.48] - 2026-08-23
+
+### 🔄 Penerapan Sistem Animatif Feedback & Fallback pada Seluruh Tombol Segarkan
+- **Status Interaktif Beranimasi (*Live Button State Transition*):**
+  - Seluruh tombol segarkan (*Segarkan Rekap*, *Segarkan Master Data*, *Segarkan Data Respons*, dan *Hapus & Segarkan Cache*) kini dilengkapi status animasi putar (*spinning icon*) dan teks indikator proses (*Menyegarkan...*).
+  - Tombol dinonaktifkan sementara selama proses berlangsung untuk mencegah *duplicate request*.
+- **Konfirmasi Berhasil & Fallback Offline yang Jelas (*Notif Fallback*):**
+  - **Kondisi Berhasil:** Tombol bertransformasi menampilkan ikon centang hijau dengan label *Tersinkron* serta memicu *toast* sukses berwarna hijau (`Data berhasil diperbarui dari server cloud`).
+  - **Kondisi Gagal / Offline:** Tombol menampilkan peringatan *Mode Offline* dan memicu notifikasi fallback *amber* (`Koneksi cloud terputus/lambat. Menampilkan data tersimpan di perangkat`) tanpa merusak atau mengosongkan tampilan data yang telah tersimpan.
+
+---
+
 ## [2.1.47] - 2026-08-23
 
 ### 📌 Penataan Posisi Footer Presisi di Dasar Dokumen (Anchored Page-Bottom)

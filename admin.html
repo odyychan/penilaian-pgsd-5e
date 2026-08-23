@@ -948,13 +948,14 @@
             <div class="pt-2 border-t border-zinc-100">
               <button 
                 type="button" 
+                id="btnPurgeCache"
                 onclick="purgeLocalCache()" 
                 class="w-full py-2 px-4 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5"
               >
                 <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                 </svg>
-                <span>Hapus & Segarkan Cache</span>
+                <span>Hapus &amp; Segarkan Cache</span>
               </button>
             </div>
           </div>
@@ -1678,6 +1679,8 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     // =========================================================================
     // FETCH ALL DATA FROM BACKEND FOR ADMIN
     // =========================================================================
+    // ADMIN MASTER DATA LOGIC (KELOMPOK, MAHASISWA & SESI)
+    // =========================================================================
     async function fetchAdminFullData() {
       const refreshBtn = document.getElementById("btnRefreshMasterData");
       if (refreshBtn) {
@@ -1686,15 +1689,11 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           <svg class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
           </svg>
-          <span>Memuat...</span>
+          <span>Menyegarkan...</span>
         `;
       }
 
-      const apiUrl = getApiUrl();
-      try {
-        const response = await fetch(`${apiUrl}?action=adminGetFullData&_t=${Date.now()}`);
-        const res = await response.json();
-
+      const restoreBtnDefault = () => {
         if (refreshBtn) {
           refreshBtn.disabled = false;
           refreshBtn.innerHTML = `
@@ -1704,6 +1703,36 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
             <span>Segarkan</span>
           `;
         }
+      };
+
+      const setBtnSuccess = () => {
+        if (refreshBtn) {
+          refreshBtn.innerHTML = `
+            <svg class="w-3.5 h-3.5 text-emerald-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span class="text-emerald-400 font-bold">Tersinkron</span>
+          `;
+          setTimeout(restoreBtnDefault, 1600);
+        }
+      };
+
+      const setBtnFallback = () => {
+        if (refreshBtn) {
+          refreshBtn.innerHTML = `
+            <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+            <span class="text-amber-400 font-bold">Mode Offline</span>
+          `;
+          setTimeout(restoreBtnDefault, 2000);
+        }
+      };
+
+      const apiUrl = getApiUrl();
+      try {
+        const response = await fetch(`${apiUrl}?action=adminGetFullData&_t=${Date.now()}`);
+        const res = await response.json();
 
         if (res.success) {
           adminMasterGroups = res.groups || [];
@@ -1715,20 +1744,15 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           populateMasterSesiFilter();
           populateResponseGroupFilter();
           setSyncState('synced');
+          setBtnSuccess();
+          showAdminToast("Data master & konfigurasi berhasil disegarkan dari Google Sheets.", "success");
         } else {
-          showAdminToast("Gagal mengambil data dari Google Sheets: " + res.error, "error");
+          setBtnFallback();
+          showAdminToast("Gagal mengambil data master dari server: " + res.error, "error");
         }
       } catch (err) {
-        if (refreshBtn) {
-          refreshBtn.disabled = false;
-          refreshBtn.innerHTML = `
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-            </svg>
-            <span>Segarkan</span>
-          `;
-        }
-        showAdminToast("Gagal terhubung ke API backend: " + err, "error");
+        setBtnFallback();
+        showAdminToast("Gagal terhubung ke API backend cloud: " + err, "error");
       }
     }
 
@@ -2195,45 +2219,65 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           <svg class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
           </svg>
-          <span>Memuat...</span>
+          <span>Menyegarkan...</span>
         `;
       }
+
+      const restoreBtnDefault = () => {
+        if (!isSilent && btn) {
+          btn.disabled = false;
+          btn.innerHTML = `
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            <span>Segarkan Data</span>
+          `;
+        }
+      };
+
+      const setBtnSuccess = () => {
+        if (!isSilent && btn) {
+          btn.innerHTML = `
+            <svg class="w-3.5 h-3.5 text-emerald-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span class="text-emerald-400 font-bold">Tersinkron</span>
+          `;
+          setTimeout(restoreBtnDefault, 1600);
+        }
+      };
+
+      const setBtnFallback = () => {
+        if (!isSilent && btn) {
+          btn.innerHTML = `
+            <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+            <span class="text-amber-400 font-bold">Mode Offline</span>
+          `;
+          setTimeout(restoreBtnDefault, 2000);
+        }
+      };
 
       const apiUrl = getApiUrl();
       try {
         const response = await fetch(`${apiUrl}?action=adminGetResponsesList&_t=${Date.now()}`);
         const res = await response.json();
 
-        if (!isSilent && btn) {
-          btn.disabled = false;
-          btn.innerHTML = `
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-            </svg>
-            <span>Segarkan Data</span>
-          `;
-        }
-
         if (res.success) {
           adminResponsesList = res.responses || [];
           document.getElementById("labelTotalResponses").textContent = `${adminResponsesList.length} Data`;
           populateResponseGroupFilter();
           renderResponsesList();
-          if (!isSilent) showAdminToast(`Berhasil memuat ${adminResponsesList.length} data respons.`, "info");
+          setBtnSuccess();
+          if (!isSilent) showAdminToast(`Berhasil memuat ${adminResponsesList.length} data respons dari cloud.`, "success");
         } else {
+          setBtnFallback();
           if (!isSilent) showAdminToast("Gagal memuat daftar respons: " + res.error, "error");
         }
       } catch (err) {
-        if (!isSilent && btn) {
-          btn.disabled = false;
-          btn.innerHTML = `
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-            </svg>
-            <span>Segarkan Data</span>
-          `;
-        }
-        if (!isSilent) showAdminToast("Koneksi respons error: " + err, "error");
+        setBtnFallback();
+        if (!isSilent) showAdminToast("Koneksi respons cloud terputus: " + err, "warning");
       }
     }
 
@@ -2573,12 +2617,42 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       }
     }
 
-    function purgeLocalCache() {
+    async function purgeLocalCache() {
+      const btn = document.getElementById("btnPurgeCache");
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `
+          <svg class="w-3.5 h-3.5 text-zinc-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          <span>Membersihkan Cache...</span>
+        `;
+      }
+
       localStorage.removeItem("PGSD_CACHE_GROUPS");
       localStorage.removeItem("PGSD_CACHE_CONFIG");
       localStorage.removeItem("PGSD_CACHE_REKAP");
-      showAdminToast("Seluruh cache lokal browser telah dibersihkan.", "success");
-      fetchAdminFullData();
+      
+      await fetchAdminFullData();
+
+      if (btn) {
+        btn.innerHTML = `
+          <svg class="w-3.5 h-3.5 text-emerald-600 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+          </svg>
+          <span class="text-emerald-700 font-bold">Cache Bersih &amp; Segar</span>
+        `;
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.innerHTML = `
+            <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            <span>Hapus &amp; Segarkan Cache</span>
+          `;
+        }, 1800);
+      }
+      showAdminToast("Seluruh cache lokal berhasil dibersihkan dan disinkronkan ulang.", "success");
     }
 
     function handleChangePassword(e) {
