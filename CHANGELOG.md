@@ -4,6 +4,14 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.32] - 2026-08-23
+
+### 🏷️ Penyesuaian Label "Kelompok Penyaji" & Default Pilihan "Semua"
+- **Label Filter:** Mengubah label filter utama dari `Penyaji Target` menjadi **`Kelompok Penyaji`**.
+- **Opsi Default:** Menyetel opsi default pada filter kelompok penyaji menjadi **`Semua`** secara konsisten.
+
+---
+
 ## [2.1.31] - 2026-08-23
 
 ### ✨ Penyempurnaan Teks & Kontrol Filter Minimalis
