@@ -537,13 +537,17 @@ function getRecapData() {
           totalSkor: 0,
           rataRataSkor: 0,
           votePresentator: {},
-          evaluasiList: {}
+          evaluasiList: {},
+          evaluators: []
         };
       }
 
       const item = rekapByGroup[kelompok];
       item.totalPenilai += 1;
       item.totalSkor += nilaiKelompok;
+      if (namaPenilai && !item.evaluators.includes(namaPenilai)) {
+        item.evaluators.push(namaPenilai);
+      }
 
       if (best1 && best1 !== "-") {
         item.votePresentator[best1] = (item.votePresentator[best1] || 0) + 1;

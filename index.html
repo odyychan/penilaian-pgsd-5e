@@ -766,30 +766,77 @@
           </div>
         </div>
 
-        <!-- Sub-View Switcher (Kelompok vs Mahasiswa Individu) -->
-        <div class="grid grid-cols-2 p-1 bg-zinc-100 rounded-lg border border-zinc-200 text-xs font-semibold">
+        <!-- Sub-View Switcher (Kelompok vs Pemateri vs Status Pengisian Presensi) -->
+        <div class="grid grid-cols-3 p-1 bg-zinc-100 rounded-xl border border-zinc-200 text-xs font-semibold">
           <button 
             id="subTabKelompokBtn" 
             onclick="switchRekapSubView('kelompok')" 
-            class="py-2 px-3 rounded-md bg-white text-zinc-900 shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
+            class="py-2 px-1.5 sm:px-3 rounded-lg bg-white text-zinc-900 shadow-xs transition flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer text-center truncate"
           >
-            <span>📊 Rekap Kelompok</span>
+            <span>📊 Kelompok</span>
           </button>
           <button 
             id="subTabIndividuBtn" 
             onclick="switchRekapSubView('individu')" 
-            class="py-2 px-3 rounded-md text-zinc-500 hover:text-zinc-900 transition flex items-center justify-center gap-1.5 cursor-pointer"
+            class="py-2 px-1.5 sm:px-3 rounded-lg text-zinc-500 hover:text-zinc-900 transition flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer text-center truncate"
           >
-            <span>👤 Rekap per Mahasiswa</span>
+            <span>👤 Pemateri</span>
+          </button>
+          <button 
+            id="subTabPresensiBtn" 
+            onclick="switchRekapSubView('presensi')" 
+            class="py-2 px-1.5 sm:px-3 rounded-lg text-zinc-500 hover:text-zinc-900 transition flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer text-center truncate"
+          >
+            <span>📋 Status Pengisian</span>
           </button>
         </div>
 
-        <!-- Filter Dropdown Bar -->
-        <div class="flex items-center justify-between gap-3 bg-zinc-50 p-3 rounded-lg border border-zinc-200 text-xs">
+        <!-- Filter Bar 1: Filter Kelompok (Untuk Kelompok & Pemateri) -->
+        <div id="rekapGroupFilterBox" class="flex items-center justify-between gap-3 bg-zinc-50 p-3 rounded-xl border border-zinc-200 text-xs">
           <label class="font-semibold text-zinc-700">Filter Kelompok:</label>
-          <select id="rekapGroupFilter" onchange="filterRekapDisplay()" class="text-xs font-medium px-3 py-1.5 rounded border border-zinc-300 bg-white focus:border-zinc-900 outline-none">
+          <select id="rekapGroupFilter" onchange="filterRekapDisplay()" class="text-xs font-medium px-3 py-1.5 rounded-lg border border-zinc-300 bg-white focus:border-zinc-900 outline-none">
             <option value="ALL">Semua Kelompok</option>
           </select>
+        </div>
+
+        <!-- Filter Bar 2: Kontrol Presensi Pengisian Mahasiswa (Khusus Sub-Tab Status Pengisian) -->
+        <div id="presensiControlBox" class="space-y-3 p-3.5 bg-zinc-50 rounded-xl border border-zinc-200 text-xs hidden">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <div>
+              <label class="block font-semibold text-zinc-700 mb-1 text-[11px]">Sesi / Minggu:</label>
+              <select id="presensiSesiFilter" onchange="filterPresensiDisplay()" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-medium focus:border-zinc-900 outline-none">
+                <option value="ALL">Semua Sesi</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold text-zinc-700 mb-1 text-[11px]">Kelompok Asal:</label>
+              <select id="presensiGroupFilter" onchange="filterPresensiDisplay()" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-medium focus:border-zinc-900 outline-none">
+                <option value="ALL">Semua Kelompok</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold text-zinc-700 mb-1 text-[11px]">Status Pengisian:</label>
+              <select id="presensiStatusFilter" onchange="filterPresensiDisplay()" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-medium focus:border-zinc-900 outline-none">
+                <option value="ALL">Semua Status (Sudah & Belum)</option>
+                <option value="SUDAH">✓ Sudah Mengisi Form</option>
+                <option value="BELUM">⏳ Belum Mengisi Form</option>
+              </select>
+            </div>
+          </div>
+          <div class="relative">
+            <input 
+              type="text" 
+              id="presensiSearchInput" 
+              placeholder="🔍 Cari nama mahasiswa atau NIM..." 
+              oninput="filterPresensiDisplay()" 
+              class="w-full pl-9 pr-3.5 py-2 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none transition bg-white placeholder-zinc-400"
+            >
+            <div class="absolute left-3 top-2.5 text-zinc-400">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </div>
+          </div>
         </div>
 
         <!-- Search Bar & Controls for Mahasiswa Individu View -->
@@ -832,6 +879,59 @@
 
         <!-- Container Rekap 2: INDIVIDU PEMATERI -->
         <div id="rekapIndividuContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 hidden"></div>
+
+        <!-- Container Rekap 3: STATUS PENGISIAN PRESENSI MAHASISWA -->
+        <div id="rekapPresensiContainer" class="space-y-4 hidden">
+          <!-- Stat Summary Badges -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 flex items-center justify-between">
+              <div>
+                <span class="text-[11px] font-medium text-zinc-500 block">Total Mahasiswa Kelas</span>
+                <span id="presensiTotalMhs" class="text-base sm:text-lg font-bold font-mono text-zinc-900">0</span>
+              </div>
+              <span class="p-2 rounded-lg bg-zinc-200/60 text-zinc-700 text-sm">👥</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200 flex items-center justify-between">
+              <div>
+                <span class="text-[11px] font-medium text-emerald-700 block">Sudah Mengisi Form</span>
+                <span id="presensiSudahMhs" class="text-base sm:text-lg font-bold font-mono text-emerald-800">0 (0%)</span>
+              </div>
+              <span class="p-2 rounded-lg bg-emerald-200/60 text-emerald-800 text-sm">✓</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 flex items-center justify-between">
+              <div>
+                <span class="text-[11px] font-medium text-amber-700 block">Belum Mengisi Form</span>
+                <span id="presensiBelumMhs" class="text-base sm:text-lg font-bold font-mono text-amber-800">0 (0%)</span>
+              </div>
+              <span class="p-2 rounded-lg bg-amber-200/60 text-amber-800 text-sm">⏳</span>
+            </div>
+          </div>
+
+          <!-- Presensi Table Box -->
+          <div class="bg-white rounded-xl border border-zinc-200 overflow-hidden shadow-2xs">
+            <div class="px-4 py-3 border-b border-zinc-200/80 bg-zinc-50/50 flex items-center justify-between">
+              <span class="font-bold text-xs text-zinc-900 uppercase tracking-wider font-mono">Daftar Status Pengisian Presensi</span>
+              <span id="presensiFilterResultCount" class="text-[11px] font-mono text-zinc-500">0 Mahasiswa</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr class="bg-zinc-100/70 border-b border-zinc-200 text-zinc-700 font-semibold">
+                    <th class="py-2.5 px-3 w-12 text-center">#</th>
+                    <th class="py-2.5 px-3">Nama Mahasiswa</th>
+                    <th class="py-2.5 px-3 w-32">NIM</th>
+                    <th class="py-2.5 px-3 w-36">Kelompok Asal</th>
+                    <th class="py-2.5 px-3 w-28 text-center">Sesi</th>
+                    <th class="py-2.5 px-3 w-40 text-center">Status Form</th>
+                  </tr>
+                </thead>
+                <tbody id="presensiTableBody" class="divide-y divide-zinc-100">
+                  <!-- Dynamic Rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
 
         <!-- Empty State -->
         <div id="rekapEmpty" class="hidden py-14 text-center space-y-2">
@@ -1021,10 +1121,10 @@
         </div>
       </div>
 
-      <!-- Printable Live Document Preview Container with Adaptive Mobile Auto-Fit -->
-      <div id="printScrollContainer" class="flex-1 overflow-auto custom-scrollbar border border-zinc-300/80 rounded-xl p-1.5 sm:p-4 bg-zinc-600/15 shadow-inner flex flex-col items-center">
-        <div id="printableReportWrapper" class="w-full flex justify-center items-start origin-top transition-all duration-150">
-          <div id="printableReportArea" class="bg-white rounded-sm border border-zinc-300 shadow-md text-zinc-900 text-xs w-[760px] min-w-[760px] max-w-[760px]" style="background: #ffffff; color: #000000; box-sizing: border-box; padding: 20px 24px; min-height: 980px; transform-origin: top center;">
+      <!-- Printable Live Document Preview Container with Adaptive 2D Zoom Pan Scroll -->
+      <div id="printScrollContainer" class="flex-1 overflow-auto custom-scrollbar border border-zinc-300/80 rounded-xl p-2 sm:p-4 bg-zinc-600/15 shadow-inner" style="touch-action: pan-x pan-y; -webkit-overflow-scrolling: touch;">
+        <div id="printableReportWrapper" style="margin: 0 auto; position: relative; transition: width 0.12s ease, height 0.12s ease;">
+          <div id="printableReportArea" class="bg-white rounded-sm border border-zinc-300 shadow-md text-zinc-900 text-xs w-[760px] min-w-[760px] max-w-[760px]" style="background: #ffffff; color: #000000; box-sizing: border-box; padding: 20px 24px; min-height: 980px; transform-origin: top left; position: absolute; top: 0; left: 0;">
             <!-- Dynamic Official Report Generated Here -->
           </div>
         </div>
@@ -2002,28 +2102,53 @@
       }
       const btnK = document.getElementById("subTabKelompokBtn");
       const btnI = document.getElementById("subTabIndividuBtn");
-      const boxK = document.getElementById("rekapKelompokContainer");
-      const boxI = document.getElementById("rekapIndividuContainer");
+      const btnP = document.getElementById("subTabPresensiBtn");
+
+      const filterGroupBar = document.getElementById("rekapGroupFilterBox");
+      const presensiControlBox = document.getElementById("presensiControlBox");
       const searchBox = document.getElementById("individuSearchControlBox");
 
+      const boxK = document.getElementById("rekapKelompokContainer");
+      const boxI = document.getElementById("rekapIndividuContainer");
+      const boxP = document.getElementById("rekapPresensiContainer");
+
+      const activeBtnClass = "py-2 px-1.5 sm:px-3 rounded-lg bg-white text-zinc-900 shadow-xs transition flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer text-center truncate font-bold";
+      const inactiveBtnClass = "py-2 px-1.5 sm:px-3 rounded-lg text-zinc-500 hover:text-zinc-900 transition flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer text-center truncate";
+
+      if (btnK) btnK.className = sub === 'kelompok' ? activeBtnClass : inactiveBtnClass;
+      if (btnI) btnI.className = sub === 'individu' ? activeBtnClass : inactiveBtnClass;
+      if (btnP) btnP.className = sub === 'presensi' ? activeBtnClass : inactiveBtnClass;
+
       if (sub === 'kelompok') {
-        btnK.className = "py-2 px-3 rounded-md bg-white text-zinc-900 shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer";
-        btnI.className = "py-2 px-3 rounded-md text-zinc-500 hover:text-zinc-900 transition flex items-center justify-center gap-1.5 cursor-pointer";
-        boxK.classList.remove("hidden");
-        boxI.classList.add("hidden");
+        if (boxK) boxK.classList.remove("hidden");
+        if (boxI) boxI.classList.add("hidden");
+        if (boxP) boxP.classList.add("hidden");
+        if (filterGroupBar) filterGroupBar.classList.remove("hidden");
+        if (presensiControlBox) presensiControlBox.classList.add("hidden");
         if (searchBox) searchBox.classList.add("hidden");
-      } else {
-        btnI.className = "py-2 px-3 rounded-md bg-white text-zinc-900 shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer";
-        btnK.className = "py-2 px-3 rounded-md text-zinc-500 hover:text-zinc-900 transition flex items-center justify-center gap-1.5 cursor-pointer";
-        boxI.classList.remove("hidden");
-        boxK.classList.add("hidden");
+      } else if (sub === 'individu') {
+        if (boxI) boxI.classList.remove("hidden");
+        if (boxK) boxK.classList.add("hidden");
+        if (boxP) boxP.classList.add("hidden");
+        if (filterGroupBar) filterGroupBar.classList.remove("hidden");
+        if (presensiControlBox) presensiControlBox.classList.add("hidden");
         if (searchBox) searchBox.classList.remove("hidden");
         filterMahasiswaSearch();
+      } else if (sub === 'presensi') {
+        if (boxP) boxP.classList.remove("hidden");
+        if (boxK) boxK.classList.add("hidden");
+        if (boxI) boxI.classList.add("hidden");
+        if (filterGroupBar) filterGroupBar.classList.add("hidden");
+        if (presensiControlBox) presensiControlBox.classList.remove("hidden");
+        if (searchBox) searchBox.classList.add("hidden");
+        populatePresensiFilters();
+        renderRekapPresensi();
       }
     }
 
     function populateRekapFilter(summaryList) {
       const select = document.getElementById("rekapGroupFilter");
+      if (!select) return;
       select.innerHTML = '<option value="ALL">Semua Kelompok</option>';
       summaryList.forEach(item => {
         const opt = document.createElement("option");
@@ -2035,6 +2160,191 @@
 
     function filterRekapDisplay() {
       renderBothRekapViews();
+    }
+
+    function populatePresensiFilters() {
+      const sesiSelect = document.getElementById("presensiSesiFilter");
+      const grpSelect = document.getElementById("presensiGroupFilter");
+
+      if (sesiSelect && grpSelect && groupsData && groupsData.length > 0) {
+        const currentSesi = sesiSelect.value || "ALL";
+        const currentGrp = grpSelect.value || "ALL";
+
+        const sessions = new Set();
+        const groups = new Set();
+
+        groupsData.forEach(g => {
+          if (g.sesi) sessions.add(g.sesi);
+          if (g.name) groups.add(g.name);
+        });
+
+        sesiSelect.innerHTML = '<option value="ALL">Semua Sesi (Keseluruhan)</option>';
+        Array.from(sessions).sort().forEach(s => {
+          const opt = document.createElement("option");
+          opt.value = s;
+          opt.textContent = s;
+          if (s === currentSesi) opt.selected = true;
+          sesiSelect.appendChild(opt);
+        });
+
+        grpSelect.innerHTML = '<option value="ALL">Semua Kelompok</option>';
+        Array.from(groups).sort().forEach(g => {
+          const opt = document.createElement("option");
+          opt.value = g;
+          opt.textContent = g;
+          if (g === currentGrp) opt.selected = true;
+          grpSelect.appendChild(opt);
+        });
+      }
+    }
+
+    function filterPresensiDisplay() {
+      renderRekapPresensi();
+    }
+
+    function renderRekapPresensi() {
+      const tableBody = document.getElementById("presensiTableBody");
+      const totalMhsBadge = document.getElementById("presensiTotalMhs");
+      const sudahMhsBadge = document.getElementById("presensiSudahMhs");
+      const belumMhsBadge = document.getElementById("presensiBelumMhs");
+      const countLabel = document.getElementById("presensiFilterResultCount");
+
+      if (!tableBody) return;
+
+      const sesiFilter = document.getElementById("presensiSesiFilter")?.value || "ALL";
+      const grpFilter = document.getElementById("presensiGroupFilter")?.value || "ALL";
+      const statusFilter = document.getElementById("presensiStatusFilter")?.value || "ALL";
+      const searchQuery = (document.getElementById("presensiSearchInput")?.value || "").trim().toLowerCase();
+
+      // 1. Kumpulkan seluruh mahasiswa dari seluruh kelompok di groupsData
+      const allClassStudents = [];
+      if (groupsData && groupsData.length > 0) {
+        groupsData.forEach(g => {
+          (g.members || []).forEach(m => {
+            allClassStudents.push({
+              name: m.name || "",
+              nim: m.nim || "",
+              kelompok: g.name || "",
+              sesi: g.sesi || "Minggu 1"
+            });
+          });
+        });
+      }
+
+      // 2. Kumpulkan evaluators map dari currentRekapData
+      const submittedMap = new Map(); // lowercase name/nim -> count
+      if (currentRekapData && currentRekapData.summary) {
+        currentRekapData.summary.forEach(g => {
+          if (g.evaluators && Array.isArray(g.evaluators)) {
+            g.evaluators.forEach(eName => {
+              if (eName && eName !== "Anonim") {
+                const norm = eName.trim().toLowerCase();
+                submittedMap.set(norm, (submittedMap.get(norm) || 0) + 1);
+              }
+            });
+          }
+          if (g.evaluasiList) {
+            Object.keys(g.evaluasiList).forEach(mName => {
+              (g.evaluasiList[mName] || []).forEach(rev => {
+                if (rev.penilai && rev.penilai !== "Anonim") {
+                  const norm = rev.penilai.trim().toLowerCase();
+                  submittedMap.set(norm, (submittedMap.get(norm) || 0) + 1);
+                }
+              });
+            });
+          }
+        });
+      }
+
+      // 3. Mapping data presensi mahasiswa
+      const studentPresensiList = allClassStudents.map(student => {
+        const normName = student.name.trim().toLowerCase();
+        const normNim = (student.nim || "").trim().toLowerCase();
+        const hasFilled = submittedMap.has(normName) || (normNim && submittedMap.has(normNim));
+        const count = submittedMap.get(normName) || (normNim ? submittedMap.get(normNim) : 0) || 0;
+
+        return {
+          name: student.name,
+          nim: student.nim || "-",
+          kelompok: student.kelompok,
+          sesi: student.sesi,
+          hasFilled: hasFilled,
+          count: count
+        };
+      });
+
+      // Hitung statistik kelas keseluruhan (sesuai filter sesi/kelompok aktif)
+      const baseScopeList = studentPresensiList.filter(s => {
+        if (sesiFilter !== "ALL" && s.sesi !== sesiFilter) return false;
+        if (grpFilter !== "ALL" && s.kelompok !== grpFilter) return false;
+        return true;
+      });
+
+      const totalStudents = baseScopeList.length;
+      const totalSudah = baseScopeList.filter(s => s.hasFilled).length;
+      const totalBelum = totalStudents - totalSudah;
+      const pctSudah = totalStudents > 0 ? Math.round((totalSudah / totalStudents) * 100) : 0;
+      const pctBelum = totalStudents > 0 ? (100 - pctSudah) : 0;
+
+      if (totalMhsBadge) totalMhsBadge.textContent = `${totalStudents} Mahasiswa`;
+      if (sudahMhsBadge) sudahMhsBadge.textContent = `${totalSudah} (${pctSudah}%)`;
+      if (belumMhsBadge) belumMhsBadge.textContent = `${totalBelum} (${pctBelum}%)`;
+
+      // Filter daftar tabel berdasarkan statusFilter dan searchQuery
+      const filteredList = baseScopeList.filter(s => {
+        if (statusFilter === "SUDAH" && !s.hasFilled) return false;
+        if (statusFilter === "BELUM" && s.hasFilled) return false;
+
+        if (searchQuery) {
+          const matchName = s.name.toLowerCase().includes(searchQuery);
+          const matchNim = s.nim.toLowerCase().includes(searchQuery);
+          const matchGroup = s.kelompok.toLowerCase().includes(searchQuery);
+          if (!matchName && !matchNim && !matchGroup) return false;
+        }
+        return true;
+      });
+
+      if (countLabel) {
+        countLabel.textContent = `${filteredList.length} dari ${totalStudents} Mahasiswa`;
+      }
+
+      if (filteredList.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-8 text-center text-zinc-400 italic">
+              Tidak ada data mahasiswa yang sesuai dengan filter atau kata kunci pencarian.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tableBody.innerHTML = filteredList.map((s, idx) => {
+        const statusBadge = s.hasFilled
+          ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300"><span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>Sudah Mengisi</span>`
+          : `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-900 border border-amber-300"><span class="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse"></span>Belum Mengisi</span>`;
+
+        return `
+          <tr class="hover:bg-zinc-50/80 transition text-zinc-800 ${idx % 2 === 1 ? 'bg-zinc-50/40' : ''}">
+            <td class="py-3 px-3 text-center font-mono text-zinc-400 text-[11px]">${idx + 1}</td>
+            <td class="py-3 px-3 font-semibold text-zinc-900">
+              ${s.name}
+            </td>
+            <td class="py-3 px-3 font-mono text-zinc-500 text-[11px]">
+              ${s.nim}
+            </td>
+            <td class="py-3 px-3">
+              <span class="px-2 py-0.5 rounded bg-zinc-100 border border-zinc-200 text-zinc-700 text-[11px] font-medium whitespace-nowrap">${s.kelompok}</span>
+            </td>
+            <td class="py-3 px-3 text-center font-mono text-zinc-500 text-[11px]">
+              ${s.sesi}
+            </td>
+            <td class="py-3 px-3 text-center">
+              ${statusBadge}
+            </td>
+          </tr>
+        `;
+      }).join("");
     }
 
     // 📈 RENDER MODERN MINIMALIST VISUAL LEADERBOARD CHART (OVERVIEW)
@@ -2174,7 +2484,7 @@
 
     function renderBothRekapViews() {
       if (!currentRekapData) return;
-      const filterVal = document.getElementById("rekapGroupFilter").value;
+      const filterVal = document.getElementById("rekapGroupFilter")?.value || "ALL";
       const summaryList = filterVal === "ALL" 
         ? currentRekapData.summary 
         : currentRekapData.summary.filter(i => i.kelompok === filterVal);
@@ -2182,6 +2492,7 @@
       renderModernRekapCharts(summaryList);
       renderRekapKelompok(summaryList, currentRekapData.isPublicReviewVisible);
       renderRekapIndividu(summaryList, currentRekapData.isPublicReviewVisible);
+      renderRekapPresensi();
 
       // Set Active Box based on SubTab
       switchRekapSubView(currentRekapSubView);
@@ -2832,7 +3143,7 @@
                   <span class="font-extrabold" style="font-size: 12.5px; font-weight: 800;">${g.kelompok}</span>
                   <span class="font-medium font-mono text-zinc-700 bg-zinc-200/80 px-2 py-0.5 rounded" style="font-size: 10.5px;">${g.sesi || 'Minggu 1'}</span>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding-top: 4px;">
             `;
 
             studentKeys.forEach(name => {
@@ -2928,14 +3239,16 @@
 
       if (area) {
         area.style.transform = `scale(${currentPrintZoom})`;
-        area.style.transformOrigin = "top center";
+        area.style.transformOrigin = "top left";
         
-        // Match wrapper height to avoid giant whitespace or clipping on scaled preview
         const baseHeight = area.offsetHeight || 1020;
-        if (wrapper && currentPrintZoom < 1.0) {
-          wrapper.style.height = `${Math.ceil(baseHeight * currentPrintZoom) + 16}px`;
-        } else if (wrapper) {
-          wrapper.style.height = "auto";
+        const scaledWidth = Math.ceil(760 * currentPrintZoom);
+        const scaledHeight = Math.ceil(baseHeight * currentPrintZoom);
+
+        if (wrapper) {
+          wrapper.style.width = `${scaledWidth}px`;
+          wrapper.style.minWidth = `${scaledWidth}px`;
+          wrapper.style.height = `${scaledHeight}px`;
         }
       }
 

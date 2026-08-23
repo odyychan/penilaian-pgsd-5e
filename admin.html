@@ -1236,10 +1236,10 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         </div>
       </div>
 
-      <!-- Printable Live Document Preview Container with Adaptive Mobile Auto-Fit -->
-      <div id="adminPrintScrollContainer" class="flex-1 overflow-auto custom-scrollbar border border-zinc-300/80 rounded-xl p-1.5 sm:p-4 bg-zinc-600/15 shadow-inner flex flex-col items-center">
-        <div id="adminPrintableReportWrapper" class="w-full flex justify-center items-start origin-top transition-all duration-150">
-          <div id="printableReportArea" class="bg-white rounded-sm border border-zinc-300 shadow-md text-zinc-900 text-xs w-[760px] min-w-[760px] max-w-[760px]" style="background: #ffffff; color: #000000; box-sizing: border-box; padding: 20px 24px; min-height: 980px; transform-origin: top center;">
+      <!-- Printable Live Document Preview Container with Adaptive 2D Zoom Pan Scroll -->
+      <div id="adminPrintScrollContainer" class="flex-1 overflow-auto custom-scrollbar border border-zinc-300/80 rounded-xl p-2 sm:p-4 bg-zinc-600/15 shadow-inner" style="touch-action: pan-x pan-y; -webkit-overflow-scrolling: touch;">
+        <div id="adminPrintableReportWrapper" style="margin: 0 auto; position: relative; transition: width 0.12s ease, height 0.12s ease;">
+          <div id="printableReportArea" class="bg-white rounded-sm border border-zinc-300 shadow-md text-zinc-900 text-xs w-[760px] min-w-[760px] max-w-[760px]" style="background: #ffffff; color: #000000; box-sizing: border-box; padding: 20px 24px; min-height: 980px; transform-origin: top left; position: absolute; top: 0; left: 0;">
             <!-- Dynamic Official Report Generated Here -->
           </div>
         </div>
@@ -2925,7 +2925,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
                   <span class="font-extrabold" style="font-size: 12.5px; font-weight: 800;">${g.kelompok}</span>
                   <span class="font-medium font-mono text-zinc-700 bg-zinc-200/80 px-2 py-0.5 rounded" style="font-size: 10.5px;">${g.sesi || 'Minggu 1'}</span>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding-top: 4px;">
             `;
 
             studentKeys.forEach(name => {
@@ -3024,14 +3024,16 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
       if (area) {
         area.style.transform = `scale(${currentAdminPrintZoom})`;
-        area.style.transformOrigin = "top center";
+        area.style.transformOrigin = "top left";
         
-        // Match wrapper height to avoid giant whitespace or clipping on scaled preview
         const baseHeight = area.offsetHeight || 1020;
-        if (wrapper && currentAdminPrintZoom < 1.0) {
-          wrapper.style.height = `${Math.ceil(baseHeight * currentAdminPrintZoom) + 16}px`;
-        } else if (wrapper) {
-          wrapper.style.height = "auto";
+        const scaledWidth = Math.ceil(760 * currentAdminPrintZoom);
+        const scaledHeight = Math.ceil(baseHeight * currentAdminPrintZoom);
+
+        if (wrapper) {
+          wrapper.style.width = `${scaledWidth}px`;
+          wrapper.style.minWidth = `${scaledWidth}px`;
+          wrapper.style.height = `${scaledHeight}px`;
         }
       }
 
