@@ -1106,23 +1106,23 @@
           </div>
 
           <!-- Filter Controls Bar for Presensi -->
-          <div id="presensiControlBox" class="space-y-3 p-3.5 bg-zinc-50 rounded-xl border border-zinc-200 text-xs">
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          <div id="presensiControlBox" class="space-y-2.5 p-3 bg-zinc-50/80 rounded-xl border border-zinc-200/80 text-xs">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <div>
-                <label for="presensiPresenterFilter" class="block font-semibold text-zinc-700 mb-1 text-[11px]">Kelompok Presentator:</label>
-                <select id="presensiPresenterFilter" onchange="onPresensiPresenterFilterChange()" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-medium focus:border-zinc-900 outline-none cursor-pointer">
-                  <option value="ALL">Semua Kelompok Presentator (Matriks Lengkap)</option>
+                <label for="presensiPresenterFilter" class="block font-medium text-zinc-500 mb-1 text-[11px]">Penyaji Target</label>
+                <select id="presensiPresenterFilter" onchange="onPresensiPresenterFilterChange()" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-medium text-zinc-800 focus:border-zinc-900 outline-none cursor-pointer transition">
+                  <option value="ALL">Semua Kelompok (Matriks)</option>
                 </select>
               </div>
               <div>
-                <label for="presensiGroupFilter" class="block font-semibold text-zinc-700 mb-1 text-[11px]">Kelompok Asal Mahasiswa:</label>
-                <select id="presensiGroupFilter" onchange="filterPresensiDisplay()" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-medium focus:border-zinc-900 outline-none cursor-pointer">
-                  <option value="ALL">Semua Kelompok Asal</option>
+                <label for="presensiGroupFilter" class="block font-medium text-zinc-500 mb-1 text-[11px]">Kelompok Asal</label>
+                <select id="presensiGroupFilter" onchange="filterPresensiDisplay()" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-medium text-zinc-800 focus:border-zinc-900 outline-none cursor-pointer transition">
+                  <option value="ALL">Semua Kelompok</option>
                 </select>
               </div>
               <div>
-                <label for="presensiStatusFilter" class="block font-semibold text-zinc-700 mb-1 text-[11px]">Status Penilaian:</label>
-                <select id="presensiStatusFilter" onchange="filterPresensiDisplay()" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-medium focus:border-zinc-900 outline-none cursor-pointer">
+                <label for="presensiStatusFilter" class="block font-medium text-zinc-500 mb-1 text-[11px]">Status</label>
+                <select id="presensiStatusFilter" onchange="filterPresensiDisplay()" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-medium text-zinc-800 focus:border-zinc-900 outline-none cursor-pointer transition">
                   <option value="ALL">Semua Status</option>
                 </select>
               </div>
@@ -1131,11 +1131,11 @@
               <input 
                 type="text" 
                 id="presensiSearchInput" 
-                placeholder="Cari nama mahasiswa, NIM, atau kelompok..." 
+                placeholder="Cari nama mahasiswa atau NIM..." 
                 oninput="filterPresensiDisplay()" 
-                class="w-full pl-9 pr-3.5 py-2 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none transition bg-white placeholder-zinc-400"
+                class="w-full pl-8 pr-3 py-1.5 rounded-lg border border-zinc-300 text-xs text-zinc-800 focus:border-zinc-900 outline-none transition bg-white placeholder-zinc-400"
               >
-              <div class="absolute left-3 top-2.5 text-zinc-400">
+              <div class="absolute left-2.5 top-2 text-zinc-400">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
@@ -1145,12 +1145,12 @@
 
           <!-- Presensi Table Box with Frozen Columns Matrix -->
           <div class="bg-white rounded-xl border border-zinc-200 overflow-hidden shadow-2xs">
-            <div class="px-4 py-3 border-b border-zinc-200/80 bg-zinc-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div class="px-3.5 py-2.5 border-b border-zinc-200/80 bg-zinc-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
-                <span class="font-bold text-xs text-zinc-900 uppercase tracking-wider font-mono">Daftar Matriks Status Pengisian Penilaian</span>
-                <p class="text-[11px] text-zinc-500 mt-0.5">Matriks kepatuhan penilaian per kelompok. Kolom nama mahasiswa difreeze untuk kemudahan navigasi.</p>
+                <span id="presensiTableTitle" class="font-bold text-xs text-zinc-900 font-mono tracking-tight">Status Presensi Penilaian</span>
+                <p id="presensiTableSubtitle" class="text-[11px] text-zinc-400 mt-0.5">Daftar kepatuhan evaluasi mahasiswa.</p>
               </div>
-              <span id="presensiFilterResultCount" class="text-[11px] font-mono font-semibold px-2.5 py-1 rounded-md bg-white border border-zinc-200 text-zinc-700 self-start sm:self-auto">0 Mahasiswa</span>
+              <span id="presensiFilterResultCount" class="text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-md bg-white border border-zinc-200 text-zinc-700 self-start sm:self-auto">0 Mahasiswa</span>
             </div>
             <div class="overflow-x-auto relative max-h-[640px] overflow-y-auto">
               <table class="w-full text-left text-xs border-collapse">
@@ -2853,8 +2853,8 @@
       });
       allPresenterGroups.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
 
-      // Populate Presentator Dropdown
-      presenterSelect.innerHTML = '<option value="ALL">Semua Kelompok Presentator (Matriks Lengkap)</option>';
+      // Populate Presentator Dropdown (Sleek & Concise)
+      presenterSelect.innerHTML = '<option value="ALL">Semua Kelompok (Matriks)</option>';
       allPresenterGroups.forEach(g => {
         const opt = document.createElement("option");
         opt.value = g.name;
@@ -2869,8 +2869,8 @@
       (groupsData || []).forEach(g => { if (g.name) originGroups.add(g.name.trim()); });
       const sortedOriginGroups = Array.from(originGroups).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
 
-      // Populate Kelompok Asal Dropdown
-      grpSelect.innerHTML = '<option value="ALL">Semua Kelompok Asal</option>';
+      // Populate Kelompok Asal Dropdown (Sleek & Concise)
+      grpSelect.innerHTML = '<option value="ALL">Semua Kelompok</option>';
       sortedOriginGroups.forEach(g => {
         const opt = document.createElement("option");
         opt.value = g;
@@ -2889,17 +2889,17 @@
 
       if (selectedPresenter === "ALL") {
         statusSelect.innerHTML = `
-          <option value="ALL">Semua Status Kepatuhan</option>
-          <option value="LENGKAP">Selesai (Semua Kelompok Dinilai / Penyaji)</option>
-          <option value="SEBAGIAN">Sebagian (Belum Lengkap)</option>
-          <option value="BELUM">Belum Mengisi (0 Kelompok)</option>
+          <option value="ALL">Semua Status</option>
+          <option value="LENGKAP">Selesai</option>
+          <option value="SEBAGIAN">Sebagian</option>
+          <option value="BELUM">Belum Mengisi</option>
         `;
       } else {
         statusSelect.innerHTML = `
-          <option value="ALL">Semua Status Penilaian</option>
-          <option value="SUDAH">Sudah Menilai ${selectedPresenter}</option>
-          <option value="BELUM">Belum Menilai ${selectedPresenter}</option>
-          <option value="PENYAJI">Anggota Penyaji ${selectedPresenter}</option>
+          <option value="ALL">Semua Status</option>
+          <option value="SUDAH">Sudah Menilai</option>
+          <option value="BELUM">Belum Menilai</option>
+          <option value="PENYAJI">Anggota Penyaji</option>
         `;
       }
 
@@ -2931,6 +2931,8 @@
       const cardTitle2 = document.getElementById("presensiCardTitle2");
       const cardTitle3 = document.getElementById("presensiCardTitle3");
       const cardTitle4 = document.getElementById("presensiCardTitle4");
+      const tableTitleEl = document.getElementById("presensiTableTitle");
+      const tableSubtitleEl = document.getElementById("presensiTableSubtitle");
       const countLabel = document.getElementById("presensiFilterResultCount");
       const dosenGuestSection = document.getElementById("dosenGuestPresensiSection");
       const dosenGuestListEl = document.getElementById("dosenGuestList");
@@ -3028,6 +3030,17 @@
       const isSinglePresenterMode = presenterFilter !== "ALL";
       const singleTargetPresenter = isSinglePresenterMode ? presenterFilter : null;
       const singlePresenterSesi = isSinglePresenterMode ? (groupSesiMap.get(singleTargetPresenter) || '') : '';
+
+      // Update Section Header Title & Subtitle
+      if (tableTitleEl && tableSubtitleEl) {
+        if (!isSinglePresenterMode) {
+          tableTitleEl.textContent = "Matriks Presensi Penilaian";
+          tableSubtitleEl.textContent = "Rekapitulasi keterisian form evaluasi mahasiswa per kelompok.";
+        } else {
+          tableTitleEl.textContent = `Presensi Penilaian • ${singleTargetPresenter}`;
+          tableSubtitleEl.textContent = `Status penilaian mahasiswa untuk ${singleTargetPresenter}${singlePresenterSesi ? ' (' + singlePresenterSesi + ')' : ''}.`;
+        }
+      }
 
       const studentPresensiList = allClassStudents.map(student => {
         const normNim = String(student.nim || "").trim().toLowerCase();
@@ -3128,14 +3141,14 @@
         return true;
       });
 
-      // 5. Hitung Statistik & Perbarui Kartu Ringkasan
+      // 5. Hitung Statistik & Perbarui Kartu Ringkasan (Concise Titles)
       const totalStudents = baseScopeList.length;
 
       if (!isSinglePresenterMode) {
         // Mode Matriks Lengkap
         if (cardTitle1) cardTitle1.textContent = "Total Mahasiswa";
-        if (cardTitle2) cardTitle2.textContent = "Selesai (Lengkap/Penyaji)";
-        if (cardTitle3) cardTitle3.textContent = "Sebagian (Kurang)";
+        if (cardTitle2) cardTitle2.textContent = "Selesai";
+        if (cardTitle3) cardTitle3.textContent = "Sebagian";
         if (cardTitle4) cardTitle4.textContent = "Belum Mengisi";
 
         const countLengkap = baseScopeList.filter(s => s.matrixStatusCategory === "LENGKAP").length;
@@ -3152,9 +3165,9 @@
       } else {
         // Mode Single Presenter
         if (cardTitle1) cardTitle1.textContent = "Total Mahasiswa";
-        if (cardTitle2) cardTitle2.textContent = `Sudah Menilai`;
-        if (cardTitle3) cardTitle3.textContent = `Anggota Penyaji`;
-        if (cardTitle4) cardTitle4.textContent = `Belum Menilai`;
+        if (cardTitle2) cardTitle2.textContent = "Sudah Menilai";
+        if (cardTitle3) cardTitle3.textContent = "Anggota Penyaji";
+        if (cardTitle4) cardTitle4.textContent = "Belum Menilai";
 
         const countSudah = baseScopeList.filter(s => s.singleStatusCategory === "SUDAH").length;
         const countPenyaji = baseScopeList.filter(s => s.singleStatusCategory === "PENYAJI").length;
@@ -3224,7 +3237,7 @@
           });
 
           headersHtml += `
-            <th class="sticky right-0 top-0 bg-zinc-100/95 z-40 px-3 py-2 text-center min-w-[125px] border-l border-zinc-200 shadow-2xs text-xs font-semibold text-zinc-700">Status</th>
+            <th class="sticky right-0 top-0 bg-zinc-100/95 z-40 px-3 py-2 text-center min-w-[110px] border-l border-zinc-200 shadow-2xs text-xs font-semibold text-zinc-700">Status</th>
           `;
 
           tableHeaderRow.innerHTML = headersHtml;
@@ -3234,10 +3247,10 @@
             <th class="sticky left-0 top-0 bg-zinc-100/95 z-40 px-2 py-2 w-9 text-center border-r border-zinc-200 font-mono text-[11px] text-zinc-500">#</th>
             <th class="sticky left-9 top-0 bg-zinc-100/95 z-40 px-3 py-2 min-w-[170px] max-w-[220px] text-left border-r border-zinc-200 shadow-2xs font-semibold text-xs text-zinc-700">Mahasiswa &amp; NIM</th>
             <th class="px-3 py-2 text-center min-w-[90px] border-r border-zinc-200 bg-zinc-100/95 text-xs font-semibold text-zinc-600">Kel. Asal</th>
-            <th class="px-3 py-2 text-center min-w-[140px] border-r border-zinc-200 bg-zinc-900 text-white font-bold">
+            <th class="px-3 py-2 text-center min-w-[130px] border-r border-zinc-200 bg-zinc-900 text-white font-bold">
               <div class="flex flex-col items-center">
-                <span class="text-xs tracking-tight">Status Penilaian ${singleTargetPresenter}</span>
-                <span class="text-[9px] text-emerald-400 font-mono font-medium leading-none mt-0.5">${singlePresenterSesi ? singlePresenterSesi + ' • ' : ''}Target Penilaian</span>
+                <span class="text-xs tracking-tight">Status • ${singleTargetPresenter}</span>
+                <span class="text-[9px] text-emerald-400 font-mono font-medium leading-none mt-0.5">${singlePresenterSesi ? singlePresenterSesi + ' • ' : ''}Target</span>
               </div>
             </th>
           `;

@@ -4,6 +4,21 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.31] - 2026-08-23
+
+### ✨ Penyempurnaan Teks & Kontrol Filter Minimalis
+- **Label & Opsi Dropdown Ringkas & Elegan:**
+  - Mengubah label filter menjadi lebih natural dan minimalis (`Penyaji Target`, `Kelompok Asal`, `Status`).
+  - Menyederhanakan teks opsi dropdown (`Semua Kelompok (Matriks)`, `Semua Kelompok`, `Semua Status`, `Selesai`, `Sebagian`, `Belum Mengisi`).
+  - Menghilangkan teks deskripsi yang kaku dan panjang agar antarmuka tetap bersih, rapi, dan mudah dipindai mata.
+- **Judul & Deskripsi Matriks Dinamis:**
+  - Judul tabel otomatis menyesuaikan konteks: `Matriks Presensi Penilaian` saat mode matriks dan `Presensi Penilaian • [Kelompok]` saat mode fokus.
+  - Subtitle kontekstual yang informatif dan padat tanpa teks berlebih.
+- **Padding & Typography Polishing:**
+  - Menyelaraskan padding, border halus `border-zinc-200/80`, dan placeholder pencarian yang bersih.
+
+---
+
 ## [2.1.30] - 2026-08-23
 
 ### 🎯 Filter Presentator Interaktif & Tampilan Fokus Tabel Penilaian Per Kelompok
