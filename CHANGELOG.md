@@ -4,6 +4,24 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.58] - 2026-08-23
+
+### 🎯 Penyelarasan Rata Tengah Sel Header Tabel Rekapitulasi Nilai
+- **Penyelarasan Kolom Header (*Header Cell Center Alignment*):**
+  - Mengatur perataan teks rata tengah (*center aligned*) dan *vertical middle* pada seluruh sel judul kolom tabel Rekapitulasi Nilai Kelompok:
+    - `Rank`
+    - `Kelompok Presentasi`
+    - `Sesi`
+    - `Penilai`
+    - `Rata-Rata`
+    - `Presentator Terbaik`
+    - `Predikat`
+  - Memastikan distribusi visual yang seimbang, simetris, dan rapi pada lembar cetak dokumen resmi A4.
+- **Sinkronisasi Dwikanal:**
+  - Diterapkan pada `index.html` dan `admin.html`.
+
+---
+
 ## [2.1.57] - 2026-08-23
 
 ### 🏛️ Penerapan Font Times New Roman pada Judul Poin A & Poin B
