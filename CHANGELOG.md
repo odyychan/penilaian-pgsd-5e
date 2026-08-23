@@ -4,6 +4,19 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.62] - 2026-08-23
+
+### 📊 Optimalisasi Baris Ringkasan Tabel & Penggabungan Kolom Penilai
+- **Penghapusan Sel Penilai Ringkasan (*Summary Cell Refinement*):**
+  - Menghapus sel penilai agregat (*3 Mhs*) pada baris ringkasan kelas untuk mencegah redundansi dan kerancuan data.
+  - Memperluas sel label *"Rata-Rata Keseluruhan Kelas"* menjadi rentang 4 kolom (`colspan="4"`, mencakup kolom *Rank*, *Kelompok Presentasi*, *Sesi*, dan *Penilai*).
+  - Menempatkan nilai rata-rata kelas (*75.00*) tepat berada lurus di bawah kolom *Rata-Rata*.
+  - Sel *"Total X Kelompok Terdaftar"* tetap mengisi rentang 2 kolom terakhir (`colspan="2"`).
+- **Sinkronisasi Dwikanal:**
+  - Diterapkan pada `index.html` dan `admin.html`.
+
+---
+
 ## [2.1.61] - 2026-08-23
 
 ### 🏛️ Penerapan Font Times New Roman pada Lembar Pengesahan Dosen
