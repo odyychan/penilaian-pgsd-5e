@@ -364,7 +364,7 @@
         <form id="assessmentForm" onsubmit="handleFinalSubmit(event)" class="space-y-5">
 
           <!-- =================================================================== -->
-          <!-- 1: IDENTITAS PENILAI -->
+          <!-- 1: IDENTITAS PENILAI (SMART ROLE & NIM-DRIVEN IDENTITY) -->
           <!-- =================================================================== -->
           <div id="stepSection_1" class="step-fade space-y-4">
             <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5">
@@ -372,7 +372,7 @@
               <div class="border-b border-zinc-100 pb-3.5 flex items-center justify-between gap-2">
                 <div>
                   <h2 class="text-base sm:text-lg font-bold text-zinc-900">Identitas Penilai</h2>
-                  <p class="text-xs text-zinc-500 mt-0.5">Masukkan identitas akun mahasiswa Anda untuk verifikasi presensi.</p>
+                  <p class="text-xs text-zinc-500 mt-0.5" id="step1Subtitle">Pilih peran dan verifikasi data identitas Anda untuk presensi penilaian.</p>
                 </div>
                 <div class="flex items-center gap-2">
                   <span id="autoSaveIndicator" class="hidden text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
@@ -385,12 +385,79 @@
                 </div>
               </div>
 
-              <!-- Responsive 2-Column Inputs on Tablet/Laptop -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- 1. Peran Penilai Switcher -->
+              <div class="space-y-2">
+                <label class="block text-xs font-bold uppercase tracking-wider text-zinc-700 font-mono">
+                  Pilih Peran Penilai <span class="text-rose-500">*</span>
+                </label>
+                <div class="grid grid-cols-3 gap-2 p-1.5 bg-zinc-100 rounded-xl border border-zinc-200 text-xs font-semibold">
+                  <label id="roleOption_Mahasiswa" class="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-lg bg-white text-zinc-950 shadow-xs border border-zinc-300 cursor-pointer transition text-center">
+                    <input type="radio" name="peranPenilai" value="Mahasiswa" checked onchange="onRoleChange('Mahasiswa')" class="sr-only">
+                    <span class="text-sm">🎓</span>
+                    <span class="font-bold truncate">Mahasiswa</span>
+                  </label>
+                  <label id="roleOption_Dosen" class="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-lg text-zinc-500 hover:text-zinc-900 border border-transparent cursor-pointer transition text-center">
+                    <input type="radio" name="peranPenilai" value="Dosen" onchange="onRoleChange('Dosen')" class="sr-only">
+                    <span class="text-sm">👨‍🏫</span>
+                    <span class="font-bold truncate">Dosen</span>
+                  </label>
+                  <label id="roleOption_Lainnya" class="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-lg text-zinc-500 hover:text-zinc-900 border border-transparent cursor-pointer transition text-center">
+                    <input type="radio" name="peranPenilai" value="Lainnya" onchange="onRoleChange('Lainnya')" class="sr-only">
+                    <span class="text-sm">🌐</span>
+                    <span class="font-bold truncate">Lainnya / Tamu</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- 2. NIM Input Field (Khusus Mahasiswa dengan Smart Auto-Lookup & Feedback) -->
+              <div id="nimContainer" class="space-y-1.5">
+                <label class="block text-xs font-semibold text-zinc-700">
+                  Nomor Induk Mahasiswa (NIM) <span class="text-rose-500">*</span>
+                </label>
+                <div class="relative">
+                  <input 
+                    type="text" 
+                    id="inputNim" 
+                    inputmode="numeric"
+                    placeholder="Masukkan NIM Anda (contoh: 211012345)..." 
+                    class="w-full pl-3.5 pr-16 py-2.5 rounded-lg border border-zinc-300 text-xs sm:text-sm font-mono focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 outline-none transition bg-white placeholder-zinc-400"
+                    oninput="validateNimLive(this.value); saveFormDraft();"
+                  >
+                  <div id="nimStatusIcon" class="absolute right-3 top-2.5 hidden">
+                    <span class="text-emerald-600 font-bold text-xs">✓ Valid</span>
+                  </div>
+                </div>
+                <!-- Banner Verifikasi Sukses / Peringatan NIM -->
+                <div id="nimFeedbackBox" class="text-xs rounded-lg p-2.5 hidden space-y-1"></div>
+              </div>
+
+              <!-- 3. Dynamic Identity Fields: Nama Lengkap & Email Penilai -->
+              <div id="identityFieldsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                <!-- Nama Lengkap Field -->
+                <div class="space-y-1.5">
+                  <div class="flex items-center justify-between">
+                    <label class="block text-xs font-semibold text-zinc-700">
+                      Nama Lengkap Penilai <span class="text-rose-500">*</span>
+                    </label>
+                    <span id="namaAutoFillNotice" class="text-[10px] text-emerald-700 font-medium hidden">
+                      ✓ Otomatis terisi (dapat disunting)
+                    </span>
+                  </div>
+                  <input 
+                    type="text" 
+                    id="inputNama" 
+                    required 
+                    autocapitalize="words"
+                    placeholder="Tuliskan nama lengkap Anda..." 
+                    class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 outline-none transition bg-white placeholder-zinc-400"
+                    oninput="saveFormDraft();"
+                  >
+                </div>
+
                 <!-- Email Field -->
                 <div class="space-y-1.5">
                   <label class="block text-xs font-semibold text-zinc-700">
-                    Email Mahasiswa <span class="text-rose-500">*</span>
+                    Email Penilai <span class="text-rose-500">*</span>
                   </label>
                   <div class="relative">
                     <input 
@@ -407,22 +474,6 @@
                     </div>
                   </div>
                   <p id="emailValidationMsg" class="text-[11px] font-medium hidden"></p>
-                </div>
-
-                <!-- Nama Lengkap Field -->
-                <div class="space-y-1.5">
-                  <label class="block text-xs font-semibold text-zinc-700">
-                    Nama Lengkap Penilai <span class="text-rose-500">*</span>
-                  </label>
-                  <input 
-                    type="text" 
-                    id="inputNama" 
-                    required 
-                    autocapitalize="words"
-                    placeholder="Tuliskan nama lengkap Anda..." 
-                    class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 outline-none transition bg-white placeholder-zinc-400"
-                    oninput="saveFormDraft();"
-                  >
                 </div>
               </div>
 
@@ -929,6 +980,20 @@
                   <!-- Dynamic Rows -->
                 </tbody>
               </table>
+            </div>
+          </div>
+
+          <!-- Dosen & Tamu Penilai Section -->
+          <div id="dosenGuestPresensiSection" class="p-3.5 sm:p-4 bg-zinc-50 rounded-xl border border-zinc-200 space-y-2.5 hidden">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="text-base">👨‍🏫</span>
+                <h4 class="text-xs font-bold text-zinc-900 font-mono uppercase tracking-wider">Dosen & Penilai Tamu Terdata</h4>
+              </div>
+              <span id="dosenGuestCountBadge" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-zinc-200 text-zinc-800">0 Penilai</span>
+            </div>
+            <div id="dosenGuestList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 pt-1">
+              <!-- Dynamic Lecturer & Guest Cards -->
             </div>
           </div>
         </div>
@@ -1486,20 +1551,193 @@
       }
     }
 
+    // =========================================================================
+    // 🎓 SMART ROLE & NIM-DRIVEN IDENTITY FUNCTIONS (STEP 1)
+    // =========================================================================
+    let currentEvaluatorRole = 'Mahasiswa'; // 'Mahasiswa' | 'Dosen' | 'Lainnya'
+
+    function onRoleChange(role) {
+      currentEvaluatorRole = role;
+
+      const optM = document.getElementById("roleOption_Mahasiswa");
+      const optD = document.getElementById("roleOption_Dosen");
+      const optL = document.getElementById("roleOption_Lainnya");
+
+      const activeClass = "flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-lg bg-white text-zinc-950 shadow-xs border border-zinc-300 cursor-pointer transition text-center font-bold";
+      const inactiveClass = "flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-lg text-zinc-500 hover:text-zinc-900 border border-transparent cursor-pointer transition text-center font-medium";
+
+      if (optM) optM.className = role === 'Mahasiswa' ? activeClass : inactiveClass;
+      if (optD) optD.className = role === 'Dosen' ? activeClass : inactiveClass;
+      if (optL) optL.className = role === 'Lainnya' ? activeClass : inactiveClass;
+
+      const radio = document.querySelector(`input[name="peranPenilai"][value="${role}"]`);
+      if (radio) radio.checked = true;
+
+      const nimContainer = document.getElementById("nimContainer");
+      const autoFillNotice = document.getElementById("namaAutoFillNotice");
+      const inputNama = document.getElementById("inputNama");
+      const inputEmail = document.getElementById("inputEmail");
+      const step1Subtitle = document.getElementById("step1Subtitle");
+
+      if (role === 'Mahasiswa') {
+        if (nimContainer) nimContainer.classList.remove("hidden");
+        if (step1Subtitle) step1Subtitle.textContent = "Masukkan NIM Anda untuk verifikasi otomatis data mahasiswa.";
+        if (inputNama) inputNama.placeholder = "Tuliskan nama lengkap Anda...";
+        if (inputEmail) inputEmail.placeholder = "nama.nim@mhs.ulm.ac.id";
+        
+        const currentNim = document.getElementById("inputNim")?.value || "";
+        if (currentNim) {
+          validateNimLive(currentNim);
+        }
+      } else if (role === 'Dosen') {
+        if (nimContainer) nimContainer.classList.add("hidden");
+        if (autoFillNotice) autoFillNotice.classList.add("hidden");
+        if (step1Subtitle) step1Subtitle.textContent = "Masukkan nama dan email dosen pengampu / penguji.";
+        if (inputNama) {
+          if (!inputNama.value || inputNama.value.trim().toLowerCase().includes("ahmad") || inputNama.value.trim().toLowerCase().includes("siti")) {
+            inputNama.value = "Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.";
+          }
+          inputNama.placeholder = "Dr. ... / Nama Dosen Pengampu";
+        }
+        if (inputEmail) {
+          if (!inputEmail.value) inputEmail.value = "ririanti@ulm.ac.id";
+          inputEmail.placeholder = "dosen@ulm.ac.id";
+          validateEmailLive(inputEmail.value);
+        }
+      } else if (role === 'Lainnya') {
+        if (nimContainer) nimContainer.classList.add("hidden");
+        if (autoFillNotice) autoFillNotice.classList.add("hidden");
+        if (step1Subtitle) step1Subtitle.textContent = "Masukkan nama dan email penilai tamu / umum.";
+        if (inputNama) {
+          if (inputNama.value.includes("Dr. Ririanti")) inputNama.value = "";
+          inputNama.placeholder = "Nama Lengkap Penilai Tamu";
+        }
+        if (inputEmail) {
+          if (inputEmail.value.includes("ririanti@")) inputEmail.value = "";
+          inputEmail.placeholder = "nama@email.com";
+          validateEmailLive(inputEmail.value);
+        }
+      }
+      saveFormDraft();
+    }
+
+    function validateNimLive(nimVal) {
+      const cleanNim = String(nimVal || "").trim();
+      const nimInput = document.getElementById("inputNim");
+      const iconEl = document.getElementById("nimStatusIcon");
+      const feedbackBox = document.getElementById("nimFeedbackBox");
+      const autoFillNotice = document.getElementById("namaAutoFillNotice");
+      const inputNama = document.getElementById("inputNama");
+      const inputEmail = document.getElementById("inputEmail");
+
+      if (!cleanNim) {
+        if (iconEl) iconEl.classList.add("hidden");
+        if (feedbackBox) feedbackBox.classList.add("hidden");
+        if (autoFillNotice) autoFillNotice.classList.add("hidden");
+        if (nimInput) nimInput.className = "w-full pl-3.5 pr-16 py-2.5 rounded-lg border border-zinc-300 text-xs sm:text-sm font-mono focus:border-zinc-900 outline-none transition bg-white placeholder-zinc-400";
+        return false;
+      }
+
+      let foundStudent = null;
+      let foundGroup = null;
+
+      if (groupsData && groupsData.length > 0) {
+        for (const g of groupsData) {
+          const m = (g.members || []).find(mem => mem.nim && String(mem.nim).trim() === cleanNim);
+          if (m) {
+            foundStudent = m;
+            foundGroup = g;
+            break;
+          }
+        }
+      }
+
+      if (foundStudent) {
+        if (iconEl) iconEl.classList.remove("hidden");
+        if (nimInput) nimInput.className = "w-full pl-3.5 pr-16 py-2.5 rounded-lg border border-emerald-500 text-xs sm:text-sm font-mono focus:border-emerald-600 outline-none transition bg-emerald-50/20";
+        
+        if (feedbackBox) {
+          feedbackBox.className = "text-xs rounded-lg p-2.5 bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center justify-between";
+          feedbackBox.innerHTML = `
+            <div class="flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold">✓</span>
+              <div>
+                <span class="font-bold block">${foundStudent.name}</span>
+                <span class="text-[10px] text-emerald-700 block font-medium">${foundGroup.name} (${foundGroup.sesi || 'Minggu 1'})</span>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-200/80 font-bold text-emerald-800">Terdaftar</span>
+          `;
+          feedbackBox.classList.remove("hidden");
+        }
+
+        // Auto-fill nama mahasiswa (dapat diedit manual sesuai permintaan pengguna)
+        if (inputNama) {
+          inputNama.value = foundStudent.name;
+        }
+        if (autoFillNotice) autoFillNotice.classList.remove("hidden");
+
+        // Suggest institutional email if empty
+        if (inputEmail && !inputEmail.value) {
+          const cleanNameSlug = foundStudent.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+          inputEmail.value = `${cleanNameSlug.slice(0, 10)}.${cleanNim}@mhs.ulm.ac.id`;
+          validateEmailLive(inputEmail.value);
+        }
+
+        return true;
+      } else {
+        if (iconEl) iconEl.classList.add("hidden");
+        if (autoFillNotice) autoFillNotice.classList.add("hidden");
+
+        if (cleanNim.length >= 6) {
+          if (nimInput) nimInput.className = "w-full pl-3.5 pr-16 py-2.5 rounded-lg border border-amber-400 text-xs sm:text-sm font-mono focus:border-amber-600 outline-none transition bg-amber-50/20";
+          if (feedbackBox) {
+            feedbackBox.className = "text-[11px] rounded-lg p-2.5 bg-amber-50 border border-amber-200 text-amber-900 flex items-center gap-2";
+            feedbackBox.innerHTML = `
+              <span class="text-amber-700 font-bold text-sm">⚠️</span>
+              <span>NIM <strong>${cleanNim}</strong> tidak ditemukan di database kelas PGSD 5E. Pastikan digit NIM sudah benar atau pilih peran <em>Dosen / Lainnya</em>.</span>
+            `;
+            feedbackBox.classList.remove("hidden");
+          }
+        } else {
+          if (nimInput) nimInput.className = "w-full pl-3.5 pr-16 py-2.5 rounded-lg border border-zinc-300 text-xs sm:text-sm font-mono focus:border-zinc-900 outline-none transition bg-white placeholder-zinc-400";
+          if (feedbackBox) feedbackBox.classList.add("hidden");
+        }
+        return false;
+      }
+    }
+
     function nextFromStep1() {
       const email = document.getElementById("inputEmail").value.trim();
       const nama = document.getElementById("inputNama").value.trim();
+      const nim = document.getElementById("inputNim") ? document.getElementById("inputNim").value.trim() : "";
 
-      if (!validateEmailLive(email)) {
-        showToast("Masukkan alamat email mahasiswa yang valid!", "error");
-        document.getElementById("inputEmail").focus();
-        return;
+      if (currentEvaluatorRole === 'Mahasiswa') {
+        if (!nim) {
+          showToast("Nomor Induk Mahasiswa (NIM) wajib diisi!", "warning");
+          document.getElementById("inputNim").focus();
+          return;
+        }
+        const isNimValid = validateNimLive(nim);
+        if (!isNimValid && nim.length < 6) {
+          showToast("Masukkan NIM mahasiswa yang valid!", "warning");
+          document.getElementById("inputNim").focus();
+          return;
+        }
       }
+
       if (!nama) {
-        showToast("Nama penilai wajib diisi!", "warning");
+        showToast("Nama lengkap penilai wajib diisi!", "warning");
         document.getElementById("inputNama").focus();
         return;
       }
+
+      if (!validateEmailLive(email)) {
+        showToast("Masukkan alamat email yang valid!", "error");
+        document.getElementById("inputEmail").focus();
+        return;
+      }
+
       updateStepUI(2);
     }
 
@@ -1517,7 +1755,7 @@
         return;
       }
 
-      document.getElementById("summaryPenilai").textContent = document.getElementById("inputNama").value.trim();
+      document.getElementById("summaryPenilai").textContent = document.getElementById("inputNama").value.trim() + ` (${currentEvaluatorRole})`;
       document.getElementById("summaryKelompok").textContent = selectedGroupObj.name;
       document.getElementById("summarySkor").textContent = document.getElementById("inputNilaiNumber").value;
       document.getElementById("summaryPresentator").textContent = selectedBestPresenters.join(", ");
@@ -1616,6 +1854,8 @@
     // =========================================================================
     function saveFormDraft() {
       try {
+        const peran = currentEvaluatorRole || "Mahasiswa";
+        const nim = document.getElementById("inputNim") ? document.getElementById("inputNim").value : "";
         const email = document.getElementById("inputEmail") ? document.getElementById("inputEmail").value : "";
         const nama = document.getElementById("inputNama") ? document.getElementById("inputNama").value : "";
         const groupName = selectedGroupObj ? selectedGroupObj.name : "";
@@ -1630,11 +1870,13 @@
         });
 
         // Hanya simpan jika ada isian yang diinputkan pengguna
-        if (!email && !nama && !groupName && selectedBestPresenters.length === 0 && Object.keys(evaluasi).length === 0) {
+        if (!email && !nama && !nim && !groupName && selectedBestPresenters.length === 0 && Object.keys(evaluasi).length === 0) {
           return;
         }
 
         const draft = {
+          peran: peran,
+          nim: nim,
           email: email,
           nama: nama,
           groupName: groupName,
@@ -1661,17 +1903,27 @@
         const draft = JSON.parse(raw);
         if (!draft) return;
 
-        // 1. Pulihkan Step 1 (Identitas)
+        // 1. Pulihkan Step 1 (Identitas & Peran)
+        if (draft.peran) {
+          onRoleChange(draft.peran);
+        }
+        if (draft.nim) {
+          const nimEl = document.getElementById("inputNim");
+          if (nimEl) {
+            nimEl.value = draft.nim;
+            validateNimLive(draft.nim);
+          }
+        }
+        if (draft.nama) {
+          const namaEl = document.getElementById("inputNama");
+          if (namaEl) namaEl.value = draft.nama;
+        }
         if (draft.email) {
           const emailEl = document.getElementById("inputEmail");
           if (emailEl) {
             emailEl.value = draft.email;
             validateEmailLive(draft.email);
           }
-        }
-        if (draft.nama) {
-          const namaEl = document.getElementById("inputNama");
-          if (namaEl) namaEl.value = draft.nama;
         }
 
         // 2. Pulihkan Pemilihan Kelompok & Sub-komponennya
@@ -1726,7 +1978,7 @@
               if (draft.step >= 2 && draft.email && draft.nama) {
                 if (draft.step >= 3 && draft.groupName) {
                   if (draft.step === 4 && draft.bestPresenters && draft.bestPresenters.length > 0) {
-                    document.getElementById("summaryPenilai").textContent = draft.nama;
+                    document.getElementById("summaryPenilai").textContent = draft.nama + ` (${draft.peran || 'Mahasiswa'})`;
                     document.getElementById("summaryKelompok").textContent = draft.groupName;
                     document.getElementById("summarySkor").textContent = draft.nilai || 85;
                     document.getElementById("summaryPresentator").textContent = draft.bestPresenters.join(", ");
@@ -1741,7 +1993,7 @@
                   updateStepUI(2, true);
                 }
               }
-            } else if (draft.email || draft.nama) {
+            } else if (draft.email || draft.nama || draft.nim) {
               startAssessmentForm();
               updateStepUI(1, true);
             }
@@ -1751,7 +2003,7 @@
         const indicator = document.getElementById("autoSaveIndicator");
         if (indicator) indicator.classList.remove("hidden");
 
-        if (draft.email || draft.nama || draft.groupName) {
+        if (draft.email || draft.nama || draft.nim || draft.groupName) {
           isDraftAlreadyRestored = true;
           startAssessmentForm();
           showToast("💾 Draf sebelumnya dipulihkan.", "info");
@@ -1790,25 +2042,28 @@
         return false;
       }
 
-      const allowedStr = appConfig["Domain_Email_Wajib"] || "mhs.ulm.ac.id, ulm.ac.id";
-      const allowedDomains = allowedStr.split(",").map(d => d.trim().toLowerCase()).filter(Boolean);
+      // Hanya wajib domain mhs.ulm.ac.id jika peran adalah Mahasiswa
+      if (currentEvaluatorRole === 'Mahasiswa') {
+        const allowedStr = appConfig["Domain_Email_Wajib"] || "mhs.ulm.ac.id, ulm.ac.id";
+        const allowedDomains = allowedStr.split(",").map(d => d.trim().toLowerCase()).filter(Boolean);
 
-      let isDomainMatch = false;
-      for (let d of allowedDomains) {
-        if (cleanEmail.endsWith("@" + d) || cleanEmail.endsWith("." + d)) {
-          isDomainMatch = true;
-          break;
+        let isDomainMatch = false;
+        for (let d of allowedDomains) {
+          if (cleanEmail.endsWith("@" + d) || cleanEmail.endsWith("." + d)) {
+            isDomainMatch = true;
+            break;
+          }
         }
-      }
 
-      if (!isDomainMatch) {
-        msgEl.textContent = "Alamat email tidak dikenali atau bukan akun resmi.";
-        msgEl.className = "text-[11px] text-rose-600 font-medium";
-        msgEl.classList.remove("hidden");
-        iconEl.classList.add("hidden");
-        emailInput.className = "w-full px-3.5 py-2.5 rounded-lg border border-rose-400 text-xs sm:text-sm focus:border-rose-600 outline-none transition bg-white";
-        isEmailValidState = false;
-        return false;
+        if (!isDomainMatch) {
+          msgEl.textContent = "Alamat email mahasiswa harus menggunakan domain resmi (" + allowedStr + ").";
+          msgEl.className = "text-[11px] text-rose-600 font-medium";
+          msgEl.classList.remove("hidden");
+          iconEl.classList.add("hidden");
+          emailInput.className = "w-full px-3.5 py-2.5 rounded-lg border border-rose-400 text-xs sm:text-sm focus:border-rose-600 outline-none transition bg-white";
+          isEmailValidState = false;
+          return false;
+        }
       }
 
       msgEl.classList.add("hidden");
@@ -1823,6 +2078,7 @@
 
       const email = document.getElementById("inputEmail").value.trim();
       const nama = document.getElementById("inputNama").value.trim();
+      const nim = document.getElementById("inputNim") ? document.getElementById("inputNim").value.trim() : "-";
       const nilai = parseFloat(document.getElementById("inputNilaiNumber").value);
 
       if (!validateEmailLive(email)) {
@@ -1859,6 +2115,8 @@
 
       const payload = {
         action: "submitAssessment",
+        peranPenilai: currentEvaluatorRole || "Mahasiswa",
+        nimPenilai: currentEvaluatorRole === 'Mahasiswa' ? nim : "-",
         email: email,
         namaPenilai: nama,
         kelompok: selectedGroupObj.name,
@@ -2208,6 +2466,9 @@
       const sudahMhsBadge = document.getElementById("presensiSudahMhs");
       const belumMhsBadge = document.getElementById("presensiBelumMhs");
       const countLabel = document.getElementById("presensiFilterResultCount");
+      const dosenGuestSection = document.getElementById("dosenGuestPresensiSection");
+      const dosenGuestListEl = document.getElementById("dosenGuestList");
+      const dosenGuestBadge = document.getElementById("dosenGuestCountBadge");
 
       if (!tableBody) return;
 
@@ -2231,24 +2492,57 @@
         });
       }
 
-      // 2. Kumpulkan evaluators map dari currentRekapData
-      const submittedMap = new Map(); // lowercase name/nim -> count
+      // 2. Kumpulkan evaluators map & penilai Dosen/Tamu
+      const submittedMhsNimMap = new Map(); // clean NIM -> count
+      const submittedMhsNameMap = new Map(); // clean lowercase name -> count
+      const dosenGuestEvaluators = [];
+
       if (currentRekapData && currentRekapData.summary) {
         currentRekapData.summary.forEach(g => {
           if (g.evaluators && Array.isArray(g.evaluators)) {
-            g.evaluators.forEach(eName => {
-              if (eName && eName !== "Anonim") {
-                const norm = eName.trim().toLowerCase();
-                submittedMap.set(norm, (submittedMap.get(norm) || 0) + 1);
+            g.evaluators.forEach(e => {
+              if (!e || e === "Anonim") return;
+              
+              if (typeof e === 'object') {
+                const ePeran = e.peran || 'Mahasiswa';
+                const eName = (e.name || "").trim();
+                const eNim = (e.nim || "").trim();
+
+                if (ePeran === 'Mahasiswa') {
+                  if (eNim && eNim !== "-") {
+                    submittedMhsNimMap.set(eNim.toLowerCase(), (submittedMhsNimMap.get(eNim.toLowerCase()) || 0) + 1);
+                  }
+                  if (eName) {
+                    submittedMhsNameMap.set(eName.toLowerCase(), (submittedMhsNameMap.get(eName.toLowerCase()) || 0) + 1);
+                  }
+                } else {
+                  // Dosen atau Lainnya
+                  const exist = dosenGuestEvaluators.find(x => x.name === eName && x.kelompok === g.kelompok);
+                  if (!exist) {
+                    dosenGuestEvaluators.push({
+                      name: eName,
+                      peran: ePeran,
+                      kelompok: g.kelompok,
+                      sesi: e.sesi || g.sesi
+                    });
+                  }
+                }
+              } else if (typeof e === 'string') {
+                // Legacy string format
+                const norm = e.trim().toLowerCase();
+                submittedMhsNameMap.set(norm, (submittedMhsNameMap.get(norm) || 0) + 1);
               }
             });
           }
+
           if (g.evaluasiList) {
             Object.keys(g.evaluasiList).forEach(mName => {
               (g.evaluasiList[mName] || []).forEach(rev => {
                 if (rev.penilai && rev.penilai !== "Anonim") {
                   const norm = rev.penilai.trim().toLowerCase();
-                  submittedMap.set(norm, (submittedMap.get(norm) || 0) + 1);
+                  if (!submittedMhsNameMap.has(norm)) {
+                    submittedMhsNameMap.set(norm, 1);
+                  }
                 }
               });
             });
@@ -2256,12 +2550,15 @@
         });
       }
 
-      // 3. Mapping data presensi mahasiswa
+      // 3. Mapping data presensi mahasiswa kelas
       const studentPresensiList = allClassStudents.map(student => {
         const normName = student.name.trim().toLowerCase();
         const normNim = (student.nim || "").trim().toLowerCase();
-        const hasFilled = submittedMap.has(normName) || (normNim && submittedMap.has(normNim));
-        const count = submittedMap.get(normName) || (normNim ? submittedMap.get(normNim) : 0) || 0;
+        
+        const hasFilledByNim = normNim && normNim !== "-" && submittedMhsNimMap.has(normNim);
+        const hasFilledByName = submittedMhsNameMap.has(normName);
+        const hasFilled = Boolean(hasFilledByNim || hasFilledByName);
+        const count = (normNim && submittedMhsNimMap.get(normNim)) || submittedMhsNameMap.get(normName) || 0;
 
         return {
           name: student.name,
@@ -2316,35 +2613,59 @@
             </td>
           </tr>
         `;
-        return;
+      } else {
+        tableBody.innerHTML = filteredList.map((s, idx) => {
+          const statusBadge = s.hasFilled
+            ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300"><span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>Sudah Mengisi</span>`
+            : `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-900 border border-amber-300"><span class="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse"></span>Belum Mengisi</span>`;
+
+          return `
+            <tr class="hover:bg-zinc-50/80 transition text-zinc-800 ${idx % 2 === 1 ? 'bg-zinc-50/40' : ''}">
+              <td class="py-3 px-3 text-center font-mono text-zinc-400 text-[11px]">${idx + 1}</td>
+              <td class="py-3 px-3 font-semibold text-zinc-900">
+                ${s.name}
+              </td>
+              <td class="py-3 px-3 font-mono text-zinc-500 text-[11px]">
+                ${s.nim}
+              </td>
+              <td class="py-3 px-3">
+                <span class="px-2 py-0.5 rounded bg-zinc-100 border border-zinc-200 text-zinc-700 text-[11px] font-medium whitespace-nowrap">${s.kelompok}</span>
+              </td>
+              <td class="py-3 px-3 text-center font-mono text-zinc-500 text-[11px]">
+                ${s.sesi}
+              </td>
+              <td class="py-3 px-3 text-center">
+                ${statusBadge}
+              </td>
+            </tr>
+          `;
+        }).join("");
       }
 
-      tableBody.innerHTML = filteredList.map((s, idx) => {
-        const statusBadge = s.hasFilled
-          ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300"><span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>Sudah Mengisi</span>`
-          : `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-900 border border-amber-300"><span class="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse"></span>Belum Mengisi</span>`;
-
-        return `
-          <tr class="hover:bg-zinc-50/80 transition text-zinc-800 ${idx % 2 === 1 ? 'bg-zinc-50/40' : ''}">
-            <td class="py-3 px-3 text-center font-mono text-zinc-400 text-[11px]">${idx + 1}</td>
-            <td class="py-3 px-3 font-semibold text-zinc-900">
-              ${s.name}
-            </td>
-            <td class="py-3 px-3 font-mono text-zinc-500 text-[11px]">
-              ${s.nim}
-            </td>
-            <td class="py-3 px-3">
-              <span class="px-2 py-0.5 rounded bg-zinc-100 border border-zinc-200 text-zinc-700 text-[11px] font-medium whitespace-nowrap">${s.kelompok}</span>
-            </td>
-            <td class="py-3 px-3 text-center font-mono text-zinc-500 text-[11px]">
-              ${s.sesi}
-            </td>
-            <td class="py-3 px-3 text-center">
-              ${statusBadge}
-            </td>
-          </tr>
-        `;
-      }).join("");
+      // 4. Render Dosen & Guest section
+      if (dosenGuestSection && dosenGuestListEl) {
+        if (dosenGuestEvaluators.length > 0) {
+          dosenGuestSection.classList.remove("hidden");
+          if (dosenGuestBadge) dosenGuestBadge.textContent = `${dosenGuestEvaluators.length} Penilai`;
+          dosenGuestListEl.innerHTML = dosenGuestEvaluators.map(dg => {
+            const roleBadgeClass = dg.peran === 'Dosen'
+              ? 'bg-purple-100 text-purple-800 border-purple-200'
+              : 'bg-blue-100 text-blue-800 border-blue-200';
+            const roleIcon = dg.peran === 'Dosen' ? '👨‍🏫' : '🌐';
+            return `
+              <div class="p-3 rounded-lg bg-white border border-zinc-200 shadow-2xs space-y-1">
+                <div class="flex items-center justify-between gap-1">
+                  <span class="text-xs font-bold text-zinc-900 truncate">${roleIcon} ${dg.name}</span>
+                  <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold border ${roleBadgeClass}">${dg.peran}</span>
+                </div>
+                <p class="text-[11px] text-zinc-500">Menilai: <span class="font-medium text-zinc-800">${dg.kelompok}</span> (${dg.sesi})</p>
+              </div>
+            `;
+          }).join("");
+        } else {
+          dosenGuestSection.classList.add("hidden");
+        }
+      }
     }
 
     // 📈 RENDER MODERN MINIMALIST VISUAL LEADERBOARD CHART (OVERVIEW)

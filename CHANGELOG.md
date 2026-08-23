@@ -1,6 +1,28 @@
-﻿# 📜 Changelog
+# 📜 Changelog
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer-Assessment PGSD Kelas 5E FKIP Universitas Lambung Mangkurat.
+
+---
+
+## [2.1.13] - 2026-08-23
+
+### 🎓 Smart Role-Based Evaluator Identity, NIM Auto-Lookup & Precision Submission Presensi
+- **Pilihan Peran Penilai Cerdas (Mahasiswa, Dosen, Lainnya/Tamu):**
+  - Menambahkan switcher peran penilai modern di Langkah 1 formulir penilaian dengan opsi segmented tab yang ramah sentuhan (*touch-friendly*).
+- **Alur Validasi Instan NIM & Auto-Fill Nama Mahasiswa:**
+  - Untuk peran **Mahasiswa**, sistem mewajibkan penginputan NIM dan secara instan melakukan pencocokan ke database master kelas PGSD 5E (`groupsData`).
+  - Menampilkan lencana verifikasi hijau `✓ Terverifikasi` beserta informasi kelompok asal dan sesi saat NIM valid.
+  - Otomatis mengisi (*auto-fill*) field **Nama Lengkap Penilai** dan menyarankan email resmi institusi (`@mhs.ulm.ac.id`), dengan tetap memberikan kebebasan kepada mahasiswa untuk menyunting nama secara manual jika ada koreksi ejaan/gelar.
+  - Memberikan umpan balik validasi yang ramah dan informatif jika NIM belum terdaftar.
+- **Alur Penilai Dosen & Tamu:**
+  - Untuk peran **Dosen** dan **Lainnya / Tamu**, field input NIM otomatis disembunyikan/dilewati.
+  - Nama dan email dapat langsung diisi secara fleksibel tanpa hambatan validasi NIM.
+- **Pemisahan & Presisi 100% Status Pengisian Presensi:**
+  - Validasi status pengisian form mahasiswa kelas dievaluasi secara ketat berdasarkan **NIM** dan **Peran Mahasiswa**, menjamin akurasi persentase kehadiran tanpa terdistorsi.
+  - Menambahkan bagian khusus terpisah **`👨‍🏫 Dosen & Penilai Tamu Terdata`** pada sub-tab presensi untuk merangkum masukan dari dosen pengampu dan penilai tamu.
+- **Pembaruan Backend Apps Script & Portal Admin:**
+  - Memperbarui `submitAssessment()`, `getRecapData()`, dan `adminGetResponsesList()` di [`Code.gs`](file:///e:/Data/GitHub/Project%20Dede/Code.gs) untuk mencatat serta menyajikan kolom `Peran` dan `NIM Penilai`.
+  - Memperbarui antarmuka log respons di [`admin.html`](file:///e:/Data/GitHub/Project%20Dede/admin.html) dengan badge peran visual dan pencarian terpadu.
 
 ---
 

@@ -385,11 +385,12 @@ function submitAssessment(payload) {
 
     const ss = getSpreadsheet();
     const config = getConfigMap(ss);
-    const sesi = String(payload.sesi || config["Sesi_Minggu_Aktif"] || "Minggu 1").trim();
+    const peranPenilai = String(payload.peranPenilai || "Mahasiswa").trim();
+    const nimPenilai = String(payload.nimPenilai || "-").trim();
 
-    // 1. Validasi Domain Email
+    // 1. Validasi Domain Email (Wajib untuk Mahasiswa)
     const allowedDomainsStr = config["Domain_Email_Wajib"] || "mhs.ulm.ac.id, ulm.ac.id";
-    if (!isValidInstitutionalEmail(email, allowedDomainsStr)) {
+    if (peranPenilai === "Mahasiswa" && !isValidInstitutionalEmail(email, allowedDomainsStr)) {
       return {
         success: false,
         error: `Format email tidak valid atau bukan domain resmi (${allowedDomainsStr}). Contoh format: nama.nim@mhs.ulm.ac.id`
@@ -445,7 +446,9 @@ function submitAssessment(payload) {
       best1,
       best2,
       evaluasiJson,
-      "VALID"
+      "VALID",
+      peranPenilai,
+      nimPenilai
     ];
 
     // 6. Zona Kunci Singkat (Lock Duration < 200ms)
@@ -542,11 +545,22 @@ function getRecapData() {
         };
       }
 
+      const peran = String(row[11] || "Mahasiswa").trim();
+      const nimPenilai = String(row[12] || "-").trim();
+
       const item = rekapByGroup[kelompok];
       item.totalPenilai += 1;
       item.totalSkor += nilaiKelompok;
-      if (namaPenilai && !item.evaluators.includes(namaPenilai)) {
-        item.evaluators.push(namaPenilai);
+      if (namaPenilai) {
+        const alreadyInList = item.evaluators.some(e => (typeof e === 'object' ? e.name : e) === namaPenilai);
+        if (!alreadyInList) {
+          item.evaluators.push({
+            name: namaPenilai,
+            nim: nimPenilai,
+            peran: peran,
+            sesi: sesi
+          });
+        }
       }
 
       if (best1 && best1 !== "-") {
@@ -995,6 +1009,8 @@ function adminGetResponsesList() {
         sesi: sesi,
         email: email,
         namaPenilai: namaPenilai,
+        peran: String(row[11] || "Mahasiswa").trim(),
+        nim: String(row[12] || "-").trim(),
         kelompok: kelompok,
         nilaiKelompok: nilaiKelompok,
         best1: best1,

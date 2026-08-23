@@ -2095,7 +2095,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         if (groupFilter !== "ALL" && item.kelompok !== groupFilter) return false;
         if (sesiFilter !== "ALL" && item.sesi !== sesiFilter) return false;
         if (query) {
-          const str = `${item.idRespons} ${item.namaPenilai} ${item.email} ${item.kelompok} ${item.sesi}`.toLowerCase();
+          const str = `${item.idRespons} ${item.namaPenilai} ${item.nim || ''} ${item.peran || ''} ${item.email} ${item.kelompok} ${item.sesi}`.toLowerCase();
           if (!str.includes(query)) return false;
         }
         return true;
@@ -2200,9 +2200,12 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
             
             <!-- Col 1: Penilai -->
             <div class="space-y-1 bg-zinc-50 p-2.5 rounded-lg border border-zinc-200/70">
-              <span class="text-[10px] font-semibold text-zinc-400 uppercase font-mono">Identitas Penilai</span>
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-semibold text-zinc-400 uppercase font-mono">Identitas Penilai</span>
+                <span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold ${r.peran === 'Dosen' ? 'bg-purple-100 text-purple-800 border border-purple-200' : (r.peran === 'Lainnya' ? 'bg-blue-100 text-blue-800 border border-blue-200' : 'bg-zinc-200 text-zinc-800')}">${r.peran || 'Mahasiswa'}</span>
+              </div>
               <p class="font-bold text-zinc-900 truncate">${r.namaPenilai}</p>
-              <p class="text-[11px] text-zinc-500 font-mono truncate">${r.email}</p>
+              <p class="text-[11px] text-zinc-500 font-mono truncate">${r.nim && r.nim !== '-' ? 'NIM: ' + r.nim + ' • ' : ''}${r.email}</p>
             </div>
 
             <!-- Col 2: Kelompok & Nilai -->
