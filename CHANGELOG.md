@@ -4,6 +4,28 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.29] - 2026-08-23
+
+### ⚡ Optimalisasi Kecepatan Muat & Desain Matriks Checklist Ultra-Minimalis (Compact Presensi)
+- **Desain Minimalis Matriks Checklist (Anti-Ramai & Mudah Dibaca):**
+  - Mengganti badge tebal berukuran besar dengan penanda ikon checklist presisi, halus, dan ringkas:
+    - `✓` (Hijau Lingkaran Halus): Menandai kelompok yang sudah dinilai.
+    - `✕` (Merah Lingkaran Halus): Menandai kelompok wajib pada sesi aktif yang belum dinilai.
+    - `Penyaji` (Tag Ungu Ramping): Menandai anggota kelompok penyaji.
+    - `-` (Abu-abu Pudar): Menandai kelompok pada jadwal sesi lain.
+  - Penyesuaian padding baris dan font tabel agar lebih padat (*compact*), bersih, dan mudah dipindai mata layaknya buku presensi digital profesional.
+  - Badge Status Kepatuhan dibuat lebih ramping dan elegan (`Selesai`, `Sebagian (X/N)`, `Belum (X/N)`).
+- **Akselerasi Kecepatan Muat (Instant 0ms Stale-While-Revalidate):**
+  - Menghilangkan proses loading blocking: Data rekapitulasi yang tersimpan di cache langsung dirender secara instan tanpa jeda saat beralih tab.
+  - Sinkronisasi API berjalan di latar belakang (*silent sync*) tanpa mengunci antarmuka atau menampilkan spinner yang mengganggu.
+  - Mengeliminasi kalkulasi render ganda (*duplicate execution*) pada sub-tab presensi.
+- **Responsivitas Header Tab Mobile:**
+  - Label sub-tab dinamis (`Presensi` di perangkat mobile, `Status Presensi` di desktop) untuk mencegah *text truncation* pada layar sempit.
+- **100% Vector SVG Sharpness (0 Raw Emojis):**
+  - Seluruh indikator checklist menggunakan SVG vektor murni yang tajam di seluruh resolusi layar (Android, iOS, Windows, Mac).
+
+---
+
 ## [2.1.28] - 2026-08-23
 
 ### 📋 Transformasi Tabel Status Presensi Menjadi Matriks Checklist Presisi & Frozen Column
