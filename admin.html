@@ -283,8 +283,8 @@
           </div>
           <div class="min-w-0">
             <div class="flex items-center gap-1.5 sm:gap-2">
-              <h1 class="font-bold text-xs sm:text-sm text-zinc-100 truncate">Admin Control Panel</h1>
-              <span class="px-1.5 py-0.2 rounded text-[9px] sm:text-[10px] font-mono font-semibold bg-zinc-800 text-emerald-400 border border-zinc-700 flex-shrink-0">Live</span>
+              <h1 class="font-bold text-xs sm:text-sm text-zinc-100 truncate">Panel Admin</h1>
+              <span class="px-1.5 py-0.2 rounded text-[9px] sm:text-[10px] font-mono font-semibold bg-zinc-800 text-emerald-400 border border-zinc-700 flex-shrink-0">Online</span>
             </div>
             <p class="text-[10px] sm:text-[11px] text-zinc-400 truncate">Bimbingan Konseling di SD</p>
           </div>
@@ -298,7 +298,7 @@
           </div>
 
           <a href="/" target="_blank" class="px-2.5 sm:px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-[11px] sm:text-xs font-medium transition flex items-center gap-1">
-            <span>Form</span>
+            <span>Buka Formulir</span>
             <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
             </svg>
@@ -316,7 +316,7 @@
           <button 
             id="adminTabBtn_data" 
             onclick="switchAdminTab('data')" 
-            class="py-2 px-1.5 sm:px-2 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate"
+            class="py-2 px-1.5 sm:px-2 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate font-bold"
           >
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
@@ -366,12 +366,12 @@
         <div class="space-y-1">
           <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0"></span>
-            <h2 class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-zinc-500 font-mono">Penentuan Sesi Minggu Aktif</h2>
+            <h2 class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-zinc-500 font-mono">Sesi Tampil Minggu Ini</h2>
           </div>
           <p class="text-xs text-zinc-900 font-medium">
             Sesi aktif saat ini di formulir: <strong id="quickActiveSessionLabel" class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-mono">Minggu 1</strong>
           </p>
-          <p class="text-[11px] text-zinc-400">Pilih sesi minggu untuk menentukan kelompok mana yang akan tampil di formulir mahasiswa. <em>Tersimpan otomatis seketika.</em></p>
+          <p class="text-[11px] text-zinc-400">Menentukan kelompok yang tampil di formulir penilaian mahasiswa. <em>Tersimpan otomatis seketika.</em></p>
         </div>
 
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto flex-shrink-0">
@@ -396,7 +396,7 @@
             <option value="Minggu 14">Minggu 14</option>
             <option value="Minggu 15">Minggu 15</option>
             <option value="Minggu 16">Minggu 16</option>
-            <option value="SEMUA">SEMUA (Tampilkan Semua Kelompok)</option>
+            <option value="SEMUA">Semua Sesi (Buka Semua Kelompok)</option>
           </select>
 
           <span class="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-1.5 rounded border border-emerald-200 text-center font-medium flex items-center justify-center gap-1">
@@ -417,8 +417,8 @@
         <div class="bg-white rounded-xl border border-zinc-200 p-3.5 sm:p-5 shadow-xs space-y-3 sm:space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 class="text-sm sm:text-base font-bold text-zinc-900">Manajemen Kelompok & Anggota</h2>
-              <p class="text-[11px] sm:text-xs text-zinc-500 mt-0.5">Kelola susunan kelompok & anggota. Seluruh perubahan tersimpan otomatis ke Spreadsheet.</p>
+              <h2 class="text-sm sm:text-base font-bold text-zinc-900">Daftar Kelompok & Mahasiswa</h2>
+              <p class="text-[11px] sm:text-xs text-zinc-500 mt-0.5">Tambah, ubah, atau atur anggota tiap kelompok presentasi. Tersimpan otomatis ke Spreadsheet.</p>
             </div>
 
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
@@ -431,14 +431,14 @@
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
                 </svg>
-                <span>Input Massal (Batch)</span>
+                <span>Impor Banyak Sekaligus</span>
               </button>
               <button 
                 type="button" 
                 onclick="openAddGroupModal()" 
                 class="w-full sm:w-auto px-3.5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
               >
-                <span>+ Tambah Kelompok</span>
+                <span>+ Kelompok Baru</span>
               </button>
               <button 
                 type="button" 
@@ -461,7 +461,7 @@
               <input 
                 type="text" 
                 id="searchMasterInput" 
-                placeholder="Cari kelompok, nama mahasiswa, atau NIM..." 
+                placeholder="Cari nama, NIM, atau kelompok..." 
                 oninput="filterMasterDataDisplay()" 
                 class="w-full pl-9 pr-3.5 py-2 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none bg-white placeholder-zinc-400"
               >
@@ -492,7 +492,7 @@
         <!-- Empty Master Groups -->
         <div id="emptyMasterGroups" class="hidden p-6 sm:p-8 text-center bg-white rounded-xl border border-zinc-200 space-y-2">
           <p class="text-sm font-semibold text-zinc-800">Tidak ada data kelompok.</p>
-          <p class="text-xs text-zinc-500">Klik tombol '+ Tambah Kelompok' di atas untuk membuat kelompok baru.</p>
+          <p class="text-xs text-zinc-500">Klik tombol '+ Kelompok Baru' di atas untuk membuat kelompok baru.</p>
         </div>
 
       </div>
@@ -505,8 +505,8 @@
           
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 pb-3.5">
             <div>
-              <h2 class="text-sm sm:text-base font-bold text-zinc-900">Konfigurasi Parameter Perkuliahan</h2>
-              <p class="text-[11px] sm:text-xs text-zinc-500 mt-0.5">Atur identitas mata kuliah, rentang skor, dan aturan formulir. <em>Tersimpan otomatis saat diedit.</em></p>
+              <h2 class="text-sm sm:text-base font-bold text-zinc-900">Pengaturan Perkuliahan & Formulir</h2>
+              <p class="text-[11px] sm:text-xs text-zinc-500 mt-0.5">Atur identitas mata kuliah, rentang skor, dan aturan penilaian. <em>Tersimpan otomatis saat diedit.</em></p>
             </div>
             <div class="flex items-center gap-2">
               <span class="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold flex items-center gap-1.5">
@@ -516,9 +516,9 @@
             </div>
           </div>
 
-          <!-- Section A: Identitas Perkuliahan (Sesi Aktif Redundan telah dipindahkan ke Widget Utama) -->
+          <!-- Section A: Identitas Perkuliahan -->
           <div class="space-y-3.5 sm:space-y-4">
-            <h3 class="text-[11px] sm:text-xs font-bold text-zinc-400 uppercase tracking-wider font-mono">1. Identitas Mata Kuliah</h3>
+            <h3 class="text-[11px] sm:text-xs font-bold text-zinc-400 uppercase tracking-wider font-mono">1. Informasi Perkuliahan</h3>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 text-xs">
               <div class="space-y-1.5 sm:col-span-2">
@@ -584,7 +584,7 @@
           <!-- Section: Kredit Pembuat Web -->
           <div class="space-y-3.5 sm:space-y-4 pt-4 border-t border-zinc-100">
             <div>
-              <h3 class="text-[11px] sm:text-xs font-bold text-zinc-400 uppercase tracking-wider font-mono">2. Kredit Pembuat Web</h3>
+              <h3 class="text-[11px] sm:text-xs font-bold text-zinc-400 uppercase tracking-wider font-mono">2. Nama Pembuat Web (Footer)</h3>
               <p class="text-[11px] text-zinc-400 mt-1">Nama Anda akan ditampilkan di footer halaman utama &amp; admin.</p>
             </div>
 
@@ -623,11 +623,11 @@
 
           <!-- Section B: Batasan Nilai & Formulir -->
           <div class="space-y-3.5 sm:space-y-4 pt-4 border-t border-zinc-100">
-            <h3 class="text-[11px] sm:text-xs font-bold text-zinc-400 uppercase tracking-wider font-mono">3. Batasan Skor & Formulir</h3>
+            <h3 class="text-[11px] sm:text-xs font-bold text-zinc-400 uppercase tracking-wider font-mono">3. Aturan Penilaian & Pengisian</h3>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 text-xs">
               <div class="space-y-1.5">
-                <label class="block font-semibold text-zinc-700">Nilai Kelompok Minimal</label>
+                <label class="block font-semibold text-zinc-700">Skor Nilai Minimum</label>
                 <input 
                   type="number" 
                   id="cfg_Nilai_Kelompok_Min" 
@@ -639,7 +639,7 @@
               </div>
 
               <div class="space-y-1.5">
-                <label class="block font-semibold text-zinc-700">Nilai Kelompok Maksimal</label>
+                <label class="block font-semibold text-zinc-700">Skor Nilai Maksimum</label>
                 <input 
                   type="number" 
                   id="cfg_Nilai_Kelompok_Max" 
@@ -651,7 +651,7 @@
               </div>
 
               <div class="space-y-1.5">
-                <label class="block font-semibold text-zinc-700">Maksimal Pilihan Presentator Terbaik</label>
+                <label class="block font-semibold text-zinc-700">Batas Suara Presentator Terbaik</label>
                 <input 
                   type="number" 
                   id="cfg_Maksimal_Pilihan_Presentator_Terbaik" 
@@ -663,7 +663,7 @@
               </div>
 
               <div class="space-y-1.5">
-                <label class="block font-semibold text-zinc-700">Maksimal Karakter Evaluasi</label>
+                <label class="block font-semibold text-zinc-700">Batas Panjang Masukan/Ulasan</label>
                 <input 
                   type="number" 
                   id="cfg_Maksimal_Karakter_Evaluasi" 
@@ -675,14 +675,14 @@
               </div>
 
               <div class="space-y-1.5">
-                <label class="block font-semibold text-zinc-700">Tampilkan Ulasan Kualitatif ke Publik</label>
+                <label class="block font-semibold text-zinc-700">Tampilkan Masukan Kualitatif ke Publik</label>
                 <select 
                   id="cfg_Tampilkan_Ulasan_Publik" 
                   onchange="handleConfigInputAutoSave(true)"
                   class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs font-medium bg-white focus:border-zinc-900 outline-none cursor-pointer"
                 >
-                  <option value="AKTIF">AKTIF (Dapat dilihat audiens pada rekapitulasi)</option>
-                  <option value="NONAKTIF">NONAKTIF (Disembunyikan dari audiens)</option>
+                  <option value="AKTIF">Tampilkan di Rekapitulasi (Dapat dilihat mahasiswa)</option>
+                  <option value="NONAKTIF">Sembunyikan dari Rekapitulasi (Khusus Admin)</option>
                 </select>
               </div>
 
@@ -693,10 +693,10 @@
                   onchange="handleConfigInputAutoSave(true)"
                   class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs font-medium bg-white focus:border-zinc-900 outline-none cursor-pointer"
                 >
-                  <option value="WAJIB_NILAI_KELOMPOK_LAIN">Wajib Menilai Kelompok Penyaji Lain (Jika ada &gt; 1 kelompok tampil di sesi yang sama)</option>
-                  <option value="BEBAS_PENUH_DI_SESINYA">Bebas Penuh Pengisian (Seluruh anggota kelompok tampil otomatis berstatus Selesai/Penyaji)</option>
+                  <option value="WAJIB_NILAI_KELOMPOK_LAIN">Wajib Menilai Sesama Penyaji (Jika ada &ge;2 kelompok tampil bareng)</option>
+                  <option value="BEBAS_PENUH_DI_SESINYA">Bebas Menilai / Fokus Tampil (Otomatis selesai &amp; tampil label 'Bebas' di matriks)</option>
                 </select>
-                <p class="text-[11px] text-zinc-400">Aturan kepatuhan bagi anggota kelompok yang sedang tampil pada sesi/minggu berjalan.</p>
+                <p class="text-[11px] text-zinc-400">Aturan kepatuhan bagi mahasiswa yang kelompoknya sedang presentasi di sesi minggu berjalan.</p>
               </div>
             </div>
           </div>
@@ -726,8 +726,8 @@
         <div class="bg-white rounded-xl border border-zinc-200 p-3.5 sm:p-5 shadow-xs space-y-3 sm:space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 class="text-sm sm:text-base font-bold text-zinc-900">Data Respons & Pengiriman Mahasiswa</h2>
-              <p class="text-[11px] sm:text-xs text-zinc-500 mt-0.5">Kelola jawaban masuk, pantau skor, dan reset/hapus data pengiriman yang salah.</p>
+              <h2 class="text-sm sm:text-base font-bold text-zinc-900">Daftar Respons Masuk</h2>
+              <p class="text-[11px] sm:text-xs text-zinc-500 mt-0.5">Pantau penilaian masuk dan kelola data evaluasi mahasiswa.</p>
             </div>
 
             <div class="flex items-center gap-2 w-full sm:w-auto flex-wrap">
@@ -747,12 +747,12 @@
                 onclick="openDeleteScopedModal()" 
                 id="btnDeleteScopedResponses"
                 class="flex-1 sm:flex-none px-3.5 py-2 rounded-lg border border-rose-200 hover:bg-rose-50 text-rose-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
-                title="Hapus respons berdasarkan kelompok atau sesi tertentu"
+                title="Hapus penilaian berdasarkan kelompok atau sesi tertentu"
               >
                 <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                 </svg>
-                <span>Hapus per Kelompok / Sesi</span>
+                <span>Hapus Berdasarkan Kategori</span>
               </button>
               <button 
                 type="button" 
@@ -835,7 +835,7 @@
           <!-- Counter info -->
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs text-zinc-500 pt-1">
             <span id="responseCountLabel">Menampilkan 0 respons</span>
-            <span class="text-[10px] sm:text-[11px] text-zinc-400 italic">Klik tombol 'Hapus/Reset' pada baris untuk membatalkan pengiriman</span>
+            <span class="text-[10px] sm:text-[11px] text-zinc-400 italic">Gunakan tombol 'Hapus Data Ini' pada kartu untuk membatalkan pengiriman</span>
           </div>
         </div>
 
@@ -879,17 +879,17 @@
         <div class="bg-white rounded-xl border border-zinc-200 p-4 sm:p-7 shadow-xs space-y-4 sm:space-y-5">
           <div class="border-b border-zinc-100 pb-3 flex items-center justify-between gap-2">
             <div>
-              <h2 class="text-sm sm:text-base font-bold text-zinc-900">Konfigurasi URL Backend API</h2>
-              <p class="text-[11px] sm:text-xs text-zinc-500 mt-0.5">URL Google Apps Script Web App yang menerima & menyimpan data ke Spreadsheet.</p>
+              <h2 class="text-sm sm:text-base font-bold text-zinc-900">Koneksi Google Spreadsheet</h2>
+              <p class="text-[11px] sm:text-xs text-zinc-500 mt-0.5">Alamat Web App Google Apps Script untuk menyimpan dan membaca data.</p>
             </div>
             <span class="text-[10px] sm:text-[11px] font-mono font-medium px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
-              Endpoint
+              Koneksi
             </span>
           </div>
 
           <div class="space-y-3.5 sm:space-y-4">
             <div class="space-y-1.5">
-              <label class="block text-xs font-semibold text-zinc-700">Google Apps Script Exec URL</label>
+              <label class="block text-xs font-semibold text-zinc-700">Alamat Script Web App (URL Exec)</label>
               <div class="flex flex-col sm:flex-row gap-2">
                 <input 
                   type="url" 
@@ -907,7 +907,7 @@
                     <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                     </svg>
-                    <span>Uji Koneksi</span>
+                    <span>Tes Sambungan</span>
                   </button>
                   <button 
                     type="button" 
@@ -923,15 +923,15 @@
             <!-- Live Ping Results -->
             <div id="pingResultBox" class="hidden p-3.5 sm:p-4 rounded-lg bg-zinc-50 border border-zinc-200 text-xs space-y-1.5 font-mono">
               <div class="flex items-center justify-between">
-                <span class="font-bold text-zinc-800">Status Endpoint:</span>
-                <span id="pingStatusText" class="font-bold text-emerald-600">Online 200 OK</span>
+                <span class="font-bold text-zinc-800">Status Koneksi:</span>
+                <span id="pingStatusText" class="font-bold text-emerald-600">Terhubung Normal</span>
               </div>
               <div class="text-[11px] text-zinc-500 flex items-center justify-between">
-                <span>Waktu Respon (Latency):</span>
+                <span>Kecepatan Respon:</span>
                 <span id="pingLatencyText" class="font-bold text-zinc-700">-</span>
               </div>
               <div class="text-[11px] text-zinc-500 flex items-center justify-between">
-                <span>Kelompok Aktif Terbaca:</span>
+                <span>Kelompok Terbaca:</span>
                 <span id="pingGroupsCount" class="font-bold text-zinc-700">-</span>
               </div>
             </div>
@@ -944,11 +944,11 @@
           <!-- Database Link & Reset All -->
           <div class="bg-white rounded-xl border border-zinc-200 p-4 sm:p-5 shadow-xs flex flex-col justify-between space-y-4">
             <div>
-              <div class="text-xs font-semibold text-zinc-400 uppercase font-mono">Data Respons Masuk</div>
+              <div class="text-xs font-semibold text-zinc-400 uppercase font-mono">Data Respons Penilaian</div>
               <div class="flex items-center justify-between mt-1">
                 <h3 class="text-sm font-bold text-zinc-900">Total Respons: <span id="labelTotalResponses" class="font-mono text-emerald-600">0 Data</span></h3>
               </div>
-              <p class="text-xs text-zinc-500 mt-1">Kosongkan seluruh data respons penilaian sekaligus jika memulai tahun ajaran atau sesi baru.</p>
+              <p class="text-xs text-zinc-500 mt-1">Hapus seluruh data penilaian mahasiswa sekaligus untuk memulai semester atau sesi baru.</p>
             </div>
 
             <div class="space-y-2 pt-2 border-t border-zinc-100">
@@ -960,7 +960,7 @@
                 <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                 </svg>
-                <span>Kosongkan Seluruh Respons</span>
+                <span>Reset Semua Penilaian (Mulai Awal)</span>
               </button>
             </div>
           </div>
@@ -968,9 +968,9 @@
           <!-- Purge Cache Action -->
           <div class="bg-white rounded-xl border border-zinc-200 p-4 sm:p-5 shadow-xs flex flex-col justify-between space-y-4">
             <div>
-              <div class="text-xs font-semibold text-zinc-400 uppercase font-mono">Cache & Sinkronisasi</div>
-              <h3 class="text-sm font-bold text-zinc-900 mt-1">Segarkan Cache Sistem</h3>
-              <p class="text-xs text-zinc-500 mt-1">Hapus seluruh cache lokal browser dan tarik data terbaru dari Google Sheets secara langsung.</p>
+              <div class="text-xs font-semibold text-zinc-400 uppercase font-mono">Cache &amp; Sinkronisasi Data</div>
+              <h3 class="text-sm font-bold text-zinc-900 mt-1">Segarkan Cache Browser</h3>
+              <p class="text-xs text-zinc-500 mt-1">Bersihkan penyimpanan cache lokal dan unduh ulang data segar dari Google Sheets.</p>
             </div>
 
             <div class="pt-2 border-t border-zinc-100">
@@ -983,7 +983,7 @@
                 <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                 </svg>
-                <span>Hapus &amp; Segarkan Cache</span>
+                <span>Bersihkan Cache &amp; Sinkronkan Ulang</span>
               </button>
             </div>
           </div>
@@ -993,8 +993,8 @@
         <!-- CARD 3: SECURITY & PASSWORD CHANGE -->
         <div class="bg-white rounded-xl border border-zinc-200 p-4 sm:p-7 shadow-xs space-y-3.5 sm:space-y-4">
           <div class="border-b border-zinc-100 pb-3">
-            <h2 class="text-sm font-bold text-zinc-900">Keamanan Akses Kata Sandi Admin</h2>
-            <p class="text-xs text-zinc-500 mt-0.5">Ubah kata sandi untuk melindungi halaman admin ini.</p>
+            <h2 class="text-sm font-bold text-zinc-900">Ubah Kata Sandi Admin</h2>
+            <p class="text-xs text-zinc-500 mt-0.5">Ganti kata sandi untuk mengamankan akses ke halaman panel admin.</p>
           </div>
 
           <form onsubmit="handleChangePassword(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg">
@@ -1091,8 +1091,8 @@
         <div class="space-y-1">
           <label class="block font-semibold text-zinc-700">Status Keaktifan</label>
           <select id="groupModalStatus" class="w-full px-3 py-2 rounded-lg border border-zinc-300 bg-white focus:border-zinc-900 outline-none font-medium cursor-pointer">
-            <option value="AKTIF">AKTIF (Dapat dipilih mahasiswa)</option>
-            <option value="NONAKTIF">NONAKTIF (Disembunyikan)</option>
+            <option value="AKTIF">Aktif (Tampil)</option>
+            <option value="NONAKTIF">Nonaktif (Sembunyi)</option>
           </select>
         </div>
 
@@ -1149,8 +1149,8 @@
         <div class="space-y-1">
           <label class="block font-semibold text-zinc-700">Status Anggota</label>
           <select id="memberModalStatus" class="w-full px-3 py-2 rounded-lg border border-zinc-300 bg-white focus:border-zinc-900 outline-none font-medium cursor-pointer">
-            <option value="AKTIF">AKTIF</option>
-            <option value="NONAKTIF">NONAKTIF</option>
+            <option value="AKTIF">Aktif</option>
+            <option value="NONAKTIF">Nonaktif</option>
           </select>
         </div>
 
@@ -1169,7 +1169,7 @@
     <div class="bg-white rounded-xl max-w-lg w-full p-4 sm:p-6 space-y-4 shadow-xl border border-zinc-200 fade-enter max-h-[90vh] overflow-y-auto custom-scrollbar">
       <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
         <div>
-          <h3 class="text-sm font-bold text-zinc-900">Catatan Masukan Penilai</h3>
+          <h3 class="text-sm font-bold text-zinc-900">Detail Masukan &amp; Saran</h3>
           <p class="text-[11px] text-zinc-500" id="responseDetailMeta">Penilai • Kelompok</p>
         </div>
         <button type="button" onclick="closeResponseDetailModal()" class="w-7 h-7 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center cursor-pointer transition">
@@ -1204,8 +1204,8 @@
             </svg>
           </div>
           <div>
-            <h3 class="text-sm font-bold text-zinc-900">Hapus Respons per Kelompok / Sesi</h3>
-            <p class="text-[11px] text-zinc-500">Pilih salah satu metode: per kelompok atau per sesi.</p>
+            <h3 class="text-sm font-bold text-zinc-900">Hapus Respons Berdasarkan Kategori</h3>
+            <p class="text-[11px] text-zinc-500">Pilih salah satu metode: satu kelompok saja atau satu sesi minggu.</p>
           </div>
         </div>
         <button type="button" onclick="closeDeleteScopedModal()" class="w-7 h-7 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center cursor-pointer transition">
@@ -1226,7 +1226,7 @@
               <input type="radio" name="scopedDeleteMode" value="KELOMPOK" checked onchange="onScopedDeleteModeChange()" class="sr-only">
               <span class="font-bold text-zinc-900 text-xs flex items-center gap-1.5">
                 <span class="w-2 h-2 rounded-full bg-rose-600 inline-block"></span>
-                Per Kelompok
+                Satu Kelompok Saja
               </span>
               <span class="text-[10.5px] text-zinc-500 mt-1 leading-snug">Hapus seluruh penilaian untuk 1 kelompok presentasi.</span>
             </label>
@@ -1235,7 +1235,7 @@
               <input type="radio" name="scopedDeleteMode" value="SESI" onchange="onScopedDeleteModeChange()" class="sr-only">
               <span class="font-bold text-zinc-900 text-xs flex items-center gap-1.5">
                 <span class="w-2 h-2 rounded-full bg-rose-600 inline-block"></span>
-                Per Sesi
+                Satu Sesi Minggu
               </span>
               <span class="text-[10.5px] text-zinc-500 mt-1 leading-snug">Hapus seluruh penilaian pada 1 sesi minggu tampil.</span>
             </label>
@@ -1280,7 +1280,7 @@
             <svg class="w-4 h-4 text-rose-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
             </svg>
-            <span>Perlindungan Database & Integritas Data</span>
+            <span>Perlindungan Database &amp; Integritas Data</span>
           </div>
           <p class="leading-relaxed">
             Hanya baris respons pada target yang dipilih yang akan dihapus. Data kelompok lain dan konfigurasi sistem tidak akan tersentuh. Mahasiswa penilai pada target ini dapat mengisi ulang formulir.
@@ -1336,9 +1336,9 @@
         </svg>
       </div>
       <div>
-        <h3 class="text-sm sm:text-base font-bold text-zinc-900">Kosongkan Seluruh Respons?</h3>
+        <h3 class="text-sm sm:text-base font-bold text-zinc-900">Kosongkan Semua Penilaian?</h3>
         <p class="text-xs text-zinc-500 leading-relaxed mt-1">
-          Tindakan ini akan menghapus seluruh data pengiriman penilaian di Google Spreadsheet. Tindakan ini tidak dapat dibatalkan.
+          Tindakan ini akan menghapus seluruh data pengiriman penilaian mahasiswa di Google Spreadsheet. Tindakan ini permanen dan tidak dapat dibatalkan.
         </p>
       </div>
       <div class="pt-2 flex flex-col gap-2">
@@ -1374,8 +1374,8 @@
             </svg>
           </div>
           <div>
-            <h3 class="text-sm sm:text-base font-bold text-zinc-900 leading-tight">Input Massal (Batch) Kelompok & Mahasiswa</h3>
-            <p class="text-[11px] text-zinc-500">Salin & tempel daftar kelompok, mahasiswa, dan NIM secara cepat dari Spreadsheet/Excel.</p>
+            <h3 class="text-sm sm:text-base font-bold text-zinc-900 leading-tight">Impor Banyak Sekaligus (Kelompok &amp; Mahasiswa)</h3>
+            <p class="text-[11px] text-zinc-500">Salin &amp; tempel daftar kelompok, mahasiswa, dan NIM secara cepat dari Spreadsheet / Excel.</p>
           </div>
         </div>
         <button type="button" onclick="closeBatchGroupModal()" class="w-8 h-8 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center cursor-pointer transition">
@@ -1409,15 +1409,15 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       <!-- Input Textarea & Mode -->
       <div class="space-y-3 flex-1 flex flex-col min-h-0">
         <div class="flex items-center justify-between text-xs font-semibold text-zinc-700">
-          <label for="batchInputText">Tempel Teks Data di Sini:</label>
+          <label for="batchInputText">Tempel Data Excel di Sini:</label>
           <div class="flex items-center gap-3">
             <label class="flex items-center gap-1.5 font-normal cursor-pointer text-[11px]">
               <input type="radio" name="batchMode" value="append" checked class="text-zinc-900 focus:ring-zinc-900">
-              <span>Tambahkan ke Data Lama</span>
+              <span>Tambahkan Data</span>
             </label>
             <label class="flex items-center gap-1.5 font-normal cursor-pointer text-[11px] text-rose-600">
               <input type="radio" name="batchMode" value="overwrite" class="text-zinc-900 focus:ring-zinc-900">
-              <span>Ganti Semua Data</span>
+              <span>Timpa Semua Data</span>
             </label>
           </div>
         </div>
@@ -1451,7 +1451,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
           </svg>
-          <span>Simpan Data Massal</span>
+          <span>Simpan Data Impor</span>
         </button>
       </div>
 
@@ -2594,7 +2594,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
               <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
               </svg>
-              <span>Hapus / Reset Respons</span>
+              <span>Hapus Data Ini</span>
             </button>
           </div>
 
@@ -2629,7 +2629,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
                 onclick="viewResponseNotesDetail('${encodeURIComponent(r.namaPenilai)}', '${encodeURIComponent(r.kelompok)}', '${encodeURIComponent(r.evaluasiDetail)}')" 
                 class="mt-1 text-[11px] font-semibold text-zinc-700 hover:text-zinc-950 underline self-start cursor-pointer"
               >
-                Lihat Catatan Evaluasi (${evalNotesCount} ulasan) →
+                Lihat Masukan &amp; Saran (${evalNotesCount} ulasan) →
               </button>
             </div>
 
@@ -2830,7 +2830,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       }
 
       if (badge) {
-        badge.textContent = `${count} Respons Cocok`;
+        badge.textContent = `${count} Data Penilaian Cocok`;
         if (count > 0) {
           badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-rose-100 text-rose-900 border border-rose-200";
         } else {

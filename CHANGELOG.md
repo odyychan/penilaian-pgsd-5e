@@ -4,6 +4,22 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.74] - 2026-08-23
+
+### 🎨 Penyederhanaan Teks & Harmonisasi Bahasa Panel Admin (Ramah Pengguna Awam)
+- **Restrukturisasi Teks & Terminologi Minimalis Seluruh Tab Admin:**
+  - Mengganti istilah teknis asing yang rumit (*REST API, Endpoint, Latency, Batch*) dengan bahasa yang lugas, komunikatif, dan mudah dipahami (*Koneksi Spreadsheet, Kecepatan Respon, Impor Banyak Sekaligus*).
+  - **Header & Navigasi:** Memperbarui judul panel (`Panel Admin • Online`) dan tombol aksi langsung (`Buka Formulir ↗`).
+  - **Widget Sesi Aktif:** Mengubah judul menjadi `Sesi Tampil Minggu Ini` dan opsi dropdown menjadi `Semua Sesi (Buka Semua Kelompok)`.
+  - **Tab 1 (Kelompok & Mahasiswa):** Menyesuaikan judul section (`Daftar Kelompok & Mahasiswa`), tombol impor massal (`Impor Banyak Sekaligus`), dan penambahan kelompok baru (`+ Kelompok Baru`).
+  - **Tab 2 (Konfigurasi):** Memperjelas subjudul section (`Informasi Perkuliahan`, `Nama Pembuat Web (Footer)`, `Aturan Penilaian & Pengisian`), serta harmonisasi opsi kewajiban penyaji (`Wajib Menilai Sesama Penyaji` vs `Bebas Menilai / Fokus Tampil`).
+  - **Tab 3 (Respons):** Menyederhanakan header tabel (`Daftar Respons Masuk`), tombol hapus bersyarat (`Hapus Berdasarkan Kategori`), dan tombol baris kartu respons (`Hapus Data Ini`).
+  - **Tab 4 (Sistem & Keamanan):** Memperbarui judul kartu menjadi `Koneksi Google Spreadsheet`, tombol uji (`Tes Sambungan`), dan aksi reset (`Reset Semua Penilaian (Mulai Awal)`).
+- **Harmonisasi Modal Aksi & Dialog Konfirmasi:**
+  - Memperbarui teks pada Modal Impor Massal, Modal Tambah Kelompok, Modal Hapus Berdasarkan Kategori, dan Modal Reset Seluruh Penilaian agar menyajikan panduan yang aman dan transparan bagi admin awam.
+
+---
+
 ## [2.1.73] - 2026-08-23
 
 ### 📊 Sinkronisasi Status & Label Minimalis Matriks Keterisian Penilaian
