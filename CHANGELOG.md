@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.72] - 2026-08-23
+
+### 🎯 Restrukturisasi Mode Eksklusif Penghapusan Respons (Per Kelompok vs Per Sesi)
+- **Pemilihan Ruang Lingkup Tunggal Eksklusif (*Exclusive Scope Selection*):**
+  - Mengubah antarmuka modal penghapusan bersyarat menjadi sistem seleksi tunggal eksklusif (pilih salah satu: **Per Kelompok Presentator** ATAU **Per Sesi Presentasi**).
+  - Kontainer input target menyesuaikan secara dinamis: hanya menampilkan dropdown kelompok ketika mode per kelompok aktif, dan hanya menampilkan dropdown sesi ketika mode per sesi aktif.
+- **Proteksi Ketat Integritas Database (*Strict Scope Protection*):**
+  - Menghapus opsi *"Semua"* di dalam modal penghapusan guna memastikan pengguna wajib memilih target spesifik.
+  - Backend `Code.gs` dan frontend `admin.html` secara ketat hanya menghapus baris respons yang persis cocok dengan target terpilih, menjamin data kelompok lain, lembar master, dan konfigurasi sistem terlindungi 100%.
+
+---
+
 ## [2.1.71] - 2026-08-23
 
 ### 🗑️ Fitur Penghapusan Respons Penilaian Bersyarat (Per Kelompok & Sesi)

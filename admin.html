@@ -1190,7 +1190,7 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- MODAL: HAPUS RESPONS BERDASARKAN KELOMPOK / SESI -->
+  <!-- MODAL: HAPUS RESPONS BERDASARKAN KELOMPOK ATAU SESI (EKSKLUSIF) -->
   <!-- ========================================================================= -->
   <div id="deleteScopedResponsesModal" class="hidden fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
     <div class="bg-white rounded-2xl max-w-lg w-full p-5 sm:p-6 space-y-4 shadow-2xl border border-zinc-200 fade-enter max-h-[92vh] overflow-y-auto custom-scrollbar">
@@ -1205,7 +1205,7 @@
           </div>
           <div>
             <h3 class="text-sm font-bold text-zinc-900">Hapus Respons per Kelompok / Sesi</h3>
-            <p class="text-[11px] text-zinc-500">Pembersihan data penilaian mahasiswa secara bersyarat dan terukur.</p>
+            <p class="text-[11px] text-zinc-500">Pilih salah satu metode: per kelompok atau per sesi.</p>
           </div>
         </div>
         <button type="button" onclick="closeDeleteScopedModal()" class="w-7 h-7 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center cursor-pointer transition">
@@ -1218,18 +1218,45 @@
       <!-- Form Body -->
       <form onsubmit="handleExecuteDeleteScoped(event)" class="space-y-4 text-xs">
         
-        <!-- Filter Scope Options -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div class="space-y-1.5">
-            <label class="block font-semibold text-zinc-700">Kelompok Presentator:</label>
-            <select id="scopedDeleteGroupSelect" onchange="updateScopedDeleteImpactCounter()" class="w-full px-3 py-2 rounded-lg border border-zinc-300 bg-white text-xs font-semibold focus:border-zinc-900 outline-none cursor-pointer">
-              <option value="ALL">Semua Kelompok</option>
+        <!-- Step 1: Mode Selection (Radio Cards) -->
+        <div class="space-y-1.5">
+          <label class="block font-semibold text-zinc-800">1. Pilih Ruang Lingkup Penghapusan:</label>
+          <div class="grid grid-cols-2 gap-2.5">
+            <label class="relative flex flex-col p-3 rounded-xl border-2 cursor-pointer transition select-none has-[:checked]:border-rose-600 has-[:checked]:bg-rose-50/50 border-zinc-200 hover:border-zinc-300">
+              <input type="radio" name="scopedDeleteMode" value="KELOMPOK" checked onchange="onScopedDeleteModeChange()" class="sr-only">
+              <span class="font-bold text-zinc-900 text-xs flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-rose-600 inline-block"></span>
+                Per Kelompok
+              </span>
+              <span class="text-[10.5px] text-zinc-500 mt-1 leading-snug">Hapus seluruh penilaian untuk 1 kelompok presentasi.</span>
+            </label>
+
+            <label class="relative flex flex-col p-3 rounded-xl border-2 cursor-pointer transition select-none has-[:checked]:border-rose-600 has-[:checked]:bg-rose-50/50 border-zinc-200 hover:border-zinc-300">
+              <input type="radio" name="scopedDeleteMode" value="SESI" onchange="onScopedDeleteModeChange()" class="sr-only">
+              <span class="font-bold text-zinc-900 text-xs flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-rose-600 inline-block"></span>
+                Per Sesi
+              </span>
+              <span class="text-[10.5px] text-zinc-500 mt-1 leading-snug">Hapus seluruh penilaian pada 1 sesi minggu tampil.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Step 2: Target Dropdown Container -->
+        <div class="space-y-1.5">
+          <!-- Mode Kelompok Dropdown -->
+          <div id="scopedTargetGroupContainer" class="space-y-1.5">
+            <label class="block font-semibold text-zinc-800">2. Pilih Kelompok Presentator Target:</label>
+            <select id="scopedDeleteGroupSelect" onchange="updateScopedDeleteImpactCounter()" class="w-full px-3 py-2.5 rounded-lg border border-zinc-300 bg-white text-xs font-bold text-zinc-900 focus:border-rose-600 outline-none cursor-pointer">
+              <!-- Dynamic Group Options -->
             </select>
           </div>
-          <div class="space-y-1.5">
-            <label class="block font-semibold text-zinc-700">Sesi Presentasi:</label>
-            <select id="scopedDeleteSesiSelect" onchange="updateScopedDeleteImpactCounter()" class="w-full px-3 py-2 rounded-lg border border-zinc-300 bg-white text-xs font-semibold focus:border-zinc-900 outline-none cursor-pointer">
-              <option value="ALL">Semua Sesi</option>
+
+          <!-- Mode Sesi Dropdown -->
+          <div id="scopedTargetSesiContainer" class="space-y-1.5 hidden">
+            <label class="block font-semibold text-zinc-800">2. Pilih Sesi Presentasi Target:</label>
+            <select id="scopedDeleteSesiSelect" onchange="updateScopedDeleteImpactCounter()" class="w-full px-3 py-2.5 rounded-lg border border-zinc-300 bg-white text-xs font-bold text-zinc-900 focus:border-rose-600 outline-none cursor-pointer">
+              <!-- Dynamic Sesi Options -->
             </select>
           </div>
         </div>
@@ -1238,12 +1265,12 @@
         <div id="scopedDeleteImpactBox" class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-2">
           <div class="flex items-center justify-between text-xs">
             <span class="font-semibold text-zinc-700">Dampak Penghapusan:</span>
-            <span id="scopedDeleteMatchBadge" class="px-2 py-0.5 rounded-full text-[11px] font-mono font-bold bg-zinc-100 text-zinc-600 border border-zinc-200">
+            <span id="scopedDeleteMatchBadge" class="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-zinc-100 text-zinc-600 border border-zinc-200">
               0 Respons Cocok
             </span>
           </div>
-          <p id="scopedDeleteDescText" class="text-[11px] text-zinc-500 leading-relaxed">
-            Pilih kelompok atau sesi spesifik untuk melihat respons yang akan dihapus.
+          <p id="scopedDeleteDescText" class="text-[11px] text-zinc-600 leading-relaxed">
+            Menghitung data respons...
           </p>
         </div>
 
@@ -1253,17 +1280,17 @@
             <svg class="w-4 h-4 text-rose-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
             </svg>
-            <span>Peringatan Keamanan & Integritas Data</span>
+            <span>Perlindungan Database & Integritas Data</span>
           </div>
           <p class="leading-relaxed">
-            Penghapusan ini akan menghapus baris respons dari database spreadsheet dan mengizinkan mahasiswa terkait untuk menilai ulang kelompok tersebut.
+            Hanya baris respons pada target yang dipilih yang akan dihapus. Data kelompok lain dan konfigurasi sistem tidak akan tersentuh. Mahasiswa penilai pada target ini dapat mengisi ulang formulir.
           </p>
         </div>
 
         <!-- Confirmation Text Input -->
         <div class="space-y-1.5">
           <label class="block font-semibold text-zinc-800">
-            Ketik kata <span class="font-mono font-bold text-rose-600 uppercase">"HAPUS"</span> untuk konfirmasi:
+            3. Ketik kata <span class="font-mono font-bold text-rose-600 uppercase">"HAPUS"</span> untuk konfirmasi:
           </label>
           <input 
             type="text" 
@@ -1290,7 +1317,7 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
             </svg>
-            <span id="btnSubmitScopedDeleteText">Hapus Respons Terpilih</span>
+            <span id="btnSubmitScopedDeleteText">Hapus Respons Target</span>
           </button>
         </div>
 
@@ -2692,50 +2719,83 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }
 
     // =========================================================================
-    // MODAL PENGHAPUSAN RESPONS BERSYARAT (PER KELOMPOK / SESI)
+    // MODAL PENGHAPUSAN RESPONS BERSYARAT (EKSKLUSIF: PER KELOMPOK ATAU PER SESI)
     // =========================================================================
+    function onScopedDeleteModeChange() {
+      const mode = document.querySelector('input[name="scopedDeleteMode"]:checked')?.value || "KELOMPOK";
+      const groupContainer = document.getElementById("scopedTargetGroupContainer");
+      const sesiContainer = document.getElementById("scopedTargetSesiContainer");
+
+      if (mode === "KELOMPOK") {
+        groupContainer.classList.remove("hidden");
+        sesiContainer.classList.add("hidden");
+      } else {
+        groupContainer.classList.add("hidden");
+        sesiContainer.classList.remove("hidden");
+      }
+
+      updateScopedDeleteImpactCounter();
+    }
+
     function openDeleteScopedModal() {
       const groupSelect = document.getElementById("scopedDeleteGroupSelect");
       const sesiSelect = document.getElementById("scopedDeleteSesiSelect");
       const confirmInput = document.getElementById("scopedDeleteConfirmInput");
 
-      // Isi dropdown kelompok secara dinamis
-      groupSelect.innerHTML = `<option value="ALL">Semua Kelompok</option>`;
+      // Isi dropdown kelompok secara dinamis (Hanya kelompok spesifik, TANPA opsi "Semua")
+      groupSelect.innerHTML = "";
       const uniqueGroups = new Set();
       adminMasterGroups.forEach(g => { if (g.name) uniqueGroups.add(g.name); });
       adminResponsesList.forEach(r => { if (r.kelompok) uniqueGroups.add(r.kelompok); });
-      Array.from(uniqueGroups).sort().forEach(grp => {
+      if (uniqueGroups.size === 0) {
+        for (let i = 1; i <= 10; i++) uniqueGroups.add(`Kelompok ${i}`);
+      }
+      const sortedGroups = Array.from(uniqueGroups).sort((a, b) => {
+        const na = parseInt(a.replace(/\D/g, "") || "0");
+        const nb = parseInt(b.replace(/\D/g, "") || "0");
+        return (na && nb) ? (na - nb) : a.localeCompare(b);
+      });
+      sortedGroups.forEach(grp => {
         const opt = document.createElement("option");
         opt.value = grp;
         opt.textContent = grp;
         groupSelect.appendChild(opt);
       });
 
-      // Isi dropdown sesi secara dinamis
-      sesiSelect.innerHTML = `<option value="ALL">Semua Sesi</option>`;
+      // Isi dropdown sesi secara dinamis (Hanya sesi spesifik, TANPA opsi "Semua")
+      sesiSelect.innerHTML = "";
       const uniqueSesi = new Set();
       adminMasterGroups.forEach(g => { if (g.sesi) uniqueSesi.add(g.sesi); });
       adminResponsesList.forEach(r => { if (r.sesi) uniqueSesi.add(r.sesi); });
       for (let s = 1; s <= 16; s++) { uniqueSesi.add(`Minggu ${s}`); }
-      Array.from(uniqueSesi).sort((a, b) => {
+      const sortedSesi = Array.from(uniqueSesi).sort((a, b) => {
         const na = parseInt(a.replace(/\D/g, "") || "0");
         const nb = parseInt(b.replace(/\D/g, "") || "0");
         return na - nb;
-      }).forEach(ses => {
+      });
+      sortedSesi.forEach(ses => {
         const opt = document.createElement("option");
         opt.value = ses;
         opt.textContent = ses;
         sesiSelect.appendChild(opt);
       });
 
-      // Sinkronkan pilihan awal dari filter aktif halaman jika ada
+      // Set default mode ke KELOMPOK
+      const kelompokRadio = document.querySelector('input[name="scopedDeleteMode"][value="KELOMPOK"]');
+      if (kelompokRadio) kelompokRadio.checked = true;
+
+      // Sinkronkan pilihan awal dari filter aktif jika ada
       const activeGroupFilter = document.getElementById("filterResponseGroupSelect")?.value || "ALL";
       const activeSesiFilter = document.getElementById("filterResponseSesiSelect")?.value || "ALL";
-      if (activeGroupFilter !== "ALL") groupSelect.value = activeGroupFilter;
-      if (activeSesiFilter !== "ALL") sesiSelect.value = activeSesiFilter;
+      if (activeGroupFilter !== "ALL" && sortedGroups.includes(activeGroupFilter)) {
+        groupSelect.value = activeGroupFilter;
+      }
+      if (activeSesiFilter !== "ALL" && sortedSesi.includes(activeSesiFilter)) {
+        sesiSelect.value = activeSesiFilter;
+      }
 
+      onScopedDeleteModeChange();
       if (confirmInput) confirmInput.value = "";
-      updateScopedDeleteImpactCounter();
       document.getElementById("deleteScopedResponsesModal").classList.remove("hidden");
     }
 
@@ -2744,18 +2804,31 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }
 
     function updateScopedDeleteImpactCounter() {
-      const selectedGroup = document.getElementById("scopedDeleteGroupSelect")?.value || "ALL";
-      const selectedSesi = document.getElementById("scopedDeleteSesiSelect")?.value || "ALL";
+      const mode = document.querySelector('input[name="scopedDeleteMode"]:checked')?.value || "KELOMPOK";
+      const groupSelect = document.getElementById("scopedDeleteGroupSelect");
+      const sesiSelect = document.getElementById("scopedDeleteSesiSelect");
       const badge = document.getElementById("scopedDeleteMatchBadge");
       const desc = document.getElementById("scopedDeleteDescText");
 
-      const matchingResponses = adminResponsesList.filter(r => {
-        const matchG = (selectedGroup === "ALL") || (r.kelompok === selectedGroup);
-        const matchS = (selectedSesi === "ALL") || (r.sesi === selectedSesi);
-        return matchG && matchS;
-      });
+      let targetValue = "";
+      let count = 0;
 
-      const count = matchingResponses.length;
+      if (mode === "KELOMPOK") {
+        targetValue = groupSelect?.value || "";
+        const matches = adminResponsesList.filter(r => (r.kelompok || "").toLowerCase() === targetValue.toLowerCase());
+        count = matches.length;
+        if (desc) {
+          desc.innerHTML = `Akan menghapus secara permanen seluruh <strong>${count} respons penilaian</strong> untuk <strong>${targetValue || '-'}</strong> di semua sesi. Lembar rekapitulasi kelompok ini akan dihitung ulang. Mahasiswa yang bersangkutan dapat mengisi ulang penilaian.`;
+        }
+      } else {
+        targetValue = sesiSelect?.value || "";
+        const matches = adminResponsesList.filter(r => (r.sesi || "").toLowerCase() === targetValue.toLowerCase());
+        count = matches.length;
+        if (desc) {
+          desc.innerHTML = `Akan menghapus secara permanen seluruh <strong>${count} respons penilaian</strong> pada <strong>${targetValue || '-'}</strong> untuk semua kelompok di sesi tersebut. Mahasiswa yang bersangkutan dapat mengisi ulang penilaian.`;
+        }
+      }
+
       if (badge) {
         badge.textContent = `${count} Respons Cocok`;
         if (count > 0) {
@@ -2765,38 +2838,30 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         }
       }
 
-      if (desc) {
-        if (selectedGroup === "ALL" && selectedSesi === "ALL") {
-          desc.innerHTML = `<span class="text-rose-600 font-semibold">Perhatian:</span> Anda memilih 'Semua Kelompok' dan 'Semua Sesi' (${count} respons total). Untuk mereset total seluruh database, disarankan melalui menu Reset Database pada Tab Pengaturan Sistem.`;
-        } else {
-          let targets = [];
-          if (selectedGroup !== "ALL") targets.push(`<strong>${selectedGroup}</strong>`);
-          if (selectedSesi !== "ALL") targets.push(`<strong>${selectedSesi}</strong>`);
-          desc.innerHTML = `Akan menghapus secara permanen <strong>${count} respons penilaian</strong> untuk ${targets.join(" pada ")}. Mahasiswa yang bersangkutan dapat mengisi ulang penilaian.`;
-        }
-      }
-
       validateScopedDeleteConfirm();
     }
 
     function validateScopedDeleteConfirm() {
+      const mode = document.querySelector('input[name="scopedDeleteMode"]:checked')?.value || "KELOMPOK";
+      const targetValue = (mode === "KELOMPOK") 
+        ? document.getElementById("scopedDeleteGroupSelect")?.value 
+        : document.getElementById("scopedDeleteSesiSelect")?.value;
       const confirmInput = document.getElementById("scopedDeleteConfirmInput");
       const submitBtn = document.getElementById("btnSubmitScopedDelete");
-      const selectedGroup = document.getElementById("scopedDeleteGroupSelect")?.value || "ALL";
-      const selectedSesi = document.getElementById("scopedDeleteSesiSelect")?.value || "ALL";
 
-      const matchingResponses = adminResponsesList.filter(r => {
-        const matchG = (selectedGroup === "ALL") || (r.kelompok === selectedGroup);
-        const matchS = (selectedSesi === "ALL") || (r.sesi === selectedSesi);
-        return matchG && matchS;
-      });
+      let count = 0;
+      if (mode === "KELOMPOK") {
+        count = adminResponsesList.filter(r => (r.kelompok || "").toLowerCase() === (targetValue || "").toLowerCase()).length;
+      } else {
+        count = adminResponsesList.filter(r => (r.sesi || "").toLowerCase() === (targetValue || "").toLowerCase()).length;
+      }
 
       const isTextMatch = (confirmInput?.value.trim().toUpperCase() === "HAPUS");
-      const hasMatches = matchingResponses.length > 0;
-      const isValidScope = !(selectedGroup === "ALL" && selectedSesi === "ALL");
+      const hasMatches = count > 0;
+      const hasTarget = !!targetValue && targetValue !== "ALL";
 
       if (submitBtn) {
-        if (isTextMatch && hasMatches && isValidScope) {
+        if (isTextMatch && hasMatches && hasTarget) {
           submitBtn.removeAttribute("disabled");
         } else {
           submitBtn.setAttribute("disabled", "true");
@@ -2806,8 +2871,10 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
     async function handleExecuteDeleteScoped(event) {
       event.preventDefault();
-      const selectedGroup = document.getElementById("scopedDeleteGroupSelect")?.value || "ALL";
-      const selectedSesi = document.getElementById("scopedDeleteSesiSelect")?.value || "ALL";
+      const mode = document.querySelector('input[name="scopedDeleteMode"]:checked')?.value || "KELOMPOK";
+      const targetValue = (mode === "KELOMPOK") 
+        ? document.getElementById("scopedDeleteGroupSelect")?.value 
+        : document.getElementById("scopedDeleteSesiSelect")?.value;
       const confirmInput = document.getElementById("scopedDeleteConfirmInput")?.value.trim().toUpperCase();
 
       if (confirmInput !== "HAPUS") {
@@ -2815,8 +2882,8 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         return;
       }
 
-      if (selectedGroup === "ALL" && selectedSesi === "ALL") {
-        showAdminToast("Pilih setidaknya satu kelompok atau sesi spesifik.", "warning");
+      if (!targetValue || targetValue === "ALL") {
+        showAdminToast(`Pilih target ${mode === "KELOMPOK" ? "kelompok" : "sesi"} yang spesifik.`, "warning");
         return;
       }
 
@@ -2829,8 +2896,8 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       const apiUrl = getApiUrl();
       const payload = {
         action: "adminDeleteScopedResponses",
-        kelompok: selectedGroup,
-        sesi: selectedSesi
+        mode: mode,
+        targetValue: targetValue
       };
 
       try {
@@ -2845,12 +2912,12 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           localStorage.removeItem("PGSD_CACHE_REKAP");
           showAdminToast(res.message || "Respons terpilih berhasil dihapus!", "success");
 
-          // Perbarui state lokal
-          adminResponsesList = adminResponsesList.filter(r => {
-            const matchG = (selectedGroup === "ALL") || (r.kelompok === selectedGroup);
-            const matchS = (selectedSesi === "ALL") || (r.sesi === selectedSesi);
-            return !(matchG && matchS);
-          });
+          // Perbarui state lokal secara ketat hanya untuk target yang dipilih
+          if (mode === "KELOMPOK") {
+            adminResponsesList = adminResponsesList.filter(r => (r.kelompok || "").toLowerCase() !== targetValue.toLowerCase());
+          } else {
+            adminResponsesList = adminResponsesList.filter(r => (r.sesi || "").toLowerCase() !== targetValue.toLowerCase());
+          }
 
           document.getElementById("labelTotalResponses").textContent = `${adminResponsesList.length} Data`;
           renderResponsesList();

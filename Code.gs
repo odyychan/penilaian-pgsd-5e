@@ -1182,7 +1182,7 @@ function adminDeleteSingleResponse(payload) {
 }
 
 /**
- * Menghapus Respons Berdasarkan Filter Kelompok Presentator dan/atau Sesi
+ * Menghapus Respons Berdasarkan Pilihan Eksklusif: Per Kelompok Presentator ATAU Per Sesi
  */
 function adminDeleteScopedResponses(payload) {
   try {
@@ -1197,12 +1197,17 @@ function adminDeleteScopedResponses(payload) {
       return { success: false, error: "Data respons kosong." };
     }
 
-    const targetKelompok = String(payload.kelompok || "ALL").trim();
-    const targetSesi = String(payload.sesi || "ALL").trim();
+    const mode = String(payload.mode || "").trim().toUpperCase(); // "KELOMPOK" atau "SESI"
+    const targetValue = String(payload.targetValue || "").trim();
 
-    if (targetKelompok === "ALL" && targetSesi === "ALL") {
+    if (!mode || (mode !== "KELOMPOK" && mode !== "SESI")) {
       lock.releaseLock();
-      return { success: false, error: "Pilih setidaknya satu kelompok atau sesi spesifik untuk penghapusan bersyarat." };
+      return { success: false, error: "Mode penghapusan tidak valid. Pilih 'KELOMPOK' atau 'SESI'." };
+    }
+
+    if (!targetValue || targetValue === "ALL") {
+      lock.releaseLock();
+      return { success: false, error: `Pilih target ${mode === "KELOMPOK" ? "kelompok presentator" : "sesi"} yang spesifik.` };
     }
 
     const data = responsSheet.getDataRange().getValues();
@@ -1210,13 +1215,21 @@ function adminDeleteScopedResponses(payload) {
 
     // Iterasi mundur dari baris terbawah agar indeks baris tidak bergeser saat deleteRow
     for (let i = data.length - 1; i >= 1; i--) {
-      const rowSesi = String(data[i][2] || "").trim();
-      const rowKelompok = String(data[i][5] || "").trim();
+      let isMatch = false;
 
-      let matchKelompok = (targetKelompok === "ALL") || (rowKelompok.toLowerCase() === targetKelompok.toLowerCase());
-      let matchSesi = (targetSesi === "ALL") || (rowSesi.toLowerCase() === targetSesi.toLowerCase());
+      if (mode === "KELOMPOK") {
+        const rowKelompok = String(data[i][5] || "").trim();
+        if (rowKelompok.toLowerCase() === targetValue.toLowerCase()) {
+          isMatch = true;
+        }
+      } else if (mode === "SESI") {
+        const rowSesi = String(data[i][2] || "").trim();
+        if (rowSesi.toLowerCase() === targetValue.toLowerCase()) {
+          isMatch = true;
+        }
+      }
 
-      if (matchKelompok && matchSesi) {
+      if (isMatch) {
         responsSheet.deleteRow(i + 1); // 1-based row index
         deletedCount++;
       }
@@ -1231,14 +1244,12 @@ function adminDeleteScopedResponses(payload) {
       } catch (e) {}
     }
 
-    let targetDesc = [];
-    if (targetKelompok !== "ALL") targetDesc.push(`Kelompok '${targetKelompok}'`);
-    if (targetSesi !== "ALL") targetDesc.push(`Sesi '${targetSesi}'`);
+    const targetLabel = (mode === "KELOMPOK") ? `Kelompok Presentasi '${targetValue}'` : `Sesi '${targetValue}'`;
 
     return {
       success: true,
       deletedCount: deletedCount,
-      message: `${deletedCount} respons untuk ${targetDesc.join(" & ")} berhasil dihapus dan rekapitulasi diperbarui.`
+      message: `${deletedCount} respons untuk ${targetLabel} berhasil dihapus dan rekapitulasi diperbarui.`
     };
   } catch (err) {
     return { success: false, error: "Gagal menghapus respons bersyarat: " + err.toString() };
