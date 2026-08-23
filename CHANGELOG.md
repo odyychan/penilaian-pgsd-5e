@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.59] - 2026-08-23
+
+### 📊 Penyelarasan Teks & Rata Tengah Sel Rata-Rata Keseluruhan Kelas
+- **Pembersihan Teks (*Label Formatting*):**
+  - Mengubah teks label baris ringkasan kelas dari *"Rata-Rata Keseluruhan Kelas:"* menjadi *"Rata-Rata Keseluruhan Kelas"* (menghapus tanda titik dua).
+- **Penyelarasan Sel (*Center Alignment*):**
+  - Menetapkan perataan `text-align: center; vertical-align: middle;` pada sel rentang 3 kolom (*colspan 3*) baris ringkasan kelas di Tabel Rekapitulasi Nilai.
+- **Sinkronisasi Dwikanal:**
+  - Diterapkan pada `index.html` dan `admin.html`.
+
+---
+
 ## [2.1.58] - 2026-08-23
 
 ### 🎯 Penyelarasan Rata Tengah Sel Header Tabel Rekapitulasi Nilai
