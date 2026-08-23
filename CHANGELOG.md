@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.50] - 2026-08-23
+
+### 🎯 Penyelarasan Mutlak 100% Identik antara Preview Modal & Hasil Cetak PDF
+- **Akar Masalah (*Root Cause Identified & Fixed*):**
+  - Adanya perbedaan tipografi (*font-family* Arial vs System-UI) dan penanganan margin browser (@page margin vs inner container padding) yang menyebabkan pergeseran koordinat fisik antara pratinjau modal dan lembar cetak.
+- **Penerapan Arsitektur Kanvas Terpadu (*Unified Zero-Margin Engine*):**
+  - Mengunci margin halaman cetak `@page { size: A4 portrait; margin: 0 !important; }` sehingga kontrol margin dan dimensi lembar dipegang penuh oleh `.print-page-wrapper`.
+  - Menyelaraskan dimensi fisik halaman secara presisi: lebar $210\text{mm}$ ($794\text{px}$), tinggi $297\text{mm}$ ($1123\text{px}$), serta padding dinas $10\text{mm} \times 14\text{mm}$ ($38\text{px} \times 53\text{px}$) pada pratinjau layar maupun berkas PDF cetak.
+  - Menyatukan tumpukan tipografi (*font stack*) `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif` dengan metrik huruf seragam di semua platform.
+- **Konsistensi Total pada Portal Admin:**
+  - Memperbaiki deklarasi variabel konfigurasi laporan cetak pada `admin.html` agar selaras 100% dengan modal pratinjau mahasiswa.
+
+---
+
 ## [2.1.49] - 2026-08-23
 
 ### 📐 Optimalisasi Batas Margin Kanan & Layout Tabel Cetak Presisi

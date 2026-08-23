@@ -112,7 +112,7 @@
         padding: 0 !important;
         background: #ffffff !important;
         color: #000000 !important;
-        font-family: Arial, "Helvetica Neue", Helvetica, sans-serif !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
         overflow: visible !important;
@@ -122,9 +122,9 @@
         display: block !important;
         position: static !important;
         visibility: visible !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        margin: 0 !important;
+        width: 210mm !important;
+        max-width: 210mm !important;
+        margin: 0 auto !important;
         padding: 0 !important;
         background: #ffffff !important;
         color: #000000 !important;
@@ -139,11 +139,16 @@
       }
 
       #printDocumentRoot .print-page-wrapper {
-        min-height: 275mm !important;
+        min-height: 297mm !important;
+        width: 210mm !important;
+        max-width: 210mm !important;
+        margin: 0 auto !important;
+        padding: 10mm 14mm 10mm 14mm !important;
         display: flex !important;
         flex-direction: column !important;
         justify-content: space-between !important;
         box-sizing: border-box !important;
+        background: #ffffff !important;
       }
 
       .overflow-x-auto, #printDocumentRoot div {
@@ -172,7 +177,7 @@
 
       @page {
         size: A4 portrait;
-        margin: 8mm 12mm 8mm 12mm;
+        margin: 0 !important;
       }
     }
   </style>
@@ -1435,7 +1440,7 @@
       <!-- Printable Live Document Preview Container with Adaptive 2D Zoom Pan Scroll -->
       <div id="printScrollContainer" class="flex-1 overflow-auto custom-scrollbar border border-zinc-300/80 rounded-xl p-2 sm:p-4 bg-zinc-600/15 shadow-inner" style="touch-action: pan-x pan-y; -webkit-overflow-scrolling: touch;">
         <div id="printableReportWrapper" style="margin: 0 auto; position: relative; transition: width 0.12s ease, height 0.12s ease;">
-          <div id="printableReportArea" class="bg-white rounded-sm border border-zinc-300 shadow-md text-zinc-900 text-xs w-[794px] min-w-[794px] max-w-[794px]" style="background: #ffffff; color: #000000; box-sizing: border-box; padding: 30px 45px 30px 45px; min-height: 1123px; transform-origin: top left; position: absolute; top: 0; left: 0;">
+          <div id="printableReportArea" class="bg-white rounded-sm border border-zinc-300 shadow-md text-zinc-900 text-xs w-[794px] min-w-[794px] max-w-[794px]" style="background: #ffffff; color: #000000; box-sizing: border-box; padding: 0; min-height: 1123px; transform-origin: top left; position: absolute; top: 0; left: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
             <!-- Dynamic Official Report Generated Here -->
           </div>
         </div>
@@ -4402,7 +4407,7 @@
 
       // HTML Template
       let html = `
-        <div class="print-page-wrapper" style="min-height: 1063px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+        <div class="print-page-wrapper" style="min-height: 1123px; width: 794px; padding: 38px 53px 38px 53px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; background: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
           
           <!-- TOP & MAIN CONTENT AREA -->
           <div style="flex: 1 0 auto;">
