@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.51] - 2026-08-23
+
+### 📑 Penanganan Komprehensif Multi-Page Document & Proteksi Page-Break Presisi
+- **Arsitektur Pemecahan Halaman Otomatis (*Smart Multi-Page Fragmentation*):**
+  - Mengonfigurasi margin kertas berulang `@page { size: A4 portrait; margin: 12mm 14mm 12mm 14mm !important; }` sehingga setiap halaman (Halaman 1, 2, 3, dst.) mendapatkan ruang napas tepi atas, bawah, kiri, dan kanan yang 100% konsisten.
+  - Menerapkan aturan proteksi baris tabel `tbody tr { break-inside: avoid !important; }` dan `thead { display: table-header-group !important; }` sehingga baris data tabel tidak pernah terbelah di tengah garis dan judul kolom tabel otomatis diulang saat berpindah halaman.
+- **Proteksi Kartu Ulasan & Judul Seksi (*No-Orphan Headers & Cards*):**
+  - Judul Seksi B (*Rangkuman Catatan Evaluasi*) dilengkapi `.print-section-header` dengan `page-break-after: avoid` agar tidak pernah tertinggal sendirian di dasar halaman tanpa kartu ulasan.
+  - Setiap kartu kelompok (`.print-card`) dan kotak masukan mahasiswa (`.student-review-item`) dikunci dengan `page-break-inside: avoid` sehingga blok evaluasi utuh berpindah ke halaman berikutnya bila ruang tersisa tidak cukup.
+- **Integritas Lembar Pengesahan & Footer (*Signature & Footer Safety*):**
+  - Blok tanda tangan dosen (`.print-signature`) dan catatan penerbitan (*footer*) dilindungi dari pemotongan (`break-inside: avoid`) dan otomatis tertata rapi di dasar dokumen baik untuk laporan 1 halaman maupun laporan berhalaman banyak (*multi-page report*).
+
+---
+
 ## [2.1.50] - 2026-08-23
 
 ### 🎯 Penyelarasan Mutlak 100% Identik antara Preview Modal & Hasil Cetak PDF

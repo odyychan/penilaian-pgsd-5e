@@ -122,9 +122,9 @@
         display: block !important;
         position: static !important;
         visibility: visible !important;
-        width: 210mm !important;
-        max-width: 210mm !important;
-        margin: 0 auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
         padding: 0 !important;
         background: #ffffff !important;
         color: #000000 !important;
@@ -139,11 +139,11 @@
       }
 
       #printDocumentRoot .print-page-wrapper {
-        min-height: 297mm !important;
-        width: 210mm !important;
-        max-width: 210mm !important;
-        margin: 0 auto !important;
-        padding: 10mm 14mm 10mm 14mm !important;
+        min-height: calc(297mm - 24mm) !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
         display: flex !important;
         flex-direction: column !important;
         justify-content: space-between !important;
@@ -175,9 +175,14 @@
         page-break-inside: avoid !important;
       }
 
+      .print-section-header {
+        break-after: avoid !important;
+        page-break-after: avoid !important;
+      }
+
       @page {
         size: A4 portrait;
-        margin: 0 !important;
+        margin: 12mm 14mm 12mm 14mm !important;
       }
     }
   </style>
@@ -1440,7 +1445,7 @@
       <!-- Printable Live Document Preview Container with Adaptive 2D Zoom Pan Scroll -->
       <div id="printScrollContainer" class="flex-1 overflow-auto custom-scrollbar border border-zinc-300/80 rounded-xl p-2 sm:p-4 bg-zinc-600/15 shadow-inner" style="touch-action: pan-x pan-y; -webkit-overflow-scrolling: touch;">
         <div id="printableReportWrapper" style="margin: 0 auto; position: relative; transition: width 0.12s ease, height 0.12s ease;">
-          <div id="printableReportArea" class="bg-white rounded-sm border border-zinc-300 shadow-md text-zinc-900 text-xs w-[794px] min-w-[794px] max-w-[794px]" style="background: #ffffff; color: #000000; box-sizing: border-box; padding: 0; min-height: 1123px; transform-origin: top left; position: absolute; top: 0; left: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+          <div id="printableReportArea" class="bg-white rounded-sm border border-zinc-300 shadow-md text-zinc-900 text-xs w-[794px] min-w-[794px] max-w-[794px]" style="background: #ffffff; color: #000000; box-sizing: border-box; padding: 45px 53px 45px 53px; min-height: 1123px; transform-origin: top left; position: absolute; top: 0; left: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
             <!-- Dynamic Official Report Generated Here -->
           </div>
         </div>
@@ -4407,7 +4412,7 @@
 
       // HTML Template
       let html = `
-        <div class="print-page-wrapper" style="min-height: 1123px; width: 794px; padding: 38px 53px 38px 53px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; background: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+        <div class="print-page-wrapper" style="min-height: 1033px; width: 100%; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; background: #ffffff;">
           
           <!-- TOP & MAIN CONTENT AREA -->
           <div style="flex: 1 0 auto;">
@@ -4542,7 +4547,7 @@
       if (includeReviews && summaryList.length > 0) {
         html += `
           <div class="my-2 space-y-1.5">
-            <h4 class="font-bold uppercase tracking-wider text-zinc-950" style="font-size: 11.5px; font-weight: 800; margin: 4px 0 3px 0;">
+            <h4 class="font-bold uppercase tracking-wider text-zinc-950 print-section-header" style="font-size: 11.5px; font-weight: 800; margin: 4px 0 3px 0; page-break-after: avoid; break-after: avoid;">
               B. Rangkuman Catatan Evaluasi Masukan Mahasiswa
             </h4>
         `;
@@ -4553,19 +4558,19 @@
 
           if (studentKeys.length > 0) {
             html += `
-              <div class="print-card print-avoid-break rounded border border-zinc-400 bg-zinc-50/50 space-y-1.5 mb-2" style="page-break-inside: avoid; break-inside: avoid; border: 1px solid #9ca3af; border-radius: 4px; padding: 7px 9px;">
-                <div class="font-bold text-zinc-950 border-b border-zinc-300 flex items-center justify-between" style="border-bottom: 1px solid #d1d5db; padding-bottom: 3px;">
+              <div class="print-card print-avoid-break rounded border border-zinc-400 bg-zinc-50/50 space-y-1 mb-1.5" style="page-break-inside: avoid; break-inside: avoid; border: 1px solid #9ca3af; border-radius: 4px; padding: 5px 8px;">
+                <div class="font-bold text-zinc-950 border-b border-zinc-300 flex items-center justify-between" style="border-bottom: 1px solid #d1d5db; padding-bottom: 2.5px;">
                   <span class="font-extrabold" style="font-size: 11.5px; font-weight: 800;">${g.kelompok}</span>
                   <span class="font-medium font-mono text-zinc-700 bg-zinc-200/80 px-1.5 py-0.5 rounded" style="font-size: 10px;">${g.sesi || 'Minggu 1'}</span>
                 </div>
-                <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; padding-top: 3px;">
+                <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; padding-top: 2.5px;">
             `;
 
             studentKeys.forEach(name => {
               const reviews = evalList[name] || [];
               if (reviews.length > 0) {
                 html += `
-                  <div class="rounded bg-white border border-zinc-200 shadow-2xs" style="page-break-inside: avoid; break-inside: avoid; border: 1px solid #e5e7eb; border-radius: 4px; padding: 5px 7px;">
+                  <div class="rounded bg-white border border-zinc-200 shadow-2xs" style="page-break-inside: avoid; break-inside: avoid; border: 1px solid #e5e7eb; border-radius: 4px; padding: 4px 6.5px;">
                     <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px dashed #e5e7eb; padding-bottom: 2px; margin-bottom: 3px;">
                       <span style="font-size: 11px; font-weight: 700; color: #111827;">${name}</span>
                       <span style="font-size: 9.5px; font-weight: 600; color: #4b5563; font-family: monospace; background: #f3f4f6; padding: 0.5px 4px; border-radius: 3px;">${reviews.length} Masukan</span>
