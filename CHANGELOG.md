@@ -4,6 +4,28 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.30] - 2026-08-23
+
+### 🎯 Filter Presentator Interaktif & Tampilan Fokus Tabel Penilaian Per Kelompok
+- **Filter Kelompok Presentator (Target Penilaian Spesifik):**
+  - Menggantikan dropdown filter sesi statis dengan dropdown **Kelompok Presentator** yang dinamis (`Semua Kelompok Presentator (Matriks Lengkap)`, `Kelompok 1`, `Kelompok 2`, dst).
+  - Ketika memilih presentator tertentu (misal `Kelompok 1`), tabel otomatis beralih dari matriks luas menjadi **Tabel Penilaian Khusus Kelompok Tersebut** untuk seluruh mahasiswa di kelas.
+- **Dukungan Filter Mendalam (*Deep Filtering*):**
+  - **Filter Kelompok Asal Mahasiswa:** Memungkinkan melihat kepatuhan penilaian mahasiswa dari kelompok asal tertentu terhadap presentator yang dipilih.
+  - **Filter Status Penilaian Dinamis:**
+    - Pada mode Presentator Spesifik: `Semua Status`, `Sudah Menilai [Kelompok]`, `Belum Menilai [Kelompok]`, dan `Anggota Penyaji [Kelompok]`.
+    - Pada mode Matriks: `Semua Status`, `Selesai`, `Sebagian`, `Belum Mengisi`.
+- **Statistik Ringkasan 4-Kartu Kontekstual & Real-Time:**
+  - Kartu ringkasan di atas tabel otomatis menyesuaikan metrik sesuai kelompok presentator yang sedang dipilih:
+    - `Total Mahasiswa`
+    - `Sudah Menilai` (persentase & jumlah penilai)
+    - `Anggota Penyaji` (jumlah anggota yang dibebaskan dari menilai kelompoknya sendiri)
+    - `Belum Menilai` (persentase & jumlah yang belum menilai)
+- **Tampilan Bersih & Minimalis:**
+  - Kolom nama mahasiswa difreeze di kiri dengan shadow halus untuk kemudahan navigasi saat tabel digeser.
+
+---
+
 ## [2.1.29] - 2026-08-23
 
 ### ⚡ Optimalisasi Kecepatan Muat & Desain Matriks Checklist Ultra-Minimalis (Compact Presensi)
