@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.35] - 2026-08-23
+
+### 🎯 Standardisasi Label Status Presensi (Zero Inconsistency)
+- **Keseragaman Label "Belum Mengisi":**
+  - Menyamakan seluruh indikator mahasiswa yang belum mengirimkan penilaian menjadi **"Belum Mengisi"**, menghilangkan inkonsistensi label `Belum (0/1)` pada anggota kelompok penyaji.
+  - Aturan status kini konsisten untuk semua mahasiswa:
+    - **Belum Mengisi:** Jika mahasiswa belum menilai satupun kelompok yang wajib dinilai.
+    - **Sebagian (X/Y):** Jika mahasiswa baru menilai sebagian kelompok wajib.
+    - **Selesai / Selesai (Penyaji):** Jika mahasiswa telah menuntaskan seluruh kewajiban penilaian di sesi aktif.
+
+---
+
 ## [2.1.34] - 2026-08-23
 
 ### 🔍 Tipografi Kompak & Optimasi Kerapatan Sel Mobile

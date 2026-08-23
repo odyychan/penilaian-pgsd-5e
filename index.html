@@ -3080,31 +3080,15 @@
         let matrixStatusCategory = "BELUM";
         let matrixStatusLabel = "Belum Mengisi";
 
-        if (isPresenterInActiveSession) {
-          if (totalTargets === 0 || filledTargetsCount === totalTargets) {
-            matrixStatusCategory = "LENGKAP";
-            matrixStatusLabel = "Selesai (Penyaji)";
-          } else if (filledTargetsCount > 0) {
-            matrixStatusCategory = "SEBAGIAN";
-            matrixStatusLabel = `Sebagian (${filledTargetsCount}/${totalTargets})`;
-          } else {
-            matrixStatusCategory = "BELUM";
-            matrixStatusLabel = `Belum (${filledTargetsCount}/${totalTargets})`;
-          }
+        if (totalTargets === 0 || filledTargetsCount === totalTargets) {
+          matrixStatusCategory = "LENGKAP";
+          matrixStatusLabel = isPresenterInActiveSession ? "Selesai (Penyaji)" : "Selesai";
+        } else if (filledTargetsCount > 0) {
+          matrixStatusCategory = "SEBAGIAN";
+          matrixStatusLabel = `Sebagian (${filledTargetsCount}/${totalTargets})`;
         } else {
-          if (totalTargets === 0) {
-            matrixStatusCategory = "LENGKAP";
-            matrixStatusLabel = "Selesai";
-          } else if (filledTargetsCount === totalTargets) {
-            matrixStatusCategory = "LENGKAP";
-            matrixStatusLabel = "Selesai";
-          } else if (filledTargetsCount > 0) {
-            matrixStatusCategory = "SEBAGIAN";
-            matrixStatusLabel = `Sebagian (${filledTargetsCount}/${totalTargets})`;
-          } else {
-            matrixStatusCategory = "BELUM";
-            matrixStatusLabel = "Belum Mengisi";
-          }
+          matrixStatusCategory = "BELUM";
+          matrixStatusLabel = "Belum Mengisi";
         }
 
         // Kalkulasi Mode Single Presentator
