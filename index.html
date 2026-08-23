@@ -379,7 +379,7 @@
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span>Draf Tersimpan</span>
                   </span>
-                  <button type="button" onclick="clearFormDraftManually()" title="Hapus Draf Isian" class="text-[10px] text-zinc-400 hover:text-rose-600 transition underline cursor-pointer">
+                  <button type="button" id="topResetDraftBtn" onclick="clearFormDraftManually()" title="Hapus Draf Isian" class="hidden text-[10px] text-zinc-400 hover:text-rose-600 transition underline cursor-pointer">
                     Reset Draf
                   </button>
                 </div>
@@ -491,22 +491,33 @@
             </div>
 
             <!-- Section 1 Actions -->
-            <div class="flex items-center justify-between gap-3">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
               <button 
                 type="button" 
                 onclick="goToInfoOverview()" 
-                class="px-5 py-3 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer"
+                class="min-h-[44px] px-5 py-3 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5"
               >
-                ← Info Form
+                <span>← Info Form</span>
               </button>
-              <button 
-                type="button" 
-                onclick="nextFromStep1()" 
-                class="flex-1 sm:flex-none px-6 py-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 flex items-center justify-center gap-2 cursor-pointer shadow-xs"
-              >
-                <span>Lanjut ke Pemilihan Kelompok</span>
-                <span>→</span>
-              </button>
+              <div class="flex items-center gap-2 sm:gap-2.5 flex-1 sm:flex-none justify-end">
+                <button 
+                  type="button" 
+                  onclick="clearFormDraftManually()" 
+                  class="btnResetDraft hidden min-h-[44px] px-3.5 sm:px-4 py-3 rounded-lg border border-rose-200 bg-rose-50/60 hover:bg-rose-100 text-rose-700 hover:text-rose-800 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
+                  title="Kosongkan dan Reset Seluruh Draf Isian"
+                >
+                  <span>🗑️</span>
+                  <span>Reset Draf</span>
+                </button>
+                <button 
+                  type="button" 
+                  onclick="nextFromStep1()" 
+                  class="flex-1 sm:flex-none min-h-[44px] px-6 py-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                >
+                  <span>Lanjut ke Pemilihan Kelompok</span>
+                  <span>→</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -552,22 +563,33 @@
           </div>
 
           <!-- Section 2 Actions -->
-          <div class="flex items-center justify-between gap-3">
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
             <button 
               type="button" 
               onclick="goToStep(1)" 
-              class="px-5 py-3 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer"
+              class="min-h-[44px] px-5 py-3 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5"
             >
-              ← Kembali
+              <span>← Kembali</span>
             </button>
-            <button 
-              type="button" 
-              onclick="nextFromStep2()" 
-              class="flex-1 sm:flex-none px-6 py-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 flex items-center justify-center gap-2 cursor-pointer shadow-xs"
-            >
-              <span>Lanjut ke Penilaian Skor</span>
-              <span>→</span>
-            </button>
+            <div class="flex items-center gap-2 sm:gap-2.5 flex-1 sm:flex-none justify-end">
+              <button 
+                type="button" 
+                onclick="clearFormDraftManually()" 
+                class="btnResetDraft hidden min-h-[44px] px-3.5 sm:px-4 py-3 rounded-lg border border-rose-200 bg-rose-50/60 hover:bg-rose-100 text-rose-700 hover:text-rose-800 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
+                title="Kosongkan dan Reset Seluruh Draf Isian"
+              >
+                <span>🗑️</span>
+                <span>Reset Draf</span>
+              </button>
+              <button 
+                type="button" 
+                onclick="nextFromStep2()" 
+                class="flex-1 sm:flex-none min-h-[44px] px-6 py-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+              >
+                <span>Lanjut ke Penilaian Skor</span>
+                <span>→</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -662,22 +684,33 @@
           </div>
 
           <!-- Section 3 Actions -->
-          <div class="flex items-center justify-between gap-3">
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
             <button 
               type="button" 
               onclick="goToStep(2)" 
-              class="px-5 py-3 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer"
+              class="min-h-[44px] px-5 py-3 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5"
             >
-              ← Kembali
+              <span>← Kembali</span>
             </button>
-            <button 
-              type="button" 
-              onclick="nextFromStep3()" 
-              class="flex-1 sm:flex-none px-6 py-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 flex items-center justify-center gap-2 cursor-pointer shadow-xs"
-            >
-              <span>Lanjut ke Evaluasi Masukan</span>
-              <span>→</span>
-            </button>
+            <div class="flex items-center gap-2 sm:gap-2.5 flex-1 sm:flex-none justify-end">
+              <button 
+                type="button" 
+                onclick="clearFormDraftManually()" 
+                class="btnResetDraft hidden min-h-[44px] px-3.5 sm:px-4 py-3 rounded-lg border border-rose-200 bg-rose-50/60 hover:bg-rose-100 text-rose-700 hover:text-rose-800 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
+                title="Kosongkan dan Reset Seluruh Draf Isian"
+              >
+                <span>🗑️</span>
+                <span>Reset Draf</span>
+              </button>
+              <button 
+                type="button" 
+                onclick="nextFromStep3()" 
+                class="flex-1 sm:flex-none min-h-[44px] px-6 py-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+              >
+                <span>Lanjut ke Evaluasi Masukan</span>
+                <span>→</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -723,27 +756,38 @@
           </div>
 
           <!-- Section 4 Actions -->
-          <div class="flex items-center justify-between gap-3">
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
             <button 
               type="button" 
               onclick="goToStep(3)" 
-              class="px-5 py-3.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer"
+              class="min-h-[44px] px-5 py-3.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5"
             >
-              ← Kembali
+              <span>← Kembali</span>
             </button>
-            <button 
-              type="submit" 
-              id="submitBtn" 
-              class="flex-1 sm:flex-none px-8 py-3.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white font-semibold text-xs sm:text-sm shadow-sm active:scale-98 transition flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <span>Kirim Penilaian</span>
-              <span id="submitSpinner" class="hidden">
-                <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                </svg>
-              </span>
-            </button>
+            <div class="flex items-center gap-2 sm:gap-2.5 flex-1 sm:flex-none justify-end">
+              <button 
+                type="button" 
+                onclick="clearFormDraftManually()" 
+                class="btnResetDraft hidden min-h-[44px] px-3.5 sm:px-4 py-3.5 rounded-lg border border-rose-200 bg-rose-50/60 hover:bg-rose-100 text-rose-700 hover:text-rose-800 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
+                title="Kosongkan dan Reset Seluruh Draf Isian"
+              >
+                <span>🗑️</span>
+                <span>Reset Draf</span>
+              </button>
+              <button 
+                type="submit" 
+                id="submitBtn" 
+                class="flex-1 sm:flex-none min-h-[44px] px-8 py-3.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white font-semibold text-xs sm:text-sm shadow-sm active:scale-98 transition flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>Kirim Penilaian</span>
+                <span id="submitSpinner" class="hidden">
+                  <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                  </svg>
+                </span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1624,6 +1668,8 @@
 
       if (!skipSave) {
         saveFormDraft();
+      } else {
+        updateDraftResetButtonVisibility();
       }
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1739,6 +1785,7 @@
         if (autoFillNotice) autoFillNotice.classList.add("hidden");
         if (btnFillNimEmail) btnFillNimEmail.classList.add("hidden");
         if (nimInput) nimInput.className = "w-full pl-3.5 pr-16 py-2.5 rounded-lg border border-zinc-300 text-xs sm:text-sm font-mono focus:border-zinc-900 outline-none transition bg-white placeholder-zinc-400";
+        updateDraftResetButtonVisibility();
         return false;
       }
 
@@ -1974,6 +2021,52 @@
     // =========================================================================
     // 💾 AUTO-SAVE FORM DRAFT ENGINE (PENYIMPANAN OTOMATIS ISIAN MAHASISWA)
     // =========================================================================
+    function hasAnyFormInputFilled() {
+      try {
+        const nim = document.getElementById("inputNim") ? document.getElementById("inputNim").value.trim() : "";
+        const nama = document.getElementById("inputNama") ? document.getElementById("inputNama").value.trim() : "";
+        const email = document.getElementById("inputEmail") ? document.getElementById("inputEmail").value.trim() : "";
+        if (nim.length > 0 || nama.length > 0 || email.length > 0) return true;
+        if (selectedGroupObj) return true;
+        if (selectedBestPresenters && selectedBestPresenters.length > 0) return true;
+
+        let hasEval = false;
+        document.querySelectorAll("#evaluationInputsContainer textarea").forEach(ta => {
+          if (ta.value.trim().length > 0) hasEval = true;
+        });
+        if (hasEval) return true;
+
+        const raw = localStorage.getItem("PGSD_FORM_DRAFT");
+        if (raw) {
+          const d = JSON.parse(raw);
+          if (d && (d.nim || d.nama || d.email || d.groupName || (d.bestPresenters && d.bestPresenters.length > 0) || (d.evaluasi && Object.keys(d.evaluasi).length > 0))) {
+            return true;
+          }
+        }
+      } catch (e) {}
+      return false;
+    }
+
+    function updateDraftResetButtonVisibility() {
+      const hasData = hasAnyFormInputFilled();
+      document.querySelectorAll(".btnResetDraft").forEach(btn => {
+        if (hasData) {
+          btn.classList.remove("hidden");
+        } else {
+          btn.classList.add("hidden");
+        }
+      });
+      const topResetBtn = document.getElementById("topResetDraftBtn");
+      if (topResetBtn) {
+        if (hasData) topResetBtn.classList.remove("hidden");
+        else topResetBtn.classList.add("hidden");
+      }
+      const indicator = document.getElementById("autoSaveIndicator");
+      if (indicator && !hasData) {
+        indicator.classList.add("hidden");
+      }
+    }
+
     function saveFormDraft() {
       try {
         const peran = currentEvaluatorRole || "Mahasiswa";
@@ -1993,6 +2086,7 @@
 
         // Hanya simpan jika ada isian yang diinputkan pengguna
         if (!email && !nama && !nim && !groupName && selectedBestPresenters.length === 0 && Object.keys(evaluasi).length === 0) {
+          updateDraftResetButtonVisibility();
           return;
         }
 
@@ -2014,6 +2108,7 @@
         const indicator = document.getElementById("autoSaveIndicator");
         if (indicator) indicator.classList.remove("hidden");
       } catch (e) {}
+      updateDraftResetButtonVisibility();
     }
 
     let isDraftAlreadyRestored = false;
@@ -2021,9 +2116,15 @@
       if (isDraftAlreadyRestored) return;
       try {
         const raw = localStorage.getItem("PGSD_FORM_DRAFT");
-        if (!raw) return;
+        if (!raw) {
+          updateDraftResetButtonVisibility();
+          return;
+        }
         const draft = JSON.parse(raw);
-        if (!draft) return;
+        if (!draft) {
+          updateDraftResetButtonVisibility();
+          return;
+        }
 
         // 1. Pulihkan Step 1 (Identitas & Peran)
         if (draft.peran) {
@@ -2131,10 +2232,11 @@
           showToast("💾 Draf sebelumnya dipulihkan.", "info");
         }
       } catch (e) {}
+      updateDraftResetButtonVisibility();
     }
 
     function clearFormDraftManually() {
-      if (confirm("Apakah Anda yakin ingin mengosongkan draf isian formulir?")) {
+      if (confirm("Apakah Anda yakin ingin mengosongkan dan mereset seluruh draf isian formulir?")) {
         localStorage.removeItem("PGSD_FORM_DRAFT");
         window.location.reload();
       }

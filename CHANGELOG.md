@@ -4,7 +4,22 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.20] - 2026-08-23
+
+### 🗑️ Penempatan Tombol Reset Draf di Sebelah Tombol Lanjut & Visibilitas Cerdas Lintas-Step
+- **Tombol Reset Draf di Setiap Langkah Navigasi (Step 1 s.d. Step 4):**
+  - Menempatkan tombol **`🗑️ Reset Draf`** berdampingan langsung di sebelah tombol aksi utama (*Lanjut ke Pemilihan Kelompok*, *Lanjut ke Penilaian Skor*, *Lanjut ke Evaluasi Masukan*, dan *Kirim Penilaian*) pada action bar setiap section form.
+  - Dirancang sesuai prinsip *Mobile-First* & standar aksesibilitas (target sentuh minimum 44px, styling soft-rose border `border-rose-200 bg-rose-50/60 text-rose-700`, layout flex responsif yang stabil di mobile portrait, landscape, tablet, hingga layar desktop lebar).
+- **Deteksi Isian Cerdas & Visibilitas Otomatis (Smart Visibility Engine):**
+  - Mengimplementasikan `hasAnyFormInputFilled()` dan `updateDraftResetButtonVisibility()` untuk mendeteksi penginputan secara real-time pada seluruh bagian formulir (NIM, Nama, Email, Pemilihan Kelompok, Pengaturan Skor, Pemilihan Presentator Terbaik, dan Masukan Tertulis Pemateri).
+  - Tombol Reset Draf otomatis muncul ketika salah satu bagian input terisi atau draf tersimpan di storage lokal, dan otomatis tersembunyi saat form dalam keadaan kosong bersih.
+- **Pembersihan Draf Aman & Menyeluruh:**
+  - Fungsi `clearFormDraftManually()` dilengkapi dialog konfirmasi protektif untuk mencegah penghapusan draf yang tidak disengaja.
+
+---
+
 ## [2.1.19] - 2026-08-23
+
 
 ### 🎓 Filter Peran Penilai di Rekapitulasi Hasil Penilaian
 - **Default Sumber Data: Mahasiswa Terdaftar:**
