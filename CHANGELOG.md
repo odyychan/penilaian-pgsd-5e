@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.63] - 2026-08-23
+
+### 👥 Integrasi Dinamis Jumlah Mahasiswa pada Ringkasan Kelompok
+- **Penyempurnaan Teks Ringkasan (*Dynamic Student Count Label*):**
+  - Mengubah teks ringkasan menjadi *"Total X Kelompok Terdaftar dengan Y Mahasiswa"*.
+  - Menghitung secara dinamis dan presisi jumlah mahasiswa terdaftar pada kelompok-kelompok yang aktif sesuai dengan cakupan filter yang dipilih.
+- **Sinkronisasi Dwikanal:**
+  - Diterapkan pada `index.html` dan `admin.html`.
+
+---
+
 ## [2.1.62] - 2026-08-23
 
 ### 📊 Optimalisasi Baris Ringkasan Tabel & Penggabungan Kolom Penilai

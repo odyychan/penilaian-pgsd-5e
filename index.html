@@ -4408,6 +4408,24 @@
           evaluatedCount++;
         }
       });
+
+      // Hitung Total Mahasiswa Terdaftar pada Kelompok Aktif
+      const activeGroupNames = new Set(summaryList.map(g => g.kelompok));
+      let totalMahasiswa = 0;
+      if (allStudentsData && allStudentsData.length > 0) {
+        totalMahasiswa = allStudentsData.filter(s => activeGroupNames.has(s.kelompok)).length;
+      } else if (groupsData && groupsData.length > 0) {
+        groupsData.filter(g => activeGroupNames.has(g.name)).forEach(g => {
+          totalMahasiswa += (g.members || []).length;
+        });
+      }
+      if (totalMahasiswa === 0) {
+        summaryList.forEach(g => {
+          if (g.evaluasiList) {
+            totalMahasiswa += Object.keys(g.evaluasiList).length;
+          }
+        });
+      }
       const avgClassScore = evaluatedCount > 0 ? (totalAllScore / evaluatedCount).toFixed(2) : "0.00";
 
       // HTML Template
@@ -4530,7 +4548,7 @@
           <tr style="background-color: #f3f4f6; font-weight: bold; border-top: 1.5px solid #000000; text-align: center;">
             <td colspan="4" style="padding: 5px 6px; text-align: center; vertical-align: middle; border: 1px solid #000000; font-size: 11px;">Rata-Rata Keseluruhan Kelas</td>
             <td style="padding: 5px 4px; border: 1px solid #000000; font-family: monospace; font-size: 11.5px; color: #000000; text-align: center; vertical-align: middle;">${avgClassScore}</td>
-            <td colspan="2" style="padding: 5px 6px; text-align: center; vertical-align: middle; border: 1px solid #000000; font-size: 10.5px; color: #374151;">Total ${summaryList.length} Kelompok Terdaftar</td>
+            <td colspan="2" style="padding: 5px 6px; text-align: center; vertical-align: middle; border: 1px solid #000000; font-size: 10.5px; color: #374151;">Total ${summaryList.length} Kelompok Terdaftar dengan ${totalMahasiswa} Mahasiswa</td>
           </tr>
         `;
       }
