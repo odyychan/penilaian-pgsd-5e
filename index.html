@@ -662,7 +662,7 @@
               </div>
 
               <span id="scoreGradeBadge" class="text-xs font-semibold px-2.5 py-1 rounded bg-zinc-100 text-zinc-800 border border-zinc-200">
-                Sangat Baik (A)
+                Nilai A (4,00)
               </span>
             </div>
 
@@ -2295,19 +2295,38 @@
     }
 
     function updateScoreBadge(val) {
-      const v = parseInt(val);
+      const v = parseFloat(val);
       const badge = document.getElementById("scoreGradeBadge");
-      if (v >= 85) {
-        badge.textContent = "Sangat Baik (A)";
+      if (!badge) return;
+      if (v >= 80) {
+        badge.textContent = "Nilai A (4,00)";
+        badge.className = "text-xs font-semibold px-2.5 py-1 rounded bg-emerald-50 text-emerald-800 border border-emerald-200";
+      } else if (v >= 77) {
+        badge.textContent = "Nilai A- (3,75)";
         badge.className = "text-xs font-semibold px-2.5 py-1 rounded bg-emerald-50 text-emerald-800 border border-emerald-200";
       } else if (v >= 75) {
-        badge.textContent = "Baik (B+)";
+        badge.textContent = "Nilai B+ (3,50)";
         badge.className = "text-xs font-semibold px-2.5 py-1 rounded bg-blue-50 text-blue-800 border border-blue-200";
-      } else if (v >= 65) {
-        badge.textContent = "Cukup (B)";
+      } else if (v >= 70) {
+        badge.textContent = "Nilai B (3,00)";
+        badge.className = "text-xs font-semibold px-2.5 py-1 rounded bg-blue-50 text-blue-800 border border-blue-200";
+      } else if (v >= 67) {
+        badge.textContent = "Nilai B- (2,75)";
         badge.className = "text-xs font-semibold px-2.5 py-1 rounded bg-amber-50 text-amber-800 border border-amber-200";
+      } else if (v >= 64) {
+        badge.textContent = "Nilai C+ (2,50)";
+        badge.className = "text-xs font-semibold px-2.5 py-1 rounded bg-amber-50 text-amber-800 border border-amber-200";
+      } else if (v >= 60) {
+        badge.textContent = "Nilai C (2,00)";
+        badge.className = "text-xs font-semibold px-2.5 py-1 rounded bg-amber-50 text-amber-800 border border-amber-200";
+      } else if (v >= 50) {
+        badge.textContent = "Nilai D+ (1,50)";
+        badge.className = "text-xs font-semibold px-2.5 py-1 rounded bg-rose-50 text-rose-800 border border-rose-200";
+      } else if (v >= 40) {
+        badge.textContent = "Nilai D (1,00)";
+        badge.className = "text-xs font-semibold px-2.5 py-1 rounded bg-rose-50 text-rose-800 border border-rose-200";
       } else {
-        badge.textContent = "Kurang";
+        badge.textContent = "Nilai E (0)";
         badge.className = "text-xs font-semibold px-2.5 py-1 rounded bg-rose-50 text-rose-800 border border-rose-200";
       }
     }
@@ -4519,10 +4538,16 @@
           const totalP = parseInt(g.totalPenilai) || 0;
           let predikat = "-";
           if (totalP > 0) {
-            if (scoreNum >= 85) predikat = "Sangat Baik (A)";
-            else if (scoreNum >= 75) predikat = "Baik (B+)";
-            else if (scoreNum >= 65) predikat = "Cukup (B)";
-            else predikat = "Kurang (C)";
+            if (scoreNum >= 80) predikat = "A";
+            else if (scoreNum >= 77) predikat = "A-";
+            else if (scoreNum >= 75) predikat = "B+";
+            else if (scoreNum >= 70) predikat = "B";
+            else if (scoreNum >= 67) predikat = "B-";
+            else if (scoreNum >= 64) predikat = "C+";
+            else if (scoreNum >= 60) predikat = "C";
+            else if (scoreNum >= 50) predikat = "D+";
+            else if (scoreNum >= 40) predikat = "D";
+            else predikat = "E";
           }
 
           const presenters = g.rankedPresenters || g.topPresentator || [];

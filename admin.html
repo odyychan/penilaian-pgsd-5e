@@ -3202,10 +3202,16 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           const totalP = parseInt(g.totalPenilai) || 0;
           let predikat = "-";
           if (totalP > 0) {
-            if (scoreNum >= 85) predikat = "Sangat Baik (A)";
-            else if (scoreNum >= 75) predikat = "Baik (B+)";
-            else if (scoreNum >= 65) predikat = "Cukup (B)";
-            else predikat = "Kurang (C)";
+            if (scoreNum >= 80) predikat = "A";
+            else if (scoreNum >= 77) predikat = "A-";
+            else if (scoreNum >= 75) predikat = "B+";
+            else if (scoreNum >= 70) predikat = "B";
+            else if (scoreNum >= 67) predikat = "B-";
+            else if (scoreNum >= 64) predikat = "C+";
+            else if (scoreNum >= 60) predikat = "C";
+            else if (scoreNum >= 50) predikat = "D+";
+            else if (scoreNum >= 40) predikat = "D";
+            else predikat = "E";
           }
 
           const presenters = g.rankedPresenters || g.topPresentator || [];

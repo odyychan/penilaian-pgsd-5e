@@ -4,6 +4,26 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.67] - 2026-08-23
+
+### 🎓 Standardisasi Skala Predikat Nilai Huruf Akademik Resmi
+- **Penerapan Konversi Nilai Huruf (*Official Letter Grade Conversion*):**
+  - Mengintegrasikan tabel standar konversi nilai akademik resmi ke dalam sistem perhitungan predikat laporan cetak dan badge formulir:
+    - $\ge 80 \rightarrow$ **A** *(Bobot 4,00)*
+    - $77 - <80 \rightarrow$ **A-** *(Bobot 3,75)*
+    - $75 - <77 \rightarrow$ **B+** *(Bobot 3,50)*
+    - $70 - <75 \rightarrow$ **B** *(Bobot 3,00)*
+    - $67 - <70 \rightarrow$ **B-** *(Bobot 2,75)*
+    - $64 - <67 \rightarrow$ **C+** *(Bobot 2,50)*
+    - $60 - <64 \rightarrow$ **C** *(Bobot 2,00)*
+    - $50 - <60 \rightarrow$ **D+** *(Bobot 1,50)*
+    - $40 - <50 \rightarrow$ **D** *(Bobot 1,00)*
+    - $00 - <40 \rightarrow$ **E** *(Bobot 0)*
+- **Sinkronisasi Dwikanal:**
+  - Diterapkan pada `index.html` dan `admin.html`.
+
+---
+
 ## [2.1.66] - 2026-08-23
 
 ### 📊 Penambahan Satuan Mahasiswa pada Kolom Penilai Tabel Rekapitulasi
