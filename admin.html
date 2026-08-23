@@ -1348,7 +1348,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       </div>
 
       <!-- Print Filter Bar -->
-      <div class="p-2 sm:p-3 bg-zinc-50 rounded-xl border border-zinc-200 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs flex-shrink-0">
+      <div class="p-2 sm:p-3 bg-zinc-50 rounded-xl border border-zinc-200 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 text-xs flex-shrink-0 items-center">
         <div>
           <label class="block font-semibold text-zinc-700 mb-1 text-[11px] sm:text-xs">Cakupan Kelompok:</label>
           <select id="adminPrintScopeGroupSelect" onchange="renderAdminPrintPreviewContent()" class="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-xs font-medium focus:border-zinc-900 outline-none">
@@ -1361,9 +1361,13 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
             <option value="ALL">Semua Sesi</option>
           </select>
         </div>
-        <div class="flex items-center gap-2 pt-1 sm:pt-5">
+        <div class="flex items-center gap-2 pt-1 sm:pt-4">
           <input type="checkbox" id="adminPrintIncludeReviews" checked onchange="renderAdminPrintPreviewContent()" class="w-4 h-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900 cursor-pointer">
-          <label for="adminPrintIncludeReviews" class="text-xs text-zinc-700 cursor-pointer font-medium">Sertakan Ulasan Evaluatif</label>
+          <label for="adminPrintIncludeReviews" class="text-xs text-zinc-700 cursor-pointer font-medium select-none">Sertakan Ulasan Evaluatif</label>
+        </div>
+        <div class="flex items-center gap-2 pt-1 sm:pt-4">
+          <input type="checkbox" id="adminPrintIncludeReviewerName" checked onchange="renderAdminPrintPreviewContent()" class="w-4 h-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900 cursor-pointer">
+          <label for="adminPrintIncludeReviewerName" class="text-xs text-zinc-700 cursor-pointer font-medium select-none">Sertakan Nama Pengirim</label>
         </div>
       </div>
 
@@ -3006,6 +3010,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       const groupSelect = document.getElementById("adminPrintScopeGroupSelect");
       const sesiSelect = document.getElementById("adminPrintScopeSesiSelect");
       const includeReviews = document.getElementById("adminPrintIncludeReviews") ? document.getElementById("adminPrintIncludeReviews").checked : true;
+      const includeReviewerName = document.getElementById("adminPrintIncludeReviewerName") ? document.getElementById("adminPrintIncludeReviewerName").checked : true;
       const selectedGroup = groupSelect ? groupSelect.value : "ALL";
       const selectedSesi = sesiSelect ? sesiSelect.value : "ALL";
 
@@ -3287,7 +3292,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
                       ${reviews.slice(0, 4).map(r => `
                         <li style="margin-bottom: 2px;">
                           <span style="font-style: italic; color: #111827;">"${r.ulasan}"</span>
-                          <span style="font-size: 9px; color: #4b5563; font-weight: 600; font-style: normal; margin-left: 3px;">— ${r.penilai || 'Penilai'}</span>
+                          ${includeReviewerName ? `<span style="font-size: 9px; color: #4b5563; font-weight: 600; font-style: normal; margin-left: 3px;">— ${r.penilai || 'Penilai'}</span>` : ''}
                         </li>
                       `).join("")}
                       ${reviews.length > 4 ? `<li style="list-style: none; font-size: 9.5px; color: #6b7280; font-style: italic; margin-top: 1px; padding-left: 0;">+ ${reviews.length - 4} catatan masukan lainnya...</li>` : ''}

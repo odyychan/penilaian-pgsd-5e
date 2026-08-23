@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.69] - 2026-08-23
+
+### 🔘 Opsi Tampilkan/Sembunyikan Nama Pengirim Ulasan Evaluatif
+- **Opsi Kontrol Privasi Ulasan (*Reviewer Name Visibility Toggle*):**
+  - Menambahkan checkbox *"Sertakan Nama Pengirim"* pada bilah alat pratinjau cetak dokumen rekapitulasi.
+  - Jika dicentang (default: aktif): Setiap catatan masukan menampilkan nama mahasiswa pengirim (*e.g. "Penjelasan runtut dan jelas" — Ahmad Fauzi*).
+  - Jika tidak dicentang: Nama pengirim disembunyikan secara otomatis, menghasilkan tampilan ulasan anonim/kolektif (*e.g. "Penjelasan runtut dan jelas"*).
+- **Sinkronisasi Dwikanal:**
+  - Diterapkan pada `index.html` dan `admin.html`.
+
+---
+
 ## [2.1.68] - 2026-08-23
 
 ### 📝 Penyederhanaan Teks Ringkasan Jumlah Kelompok dan Mahasiswa
