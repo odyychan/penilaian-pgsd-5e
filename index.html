@@ -465,9 +465,9 @@
                       id="btnFillNimEmail" 
                       onclick="fillNimEmailFormat()" 
                       class="hidden text-[10px] font-mono font-semibold text-zinc-700 hover:text-zinc-950 bg-zinc-100 hover:bg-zinc-200 px-2 py-0.5 rounded border border-zinc-300 transition cursor-pointer flex items-center gap-1"
-                      title="Isi email otomatis dengan format NIM@mhs.ulm.ac.id"
+                      title="Isi otomatis email dengan format NIM@mhs.ulm.ac.id"
                     >
-                      <span>⚡ Gunakan Format NIM</span>
+                      <span>⚡ Isi Otomatis</span>
                     </button>
                   </div>
                   <div class="relative">
@@ -1238,6 +1238,7 @@
     let currentStep = 1;
     let appConfig = {};
     let groupsData = [];
+    let allStudentsData = [];
     let selectedGroupObj = null;
     let selectedBestPresenters = [];
     let currentRekapData = null;
@@ -1271,11 +1272,31 @@
       try {
         const cachedGroups = localStorage.getItem("PGSD_CACHE_GROUPS");
         const cachedConfig = localStorage.getItem("PGSD_CACHE_CONFIG");
+        const cachedStudents = localStorage.getItem("PGSD_CACHE_ALL_STUDENTS");
         const cachedRekap = localStorage.getItem("PGSD_CACHE_REKAP");
+
+        if (cachedStudents) {
+          try { allStudentsData = JSON.parse(cachedStudents) || []; } catch(e) {}
+        }
 
         if (cachedGroups && cachedConfig) {
           appConfig = JSON.parse(cachedConfig);
           groupsData = JSON.parse(cachedGroups);
+
+          if (!allStudentsData || allStudentsData.length === 0) {
+            allStudentsData = [];
+            groupsData.forEach(g => {
+              (g.members || []).forEach(m => {
+                allStudentsData.push({
+                  nim: m.nim || "",
+                  name: m.name || "",
+                  kelompok: g.name || "",
+                  sesi: g.sesi || "Minggu 1"
+                });
+              });
+            });
+          }
+
           renderConfigHeader();
           renderGroupOptions();
         } else {
@@ -1303,7 +1324,7 @@
         document.getElementById("groupsContainer").classList.add("hidden");
       }
 
-      const fetchWithTimeout = (url, ms = 7000) => {
+      const fetchWithTimeout = (url, ms = 9000) => {
         return Promise.race([
           fetch(url),
           new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), ms))
@@ -1311,19 +1332,42 @@
       };
 
       try {
-        const response = await fetchWithTimeout(`${apiUrl}?action=getInitialData&_t=${Date.now()}`, 7000);
+        const response = await fetchWithTimeout(`${apiUrl}?action=getInitialData&nocache=1&_t=${Date.now()}`, 9000);
         const result = await response.json();
 
         if (result && result.success) {
           appConfig = result.config || {};
           groupsData = result.groups || [];
           
+          if (result.allStudents && Array.isArray(result.allStudents)) {
+            allStudentsData = result.allStudents;
+          } else {
+            allStudentsData = [];
+            groupsData.forEach(g => {
+              (g.members || []).forEach(m => {
+                allStudentsData.push({
+                  nim: m.nim || "",
+                  name: m.name || "",
+                  kelompok: g.name || "",
+                  sesi: g.sesi || "Minggu 1"
+                });
+              });
+            });
+          }
+          
           localStorage.setItem("PGSD_CACHE_GROUPS", JSON.stringify(groupsData));
+          localStorage.setItem("PGSD_CACHE_ALL_STUDENTS", JSON.stringify(allStudentsData));
           localStorage.setItem("PGSD_CACHE_CONFIG", JSON.stringify(appConfig));
 
           renderConfigHeader();
           renderGroupOptions();
           restoreFormDraft();
+
+          // Jika pengguna sudah mengetikkan NIM, re-evaluasi secara instan dengan data terbaru
+          const currentNimInput = document.getElementById("inputNim")?.value || "";
+          if (currentNimInput && currentEvaluatorRole === 'Mahasiswa') {
+            validateNimLive(currentNimInput);
+          }
         }
       } catch (err) {
         renderConfigHeader();
@@ -1647,7 +1691,7 @@
     }
 
     function validateNimLive(nimVal) {
-      const cleanNim = String(nimVal || "").trim();
+      const cleanNim = String(nimVal || "").replace(/\s+/g, "").trim().toLowerCase();
       const nimInput = document.getElementById("inputNim");
       const iconEl = document.getElementById("nimStatusIcon");
       const feedbackBox = document.getElementById("nimFeedbackBox");
@@ -1665,14 +1709,33 @@
       }
 
       let foundStudent = null;
-      let foundGroup = null;
+      let foundGroupName = "";
+      let foundGroupSesi = "";
 
-      if (groupsData && groupsData.length > 0) {
+      // 1. Cari di allStudentsData (Roster Master Seluruh Mahasiswa Kelas)
+      if (allStudentsData && allStudentsData.length > 0) {
+        for (const s of allStudentsData) {
+          const sNim = String(s.nim || "").replace(/\s+/g, "").trim().toLowerCase();
+          if (sNim && sNim === cleanNim) {
+            foundStudent = s;
+            foundGroupName = s.kelompok || "Kelompok Terdaftar";
+            foundGroupSesi = s.sesi || "Minggu 1";
+            break;
+          }
+        }
+      }
+
+      // 2. Fallback cari di groupsData jika allStudentsData belum terisi
+      if (!foundStudent && groupsData && groupsData.length > 0) {
         for (const g of groupsData) {
-          const m = (g.members || []).find(mem => mem.nim && String(mem.nim).trim() === cleanNim);
+          const m = (g.members || []).find(mem => {
+            const mNim = String(mem.nim || "").replace(/\s+/g, "").trim().toLowerCase();
+            return mNim && mNim === cleanNim;
+          });
           if (m) {
             foundStudent = m;
-            foundGroup = g;
+            foundGroupName = g.name || "Kelompok Terdaftar";
+            foundGroupSesi = g.sesi || "Minggu 1";
             break;
           }
         }
@@ -1689,7 +1752,7 @@
               <span class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold">✓</span>
               <div>
                 <span class="font-bold block">${foundStudent.name}</span>
-                <span class="text-[10px] text-emerald-700 block font-medium">${foundGroup.name} (${foundGroup.sesi || 'Minggu 1'})</span>
+                <span class="text-[10px] text-emerald-700 block font-medium">${foundGroupName} (${foundGroupSesi})</span>
               </div>
             </div>
             <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-200/80 font-bold text-emerald-800">Terdaftar</span>
@@ -3250,6 +3313,17 @@
             { name: "Dimas Anggara", nim: "221012310007" }
           ]
         }
+      ];
+
+      allStudentsData = [
+        { name: "Ahmad Fauzi", nim: "221012310001", kelompok: "Kelompok 1", sesi: "Minggu 1" },
+        { name: "Siti Nurhaliza", nim: "221012310002", kelompok: "Kelompok 1", sesi: "Minggu 1" },
+        { name: "Budi Santoso", nim: "221012310003", kelompok: "Kelompok 1", sesi: "Minggu 1" },
+        { name: "Dewi Lestari", nim: "221012310004", kelompok: "Kelompok 1", sesi: "Minggu 1" },
+        { name: "Rian Pratama", nim: "221012310005", kelompok: "Kelompok 2", sesi: "Minggu 1" },
+        { name: "Putri Rahayu", nim: "221012310006", kelompok: "Kelompok 2", sesi: "Minggu 1" },
+        { name: "Dimas Anggara", nim: "221012310007", kelompok: "Kelompok 2", sesi: "Minggu 1" },
+        { name: "Rodhiyah", nim: "2210118210013", kelompok: "Kelompok 3", sesi: "Minggu 2" }
       ];
 
       renderConfigHeader();

@@ -127,15 +127,17 @@ function getRekapSheet(ss) {
 function doGet(e) {
   const action = e && e.parameter ? e.parameter.action : "";
 
-  // 1. Endpoint Ambil Data Awal Form (Cache Accelerated ~50ms)
+  // 1. Endpoint Ambil Data Awal Form (Direct Live & Real-Time Sync)
   if (action === "getInitialData") {
-    const data = getCachedInitialData();
+    const isNoCache = !e || !e.parameter || e.parameter.nocache === "1" || e.parameter._t;
+    const data = getCachedInitialData(isNoCache);
     return createJsonResponse(data);
   }
 
-  // 2. Endpoint Ambil Data Rekapitulasi Nilai (Cache Accelerated ~50ms)
+  // 2. Endpoint Ambil Data Rekapitulasi Nilai (Direct Live & Real-Time Sync)
   if (action === "getRecapData") {
-    const data = getCachedRecapData();
+    const isNoCache = !e || !e.parameter || e.parameter.nocache === "1" || e.parameter._t;
+    const data = getCachedRecapData(isNoCache);
     return createJsonResponse(data);
   }
 
@@ -218,42 +220,48 @@ function createJsonResponse(data) {
 }
 
 /**
- * Ambil Data Awal dengan Cache (Merespons dalam hitungan milidetik)
+ * Ambil Data Awal dengan Cache Cerdas (Merespons dalam milidetik & realtime saat ada permintaan baru)
  */
-function getCachedInitialData() {
-  const cache = CacheService.getScriptCache();
-  const cached = cache.get("INIT_FORM_DATA_V3");
-  if (cached) {
-    try {
-      return JSON.parse(cached);
-    } catch (e) {}
+function getCachedInitialData(bypassCache) {
+  if (!bypassCache) {
+    const cache = CacheService.getScriptCache();
+    const cached = cache.get("INIT_FORM_DATA_V4");
+    if (cached) {
+      try {
+        return JSON.parse(cached);
+      } catch (e) {}
+    }
   }
 
   const liveData = getFormInitialData();
   if (liveData && liveData.success) {
     try {
-      cache.put("INIT_FORM_DATA_V3", JSON.stringify(liveData), 300); // cache 5 menit
+      const cache = CacheService.getScriptCache();
+      cache.put("INIT_FORM_DATA_V4", JSON.stringify(liveData), 20); // 20 detik cache
     } catch (e) {}
   }
   return liveData;
 }
 
 /**
- * Ambil Data Rekapitulasi dengan Cache (Sangat Cepat)
+ * Ambil Data Rekapitulasi dengan Cache Cerdas
  */
-function getCachedRecapData() {
-  const cache = CacheService.getScriptCache();
-  const cached = cache.get("REKAP_DATA_CACHE_V3");
-  if (cached) {
-    try {
-      return JSON.parse(cached);
-    } catch (e) {}
+function getCachedRecapData(bypassCache) {
+  if (!bypassCache) {
+    const cache = CacheService.getScriptCache();
+    const cached = cache.get("REKAP_DATA_CACHE_V4");
+    if (cached) {
+      try {
+        return JSON.parse(cached);
+      } catch (e) {}
+    }
   }
 
   const liveData = getRecapData();
   if (liveData && liveData.success) {
     try {
-      cache.put("REKAP_DATA_CACHE_V3", JSON.stringify(liveData), 120); // cache 2 menit
+      const cache = CacheService.getScriptCache();
+      cache.put("REKAP_DATA_CACHE_V4", JSON.stringify(liveData), 20); // 20 detik cache
     } catch (e) {}
   }
   return liveData;
@@ -265,6 +273,8 @@ function getCachedRecapData() {
 function clearApiCache() {
   try {
     const cache = CacheService.getScriptCache();
+    cache.remove("INIT_FORM_DATA_V4");
+    cache.remove("REKAP_DATA_CACHE_V4");
     cache.remove("INIT_FORM_DATA_V3");
     cache.remove("REKAP_DATA_CACHE_V3");
   } catch (e) {}
@@ -290,7 +300,7 @@ function getConfigMap(ss) {
 }
 
 /**
- * Mengambil Data Awal Form (Langsung & Cepat)
+ * Mengambil Data Awal Form (Langsung & Cepat Dari Spreadsheet)
  */
 function getFormInitialData() {
   try {
@@ -302,43 +312,68 @@ function getFormInitialData() {
     const sesiAktif = (config["Sesi_Minggu_Aktif"] || "").trim().toUpperCase();
 
     const groupsMap = {};
+    const allGroupsMap = {};
+    const allStudentsList = [];
 
     for (let i = 1; i < masterData.length; i++) {
       const row = masterData[i];
       const kelompok = String(row[0] || "").trim();
       const sesi = String(row[1] || "").trim();
-      const nim = String(row[2] || "").trim();
+      const rawNim = row[2];
+      const nim = (rawNim !== null && rawNim !== undefined) ? String(rawNim).trim() : "";
       const nama = String(row[3] || "").trim();
       const status = String(row[4] || "AKTIF").trim().toUpperCase();
 
       if (!kelompok || !nama) continue;
       if (status === "NONAKTIF") continue;
 
-      const sesiRow = sesi.trim().toUpperCase();
-      if (sesiAktif !== "SEMUA" && sesiAktif !== "" && sesiRow !== sesiAktif) {
-        continue;
-      }
+      // Roster seluruh mahasiswa kelas 5E (untuk validasi identitas penilai instan)
+      allStudentsList.push({
+        nim: nim,
+        name: nama,
+        kelompok: kelompok,
+        sesi: sesi
+      });
 
-      if (!groupsMap[kelompok]) {
-        groupsMap[kelompok] = {
+      // Seluruh kelompok tanpa batas filter sesi
+      if (!allGroupsMap[kelompok]) {
+        allGroupsMap[kelompok] = {
           name: kelompok,
           sesi: sesi,
           members: []
         };
       }
-
-      groupsMap[kelompok].members.push({
+      allGroupsMap[kelompok].members.push({
         nim: nim,
         name: nama
       });
+
+      // Kelompok aktif untuk pilihan tampil (Langkah 2 Pemilihan Kelompok)
+      const sesiRow = sesi.trim().toUpperCase();
+      if (sesiAktif === "SEMUA" || sesiAktif === "" || sesiRow === sesiAktif) {
+        if (!groupsMap[kelompok]) {
+          groupsMap[kelompok] = {
+            name: kelompok,
+            sesi: sesi,
+            members: []
+          };
+        }
+        groupsMap[kelompok].members.push({
+          nim: nim,
+          name: nama
+        });
+      }
     }
 
     const groupList = Object.keys(groupsMap).map(k => groupsMap[k]);
+    const allGroupList = Object.keys(allGroupsMap).map(k => allGroupsMap[k]);
 
     return {
       success: true,
       config: config,
-      groups: groupList,
+      groups: groupList.length > 0 ? groupList : allGroupList,
+      allGroups: allGroupList,
+      allStudents: allStudentsList,
       loggedInEmail: ""
     };
   } catch (err) {

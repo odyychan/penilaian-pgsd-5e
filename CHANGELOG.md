@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.16] - 2026-08-23
+
+### ⚡ Real-Time Spreadsheet Sync (No Redeploy Needed) & Penamaan Tombol 'Isi Otomatis'
+- **Pembaruan Label Tombol Pintas Email:**
+  - Mengubah teks tombol pintas email mahasiswa menjadi **`⚡ Isi Otomatis`** (sebelumnya `⚡ Gunakan Format NIM`) untuk instruksi yang lebih ringkas dan intuitif.
+- **Roster Kelas Menyeluruh (Bypass Filter Sesi untuk Validasi NIM):**
+  - Memperbarui `getFormInitialData()` pada [`Code.gs`](file:///e:/Data/GitHub/Project%20Dede/Code.gs) agar mengembalikan `allStudents` (seluruh mahasiswa kelas 5E dari semua kelompok dan sesi tanpa terpotong oleh filter sesi aktif minggu).
+  - Setiap mahasiswa dari kelompok manapun (misal Kelompok 3, Minggu 2) dapat melakukan penilaian pada sesi aktif saat ini dan langsung terverifikasi dengan nama terisi otomatis.
+- **Sinkronisasi Real-Time Langsung dari Spreadsheet (Tanpa Deploy Ulang):**
+  - Mengimplementasikan `nocache=1` dan parameter timestamp `_t=${Date.now()}` pada pemanggilan API sehingga setiap perubahan data mahasiswa, nama, dan NIM di Google Spreadsheet langsung terbaca secara instan dan live saat halaman dibuka tanpa perlu redeploy Apps Script.
+  - Menambahkan normalisasi string NIM (penghapusan spasi liar, case-insensitivity) pada [`index.html`](file:///e:/Data/GitHub/Project%20Dede/index.html).
+
+---
+
 ## [2.1.15] - 2026-08-23
 
 ### 🔒 Kontrol Pengisian Manual & Tombol Format Email Khusus Mahasiswa
