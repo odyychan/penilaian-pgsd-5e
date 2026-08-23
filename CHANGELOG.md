@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.66] - 2026-08-23
+
+### 📊 Penambahan Satuan Mahasiswa pada Kolom Penilai Tabel Rekapitulasi
+- **Standardisasi Satuan Kolom Penilai (*Evaluator Unit Suffix*):**
+  - Menambahkan sufiks satuan *"Mhs"* pada setiap nilai di kolom **Penilai** pada Tabel Rekapitulasi Nilai & Peringkat Performa Kelompok (misalnya `2 Mhs`, `1 Mhs`, dst.).
+  - Memperjelas bahwa angka tersebut merujuk pada kuantitas mahasiswa penilai (*peer-assessors*).
+- **Sinkronisasi Dwikanal:**
+  - Diterapkan pada `index.html` dan `admin.html`.
+
+---
+
 ## [2.1.65] - 2026-08-23
 
 ### 🖋️ Pembersihan Placeholder & Perluasan Ruang Tanda Tangan Dosen
