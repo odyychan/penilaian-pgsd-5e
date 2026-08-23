@@ -4,7 +4,23 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.17] - 2026-08-23
+
+### 🐛 Perbaikan Error Kritis Pengiriman Penilaian & Optimasi Kinerja Backend
+- **Fix Error `ReferenceError: sesi is not defined`:**
+  - Memperbaiki bug kritis pada fungsi `submitAssessment()` di [`Code.gs`](file:///e:/Data/GitHub/Project%20Dede/Code.gs) di mana variabel `sesi` digunakan tanpa dideklarasikan terlebih dahulu dalam scope fungsi.
+  - Variabel `sesi` kini diekstrak langsung dari `payload.sesi` yang dikirim frontend, dengan fallback ke `"Minggu 1"` jika tidak tersedia.
+  - Tombol **Kirim Penilaian** pada Langkah 4 kini berfungsi tanpa error server.
+- **Optimasi Kecepatan Tulis Data (Write Performance):**
+  - Mengganti `appendRow()` dengan `getRange().setValues()` pada operasi penyimpanan respons untuk menulis langsung ke baris target tanpa overhead pencarian akhir baris oleh Apps Script.
+  - ID Respons kini menggunakan rentang acak 4 digit (`1000–9999`) untuk memperkecil kemungkinan tabrakan ID pada submission bersamaan.
+- **Optimasi Kecepatan Baca Cek Duplikat (Read Performance):**
+  - Batch read cek duplikat kini hanya mengambil kolom C–K (9 kolom) alih-alih A–K (11 kolom), mengurangi data transfer dari Sheets API.
+
+---
+
 ## [2.1.16] - 2026-08-23
+
 
 ### ⚡ Real-Time Spreadsheet Sync (No Redeploy Needed) & Penamaan Tombol 'Isi Otomatis'
 - **Pembaruan Label Tombol Pintas Email:**

@@ -410,6 +410,7 @@ function submitAssessment(payload) {
     const email = String(payload.email || "").trim().toLowerCase();
     const namaPenilai = String(payload.namaPenilai || "").trim();
     const kelompok = String(payload.kelompok || "").trim();
+    const sesi = String(payload.sesi || "Minggu 1").trim();
     const nilaiKelompok = parseFloat(payload.nilaiKelompok);
     const presentatorTerbaik = Array.isArray(payload.presentatorTerbaik) ? payload.presentatorTerbaik : [];
     const evaluasiDetail = payload.evaluasiDetail || {};
@@ -428,7 +429,7 @@ function submitAssessment(payload) {
     if (peranPenilai === "Mahasiswa" && !isValidInstitutionalEmail(email, allowedDomainsStr)) {
       return {
         success: false,
-        error: `Format email tidak valid atau bukan domain resmi (${allowedDomainsStr}). Contoh format: nama.nim@mhs.ulm.ac.id`
+        error: `Format email tidak valid atau bukan domain resmi (${allowedDomainsStr}). Contoh format: nim@mhs.ulm.ac.id`
       };
     }
 
@@ -464,7 +465,7 @@ function submitAssessment(payload) {
     }
 
     // 5. Persiapkan Data Baru
-    const idRespons = "RESP-" + Utilities.formatDate(new Date(), "Asia/Makassar", "yyyyMMddHHmmss") + "-" + Math.floor(Math.random() * 1000);
+    const idRespons = "RESP-" + Utilities.formatDate(new Date(), "Asia/Makassar", "yyyyMMddHHmmss") + "-" + Math.floor(Math.random() * 9000 + 1000);
     const timestamp = new Date();
     const best1 = presentatorTerbaik[0] || "-";
     const best2 = presentatorTerbaik[1] || "-";
@@ -486,7 +487,7 @@ function submitAssessment(payload) {
       nimPenilai
     ];
 
-    // 6. Zona Kunci Singkat (Lock Duration < 200ms)
+    // 6. Zona Kunci Singkat untuk Cek Duplikat & Tulis (Fast Batch Read)
     const lock = LockService.getScriptLock();
     lock.waitLock(10000);
 
@@ -494,13 +495,14 @@ function submitAssessment(payload) {
     const lastRow = responsSheet.getLastRow();
 
     if (lastRow > 1) {
-      // Ambil hanya kolom Sesi (3), Email (4), Kelompok (6), Status (11) untuk cek duplikat cepat
-      const checkData = responsSheet.getRange(2, 1, lastRow - 1, 11).getValues();
+      // Batch read: Ambil hanya kolom Sesi (3), Email (4), Kelompok (6), Status (11) untuk cek duplikat
+      const totalRows = lastRow - 1;
+      const checkData = responsSheet.getRange(2, 3, totalRows, 9).getValues(); // Kolom C–K
       for (let i = 0; i < checkData.length; i++) {
-        const rSesi = String(checkData[i][2] || "").trim();
-        const rEmail = String(checkData[i][3] || "").trim().toLowerCase();
-        const rKelompok = String(checkData[i][5] || "").trim();
-        const rStatus = String(checkData[i][10] || "VALID").trim().toUpperCase();
+        const rSesi    = String(checkData[i][0] || "").trim();  // Kolom C
+        const rEmail   = String(checkData[i][1] || "").trim().toLowerCase(); // Kolom D
+        const rKelompok = String(checkData[i][3] || "").trim(); // Kolom F
+        const rStatus  = String(checkData[i][8] || "VALID").trim().toUpperCase(); // Kolom K
 
         if (rStatus === "VALID" && rEmail === email && rKelompok === kelompok && rSesi === sesi) {
           lock.releaseLock();
@@ -512,7 +514,9 @@ function submitAssessment(payload) {
       }
     }
 
-    responsSheet.appendRow(newRow);
+    // Tulis langsung ke sheet dalam satu operasi
+    const nextRow = lastRow + 1;
+    responsSheet.getRange(nextRow, 1, 1, newRow.length).setValues([newRow]);
     lock.releaseLock();
 
     // 7. Bersihkan Cache API Seketika
