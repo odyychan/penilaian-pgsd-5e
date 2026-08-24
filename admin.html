@@ -2562,7 +2562,22 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           adminMasterGroups = res.groups || [];
           adminAppConfig = res.config || {};
           adminCustomQuestions = res.customFields || [];
-          adminFormSchema = res.formSchema || (typeof res.customFields === 'object' && res.customFields.tahapan ? res.customFields : null);
+          if (res.formSchema && res.formSchema.tahapan) {
+            adminFormSchema = res.formSchema;
+          } else if (typeof res.customFields === 'object' && res.customFields.tahapan) {
+            adminFormSchema = res.customFields;
+          } else {
+            const localDraft = localStorage.getItem(`PGSD_DRAFT_SCHEMA_${targetForm}`);
+            if (localDraft) {
+              try {
+                adminFormSchema = JSON.parse(localDraft);
+              } catch(e) {
+                adminFormSchema = targetForm === DEFAULT_PRIMARY_FORM_ID ? getDefaultFormSchema(adminAppConfig) : getBlankFormSchema();
+              }
+            } else {
+              adminFormSchema = targetForm === DEFAULT_PRIMARY_FORM_ID ? getDefaultFormSchema(adminAppConfig) : getBlankFormSchema();
+            }
+          }
           initOrNormalizeFormSchema();
 
           document.getElementById("activeFormTitleBanner").textContent = currentFormMeta.judulForm || adminAppConfig["Judul_Form"] || "Penilaian Presentasi";
@@ -2575,12 +2590,31 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           populateMasterSesiFilter();
           populateResponseGroupFilter();
           setSyncState('synced');
-          showAdminToast(`Data formulir '${targetForm}' berhasil dimuat dari Google Sheets.`, "success");
         } else {
           showAdminToast("Gagal memuat data formulir: " + res.error, "error");
+          const localDraft = localStorage.getItem(`PGSD_DRAFT_SCHEMA_${targetForm}`);
+          if (localDraft) {
+            try { adminFormSchema = JSON.parse(localDraft); } catch(e) { adminFormSchema = targetForm === DEFAULT_PRIMARY_FORM_ID ? getDefaultFormSchema(adminAppConfig) : getBlankFormSchema(); }
+          } else {
+            adminFormSchema = targetForm === DEFAULT_PRIMARY_FORM_ID ? getDefaultFormSchema(adminAppConfig) : getBlankFormSchema();
+          }
+          initOrNormalizeFormSchema();
+          renderMasterGroups();
+          populateConfigFormValues();
+          renderCustomQuestionsList();
         }
       } catch (err) {
         showAdminToast("Gagal terhubung ke server cloud: " + err, "error");
+        const localDraft = localStorage.getItem(`PGSD_DRAFT_SCHEMA_${targetForm}`);
+        if (localDraft) {
+          try { adminFormSchema = JSON.parse(localDraft); } catch(e) { adminFormSchema = targetForm === DEFAULT_PRIMARY_FORM_ID ? getDefaultFormSchema(adminAppConfig) : getBlankFormSchema(); }
+        } else {
+          adminFormSchema = targetForm === DEFAULT_PRIMARY_FORM_ID ? getDefaultFormSchema(adminAppConfig) : getBlankFormSchema();
+        }
+        initOrNormalizeFormSchema();
+        renderMasterGroups();
+        populateConfigFormValues();
+        renderCustomQuestionsList();
       } finally {
         restoreBtnDefault();
       }
@@ -2740,6 +2774,21 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     // =========================================================================
     let adminFormSchema = null;
 
+    function getBlankFormSchema() {
+      return {
+        version: 1,
+        updatedAt: new Date().toISOString(),
+        tahapan: [
+          {
+            id: "stage_1",
+            title: "Bagian 1",
+            description: "",
+            fields: []
+          }
+        ]
+      };
+    }
+
     function getDefaultFormSchema(config) {
       config = config || adminAppConfig || {};
       return {
@@ -2834,7 +2883,11 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
     function initOrNormalizeFormSchema() {
       if (!adminFormSchema || !adminFormSchema.tahapan || !Array.isArray(adminFormSchema.tahapan)) {
-        adminFormSchema = getDefaultFormSchema(adminAppConfig);
+        if (currentFormId === DEFAULT_PRIMARY_FORM_ID) {
+          adminFormSchema = getDefaultFormSchema(adminAppConfig);
+        } else {
+          adminFormSchema = getBlankFormSchema();
+        }
       }
     }
 
@@ -4815,9 +4868,18 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }
 
     function resetToDefaultStandardSchema() {
-      pushUndoSnapshot('Reset Susunan Standar');
-      if (!confirm("Kembalikan struktur formulir ke 4-Tahap Standar PGSD bawaan? Seluruh tahapan akan direset ke default.")) return;
-      adminFormSchema = getDefaultFormSchema(adminAppConfig);
+      if (currentFormId === DEFAULT_PRIMARY_FORM_ID) {
+        if (!confirm("Kembalikan formulir ini ke template 4 tahap standar perkuliahan BK 5E?")) return;
+        adminFormSchema = getDefaultFormSchema(adminAppConfig);
+      } else {
+        const choice = confirm("Pilih 'OK' untuk mengosongkan formulir menjadi bersih (0 pertanyaan), atau 'Cancel' untuk memuat template 4 tahap standar BK 5E?");
+        if (choice) {
+          adminFormSchema = getBlankFormSchema();
+        } else {
+          adminFormSchema = getDefaultFormSchema(adminAppConfig);
+        }
+      }
+      recordRevisionSnapshot("Reset Formulir");
       renderDynamicStagesCanvas();
       triggerAutoSaveSchema();
       showAdminToast("Struktur formulir berhasil direset ke 4-Tahap Standar PGSD.", "info");
@@ -5332,6 +5394,11 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
             });
           }
 
+          const initialBlankSchema = getBlankFormSchema();
+          localStorage.setItem(`PGSD_DRAFT_SCHEMA_${res.formId}`, JSON.stringify(initialBlankSchema));
+          localStorage.setItem(`PGSD_CACHE_FORM_SCHEMA_${res.formId}`, JSON.stringify(initialBlankSchema));
+          adminFormSchema = initialBlankSchema;
+
           await fetchFormsRegistry(true);
           openFormWorkspace(res.formId);
         } else {
@@ -5399,6 +5466,11 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         const res = await response.json();
         if (res.success) {
           showAdminToast(res.message || "Formulir berhasil diduplikasi!", "success");
+          const initialBlankSchema = getBlankFormSchema();
+          localStorage.setItem(`PGSD_DRAFT_SCHEMA_${res.formId}`, JSON.stringify(initialBlankSchema));
+          localStorage.setItem(`PGSD_CACHE_FORM_SCHEMA_${res.formId}`, JSON.stringify(initialBlankSchema));
+          adminFormSchema = initialBlankSchema;
+
           await fetchFormsRegistry(true);
           openFormWorkspace(res.formId);
         } else {

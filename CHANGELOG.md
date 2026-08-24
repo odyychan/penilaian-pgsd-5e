@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.98] - 2026-08-24
+
+### 📄 Truly Blank Form Initialization (*Zero Default Copying on New Forms*)
+- **Inisialisasi Formulir Baru Bersih Murni (`getBlankFormSchema`):**
+  - Formulir baru yang dibuat dengan opsi *Mulai dari Formulir Kosong* kini **benar-benar dimulai dari keadaan kosong (0 pertanyaan, 1 bagian awal bersih)** tanpa lagi menduplikasi 4 tahap preset bawaan perkuliahan BK 5E.
+  - Template 4 tahap rubrik default (Nilai Presentasi, Voting Pemateri, Evaluasi Anggota) diisolasi eksklusif hanya untuk form utama (`BK5E`), memberikan keleluasaan penuh bagi admin untuk membuat susunan pertanyaan kustom dari nol.
+- **Dukungan Reset Fleksibel:**
+  - Opsi reset pada form sekunder memberikan pilihan konfirmasi untuk mengosongkan form menjadi bersih (*0 pertanyaan*) atau memuat template standar 4 tahap BK 5E.
+
+---
+
 ## [2.1.97] - 2026-08-24
 
 ### 🔝 Sesi Aktif Dropdown Hierarchy & Single Chevron Polish
