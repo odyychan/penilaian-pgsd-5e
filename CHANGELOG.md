@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.21] - 2026-08-24
+
+### 🎯 Eliminasi Tombol Redundan di Dasar Kanvas Form Builder
+- **Pembersihan Aksi di Dasar Halaman Studio:**
+  - Menghapus tombol redundan `+ Tambah Pertanyaan` yang berada di dasar halaman formulir.
+  - Mempertahankan satu tombol terpusat dan elegan (**`⎘ + Tambah Bagian Baru`**) di bagian paling bawah kanvas studio.
+  - Penambahan butir pertanyaan tetap berfokus melalui tombol kontekstual di dalam setiap bagian (`+ Tambah Pertanyaan ke Bagian X`) dan bilah alat mengambang (*Floating Action Dock*).
+- **Pengujian Headless Browser:**
+  - Diuji dan diverifikasi menggunakan Playwright remote browser di resolusi desktop dan mobile dengan 0 kesalahan konsol.
+
+---
+
 ## [2.2.20] - 2026-08-24
 
 ### 💎 Penyatuan Bilah Navigasi Sticky Top Bar Google Forms & Pemisahan Tab Setelan
