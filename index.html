@@ -1558,12 +1558,12 @@
 
         
     // =========================================================================
-    // UNIVERSAL SMART MATH & KATEX AUTO-RENDER ENGINE
+    // UNIVERSAL SMART MATH & KATEX AUTO-RENDER ENGINE (ROCK-SOLID & CONFLICT-FREE)
     // =========================================================================
     function smartMathFormat(text) {
       if (!text || typeof text !== 'string') return "";
 
-      // 0. Normalize unicode math from Word / Mobile keyboards
+      // 0. Normalize unicode math from Microsoft Word / Mobile keyboards
       let res = text
         .replace(/([a-zA-Z0-9\)])[⁰]/g, '$1^{0}')
         .replace(/([a-zA-Z0-9\)])[¹]/g, '$1^{1}')
@@ -1629,15 +1629,13 @@
       const hasWordTokens = /\b(jika|dan|atau|adalah|nilai|hitunglah|apakah|pada|yang|dari|untuk|tentukan|sebuah|berapa|berapakah|bagaimana|mengapa|apa|tentang|hasil|persamaan|fungsi|berikut|grafik|diagram|rumus|soal|jawaban|pertanyaan|turunan|pertama|pilihlah|salah|satu|paling|tepat|di|bawah|ini)\b/i.test(res);
 
       if (!hasWordTokens) {
-        return `$${res}$`;
+        return `$${res.trim()}$`;
       }
 
-      // Match function equation: f(x) = x^2 + 2x + 1
       res = res.replace(/(\b[a-zA-Z]\([a-zA-Z0-9]\)\s*=\s*[a-zA-Z0-9\(\)\+\-\*/\^_\s\\]+?(?=[,\.?!;:]|\s+(?:di|pada|jika|dan|atau|untuk|dengan|yang|adalah|ini|bawah)\b|$))/g, function(m) {
         return `$${m.trim()}$`;
       });
 
-      // Match remaining standalone caret/subscript terms
       res = res.replace(/(\b[a-zA-Z0-9\)]+[\^_][a-zA-Z0-9\{\}\(\)\+\-]+)/g, function(match, p1, offset, str) {
         const before = str.slice(0, offset);
         const dollarCount = (before.match(/\$/g) || []).length;
@@ -1678,18 +1676,88 @@
       }
     }
 
+    function updateLiveMathBadge(val, badgeId) {
+      let badge = document.getElementById(badgeId);
+      if (!badge) return;
+      const formatted = smartMathFormat(val || "");
+      const isMathPresent = !!val && (formatted.includes('$') || formatted.includes('\\(') || formatted.includes('\\[') || /\\(frac|sqrt|int|sum|alpha|beta|pi)/.test(formatted));
+      
+      if (!isMathPresent) {
+        badge.classList.add("hidden");
+      } else {
+        badge.classList.remove("hidden");
+        const span = badge.querySelector('.math-renderable');
+        if (span) {
+          try {
+            if (typeof katex !== 'undefined' && formatted.startsWith('$') && formatted.endsWith('$') && !formatted.slice(1, -1).includes('$')) {
+              katex.render(formatted.slice(1, -1), span, { throwOnError: false, displayMode: false });
+            } else {
+              span.innerHTML = formatted;
+              if (typeof renderMathInElement === 'function') {
+                renderMathInElement(span, {
+                  delimiters: [
+                    { left: '$$', right: '$$', display: true },
+                    { left: '$', right: '$', display: false },
+                    { left: '\\(', right: '\\)', display: false },
+                    { left: '\\[', right: '\\]', display: true }
+                  ],
+                  throwOnError: false
+                });
+              }
+            }
+          } catch(e) {
+            span.textContent = formatted;
+          }
+        }
+      }
+    }
+
     function getLiveMathBadgeHtml(rawText, containerId) {
-      if (!rawText || !rawText.trim()) return '';
-      const formatted = smartMathFormat(rawText);
-      const isMathPresent = formatted.includes('$') || formatted.includes('\\(') || formatted.includes('\\[') || /\\(frac|sqrt|int|sum|alpha|beta|pi)/.test(formatted);
-      if (!isMathPresent) return '';
+      const formatted = smartMathFormat(rawText || "");
+      const isMathPresent = !!rawText && (formatted.includes('$') || formatted.includes('\\(') || formatted.includes('\\[') || /\\(frac|sqrt|int|sum|alpha|beta|pi)/.test(formatted));
+
+      let mathRenderHtml = formatted;
+      if (isMathPresent && typeof katex !== 'undefined' && formatted.startsWith('$') && formatted.endsWith('$') && !formatted.slice(1, -1).includes('$')) {
+        try {
+          mathRenderHtml = katex.renderToString(formatted.slice(1, -1), { throwOnError: false, displayMode: false });
+        } catch(e) {}
+      }
 
       return `
-        <div id="${containerId}" class="math-live-preview-badge flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-50/80 border border-indigo-200 text-indigo-950 text-xs shadow-2xs mt-1 transition">
-          <span class="text-[10px] font-bold font-mono text-indigo-600 bg-indigo-100/80 px-1.5 py-0.5 rounded border border-indigo-200 uppercase tracking-wider shrink-0">Rumus Ter-render:</span>
-          <span class="math-renderable font-medium leading-relaxed">${formatted}</span>
+        <div id="${containerId}" class="math-live-preview-badge inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50/90 border border-indigo-200/80 text-indigo-950 text-xs shadow-2xs mt-1 transition ${isMathPresent ? '' : 'hidden'}">
+          <span class="text-[9.5px] font-bold font-mono text-indigo-600 bg-indigo-100 px-1 py-0.5 rounded uppercase tracking-wider shrink-0">∑ Rumus:</span>
+          <span class="math-renderable font-medium leading-relaxed">${mathRenderHtml}</span>
         </div>
       `;
+    }
+
+    // Quick Math Symbol Palette Inserter
+    function toggleQuickMathPalette(sIdx, fIdx) {
+      const palette = document.getElementById(`quickMathPalette_${sIdx}_${fIdx}`);
+      if (palette) {
+        palette.classList.toggle("hidden");
+      }
+    }
+
+    function insertMathSymbolAtField(sIdx, fIdx, symbol) {
+      const input = document.querySelector(`input[data-field-id="${adminFormSchema.tahapan[sIdx].fields[fIdx].id}"]`) || document.querySelector(`#stepCard_${sIdx}_${fIdx} input[type="text"]`);
+      if (!input) return;
+
+      const start = input.selectionStart || 0;
+      const end = input.selectionEnd || 0;
+      const val = input.value || "";
+
+      let insertVal = symbol;
+      if (symbol === '$...$') {
+        const selected = val.substring(start, end) || 'x';
+        insertVal = `$${selected}$`;
+      }
+
+      input.value = val.substring(0, start) + insertVal + val.substring(end);
+      input.focus();
+      input.setSelectionRange(start + insertVal.length, start + insertVal.length);
+
+      handleInlineFieldUpdate(sIdx, fIdx, 'label', input.value);
     }
 
     function openClientImageZoom(src, caption = '') {
@@ -3635,6 +3703,12 @@
       } else {
         updateDraftResetButtonVisibility();
       }
+
+      setTimeout(() => {
+        const stageSec = document.getElementById(`stepSection_${step}`);
+        if (stageSec) renderAllMathInElement(stageSec);
+        renderAllMathInElement(document.getElementById("dynamicStagesContainer") || document.body);
+      }, 40);
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }

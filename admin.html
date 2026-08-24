@@ -2080,12 +2080,12 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
     
     // =========================================================================
-    // UNIVERSAL SMART MATH & KATEX AUTO-RENDER ENGINE
+    // UNIVERSAL SMART MATH & KATEX AUTO-RENDER ENGINE (ROCK-SOLID & CONFLICT-FREE)
     // =========================================================================
     function smartMathFormat(text) {
       if (!text || typeof text !== 'string') return "";
 
-      // 0. Normalize unicode math from Word / Mobile keyboards
+      // 0. Normalize unicode math from Microsoft Word / Mobile keyboards
       let res = text
         .replace(/([a-zA-Z0-9\)])[⁰]/g, '$1^{0}')
         .replace(/([a-zA-Z0-9\)])[¹]/g, '$1^{1}')
@@ -2151,15 +2151,13 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       const hasWordTokens = /\b(jika|dan|atau|adalah|nilai|hitunglah|apakah|pada|yang|dari|untuk|tentukan|sebuah|berapa|berapakah|bagaimana|mengapa|apa|tentang|hasil|persamaan|fungsi|berikut|grafik|diagram|rumus|soal|jawaban|pertanyaan|turunan|pertama|pilihlah|salah|satu|paling|tepat|di|bawah|ini)\b/i.test(res);
 
       if (!hasWordTokens) {
-        return `$${res}$`;
+        return `$${res.trim()}$`;
       }
 
-      // Match function equation: f(x) = x^2 + 2x + 1
       res = res.replace(/(\b[a-zA-Z]\([a-zA-Z0-9]\)\s*=\s*[a-zA-Z0-9\(\)\+\-\*/\^_\s\\]+?(?=[,\.?!;:]|\s+(?:di|pada|jika|dan|atau|untuk|dengan|yang|adalah|ini|bawah)\b|$))/g, function(m) {
         return `$${m.trim()}$`;
       });
 
-      // Match remaining standalone caret/subscript terms
       res = res.replace(/(\b[a-zA-Z0-9\)]+[\^_][a-zA-Z0-9\{\}\(\)\+\-]+)/g, function(match, p1, offset, str) {
         const before = str.slice(0, offset);
         const dollarCount = (before.match(/\$/g) || []).length;
@@ -2199,7 +2197,6 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         }
       }
     }
-
 
     function updateLiveMathBadge(val, badgeId) {
       let badge = document.getElementById(badgeId);
@@ -2241,12 +2238,48 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       const formatted = smartMathFormat(rawText || "");
       const isMathPresent = !!rawText && (formatted.includes('$') || formatted.includes('\\(') || formatted.includes('\\[') || /\\(frac|sqrt|int|sum|alpha|beta|pi)/.test(formatted));
 
+      let mathRenderHtml = formatted;
+      if (isMathPresent && typeof katex !== 'undefined' && formatted.startsWith('$') && formatted.endsWith('$') && !formatted.slice(1, -1).includes('$')) {
+        try {
+          mathRenderHtml = katex.renderToString(formatted.slice(1, -1), { throwOnError: false, displayMode: false });
+        } catch(e) {}
+      }
+
       return `
-        <div id="${containerId}" class="math-live-preview-badge flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-50/80 border border-indigo-200 text-indigo-950 text-xs shadow-2xs mt-1 transition ${isMathPresent ? '' : 'hidden'}">
-          <span class="text-[10px] font-bold font-mono text-indigo-600 bg-indigo-100/80 px-1.5 py-0.5 rounded border border-indigo-200 uppercase tracking-wider shrink-0">Rumus Ter-render:</span>
-          <span class="math-renderable font-medium leading-relaxed">${formatted}</span>
+        <div id="${containerId}" class="math-live-preview-badge inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50/90 border border-indigo-200/80 text-indigo-950 text-xs shadow-2xs mt-1 transition ${isMathPresent ? '' : 'hidden'}">
+          <span class="text-[9.5px] font-bold font-mono text-indigo-600 bg-indigo-100 px-1 py-0.5 rounded uppercase tracking-wider shrink-0">∑ Rumus:</span>
+          <span class="math-renderable font-medium leading-relaxed">${mathRenderHtml}</span>
         </div>
       `;
+    }
+
+    // Quick Math Symbol Palette Inserter
+    function toggleQuickMathPalette(sIdx, fIdx) {
+      const palette = document.getElementById(`quickMathPalette_${sIdx}_${fIdx}`);
+      if (palette) {
+        palette.classList.toggle("hidden");
+      }
+    }
+
+    function insertMathSymbolAtField(sIdx, fIdx, symbol) {
+      const input = document.querySelector(`input[data-field-id="${adminFormSchema.tahapan[sIdx].fields[fIdx].id}"]`) || document.querySelector(`#stepCard_${sIdx}_${fIdx} input[type="text"]`);
+      if (!input) return;
+
+      const start = input.selectionStart || 0;
+      const end = input.selectionEnd || 0;
+      const val = input.value || "";
+
+      let insertVal = symbol;
+      if (symbol === '$...$') {
+        const selected = val.substring(start, end) || 'x';
+        insertVal = `$${selected}$`;
+      }
+
+      input.value = val.substring(0, start) + insertVal + val.substring(end);
+      input.focus();
+      input.setSelectionRange(start + insertVal.length, start + insertVal.length);
+
+      handleInlineFieldUpdate(sIdx, fIdx, 'label', input.value);
     }
 
     // =========================================================================
@@ -5300,6 +5333,38 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
               <!-- Media Preview (If attached BELOW question) -->
               ${f.media && f.media.position === 'BELOW_QUESTION' ? getBuilderMediaPreviewHtml(f.media, sIdx, fIdx) : ''}
 
+              <!-- Quick Math Symbol Palette (1-Click Insert) -->
+              <div id="quickMathPalette_${sIdx}_${fIdx}" class="hidden p-3 bg-indigo-50/70 rounded-xl border border-indigo-200 space-y-2 transition">
+                <div class="flex items-center justify-between">
+                  <span class="text-[11px] font-bold text-indigo-900 flex items-center gap-1.5">
+                    <span class="w-4 h-4 rounded bg-indigo-600 text-white font-mono text-[10px] flex items-center justify-center font-bold">∑</span>
+                    <span>Palet Simbol & Rumus Matematika Cepat:</span>
+                  </span>
+                  <button type="button" onclick="toggleQuickMathPalette(${sIdx}, ${fIdx})" class="text-zinc-400 hover:text-zinc-700 text-xs font-bold px-1.5 py-0.5 rounded cursor-pointer">✕</button>
+                </div>
+                <div class="flex items-center gap-1.5 flex-wrap text-xs">
+                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, 'x^2')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs" title="Pangkat Dua">x²</button>
+                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, 'x^3')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs" title="Pangkat Tiga">x³</button>
+                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, 'x^{n}')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs" title="Pangkat n">xⁿ</button>
+                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, 'x_1')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs" title="Indeks 1">x₁</button>
+                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, 'x_i')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs" title="Indeks i">xᵢ</button>
+                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, '\\frac{a}{b}')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs" title="Pecahan a/b">½ Pecahan</button>
+                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, '\\sqrt{x}')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs" title="Akar Kuadrat">√x</button>
+                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, '±')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">±</button>
+                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, '≤')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">≤</button>
+                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, '≥')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">≥</button>
+                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, '≠')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">≠</button>
+                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, '≈')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">≈</button>
+                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, 'π')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">π</button>
+                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, 'θ')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">θ</button>
+                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, 'α')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">α</button>
+                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, 'β')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">β</button>
+                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, '∑')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">∑</button>
+                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, '∫')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">∫</button>
+                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, '$...$')" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md font-mono font-bold transition cursor-pointer shadow-xs" title="Bungkus dengan $...">$...$ Formula</button>
+                </div>
+              </div>
+
               <!-- Bottom Row: Google Forms Action Toolbar -->
               <div class="flex items-center justify-between gap-3 pt-3.5 border-t border-zinc-200/80 text-xs">
                 <div class="flex items-center gap-1.5 flex-wrap">
@@ -5307,6 +5372,10 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
                   <button type="button" onclick="moveField(${sIdx}, ${fIdx}, 1)" ${fIdx === fields.length - 1 ? 'disabled' : ''} class="p-1.5 rounded-lg hover:bg-zinc-100 disabled:opacity-20 text-zinc-600 cursor-pointer" title="Turunkan Posisi">▼</button>
                   <button type="button" onclick="openMoveFieldModal(${sIdx}, ${fIdx})" class="px-2.5 py-1 rounded-lg border border-zinc-200 hover:bg-zinc-100 text-zinc-700 text-[11px] font-medium flex items-center gap-1 cursor-pointer">
                     <span>Pindah Bagian ↗</span>
+                  </button>
+                  <button type="button" onclick="toggleQuickMathPalette(${sIdx}, ${fIdx})" class="px-2.5 py-1 rounded-lg border border-indigo-200 hover:bg-indigo-50 text-indigo-700 text-[11px] font-semibold flex items-center gap-1 cursor-pointer transition shadow-2xs" title="Palet Sisip Simbol & Rumus Matematika">
+                    <span class="font-bold font-mono">∑</span>
+                    <span>Rumus</span>
                   </button>
                   <button type="button" onclick="openAttachMediaModal(${sIdx}, ${fIdx})" class="px-2.5 py-1 rounded-lg border ${f.media ? 'border-indigo-300 bg-indigo-50 text-indigo-700 font-semibold' : 'border-zinc-200 hover:bg-zinc-100 text-zinc-700 font-medium'} text-[11px] flex items-center gap-1.5 cursor-pointer transition shadow-2xs" title="Lampirkan Media (Gambar, Video, Audio, Link)">
                     <svg class="w-3.5 h-3.5 ${f.media ? 'text-indigo-600' : 'text-zinc-500'}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>

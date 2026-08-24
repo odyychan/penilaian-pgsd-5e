@@ -4,6 +4,26 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.13] - 2026-08-24
+
+### 🧠 Conflict-Free Smart Math UX, Quick Symbol Palette & Compact In-Place Live Preview
+- **Desain Interaksi Pengisian Rumus Bebas Konflik (Conflict-Free Math UX):**
+  - Mengganti banner pratinjau yang kaku dengan pil mini melayang (*compact floating badge*) `∑ Rumus: [ x² ]` yang rapi, elegan, dan tidak menggeser tata letak form.
+  - Memperbaiki perenderan pada saat *initial load* dari cache lokal sehingga rumus $x^2$ langsung ter-render dengan sempurna tanpa menampilkan raw code `$...$`.
+- **Palet Simbol & Rumus Matematika Cepat (*1-Click Math Inserter*):**
+  - Menambahkan tombol interaktif **`[ ∑ Rumus ]`** di setiap bilah aksi pertanyaan pada Form Builder (`admin.html`).
+  - Menyediakan *chips* sisip instan untuk mempermudah guru/dosen membuat soal matematika tanpa perlu menghafal sintaks LaTeX yang rumit:
+    - Pangkat & Eksponen: `x²`, `x³`, `xⁿ`
+    - Indeks & Subskrip: `x₁`, `xᵢ`
+    - Pecahan & Akar: `\frac{a}{b}`, `\sqrt{x}`
+    - Operator & Relasi: `±`, `≤`, `≥`, `≠`, `≈`, `∞`
+    - Simbol Ilmiah & Yunani: `π`, `θ`, `α`, `β`, `∑`, `∫`
+    - Tombol Pembungkus Rumus: `$...$`
+- **Jaminan Konsistensi Perenderan Matematika di Sisi Klien (`index.html`):**
+  - Memastikan *lifecycle trigger* KaTeX otomatis dieksekusi saat perpindahan langkah (*Step Navigation* `updateStepUI`), pemuatan awal, dan pemulihan draf sehingga tidak ada teks rumus yang terlewat.
+
+---
+
 ## [2.2.12] - 2026-08-24
 
 ### 📐 Smart Auto-Math Engine & Live Math Preview Badges (Word Equation, Superscripts & Caret Notation)
