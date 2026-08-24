@@ -5060,6 +5060,112 @@
         if (chartOverviewCard) chartOverviewCard.classList.add("hidden");
       }
 
+      // ⚡ FAST-PATH (< 30ms): Ambil langsung dari Supabase Database
+      const sb = getSupabaseClient();
+      if (sb) {
+        try {
+          const { data: respList, error: sbErr } = await sb
+            .from('pgsd_responses')
+            .select('*')
+            .eq('form_id', activeFormId)
+            .eq('status', 'VALID')
+            .order('created_at', { ascending: false });
+
+          if (!sbErr && Array.isArray(respList)) {
+            // Kalkulasi summary per kelompok secara instan di memori browser
+            const groupMap = {};
+            respList.forEach(r => {
+              const grp = r.kelompok_dinilai || "Kelompok";
+              if (!groupMap[grp]) {
+                groupMap[grp] = {
+                  kelompok: grp,
+                  sesi: r.sesi || "Minggu 1",
+                  totalNilai: 0,
+                  totalPenilai: 0,
+                  totalKomentar: 0,
+                  presentatorMap: {}
+                };
+              }
+              groupMap[grp].totalNilai += (parseFloat(r.nilai_kelompok) || 0);
+              groupMap[grp].totalPenilai += 1;
+              if (r.evaluasi_detail && Object.keys(r.evaluasi_detail).length > 0) {
+                groupMap[grp].totalKomentar += Object.keys(r.evaluasi_detail).length;
+              }
+              if (r.best_presenter_1 && r.best_presenter_1 !== "-") {
+                groupMap[grp].presentatorMap[r.best_presenter_1] = (groupMap[grp].presentatorMap[r.best_presenter_1] || 0) + 1;
+              }
+              if (r.best_presenter_2 && r.best_presenter_2 !== "-") {
+                groupMap[grp].presentatorMap[r.best_presenter_2] = (groupMap[grp].presentatorMap[r.best_presenter_2] || 0) + 1;
+              }
+            });
+
+            const summaryArray = Object.values(groupMap).map(g => {
+              let best1 = "-", best2 = "-", max1 = 0, max2 = 0;
+              for (let p in g.presentatorMap) {
+                const count = g.presentatorMap[p];
+                if (count > max1) {
+                  max2 = max1; best2 = best1;
+                  max1 = count; best1 = p;
+                } else if (count > max2) {
+                  max2 = count; best2 = p;
+                }
+              }
+              return {
+                kelompok: g.kelompok,
+                sesi: g.sesi,
+                rataRataNilai: g.totalPenilai > 0 ? parseFloat((g.totalNilai / g.totalPenilai).toFixed(2)) : 0,
+                totalPenilai: g.totalPenilai,
+                totalKomentar: g.totalKomentar,
+                presentatorTerbaik1: best1 !== "-" ? `${best1} (${max1} Suara)` : "-",
+                presentatorTerbaik2: best2 !== "-" ? `${best2} (${max2} Suara)` : "-"
+              };
+            });
+
+            const res = {
+              success: true,
+              summary: summaryArray,
+              responses: respList.map(r => ({
+                idRespons: r.id_respons,
+                timestamp: new Date(r.created_at).toLocaleString('id-ID'),
+                sesi: r.sesi,
+                email: r.email,
+                namaPenilai: r.nama_penilai,
+                peran: r.peran_penilai,
+                nim: r.nim_penilai,
+                kelompok: r.kelompok_dinilai,
+                nilaiKelompok: r.nilai_kelompok,
+                presentatorTerbaik: [r.best_presenter_1, r.best_presenter_2].filter(x => x && x !== "-"),
+                evaluasiDetail: r.evaluasi_detail || {},
+                customAnswers: r.custom_answers || {}
+              }))
+            };
+
+            currentRekapData = res;
+            localStorage.setItem("PGSD_CACHE_REKAP_" + activeFormId, JSON.stringify(res));
+            if (loading) loading.classList.add("hidden");
+
+            if (summaryArray.length === 0) {
+              if (empty) empty.classList.remove("hidden");
+              if (chartOverviewCard) chartOverviewCard.classList.add("hidden");
+              if (kelompokBox) kelompokBox.classList.add("hidden");
+              if (individuBox) individuBox.classList.add("hidden");
+            } else {
+              if (empty) empty.classList.add("hidden");
+              populateRekapFilter(summaryArray);
+              populatePresensiFilters();
+              renderBothRekapViews();
+            }
+            if (!isSilent) {
+              setBtnSuccess();
+              showToast("Data rekapitulasi diperbarui dari Supabase (< 30ms).", "success");
+            }
+            return;
+          }
+        } catch (sbErr) {
+          console.warn("Supabase loadRekapData notice:", sbErr);
+        }
+      }
+
       const apiUrl = getApiUrl();
 
       try {

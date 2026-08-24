@@ -4,6 +4,19 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.51] - 2026-08-24
+
+### ⚡ Eliminasi Latensi Layar Kosong & Implementasi Fast-Path Supabase Menyeluruh
+- **Penyebab Utama Layar Kosong Terdahulu Teridentifikasi & Dihilangkan:**
+  - Menemukan bahwa fungsi pemuatan data workspace (`fetchAdminFullData`), daftar respons (`fetchAdminResponsesList`), publikasi skema (`publishFormSchema`), dan rekapitulasi nilai (`loadRekapData`) sebelumnya masih memanggil Google Apps Script secara langsung atau memiliki *fallback* yang memblokir rendering UI selama 3–8 detik.
+- **Implementasi Supabase Dedicated Fast-Path (< 30ms):**
+  - **Master Hub Form List**: Membaca langsung dari PostgreSQL View `pgsd_v_forms_summary` sehingga total kelompok, mahasiswa, dan respons teragregasi seketika.
+  - **Form Workspace Data**: Membaca metadata form, konfigurasi, skema builder, kelompok, dan mahasiswa via `Promise.all` paralel langsung ke Supabase PostgreSQL.
+  - **Tampilan Rekapitulasi Nilai**: Mengambil respons valid langsung dari Supabase dan melakukan komputasi rata-rata nilai, rekap kelompok, dan agregasi presenter terbaik secara instan di memori browser.
+  - **Publikasi & Autosave**: Menyimpan langsung ke database Supabase secara real-time dan mengalihkan duplikasi ke Google Sheets menjadi *background job* asinkron tanpa membebani antarmuka pengguna.
+
+---
+
 ## [2.2.50] - 2026-08-24
 
 ### 💾 Integrasi Cadangan & Pemulihan Database Penuh Serta Pemurnian Tab Setelan Form

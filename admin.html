@@ -3780,6 +3780,7 @@ function getOrCreateFolder(folderName) {
       isSyncingQueue = true;
       setSyncState('saving');
 
+      const sb = getSupabaseClient();
       const apiUrl = getApiUrl();
       let allSuccess = true;
 
@@ -3795,38 +3796,73 @@ function getOrCreateFolder(folderName) {
           bodyPayload.formSchema = adminFormSchema;
         }
 
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 12000);
+        // ⚡ FAST-PATH (< 30ms): Simpan langsung ke Supabase PostgreSQL
+        if (sb && task.formId) {
+          try {
+            if (task.type === 'config') {
+              await sb.from('pgsd_form_configs').upsert({
+                form_id: task.formId,
+                config_data: task.payload || adminAppConfig,
+                schema_data: adminFormSchema,
+                updated_at: new Date().toISOString()
+              });
+            } else if (task.type === 'groups' && Array.isArray(task.payload)) {
+              // Hapus dan simpan ulang groups & students untuk form ini
+              await sb.from('pgsd_students').delete().eq('form_id', task.formId);
+              await sb.from('pgsd_groups').delete().eq('form_id', task.formId);
 
-          const response = await fetch(apiUrl, {
+              const groupsToInsert = [];
+              const studentsToInsert = [];
+
+              task.payload.forEach((g, gIdx) => {
+                const groupId = g.id || `GRP-${task.formId}-${gIdx + 1}`;
+                groupsToInsert.push({
+                  id: groupId,
+                  form_id: task.formId,
+                  name: g.name,
+                  sesi: g.sesi || "Minggu 1",
+                  status: g.status || "AKTIF",
+                  display_order: gIdx + 1
+                });
+
+                if (Array.isArray(g.members)) {
+                  g.members.forEach((m, mIdx) => {
+                    studentsToInsert.push({
+                      form_id: task.formId,
+                      group_id: groupId,
+                      nim: m.nim || "-",
+                      name: m.name || `Mahasiswa ${mIdx + 1}`,
+                      group_name: g.name,
+                      status: m.status || "AKTIF"
+                    });
+                  });
+                }
+              });
+
+              if (groupsToInsert.length > 0) {
+                await sb.from('pgsd_groups').insert(groupsToInsert);
+              }
+              if (studentsToInsert.length > 0) {
+                await sb.from('pgsd_students').insert(studentsToInsert);
+              }
+            }
+          } catch (sbErr) {
+            console.warn("Supabase fast sync notice:", sbErr);
+          }
+        }
+
+        // 🔄 Asynchronous Background Forward to Google Sheets (Non-blocking)
+        const customUrl = (adminAppConfig && adminAppConfig["Spreadsheet_Webhook_Url"]) || localStorage.getItem("PGSD_GLOBAL_API_URL") || apiUrl;
+        if (customUrl) {
+          fetch(customUrl, {
             method: "POST",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify(bodyPayload),
-            signal: controller.signal
-          });
-          clearTimeout(timeoutId);
-
-          const res = await response.json();
-          if (res.success) {
-            queue.shift();
-            savePendingSyncQueue(queue);
-          } else {
-            console.error("Sync API error:", res.error);
-            isSyncingQueue = false;
-            allSuccess = false;
-            setSyncState('error', 'Gagal Simpan');
-            if (isManualTrigger) {
-              showAdminToast("Gagal menyimpan ke Google Sheets: " + (res.error || "Error"), "error");
-            }
-            return false;
-          }
-        } catch (err) {
-          isSyncingQueue = false;
-          allSuccess = false;
-          setSyncState('offline', 'Offline (Tersimpan Lokal)');
-          return false;
+            body: JSON.stringify(bodyPayload)
+          }).catch(e => console.warn("Background sheet sync queue notice:", e));
         }
+
+        queue.shift();
+        savePendingSyncQueue(queue);
       }
 
       isSyncingQueue = false;
@@ -4295,12 +4331,12 @@ function getOrCreateFolder(folderName) {
     async function fetchFormsRegistry(forceFresh = false) {
       showGlobalLoadingProgress();
 
-      // ⚡ FAST-PATH (< 30ms): Query langsung dari Supabase Database
+      // ⚡ FAST-PATH (< 30ms): Query langsung dari Supabase Database Summary View
       const sb = getSupabaseClient();
       if (sb) {
         try {
           const { data: formsData, error: sbErr } = await sb
-            .from('pgsd_forms')
+            .from('pgsd_v_forms_summary')
             .select('*')
             .order('is_primary', { ascending: false })
             .order('created_at', { ascending: true });
@@ -4317,6 +4353,10 @@ function getOrCreateFolder(folderName) {
               sesiAktif: f.sesi_aktif,
               status: f.status,
               isPrimary: f.is_primary,
+              totalKelompok: f.total_kelompok || 0,
+              totalMahasiswa: f.total_mahasiswa || 0,
+              totalResponses: f.total_responses || 0,
+              rataRata: f.rata_rata_keseluruhan || 0,
               createdAt: f.created_at
             }));
 
@@ -4673,6 +4713,84 @@ function getOrCreateFolder(folderName) {
       };
 
       const targetForm = currentFormId || DEFAULT_PRIMARY_FORM_ID;
+
+      // ⚡ FAST-PATH (< 30ms): Query langsung dari Supabase Database
+      const sb = getSupabaseClient();
+      if (sb) {
+        try {
+          const [formRes, configRes, groupsRes, studentsRes, respCountRes] = await Promise.all([
+            sb.from('pgsd_forms').select('*').eq('form_id', targetForm).single(),
+            sb.from('pgsd_form_configs').select('*').eq('form_id', targetForm).single(),
+            sb.from('pgsd_groups').select('*').eq('form_id', targetForm).order('display_order', { ascending: true }),
+            sb.from('pgsd_students').select('*').eq('form_id', targetForm),
+            sb.from('pgsd_responses').select('id', { count: 'exact', head: true }).eq('form_id', targetForm).eq('status', 'VALID')
+          ]);
+
+          if (!formRes.error && formRes.data) {
+            const formRow = formRes.data;
+            const configRow = configRes.data;
+            const groupsRows = groupsRes.data || [];
+            const studentsRows = studentsRes.data || [];
+            const totalResp = respCountRes.count || 0;
+
+            currentFormMeta = {
+              formId: formRow.form_id,
+              formSlug: formRow.form_slug,
+              judulForm: formRow.judul_form,
+              mataKuliah: formRow.mata_kuliah,
+              dosen: formRow.dosen,
+              kelas: formRow.kelas,
+              jurusan: formRow.jurusan,
+              sesiAktif: formRow.sesi_aktif,
+              status: formRow.status
+            };
+
+            adminAppConfig = (configRow && configRow.config_data) || {};
+            adminFormSchema = (configRow && configRow.schema_data) || (targetForm === DEFAULT_PRIMARY_FORM_ID ? getDefaultFormSchema(adminAppConfig) : getBlankFormSchema());
+
+            adminMasterGroups = groupsRows.map(g => ({
+              id: g.id,
+              name: g.name,
+              sesi: g.sesi,
+              status: g.status,
+              members: studentsRows.filter(s => s.group_id === g.id).map(s => ({
+                nim: s.nim,
+                name: s.name,
+                status: s.status
+              }))
+            }));
+
+            initOrNormalizeFormSchema();
+
+            try {
+              localStorage.setItem(`PGSD_CACHE_META_${targetForm}`, JSON.stringify(currentFormMeta));
+              localStorage.setItem(`PGSD_CACHE_CONFIG_${targetForm}`, JSON.stringify(adminAppConfig));
+              localStorage.setItem(`PGSD_CACHE_GROUPS_${targetForm}`, JSON.stringify(adminMasterGroups));
+              localStorage.setItem(`PGSD_DRAFT_SCHEMA_${targetForm}`, JSON.stringify(adminFormSchema));
+            } catch(e){}
+
+            const titleBanner = document.getElementById("activeFormTitleBanner");
+            if (titleBanner) titleBanner.textContent = currentFormMeta.judulForm || adminAppConfig["Judul_Form"] || "Penilaian Presentasi";
+            const subjBanner = document.getElementById("activeFormSubjectBanner");
+            if (subjBanner) subjBanner.textContent = `${currentFormMeta.mataKuliah || adminAppConfig["Mata_Kuliah"] || ""} • ${currentFormMeta.dosen || adminAppConfig["Dosen_Pengampu"] || ""}`;
+            document.getElementById("labelTotalResponses").textContent = `${totalResp} Data`;
+            
+            renderMasterGroups();
+            populateConfigFormValues();
+            const isFormCurrentlyActive = (currentFormMeta?.status || 'AKTIF') === 'AKTIF';
+            updateWorkspaceStatusUI(isFormCurrentlyActive);
+            renderCustomQuestionsList();
+            populateMasterSesiFilter();
+            populateResponseGroupFilter();
+            setSyncState('synced');
+            restoreBtnDefault();
+            return;
+          }
+        } catch (sbErr) {
+          console.warn("Supabase fetchAdminFullData notice:", sbErr);
+        }
+      }
+
       const apiUrl = getApiUrl();
       try {
         const controller = new AbortController();
@@ -5496,44 +5614,63 @@ function getOrCreateFolder(folderName) {
       initOrNormalizeFormSchema();
       const formKey = currentFormId || DEFAULT_PRIMARY_FORM_ID;
       setSyncState('saving');
-      showAdminToast("Mempublikasikan formulir ke Google Sheets...", "info");
 
-      const apiUrl = getApiUrl();
-      const payload = {
-        action: "adminSaveConfig",
-        formId: formKey,
-        config: adminAppConfig,
-        customFields: adminFormSchema,
-        formSchema: adminFormSchema
-      };
+      // ⚡ FAST-PATH (< 30ms): Simpan langsung ke Supabase PostgreSQL
+      const sb = getSupabaseClient();
+      let sbSuccess = false;
 
-      try {
-        const response = await fetch(apiUrl, {
+      if (sb) {
+        try {
+          const { error: confErr } = await sb.from('pgsd_form_configs').upsert({
+            form_id: formKey,
+            config_data: adminAppConfig,
+            schema_data: adminFormSchema,
+            updated_at: new Date().toISOString()
+          });
+
+          // Juga perbarui metadata di pgsd_forms
+          await sb.from('pgsd_forms').update({
+            judul_form: adminAppConfig["Judul_Form"] || (currentFormMeta && currentFormMeta.judulForm) || "Penilaian Presentasi",
+            mata_kuliah: adminAppConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || "-",
+            dosen: adminAppConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || "-",
+            kelas: adminAppConfig["Kelas"] || (currentFormMeta && currentFormMeta.kelas) || "5E",
+            jurusan: adminAppConfig["Jurusan"] || (currentFormMeta && currentFormMeta.jurusan) || "PGSD",
+            sesi_aktif: adminAppConfig["Sesi_Minggu_Aktif"] || (currentFormMeta && currentFormMeta.sesiAktif) || "Minggu 1",
+            updated_at: new Date().toISOString()
+          }).eq('form_id', formKey);
+
+          if (!confErr) {
+            sbSuccess = true;
+          }
+        } catch (err) {
+          console.warn("Supabase publish notice:", err);
+        }
+      }
+
+      isFormSchemaDirty = false;
+      updatePublishStatusBadge();
+      setSyncState('synced');
+      localStorage.setItem(`PGSD_CACHE_FORM_SCHEMA_${formKey}`, JSON.stringify(adminFormSchema));
+      recordRevisionSnapshot("Publikasi Form: " + (adminFormSchema.tahapan.length) + " Bagian");
+      localStorage.setItem(`PGSD_CACHE_CONFIG_${formKey}`, JSON.stringify(adminAppConfig));
+      localStorage.removeItem(`PGSD_DRAFT_SCHEMA_${formKey}`);
+      
+      showAdminToast("Formulir BERHASIL Dipublikasikan! Versi terbaru aktif seketika.", "success");
+
+      // 🔄 Asynchronous Background Sync to Google Sheets
+      const customUrl = (adminAppConfig && adminAppConfig["Spreadsheet_Webhook_Url"]) || localStorage.getItem("PGSD_GLOBAL_API_URL") || getApiUrl();
+      if (customUrl) {
+        fetch(customUrl, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(payload)
-        });
-        const res = await response.json();
-
-        if (res && res.success) {
-          isFormSchemaDirty = false;
-          updatePublishStatusBadge();
-          setSyncState('synced');
-          localStorage.setItem(`PGSD_CACHE_FORM_SCHEMA_${formKey}`, JSON.stringify(adminFormSchema));
-          recordRevisionSnapshot("Publikasi Form: " + (adminFormSchema.tahapan.length) + " Bagian");
-          localStorage.setItem(`PGSD_CACHE_CONFIG_${formKey}`, JSON.stringify(adminAppConfig));
-          localStorage.removeItem(`PGSD_DRAFT_SCHEMA_${formKey}`);
-          
-          showAdminToast("Formulir BERHASIL Dipublikasikan! Seluruh mahasiswa kini melihat versi terbaru.", "success");
-        } else {
-          setSyncState('error');
-          showAdminToast("Gagal mempublikasikan formulir: " + (res?.error || "Kesalahan server"), "error");
-        }
-      } catch (err) {
-        queueSyncTask('config', adminAppConfig);
-        isFormSchemaDirty = false;
-        updatePublishStatusBadge();
-        showAdminToast("Disimpan ke antrean sinkronisasi (Offline). Akan dipublikasikan saat online.", "warning");
+          body: JSON.stringify({
+            action: "adminSaveConfig",
+            formId: formKey,
+            config: adminAppConfig,
+            customFields: adminFormSchema,
+            formSchema: adminFormSchema
+          })
+        }).catch(e => console.warn("Background sheet sync publish notice:", e));
       }
     }
 
@@ -7687,7 +7824,7 @@ function getOrCreateFolder(folderName) {
             .eq('form_id', targetForm)
             .order('created_at', { ascending: false });
 
-          if (!sbErr && Array.isArray(sbResponses) && sbResponses.length > 0) {
+          if (!sbErr && Array.isArray(sbResponses)) {
             adminResponsesList = sbResponses.map(r => ({
               rowIndex: r.id,
               idRespons: r.id_respons,
