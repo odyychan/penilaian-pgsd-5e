@@ -4,6 +4,27 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.79] - 2026-08-24
+
+### ✍️ Direct Inline Live Editing (Google Forms Real-Time Canvas)
+- **Pengeditan Langsung di Tempat (*Direct Inline WYSIWYG Editing*):**
+  - Seluruh elemen formulir kini dapat langsung diketik dan disesuaikan langsung pada kanvas Form Builder tanpa perlu membuka jendela modal:
+    - **Judul & Panduan Tahap:** Langsung diketik pada heading tahap.
+    - **Teks Pertanyaan & Petunjuk:** Langsung diketik pada header kartu input.
+    - **Pilihan Peran Penilai (`CORE_IDENTITY`):** Langsung mengedit teks peran Mahasiswa, Dosen, dan Tamu/Lainnya di kartu.
+    - **Domain Email Kampus:** Langsung mengubah daftar domain resmi yang diizinkan (`mhs.ulm.ac.id, ulm.ac.id`).
+    - **Petunjuk Pemilihan Kelompok (`CORE_GROUP_SELECT`):** Langsung mengedit teks instruksi kelompok.
+    - **Skor Minimum & Maksimum (`CORE_SCORE_RUBRIC`):** Langsung mengetik angka batas skor pada kartu.
+    - **Batas Voting Pemateri (`CORE_BEST_PRESENTER`):** Langsung mengetik kuota maksimal pilihan suara.
+    - **Batas Karakter & Visibilitas Ulasan (`CORE_MEMBER_FEEDBACK`):** Langsung mengatur batas karakter dan publikasi ulasan pada kartu.
+    - **Opsi Pilihan Ganda, Checkbox, dan Dropdown:** Langsung mengetik teks opsi, menambah opsi baru (`+ Tambah Opsi`), dan menghapus opsi (`✕`) di kartu.
+    - **Skala Linier (1-5 / 1-10):** Langsung memilih rentang angka dan mengedit label ujung *Sangat Kurang* / *Sangat Baik*.
+    - **Teks Singkat / Paragraf:** Langsung mengedit teks contoh placeholder.
+- **Penyimpanan Otomatis Real-Time (*Debounced Instant Auto-Save*):**
+  - Setiap ketikan atau perubahan inline langsung tersimpan otomatis secara aman ke Google Sheets dengan sinkronisasi instan ke formulir mahasiswa.
+
+---
+
 ## [2.1.78] - 2026-08-24
 
 ### 🎨 True WYSIWYG Google Forms-Style Visual Form Builder & Live Simulator

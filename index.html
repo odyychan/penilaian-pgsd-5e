@@ -1999,6 +1999,17 @@
       document.getElementById("inputNilaiNumber").max = maxVal;
       updateScoreBadge(document.getElementById("inputNilaiNumber").value || 85);
 
+      // Dynamic Role & Group Labels (Inline Editable Sync)
+      const optMhs = document.querySelector('#selectPeranPenilai option[value="Mahasiswa"]');
+      if (optMhs && appConfig['Peran_Mahasiswa_Label']) optMhs.textContent = appConfig['Peran_Mahasiswa_Label'];
+      const optDosen = document.querySelector('#selectPeranPenilai option[value="Dosen"]');
+      if (optDosen && appConfig['Peran_Dosen_Label']) optDosen.textContent = appConfig['Peran_Dosen_Label'];
+      const optLainnya = document.querySelector('#selectPeranPenilai option[value="Lainnya"]');
+      if (optLainnya && appConfig['Peran_Lainnya_Label']) optLainnya.textContent = appConfig['Peran_Lainnya_Label'];
+
+      const groupSubtitle = document.getElementById('step2Subtitle');
+      if (groupSubtitle && appConfig['Pilih_Kelompok_Label']) groupSubtitle.textContent = appConfig['Pilih_Kelompok_Label'];
+
       // Update footer kredit pembuat web
       const pembuatNama   = (appConfig["Pembuat_Web_Nama"]   || "").trim();
       const pembuatPrefix = (appConfig["Pembuat_Web_Prefix"] || "Dibuat oleh").trim();
