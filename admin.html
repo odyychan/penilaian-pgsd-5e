@@ -705,46 +705,10 @@
             </span>
           </div>
 
-          <!-- Judul Formulir -->
+          <!-- Judul Formulir Penilaian -->
           <div class="group/fieldBlock space-y-1.5">
             <div class="flex items-center justify-between">
               <label class="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider font-mono">Judul Formulir Penilaian</label>
-              
-              <!-- Toolbar -->
-              <div class="hidden group-focus-within/fieldBlock:flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 bg-zinc-100/90 rounded-lg border border-zinc-200 w-fit text-zinc-700 select-none shadow-2xs transition-all duration-150 animate-in fade-in relative">
-                <button type="button" onmousedown="event.preventDefault()" onclick="applyUniversalTextFormat('#cfg_Judul_Form', 'bold')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center font-serif font-black hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer text-sm" title="Tebal (Ctrl + B)">B</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="applyUniversalTextFormat('#cfg_Judul_Form', 'italic')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center font-serif italic font-bold hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer text-sm" title="Miring (Ctrl + I)">I</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="applyUniversalTextFormat('#cfg_Judul_Form', 'underline')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center font-serif underline font-bold hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer text-sm" title="Garis Bawah (Ctrl + U)">U</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="applyUniversalTextFormat('#cfg_Judul_Form', 'link')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer" title="Sisipkan Tautan (Ctrl + K)"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg></button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="applyUniversalTextFormat('#cfg_Judul_Form', 'remove_format')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer" title="Hapus Format (Ctrl + \ atau Ctrl + Shift + X)"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4v3h4.5v13h3V7H18V4H6zm14.7 15.3l-1.4 1.4L4.3 5.7 5.7 4.3l15 15z"></path></svg></button>
-                <div class="h-4 w-px bg-zinc-300 mx-0.5"></div>
-                
-                <div class="relative inline-block">
-                  <button type="button" onmousedown="event.preventDefault()" onclick="handleUniversalMathButtonClick('cfg_Judul_Form')" class="px-2 h-7 sm:h-8 rounded-md hover:bg-indigo-100 text-indigo-700 font-mono font-bold flex items-center gap-1 transition cursor-pointer text-xs" title="Rumus Matematika (Ctrl + M) • Blok teks untuk otomatis ubah, atau klik untuk buka palet simbol"><span class="text-sm font-extrabold">∑</span><span class="text-[11px] font-sans font-semibold">Rumus</span></button>
-                  
-                  <div id="quickMathPalette_cfg_Judul_Form" class="math-floating-palette hidden absolute right-0 top-full mt-1.5 z-50 p-2.5 bg-white/95 backdrop-blur-md rounded-2xl border border-zinc-200 shadow-2xl space-y-2 text-xs w-72 sm:w-80 animate-in fade-in zoom-in-95 duration-150" style="box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.15), 0 4px 10px -2px rgba(0, 0, 0, 0.08);">
-                    <div class="flex items-center justify-between text-[11px] font-semibold text-indigo-950 pb-1.5 border-b border-zinc-100">
-                      <span class="flex items-center gap-1 font-bold text-indigo-900"><span class="text-indigo-600 font-extrabold">∑</span> Palet Simbol Cepat:</span>
-                      <span class="text-[10px] text-zinc-400 font-mono">Pintasan: Ctrl + M</span>
-                      <button type="button" onmousedown="event.preventDefault()" onclick="toggleUniversalMathPalette('cfg_Judul_Form')" class="w-5 h-5 rounded-full hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center text-xs transition cursor-pointer">✕</button>
-                    </div>
-                    <div class="grid grid-cols-4 gap-1 text-xs">
-                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Judul_Form', 'x^2'); toggleUniversalMathPalette('cfg_Judul_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Pangkat Dua">x²</button>
-                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Judul_Form', '\\\\sqrt{x}'); toggleUniversalMathPalette('cfg_Judul_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Akar Kuadrat">√x</button>
-                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Judul_Form', '\\\\frac{a}{b}'); toggleUniversalMathPalette('cfg_Judul_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Pecahan">a/b</button>
-                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Judul_Form', '±'); toggleUniversalMathPalette('cfg_Judul_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Plus Minus">±</button>
-                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Judul_Form', '≤'); toggleUniversalMathPalette('cfg_Judul_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Kurang Dari Sama Dengan">≤</button>
-                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Judul_Form', '≥'); toggleUniversalMathPalette('cfg_Judul_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Lebih Dari Sama Dengan">≥</button>
-                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Judul_Form', '≠'); toggleUniversalMathPalette('cfg_Judul_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Tidak Sama Dengan">≠</button>
-                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Judul_Form', 'π'); toggleUniversalMathPalette('cfg_Judul_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Pi">π</button>
-                    </div>
-                    <div class="pt-1">
-                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Judul_Form', '$...$'); toggleUniversalMathPalette('cfg_Judul_Form');" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-mono font-bold text-xs transition cursor-pointer shadow-xs text-center">$ Sisipkan Rumus KaTeX $</button>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
             </div>
 
             <input 
@@ -765,42 +729,6 @@
           <div class="group/fieldBlock space-y-1.5">
             <div class="flex items-center justify-between">
               <label class="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider font-mono">Deskripsi &amp; Panduan Pengisian</label>
-
-              <!-- Toolbar -->
-              <div class="hidden group-focus-within/fieldBlock:flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 bg-zinc-100/90 rounded-lg border border-zinc-200 w-fit text-zinc-700 select-none shadow-2xs transition-all duration-150 animate-in fade-in relative">
-                <button type="button" onmousedown="event.preventDefault()" onclick="applyUniversalTextFormat('#cfg_Deskripsi_Form', 'bold')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center font-serif font-black hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer text-sm" title="Tebal (Ctrl + B)">B</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="applyUniversalTextFormat('#cfg_Deskripsi_Form', 'italic')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center font-serif italic font-bold hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer text-sm" title="Miring (Ctrl + I)">I</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="applyUniversalTextFormat('#cfg_Deskripsi_Form', 'underline')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center font-serif underline font-bold hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer text-sm" title="Garis Bawah (Ctrl + U)">U</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="applyUniversalTextFormat('#cfg_Deskripsi_Form', 'link')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer" title="Sisipkan Tautan (Ctrl + K)"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg></button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="applyUniversalTextFormat('#cfg_Deskripsi_Form', 'remove_format')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer" title="Hapus Format (Ctrl + \ atau Ctrl + Shift + X)"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4v3h4.5v13h3V7H18V4H6zm14.7 15.3l-1.4 1.4L4.3 5.7 5.7 4.3l15 15z"></path></svg></button>
-                <div class="h-4 w-px bg-zinc-300 mx-0.5"></div>
-                
-                <div class="relative inline-block">
-                  <button type="button" onmousedown="event.preventDefault()" onclick="handleUniversalMathButtonClick('cfg_Deskripsi_Form')" class="px-2 h-7 sm:h-8 rounded-md hover:bg-indigo-100 text-indigo-700 font-mono font-bold flex items-center gap-1 transition cursor-pointer text-xs" title="Rumus Matematika (Ctrl + M) • Blok teks untuk otomatis ubah, atau klik untuk buka palet simbol"><span class="text-sm font-extrabold">∑</span><span class="text-[11px] font-sans font-semibold">Rumus</span></button>
-                  
-                  <div id="quickMathPalette_cfg_Deskripsi_Form" class="math-floating-palette hidden absolute right-0 top-full mt-1.5 z-50 p-2.5 bg-white/95 backdrop-blur-md rounded-2xl border border-zinc-200 shadow-2xl space-y-2 text-xs w-72 sm:w-80 animate-in fade-in zoom-in-95 duration-150" style="box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.15), 0 4px 10px -2px rgba(0, 0, 0, 0.08);">
-                    <div class="flex items-center justify-between text-[11px] font-semibold text-indigo-950 pb-1.5 border-b border-zinc-100">
-                      <span class="flex items-center gap-1 font-bold text-indigo-900"><span class="text-indigo-600 font-extrabold">∑</span> Palet Simbol Cepat:</span>
-                      <span class="text-[10px] text-zinc-400 font-mono">Pintasan: Ctrl + M</span>
-                      <button type="button" onmousedown="event.preventDefault()" onclick="toggleUniversalMathPalette('cfg_Deskripsi_Form')" class="w-5 h-5 rounded-full hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center text-xs transition cursor-pointer">✕</button>
-                    </div>
-                    <div class="grid grid-cols-4 gap-1 text-xs">
-                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Deskripsi_Form', 'x^2'); toggleUniversalMathPalette('cfg_Deskripsi_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Pangkat Dua">x²</button>
-                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Deskripsi_Form', '\\\\sqrt{x}'); toggleUniversalMathPalette('cfg_Deskripsi_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Akar Kuadrat">√x</button>
-                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Deskripsi_Form', '\\\\frac{a}{b}'); toggleUniversalMathPalette('cfg_Deskripsi_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Pecahan">a/b</button>
-                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Deskripsi_Form', '±'); toggleUniversalMathPalette('cfg_Deskripsi_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Plus Minus">±</button>
-                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Deskripsi_Form', '≤'); toggleUniversalMathPalette('cfg_Deskripsi_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Kurang Dari Sama Dengan">≤</button>
-                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Deskripsi_Form', '≥'); toggleUniversalMathPalette('cfg_Deskripsi_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Lebih Dari Sama Dengan">≥</button>
-                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Deskripsi_Form', '≠'); toggleUniversalMathPalette('cfg_Deskripsi_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Tidak Sama Dengan">≠</button>
-                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Deskripsi_Form', 'π'); toggleUniversalMathPalette('cfg_Deskripsi_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Pi">π</button>
-                    </div>
-                    <div class="pt-1">
-                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Deskripsi_Form', '$...$'); toggleUniversalMathPalette('cfg_Deskripsi_Form');" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-mono font-bold text-xs transition cursor-pointer shadow-xs text-center">$ Sisipkan Rumus KaTeX $</button>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
             </div>
 
             <textarea 
@@ -2464,120 +2392,129 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       }
     }
 
+    // =========================================================================
+    // UNIVERSAL FLOATING BOTTOM FORMATTING TOOLBAR ENGINE (FIXED CENTER BOTTOM OVERLAY)
+    // =========================================================================
+    let currentActiveFormInput = null;
+    let floatingToolbarHideTimeout = null;
+
+    function isMathEligibleInput(el) {
+      if (!el) return false;
+      const tag = el.tagName ? el.tagName.toUpperCase() : '';
+      if (tag !== 'INPUT' && tag !== 'TEXTAREA') return false;
+      if (tag === 'INPUT') {
+        const type = (el.type || 'text').toLowerCase();
+        if (type === 'checkbox' || type === 'radio' || type === 'button' || type === 'submit' || type === 'file') return false;
+      }
+      return true;
+    }
+
+    function isInsideFormCanvas(el) {
+      if (!el) return false;
+      const viewConfig = document.getElementById("adminView_config");
+      return viewConfig ? viewConfig.contains(el) : false;
+    }
+
+    function showUniversalFloatingFormattingBar(targetInput) {
+      if (currentAdminTab !== 'config') return;
+      if (!isInsideFormCanvas(targetInput)) return;
+      if (!isMathEligibleInput(targetInput)) return;
+
+      currentActiveFormInput = targetInput;
+      if (floatingToolbarHideTimeout) {
+        clearTimeout(floatingToolbarHideTimeout);
+        floatingToolbarHideTimeout = null;
+      }
+
+      const bar = document.getElementById("universalFloatingFormattingBar");
+      if (bar) {
+        bar.classList.remove("hidden");
+        bar.classList.add("flex");
+      }
+    }
+
+    function hideUniversalFloatingFormattingBar() {
+      if (floatingToolbarHideTimeout) clearTimeout(floatingToolbarHideTimeout);
+      floatingToolbarHideTimeout = setTimeout(() => {
+        const active = document.activeElement;
+        if (active && isInsideFormCanvas(active) && isMathEligibleInput(active)) {
+          currentActiveFormInput = active;
+          return;
+        }
+
+        const bar = document.getElementById("universalFloatingFormattingBar");
+        if (bar) {
+          bar.classList.add("hidden");
+          bar.classList.remove("flex");
+        }
+        const palette = document.getElementById("universalFloatingMathPalette");
+        if (palette) {
+          palette.classList.add("hidden");
+        }
+      }, 180);
+    }
+
+    function applyActiveFieldFormat(formatType) {
+      const target = currentActiveFormInput || (isInsideFormCanvas(document.activeElement) ? document.activeElement : null);
+      if (target && isMathEligibleInput(target)) {
+        target.focus();
+        applyUniversalTextFormat(target, formatType);
+      } else {
+        showAdminToast("Pilih salah satu kolom isian pertanyaan terlebih dahulu.", "info");
+      }
+    }
+
+    function handleActiveFieldMathButtonClick() {
+      const target = currentActiveFormInput || (isInsideFormCanvas(document.activeElement) ? document.activeElement : null);
+      if (!target || !isMathEligibleInput(target)) {
+        showAdminToast("Pilih salah satu kolom isian pertanyaan terlebih dahulu.", "info");
+        return;
+      }
+
+      target.focus();
+      const start = typeof target.selectionStart === 'number' ? target.selectionStart : 0;
+      const end = typeof target.selectionEnd === 'number' ? target.selectionEnd : 0;
+      const val = target.value || "";
+      const selected = val.substring(start, end);
+
+      if (selected && selected.trim()) {
+        pushUndoSnapshot('Format Rumus Matematika');
+        const trimmed = selected.trim();
+        let formattedMath = "";
+        if (trimmed.startsWith('$') && trimmed.endsWith('$') && trimmed.length >= 2) {
+          formattedMath = trimmed.slice(1, -1);
+        } else {
+          formattedMath = `$${trimmed}$`;
+        }
+
+        target.value = val.substring(0, start) + formattedMath + val.substring(end);
+        const newCursor = start + formattedMath.length;
+        target.setSelectionRange(newCursor, newCursor);
+        target.dispatchEvent(new Event('input', { bubbles: true }));
+        showAdminToast("Teks terpilih berhasil diubah menjadi rumus matematika KaTeX! (Ctrl + M)", "success");
+        return;
+      }
+
+      toggleUniversalFloatingMathPalette();
+    }
+
+    function toggleUniversalFloatingMathPalette() {
+      const palette = document.getElementById("universalFloatingMathPalette");
+      if (!palette) return;
+      palette.classList.toggle("hidden");
+    }
+
+    function insertActiveFieldMathSymbol(symbol) {
+      const target = currentActiveFormInput || (isInsideFormCanvas(document.activeElement) ? document.activeElement : null);
+      if (!target || !isMathEligibleInput(target)) return;
+
+      target.focus();
+      insertUniversalMathSymbol(target, symbol);
+    }
+
+    // Cleaned up helper returning empty string to prevent inline layout shifts on cards
     function getRichTextToolbarHtml(targetInputId, customClass = '') {
-      return `
-        <!-- Google Forms Authentic Rich Text Formatting Toolbar (Shows ONLY when focused) -->
-        <div class="hidden group-focus-within/fieldBlock:flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 bg-zinc-100/90 rounded-lg border border-zinc-200 w-fit text-zinc-700 select-none shadow-2xs transition-all duration-150 animate-in fade-in relative ${customClass}">
-          
-          <!-- Bold (B) -->
-          <button 
-            type="button" 
-            onmousedown="event.preventDefault()"
-            onclick="applyUniversalTextFormat('#${targetInputId}', 'bold')" 
-            class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center font-serif font-black hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer text-sm" 
-            title="Tebal (Ctrl + B)"
-          >
-            B
-          </button>
-
-          <!-- Italic (I) -->
-          <button 
-            type="button" 
-            onmousedown="event.preventDefault()"
-            onclick="applyUniversalTextFormat('#${targetInputId}', 'italic')" 
-            class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center font-serif italic font-bold hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer text-sm" 
-            title="Miring (Ctrl + I)"
-          >
-            I
-          </button>
-
-          <!-- Underline (U) -->
-          <button 
-            type="button" 
-            onmousedown="event.preventDefault()"
-            onclick="applyUniversalTextFormat('#${targetInputId}', 'underline')" 
-            class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center font-serif underline font-bold hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer text-sm" 
-            title="Garis Bawah (Ctrl + U)"
-          >
-            U
-          </button>
-
-          <!-- Link (🔗) -->
-          <button 
-            type="button" 
-            onmousedown="event.preventDefault()"
-            onclick="applyUniversalTextFormat('#${targetInputId}', 'link')" 
-            class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer" 
-            title="Sisipkan Tautan (Ctrl + K)"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
-            </svg>
-          </button>
-
-          <!-- Remove Formatting (T̶ / Tx) -->
-          <button 
-            type="button" 
-            onmousedown="event.preventDefault()"
-            onclick="applyUniversalTextFormat('#${targetInputId}', 'remove_format')" 
-            class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer" 
-            title="Hapus Format (Ctrl + \\ atau Ctrl + Shift + X)"
-          >
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M6 4v3h4.5v13h3V7H18V4H6zm14.7 15.3l-1.4 1.4L4.3 5.7 5.7 4.3l15 15z"></path>
-            </svg>
-          </button>
-
-          <div class="h-4 w-px bg-zinc-300 mx-0.5"></div>
-
-          <!-- Rumus / Math Formula Button with Compact Floating Overlay -->
-          <div class="relative inline-block">
-            <button 
-              type="button" 
-              onmousedown="event.preventDefault()"
-              onclick="handleUniversalMathButtonClick('${targetInputId}')" 
-              class="px-2 h-7 sm:h-8 rounded-md hover:bg-indigo-100 text-indigo-700 font-mono font-bold flex items-center gap-1 transition cursor-pointer text-xs" 
-              title="Rumus Matematika (Ctrl + M) • Blok teks untuk otomatis ubah, atau klik untuk buka palet simbol"
-            >
-              <span class="text-sm font-extrabold">∑</span>
-              <span class="text-[11px] font-sans font-semibold">Rumus</span>
-            </button>
-
-            <!-- Compact Floating Overlay Popover (Does NOT push layout) -->
-            <div 
-              id="quickMathPalette_${targetInputId}" 
-              class="math-floating-palette hidden absolute right-0 top-full mt-1.5 z-50 p-2.5 bg-white/95 backdrop-blur-md rounded-2xl border border-zinc-200 shadow-2xl space-y-2 text-xs w-72 sm:w-80 animate-in fade-in zoom-in-95 duration-150"
-              style="box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.15), 0 4px 10px -2px rgba(0, 0, 0, 0.08);"
-            >
-              <div class="flex items-center justify-between text-[11px] font-semibold text-indigo-950 pb-1.5 border-b border-zinc-100">
-                <span class="flex items-center gap-1 font-bold text-indigo-900">
-                  <span class="text-indigo-600 font-extrabold">∑</span> Palet Simbol Cepat:
-                </span>
-                <span class="text-[10px] text-zinc-400 font-mono">Pintasan: Ctrl + M</span>
-                <button type="button" onmousedown="event.preventDefault()" onclick="toggleUniversalMathPalette('${targetInputId}')" class="w-5 h-5 rounded-full hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center text-xs transition cursor-pointer">✕</button>
-              </div>
-
-              <div class="grid grid-cols-4 gap-1 text-xs">
-                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#${targetInputId}', 'x^2'); toggleUniversalMathPalette('${targetInputId}');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Pangkat Dua">x²</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#${targetInputId}', '\\\\sqrt{x}'); toggleUniversalMathPalette('${targetInputId}');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Akar Kuadrat">√x</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#${targetInputId}', '\\\\frac{a}{b}'); toggleUniversalMathPalette('${targetInputId}');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Pecahan">a/b</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#${targetInputId}', '±'); toggleUniversalMathPalette('${targetInputId}');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Plus Minus">±</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#${targetInputId}', '≤'); toggleUniversalMathPalette('${targetInputId}');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Kurang Dari Sama Dengan">≤</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#${targetInputId}', '≥'); toggleUniversalMathPalette('${targetInputId}');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Lebih Dari Sama Dengan">≥</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#${targetInputId}', '≠'); toggleUniversalMathPalette('${targetInputId}');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Tidak Sama Dengan">≠</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#${targetInputId}', 'π'); toggleUniversalMathPalette('${targetInputId}');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Pi">π</button>
-              </div>
-
-              <div class="pt-1">
-                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#${targetInputId}', '$...$'); toggleUniversalMathPalette('${targetInputId}');" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-mono font-bold text-xs transition cursor-pointer shadow-xs text-center">
-                  $ Sisipkan Rumus KaTeX $
-                </button>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      `;
+      return '';
     }
 
     // Backward-compatibility aliases
@@ -2585,17 +2522,35 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       applyUniversalTextFormat(`#fieldLabelInput_${sIdx}_${fIdx}`, formatType);
     }
     function toggleQuickMathPalette(sIdx, fIdx) {
-      toggleUniversalMathPalette(`fieldLabelInput_${sIdx}_${fIdx}`);
+      toggleUniversalFloatingMathPalette();
     }
     function insertMathSymbolAtField(sIdx, fIdx, symbol) {
       insertUniversalMathSymbol(`#fieldLabelInput_${sIdx}_${fIdx}`, symbol);
     }
+    function handleUniversalMathButtonClick(targetInputId) {
+      handleActiveFieldMathButtonClick();
+    }
+    function toggleUniversalMathPalette(targetInputId) {
+      toggleUniversalFloatingMathPalette();
+    }
 
     document.addEventListener("click", (e) => {
-      if (!e.target.closest('.math-floating-palette') && !e.target.closest('button[title*="Rumus"]') && !e.target.closest('button[onclick*="handleUniversalMathButtonClick"]') && !e.target.closest('button[onclick*="toggleUniversalMathPalette"]')) {
-        document.querySelectorAll('.math-floating-palette').forEach(p => p.classList.add("hidden"));
+      if (!e.target.closest('#universalFloatingFormattingBar') && !e.target.closest('#universalFloatingMathPalette')) {
+        const palette = document.getElementById("universalFloatingMathPalette");
+        if (palette) palette.classList.add("hidden");
       }
     });
+
+    // Smart Focus Trackers: show bottom floating formatting bar ONLY when focused in Tab Pertanyaan
+    document.addEventListener('focusin', function(e) {
+      if (isInsideFormCanvas(e.target) && isMathEligibleInput(e.target)) {
+        showUniversalFloatingFormattingBar(e.target);
+      }
+    }, true);
+
+    document.addEventListener('focusout', function(e) {
+      hideUniversalFloatingFormattingBar();
+    }, true);
 
     // =========================================================================
     // UNIVERSAL KEYBOARD SHORTCUTS ENGINE (Ctrl+B, Ctrl+I, Ctrl+U, Ctrl+K, Ctrl+\, Ctrl+M)
@@ -2652,14 +2607,15 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         if ((isCtrlOrCmd && key === 'm') || (e.altKey && key === 'm')) {
           e.preventDefault();
           e.stopPropagation();
-          handleUniversalMathButtonClick(target.id || target);
+          handleActiveFieldMathButtonClick();
           return;
         }
       }
 
       // Escape key: close open floating math palettes
       if (e.key === 'Escape') {
-        document.querySelectorAll('.math-floating-palette').forEach(p => p.classList.add('hidden'));
+        const palette = document.getElementById("universalFloatingMathPalette");
+        if (palette) palette.classList.add('hidden');
         hideMathContextMenu();
         hideFloatingSelectionBubble();
       }
@@ -2670,17 +2626,6 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     // =========================================================================
     let activeMathSelectionTarget = null;
     let activeMathSelectionRange = { start: 0, end: 0, text: "" };
-
-    function isMathEligibleInput(el) {
-      if (!el) return false;
-      const tag = el.tagName ? el.tagName.toUpperCase() : '';
-      if (tag !== 'INPUT' && tag !== 'TEXTAREA') return false;
-      if (tag === 'INPUT') {
-        const type = (el.type || 'text').toLowerCase();
-        if (type === 'checkbox' || type === 'radio' || type === 'button' || type === 'submit' || type === 'file') return false;
-      }
-      return true;
-    }
 
     function captureActiveSelection(el) {
       if (!isMathEligibleInput(el)) return null;
@@ -8563,6 +8508,121 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     <button type="button" onclick="openMathContextMenuFromBubble(event)" class="text-zinc-400 hover:text-white transition cursor-pointer text-[11px]" title="Pilihan Rumus Lainnya">
       <span>Opsi ▾</span>
     </button>
+  </div>
+
+  <!-- UNIVERSAL FLOATING BOTTOM FORMATTING TOOLBAR (Pill-shaped Bottom-Center Overlay, Persistent on Scroll) -->
+  <div 
+    id="universalFloatingFormattingBar" 
+    class="hidden fixed bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-50 items-center gap-1 sm:gap-1.5 px-3 py-1.5 bg-white/95 backdrop-blur-md rounded-2xl border border-zinc-200 shadow-2xl text-zinc-700 select-none transition-all duration-200 animate-in fade-in slide-in-from-bottom-4 ring-1 ring-black/5"
+    style="box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.2), 0 6px 16px -4px rgba(0, 0, 0, 0.1);"
+  >
+    <!-- Bold (B) -->
+    <button 
+      type="button" 
+      onmousedown="event.preventDefault()"
+      onclick="applyActiveFieldFormat('bold')" 
+      class="w-8 h-8 rounded-xl flex items-center justify-center font-serif font-black hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-sm" 
+      title="Tebal (Ctrl + B)"
+    >
+      B
+    </button>
+
+    <!-- Italic (I) -->
+    <button 
+      type="button" 
+      onmousedown="event.preventDefault()"
+      onclick="applyActiveFieldFormat('italic')" 
+      class="w-8 h-8 rounded-xl flex items-center justify-center font-serif italic font-bold hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-sm" 
+      title="Miring (Ctrl + I)"
+    >
+      I
+    </button>
+
+    <!-- Underline (U) -->
+    <button 
+      type="button" 
+      onmousedown="event.preventDefault()"
+      onclick="applyActiveFieldFormat('underline')" 
+      class="w-8 h-8 rounded-xl flex items-center justify-center font-serif underline font-bold hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-sm" 
+      title="Garis Bawah (Ctrl + U)"
+    >
+      U
+    </button>
+
+    <!-- Link (🔗) -->
+    <button 
+      type="button" 
+      onmousedown="event.preventDefault()"
+      onclick="applyActiveFieldFormat('link')" 
+      class="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-zinc-700" 
+      title="Sisipkan Tautan (Ctrl + K)"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+      </svg>
+    </button>
+
+    <!-- Clear Formatting (T̶) -->
+    <button 
+      type="button" 
+      onmousedown="event.preventDefault()"
+      onclick="applyActiveFieldFormat('remove_format')" 
+      class="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-zinc-700" 
+      title="Hapus Format (Ctrl + \ atau Ctrl + Shift + X)"
+    >
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M6 4v3h4.5v13h3V7H18V4H6zm14.7 15.3l-1.4 1.4L4.3 5.7 5.7 4.3l15 15z"></path>
+      </svg>
+    </button>
+
+    <div class="h-4 w-px bg-zinc-200 mx-1"></div>
+
+    <!-- Formula Button with Upward Floating Palette -->
+    <div class="relative">
+      <button 
+        type="button" 
+        onmousedown="event.preventDefault()"
+        onclick="handleActiveFieldMathButtonClick()" 
+        class="px-2.5 h-8 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-mono font-bold flex items-center gap-1.5 transition cursor-pointer text-xs border border-indigo-200/70" 
+        title="Rumus Matematika (Ctrl + M) • Blok teks untuk otomatis ubah, atau klik untuk buka palet simbol"
+      >
+        <span class="text-sm font-extrabold text-indigo-600">∑</span>
+        <span class="text-[11px] font-sans font-semibold">Rumus</span>
+      </button>
+
+      <!-- Upward Floating Math Palette Overlay (Pops up above the bottom bar) -->
+      <div 
+        id="universalFloatingMathPalette" 
+        class="hidden absolute bottom-full mb-3 left-1/2 -translate-x-1/2 z-50 p-3 bg-white/98 backdrop-blur-md rounded-2xl border border-zinc-200 shadow-2xl space-y-2 text-xs w-72 sm:w-80 animate-in fade-in zoom-in-95 duration-150 ring-1 ring-black/5"
+        style="box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.25), 0 8px 18px -4px rgba(0, 0, 0, 0.12);"
+      >
+        <div class="flex items-center justify-between text-[11px] font-semibold text-indigo-950 pb-1.5 border-b border-zinc-100">
+          <span class="flex items-center gap-1 font-bold text-indigo-900">
+            <span class="text-indigo-600 font-extrabold">∑</span> Palet Simbol Cepat:
+          </span>
+          <span class="text-[10px] text-zinc-400 font-mono">Pintasan: Ctrl + M</span>
+          <button type="button" onmousedown="event.preventDefault()" onclick="toggleUniversalFloatingMathPalette()" class="w-5 h-5 rounded-full hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center text-xs transition cursor-pointer">✕</button>
+        </div>
+
+        <div class="grid grid-cols-4 gap-1 text-xs">
+          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('x^2'); toggleUniversalFloatingMathPalette();" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Pangkat Dua">x²</button>
+          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('\\\\sqrt{x}'); toggleUniversalFloatingMathPalette();" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Akar Kuadrat">√x</button>
+          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('\\\\frac{a}{b}'); toggleUniversalFloatingMathPalette();" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Pecahan">a/b</button>
+          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('±'); toggleUniversalFloatingMathPalette();" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Plus Minus">±</button>
+          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('≤'); toggleUniversalFloatingMathPalette();" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Kurang Dari Sama Dengan">≤</button>
+          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('≥'); toggleUniversalFloatingMathPalette();" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Lebih Dari Sama Dengan">≥</button>
+          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('≠'); toggleUniversalFloatingMathPalette();" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Tidak Sama Dengan">≠</button>
+          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('π'); toggleUniversalFloatingMathPalette();" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Pi">π</button>
+        </div>
+
+        <div class="pt-1">
+          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('$...$'); toggleUniversalFloatingMathPalette();" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-mono font-bold text-xs transition cursor-pointer shadow-xs text-center">
+            $ Sisipkan Rumus KaTeX $
+          </button>
+        </div>
+      </div>
+    </div>
+
   </div>
 
 </body>

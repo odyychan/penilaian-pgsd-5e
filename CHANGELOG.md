@@ -4,6 +4,22 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.33] - 2026-08-24
+
+### 🎯 Universal Floating Bottom Toolbar (Overlay Tetap Tengah Bawah Layar)
+- **Desain Floating Toolbar Terpusat (*Persistent Bottom-Center Overlay*):**
+  - Memindahkan seluruh toolbar pemformatan teks dan rumus matematika dari yang sebelumnya menempel pada header tiap-tiap input menjadi **Satu Toolbar Melayang Universal (*Universal Floating Toolbar*)** di tengah paling bawah layar (`fixed bottom-6 left-1/2 -translate-x-1/2 z-50`).
+  - Posisi tetap stabil melayang di atas konten (*overlay* anti tertutup saat scroll), dengan desain *pill-shaped*, efek kaca *backdrop-blur*, bayangan elegan (*shadow-2xl*), dan animasi masuk/keluar yang mulus.
+- **Visibilitas Pintar Berbasis Fokus (*Smart Context-Aware Visibility*):**
+  - Toolbar **hanya tampil saat pengguna aktif mengedit/menulis** pada bagian-bagian formulir di Tab Pertanyaan (`cfg_Judul_Form`, `cfg_Deskripsi_Form`, judul/keterangan tahapan, teks alur, label pertanyaan, opsi jawaban, dll).
+  - Saat fokus dilepas (*blur* / klik di luar kolom formulir) atau berpindah ke tab lain (Setelan, Respons, Kelompok, Sistem), toolbar otomatis menghilang sehingga tampilan formulir tetap bersih, luas, dan rapi tanpa pergeseran layout.
+- **Palet Rumus Terpadu & Interaksi 1-Klik:**
+  - Menekan tombol `∑ Rumus` saat teks diblok akan langsung mengubah teks tersebut menjadi rumus KaTeX, sedangkan jika tanpa teks terpilih akan memunculkan palet rumus melayang ke arah atas (*upward popover*) di atas toolbar.
+- **Pengujian Headless Browser:**
+  - Terverifikasi 100% via remote Playwright browser testing untuk visibilitas dinamis saat fokus, persistensi saat scroll, dan pemformatan teks aktif.
+
+---
+
 ## [2.2.32] - 2026-08-24
 
 ### ⌨️ Pintasan Keyboard (*Keyboard Shortcuts*) Lengkap untuk Toolbar & Rumus
