@@ -4645,7 +4645,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         const contentEl = document.getElementById("simulatorScreenContainer");
         if (contentEl) contentEl.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
-        alert("Simulasi Selesai! Seluruh alur pengisian dari Tahap 1 hingga Tahap " + tahapan.length + " berjalan dengan sempurna.");
+        showAdminToast("Simulasi Selesai! Seluruh alur pengisian dari Tahap 1 hingga Tahap " + tahapan.length + " berjalan lancar.", "success");
         closeLiveFormSimulator();
       }
     }
@@ -5029,18 +5029,26 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       showAdminToast(`Tahap '${stage.title}' berhasil diduplikasi!`, "success");
     }
 
-    function deleteStage(sIdx) {
-      pushUndoSnapshot('Hapus Bagian');
+    async function deleteStage(sIdx) {
       if (adminFormSchema.tahapan.length <= 1) {
-        alert("Formulir wajib memiliki minimal 1 Tahap pengisian.");
+        showAdminToast("Formulir wajib memiliki minimal 1 Bagian pengisian.", "warning");
         return;
       }
       const stage = adminFormSchema.tahapan[sIdx];
-      if (!confirm(`Hapus '${stage.title}' beserta seluruh (${(stage.fields||[]).length}) input di dalamnya?`)) return;
+      const count = (stage.fields || []).length;
+      const ok = await showAppConfirm({
+        title: "Hapus Bagian Formulir?",
+        message: `Apakah Anda yakin ingin menghapus '${stage.title}' beserta seluruh (${count}) pertanyaan di dalamnya?`,
+        confirmText: "Ya, Hapus Bagian",
+        type: "danger"
+      });
+      if (!ok) return;
+
+      pushUndoSnapshot('Hapus Bagian');
       adminFormSchema.tahapan.splice(sIdx, 1);
       renderDynamicStagesCanvas();
       triggerAutoSaveSchema();
-      showAdminToast("Tahap berhasil dihapus.", "info");
+      showAdminToast("Bagian berhasil dihapus.", "info");
     }
 
     // FIELD CRUD ACTIONS
@@ -5148,14 +5156,22 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       triggerAutoSaveSchema();
     }
 
-    function deleteField(sIdx, fIdx) {
+    async function deleteField(sIdx, fIdx) {
+      const f = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
+      if (!f) return;
+      const ok = await showAppConfirm({
+        title: "Hapus Pertanyaan?",
+        message: `Apakah Anda yakin ingin menghapus '${f.label || 'Pertanyaan tanpa judul'}' dari Bagian ${sIdx + 1}?`,
+        confirmText: "Ya, Hapus Pertanyaan",
+        type: "danger"
+      });
+      if (!ok) return;
+
       pushUndoSnapshot('Hapus Pertanyaan');
-      const f = adminFormSchema.tahapan[sIdx].fields[fIdx];
-      if (!confirm(`Hapus input '${f.label}' dari Tahap ${sIdx + 1}?`)) return;
       adminFormSchema.tahapan[sIdx].fields.splice(fIdx, 1);
       renderDynamicStagesCanvas();
       triggerAutoSaveSchema();
-      showAdminToast("Input dihapus.", "info");
+      showAdminToast("Pertanyaan berhasil dihapus.", "info");
     }
 
     // MOVE FIELD ACROSS STAGES
@@ -5241,22 +5257,33 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       triggerAutoSaveSchema();
     }
 
-    function resetToDefaultStandardSchema() {
+    async function resetToDefaultStandardSchema() {
       if (currentFormId === DEFAULT_PRIMARY_FORM_ID) {
-        if (!confirm("Kembalikan formulir ini ke template 4 tahap standar perkuliahan BK 5E?")) return;
+        const ok = await showAppConfirm({
+          title: "Reset ke Standar Perkuliahan?",
+          message: "Kembalikan formulir ini ke template 4 tahap standar perkuliahan PGSD BK 5E?",
+          confirmText: "Ya, Kembalikan Standar",
+          type: "warning"
+        });
+        if (!ok) return;
         adminFormSchema = getDefaultFormSchema(adminAppConfig);
       } else {
-        const choice = confirm("Pilih 'OK' untuk mengosongkan formulir menjadi bersih (0 pertanyaan), atau 'Cancel' untuk memuat template 4 tahap standar BK 5E?");
-        if (choice) {
+        const ok = await showAppConfirm({
+          title: "Kosongkan Formulir?",
+          message: "Apakah Anda ingin mengosongkan formulir ini menjadi bersih (0 pertanyaan)?",
+          confirmText: "Ya, Kosongkan Formulir",
+          type: "warning"
+        });
+        if (ok) {
           adminFormSchema = getBlankFormSchema();
         } else {
-          adminFormSchema = getDefaultFormSchema(adminAppConfig);
+          return;
         }
       }
       recordRevisionSnapshot("Reset Formulir");
       renderDynamicStagesCanvas();
       triggerAutoSaveSchema();
-      showAdminToast("Struktur formulir berhasil direset ke 4-Tahap Standar PGSD.", "info");
+      showAdminToast("Struktur formulir berhasil diperbarui.", "info");
     }
 
     function triggerAutoSaveSchema() {
@@ -5557,7 +5584,13 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }
 
     async function deleteSingleResponse(idRespons, rowIndex) {
-      if (!confirm(`Hapus respons ID '${idRespons}' secara permanen?`)) return;
+      const ok = await showAppConfirm({
+        title: "Hapus Respons Penilaian?",
+        message: `Hapus respons ID '${idRespons}' secara permanen? Data penilaian ini akan dihapus dari sistem.`,
+        confirmText: "Ya, Hapus Respons",
+        type: "danger"
+      });
+      if (!ok) return;
       const targetForm = currentFormId || DEFAULT_PRIMARY_FORM_ID;
       const apiUrl = getApiUrl();
 
@@ -5920,7 +5953,13 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }
 
     async function cloneFormAction(sourceFormId) {
-      if (!confirm(`Kloning susunan kelompok & pengaturan dari form '${sourceFormId}' ke form baru?`)) return;
+      const ok = await showAppConfirm({
+        title: "Kloning Formulir?",
+        message: `Kloning susunan kelompok & pengaturan dari form '${sourceFormId}' ke formulir baru?`,
+        confirmText: "Ya, Kloning Form",
+        type: "info"
+      });
+      if (!ok) return;
       const apiUrl = getApiUrl();
       try {
         const response = await fetch(apiUrl, {
@@ -5994,8 +6033,16 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       showAdminToast("Data kelompok berhasil disimpan (Tersimpan Otomatis).", "success");
     }
 
-    function deleteGroup(gIdx) {
-      if (!confirm(`Hapus ${adminMasterGroups[gIdx].name} beserta seluruh anggotanya?`)) return;
+    async function deleteGroup(gIdx) {
+      const grp = adminMasterGroups[gIdx];
+      if (!grp) return;
+      const ok = await showAppConfirm({
+        title: "Hapus Kelompok?",
+        message: `Hapus '${grp.name}' beserta seluruh anggotanya?`,
+        confirmText: "Ya, Hapus Kelompok",
+        type: "danger"
+      });
+      if (!ok) return;
       adminMasterGroups.splice(gIdx, 1);
       renderMasterGroups();
       triggerAutoSaveMasterData();
@@ -6144,6 +6191,74 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }
 
     // TOAST HELPER
+        // UNIVERSAL IN-APP ACTION CONFIRMATION ENGINE
+    function showAppConfirm({
+      title = "Konfirmasi Tindakan",
+      message = "Apakah Anda yakin ingin melanjutkan tindakan ini?",
+      confirmText = "Ya, Lanjutkan",
+      cancelText = "Batal",
+      type = "danger" // 'danger' | 'warning' | 'info'
+    }) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById("modalAppConfirm");
+        const titleEl = document.getElementById("appConfirmTitle");
+        const msgEl = document.getElementById("appConfirmMessage");
+        const btnOk = document.getElementById("btnAppConfirmOk");
+        const btnCancel = document.getElementById("btnAppConfirmCancel");
+        const iconBox = document.getElementById("appConfirmIconBox");
+
+        if (!modal) {
+          resolve(window.confirm(message));
+          return;
+        }
+
+        if (titleEl) titleEl.textContent = title;
+        if (msgEl) msgEl.textContent = message;
+        if (btnCancel) btnCancel.textContent = cancelText;
+
+        if (btnOk) {
+          btnOk.textContent = confirmText;
+          if (type === 'danger') {
+            btnOk.className = "px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition cursor-pointer shadow-xs";
+            if (iconBox) {
+              iconBox.className = "w-10 h-10 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center shrink-0";
+              iconBox.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>';
+            }
+          } else if (type === 'warning') {
+            btnOk.className = "px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition cursor-pointer shadow-xs";
+            if (iconBox) {
+              iconBox.className = "w-10 h-10 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center shrink-0";
+              iconBox.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>';
+            }
+          } else {
+            btnOk.className = "px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition cursor-pointer shadow-xs";
+            if (iconBox) {
+              iconBox.className = "w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-200 flex items-center justify-center shrink-0";
+              iconBox.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+            }
+          }
+        }
+
+        const cleanup = () => {
+          modal.classList.add("hidden");
+          btnOk.onclick = null;
+          btnCancel.onclick = null;
+        };
+
+        btnOk.onclick = () => {
+          cleanup();
+          resolve(true);
+        };
+
+        btnCancel.onclick = () => {
+          cleanup();
+          resolve(false);
+        };
+
+        modal.classList.remove("hidden");
+      });
+    }
+
     function showAdminToast(msg, type = "info") {
       const container = document.getElementById("floatingToastContainer");
       if (!container) return;
@@ -6466,6 +6581,42 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         </button>
       </div>
 
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: UNIVERSAL IN-APP ACTION CONFIRMATION (ZERO NATIVE BROWSER POPUP) -->
+  <!-- ========================================================================= -->
+  <div id="modalAppConfirm" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-4 transition-all">
+      <div class="flex items-start gap-3.5">
+        <div id="appConfirmIconBox" class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+          </svg>
+        </div>
+        <div class="space-y-1">
+          <h3 id="appConfirmTitle" class="font-bold text-sm sm:text-base text-zinc-900">Konfirmasi Tindakan</h3>
+          <p id="appConfirmMessage" class="text-xs text-zinc-600 leading-relaxed"></p>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-zinc-100">
+        <button 
+          type="button" 
+          id="btnAppConfirmCancel"
+          class="px-4 py-2.5 rounded-xl border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition cursor-pointer"
+        >
+          Batal
+        </button>
+        <button 
+          type="button" 
+          id="btnAppConfirmOk"
+          class="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition cursor-pointer shadow-xs"
+        >
+          Ya, Lanjutkan
+        </button>
+      </div>
     </div>
   </div>
 

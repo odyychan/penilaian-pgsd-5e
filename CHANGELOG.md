@@ -4,6 +4,24 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.6] - 2026-08-24
+
+### 💎 Universal In-App Confirmation Modal Engine (Zero Browser Native Popups)
+- **Penggantian Total Dialog Konfirmasi Bawaan Browser (`confirm()` & `alert()`):**
+  - Menggantikan seluruh popup dialog bawaan browser sistem operasi (*This page says / OK-Cancel*) yang kaku dan mengganggu alur visual dengan **Universal In-App Action Confirmation Modal** modern:
+    - Dilengkapi ikon tematik sesuai level risiko (*danger / warning / info*), judul dialog jelas, penjelasan dampak tindakan, serta tombol aksi (*Batal* vs *Ya, Lanjutkan*).
+    - Latar belakang redup lembut dengan efek blur (*backdrop-blur-xs*) dan transisi animasi halus.
+  - Diterapkan secara menyeluruh pada seluruh tindakan kritis:
+    - Hapus Pertanyaan (*Delete Question*)
+    - Hapus Bagian Formulir (*Delete Section*)
+    - Reset Struktur Formulir ke Standar / Bersih (*Reset Schema*)
+    - Hapus Respons Penilaian (*Delete Response*)
+    - Kloning Formulir (*Clone Form*)
+    - Hapus Data Kelompok (*Delete Group*)
+    - Reset Draf Isian Responden di `index.html` (*Clear Form Draft*)
+
+---
+
 ## [2.2.5] - 2026-08-24
 
 ### 🧠 Smart Contextual Point Label Presets for Linear Scales (Skala Linier Cerdas)
