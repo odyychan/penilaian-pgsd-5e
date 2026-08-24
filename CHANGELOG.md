@@ -4,6 +4,19 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.82] - 2026-08-24
+
+### ⚡ 1-Click Zero-Modal Question & Section Creation (Google Forms Direct Workflow)
+- **Pembuatan Pertanyaan & Bagian 1-Klik Langsung di Kanvas (*Zero-Modal Experience*):**
+  - Menghapus seluruh jendela pop-up / modal konfigurasi yang menyusahkan saat menambah pertanyaan atau bagian.
+  - Mengklik **`+ Tambah Pertanyaan`** kini **langsung menyisipkan kartu pertanyaan baru seketika di kanvas** dengan judul awal *"Pertanyaan tanpa judul"* dan opsi *"○ Opsi 1"*.
+  - Layar otomatis menyorot dan mengaktifkan kursor (*auto-focus & select*) pada kolom judul pertanyaan sehingga admin dapat langsung mengetik, mengganti tipe dari dropdown kartu, atau menambah opsi tanpa jeda.
+  - Mengklik **`+ Tambah Bagian`** kini **langsung menyisipkan kartu bagian baru seketika di kanvas** dan langsung siap diketik judulnya.
+- **Konfigurasi 100% di Tempat (*In-Place Configuration*):**
+  - Seluruh pengaturan cakupan, tipe input, teks opsi, dan parameter pertanyaan dilakukan 100% langsung pada kartu yang bersangkutan tanpa perlu membuka popup terpisah.
+
+---
+
 ## [2.1.81] - 2026-08-24
 
 ### 🚀 Draft vs Published Workflow & Interactive Live Form Simulator
