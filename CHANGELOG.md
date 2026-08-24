@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.99] - 2026-08-24
+
+### 🗑️ Full Form Deletion Feature & Multi-Form Management Lifecycle
+- **Tombol Hapus Formulir pada Master Form Hub:**
+  - Menambahkan tombol aksi hapus (*trash icon*) pada setiap kartu formulir sekunder di Master Form Hub, dengan perlindungan otomatis untuk mencegah penghapusan formulir utama (`BK5E`).
+- **Modal Konfirmasi Penghapusan Aman (`#modalDeleteFormConfirm`):**
+  - Menyediakan modal konfirmasi berlapis dengan visual bahaya (*rose theme*), rincian judul formulir & PIN, serta opsi untuk menghapus sheet database terkait di Google Sheets (Master, Config, Respons, Rekap).
+- **Integrasi Cloud Backend & Zona Bahaya Tab Sistem:**
+  - Menghubungkan proses penghapusan ke fungsi server-side `adminDeleteForm`, membersihkan draf lokal seketika, dan menyediakan tombol hapus di Tab Sistem (*Zona Berbahaya*).
+
+---
+
 ## [2.1.98] - 2026-08-24
 
 ### 📄 Truly Blank Form Initialization (*Zero Default Copying on New Forms*)

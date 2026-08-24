@@ -1106,6 +1106,63 @@
   </div>
 
   <!-- ========================================================================= -->
+  <!-- MODAL: KONFIRMASI HAPUS FORMULIR (DANGER MODAL) -->
+  <!-- ========================================================================= -->
+  <div id="modalDeleteFormConfirm" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-4 fade-enter">
+      
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-bold text-sm sm:text-base text-zinc-900">Hapus Formulir Penilaian?</h3>
+          <p class="text-[11.5px] text-zinc-500">Tindakan ini permanen dan tidak dapat dibatalkan.</p>
+        </div>
+      </div>
+
+      <div class="p-3.5 bg-rose-50/50 rounded-xl border border-rose-200/80 space-y-2 text-xs">
+        <p class="text-zinc-700 font-medium">Anda akan menghapus formulir:</p>
+        <p id="deleteTargetFormTitle" class="font-bold text-zinc-900 text-sm bg-white p-2 rounded-lg border border-rose-200">
+          Judul Form
+        </p>
+        <p class="text-[11px] text-zinc-500 leading-relaxed">
+          Seluruh susunan pertanyaan, data kelompok, dan catatan penilaian pada form ini akan dihapus.
+        </p>
+      </div>
+
+      <label class="flex items-start gap-2 text-xs text-zinc-700 cursor-pointer select-none">
+        <input type="checkbox" id="checkDeleteGoogleSheets" checked class="mt-0.5 w-4 h-4 text-rose-600 rounded cursor-pointer">
+        <span>Hapus juga sheet data terkait di Google Sheets (Master, Config, Respons, Rekap)</span>
+      </label>
+
+      <div class="flex items-center justify-between gap-2.5 pt-3 border-t border-zinc-100">
+        <button 
+          type="button" 
+          onclick="closeDeleteFormModal()" 
+          class="px-4 py-2.5 rounded-xl border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold cursor-pointer transition"
+        >
+          Batal
+        </button>
+        <button 
+          type="button" 
+          id="btnConfirmExecuteDeleteForm"
+          onclick="handleExecuteDeleteForm()" 
+          class="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 active:scale-98 text-white text-xs font-bold shadow-sm flex items-center gap-1.5 cursor-pointer transition"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+          </svg>
+          <span>Ya, Hapus Formulir</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
   <!-- MODAL: BUAT FORMULIR BARU (CREATION WIZARD) -->
   <!-- ========================================================================= -->
   <div id="modalCreateForm" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4">
@@ -2434,28 +2491,41 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
               <span>Kelola Formulir Ini</span>
             </button>
 
-            <div class="grid grid-cols-2 gap-2">
+            <div class="grid ${isPrimary ? 'grid-cols-2' : 'grid-cols-5'} gap-2">
               <button 
                 type="button" 
                 onclick="openShareModal('${fId}')" 
-                class="py-2 px-2.5 rounded-xl border border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300 active:scale-98 text-zinc-700 text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition shadow-2xs"
+                class="${isPrimary ? 'col-span-1' : 'col-span-2'} py-2 px-2.5 rounded-xl border border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300 active:scale-98 text-zinc-700 text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition shadow-2xs"
               >
                 <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
                 </svg>
-                <span>Bagikan (QR)</span>
+                <span>Bagikan</span>
               </button>
 
               <button 
                 type="button" 
                 onclick="cloneFormAction('${fId}')" 
-                class="py-2 px-2.5 rounded-xl border border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300 active:scale-98 text-zinc-700 text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition shadow-2xs"
+                class="${isPrimary ? 'col-span-1' : 'col-span-2'} py-2 px-2.5 rounded-xl border border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300 active:scale-98 text-zinc-700 text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition shadow-2xs"
               >
                 <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path>
                 </svg>
                 <span>Kloning</span>
               </button>
+
+              ${!isPrimary ? `
+              <button 
+                type="button" 
+                onclick="openDeleteFormModal('${fId}', '${encodeURIComponent(fTitle)}')" 
+                class="col-span-1 py-2 px-2 rounded-xl border border-rose-200 bg-rose-50/70 hover:bg-rose-100 hover:border-rose-300 active:scale-98 text-rose-600 text-xs font-bold flex items-center justify-center cursor-pointer transition shadow-2xs"
+                title="Hapus Formulir Ini"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+              </button>
+              ` : ''}
             </div>
           </div>
         `;
@@ -5409,6 +5479,92 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       } finally {
         btn.disabled = false;
         btn.innerHTML = `<span>Buat Formulir Sekarang</span>`;
+      }
+    }
+
+    // =========================================================================
+    // FORM DELETION HANDLERS
+    // =========================================================================
+    let pendingDeleteFormId = null;
+
+    function openDeleteFormModal(formId, encodedTitle) {
+      if (!formId || formId === DEFAULT_PRIMARY_FORM_ID) {
+        showAdminToast("Formulir utama (BK 5E) tidak dapat dihapus.", "error");
+        return;
+      }
+      pendingDeleteFormId = formId;
+      const decodedTitle = decodeURIComponent(encodedTitle || formId);
+      document.getElementById("deleteTargetFormTitle").textContent = `${decodedTitle} (PIN: ${formId})`;
+      document.getElementById("checkDeleteGoogleSheets").checked = true;
+      document.getElementById("modalDeleteFormConfirm").classList.remove("hidden");
+    }
+
+    function closeDeleteFormModal() {
+      pendingDeleteFormId = null;
+      document.getElementById("modalDeleteFormConfirm").classList.add("hidden");
+    }
+
+    async function handleExecuteDeleteForm() {
+      if (!pendingDeleteFormId) return;
+      const formIdToDelete = pendingDeleteFormId;
+      const deleteSheets = document.getElementById("checkDeleteGoogleSheets").checked;
+      const btn = document.getElementById("btnConfirmExecuteDeleteForm");
+      
+      btn.disabled = true;
+      btn.innerHTML = `<span>Menghapus...</span>`;
+
+      const apiUrl = getApiUrl();
+      try {
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "adminDeleteForm",
+            formId: formIdToDelete,
+            deleteSheets: deleteSheets
+          })
+        });
+        const res = await response.json();
+        
+        // Remove local caches
+        localStorage.removeItem(`PGSD_DRAFT_SCHEMA_${formIdToDelete}`);
+        localStorage.removeItem(`PGSD_CACHE_FORM_SCHEMA_${formIdToDelete}`);
+
+        // Update local formsRegistryList
+        formsRegistryList = formsRegistryList.filter(f => (f.formId || DEFAULT_PRIMARY_FORM_ID) !== formIdToDelete);
+        localStorage.setItem("PGSD_CACHE_REGISTRY_FORMS", JSON.stringify(formsRegistryList));
+
+        closeDeleteFormModal();
+        showAdminToast(`Formulir '${formIdToDelete}' berhasil dihapus.`, "success");
+
+        if (currentFormId === formIdToDelete) {
+          returnToMasterHub(true);
+        } else {
+          renderHubFormsGrid();
+        }
+      } catch (err) {
+        // Fallback local cleanup if network error
+        localStorage.removeItem(`PGSD_DRAFT_SCHEMA_${formIdToDelete}`);
+        localStorage.removeItem(`PGSD_CACHE_FORM_SCHEMA_${formIdToDelete}`);
+        formsRegistryList = formsRegistryList.filter(f => (f.formId || DEFAULT_PRIMARY_FORM_ID) !== formIdToDelete);
+        localStorage.setItem("PGSD_CACHE_REGISTRY_FORMS", JSON.stringify(formsRegistryList));
+        
+        closeDeleteFormModal();
+        showAdminToast(`Formulir '${formIdToDelete}' berhasil dihapus dari daftar lokal.`, "info");
+        
+        if (currentFormId === formIdToDelete) {
+          returnToMasterHub(true);
+        } else {
+          renderHubFormsGrid();
+        }
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+          </svg>
+          <span>Ya, Hapus Formulir</span>
+        `;
       }
     }
 
