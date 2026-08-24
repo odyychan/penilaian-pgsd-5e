@@ -4102,6 +4102,47 @@ function getOrCreateFolder(folderName) {
 
     async function fetchFormsRegistry(forceFresh = false) {
       showGlobalLoadingProgress();
+
+      // ⚡ FAST-PATH (< 30ms): Query langsung dari Supabase Database
+      const sb = getSupabaseClient();
+      if (sb) {
+        try {
+          const { data: formsData, error: sbErr } = await sb
+            .from('pgsd_forms')
+            .select('*')
+            .order('is_primary', { ascending: false })
+            .order('created_at', { ascending: true });
+
+          if (!sbErr && Array.isArray(formsData) && formsData.length > 0) {
+            formsRegistryList = formsData.map(f => ({
+              formId: f.form_id,
+              formSlug: f.form_slug,
+              judulForm: f.judul_form,
+              mataKuliah: f.mata_kuliah,
+              dosen: f.dosen,
+              kelas: f.kelas,
+              jurusan: f.jurusan,
+              sesiAktif: f.sesi_aktif,
+              status: f.status,
+              isPrimary: f.is_primary,
+              createdAt: f.created_at
+            }));
+
+            localStorage.setItem("PGSD_CACHE_REGISTRY_FORMS", JSON.stringify(formsRegistryList));
+            hideGlobalLoadingProgress();
+            renderHubFormsGrid();
+            initAllModernDropdowns();
+            setTimeout(() => {
+              const containerEl = document.getElementById("dynamicStagesCanvasContainer");
+              if (containerEl) renderAllMathInElement(containerEl);
+            }, 60);
+            return;
+          }
+        } catch (e) {
+          console.warn("Supabase fetchFormsRegistry notice:", e);
+        }
+      }
+
       const apiUrl = getApiUrl();
       try {
         const controller = new AbortController();

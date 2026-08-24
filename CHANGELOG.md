@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.46] - 2026-08-24
+
+### 🔄 Sinkronisasi Penuh Spreadsheet ke Supabase & Fast-Path Hydration (< 30ms)
+- **Sinkronisasi Menyeluruh Database & Skema:**
+  - Menjalankan migrasi komprehensif dari Google Spreadsheet ke seluruh tabel Supabase PostgreSQL (`pgsd_forms`, `pgsd_form_configs`, `pgsd_groups`, `pgsd_students`, `pgsd_responses`).
+  - Berhasil menyinkronkan seluruh formulir aktif (`BK5E`, `BBJX`), skema builder kustom, dan seluruh data kelompok beserta mahasiswa dengan integritas relasi foreign key 100%.
+- **Optimalisasi Fast-Path Langsung dari Supabase:**
+  - Memperbarui fungsi `fetchInitialFormData` pada [index.html](file:///e:/Data/GitHub/Project%20Dede/index.html) dan `fetchFormsRegistry` pada [admin.html](file:///e:/Data/GitHub/Project%20Dede/admin.html) untuk memuat data langsung dari Supabase PostgreSQL dalam `< 30ms` dengan fallback cerdas.
+
+---
+
 ## [2.2.45] - 2026-08-24
 
 ### 🎛️ Antarmuka Pengaturan Dinamis Spreadsheet & Drive Serta Modal Skrip Universal

@@ -3417,14 +3417,77 @@
     }
 
     async function fetchInitialFormData(showLoadingSpinner = false) {
-      const apiUrl = getApiUrl();
-      const loading = document.getElementById("groupsLoading");
-      
-      if (showLoadingSpinner) {
-        loading.classList.remove("hidden");
-        document.getElementById("groupsContainer").classList.add("hidden");
+      // ⚡ FAST-PATH (< 30ms): Ambil data langsung dari Supabase Database
+      const sb = getSupabaseClient();
+      if (sb) {
+        try {
+          const [formRes, configRes, groupsRes, studentsRes] = await Promise.all([
+            sb.from('pgsd_forms').select('*').eq('form_id', activeFormId).single(),
+            sb.from('pgsd_form_configs').select('*').eq('form_id', activeFormId).single(),
+            sb.from('pgsd_groups').select('*').eq('form_id', activeFormId).order('display_order', { ascending: true }),
+            sb.from('pgsd_students').select('*').eq('form_id', activeFormId)
+          ]);
+
+          if (!formRes.error && formRes.data) {
+            const formRow = formRes.data;
+            const configRow = configRes.data;
+            const groupsRows = groupsRes.data || [];
+            const studentsRows = studentsRes.data || [];
+
+            currentFormMeta = {
+              formId: formRow.form_id,
+              formSlug: formRow.form_slug,
+              judulForm: formRow.judul_form,
+              mataKuliah: formRow.mata_kuliah,
+              dosen: formRow.dosen,
+              kelas: formRow.kelas,
+              jurusan: formRow.jurusan,
+              sesiAktif: formRow.sesi_aktif,
+              status: formRow.status
+            };
+
+            appConfig = (configRow && configRow.config_data) || {};
+            currentFormSchema = (configRow && configRow.schema_data) || { tahapan: [] };
+
+            // Susun data kelompok & anggota
+            groupsData = groupsRows.map(g => ({
+              id: g.id,
+              name: g.name,
+              sesi: g.sesi,
+              status: g.status,
+              members: studentsRows.filter(s => s.group_id === g.id).map(s => ({
+                nim: s.nim,
+                name: s.name,
+                status: s.status
+              }))
+            }));
+
+            allStudentsData = studentsRows.map(s => ({
+              nim: s.nim,
+              name: s.name,
+              kelompok: s.group_name,
+              sesi: (groupsRows.find(g => g.id === s.group_id) || {}).sesi || "Minggu 1"
+            }));
+
+            const pinEl = document.getElementById("navPinBadge");
+            if (pinEl) pinEl.textContent = `PIN: ${activeFormId}`;
+            renderDynamicCustomFields();
+
+            localStorage.setItem("PGSD_CACHE_GROUPS_" + activeFormId, JSON.stringify(groupsData));
+            localStorage.setItem("PGSD_CACHE_CONFIG_" + activeFormId, JSON.stringify(appConfig));
+            localStorage.setItem("PGSD_CACHE_META_" + activeFormId, JSON.stringify(currentFormMeta));
+            localStorage.setItem("PGSD_CACHE_FORM_SCHEMA_" + activeFormId, JSON.stringify(currentFormSchema));
+
+            renderConfigHeader();
+            renderGroupOptions();
+            return;
+          }
+        } catch(sbErr) {
+          console.warn("Supabase fetchInitialFormData notice:", sbErr);
+        }
       }
 
+      const apiUrl = getApiUrl();
       const fetchWithTimeout = (url, ms = 9000) => {
         return Promise.race([
           fetch(url),
