@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.86] - 2026-08-24
+
+### 🧹 Form Builder Simplification, Natural Human Text & "Judul & Deskripsi Teks" Block
+- **Penyederhanaan Total Alur Form Builder (*Clean & Minimalist Google Forms Style*):**
+  - Membersihkan toolbar header Form Builder dari tombol-tombol template yang membingungkan, menyisakan hanya 4 aksi utama yang jelas dan terarah: **`🚀 Publikasikan`**, **`👁️ Pratinjau`**, **`+ Pertanyaan`**, dan **`+ Bagian`**.
+  - Alur vertikal kanvas menjadi lebih lapang, bersih, dan sangat mudah dipahami pengguna awam.
+- **Tipe Komponen Baru: `📄 Judul & Deskripsi Teks` (*Informational Text Block*):**
+  - Menyediakan blok teks panduan/informasi kustom (bukan pertanyaan responden).
+  - Admin dapat mengisi judul panduan dan deskripsi penjelasan yang tampil rapi di formulir mahasiswa tanpa kolom isian jawaban.
+- **Audit & Perombakan Teks Alami (*Natural Human Tone*):**
+  - Mengganti seluruh kalimat kaku / berbau *AI-generated* dengan bahasa Indonesia yang sederhana, komunikatif, dan langsung ke sasaran.
+
+---
+
 ## [2.1.85] - 2026-08-24
 
 ### 📐 Popover Overflow Fix, Internal Smooth Scroll & Smart Viewport Positioning

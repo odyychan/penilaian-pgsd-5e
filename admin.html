@@ -480,7 +480,7 @@
             <span class="text-[10px] sm:text-xs font-bold text-zinc-500 uppercase tracking-wider font-mono">Sesi Tampil Minggu Ini</span>
           </div>
           <div class="flex items-center gap-1.5 flex-wrap">
-            <span class="text-xs sm:text-sm font-semibold text-zinc-700">Sesi aktif saat ini di formulir:</span>
+            <span class="text-xs sm:text-sm font-semibold text-zinc-700">Sesi Aktif Pekan Ini:</span>
             <span id="labelCurrentActiveSesi" class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-300 font-mono font-bold text-xs sm:text-sm">Minggu 1</span>
           </div>
           <p class="text-[11px] sm:text-xs text-zinc-400">Menentukan kelompok yang tampil di formulir penilaian mahasiswa. <em>Tersimpan otomatis seketika.</em></p>
@@ -622,7 +622,7 @@
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 pb-3.5">
             <div>
               <h2 class="text-sm sm:text-base font-bold text-zinc-900">Pengaturan Perkuliahan &amp; Form Builder</h2>
-              <p class="text-[11px] sm:text-xs text-zinc-500 mt-0.5">Pemetaan seluruh struktur formulir (pertanyaan inti &amp; kustom) serta identitas akademik.</p>
+              <p class="text-[11px] sm:text-xs text-zinc-500 mt-0.5">Atur informasi perkuliahan dan susunan pertanyaan formulir di sini.</p>
             </div>
             <div class="flex items-center gap-2">
               <span class="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold flex items-center gap-1.5">
@@ -743,92 +743,87 @@
             </div>
           </div>
 
-          <!-- Section 3: DYNAMIC STAGE & FIELD FORM BUILDER CANVAS -->
+          <!-- Section 3: Clean & Modern Form Builder Header -->
           <div class="space-y-4 pt-4 border-t border-zinc-100">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-zinc-900 text-white p-5 sm:p-6 rounded-2xl border border-zinc-800 shadow-sm">
-              <div class="space-y-1.5 min-w-0 flex-1">
-                <div class="flex items-center gap-2 flex-wrap">
-                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-indigo-500/30 text-indigo-300 border border-indigo-500/40">
-                    Form Builder 100% Google Forms Style
-                  </span>
-                  <span id="builderStatsBadge" class="text-xs text-zinc-300 font-mono">
-                    4 Bagian • 5 Pertanyaan
-                  </span>
-                  <div id="builderPublishStatusBadge" class="inline-flex">
-                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
-                      <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                      Form Terpublikasi &amp; Aktif
+            <div class="bg-white rounded-2xl border border-zinc-200 p-5 sm:p-6 shadow-xs space-y-4">
+              
+              <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-100 pb-4">
+                <div class="space-y-1.5">
+                  <div class="flex items-center gap-2.5 flex-wrap">
+                    <h3 class="text-base sm:text-lg font-bold text-zinc-900">Susunan Pertanyaan Formulir</h3>
+                    <span id="builderStatsBadge" class="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-zinc-100 text-zinc-700 border border-zinc-200">
+                      4 Bagian • 5 Pertanyaan
+                    </span>
+                    <span id="builderPublishStatusBadge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                      <span>Form Aktif</span>
                     </span>
                   </div>
+                  <p class="text-xs text-zinc-500 leading-relaxed">
+                    Atur urutan pertanyaan dan tahap penilaian di bawah ini. Perubahan tersimpan di draf sebelum Anda publikasikan.
+                  </p>
                 </div>
-                <h3 class="text-sm sm:text-base font-bold text-white tracking-tight">Form Builder Dinamis • Bagian &amp; Komponen Pertanyaan</h3>
-                <p class="text-[11.5px] text-zinc-400 leading-relaxed max-w-2xl">
-                  Rancang struktur formulir secara bebas. Perubahan tersimpan sebagai <strong>Draf</strong> dan tidak langsung tayang ke mahasiswa sampai Anda menekan tombol <strong>Publikasikan</strong>.
-                </p>
+
+                <!-- 4 Simple & Direct Action Buttons -->
+                <div class="flex items-center gap-2 flex-wrap shrink-0">
+                  <button 
+                    type="button" 
+                    onclick="publishFormSchema()" 
+                    id="btnPublishSchema"
+                    class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-98 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition cursor-pointer"
+                    title="Publikasikan draf agar resmi tayang ke mahasiswa"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                    <span>Publikasikan</span>
+                  </button>
+
+                  <button 
+                    type="button" 
+                    onclick="openLiveFormSimulator()" 
+                    class="px-3.5 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 active:scale-98 text-zinc-100 text-xs font-semibold shadow-xs flex items-center gap-1.5 transition cursor-pointer"
+                    title="Buka simulasi pratinjau formulir mahasiswa"
+                  >
+                    <svg class="w-4 h-4 text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    <span>Pratinjau</span>
+                  </button>
+
+                  <button 
+                    type="button" 
+                    onclick="addNewQuestionDirect(adminFormSchema ? adminFormSchema.tahapan.length - 1 : 0)" 
+                    class="px-3.5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-98 text-white text-xs font-semibold shadow-xs flex items-center gap-1.5 transition cursor-pointer"
+                    title="Tambah pertanyaan baru"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                    <span>+ Pertanyaan</span>
+                  </button>
+
+                  <button 
+                    type="button" 
+                    onclick="addNewStageDirect()" 
+                    class="px-3.5 py-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 active:scale-98 text-zinc-800 border border-zinc-200 text-xs font-semibold shadow-xs flex items-center gap-1.5 transition cursor-pointer"
+                    title="Tambah tahap bagian baru"
+                  >
+                    <svg class="w-4 h-4 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    <span>+ Bagian</span>
+                  </button>
+                </div>
               </div>
 
-              <!-- Main Action Buttons -->
-              <div class="flex items-center gap-2 flex-wrap shrink-0">
+              <!-- Minimal Sub-bar with Reset Option -->
+              <div class="flex items-center justify-between text-xs text-zinc-400">
+                <span>Klik kartu di bawah untuk mengubah teks atau tipe input langsung di tempat.</span>
                 <button 
                   type="button" 
-                  onclick="publishFormSchema()" 
-                  id="btnPublishSchema"
-                  class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold shadow-md flex items-center gap-2 transition active:scale-98 cursor-pointer"
-                  title="Publikasikan draf agar resmi tayang ke mahasiswa"
+                  onclick="resetToDefaultStandardSchema()" 
+                  class="text-zinc-400 hover:text-rose-600 transition cursor-pointer flex items-center gap-1"
+                  title="Kembalikan ke 4 tahap standar"
                 >
-                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                  <span> Publikasikan Perubahan</span>
-                </button>
-
-                <button 
-                  type="button" 
-                  onclick="openLiveFormSimulator()" 
-                  class="px-3.5 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-xs font-semibold border border-zinc-700 shadow-xs flex items-center gap-1.5 transition active:scale-98 cursor-pointer"
-                  title="Buka simulasi interaktif alur formulir mahasiswa"
-                >
-                  <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                  <span>Pratinjau Form Langsung</span>
-                </button>
-
-                <button 
-                  type="button" 
-                  onclick="addNewStageDirect()" 
-                  class="px-3 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-xs flex items-center gap-1 transition active:scale-98 cursor-pointer"
-                  title="Tambah Bagian Baru langsung ke formulir"
-                >
-                  <span>+ Tambah Bagian</span>
-                </button>
-                <button 
-                  type="button" 
-                  onclick="addNewQuestionDirect(adminFormSchema ? adminFormSchema.tahapan.length - 1 : 0)" 
-                  class="px-3 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold border border-zinc-700 shadow-xs flex items-center gap-1 transition active:scale-98 cursor-pointer"
-                  title="Tambah Pertanyaan Baru langsung ke formulir"
-                >
-                  <span>+ Tambah Pertanyaan</span>
+                  <span>↺ Reset Standar</span>
                 </button>
               </div>
+
             </div>
-
-            <!-- Quick Template Presets Bar -->
-            <div class="p-3 rounded-xl bg-zinc-50 border border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-              <div class="flex items-center gap-1.5 text-zinc-700 font-semibold">
-                <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                </svg>
-                <span>Aksi &amp; Template Instan Cepat:</span>
-              </div>
-              <div class="flex items-center gap-1.5 flex-wrap">
-                <button type="button" onclick="addStagePreset('REFLEKSI_UPLOAD')" class="px-2.5 py-1 rounded-md bg-white border border-zinc-300 text-zinc-800 hover:border-zinc-500 text-[11px] font-medium transition cursor-pointer">
-                  + Tahap Refleksi &amp; Upload Berkas
-                </button>
-                <button type="button" onclick="addStagePreset('RUBRIK_QNA')" class="px-2.5 py-1 rounded-md bg-white border border-zinc-300 text-zinc-800 hover:border-zinc-500 text-[11px] font-medium transition cursor-pointer">
-                  + Input Rubrik Tanya Jawab (1-5)
-                </button>
-                <button type="button" onclick="resetToDefaultStandardSchema()" class="px-2.5 py-1 rounded-md bg-white border border-rose-200 text-rose-700 hover:bg-rose-50 text-[11px] font-medium transition cursor-pointer">
-                  ↺ Reset 4-Tahap Standar PGSD
-                </button>
-              </div>
-            </div>
+          </div>
 
             <!-- DYNAMIC STAGES CANVAS CONTAINER -->
             <div id="dynamicStagesCanvasContainer" class="space-y-4 pt-1">
@@ -2537,13 +2532,13 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           {
             id: "tahap_1",
             title: "Identitas & Akses Penilai",
-            description: "Lengkapi data identitas diri penilai sebelum memulai penilaian.",
+            description: "Isi identitas diri Anda sebelum menilai.",
             fields: [
               {
                 id: "fld_core_identity",
                 type: "CORE_IDENTITY",
                 label: "Identitas Penilai (Peran, NIM, Nama Lengkap, Email Kampus)",
-                description: "Merekam data penilai dan memvalidasi alamat email resmi mahasiswa serta format NIM.",
+                description: "Data identitas penilai (peran, NIM, nama, dan email resmi).",
                 required: true,
                 scope: "GLOBAL",
                 config: {
@@ -2555,13 +2550,13 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           {
             id: "tahap_2",
             title: "Pemilihan Kelompok Presentator",
-            description: "Pilih salah satu kelompok yang sedang presentasi di depan kelas.",
+            description: "Pilih kelompok yang sedang presentasi.",
             fields: [
               {
                 id: "fld_core_group",
                 type: "CORE_GROUP_SELECT",
                 label: "Pemilihan Kelompok Presentator Tampil",
-                description: "Menampilkan daftar kelompok yang tampil pada sesi aktif minggu ini. Terhubung otomatis dengan data kelompok.",
+                description: "Pilihan kelompok presentator yang tampil pada sesi aktif.",
                 required: true,
                 scope: "GLOBAL",
                 config: {}
@@ -2571,7 +2566,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           {
             id: "tahap_3",
             title: "Skor Rubrik & Voting Presentator",
-            description: "Penilaian performa materi presentasi dan pemilihan pemateri terbaik.",
+            description: "Berikan nilai presentasi dan pilih pemateri terbaik.",
             fields: [
               {
                 id: "fld_core_score",
@@ -2589,7 +2584,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
                 id: "fld_core_voting",
                 type: "CORE_BEST_PRESENTER",
                 label: "Pemilihan Presentator Terbaik",
-                description: "Pemilihan anggota pemateri terbaik per kelompok dengan sistem checklist voting.",
+                description: "Voting pemilihan pemateri terbaik per kelompok.",
                 required: true,
                 scope: "GLOBAL",
                 config: {
@@ -2601,13 +2596,13 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           {
             id: "tahap_4",
             title: "Evaluasi Masukan Kualitatif",
-            description: "Tuliskan masukan dan tanggapan objektif untuk setiap anggota pemateri kelompok.",
+            description: "Tuliskan masukan apresiasi dan catatan untuk pemateri.",
             fields: [
               {
                 id: "fld_core_feedback",
                 type: "CORE_MEMBER_FEEDBACK",
                 label: "Evaluasi Masukan Kualitatif Tiap Pemateri",
-                description: "Kolom ulasan tertulis terpisah untuk setiap anggota pemateri kelompok.",
+                description: "Ulasan kualitatif untuk setiap anggota pemateri kelompok.",
                 required: true,
                 scope: "PER_KELOMPOK",
                 config: {
@@ -2836,7 +2831,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     // =========================================================================
     const QUESTION_TYPES_DEF = [
       {
-        category: "Tipe Pertanyaan Standar",
+        category: "Tipe Pertanyaan & Teks",
         items: [
           { type: "RADIO", label: "Pilihan Ganda", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="2"></circle><circle cx="12" cy="12" r="4" fill="currentColor"></circle></svg>` },
           { type: "CHECKBOX", label: "Kotak Centang", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>` },
@@ -2844,7 +2839,8 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           { type: "SHORT_TEXT", label: "Jawaban Singkat", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h10M4 18h6"></path></svg>` },
           { type: "TEXTAREA", label: "Paragraf / Ulasan", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h10"></path></svg>` },
           { type: "RATING_SCALE", label: "Skala Linier (1–5)", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>` },
-          { type: "FILE_UPLOAD", label: "Upload Berkas Drive", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>` },
+          { type: "FILE_UPLOAD", label: "Upload Berkas", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>` },
+          { type: "TITLE_DESC", label: "Judul & Deskripsi Teks", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>` },
         ]
       },
       {
@@ -3025,6 +3021,19 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }
 
     function getGoogleFormsVisualBodyHtml(f, sIdx, fIdx) {
+      // 0. TITLE_DESC / BLOK INFORMASI TEKS SAJA
+      if (f.type === 'TITLE_DESC') {
+        return `
+          <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 text-xs text-zinc-600 space-y-1">
+            <div class="flex items-center gap-1.5 text-indigo-700 font-bold">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <span>Blok Informasi / Panduan Bebas</span>
+            </div>
+            <p class="text-[11px] text-zinc-500">Teks judul dan deskripsi di atas akan tampil sebagai petunjuk bagi responden tanpa kolom isian jawaban.</p>
+          </div>
+        `;
+      }
+
       const scoreMin = adminAppConfig["Nilai_Kelompok_Min"] || 50;
       const scoreMax = adminAppConfig["Nilai_Kelompok_Max"] || 100;
       const votingMax = adminAppConfig["Maksimal_Pilihan_Presentator_Terbaik"] || 2;
@@ -3196,7 +3205,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
             <input 
               type="text" 
               value="${f.placeholder || ''}" 
-              placeholder="Ketik contoh placeholder teks bantuan jawaban..."
+              placeholder="Contoh teks bantuan jawaban..."
               oninput="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'placeholder', this.value)"
               class="w-full sm:w-3/4 px-3 py-2 rounded-lg border border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 text-xs text-zinc-800 bg-white outline-none transition shadow-2xs"
             >
@@ -3214,7 +3223,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
             <input 
               type="text" 
               value="${f.placeholder || ''}" 
-              placeholder="Ketik contoh placeholder teks bantuan ulasan/paragraf..."
+              placeholder="Contoh teks bantuan ulasan..."
               oninput="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'placeholder', this.value)"
               class="w-full px-3 py-2 rounded-lg border border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 text-xs text-zinc-800 bg-white outline-none transition shadow-2xs"
             >
@@ -3250,7 +3259,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
               <input 
                 type="text" 
                 value="${currentLabel}" 
-                placeholder="Keterangan teks untuk nilai ${i} (contoh: ${i === 1 ? 'Sangat Kurang' : (i === maxV ? 'Sangat Baik' : 'Cukup')})..."
+                placeholder="Label teks nilai ${i} (contoh: ${i === 1 ? 'Sangat Kurang' : (i === maxV ? 'Sangat Baik' : 'Cukup')})..."
                 oninput="handleInlineScalePointLabelUpdate(${sIdx}, ${fIdx}, '${i}', this.value)"
                 class="flex-1 px-3 py-1.5 rounded-lg border border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 bg-white text-xs text-zinc-800 outline-none transition shadow-2xs"
               >

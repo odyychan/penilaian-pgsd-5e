@@ -1686,6 +1686,20 @@
     }
 
     function renderSingleCustomField(field, parentEl) {
+      // 0. TITLE_DESC (BLOK INFORMASI / PANDUAN NON-PERTANYAAN)
+      if (field.type === 'TITLE_DESC') {
+        wrapper.className = "bg-indigo-50/60 p-4 sm:p-5 rounded-2xl border border-indigo-100 space-y-1.5";
+        wrapper.innerHTML = `
+          <div class="flex items-center gap-2 text-indigo-900 font-bold text-xs sm:text-sm">
+            <svg class="w-4 h-4 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span>${field.label}</span>
+          </div>
+          ${field.description ? `<p class="text-xs text-indigo-950/80 leading-relaxed">${field.description}</p>` : ''}
+        `;
+        parentEl.appendChild(wrapper);
+        return;
+      }
+
       const wrapper = document.createElement("div");
       wrapper.className = "space-y-2 text-xs bg-zinc-50/50 p-3.5 sm:p-4 rounded-xl border border-zinc-200";
       const reqBadge = field.required ? '<span class="text-rose-500 font-bold text-sm">*</span>' : '';
