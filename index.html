@@ -215,9 +215,21 @@
         </div>
       </div>
 
-      <!-- Sesi Pill -->
-      <div class="flex items-center gap-2 flex-shrink-0">
-        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-[11px] font-medium" id="badgeSesiTop">
+      <!-- PIN Badge & Sesi Pill -->
+      <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+        <button 
+          type="button" 
+          onclick="openSwitchFormModal()" 
+          title="Ganti Formulir / Masukkan Kode PIN (4-5 Karakter)" 
+          class="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-full bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-700/80 text-indigo-300 hover:text-white text-[10px] sm:text-[11px] font-mono font-bold transition cursor-pointer active:scale-95 shadow-xs"
+        >
+          <svg class="w-3 h-3 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+          </svg>
+          <span id="navPinBadge">PIN: BK5E</span>
+        </button>
+
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-[10px] sm:text-[11px] font-medium" id="badgeSesiTop">
           <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
           <span id="badgeSesiTopText">Minggu 1</span>
         </div>
@@ -738,6 +750,11 @@
             </div>
           </div>
 
+          <!-- 3C: Dynamic Custom Questions (Rubrik Per Kelompok) -->
+          <div id="perKelompokCustomFieldsContainer" class="hidden space-y-4">
+            <!-- Rendered dynamically -->
+          </div>
+
           <!-- Section 3 Actions -->
           <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
             <button 
@@ -785,6 +802,11 @@
             <!-- List Textarea Dynamic Inputs (Responsive 2-Column Grid on Laptop) -->
             <div id="evaluationInputsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <!-- Dynamic Member Feedback Textareas -->
+            </div>
+
+            <!-- Dynamic Custom Questions (Global Form Fields & Uploads) -->
+            <div id="globalCustomFieldsContainer" class="hidden space-y-4 pt-2">
+              <!-- Rendered dynamically -->
             </div>
 
             <!-- Summary Review Box -->
@@ -1522,6 +1544,13 @@
       return localStorage.getItem("PGSD_API_URL") || DEFAULT_API_URL;
     }
 
+    // Multi-Form & Dynamic Questions State
+    const urlParams = new URLSearchParams(window.location.search);
+    let activeFormId = (urlParams.get('id') || urlParams.get('form') || localStorage.getItem('PGSD_ACTIVE_CLIENT_FORM_ID') || 'BK5E').toUpperCase();
+    let currentFormMeta = null;
+    let customFieldsData = [];
+    let customUploadedFilesMap = {};
+
     let currentStep = 1;
     let appConfig = {};
     let groupsData = [];
@@ -1559,6 +1588,224 @@
       // Inisialisasi Sinkronisasi Real-Time 2 Arah
       initRealtimeSyncEngine();
     });
+
+
+    // =========================================================================
+    // MULTI-FORM PIN SWITCHER & DYNAMIC CUSTOM FIELDS ENGINE
+    // =========================================================================
+    function openSwitchFormModal() {
+      const pinInput = document.getElementById("inputSwitchFormPin");
+      if (pinInput) pinInput.value = activeFormId;
+      document.getElementById("modalSwitchForm").classList.remove("hidden");
+    }
+
+    function closeSwitchFormModal() {
+      document.getElementById("modalSwitchForm").classList.add("hidden");
+    }
+
+    function handleSwitchFormSubmit(e) {
+      e.preventDefault();
+      const pin = document.getElementById("inputSwitchFormPin").value.trim().toUpperCase();
+      if (!pin) return;
+      localStorage.setItem("PGSD_ACTIVE_CLIENT_FORM_ID", pin);
+      localStorage.removeItem("PGSD_FORM_DRAFT");
+      window.location.href = `/?id=${encodeURIComponent(pin)}`;
+    }
+
+    function renderDynamicCustomFields() {
+      const pkContainer = document.getElementById("perKelompokCustomFieldsContainer");
+      const globContainer = document.getElementById("globalCustomFieldsContainer");
+      
+      if (pkContainer) pkContainer.innerHTML = "";
+      if (globContainer) globContainer.innerHTML = "";
+
+      if (!customFieldsData || customFieldsData.length === 0) {
+        if (pkContainer) pkContainer.classList.add("hidden");
+        if (globContainer) globContainer.classList.add("hidden");
+        return;
+      }
+
+      const pkFields = customFieldsData.filter(f => f.scope === 'PER_KELOMPOK');
+      const globFields = customFieldsData.filter(f => f.scope !== 'PER_KELOMPOK');
+
+      if (pkFields.length > 0 && pkContainer) {
+        pkContainer.classList.remove("hidden");
+        pkContainer.innerHTML = `
+          <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-4">
+            <div class="border-b border-zinc-100 pb-3">
+              <h2 class="text-base sm:text-lg font-bold text-zinc-900">Rubrik Tambahan Kelompok</h2>
+              <p class="text-xs text-zinc-500 mt-0.5">Penilaian spesifik untuk performa kelompok terpilih.</p>
+            </div>
+            <div id="pkFieldsInputsList" class="space-y-4"></div>
+          </div>
+        `;
+        const list = document.getElementById("pkFieldsInputsList");
+        pkFields.forEach(f => renderSingleCustomField(f, list));
+      } else if (pkContainer) {
+        pkContainer.classList.add("hidden");
+      }
+
+      if (globFields.length > 0 && globContainer) {
+        globContainer.classList.remove("hidden");
+        globContainer.innerHTML = `
+          <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-4">
+            <div class="border-b border-zinc-100 pb-3">
+              <h2 class="text-base sm:text-lg font-bold text-zinc-900">Pertanyaan &amp; Lampiran Tambahan</h2>
+              <p class="text-xs text-zinc-500 mt-0.5">Lengkapi isian dan lampiran dokumen yang diperlukan.</p>
+            </div>
+            <div id="globFieldsInputsList" class="space-y-4"></div>
+          </div>
+        `;
+        const list = document.getElementById("globFieldsInputsList");
+        globFields.forEach(f => renderSingleCustomField(f, list));
+      } else if (globContainer) {
+        globContainer.classList.add("hidden");
+      }
+    }
+
+    function renderSingleCustomField(field, parentEl) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "space-y-1.5 text-xs";
+      const reqBadge = field.required ? '<span class="text-rose-500 font-bold">*</span>' : '';
+
+      if (field.type === 'SHORT_TEXT') {
+        wrapper.innerHTML = `
+          <label class="block font-semibold text-zinc-700">${field.label} ${reqBadge}</label>
+          <input 
+            type="text" 
+            id="cust_${field.id}" 
+            ${field.required ? 'required' : ''} 
+            placeholder="Tuliskan jawaban..." 
+            class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none"
+          >
+        `;
+      } else if (field.type === 'TEXTAREA') {
+        wrapper.innerHTML = `
+          <label class="block font-semibold text-zinc-700">${field.label} ${reqBadge}</label>
+          <textarea 
+            id="cust_${field.id}" 
+            rows="3" 
+            ${field.required ? 'required' : ''} 
+            placeholder="Tuliskan ulasan atau penjelasan..." 
+            class="w-full p-3 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none"
+          ></textarea>
+        `;
+      } else if (field.type === 'RATING_SCALE') {
+        const minVal = field.minVal || 1;
+        const maxVal = field.maxVal || 5;
+        let buttons = '';
+        for (let i = minVal; i <= maxVal; i++) {
+          buttons += `
+            <label class="flex-1 text-center p-2.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 cursor-pointer transition">
+              <input type="radio" name="cust_${field.id}" value="${i}" ${i === Math.ceil((minVal+maxVal)/2) ? 'checked' : ''} class="sr-only peer">
+              <span class="block font-mono font-bold text-sm text-zinc-700 peer-checked:text-indigo-600 peer-checked:font-extrabold">${i}</span>
+            </label>
+          `;
+        }
+        wrapper.innerHTML = `
+          <div class="flex items-center justify-between">
+            <label class="block font-semibold text-zinc-700">${field.label} ${reqBadge}</label>
+            <span class="text-[10px] text-zinc-400 font-mono">Skala ${minVal}-${maxVal}</span>
+          </div>
+          <div class="flex items-center gap-1.5 pt-1">
+            ${buttons}
+          </div>
+        `;
+      } else if (field.type === 'RADIO') {
+        const opts = (field.options || []).map((opt, oIdx) => `
+          <label class="flex items-center gap-2 p-2 rounded-lg border border-zinc-200 hover:bg-zinc-50 cursor-pointer">
+            <input type="radio" name="cust_${field.id}" value="${opt}" ${oIdx === 0 && field.required ? 'checked' : ''} class="text-zinc-900">
+            <span class="text-zinc-800">${opt}</span>
+          </label>
+        `).join("");
+        wrapper.innerHTML = `
+          <label class="block font-semibold text-zinc-700">${field.label} ${reqBadge}</label>
+          <div class="space-y-1.5 pt-1">${opts}</div>
+        `;
+      } else if (field.type === 'CHECKBOX') {
+        const opts = (field.options || []).map(opt => `
+          <label class="flex items-center gap-2 p-2 rounded-lg border border-zinc-200 hover:bg-zinc-50 cursor-pointer">
+            <input type="checkbox" name="cust_${field.id}" value="${opt}" class="rounded text-zinc-900">
+            <span class="text-zinc-800">${opt}</span>
+          </label>
+        `).join("");
+        wrapper.innerHTML = `
+          <label class="block font-semibold text-zinc-700">${field.label} ${reqBadge}</label>
+          <div class="space-y-1.5 pt-1">${opts}</div>
+        `;
+      } else if (field.type === 'FILE_UPLOAD') {
+        wrapper.innerHTML = `
+          <label class="block font-semibold text-zinc-700">${field.label} ${reqBadge}</label>
+          <div class="p-3 bg-zinc-50 rounded-xl border border-zinc-200 space-y-2">
+            <input 
+              type="file" 
+              id="cust_${field.id}" 
+              accept=".pdf,image/*,.pptx" 
+              onchange="handleClientFileUpload('${field.id}', this)" 
+              class="w-full text-xs text-zinc-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-zinc-900 file:text-white hover:file:bg-zinc-800 cursor-pointer"
+            >
+            <p id="cust_file_status_${field.id}" class="text-[10px] text-zinc-400">Format didukung: PDF, PPTX, JPG, PNG (Maks 5 MB).</p>
+          </div>
+        `;
+      }
+
+      parentEl.appendChild(wrapper);
+    }
+
+    function handleClientFileUpload(fieldId, fileInput) {
+      const file = fileInput.files && fileInput.files[0];
+      const statusEl = document.getElementById(`cust_file_status_${fieldId}`);
+      if (!file) {
+        delete customUploadedFilesMap[fieldId];
+        if (statusEl) statusEl.textContent = "Format didukung: PDF, PPTX, JPG, PNG (Maks 5 MB).";
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Ukuran berkas melebihi batas maksimal 5 MB!");
+        fileInput.value = "";
+        delete customUploadedFilesMap[fieldId];
+        return;
+      }
+
+      if (statusEl) statusEl.textContent = `Membaca ${file.name} (${Math.round(file.size/1024)} KB)...`;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64Data = e.target.result;
+        customUploadedFilesMap[fieldId] = {
+          name: file.name,
+          type: file.type || "application/octet-stream",
+          base64: base64Data
+        };
+        if (statusEl) statusEl.textContent = `✓ Berkas '${file.name}' siap diunggah ke Google Drive.`;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function collectCustomFieldsAnswers() {
+      const answers = {};
+      if (!customFieldsData || customFieldsData.length === 0) return answers;
+
+      customFieldsData.forEach(f => {
+        if (f.type === 'SHORT_TEXT' || f.type === 'TEXTAREA') {
+          const el = document.getElementById(`cust_${f.id}`);
+          if (el) answers[f.id] = el.value.trim();
+        } else if (f.type === 'RATING_SCALE' || f.type === 'RADIO') {
+          const selected = document.querySelector(`input[name="cust_${f.id}"]:checked`);
+          if (selected) answers[f.id] = selected.value;
+        } else if (f.type === 'CHECKBOX') {
+          const checked = Array.from(document.querySelectorAll(`input[name="cust_${f.id}"]:checked`)).map(c => c.value);
+          if (checked.length > 0) answers[f.id] = checked.join(", ");
+        } else if (f.type === 'FILE_UPLOAD') {
+          if (customUploadedFilesMap[f.id]) {
+            answers[f.id] = customUploadedFilesMap[f.id].name;
+          }
+        }
+      });
+
+      return answers;
+    }
 
     // =========================================================================
     // TWO-WAY REAL-TIME SYNCHRONIZATION ENGINE
@@ -1681,12 +1928,18 @@
       };
 
       try {
-        const response = await fetchWithTimeout(`${apiUrl}?action=getInitialData&nocache=1&_t=${Date.now()}`, 9000);
+        const response = await fetchWithTimeout(`${apiUrl}?action=getInitialData&formId=${encodeURIComponent(activeFormId)}&nocache=1&_t=${Date.now()}`, 9000);
         const result = await response.json();
 
         if (result && result.success) {
           appConfig = result.config || {};
           groupsData = result.groups || [];
+          customFieldsData = result.customFields || [];
+          currentFormMeta = result.formMeta || null;
+
+          const pinEl = document.getElementById("navPinBadge");
+          if (pinEl) pinEl.textContent = `PIN: ${activeFormId}`;
+          renderDynamicCustomFields();
           
           if (result.allStudents && Array.isArray(result.allStudents)) {
             allStudentsData = result.allStudents;
@@ -2724,8 +2977,11 @@
         return;
       }
 
+      const customAnswers = collectCustomFieldsAnswers();
+
       const payload = {
         action: "submitAssessment",
+        formId: activeFormId,
         peranPenilai: currentEvaluatorRole || "Mahasiswa",
         nimPenilai: currentEvaluatorRole === 'Mahasiswa' ? nim : "-",
         email: email,
@@ -2734,7 +2990,9 @@
         sesi: appConfig["Sesi_Minggu_Aktif"] || "Minggu 1",
         nilaiKelompok: nilai,
         presentatorTerbaik: selectedBestPresenters,
-        evaluasiDetail: evaluasiDetail
+        evaluasiDetail: evaluasiDetail,
+        customAnswers: customAnswers,
+        uploadedFiles: customUploadedFilesMap
       };
 
       const submitBtn = document.getElementById("submitBtn");
@@ -2991,7 +3249,7 @@
           ]);
         };
 
-        const response = await fetchWithTimeout(`${apiUrl}?action=getRecapData&_t=${Date.now()}`, 6000);
+        const response = await fetchWithTimeout(`${apiUrl}?action=getRecapData&formId=${encodeURIComponent(activeFormId)}&_t=${Date.now()}`, 6000);
         const res = await response.json();
 
         if (loading) loading.classList.add("hidden");
@@ -4838,5 +5096,36 @@
       }, 50);
     }
   </script>
+  <!-- ========================================================================= -->
+  <!-- MODAL: GANTI FORMULIR (INPUT PIN 4-5 KARAKTER) -->
+  <!-- ========================================================================= -->
+  <div id="modalSwitchForm" class="hidden fixed inset-0 z-50 bg-zinc-950/75 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-4 fade-enter text-center">
+      <div class="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+        </svg>
+      </div>
+      <div>
+        <h3 class="font-bold text-base text-zinc-900">Buka Formulir Penilaian Lain</h3>
+        <p class="text-xs text-zinc-500 mt-1">Masukkan kode PIN (4–5 karakter) atau slug tautan yang diberikan dosen/admin.</p>
+      </div>
+      <form onsubmit="handleSwitchFormSubmit(event)" class="space-y-3">
+        <input 
+          type="text" 
+          id="inputSwitchFormPin" 
+          maxlength="20" 
+          required 
+          placeholder="contoh: BK5E / IPA1" 
+          class="w-full text-center px-4 py-2.5 rounded-xl border border-zinc-300 font-mono font-extrabold text-base tracking-widest uppercase focus:border-indigo-600 outline-none select-all"
+        >
+        <div class="flex items-center justify-center gap-2 pt-1">
+          <button type="button" onclick="closeSwitchFormModal()" class="px-4 py-2 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-medium cursor-pointer">Batal</button>
+          <button type="submit" class="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs cursor-pointer">Buka Formulir</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
 </body>
 </html>

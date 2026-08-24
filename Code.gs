@@ -1,18 +1,22 @@
 /**
  * ==============================================================================
- * BACKEND REST API - SISTEM PENILAIAN PRESENTASI PGSD KELAS 5E (ULTRA FAST)
+ * BACKEND REST API - SISTEM MULTI-FORM & PENILAIAN PRESENTASI PGSD (ULTRA FAST)
  * Spreadsheet ID: 1D7nQcVEbmOKjgcJ6LzKeeDQPQxhAIiCELRC9eP9w7WU
- * Mata Kuliah: Bimbingan Konseling di SD
- * Dosen Pengampu: Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.
+ * Multi-Form Engine, Dynamic Form Builder, Google Drive Uploader & Isolated Sandboxes
  * ==============================================================================
  */
 
 // ==============================================================================
-// ⚙️ KONFIGURASI SPREADSHEET
+// ⚙️ KONFIGURASI SPREADSHEET & REGISTRY DEFAULT
 // ==============================================================================
 const SPREADSHEET_ID = "1D7nQcVEbmOKjgcJ6LzKeeDQPQxhAIiCELRC9eP9w7WU";
 
-// Nama Tab Spreadsheet Default
+// Nama Sheet Registry Pusat
+const SHEET_REGISTRY = "Registry_Forms";
+
+// Nama Tab Spreadsheet Default (Formulir Utama / Default ID: BK5E)
+const DEFAULT_FORM_ID = "BK5E";
+const DEFAULT_FORM_SLUG = "bk-5e";
 const SHEET_CONFIG = "Konfigurasi";
 const SHEET_MASTER = "Master_Kelompok";
 const SHEET_RESPONS = "Respons_Penilaian";
@@ -64,100 +68,336 @@ function findSheetFlexible(ss, targetNames) {
   return null;
 }
 
-function getMasterSheet(ss) {
-  if (!ss) ss = getSpreadsheet();
-  let s = findSheetFlexible(ss, ["Master_Kelompok", "Master Kelompok", "DATA_KELOMPOK_PGSD_5E", "Data_Kelompok", "Data Kelompok", "Kelompok", "Data Penilaian"]);
-  if (!s) {
-    const sheets = ss.getSheets();
-    for (let sh of sheets) {
-      if (sh.getLastRow() > 0) {
-        const firstRow = sh.getRange(1, 1, 1, Math.min(sh.getLastColumn() || 1, 8)).getValues()[0];
-        const hasKelompok = firstRow.some(cell => String(cell).toLowerCase().includes("kelompok"));
-        if (hasKelompok) {
-          _memoizedSheets["master"] = sh;
-          return sh;
-        }
-      }
-    }
-    initAllSheets(ss);
-    s = ss.getSheetByName(SHEET_MASTER);
-  }
-  return s;
-}
-
-function getConfigSheet(ss) {
-  if (!ss) ss = getSpreadsheet();
-  let s = findSheetFlexible(ss, ["Konfigurasi", "Config", "CONFIG_APP", "Pengaturan", "Setting"]);
-  if (!s) {
-    initAllSheets(ss);
-    s = ss.getSheetByName(SHEET_CONFIG);
-  }
-  return s;
-}
-
-function getResponsSheet(ss) {
-  if (!ss) ss = getSpreadsheet();
-  let s = findSheetFlexible(ss, ["Respons_Penilaian", "Respons Penilaian", "RESPONS_PENILAIAN", "Responses", "Jawaban Formulir 1", "Respons"]);
-  if (!s) {
-    initAllSheets(ss);
-    s = ss.getSheetByName(SHEET_RESPONS);
-  }
-  return s;
-}
-
-function getRekapSheet(ss) {
-  if (!ss) ss = getSpreadsheet();
-  let s = findSheetFlexible(ss, ["Rekap_Nilai", "Rekap Nilai", "REKAP_NILAI", "Rekapitulasi"]);
-  if (!s) {
-    initAllSheets(ss);
-    s = ss.getSheetByName(SHEET_REKAP);
-  }
-  return s;
-}
-
 /**
  * ==============================================================================
- * 🌐 REST API ENDPOINTS (GET & POST) DENGAN CACHE ACCELERATION
+ * ️ MULTI-FORM REGISTRY & ISOLATED SHEET RESOLVER
  * ==============================================================================
  */
 
 /**
- * Handle HTTP GET Requests (Ultra-Fast Cached & Concurrency Ready)
+ * Inisialisasi Sheet Registry Formulir Pusat
+ */
+function getRegistrySheet(ss) {
+  if (!ss) ss = getSpreadsheet();
+  let sheet = ss.getSheetByName(SHEET_REGISTRY);
+  if (!sheet) {
+    sheet = ss.insertSheet(SHEET_REGISTRY);
+    const headers = [
+      "Form_ID",
+      "Form_Slug",
+      "Judul_Form",
+      "Mata_Kuliah",
+      "Dosen_Pengampu",
+      "Kelas",
+      "Jurusan",
+      "Sesi_Aktif",
+      "Status",
+      "Custom_Fields_JSON",
+      "Master_Sheet_Name",
+      "Respons_Sheet_Name",
+      "Config_Sheet_Name",
+      "Rekap_Sheet_Name",
+      "Created_At"
+    ];
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    formatHeaderRange(sheet.getRange(1, 1, 1, headers.length), "#4338CA", "#FFFFFF");
+
+    // Seed formulir default (BK5E) menggunakan sheet yang sudah ada
+    const nowStr = Utilities.formatDate(new Date(), "Asia/Makassar", "yyyy-MM-dd HH:mm:ss");
+    const defaultRow = [
+      DEFAULT_FORM_ID,
+      DEFAULT_FORM_SLUG,
+      "PENILAIAN PRESENTASI KELAS 5E PGSD 2026",
+      "Bimbingan Konseling di SD",
+      "Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.",
+      "5E",
+      "PGSD",
+      "Minggu 1",
+      "AKTIF",
+      "[]",
+      SHEET_MASTER,
+      SHEET_RESPONS,
+      SHEET_CONFIG,
+      SHEET_REKAP,
+      nowStr
+    ];
+    sheet.getRange(2, 1, 1, defaultRow.length).setValues([defaultRow]);
+    sheet.autoResizeColumns(1, headers.length);
+  }
+  return sheet;
+}
+
+/**
+ * Generate Short ID Unik (4-5 Karakter Alfanumerik)
+ */
+function generateShortFormId(ss) {
+  if (!ss) ss = getSpreadsheet();
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // Tanpa karakter ambigu (0, O, 1, I)
+  const regSheet = getRegistrySheet(ss);
+  const existingData = regSheet.getDataRange().getValues();
+  const existingIds = new Set();
+  for (let i = 1; i < existingData.length; i++) {
+    const id = String(existingData[i][0] || "").trim().toUpperCase();
+    if (id) existingIds.add(id);
+  }
+
+  for (let attempt = 0; attempt < 100; attempt++) {
+    let code = "";
+    const len = attempt > 50 ? 5 : 4; // 4 karakter pertama, 5 jika bentrok
+    for (let i = 0; i < len; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    if (!existingIds.has(code)) {
+      return code;
+    }
+  }
+  return "F" + Math.floor(1000 + Math.random() * 9000);
+}
+
+/**
+ * Generate Clean URL Slug
+ */
+function generateFormSlug(title, formId) {
+  if (!title) return (formId || "form").toLowerCase();
+  let slug = title.toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .substring(0, 35);
+  return slug || (formId || "form").toLowerCase();
+}
+
+/**
+ * Mendapatkan Metadata Formulir berdasarkan ID atau Slug
+ */
+function getFormMeta(ss, formIdOrSlug) {
+  if (!ss) ss = getSpreadsheet();
+  const regSheet = getRegistrySheet(ss);
+  const data = regSheet.getDataRange().getValues();
+
+  const search = String(formIdOrSlug || "").trim().toLowerCase();
+
+  // Jika tanpa parameter atau "default", kembalikan form default / baris pertama
+  if (!search || search === "default" || search === "main") {
+    if (data.length > 1) {
+      return parseFormMetaRow(data[1]);
+    }
+  }
+
+  // Cari berdasarkan Form_ID atau Form_Slug
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    const rowId = String(row[0] || "").trim().toLowerCase();
+    const rowSlug = String(row[1] || "").trim().toLowerCase();
+    if (rowId === search || rowSlug === search) {
+      return parseFormMetaRow(row);
+    }
+  }
+
+  // Fallback ke form default jika tidak ditemukan
+  if (data.length > 1) {
+    return parseFormMetaRow(data[1]);
+  }
+
+  // Fallback darurat
+  return {
+    formId: DEFAULT_FORM_ID,
+    formSlug: DEFAULT_FORM_SLUG,
+    judulForm: "Penilaian Presentasi PGSD 5E",
+    mataKuliah: "Bimbingan Konseling di SD",
+    dosen: "Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.",
+    kelas: "5E",
+    jurusan: "PGSD",
+    sesiAktif: "Minggu 1",
+    status: "AKTIF",
+    customFields: [],
+    masterSheetName: SHEET_MASTER,
+    responsSheetName: SHEET_RESPONS,
+    configSheetName: SHEET_CONFIG,
+    rekapSheetName: SHEET_REKAP,
+    createdAt: new Date().toISOString()
+  };
+}
+
+function parseFormMetaRow(row) {
+  let customFields = [];
+  try {
+    const jsonStr = String(row[9] || "[]").trim();
+    if (jsonStr) customFields = JSON.parse(jsonStr);
+  } catch (e) {
+    customFields = [];
+  }
+
+  return {
+    formId: String(row[0] || DEFAULT_FORM_ID).trim().toUpperCase(),
+    formSlug: String(row[1] || DEFAULT_FORM_SLUG).trim().toLowerCase(),
+    judulForm: String(row[2] || "").trim(),
+    mataKuliah: String(row[3] || "").trim(),
+    dosen: String(row[4] || "").trim(),
+    kelas: String(row[5] || "").trim(),
+    jurusan: String(row[6] || "").trim(),
+    sesiAktif: String(row[7] || "Minggu 1").trim(),
+    status: String(row[8] || "AKTIF").trim().toUpperCase(),
+    customFields: Array.isArray(customFields) ? customFields : [],
+    masterSheetName: String(row[10] || SHEET_MASTER).trim(),
+    responsSheetName: String(row[11] || SHEET_RESPONS).trim(),
+    configSheetName: String(row[12] || SHEET_CONFIG).trim(),
+    rekapSheetName: String(row[13] || SHEET_REKAP).trim(),
+    createdAt: String(row[14] || "").trim()
+  };
+}
+
+/**
+ * Helper Sheet Resolvers Berdasarkan Form ID (Isolasi Total)
+ */
+function getMasterSheet(ss, formId) {
+  if (!ss) ss = getSpreadsheet();
+  const meta = getFormMeta(ss, formId);
+  let s = ss.getSheetByName(meta.masterSheetName);
+  if (!s) {
+    s = findSheetFlexible(ss, [meta.masterSheetName, "Master_Kelompok", "Master Kelompok"]);
+    if (!s) {
+      s = ss.insertSheet(meta.masterSheetName);
+      const masterHeaders = [["Kelompok", "Sesi_Minggu", "NIM", "Nama_Lengkap", "Status_Aktif"]];
+      s.getRange(1, 1, 1, 5).setValues(masterHeaders);
+      formatHeaderRange(s.getRange(1, 1, 1, 5), "#047857", "#FFFFFF");
+      s.autoResizeColumns(1, 5);
+    }
+  }
+  return s;
+}
+
+function getConfigSheet(ss, formId) {
+  if (!ss) ss = getSpreadsheet();
+  const meta = getFormMeta(ss, formId);
+  let s = ss.getSheetByName(meta.configSheetName);
+  if (!s) {
+    s = findSheetFlexible(ss, [meta.configSheetName, "Konfigurasi", "Config"]);
+    if (!s) {
+      s = ss.insertSheet(meta.configSheetName);
+      const configData = [
+        ["PARAMETER", "NILAI_PENGATURAN", "KETERANGAN"],
+        ["Judul_Form", meta.judulForm || "Penilaian Presentasi", "Judul formulir"],
+        ["Mata_Kuliah", meta.mataKuliah || "Mata Kuliah", "Nama mata kuliah"],
+        ["Dosen_Pengampu", meta.dosen || "", "Nama dosen pengampu"],
+        ["Kelas", meta.kelas || "5E", "Kelas mahasiswa"],
+        ["Jurusan", meta.jurusan || "PGSD", "Jurusan / Program Studi"],
+        ["Sesi_Minggu_Aktif", meta.sesiAktif || "Minggu 1", "Sesi pertemuan aktif"],
+        ["Domain_Email_Wajib", "mhs.ulm.ac.id, ulm.ac.id", "Domain email yang diizinkan"],
+        ["Tampilkan_Ulasan_Publik", "AKTIF", "Pilihan: AKTIF atau NONAKTIF"],
+        ["Nilai_Kelompok_Min", "50", "Batas nilai minimum presentasi"],
+        ["Nilai_Kelompok_Max", "100", "Batas nilai maksimum presentasi"],
+        ["Maksimal_Karakter_Evaluasi", "500", "Batas karakter per ulasan pemateri"],
+        ["Maksimal_Pilihan_Presentator_Terbaik", "2", "Maksimal pemateri terbaik yang boleh dipilih"],
+        ["Kewajiban_Menilai_Penyaji", "BEBAS_PENUH_DI_SESINYA", "Aturan kewajiban menilai bagi penyaji"]
+      ];
+      s.getRange(1, 1, configData.length, 3).setValues(configData);
+      formatHeaderRange(s.getRange(1, 1, 1, 3), "#1E3A8A", "#FFFFFF");
+      s.autoResizeColumns(1, 3);
+    }
+  }
+  return s;
+}
+
+function getResponsSheet(ss, formId) {
+  if (!ss) ss = getSpreadsheet();
+  const meta = getFormMeta(ss, formId);
+  let s = ss.getSheetByName(meta.responsSheetName);
+  if (!s) {
+    s = findSheetFlexible(ss, [meta.responsSheetName, "Respons_Penilaian", "Responses"]);
+    if (!s) {
+      s = ss.insertSheet(meta.responsSheetName);
+      const responsHeaders = [[
+        "ID_Respons",
+        "Timestamp",
+        "Sesi_Minggu",
+        "Email_Penilai",
+        "Nama_Penilai",
+        "Kelompok_Dinilai",
+        "Nilai_Kelompok",
+        "Presentator_Terbaik_1",
+        "Presentator_Terbaik_2",
+        "Evaluasi_Detail_JSON",
+        "Status",
+        "Peran",
+        "NIM_Penilai",
+        "Custom_Answers_JSON"
+      ]];
+      s.getRange(1, 1, 1, responsHeaders[0].length).setValues(responsHeaders);
+      formatHeaderRange(s.getRange(1, 1, 1, responsHeaders[0].length), "#B91C1C", "#FFFFFF");
+      s.autoResizeColumns(1, responsHeaders[0].length);
+    }
+  }
+  return s;
+}
+
+function getRekapSheet(ss, formId) {
+  if (!ss) ss = getSpreadsheet();
+  const meta = getFormMeta(ss, formId);
+  let s = ss.getSheetByName(meta.rekapSheetName);
+  if (!s) {
+    s = findSheetFlexible(ss, [meta.rekapSheetName, "Rekap_Nilai", "Rekapitulasi"]);
+    if (!s) {
+      s = ss.insertSheet(meta.rekapSheetName);
+      const rekapHeaders = [["Kelompok", "Sesi_Minggu", "Jumlah_Penilai", "Rata_Rata_Nilai", "Presentator_Terbaik_Terbanyak"]];
+      s.getRange(1, 1, 1, 5).setValues(rekapHeaders);
+      formatHeaderRange(s.getRange(1, 1, 1, 5), "#1E40AF", "#FFFFFF");
+      s.autoResizeColumns(1, 5);
+    }
+  }
+  return s;
+}
+
+/**
+ * ==============================================================================
+ *  REST API ENDPOINTS (GET & POST) DENGAN CACHE ACCELERATION
+ * ==============================================================================
+ */
+
+/**
+ * Handle HTTP GET Requests
  */
 function doGet(e) {
-  const action = e && e.parameter ? e.parameter.action : "";
+  const params = (e && e.parameter) ? e.parameter : {};
+  const action = params.action || "";
+  const formId = params.formId || params.form || params.id || "";
+  const isNoCache = !e || !e.parameter || params.nocache === "1" || params._t;
 
-  // 1. Endpoint Ambil Data Awal Form (Direct Live & Real-Time Sync)
+  // 1. Endpoint Ambil Registry Seluruh Formulir (Master Hub)
+  if (action === "adminGetFormsRegistry") {
+    const data = adminGetFormsRegistry();
+    return createJsonResponse(data);
+  }
+
+  // 2. Endpoint Ambil Data Awal Form (Sisi Mahasiswa)
   if (action === "getInitialData") {
-    const isNoCache = !e || !e.parameter || e.parameter.nocache === "1" || e.parameter._t;
-    const data = getCachedInitialData(isNoCache);
+    const data = getCachedInitialData(isNoCache, formId);
     return createJsonResponse(data);
   }
 
-  // 2. Endpoint Ambil Data Rekapitulasi Nilai (Direct Live & Real-Time Sync)
+  // 3. Endpoint Ambil Data Rekapitulasi Nilai
   if (action === "getRecapData") {
-    const isNoCache = !e || !e.parameter || e.parameter.nocache === "1" || e.parameter._t;
-    const data = getCachedRecapData(isNoCache);
+    const data = getCachedRecapData(isNoCache, formId);
     return createJsonResponse(data);
   }
 
-  // 3. Endpoint Admin: Ambil Semua Data Master & Config
+  // 4. Endpoint Admin: Ambil Semua Data Master & Config per Form
   if (action === "adminGetFullData") {
-    const data = adminGetFullData();
+    const data = adminGetFullData(formId);
     return createJsonResponse(data);
   }
 
-  // 4. Endpoint Admin: Ambil Seluruh Daftar Respons Penilaian
+  // 5. Endpoint Admin: Ambil Seluruh Daftar Respons Penilaian per Form
   if (action === "adminGetResponsesList") {
-    const data = adminGetResponsesList();
+    const data = adminGetResponsesList(formId);
     return createJsonResponse(data);
   }
 
-  // 5. Fallback Info
+  // Fallback Info
   return createJsonResponse({
     status: "API Online",
     spreadsheetId: SPREADSHEET_ID,
-    message: "REST API Backend Aktif (High Performance & Cache Accelerated)."
+    message: "REST API Multi-Form & Dynamic Form Builder Aktif."
   });
 }
 
@@ -179,18 +419,33 @@ function doPost(e) {
     }
 
     const action = payload.action || "submitAssessment";
+    const formId = payload.formId || payload.form || payload.id || "";
     let result = { success: false, error: "Aksi tidak dikenali." };
 
-    if (action === "submitAssessment") {
+    // Multi-Form Registry Controllers
+    if (action === "adminGetFormsRegistry") {
+      result = adminGetFormsRegistry();
+    } else if (action === "adminCreateForm") {
+      result = adminCreateForm(payload);
+    } else if (action === "adminUpdateFormMeta") {
+      result = adminUpdateFormMeta(payload);
+    } else if (action === "adminCloneForm") {
+      result = adminCloneForm(payload);
+    } else if (action === "adminDeleteForm") {
+      result = adminDeleteForm(payload);
+    }
+
+    // Form Sandbox Operations (Per-Form Scoped)
+    else if (action === "submitAssessment") {
       result = submitAssessment(payload);
     } else if (action === "getInitialData") {
-      result = getCachedInitialData();
+      result = getCachedInitialData(true, formId);
     } else if (action === "getRecapData") {
-      result = getCachedRecapData();
+      result = getCachedRecapData(true, formId);
     } else if (action === "adminGetFullData") {
-      result = adminGetFullData();
+      result = adminGetFullData(formId);
     } else if (action === "adminGetResponsesList") {
-      result = adminGetResponsesList();
+      result = adminGetResponsesList(formId);
     } else if (action === "adminSaveMasterData") {
       result = adminSaveMasterData(payload);
     } else if (action === "adminSaveConfig") {
@@ -222,24 +477,38 @@ function createJsonResponse(data) {
 }
 
 /**
- * Ambil Data Awal dengan Cache Cerdas (Merespons dalam milidetik & realtime saat ada permintaan baru)
+ * Reset Cache saat Ada Perubahan Data
  */
-function getCachedInitialData(bypassCache) {
+function clearApiCache(formId) {
+  try {
+    const cache = CacheService.getScriptCache();
+    const cleanId = (formId || DEFAULT_FORM_ID).trim().toUpperCase();
+    cache.remove("INIT_FORM_DATA_" + cleanId);
+    cache.remove("REKAP_DATA_CACHE_" + cleanId);
+    cache.remove("INIT_FORM_DATA_V4");
+    cache.remove("REKAP_DATA_CACHE_V4");
+    cache.remove("REGISTRY_FORMS_LIST");
+  } catch (e) {}
+}
+
+/**
+ * Ambil Data Awal dengan Cache Cerdas
+ */
+function getCachedInitialData(bypassCache, formId) {
+  const cleanId = (formId || DEFAULT_FORM_ID).trim().toUpperCase();
   if (!bypassCache) {
     const cache = CacheService.getScriptCache();
-    const cached = cache.get("INIT_FORM_DATA_V4");
+    const cached = cache.get("INIT_FORM_DATA_" + cleanId);
     if (cached) {
-      try {
-        return JSON.parse(cached);
-      } catch (e) {}
+      try { return JSON.parse(cached); } catch (e) {}
     }
   }
 
-  const liveData = getFormInitialData();
+  const liveData = getFormInitialData(formId);
   if (liveData && liveData.success) {
     try {
       const cache = CacheService.getScriptCache();
-      cache.put("INIT_FORM_DATA_V4", JSON.stringify(liveData), 20); // 20 detik cache
+      cache.put("INIT_FORM_DATA_" + cleanId, JSON.stringify(liveData), 20);
     } catch (e) {}
   }
   return liveData;
@@ -248,46 +517,32 @@ function getCachedInitialData(bypassCache) {
 /**
  * Ambil Data Rekapitulasi dengan Cache Cerdas
  */
-function getCachedRecapData(bypassCache) {
+function getCachedRecapData(bypassCache, formId) {
+  const cleanId = (formId || DEFAULT_FORM_ID).trim().toUpperCase();
   if (!bypassCache) {
     const cache = CacheService.getScriptCache();
-    const cached = cache.get("REKAP_DATA_CACHE_V4");
+    const cached = cache.get("REKAP_DATA_CACHE_" + cleanId);
     if (cached) {
-      try {
-        return JSON.parse(cached);
-      } catch (e) {}
+      try { return JSON.parse(cached); } catch (e) {}
     }
   }
 
-  const liveData = getRecapData();
+  const liveData = getRecapData(formId);
   if (liveData && liveData.success) {
     try {
       const cache = CacheService.getScriptCache();
-      cache.put("REKAP_DATA_CACHE_V4", JSON.stringify(liveData), 20); // 20 detik cache
+      cache.put("REKAP_DATA_CACHE_" + cleanId, JSON.stringify(liveData), 20);
     } catch (e) {}
   }
   return liveData;
 }
 
 /**
- * Reset Cache saat Ada Perubahan Data
- */
-function clearApiCache() {
-  try {
-    const cache = CacheService.getScriptCache();
-    cache.remove("INIT_FORM_DATA_V4");
-    cache.remove("REKAP_DATA_CACHE_V4");
-    cache.remove("INIT_FORM_DATA_V3");
-    cache.remove("REKAP_DATA_CACHE_V3");
-  } catch (e) {}
-}
-
-/**
  * Mengambil Data Konfigurasi Spreadsheet
  */
-function getConfigMap(ss) {
+function getConfigMap(ss, formId) {
   if (!ss) ss = getSpreadsheet();
-  let sheet = getConfigSheet(ss);
+  let sheet = getConfigSheet(ss, formId);
   
   const data = sheet.getDataRange().getValues();
   const config = {};
@@ -302,16 +557,359 @@ function getConfigMap(ss) {
 }
 
 /**
- * Mengambil Data Awal Form (Langsung & Cepat Dari Spreadsheet)
+ * ==============================================================================
+ * ️ CONTROLLER: MASTER FORM REGISTRY
+ * ==============================================================================
  */
-function getFormInitialData() {
+
+/**
+ * Mengambil Daftar Seluruh Formulir di Registry
+ */
+function adminGetFormsRegistry() {
   try {
     const ss = getSpreadsheet();
-    const config = getConfigMap(ss);
-    let masterSheet = getMasterSheet(ss);
+    const regSheet = getRegistrySheet(ss);
+    const data = regSheet.getDataRange().getValues();
+    const forms = [];
+
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      const formId = String(row[0] || "").trim();
+      if (!formId) continue;
+
+      const meta = parseFormMetaRow(row);
+
+      // Hitung total respons pada sheet respons form ini
+      let totalResponses = 0;
+      try {
+        const respSheet = ss.getSheetByName(meta.responsSheetName);
+        if (respSheet && respSheet.getLastRow() > 1) {
+          totalResponses = respSheet.getLastRow() - 1;
+        }
+      } catch (e) {}
+
+      forms.push({
+        ...meta,
+        totalResponses: totalResponses
+      });
+    }
+
+    return {
+      success: true,
+      forms: forms
+    };
+  } catch (err) {
+    return { success: false, error: "Gagal memuat registry formulir: " + err.toString() };
+  }
+}
+
+/**
+ * Membuat Formulir Baru dengan Short ID 4-5 Karakter & Sheet Terisolasi
+ */
+function adminCreateForm(payload) {
+  try {
+    const lock = LockService.getScriptLock();
+    lock.waitLock(15000);
+
+    const ss = getSpreadsheet();
+    const regSheet = getRegistrySheet(ss);
+
+    const judulForm = String(payload.judulForm || "Penilaian Presentasi Baru").trim();
+    const mataKuliah = String(payload.mataKuliah || "").trim();
+    const dosen = String(payload.dosen || "").trim();
+    const kelas = String(payload.kelas || "").trim();
+    const jurusan = String(payload.jurusan || "PGSD").trim();
+    const sesiAktif = String(payload.sesiAktif || "Minggu 1").trim();
+
+    // Generate Short ID 4-5 Karakter Unik (atau gunakan custom jika diinput)
+    let formId = String(payload.customFormId || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+    if (!formId || formId.length < 3 || formId.length > 6) {
+      formId = generateShortFormId(ss);
+    }
+
+    // Generate Slug Unik
+    let formSlug = String(payload.customSlug || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+    if (!formSlug) {
+      formSlug = generateFormSlug(mataKuliah || judulForm, formId);
+    }
+
+    const masterSheetName = "Master_" + formId;
+    const configSheetName = "Config_" + formId;
+    const responsSheetName = "Respons_" + formId;
+    const rekapSheetName = "Rekap_" + formId;
+    const nowStr = Utilities.formatDate(new Date(), "Asia/Makassar", "yyyy-MM-dd HH:mm:ss");
+
+    // 1. Buat Sheet Master Terisolasi
+    let sMaster = ss.insertSheet(masterSheetName);
+    const masterHeaders = [["Kelompok", "Sesi_Minggu", "NIM", "Nama_Lengkap", "Status_Aktif"]];
+    sMaster.getRange(1, 1, 1, 5).setValues(masterHeaders);
+    formatHeaderRange(sMaster.getRange(1, 1, 1, 5), "#047857", "#FFFFFF");
+    sMaster.autoResizeColumns(1, 5);
+
+    // 2. Buat Sheet Config Terisolasi
+    let sConfig = ss.insertSheet(configSheetName);
+    const configData = [
+      ["PARAMETER", "NILAI_PENGATURAN", "KETERANGAN"],
+      ["Judul_Form", judulForm, "Judul utama pada formulir"],
+      ["Mata_Kuliah", mataKuliah, "Nama mata kuliah"],
+      ["Dosen_Pengampu", dosen, "Nama dosen pengampu"],
+      ["Kelas", kelas, "Kelas mahasiswa"],
+      ["Jurusan", jurusan, "Jurusan / Program Studi"],
+      ["Sesi_Minggu_Aktif", sesiAktif, "Sesi pertemuan saat ini"],
+      ["Domain_Email_Wajib", "mhs.ulm.ac.id, ulm.ac.id", "Domain email yang diizinkan"],
+      ["Tampilkan_Ulasan_Publik", "AKTIF", "Pilihan: AKTIF atau NONAKTIF"],
+      ["Nilai_Kelompok_Min", "50", "Batas nilai minimum presentasi"],
+      ["Nilai_Kelompok_Max", "100", "Batas nilai maksimum presentasi"],
+      ["Maksimal_Karakter_Evaluasi", "500", "Batas karakter per ulasan pemateri"],
+      ["Maksimal_Pilihan_Presentator_Terbaik", "2", "Maksimal pemateri terbaik yang boleh dipilih"],
+      ["Kewajiban_Menilai_Penyaji", "BEBAS_PENUH_DI_SESINYA", "Aturan kewajiban menilai bagi penyaji"]
+    ];
+    sConfig.getRange(1, 1, configData.length, 3).setValues(configData);
+    formatHeaderRange(sConfig.getRange(1, 1, 1, 3), "#1E3A8A", "#FFFFFF");
+    sConfig.autoResizeColumns(1, 3);
+
+    // 3. Buat Sheet Respons Terisolasi
+    let sRespons = ss.insertSheet(responsSheetName);
+    const responsHeaders = [[
+      "ID_Respons",
+      "Timestamp",
+      "Sesi_Minggu",
+      "Email_Penilai",
+      "Nama_Penilai",
+      "Kelompok_Dinilai",
+      "Nilai_Kelompok",
+      "Presentator_Terbaik_1",
+      "Presentator_Terbaik_2",
+      "Evaluasi_Detail_JSON",
+      "Status",
+      "Peran",
+      "NIM_Penilai",
+      "Custom_Answers_JSON"
+    ]];
+    sRespons.getRange(1, 1, 1, responsHeaders[0].length).setValues(responsHeaders);
+    formatHeaderRange(sRespons.getRange(1, 1, 1, responsHeaders[0].length), "#B91C1C", "#FFFFFF");
+    sRespons.autoResizeColumns(1, responsHeaders[0].length);
+
+    // 4. Buat Sheet Rekap Terisolasi
+    let sRekap = ss.insertSheet(rekapSheetName);
+    const rekapHeaders = [["Kelompok", "Sesi_Minggu", "Jumlah_Penilai", "Rata_Rata_Nilai", "Presentator_Terbaik_Terbanyak"]];
+    sRekap.getRange(1, 1, 1, 5).setValues(rekapHeaders);
+    formatHeaderRange(sRekap.getRange(1, 1, 1, 5), "#1E40AF", "#FFFFFF");
+    sRekap.autoResizeColumns(1, 5);
+
+    // 5. Simpan ke Registry Forms
+    const newRow = [
+      formId,
+      formSlug,
+      judulForm,
+      mataKuliah,
+      dosen,
+      kelas,
+      jurusan,
+      sesiAktif,
+      "AKTIF",
+      "[]",
+      masterSheetName,
+      responsSheetName,
+      configSheetName,
+      rekapSheetName,
+      nowStr
+    ];
+    regSheet.appendRow(newRow);
+
+    lock.releaseLock();
+    clearApiCache();
+
+    return {
+      success: true,
+      formId: formId,
+      formSlug: formSlug,
+      message: `Formulir '${judulForm}' berhasil dibuat dengan Kode ID: ${formId}!`
+    };
+  } catch (err) {
+    return { success: false, error: "Gagal membuat formulir baru: " + err.toString() };
+  }
+}
+
+/**
+ * Mengupdate Metadata Formulir di Registry
+ */
+function adminUpdateFormMeta(payload) {
+  try {
+    const lock = LockService.getScriptLock();
+    lock.waitLock(10000);
+
+    const ss = getSpreadsheet();
+    const regSheet = getRegistrySheet(ss);
+    const data = regSheet.getDataRange().getValues();
+
+    const targetFormId = String(payload.formId || "").trim().toUpperCase();
+    let targetRow = -1;
+
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][0] || "").trim().toUpperCase() === targetFormId) {
+        targetRow = i + 1;
+        break;
+      }
+    }
+
+    if (targetRow === -1) {
+      lock.releaseLock();
+      return { success: false, error: `Formulir dengan ID '${targetFormId}' tidak ditemukan.` };
+    }
+
+    if (payload.status) {
+      regSheet.getRange(targetRow, 9).setValue(String(payload.status).toUpperCase());
+    }
+    if (payload.judulForm) {
+      regSheet.getRange(targetRow, 3).setValue(payload.judulForm);
+    }
+    if (payload.mataKuliah) {
+      regSheet.getRange(targetRow, 4).setValue(payload.mataKuliah);
+    }
+    if (payload.dosen) {
+      regSheet.getRange(targetRow, 5).setValue(payload.dosen);
+    }
+    if (payload.sesiAktif) {
+      regSheet.getRange(targetRow, 8).setValue(payload.sesiAktif);
+    }
+    if (payload.customFields !== undefined) {
+      const customStr = typeof payload.customFields === 'string' ? payload.customFields : JSON.stringify(payload.customFields || []);
+      regSheet.getRange(targetRow, 10).setValue(customStr);
+    }
+
+    lock.releaseLock();
+    clearApiCache(targetFormId);
+
+    return {
+      success: true,
+      message: `Metadata formulir '${targetFormId}' berhasil diperbarui.`
+    };
+  } catch (err) {
+    return { success: false, error: "Gagal memperbarui formulir: " + err.toString() };
+  }
+}
+
+/**
+ * Kloning Formulir (Duplikasi Roster & Config ke Form Baru)
+ */
+function adminCloneForm(payload) {
+  try {
+    const ss = getSpreadsheet();
+    const sourceFormId = String(payload.sourceFormId || DEFAULT_FORM_ID).trim().toUpperCase();
+    const sourceMeta = getFormMeta(ss, sourceFormId);
+
+    const newTitle = String(payload.newTitle || (sourceMeta.judulForm + " (Salinan)")).trim();
+    const createResult = adminCreateForm({
+      judulForm: newTitle,
+      mataKuliah: sourceMeta.mataKuliah,
+      dosen: sourceMeta.dosen,
+      kelas: sourceMeta.kelas,
+      jurusan: sourceMeta.jurusan,
+      sesiAktif: sourceMeta.sesiAktif
+    });
+
+    if (!createResult.success) return createResult;
+
+    const newFormId = createResult.formId;
+
+    // Salin Master Data jika ada
+    const sourceMasterSheet = ss.getSheetByName(sourceMeta.masterSheetName);
+    const targetMasterSheet = ss.getSheetByName("Master_" + newFormId);
+
+    if (sourceMasterSheet && targetMasterSheet && sourceMasterSheet.getLastRow() > 1) {
+      const masterValues = sourceMasterSheet.getRange(2, 1, sourceMasterSheet.getLastRow() - 1, 5).getValues();
+      targetMasterSheet.getRange(2, 1, masterValues.length, 5).setValues(masterValues);
+    }
+
+    return {
+      success: true,
+      formId: newFormId,
+      message: `Berhasil menduplikasi form ke Kode ID baru: ${newFormId}!`
+    };
+  } catch (err) {
+    return { success: false, error: "Gagal kloning formulir: " + err.toString() };
+  }
+}
+
+/**
+ * Hapus / Arsipkan Formulir
+ */
+function adminDeleteForm(payload) {
+  try {
+    const lock = LockService.getScriptLock();
+    lock.waitLock(10000);
+
+    const ss = getSpreadsheet();
+    const regSheet = getRegistrySheet(ss);
+    const data = regSheet.getDataRange().getValues();
+
+    const targetFormId = String(payload.formId || "").trim().toUpperCase();
+    if (targetFormId === DEFAULT_FORM_ID) {
+      lock.releaseLock();
+      return { success: false, error: "Formulir default utama tidak boleh dihapus." };
+    }
+
+    let targetRow = -1;
+    let meta = null;
+
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][0] || "").trim().toUpperCase() === targetFormId) {
+        targetRow = i + 1;
+        meta = parseFormMetaRow(data[i]);
+        break;
+      }
+    }
+
+    if (targetRow === -1) {
+      lock.releaseLock();
+      return { success: false, error: "Formulir tidak ditemukan." };
+    }
+
+    // Hapus baris dari registry
+    regSheet.deleteRow(targetRow);
+
+    // Hapus sheet terisolasi jika diminta
+    if (payload.deleteSheets && meta) {
+      const sheetsToDelete = [meta.masterSheetName, meta.responsSheetName, meta.configSheetName, meta.rekapSheetName];
+      sheetsToDelete.forEach(sName => {
+        try {
+          const s = ss.getSheetByName(sName);
+          if (s) ss.deleteSheet(s);
+        } catch (e) {}
+      });
+    }
+
+    lock.releaseLock();
+    clearApiCache(targetFormId);
+
+    return {
+      success: true,
+      message: `Formulir '${targetFormId}' berhasil dihapus dari registry.`
+    };
+  } catch (err) {
+    return { success: false, error: "Gagal menghapus formulir: " + err.toString() };
+  }
+}
+
+/**
+ * ==============================================================================
+ *  CLIENT/STUDENT FORM DATA FETCHING & SUBMISSION
+ * ==============================================================================
+ */
+
+/**
+ * Mengambil Data Awal Form untuk Mahasiswa
+ */
+function getFormInitialData(formId) {
+  try {
+    const ss = getSpreadsheet();
+    const formMeta = getFormMeta(ss, formId);
+    const config = getConfigMap(ss, formMeta.formId);
+    let masterSheet = getMasterSheet(ss, formMeta.formId);
 
     const masterData = masterSheet.getDataRange().getValues();
-    const sesiAktif = (config["Sesi_Minggu_Aktif"] || "").trim().toUpperCase();
+    const sesiAktif = (config["Sesi_Minggu_Aktif"] || formMeta.sesiAktif || "").trim().toUpperCase();
 
     const groupsMap = {};
     const allGroupsMap = {};
@@ -329,7 +927,6 @@ function getFormInitialData() {
       if (!kelompok || !nama) continue;
       if (status === "NONAKTIF") continue;
 
-      // Roster seluruh mahasiswa kelas 5E (untuk validasi identitas penilai instan)
       allStudentsList.push({
         nim: nim,
         name: nama,
@@ -337,7 +934,6 @@ function getFormInitialData() {
         sesi: sesi
       });
 
-      // Seluruh kelompok tanpa batas filter sesi
       if (!allGroupsMap[kelompok]) {
         allGroupsMap[kelompok] = {
           name: kelompok,
@@ -345,12 +941,8 @@ function getFormInitialData() {
           members: []
         };
       }
-      allGroupsMap[kelompok].members.push({
-        nim: nim,
-        name: nama
-      });
+      allGroupsMap[kelompok].members.push({ nim: nim, name: nama });
 
-      // Kelompok aktif untuk pilihan tampil (Langkah 2 Pemilihan Kelompok)
       const sesiRow = sesi.trim().toUpperCase();
       if (sesiAktif === "SEMUA" || sesiAktif === "" || sesiRow === sesiAktif) {
         if (!groupsMap[kelompok]) {
@@ -360,10 +952,7 @@ function getFormInitialData() {
             members: []
           };
         }
-        groupsMap[kelompok].members.push({
-          nim: nim,
-          name: nama
-        });
+        groupsMap[kelompok].members.push({ nim: nim, name: nama });
       }
     }
 
@@ -372,7 +961,9 @@ function getFormInitialData() {
 
     return {
       success: true,
+      formMeta: formMeta,
       config: config,
+      customFields: formMeta.customFields || [],
       groups: groupList.length > 0 ? groupList : allGroupList,
       allGroups: allGroupList,
       allStudents: allStudentsList,
@@ -405,10 +996,43 @@ function isValidInstitutionalEmail(email, allowedDomainsStr) {
 }
 
 /**
- * Memproses Submission Penilaian (Ultra High Concurrency & Fast Lock Execution)
+ * Upload File ke Google Drive secara Terstruktur
+ */
+function saveUploadedFileToDrive(base64Data, fileName, mimeType, formId) {
+  try {
+    const cleanFormId = (formId || DEFAULT_FORM_ID).trim().toUpperCase();
+    const parentFolder = getOrCreateDriveFolder("Penilaian PGSD 5E - Dokumen");
+    const formFolder = getOrCreateDriveSubfolder(parentFolder, cleanFormId);
+
+    const decoded = Utilities.base64Decode(base64Data);
+    const blob = Utilities.newBlob(decoded, mimeType || "application/octet-stream", fileName || "lampiran");
+    const file = formFolder.createFile(blob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+    return file.getUrl();
+  } catch (e) {
+    return "";
+  }
+}
+
+function getOrCreateDriveFolder(folderName) {
+  const folders = DriveApp.getFoldersByName(folderName);
+  if (folders.hasNext()) return folders.next();
+  return DriveApp.createFolder(folderName);
+}
+
+function getOrCreateDriveSubfolder(parentFolder, subfolderName) {
+  const folders = parentFolder.getFoldersByName(subfolderName);
+  if (folders.hasNext()) return folders.next();
+  return parentFolder.createFolder(subfolderName);
+}
+
+/**
+ * Memproses Submission Penilaian
  */
 function submitAssessment(payload) {
   try {
+    const formId = String(payload.formId || DEFAULT_FORM_ID).trim();
     const email = String(payload.email || "").trim().toLowerCase();
     const namaPenilai = String(payload.namaPenilai || "").trim();
     const kelompok = String(payload.kelompok || "").trim();
@@ -416,17 +1040,25 @@ function submitAssessment(payload) {
     const nilaiKelompok = parseFloat(payload.nilaiKelompok);
     const presentatorTerbaik = Array.isArray(payload.presentatorTerbaik) ? payload.presentatorTerbaik : [];
     const evaluasiDetail = payload.evaluasiDetail || {};
+    const customAnswers = payload.customAnswers || {};
 
     if (!email || !namaPenilai || !kelompok || isNaN(nilaiKelompok)) {
       return { success: false, error: "Semua kolom wajib diisi dengan benar!" };
     }
 
     const ss = getSpreadsheet();
-    const config = getConfigMap(ss);
+    const formMeta = getFormMeta(ss, formId);
+
+    // Cek status form
+    if (formMeta.status === "TUTUP" || formMeta.status === "ARSIP") {
+      return { success: false, error: "Formulir ini sudah ditutup untuk pengisian penilaian baru." };
+    }
+
+    const config = getConfigMap(ss, formMeta.formId);
     const peranPenilai = String(payload.peranPenilai || "Mahasiswa").trim();
     const nimPenilai = String(payload.nimPenilai || "-").trim();
 
-    // 1. Validasi Domain Email (Wajib untuk Mahasiswa)
+    // 1. Validasi Domain Email
     const allowedDomainsStr = config["Domain_Email_Wajib"] || "mhs.ulm.ac.id, ulm.ac.id";
     if (peranPenilai === "Mahasiswa" && !isValidInstitutionalEmail(email, allowedDomainsStr)) {
       return {
@@ -450,32 +1082,38 @@ function submitAssessment(payload) {
     if (presentatorTerbaik.length > maxBest) {
       return {
         success: false,
-        error: `Anda hanya diperbolehkan memilih maksimal ${maxBest} orang presentator terbaik!`
+        error: `Anda hanya diperkenankan memilih maksimal ${maxBest} pemateri terbaik!`
       };
     }
 
-    // 4. Validasi Karakter Evaluasi
-    const maxChars = parseInt(config["Maksimal_Karakter_Evaluasi"] || 500);
-    for (let member in evaluasiDetail) {
-      const text = String(evaluasiDetail[member] || "").trim();
-      if (text.length > maxChars) {
-        return {
-          success: false,
-          error: `Evaluasi untuk ${member} melebihi batas ${maxChars} karakter.`
-        };
+    // 4. Proses File Upload jika ada
+    if (payload.uploadedFiles && typeof payload.uploadedFiles === 'object') {
+      for (let fldId in payload.uploadedFiles) {
+        const fileObj = payload.uploadedFiles[fldId];
+        if (fileObj && fileObj.base64) {
+          const fileUrl = saveUploadedFileToDrive(fileObj.base64, fileObj.name, fileObj.type, formMeta.formId);
+          customAnswers[fldId] = fileUrl || fileObj.name;
+        }
       }
     }
 
-    // 5. Persiapkan Data Baru
-    const idRespons = "RESP-" + Utilities.formatDate(new Date(), "Asia/Makassar", "yyyyMMddHHmmss") + "-" + Math.floor(Math.random() * 9000 + 1000);
-    const timestamp = new Date();
+    // 5. Lock & Atomic Write to Respons Sheet
+    const lock = LockService.getScriptLock();
+    lock.waitLock(10000);
+
+    let responsSheet = getResponsSheet(ss, formMeta.formId);
+    const lastRow = responsSheet.getLastRow();
+    const idRespons = "RESP-" + formMeta.formId + "-" + Utilities.formatDate(new Date(), "Asia/Makassar", "yyyyMMdd-HHmmss") + "-" + Math.floor(100 + Math.random() * 900);
+    const now = new Date();
+
     const best1 = presentatorTerbaik[0] || "-";
     const best2 = presentatorTerbaik[1] || "-";
-    const evaluasiJson = JSON.stringify(evaluasiDetail);
+    const evaluasiJsonStr = JSON.stringify(evaluasiDetail);
+    const customAnswersJsonStr = JSON.stringify(customAnswers);
 
     const newRow = [
       idRespons,
-      timestamp,
+      now,
       sesi,
       email,
       namaPenilai,
@@ -483,28 +1121,22 @@ function submitAssessment(payload) {
       nilaiKelompok,
       best1,
       best2,
-      evaluasiJson,
+      evaluasiJsonStr,
       "VALID",
       peranPenilai,
-      nimPenilai
+      nimPenilai,
+      customAnswersJsonStr
     ];
 
-    // 6. Zona Kunci Singkat untuk Cek Duplikat & Tulis (Fast Batch Read)
-    const lock = LockService.getScriptLock();
-    lock.waitLock(10000);
-
-    let responsSheet = getResponsSheet(ss);
-    const lastRow = responsSheet.getLastRow();
-
+    // Cek Duplikat
     if (lastRow > 1) {
-      // Batch read: Ambil hanya kolom Sesi (3), Email (4), Kelompok (6), Status (11) untuk cek duplikat
       const totalRows = lastRow - 1;
-      const checkData = responsSheet.getRange(2, 3, totalRows, 9).getValues(); // Kolom C–K
+      const checkData = responsSheet.getRange(2, 3, totalRows, 9).getValues();
       for (let i = 0; i < checkData.length; i++) {
-        const rSesi    = String(checkData[i][0] || "").trim();  // Kolom C
-        const rEmail   = String(checkData[i][1] || "").trim().toLowerCase(); // Kolom D
-        const rKelompok = String(checkData[i][3] || "").trim(); // Kolom F
-        const rStatus  = String(checkData[i][8] || "VALID").trim().toUpperCase(); // Kolom K
+        const rSesi = String(checkData[i][0] || "").trim();
+        const rEmail = String(checkData[i][1] || "").trim().toLowerCase();
+        const rKelompok = String(checkData[i][3] || "").trim();
+        const rStatus = String(checkData[i][8] || "VALID").trim().toUpperCase();
 
         if (rStatus === "VALID" && rEmail === email && rKelompok === kelompok && rSesi === sesi) {
           lock.releaseLock();
@@ -516,13 +1148,11 @@ function submitAssessment(payload) {
       }
     }
 
-    // Tulis langsung ke sheet dalam satu operasi
     const nextRow = lastRow + 1;
     responsSheet.getRange(nextRow, 1, 1, newRow.length).setValues([newRow]);
     lock.releaseLock();
 
-    // 7. Bersihkan Cache API Seketika
-    clearApiCache();
+    clearApiCache(formMeta.formId);
 
     return {
       success: true,
@@ -534,22 +1164,27 @@ function submitAssessment(payload) {
 }
 
 /**
+ * ==============================================================================
+ *  REKAPITULASI & STATISTIK PENILAIAN
+ * ==============================================================================
+ */
+
+/**
  * Mengambil Rekap Nilai + Data Status Pengisian Presisi Tinggi
  */
-function getRecapData() {
+function getRecapData(formId) {
   try {
     const ss = getSpreadsheet();
-    const config = getConfigMap(ss);
-    let responsSheet = getResponsSheet(ss);
-    let masterSheet = getMasterSheet(ss);
+    const formMeta = getFormMeta(ss, formId);
+    const config = getConfigMap(ss, formMeta.formId);
+    let responsSheet = getResponsSheet(ss, formMeta.formId);
+    let masterSheet = getMasterSheet(ss, formMeta.formId);
 
     const isPublicReviewVisible = (config["Tampilkan_Ulasan_Publik"] || "AKTIF").trim().toUpperCase() === "AKTIF";
 
-    // Batch read sekali untuk seluruh data respons dan master
     const responsData = responsSheet.getLastRow() > 0 ? responsSheet.getDataRange().getValues() : [];
     const masterData = masterSheet.getLastRow() > 0 ? masterSheet.getDataRange().getValues() : [];
 
-    // Build groupMembersMap dari sheet master
     const groupMembersMap = {};
     for (let i = 1; i < masterData.length; i++) {
       const g = String(masterData[i][0] || "").trim();
@@ -561,15 +1196,10 @@ function getRecapData() {
       }
     }
 
-    // === STATUS PENGISIAN: Build submitted NIM & Name sets dari respons sheet langsung ===
-    // Ini adalah sumber kebenaran tunggal (single source of truth) — bukan dari evaluators[]
-    // submittedNims: Set NIM mahasiswa (lowercase) yang punya respons VALID
-    // submittedNames: Set nama penilai (lowercase) mahasiswa yang punya respons VALID (fallback)
-    // submittedNimPerKelompok: Map<nim_lower, Set<kelompok>> — untuk cek apakah submit di kelompok mana
     const submittedNimSet = new Set();
     const submittedNameSet = new Set();
-    const nimToKelompokMap = {}; // nim_lower -> [kelompok, ...]
-    const nameToKelompokMap = {}; // namaLower -> [kelompok, ...]
+    const nimToKelompokMap = {};
+    const nameToKelompokMap = {};
 
     for (let i = 1; i < responsData.length; i++) {
       const row = responsData[i];
@@ -577,7 +1207,7 @@ function getRecapData() {
       if (status !== "VALID") continue;
 
       const peran = String(row[11] || "Mahasiswa").trim();
-      if (peran !== "Mahasiswa") continue; // Hanya mahasiswa yang masuk matriks evaluasi keterisian
+      if (peran !== "Mahasiswa") continue;
 
       const nim = String(row[12] || "").trim().toLowerCase();
       const namaLower = String(row[4] || "").trim().toLowerCase();
@@ -594,11 +1224,9 @@ function getRecapData() {
         if (!nameToKelompokMap[namaLower].includes(kelompok)) nameToKelompokMap[namaLower].push(kelompok);
       }
     }
-    // ==================================================================================
 
-    // Agregasi rekap: dua pass — Mahasiswa saja vs semua peran
-    const rekapByGroupMhs = {}; // Mahasiswa terdaftar saja
-    const rekapByGroupAll = {}; // Semua peran (Mahasiswa + Dosen + Lainnya)
+    const rekapByGroupMhs = {};
+    const rekapByGroupAll = {};
 
     function initGroupEntry(map, kelompok, sesi) {
       if (!map[kelompok]) {
@@ -633,7 +1261,6 @@ function getRecapData() {
       const isMhs = peran === "Mahasiswa";
       const evaluatorObj = { name: namaPenilai, nim: nimPenilai, peran: peran, sesi: sesi };
 
-      // === Agregasi Semua Peran ===
       initGroupEntry(rekapByGroupAll, kelompok, sesi);
       const itemAll = rekapByGroupAll[kelompok];
       itemAll.totalPenilai += 1;
@@ -654,7 +1281,6 @@ function getRecapData() {
         }
       } catch (e) {}
 
-      // === Agregasi Mahasiswa Saja ===
       if (isMhs) {
         initGroupEntry(rekapByGroupMhs, kelompok, sesi);
         const itemMhs = rekapByGroupMhs[kelompok];
@@ -695,12 +1321,12 @@ function getRecapData() {
 
     return {
       success: true,
+      formMeta: formMeta,
       isPublicReviewVisible: isPublicReviewVisible,
       config: config,
-      summary: summaryAll,        // Semua peran (backward-compatible)
-      summaryMhs: summaryMhs,     // Mahasiswa terdaftar saja (DEFAULT tampilan rekap)
+      summary: summaryAll,
+      summaryMhs: summaryMhs,
       groupMembersMap: groupMembersMap,
-      // === DATA STATUS KETERISIAN PRESISI TINGGI ===
       submittedNims: Array.from(submittedNimSet),
       submittedNames: Array.from(submittedNameSet),
       nimToKelompokMap: nimToKelompokMap,
@@ -711,20 +1337,15 @@ function getRecapData() {
   }
 }
 
-
 /**
  * Menuliskan Rekap ke Sheet
  */
-
-function generateRekapSheet() {
+function generateRekapSheet(formId) {
   const ss = getSpreadsheet();
-  let sheetRekap = ss.getSheetByName(SHEET_REKAP);
-  if (!sheetRekap) {
-    sheetRekap = ss.insertSheet(SHEET_REKAP);
-  }
+  let sheetRekap = getRekapSheet(ss, formId);
   sheetRekap.clear();
 
-  const rekapResult = getRecapData();
+  const rekapResult = getRecapData(formId);
   if (!rekapResult.success) return;
 
   const headers = [
@@ -758,105 +1379,6 @@ function generateRekapSheet() {
 }
 
 /**
- * Inisialisasi Seluruh Tab Spreadsheet
- */
-function initAllSheets(ss) {
-  if (!ss) ss = getSpreadsheet();
-
-  // 1. Tab Konfigurasi
-  let sheetConfig = ss.getSheetByName(SHEET_CONFIG);
-  if (!sheetConfig) {
-    sheetConfig = ss.insertSheet(SHEET_CONFIG);
-  }
-  if (sheetConfig.getLastRow() === 0) {
-    const configData = [
-      ["PARAMETER", "NILAI_PENGATURAN", "KETERANGAN"],
-      ["Judul_Form", "PENILAIAN PRESENTASI KELAS 5E PGSD 2026", "Judul utama pada halaman web"],
-      ["Mata_Kuliah", "Bimbingan Konseling di SD", "Nama mata kuliah"],
-      ["Dosen_Pengampu", "Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.", "Nama dosen pengampu"],
-      ["Kelas", "5E", "Kelas mahasiswa"],
-      ["Jurusan", "PGSD", "Jurusan / Program Studi"],
-      ["Sesi_Minggu_Aktif", "Minggu 1", "Sesi pertemuan saat ini (Contoh: Minggu 1, Minggu 2, atau 'SEMUA')"],
-      ["Domain_Email_Wajib", "mhs.ulm.ac.id, ulm.ac.id", "Domain email yang diizinkan (pisahkan dengan koma)"],
-      ["Tampilkan_Ulasan_Publik", "AKTIF", "Pilihan: AKTIF (ulasan terlihat di dashboard) atau SEMBUNYIKAN"],
-      ["Nilai_Kelompok_Min", "50", "Batas nilai minimum presentasi"],
-      ["Nilai_Kelompok_Max", "100", "Batas nilai maksimum presentasi"],
-      ["Maksimal_Karakter_Evaluasi", "500", "Batas karakter per ulasan pemateri"],
-      ["Maksimal_Pilihan_Presentator_Terbaik", "2", "Maksimal pemateri terbaik yang boleh dipilih"]
-    ];
-    sheetConfig.getRange(1, 1, configData.length, 3).setValues(configData);
-    formatHeaderRange(sheetConfig.getRange(1, 1, 1, 3), "#1E3A8A", "#FFFFFF");
-    sheetConfig.autoResizeColumns(1, 3);
-  }
-
-  // 2. Tab Master Kelompok
-  let sheetMaster = ss.getSheetByName(SHEET_MASTER);
-  if (!sheetMaster) {
-    sheetMaster = ss.insertSheet(SHEET_MASTER);
-  }
-  if (sheetMaster.getLastRow() === 0) {
-    const masterHeaders = [
-      ["Kelompok", "Sesi_Minggu", "NIM", "Nama_Lengkap", "Status_Aktif"]
-    ];
-    const sampleMaster = [
-      ["Kelompok 1", "Minggu 1", "221012310001", "Ahmad Fauzi", "AKTIF"],
-      ["Kelompok 1", "Minggu 1", "221012310002", "Siti Nurhaliza", "AKTIF"],
-      ["Kelompok 1", "Minggu 1", "221012310003", "Budi Santoso", "AKTIF"],
-      ["Kelompok 1", "Minggu 1", "221012310004", "Dewi Lestari", "AKTIF"],
-      ["Kelompok 2", "Minggu 1", "221012310005", "Rian Pratama", "AKTIF"],
-      ["Kelompok 2", "Minggu 1", "221012310006", "Putri Rahayu", "AKTIF"],
-      ["Kelompok 2", "Minggu 1", "221012310007", "Dimas Anggara", "AKTIF"],
-      ["Kelompok 3", "Minggu 2", "221012310008", "Eka Saputra", "AKTIF"],
-      ["Kelompok 3", "Minggu 2", "221012310009", "Nabila Putri", "AKTIF"]
-    ];
-    sheetMaster.getRange(1, 1, 1, 5).setValues(masterHeaders);
-    sheetMaster.getRange(2, 1, sampleMaster.length, 5).setValues(sampleMaster);
-    formatHeaderRange(sheetMaster.getRange(1, 1, 1, 5), "#047857", "#FFFFFF");
-    sheetMaster.autoResizeColumns(1, 5);
-  }
-
-  // 3. Tab Respons Penilaian
-  let sheetRespons = ss.getSheetByName(SHEET_RESPONS);
-  if (!sheetRespons) {
-    sheetRespons = ss.insertSheet(SHEET_RESPONS);
-  }
-  if (sheetRespons.getLastRow() === 0) {
-    const responsHeaders = [
-      [
-        "ID_Respons",
-        "Timestamp",
-        "Sesi_Minggu",
-        "Email_Penilai",
-        "Nama_Penilai",
-        "Kelompok_Dinilai",
-        "Nilai_Kelompok",
-        "Presentator_Terbaik_1",
-        "Presentator_Terbaik_2",
-        "Evaluasi_Detail_JSON",
-        "Status"
-      ]
-    ];
-    sheetRespons.getRange(1, 1, 1, responsHeaders[0].length).setValues(responsHeaders);
-    formatHeaderRange(sheetRespons.getRange(1, 1, 1, responsHeaders[0].length), "#B91C1C", "#FFFFFF");
-    sheetRespons.autoResizeColumns(1, responsHeaders[0].length);
-  }
-
-  // 4. Tab Rekap Nilai
-  let sheetRekap = ss.getSheetByName(SHEET_REKAP);
-  if (!sheetRekap) {
-    sheetRekap = ss.insertSheet(SHEET_REKAP);
-  }
-  if (sheetRekap.getLastRow() === 0) {
-    const rekapHeaders = [
-      ["Kelompok", "Sesi_Minggu", "Jumlah_Penilai", "Rata_Rata_Nilai", "Presentator_Terbaik_Terbanyak"]
-    ];
-    sheetRekap.getRange(1, 1, 1, 5).setValues(rekapHeaders);
-    formatHeaderRange(sheetRekap.getRange(1, 1, 1, 5), "#1E40AF", "#FFFFFF");
-    sheetRekap.autoResizeColumns(1, 5);
-  }
-}
-
-/**
  * Format Header Range
  */
 function formatHeaderRange(range, bgColor, fontColor) {
@@ -869,19 +1391,20 @@ function formatHeaderRange(range, bgColor, fontColor) {
 
 /**
  * ==============================================================================
- * 🔐 ADMIN BACKEND CONTROLLERS (DATA & CONFIG MANAGEMENT)
+ *  ADMIN BACKEND CONTROLLERS (DATA & CONFIG MANAGEMENT)
  * ==============================================================================
  */
 
 /**
- * Mengambil Seluruh Data Master (Aktif/Nonaktif) & Konfigurasi untuk Admin
+ * Mengambil Seluruh Data Master & Konfigurasi untuk Admin Form Terisolasi
  */
-function adminGetFullData() {
+function adminGetFullData(formId) {
   try {
     const ss = getSpreadsheet();
-    const config = getConfigMap(ss);
-    let masterSheet = getMasterSheet(ss);
-    let responsSheet = getResponsSheet(ss);
+    const formMeta = getFormMeta(ss, formId);
+    const config = getConfigMap(ss, formMeta.formId);
+    let masterSheet = getMasterSheet(ss, formMeta.formId);
+    let responsSheet = getResponsSheet(ss, formMeta.formId);
 
     const masterData = masterSheet.getLastRow() > 0 ? masterSheet.getDataRange().getValues() : [];
     const groupsMap = {};
@@ -900,7 +1423,7 @@ function adminGetFullData() {
         groupsMap[kelompok] = {
           name: kelompok,
           sesi: sesi,
-          status: status, // status kelompok ditentukan oleh anggotanya
+          status: status,
           members: []
         };
       }
@@ -919,7 +1442,9 @@ function adminGetFullData() {
 
     return {
       success: true,
+      formMeta: formMeta,
       config: config,
+      customFields: formMeta.customFields || [],
       groups: groupList,
       totalResponses: totalResponses
     };
@@ -937,7 +1462,8 @@ function adminSaveMasterData(payload) {
     lock.waitLock(10000);
 
     const ss = getSpreadsheet();
-    let masterSheet = getMasterSheet(ss);
+    const formId = payload.formId || DEFAULT_FORM_ID;
+    let masterSheet = getMasterSheet(ss, formId);
 
     const groups = payload.groups || [];
     const rowsToWrite = [];
@@ -951,7 +1477,6 @@ function adminSaveMasterData(payload) {
       if (!groupName) return;
 
       if (members.length === 0) {
-        // Simpan kelompok meski belum ada anggota
         rowsToWrite.push([groupName, sesi, "-", "-", groupStatus]);
       } else {
         members.forEach(m => {
@@ -965,18 +1490,16 @@ function adminSaveMasterData(payload) {
       }
     });
 
-    // Bersihkan isi sheet lama (kecuali header baris 1)
     if (masterSheet.getLastRow() > 1) {
       masterSheet.getRange(2, 1, masterSheet.getLastRow() - 1, 5).clearContent();
     }
 
-    // Tulis baris baru jika ada
     if (rowsToWrite.length > 0) {
       masterSheet.getRange(2, 1, rowsToWrite.length, 5).setValues(rowsToWrite);
     }
 
     lock.releaseLock();
-    clearApiCache();
+    clearApiCache(formId);
 
     return {
       success: true,
@@ -988,7 +1511,7 @@ function adminSaveMasterData(payload) {
 }
 
 /**
- * Menyimpan Konfigurasi Sistem Perkuliahan ke CONFIG_APP
+ * Menyimpan Konfigurasi Sistem Perkuliahan
  */
 function adminSaveConfig(payload) {
   try {
@@ -996,7 +1519,8 @@ function adminSaveConfig(payload) {
     lock.waitLock(10000);
 
     const ss = getSpreadsheet();
-    let configSheet = getConfigSheet(ss);
+    const formId = payload.formId || DEFAULT_FORM_ID;
+    let configSheet = getConfigSheet(ss, formId);
 
     const newConfig = payload.config || {};
     const configData = configSheet.getDataRange().getValues();
@@ -1005,7 +1529,7 @@ function adminSaveConfig(payload) {
     for (let i = 1; i < configData.length; i++) {
       const key = String(configData[i][0] || "").trim();
       if (key) {
-        existingKeys[key] = i + 1; // Baris 1-based
+        existingKeys[key] = i + 1;
       }
     }
 
@@ -1018,12 +1542,24 @@ function adminSaveConfig(payload) {
       }
     }
 
+    // Update juga custom fields jika dikirim
+    if (payload.customFields !== undefined) {
+      adminUpdateFormMeta({
+        formId: formId,
+        customFields: payload.customFields,
+        judulForm: newConfig["Judul_Form"],
+        mataKuliah: newConfig["Mata_Kuliah"],
+        dosen: newConfig["Dosen_Pengampu"],
+        sesiAktif: newConfig["Sesi_Minggu_Aktif"]
+      });
+    }
+
     lock.releaseLock();
-    clearApiCache();
+    clearApiCache(formId);
 
     return {
       success: true,
-      message: "Konfigurasi sistem perkuliahan berhasil disimpan!"
+      message: "Konfigurasi formulir berhasil disimpan!"
     };
   } catch (err) {
     return { success: false, error: "Gagal menyimpan konfigurasi: " + err.toString() };
@@ -1031,7 +1567,7 @@ function adminSaveConfig(payload) {
 }
 
 /**
- * Mereset / Menghapus Seluruh Respons Penilaian
+ * Mereset / Menghapus Seluruh Respons Penilaian per Form
  */
 function adminResetResponses(payload) {
   try {
@@ -1039,8 +1575,9 @@ function adminResetResponses(payload) {
     lock.waitLock(10000);
 
     const ss = getSpreadsheet();
-    let responsSheet = getResponsSheet(ss);
-    let rekapSheet = getRekapSheet(ss);
+    const formId = payload.formId || DEFAULT_FORM_ID;
+    let responsSheet = getResponsSheet(ss, formId);
+    let rekapSheet = getRekapSheet(ss, formId);
 
     if (responsSheet && responsSheet.getLastRow() > 1) {
       responsSheet.getRange(2, 1, responsSheet.getLastRow() - 1, responsSheet.getLastColumn()).clearContent();
@@ -1051,11 +1588,11 @@ function adminResetResponses(payload) {
     }
 
     lock.releaseLock();
-    clearApiCache();
+    clearApiCache(formId);
 
     return {
       success: true,
-      message: "Seluruh respons penilaian berhasil dibersihkan."
+      message: "Seluruh respons penilaian pada form ini berhasil dibersihkan."
     };
   } catch (err) {
     return { success: false, error: "Gagal reset respons: " + err.toString() };
@@ -1063,15 +1600,16 @@ function adminResetResponses(payload) {
 }
 
 /**
- * Mengambil Seluruh Daftar Respons Penilaian untuk Admin (Tabel Filterable)
+ * Mengambil Seluruh Daftar Respons Penilaian per Form
  */
-function adminGetResponsesList() {
+function adminGetResponsesList(formId) {
   try {
     const ss = getSpreadsheet();
-    let responsSheet = getResponsSheet(ss);
+    const formMeta = getFormMeta(ss, formId);
+    let responsSheet = getResponsSheet(ss, formMeta.formId);
 
     if (!responsSheet || responsSheet.getLastRow() <= 1) {
-      return { success: true, responses: [] };
+      return { success: true, formMeta: formMeta, responses: [] };
     }
 
     const data = responsSheet.getDataRange().getValues();
@@ -1097,6 +1635,9 @@ function adminGetResponsesList() {
       const best2 = String(row[8] || "-").trim();
       const evaluasiJsonStr = String(row[9] || "{}").trim();
       const status = String(row[10] || "VALID").trim().toUpperCase();
+      const peran = String(row[11] || "Mahasiswa").trim();
+      const nim = String(row[12] || "-").trim();
+      const customAnswersStr = String(row[13] || "{}").trim();
 
       if (!email && !namaPenilai && !kelompok) continue;
 
@@ -1107,20 +1648,21 @@ function adminGetResponsesList() {
         sesi: sesi,
         email: email,
         namaPenilai: namaPenilai,
-        peran: String(row[11] || "Mahasiswa").trim(),
-        nim: String(row[12] || "-").trim(),
+        peran: peran,
+        nim: nim,
         kelompok: kelompok,
         nilaiKelompok: nilaiKelompok,
         best1: best1,
         best2: best2,
         evaluasiDetail: evaluasiJsonStr,
+        customAnswers: customAnswersStr,
         status: status
       });
     }
 
-    // Urutkan dari yang paling baru (Newest first)
     return {
       success: true,
+      formMeta: formMeta,
       responses: responses.reverse()
     };
   } catch (err) {
@@ -1137,7 +1679,8 @@ function adminDeleteSingleResponse(payload) {
     lock.waitLock(10000);
 
     const ss = getSpreadsheet();
-    let responsSheet = getResponsSheet(ss);
+    const formId = payload.formId || DEFAULT_FORM_ID;
+    let responsSheet = getResponsSheet(ss, formId);
 
     if (!responsSheet || responsSheet.getLastRow() <= 1) {
       lock.releaseLock();
@@ -1150,7 +1693,7 @@ function adminDeleteSingleResponse(payload) {
 
     for (let i = 1; i < data.length; i++) {
       if (String(data[i][0] || "").trim() === idTarget) {
-        targetRow = i + 1; // 1-based row
+        targetRow = i + 1;
         break;
       }
     }
@@ -1162,10 +1705,10 @@ function adminDeleteSingleResponse(payload) {
     if (targetRow > 1 && targetRow <= responsSheet.getLastRow()) {
       responsSheet.deleteRow(targetRow);
       lock.releaseLock();
-      clearApiCache();
+      clearApiCache(formId);
 
       try {
-        generateRekapSheet();
+        generateRekapSheet(formId);
       } catch (e) {}
 
       return {
@@ -1190,14 +1733,15 @@ function adminDeleteScopedResponses(payload) {
     lock.waitLock(15000);
 
     const ss = getSpreadsheet();
-    let responsSheet = getResponsSheet(ss);
+    const formId = payload.formId || DEFAULT_FORM_ID;
+    let responsSheet = getResponsSheet(ss, formId);
 
     if (!responsSheet || responsSheet.getLastRow() <= 1) {
       lock.releaseLock();
       return { success: false, error: "Data respons kosong." };
     }
 
-    const mode = String(payload.mode || "").trim().toUpperCase(); // "KELOMPOK" atau "SESI"
+    const mode = String(payload.mode || "").trim().toUpperCase();
     const targetValue = String(payload.targetValue || "").trim();
 
     if (!mode || (mode !== "KELOMPOK" && mode !== "SESI")) {
@@ -1213,7 +1757,6 @@ function adminDeleteScopedResponses(payload) {
     const data = responsSheet.getDataRange().getValues();
     let deletedCount = 0;
 
-    // Iterasi mundur dari baris terbawah agar indeks baris tidak bergeser saat deleteRow
     for (let i = data.length - 1; i >= 1; i--) {
       let isMatch = false;
 
@@ -1230,17 +1773,17 @@ function adminDeleteScopedResponses(payload) {
       }
 
       if (isMatch) {
-        responsSheet.deleteRow(i + 1); // 1-based row index
+        responsSheet.deleteRow(i + 1);
         deletedCount++;
       }
     }
 
     lock.releaseLock();
-    clearApiCache();
+    clearApiCache(formId);
 
     if (deletedCount > 0) {
       try {
-        generateRekapSheet();
+        generateRekapSheet(formId);
       } catch (e) {}
     }
 
@@ -1255,4 +1798,3 @@ function adminDeleteScopedResponses(payload) {
     return { success: false, error: "Gagal menghapus respons bersyarat: " + err.toString() };
   }
 }
-

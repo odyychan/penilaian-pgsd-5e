@@ -4,6 +4,36 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.75] - 2026-08-24
+
+### 🚀 Dynamic Form Builder & Multi-Form Management Engine (Arsitektur Multi-Form Terpadu)
+- **Pusat Pengelolaan Multi-Formulir (Master Form Hub):**
+  - Menghadirkan antarmuka Master Form Hub di portal admin untuk memantau dan mengelola banyak formulir perkuliahan/kelas secara terpadu.
+  - Dilengkapi bilah pencarian cerdas, filter status aktif/ditutup, dan kartu formulir informatif (PIN alfanumerik 4–5 karakter, mata kuliah, dosen, sesi aktif, jumlah respons masuk).
+- **Ruang Kerja Administrasi Terisolasi (Single Form Sandbox Workspace):**
+  - Setiap formulir yang dikelola beroperasi di dalam ruang kerja mandiri (`?id=XXXX`) dengan 4 tab administrasi lengkap (Kelompok, Konfigurasi & Builder, Respons, Sistem).
+  - Navigasi mulus dengan tombol kembali `← Hub Formulir` dan breadcrumb identitas form aktif.
+- **Wizard Pembuatan Formulir Baru & Generator PIN 4–5 Karakter:**
+  - Pembuatan formulir baru instan dengan auto-generate kode PIN unik 4–5 karakter (misal: `BK5E`, `IPA1`, `7K9P`) dan slug tautan URL yang bersih.
+  - Pilihan inisialisasi susunan mahasiswa (Formulir Bersih Baru atau Duplikasi dari Roster Kelas).
+- **Modal Bagikan Interaktif (QR Code & PIN Mahasiswa):**
+  - Dilengkapi generator gambar QR Code otomatis resolusi tinggi yang dapat diunduh langsung (`.png`).
+  - Tampilan kode PIN 4–5 digit berukuran besar dengan tombol salin 1-klik, serta tautan langsung mahasiswa.
+- **Form Builder Terintegrasi di Tab Konfigurasi:**
+  - Penambahan input pertanyaan dinamis seperti Google Forms: **Teks Singkat**, **Paragraf Panjang**, **Rubrik Skala Nilai (1-5 / 0-100)**, **Pilihan Ganda**, **Kotak Centang (Checkboxes)**, dan **Unggah Berkas (PDF/Gambar ke Google Drive)**.
+  - Pilihan cakupan fleksibel: Pertanyaan Umum Formulir (*Global*) atau Rubrik per Kelompok Presentasi (*Per-Kelompok*).
+  - Template instan 1-klik: *Upload Slide Presentasi (PDF)*, *Rubrik Tanya Jawab (1-5)*, dan *Refleksi Perkuliahan*.
+- **Client Dynamic Renderer & PIN Switcher (`index.html`):**
+  - Tombol PIN Badge di bilah atas untuk mahasiswa berpindah kelas/formulir secara cepat dengan memasukkan kode 4–5 karakter.
+  - Perenderan dinamis rubrik tambahan per kelompok dan kolom umum pada tahapan penilaian mahasiswa.
+  - Pengunggah berkas terintegrasi (*Base64 Reader*) untuk lampiran slide presentasi/dokumen.
+- **Backend Multi-Form Engine & Drive Uploader (`Code.gs`):**
+  - Lembar `Registry_Forms` untuk pencatatan metadata seluruh formulir.
+  - Resolver sheet dinamis terisolasi (`Master_<ID>`, `Config_<ID>`, `Respons_<ID>`, `Rekap_<ID>`) dengan kompatibilitas penuh 100% terhadap data lama.
+  - Handler Google Drive untuk penyimpanan dokumen lampiran mahasiswa.
+
+---
+
 ## [2.1.74] - 2026-08-23
 
 ### 🎨 Penyederhanaan Teks & Harmonisasi Bahasa Panel Admin (Ramah Pengguna Awam)
@@ -875,7 +905,8 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
   - Mengeliminasi kendala *scroll lock* / *centering cutoff* pada layar smartphone sempit, sehingga saat dokumen diperbesar (zoom in 50% - 150%), pengguna dapat menggeser (*pan/scroll*) secara bebas secara horizontal dan vertikal ke seluruh penjuru lembar kerja.
   - Mode tombol Fit tetap menghitung skala otomatis pas layar ponsel secara instan.
 - **Presisi 100% WYSIWYG Antara Preview Layar & Hasil PDF:**
-  - Menghilangkan kebocoran kelas responsif CSS Tailwind (sm:grid-cols-2, dll.) di dalam kanvas lembar kerja A4, menggantinya dengan styling grid inline murni (epeat(2, minmax(0, 1fr))).
+  - Menghilangkan kebocoran kelas responsif CSS Tailwind (sm:grid-cols-2, dll.) di dalam kanvas lembar kerja A4, menggantinya dengan styling grid inline murni (
+epeat(2, minmax(0, 1fr))).
   - Menjamin tampilan pratinjau di layar mobile 320px identik 1:1 tanpa perbedaan sedikitpun dengan dokumen PDF A4 yang dicetak.
 
 ---
