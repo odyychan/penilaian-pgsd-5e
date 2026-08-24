@@ -160,6 +160,10 @@
       .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
+  <!-- KaTeX CSS & JS for Universal Math / LaTeX / AI & Word Formula Rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
 </head>
 <body class="min-h-screen flex flex-col bg-zinc-50 font-sans antialiased text-zinc-900 relative">
 
@@ -2074,7 +2078,394 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       return localStorage.getItem("PGSD_API_URL") || DEFAULT_API_URL;
     }
 
-        // =========================================================================
+    
+    // =========================================================================
+    // UNIVERSAL MATH & KATEX AUTO-RENDER ENGINE
+    // =========================================================================
+    function renderAllMathInElement(domElement) {
+      if (!domElement) return;
+      if (typeof renderMathInElement === 'function') {
+        try {
+          renderMathInElement(domElement, {
+            delimiters: [
+              { left: '$$', right: '$$', display: true },
+              { left: '$', right: '$', display: false },
+              { left: '\\(', right: '\\)', display: false },
+              { left: '\\[', right: '\\]', display: true }
+            ],
+            ignoredTags: ["script", "noscript", "style", "textarea", "pre", "code", "option"],
+            throwOnError: false,
+            trust: true
+          });
+        } catch(e) {
+          console.warn("KaTeX render error:", e);
+        }
+      }
+    }
+
+    // =========================================================================
+    // RICH MULTI-MEDIA ENGINE (IMAGE, VIDEO, AUDIO, EMBED)
+    // =========================================================================
+    let currentMediaEditing = { sIdx: -1, fIdx: -1, type: 'IMAGE' };
+
+    function convertToEmbedUrl(url, type) {
+      if (!url) return '';
+      url = url.trim();
+
+      if (type === 'VIDEO') {
+        const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=|shorts\/)|youtu\.be\/)([^"&?\/\s]{11})/i);
+        if (ytMatch && ytMatch[1]) {
+          return `https://www.youtube.com/embed/${ytMatch[1]}`;
+        }
+        const vimeoMatch = url.match(/vimeo\.com\/(\d+)/i);
+        if (vimeoMatch && vimeoMatch[1]) {
+          return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+        }
+        const driveMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i);
+        if (driveMatch && driveMatch[1]) {
+          return `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
+        }
+      }
+
+      if (type === 'IMAGE') {
+        const driveImgMatch = url.match(/drive\.google\.com\/(?:file\/d\/|open\?id=)([a-zA-Z0-9_-]+)/i);
+        if (driveImgMatch && driveImgMatch[1]) {
+          return `https://drive.google.com/uc?export=view&id=${driveImgMatch[1]}`;
+        }
+      }
+
+      if (type === 'AUDIO') {
+        const driveAudioMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i);
+        if (driveAudioMatch && driveAudioMatch[1]) {
+          return `https://drive.google.com/file/d/${driveAudioMatch[1]}/preview`;
+        }
+      }
+
+      return url;
+    }
+
+    function getBuilderMediaPreviewHtml(media, sIdx, fIdx) {
+      if (!media || !media.url) return '';
+      const alignClass = media.align === 'left' ? 'justify-start' : (media.align === 'right' ? 'justify-end' : 'justify-center');
+      const embedUrl = convertToEmbedUrl(media.url, media.type);
+
+      let mediaBody = '';
+      if (media.type === 'IMAGE') {
+        mediaBody = `
+          <div class="relative group inline-block max-w-full">
+            <img src="${embedUrl}" alt="${media.caption || 'Gambar Pertanyaan'}" class="max-h-72 w-auto rounded-xl border border-zinc-200 shadow-xs object-contain bg-zinc-900/5">
+          </div>
+        `;
+      } else if (media.type === 'VIDEO') {
+        if (embedUrl.includes('youtube.com/embed') || embedUrl.includes('vimeo.com') || embedUrl.includes('drive.google.com')) {
+          mediaBody = `
+            <div class="w-full max-w-lg aspect-video rounded-xl overflow-hidden border border-zinc-200 shadow-xs bg-black">
+              <iframe src="${embedUrl}" class="w-full h-full" frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+            </div>
+          `;
+        } else {
+          mediaBody = `
+            <div class="w-full max-w-lg aspect-video rounded-xl overflow-hidden border border-zinc-200 shadow-xs bg-black">
+              <video src="${embedUrl}" controls class="w-full h-full object-contain"></video>
+            </div>
+          `;
+        }
+      } else if (media.type === 'AUDIO') {
+        mediaBody = `
+          <div class="w-full max-w-md p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 shadow-2xs space-y-2">
+            <div class="flex items-center gap-2 text-xs font-semibold text-zinc-800">
+              <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg>
+              <span>Audio Pertanyaan</span>
+            </div>
+            <audio src="${embedUrl}" controls class="w-full h-8"></audio>
+          </div>
+        `;
+      } else if (media.type === 'EMBED') {
+        mediaBody = `
+          <div class="w-full max-w-xl aspect-[16/10] rounded-xl overflow-hidden border border-zinc-200 shadow-xs bg-zinc-100">
+            <iframe src="${embedUrl}" class="w-full h-full" frameborder="0"></iframe>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="p-3 bg-zinc-50/80 rounded-2xl border border-zinc-200/90 space-y-2 my-2.5">
+          <div class="flex items-center justify-between gap-2 border-b border-zinc-200/60 pb-2">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">
+                MEDIA ${media.type}
+              </span>
+              <span class="text-[11px] text-zinc-600 font-medium truncate max-w-[200px]">${media.caption || 'Tanpa keterangan'}</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="openAttachMediaModal(${sIdx}, ${fIdx})" class="px-2.5 py-1 rounded-lg bg-white border border-zinc-200 hover:bg-zinc-100 text-[11px] text-zinc-700 font-semibold cursor-pointer shadow-2xs">
+                Ubah
+              </button>
+              <button type="button" onclick="handleRemoveMedia(${sIdx}, ${fIdx})" class="px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-200 hover:bg-rose-100 text-[11px] text-rose-600 font-semibold cursor-pointer shadow-2xs">
+                Hapus
+              </button>
+            </div>
+          </div>
+          <div class="flex ${alignClass} py-1">
+            ${mediaBody}
+          </div>
+          ${media.caption ? `<p class="text-xs text-zinc-600 italic text-center border-t border-zinc-200/40 pt-1.5 math-renderable">${media.caption}</p>` : ''}
+        </div>
+      `;
+    }
+
+    function openAttachMediaModal(sIdx, fIdx) {
+      currentMediaEditing.sIdx = sIdx;
+      currentMediaEditing.fIdx = fIdx;
+      const field = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
+      if (!field) return;
+
+      const media = field.media || { type: 'IMAGE', url: '', caption: '', align: 'center', position: 'ABOVE_QUESTION' };
+      currentMediaEditing.type = media.type || 'IMAGE';
+
+      switchMediaModalType(currentMediaEditing.type);
+      document.getElementById("inputMediaUrl").value = media.url || '';
+      document.getElementById("inputMediaCaption").value = media.caption || '';
+      document.getElementById("selectMediaAlign").value = media.align || 'center';
+      document.getElementById("selectMediaPosition").value = media.position || 'ABOVE_QUESTION';
+
+      const btnDel = document.getElementById("btnDeleteModalMedia");
+      if (btnDel) {
+        if (field.media && field.media.url) btnDel.classList.remove("hidden");
+        else btnDel.classList.add("hidden");
+      }
+
+      updateMediaModalLivePreview();
+      document.getElementById("modalAttachQuestionMedia").classList.remove("hidden");
+    }
+
+    function closeAttachMediaModal() {
+      document.getElementById("modalAttachQuestionMedia").classList.add("hidden");
+    }
+
+    function switchMediaModalType(type) {
+      currentMediaEditing.type = type;
+      ['IMAGE', 'VIDEO', 'AUDIO', 'EMBED'].forEach(t => {
+        const tab = document.getElementById(`mediaTab_${t}`);
+        if (tab) {
+          if (t === type) {
+            tab.className = "py-2 rounded-lg bg-white text-zinc-950 shadow-2xs text-center transition cursor-pointer font-bold";
+          } else {
+            tab.className = "py-2 rounded-lg text-zinc-500 hover:text-zinc-900 text-center transition cursor-pointer";
+          }
+        }
+      });
+
+      const label = document.getElementById("mediaUrlLabel");
+      const help = document.getElementById("mediaUrlHelp");
+      const uploadBtn = document.getElementById("btnMediaDirectUpload");
+
+      if (type === 'IMAGE') {
+        if (label) label.textContent = "Tautan / URL Gambar:";
+        if (help) help.textContent = "Mendukung tautan langsung (JPG/PNG/GIF), Google Drive share link, atau klik Unggah File.";
+        if (uploadBtn) uploadBtn.classList.remove("hidden");
+      } else if (type === 'VIDEO') {
+        if (label) label.textContent = "Tautan Video (YouTube, Vimeo, Drive, MP4):";
+        if (help) help.textContent = "Mendukung link YouTube biasa/shorts, Vimeo, Google Drive Video, atau direct link MP4.";
+        if (uploadBtn) uploadBtn.classList.add("hidden");
+      } else if (type === 'AUDIO') {
+        if (label) label.textContent = "Tautan Berkas Audio (MP3, WAV, Drive Audio):";
+        if (help) help.textContent = "Mendukung file audio MP3/WAV online, Google Drive audio, atau rekaman soal.";
+        if (uploadBtn) uploadBtn.classList.remove("hidden");
+      } else if (type === 'EMBED') {
+        if (label) label.textContent = "Tautan Halaman / Embed Iframe:";
+        if (help) help.textContent = "Mendukung link web interaktif, slide presentasi Google Slides, Figma, atau PDF online.";
+        if (uploadBtn) uploadBtn.classList.add("hidden");
+      }
+
+      updateMediaModalLivePreview();
+    }
+
+    async function handleModalDirectFileUpload(fileInput) {
+      const file = fileInput.files ? fileInput.files[0] : null;
+      if (!file) return;
+      if (file.size > 10 * 1024 * 1024) {
+        showAdminToast("Ukuran berkas melebihi batas 10 MB!", "warning");
+        return;
+      }
+
+      showAdminToast(`Memproses '${file.name}'...`, "info");
+
+      try {
+        const readBase64Promise = (f) => new Promise((resolve) => {
+          if (!f.type.startsWith("image/") || f.type === "image/svg+xml") {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve({ dataUrl: e.target.result, base64: e.target.result.split(',')[1] || '' });
+            reader.readAsDataURL(f);
+            return;
+          }
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+              let width = img.width;
+              let height = img.height;
+              const maxDim = 1600;
+              if (width > maxDim || height > maxDim) {
+                if (width > height) {
+                  height = Math.round((height * maxDim) / width);
+                  width = maxDim;
+                } else {
+                  width = Math.round((width * maxDim) / height);
+                  height = maxDim;
+                }
+              }
+              const canvas = document.createElement("canvas");
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(img, 0, 0, width, height);
+              const dataUrl = canvas.toDataURL(f.type === "image/png" ? "image/png" : "image/jpeg", 0.88);
+              const base64 = dataUrl.split(',')[1] || '';
+              resolve({ dataUrl, base64 });
+            };
+            img.src = e.target.result;
+          };
+          reader.readAsDataURL(f);
+        });
+
+        const { dataUrl, base64 } = await readBase64Promise(file);
+        document.getElementById("inputMediaUrl").value = dataUrl;
+        updateMediaModalLivePreview();
+
+        // Optional cloud drive upload if backend is online
+        const apiUrl = getAdminApiUrl();
+        if (navigator.onLine && apiUrl && !apiUrl.includes("localhost")) {
+          showAdminToast("Mengunggah media ke Google Drive...", "info");
+          try {
+            const resp = await fetch(apiUrl, {
+              method: "POST",
+              headers: { "Content-Type": "text/plain;charset=utf-8" },
+              body: JSON.stringify({
+                action: "adminUploadMedia",
+                formId: currentFormId || DEFAULT_PRIMARY_FORM_ID,
+                name: file.name,
+                type: file.type,
+                base64: base64
+              })
+            });
+            const resJson = await resp.json();
+            if (resJson && resJson.success && resJson.fileUrl) {
+              document.getElementById("inputMediaUrl").value = resJson.fileUrl;
+              updateMediaModalLivePreview();
+              showAdminToast("Media berhasil diunggah ke Google Drive!", "success");
+              return;
+            }
+          } catch(netErr) {
+            console.log("Drive upload fallback to local dataUrl:", netErr);
+          }
+        }
+
+        showAdminToast(`Berkas '${file.name}' siap dilampirkan.`, "success");
+      } catch (err) {
+        console.error("Direct upload error:", err);
+        showAdminToast("Gagal memproses berkas.", "error");
+      }
+    }
+
+    function updateMediaModalLivePreview() {
+      const container = document.getElementById("mediaModalPreviewContainer");
+      if (!container) return;
+
+      const url = (document.getElementById("inputMediaUrl")?.value || "").trim();
+      const caption = (document.getElementById("inputMediaCaption")?.value || "").trim();
+      const align = document.getElementById("selectMediaAlign")?.value || "center";
+      const alignClass = align === 'left' ? 'justify-start' : (align === 'right' ? 'justify-end' : 'justify-center');
+
+      if (!url) {
+        container.innerHTML = '<span class="text-zinc-400 italic">Masukkan URL atau pilih berkas untuk melihat pratinjau media</span>';
+        return;
+      }
+
+      const type = currentMediaEditing.type;
+      const embedUrl = convertToEmbedUrl(url, type);
+
+      let mediaHtml = '';
+      if (type === 'IMAGE') {
+        mediaHtml = `<img src="${embedUrl}" class="max-h-48 w-auto rounded-xl border border-zinc-200 object-contain shadow-xs">`;
+      } else if (type === 'VIDEO') {
+        mediaHtml = `
+          <div class="w-full max-w-md aspect-video rounded-xl overflow-hidden border border-zinc-200 shadow-xs bg-black">
+            <iframe src="${embedUrl}" class="w-full h-full" frameborder="0" allowfullscreen></iframe>
+          </div>
+        `;
+      } else if (type === 'AUDIO') {
+        mediaHtml = `
+          <div class="w-full max-w-sm p-3 rounded-xl bg-zinc-50 border border-zinc-200">
+            <audio src="${embedUrl}" controls class="w-full h-8"></audio>
+          </div>
+        `;
+      } else if (type === 'EMBED') {
+        mediaHtml = `
+          <div class="w-full max-w-md aspect-video rounded-xl overflow-hidden border border-zinc-200 shadow-xs bg-zinc-100">
+            <iframe src="${embedUrl}" class="w-full h-full" frameborder="0"></iframe>
+          </div>
+        `;
+      }
+
+      container.innerHTML = `
+        <div class="w-full space-y-2">
+          <div class="flex ${alignClass}">
+            ${mediaHtml}
+          </div>
+          ${caption ? `<p class="text-xs text-zinc-600 text-center italic math-renderable">${caption}</p>` : ''}
+        </div>
+      `;
+      renderAllMathInElement(container);
+    }
+
+    function handleSaveModalMedia() {
+      const { sIdx, fIdx } = currentMediaEditing;
+      const field = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
+      if (!field) return;
+
+      const url = (document.getElementById("inputMediaUrl")?.value || "").trim();
+      const caption = (document.getElementById("inputMediaCaption")?.value || "").trim();
+      const align = document.getElementById("selectMediaAlign")?.value || "center";
+      const position = document.getElementById("selectMediaPosition")?.value || "ABOVE_QUESTION";
+
+      if (!url) {
+        showAdminToast("Mohon masukkan tautan / URL media terlebih dahulu.", "warning");
+        return;
+      }
+
+      pushUndoSnapshot('Lampirkan Media Pertanyaan');
+      field.media = {
+        type: currentMediaEditing.type,
+        url: url,
+        caption: caption,
+        align: align,
+        position: position
+      };
+
+      closeAttachMediaModal();
+      renderDynamicStagesCanvas();
+      markSchemaAsDirty();
+      showAdminToast("Media berhasil dilampirkan ke pertanyaan!", "success");
+    }
+
+    function handleRemoveMedia(sIdx, fIdx) {
+      const field = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
+      if (!field) return;
+      pushUndoSnapshot('Hapus Media Pertanyaan');
+      delete field.media;
+      renderDynamicStagesCanvas();
+      markSchemaAsDirty();
+      showAdminToast("Media pertanyaan dihapus.", "info");
+    }
+
+    function handleRemoveModalMedia() {
+      const { sIdx, fIdx } = currentMediaEditing;
+      handleRemoveMedia(sIdx, fIdx);
+      closeAttachMediaModal();
+    }
+
+    // =========================================================================
     // UNIVERSAL PROGRESS BAR & SKELETON LOADERS ENGINE
     // =========================================================================
     let activeGlobalLoadingCount = 0;
@@ -2814,6 +3205,9 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       }
       renderHubFormsGrid();
       initAllModernDropdowns();
+      setTimeout(() => {
+        renderAllMathInElement(document.getElementById("dynamicStagesCanvasContainer"));
+      }, 50);
     }
 
     function fallbackRegistryList() {
@@ -4736,10 +5130,16 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
               </div>
 
+              <!-- Media Preview (If attached ABOVE question) -->
+              ${f.media && (f.media.position === 'ABOVE_QUESTION' || !f.media.position) ? getBuilderMediaPreviewHtml(f.media, sIdx, fIdx) : ''}
+
               <!-- Middle: Authentic Google Forms Question Body -->
               <div class="pt-1">
                 ${visualBody}
               </div>
+
+              <!-- Media Preview (If attached BELOW question) -->
+              ${f.media && f.media.position === 'BELOW_QUESTION' ? getBuilderMediaPreviewHtml(f.media, sIdx, fIdx) : ''}
 
               <!-- Bottom Row: Google Forms Action Toolbar -->
               <div class="flex items-center justify-between gap-3 pt-3.5 border-t border-zinc-200/80 text-xs">
@@ -4748,6 +5148,10 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
                   <button type="button" onclick="moveField(${sIdx}, ${fIdx}, 1)" ${fIdx === fields.length - 1 ? 'disabled' : ''} class="p-1.5 rounded-lg hover:bg-zinc-100 disabled:opacity-20 text-zinc-600 cursor-pointer" title="Turunkan Posisi">▼</button>
                   <button type="button" onclick="openMoveFieldModal(${sIdx}, ${fIdx})" class="px-2.5 py-1 rounded-lg border border-zinc-200 hover:bg-zinc-100 text-zinc-700 text-[11px] font-medium flex items-center gap-1 cursor-pointer">
                     <span>Pindah Bagian ↗</span>
+                  </button>
+                  <button type="button" onclick="openAttachMediaModal(${sIdx}, ${fIdx})" class="px-2.5 py-1 rounded-lg border ${f.media ? 'border-indigo-300 bg-indigo-50 text-indigo-700 font-semibold' : 'border-zinc-200 hover:bg-zinc-100 text-zinc-700 font-medium'} text-[11px] flex items-center gap-1.5 cursor-pointer transition shadow-2xs" title="Lampirkan Media (Gambar, Video, Audio, Link)">
+                    <svg class="w-3.5 h-3.5 ${f.media ? 'text-indigo-600' : 'text-zinc-500'}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <span>${f.media ? 'Media Terlampir ✓' : '+ Media'}</span>
                   </button>
                   <span class="text-[10px] font-mono text-zinc-400 hidden sm:inline">• Tersimpan di Draf</span>
                 </div>
@@ -6866,6 +7270,140 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           Ya, Lanjutkan
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: ATTACH MULTI-MEDIA TO QUESTION (IMAGE, VIDEO, AUDIO, EMBED) -->
+  <!-- ========================================================================= -->
+  <div id="modalAttachQuestionMedia" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-5 fade-enter max-h-[90vh] overflow-y-auto">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-200 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-bold text-sm sm:text-base text-zinc-900">Sematkan Media ke Pertanyaan</h3>
+            <p class="text-[11.5px] text-zinc-500">Tambahkan gambar, video, audio, atau link interaktif ke pertanyaan ini.</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeAttachMediaModal()" class="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <!-- Media Type Tabs -->
+      <div class="grid grid-cols-4 gap-1.5 p-1 bg-zinc-100 rounded-xl text-xs font-semibold">
+        <button type="button" id="mediaTab_IMAGE" onclick="switchMediaModalType('IMAGE')" class="py-2 rounded-lg bg-white text-zinc-950 shadow-2xs text-center transition cursor-pointer font-bold">
+          Gambar
+        </button>
+        <button type="button" id="mediaTab_VIDEO" onclick="switchMediaModalType('VIDEO')" class="py-2 rounded-lg text-zinc-500 hover:text-zinc-900 text-center transition cursor-pointer">
+          Video
+        </button>
+        <button type="button" id="mediaTab_AUDIO" onclick="switchMediaModalType('AUDIO')" class="py-2 rounded-lg text-zinc-500 hover:text-zinc-900 text-center transition cursor-pointer">
+          Audio
+        </button>
+        <button type="button" id="mediaTab_EMBED" onclick="switchMediaModalType('EMBED')" class="py-2 rounded-lg text-zinc-500 hover:text-zinc-900 text-center transition cursor-pointer">
+          Embed Link
+        </button>
+      </div>
+
+      <!-- Form Inputs -->
+      <div class="space-y-4 text-xs">
+        
+        <!-- URL Input & Direct Upload for Image -->
+        <div class="space-y-1.5">
+          <label class="block font-bold text-zinc-800" id="mediaUrlLabel">Tautan / URL Gambar:</label>
+          <div class="flex items-center gap-2">
+            <input 
+              type="text" 
+              id="inputMediaUrl" 
+              placeholder="https://... (contoh: https://images.unsplash.com/... atau link Drive)" 
+              oninput="updateMediaModalLivePreview()"
+              class="flex-1 px-3.5 py-2 rounded-xl border border-zinc-300 text-xs bg-white focus:border-indigo-600 outline-none transition"
+            >
+            <label id="btnMediaDirectUpload" class="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-semibold cursor-pointer shrink-0 transition">
+              <span>Unggah File</span>
+              <input type="file" id="inputDirectMediaFile" accept="image/*,audio/*,video/*" onchange="handleModalDirectFileUpload(this)" class="sr-only">
+            </label>
+          </div>
+          <p class="text-[11px] text-zinc-400" id="mediaUrlHelp">Mendukung tautan langsung gambar, Google Drive preview, dan YouTube.</p>
+        </div>
+
+        <!-- Caption Input -->
+        <div class="space-y-1.5">
+          <label class="block font-bold text-zinc-800">Keterangan / Caption Media (Opsional):</label>
+          <input 
+            type="text" 
+            id="inputMediaCaption" 
+            placeholder="Teks keterangan di bawah media (mendukung math: $E=mc^2$)..." 
+            oninput="updateMediaModalLivePreview()"
+            class="w-full px-3.5 py-2 rounded-xl border border-zinc-300 text-xs bg-white focus:border-indigo-600 outline-none transition"
+          >
+        </div>
+
+        <!-- Alignment & Position Controls -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="space-y-1.5">
+            <label class="block font-bold text-zinc-800">Perataan Media:</label>
+            <select id="selectMediaAlign" onchange="updateMediaModalLivePreview()" class="w-full px-3 py-2 rounded-xl border border-zinc-300 bg-white font-semibold text-xs">
+              <option value="center">Tengah (Center)</option>
+              <option value="left">Rata Kiri (Left)</option>
+              <option value="right">Rata Kanan (Right)</option>
+            </select>
+          </div>
+          <div class="space-y-1.5">
+            <label class="block font-bold text-zinc-800">Posisi Media:</label>
+            <select id="selectMediaPosition" class="w-full px-3 py-2 rounded-xl border border-zinc-300 bg-white font-semibold text-xs">
+              <option value="ABOVE_QUESTION">Di Atas Pertanyaan</option>
+              <option value="BELOW_QUESTION">Di Bawah Pertanyaan</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Live Preview Card inside Modal -->
+        <div class="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-2">
+          <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider font-mono block">Pratinjau Langsung (Live Preview):</span>
+          <div id="mediaModalPreviewContainer" class="min-h-[100px] flex items-center justify-center p-3 bg-white rounded-xl border border-zinc-200/80 text-zinc-400 text-xs italic">
+            Masukkan URL atau pilih berkas untuk melihat pratinjau media
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-between gap-2 pt-3 border-t border-zinc-100">
+        <button 
+          type="button" 
+          id="btnDeleteModalMedia"
+          onclick="handleRemoveModalMedia()" 
+          class="px-4 py-2.5 rounded-xl border border-rose-200 hover:bg-rose-50 text-rose-600 text-xs font-semibold cursor-pointer transition hidden"
+        >
+          Hapus Media
+        </button>
+        <div class="flex items-center gap-2 ml-auto">
+          <button 
+            type="button" 
+            onclick="closeAttachMediaModal()" 
+            class="px-4 py-2.5 rounded-xl border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold cursor-pointer transition"
+          >
+            Batal
+          </button>
+          <button 
+            type="button" 
+            onclick="handleSaveModalMedia()" 
+            class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md cursor-pointer transition"
+          >
+            Simpan Media
+          </button>
+        </div>
+      </div>
+
     </div>
   </div>
 

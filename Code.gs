@@ -436,7 +436,9 @@ function doPost(e) {
     }
 
     // Form Sandbox Operations (Per-Form Scoped)
-    else if (action === "submitAssessment") {
+    else if (action === "uploadSingleFile" || action === "adminUploadMedia") {
+      result = handleDirectFileUpload(payload);
+    } else if (action === "submitAssessment") {
       result = submitAssessment(payload);
     } else if (action === "getInitialData") {
       result = getCachedInitialData(true, formId);
@@ -1117,18 +1119,70 @@ function isValidInstitutionalEmail(email, allowedDomainsStr) {
  */
 function saveUploadedFileToDrive(base64Data, fileName, mimeType, formId) {
   try {
-    const cleanFormId = (formId || DEFAULT_FORM_ID).trim().toUpperCase();
+    if (!base64Data || typeof base64Data !== 'string') return "";
+
+    const cleanFormId = String(formId || DEFAULT_FORM_ID).trim().toUpperCase();
     const parentFolder = getOrCreateDriveFolder("Penilaian PGSD 5E - Dokumen");
     const formFolder = getOrCreateDriveSubfolder(parentFolder, cleanFormId);
 
-    const decoded = Utilities.base64Decode(base64Data);
-    const blob = Utilities.newBlob(decoded, mimeType || "application/octet-stream", fileName || "lampiran");
-    const file = formFolder.createFile(blob);
-    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    // Strip Data URL header if present (e.g. data:image/png;base64,...)
+    let cleanBase64 = base64Data;
+    if (cleanBase64.indexOf(",") > -1) {
+      cleanBase64 = cleanBase64.split(",")[1];
+    }
+    cleanBase64 = cleanBase64.trim();
 
-    return file.getUrl();
+    const decoded = Utilities.base64Decode(cleanBase64);
+    const safeName = (fileName || ("berkas_" + Date.now())).replace(/[\\/:*?"<>|]/g, "_");
+    const blob = Utilities.newBlob(decoded, mimeType || "application/octet-stream", safeName);
+    const file = formFolder.createFile(blob);
+
+    try {
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    } catch(shareErr) {
+      Logger.log("Sharing permission notice: " + shareErr.toString());
+    }
+
+    const fileId = file.getId();
+    const isImage = (mimeType && mimeType.startsWith("image/")) || /\.(jpe?g|png|gif|webp|bmp)$/i.test(safeName);
+    const directUrl = isImage 
+      ? `https://drive.google.com/uc?export=view&id=${fileId}`
+      : file.getUrl();
+
+    return directUrl || file.getUrl();
   } catch (e) {
+    Logger.log("Error saveUploadedFileToDrive: " + e.toString());
     return "";
+  }
+}
+
+/**
+ * Endpoint Khusus Upload Berkas / Media Langsung ke Google Drive
+ */
+function handleDirectFileUpload(payload) {
+  try {
+    let base64Data = payload.base64 || payload.dataUrl || payload.fileData || "";
+    const fileName = payload.name || payload.fileName || ("media_" + Date.now());
+    const mimeType = payload.type || payload.mimeType || "application/octet-stream";
+    const formId = payload.formId || DEFAULT_FORM_ID;
+
+    if (!base64Data) {
+      return { success: false, error: "Data berkas (base64) kosong." };
+    }
+
+    const fileUrl = saveUploadedFileToDrive(base64Data, fileName, mimeType, formId);
+    if (!fileUrl) {
+      return { success: false, error: "Gagal menyimpan berkas ke Google Drive. Pastikan izin akses Drive aktif." };
+    }
+
+    return {
+      success: true,
+      fileUrl: fileUrl,
+      fileName: fileName,
+      mimeType: mimeType
+    };
+  } catch (e) {
+    return { success: false, error: "Gagal memproses unggahan: " + e.toString() };
   }
 }
 

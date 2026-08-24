@@ -4,6 +4,25 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.11] - 2026-08-24
+
+### 🎬 Rich Multi-Media & Universal KaTeX Math Formula Engine + Google Drive Uploader Fix
+- **Penyematan Multimedia Lengkap per Pertanyaan (*Melebihi Fitur Google Form Biasa*):**
+  - **Gambar (Image):** Mendukung URL langsung, link Google Drive, serta unggah langsung (*Direct File Upload / Galeri*) dengan kompresi cerdas di sisi klien (*Client-Side Canvas Optimization*) dan pratinjau modal *fullscreen zoom*.
+  - **Video (YouTube / Vimeo / MP4 / Drive):** Player tersemat otomatis dengan rasio responsif 16:9 yang dapat memutar video YouTube (termasuk YouTube Shorts), Vimeo, dan Google Drive Video langsung di dalam kartu pertanyaan.
+  - **Audio (Listening Test / Voice Note):** Pemutar audio HTML5 elegan untuk evaluasi mendengarkan (*listening test*) atau rekaman suara perkuliahan.
+  - **Embedded Link & Dokumen Interaktif:** Memuat halaman web, slide presentasi Google Slides, PDF, atau Figma interaktif via iframe.
+  - Pengaturan tata letak fleksibel (*Perataan Kiri, Tengah, Kanan*) serta penempatan di atas atau di bawah teks pertanyaan.
+- **Universal Math & Formula Engine (KaTeX + Auto-Renderer):**
+  - Perenderan instan rumus matematika kompleks menggunakan sintaks LaTeX standar (`$...$`, `$$...$$`, `\(...\)`, `\[...\]`).
+  - Mendukung *copy-paste* langsung dari AI (ChatGPT, Gemini, Claude) maupun rumus matematika Microsoft Word ke dalam judul pertanyaan, deskripsi, opsi pilihan, dan keterangan media (*caption*).
+- **Perbaikan Total Pipeline Unggah Berkas ke Google Drive (`Code.gs` & Client Form):**
+  - Memperbaiki parsing Base64 pada `saveUploadedFileToDrive` dengan membersihkan *Data URL header prefix* (`data:...;base64,`) sehingga berkas terunggah 100% sempurna ke folder Drive `Penilaian PGSD 5E - Dokumen / {PIN}` tanpa galat decode.
+  - Menambahkan endpoint `adminUploadMedia` / `uploadSingleFile` untuk penyimpanan cloud permanen dengan tautan pratinjau publik (*public view sharing*).
+  - Penyatuan fungsi unggah berkas klien (`handleClientFileUpload`) dilengkapi kompresi gambar otomatis (mengurangi ukuran hingga 90% tanpa penurunan resolusi) dan lencana status hijau responsif.
+
+---
+
 ## [2.2.10] - 2026-08-24
 
 ### 🛡️ Strict Multi-PIN Data & Draft Isolation (Zero Cross-Form Data Leakage)

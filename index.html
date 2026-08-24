@@ -205,6 +205,10 @@
       }
     }
   </style>
+  <!-- KaTeX CSS & JS for Universal Math / LaTeX / AI & Word Formula Rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
 </head>
 <body class="min-h-screen flex flex-col bg-zinc-50 font-sans antialiased text-zinc-900">
 
@@ -1552,7 +1556,147 @@
       4: { badge: "04/04", title: "Evaluasi Masukan Pemateri", percent: 100 }
     };
 
-            // =========================================================================
+        
+    // =========================================================================
+    // UNIVERSAL MATH & KATEX AUTO-RENDER ENGINE
+    // =========================================================================
+    function renderAllMathInElement(domElement) {
+      if (!domElement) return;
+      if (typeof renderMathInElement === 'function') {
+        try {
+          renderMathInElement(domElement, {
+            delimiters: [
+              { left: '$$', right: '$$', display: true },
+              { left: '$', right: '$', display: false },
+              { left: '\\(', right: '\\)', display: false },
+              { left: '\\[', right: '\\]', display: true }
+            ],
+            ignoredTags: ["script", "noscript", "style", "textarea", "pre", "code", "option"],
+            throwOnError: false,
+            trust: true
+          });
+        } catch(e) {
+          console.warn("KaTeX render error:", e);
+        }
+      }
+    }
+
+    function openClientImageZoom(src, caption = '') {
+      const modal = document.getElementById("modalClientImageZoom");
+      const img = document.getElementById("clientZoomedImg");
+      const cap = document.getElementById("clientZoomedCaption");
+      if (!modal || !img) return;
+      img.src = src;
+      if (cap) cap.textContent = caption;
+      modal.classList.remove("hidden");
+      renderAllMathInElement(cap);
+    }
+
+    function closeClientImageZoom() {
+      const modal = document.getElementById("modalClientImageZoom");
+      if (modal) modal.classList.add("hidden");
+    }
+
+    function convertToEmbedUrl(url, type) {
+      if (!url) return '';
+      url = url.trim();
+
+      if (type === 'VIDEO') {
+        const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=|shorts\/)|youtu\.be\/)([^"&?\/\s]{11})/i);
+        if (ytMatch && ytMatch[1]) {
+          return `https://www.youtube.com/embed/${ytMatch[1]}`;
+        }
+        const vimeoMatch = url.match(/vimeo\.com\/(\d+)/i);
+        if (vimeoMatch && vimeoMatch[1]) {
+          return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+        }
+        const driveMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i);
+        if (driveMatch && driveMatch[1]) {
+          return `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
+        }
+      }
+
+      if (type === 'IMAGE') {
+        const driveImgMatch = url.match(/drive\.google\.com\/(?:file\/d\/|open\?id=)([a-zA-Z0-9_-]+)/i);
+        if (driveImgMatch && driveImgMatch[1]) {
+          return `https://drive.google.com/uc?export=view&id=${driveImgMatch[1]}`;
+        }
+      }
+
+      if (type === 'AUDIO') {
+        const driveAudioMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i);
+        if (driveAudioMatch && driveAudioMatch[1]) {
+          return `https://drive.google.com/file/d/${driveAudioMatch[1]}/preview`;
+        }
+      }
+
+      return url;
+    }
+
+    function renderClientMediaHtml(media) {
+      if (!media || !media.url) return '';
+      const alignClass = media.align === 'left' ? 'justify-start' : (media.align === 'right' ? 'justify-end' : 'justify-center');
+      const embedUrl = convertToEmbedUrl(media.url, media.type);
+
+      let mediaBody = '';
+      if (media.type === 'IMAGE') {
+        mediaBody = `
+          <div class="relative group inline-block max-w-full">
+            <img 
+              src="${embedUrl}" 
+              alt="${media.caption || 'Gambar Pertanyaan'}" 
+              onclick="openClientImageZoom('${embedUrl}', '${(media.caption || '').replace(/'/g, "\\'")}')"
+              class="max-h-80 w-auto rounded-2xl border border-zinc-200 shadow-xs object-contain bg-zinc-900/5 cursor-zoom-in hover:opacity-95 transition"
+            >
+            <div class="absolute bottom-2 right-2 px-2 py-1 rounded-lg bg-zinc-900/80 backdrop-blur-xs text-white text-[10px] font-semibold opacity-0 group-hover:opacity-100 transition pointer-events-none flex items-center gap-1">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"></path></svg>
+              <span>Perbesar</span>
+            </div>
+          </div>
+        `;
+      } else if (media.type === 'VIDEO') {
+        if (embedUrl.includes('youtube.com/embed') || embedUrl.includes('vimeo.com') || embedUrl.includes('drive.google.com')) {
+          mediaBody = `
+            <div class="w-full max-w-lg aspect-video rounded-2xl overflow-hidden border border-zinc-200 shadow-xs bg-black">
+              <iframe src="${embedUrl}" class="w-full h-full" frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+            </div>
+          `;
+        } else {
+          mediaBody = `
+            <div class="w-full max-w-lg aspect-video rounded-2xl overflow-hidden border border-zinc-200 shadow-xs bg-black">
+              <video src="${embedUrl}" controls class="w-full h-full object-contain"></video>
+            </div>
+          `;
+        }
+      } else if (media.type === 'AUDIO') {
+        mediaBody = `
+          <div class="w-full max-w-md p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100 shadow-2xs space-y-2.5">
+            <div class="flex items-center gap-2 text-xs font-bold text-indigo-950">
+              <svg class="w-4 h-4 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg>
+              <span>Dengarkan Audio Pertanyaan:</span>
+            </div>
+            <audio src="${embedUrl}" controls class="w-full h-9"></audio>
+          </div>
+        `;
+      } else if (media.type === 'EMBED') {
+        mediaBody = `
+          <div class="w-full max-w-xl aspect-[16/10] rounded-2xl overflow-hidden border border-zinc-200 shadow-xs bg-zinc-100">
+            <iframe src="${embedUrl}" class="w-full h-full" frameborder="0"></iframe>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="space-y-1.5 pt-1 pb-2">
+          <div class="flex ${alignClass}">
+            ${mediaBody}
+          </div>
+          ${media.caption ? `<p class="text-[11.5px] text-zinc-500 italic text-center math-renderable">${media.caption}</p>` : ''}
+        </div>
+      `;
+    }
+
+    // =========================================================================
     // UNIVERSAL PROGRESS BAR & SKELETON LOADERS ENGINE
     // =========================================================================
     let activeGlobalLoadingCount = 0;
@@ -1882,40 +2026,117 @@
       saveFormDraft();
     }
 
-    function handleClientFileUpload(fieldId, fileInput) {
-      const file = fileInput.files ? fileInput.files[0] : null;
-      const statusEl = document.getElementById(`fileStatus_${fieldId}`);
-      if (!file) return;
 
-      if (file.size > 5 * 1024 * 1024) {
-        showToast("Ukuran berkas melebihi batas maksimal 5 MB!", "error");
-        fileInput.value = "";
-        if (statusEl) statusEl.innerHTML = `<span class="text-rose-600 font-bold">Gagal: Ukuran file > 5 MB</span>`;
+    // =========================================================================
+    // UNIVERSAL FILE & IMAGE UPLOAD ENGINE (WITH CLIENT COMPRESSION)
+    // =========================================================================
+    function compressImageFile(file, maxDimension = 1600, quality = 0.85) {
+      return new Promise((resolve) => {
+        if (!file.type.startsWith("image/") || file.type === "image/svg+xml") {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve({ dataUrl: e.target.result, base64: e.target.result.split(',')[1] || '' });
+          reader.readAsDataURL(file);
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = new Image();
+          img.onload = function() {
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxDimension || height > maxDimension) {
+              if (width > height) {
+                height = Math.round((height * maxDimension) / width);
+                width = maxDimension;
+              } else {
+                width = Math.round((width * maxDimension) / height);
+                height = maxDimension;
+              }
+            }
+
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const dataUrl = canvas.toDataURL(file.type === "image/png" ? "image/png" : "image/jpeg", quality);
+            const base64 = dataUrl.split(',')[1] || '';
+            resolve({ dataUrl, base64 });
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function handleClientFileUpload(fieldId, fileInput) {
+      const file = fileInput.files ? fileInput.files[0] : null;
+      const statusEl = document.getElementById(`fileStatus_${fieldId}`) || document.getElementById(`fileCustomPreview_${fieldId}`);
+      
+      if (!file) {
+        delete customUploadedFilesMap[fieldId];
+        delete clientCustomFormAnswers[fieldId];
+        if (statusEl) statusEl.innerHTML = `<span class="text-xs text-zinc-500 font-medium">Belum ada berkas dipilih</span>`;
+        saveFormDraft();
         return;
       }
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        clientCustomFormAnswers[fieldId] = {
+      if (file.size > 10 * 1024 * 1024) {
+        showToast("Ukuran berkas melebihi batas maksimal 10 MB!", "error");
+        fileInput.value = "";
+        if (statusEl) statusEl.innerHTML = `<span class="text-rose-600 font-bold text-xs">Gagal: Ukuran file > 10 MB</span>`;
+        return;
+      }
+
+      if (statusEl) {
+        statusEl.innerHTML = `
+          <span class="inline-flex items-center gap-1.5 text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-200 text-xs font-medium">
+            <svg class="w-3.5 h-3.5 text-indigo-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            <span>Memproses berkas...</span>
+          </span>
+        `;
+      }
+
+      try {
+        const { dataUrl, base64 } = await compressImageFile(file);
+
+        const fileObj = {
           name: file.name,
           size: file.size,
           type: file.type,
-          dataUrl: e.target.result
+          dataUrl: dataUrl,
+          base64: base64
         };
+
+        customUploadedFilesMap[fieldId] = fileObj;
+        clientCustomFormAnswers[fieldId] = fileObj;
+
         if (statusEl) {
+          const isImg = file.type.startsWith("image/");
           statusEl.innerHTML = `
-            <span class="inline-flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 font-semibold text-xs">
-              <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-              <span class="truncate max-w-[200px]">${file.name}</span>
-              <span class="text-[10px] text-emerald-600 font-mono">(${(file.size / 1024).toFixed(0)} KB)</span>
-            </span>
+            <div class="flex items-center gap-2">
+              ${isImg ? `<img src="${dataUrl}" class="w-8 h-8 rounded-lg object-cover border border-emerald-300 shadow-2xs">` : ''}
+              <span class="inline-flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 font-semibold text-xs">
+                <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                <span class="truncate max-w-[180px] sm:max-w-[240px]">${file.name}</span>
+                <span class="text-[10px] text-emerald-600 font-mono">(${(file.size / 1024).toFixed(0)} KB)</span>
+              </span>
+            </div>
           `;
         }
+
         saveFormDraft();
-        showToast(`Berkas '${file.name}' siap diunggah.`, "success");
-      };
-      reader.readAsDataURL(file);
+        showToast(`Berkas '${file.name}' siap diunggah ke formulir.`, "success");
+      } catch (err) {
+        console.error("Upload error:", err);
+        if (statusEl) statusEl.innerHTML = `<span class="text-rose-600 font-bold text-xs">Gagal memproses berkas</span>`;
+        showToast("Gagal memproses berkas. Coba pilih kembali.", "error");
+      }
     }
+
 
     function updateRatingScaleUI(fieldId) {
       const selectedVal = clientCustomFormAnswers[fieldId];
@@ -2098,6 +2319,10 @@
 
       container.innerHTML = stagesHtml;
       initAllModernDropdowns();
+      setTimeout(() => {
+        renderAllMathInElement(container);
+        renderAllMathInElement(document.getElementById("formOverviewSection"));
+      }, 50);
     }
 
     function renderSingleClientFieldHtml(f) {
@@ -2118,12 +2343,19 @@
         `;
       }
 
+      const mediaAbove = f.media && f.media.position === 'ABOVE_QUESTION' ? renderClientMediaHtml(f.media) : '';
+      const mediaBelow = f.media && f.media.position === 'BELOW_QUESTION' ? renderClientMediaHtml(f.media) : (f.media && !f.media.position ? renderClientMediaHtml(f.media) : '');
+
       // 1. SHORT_TEXT
       if (f.type === 'SHORT_TEXT') {
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2">
-            <label class="block text-xs font-bold text-zinc-900 leading-snug">${f.label || 'Pertanyaan'}${reqBadge}</label>
-            ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed">${f.description}</p>` : ''}
+          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5">
+            ${mediaAbove}
+            <div>
+              <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${f.label || 'Pertanyaan'}${reqBadge}</label>
+              ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${f.description}</p>` : ''}
+            </div>
+            ${mediaBelow}
             <input 
               type="text" 
               value="${savedVal}" 
@@ -2139,9 +2371,13 @@
       // 2. PARAGRAPH / TEXTAREA
       if (f.type === 'PARAGRAPH' || f.type === 'TEXTAREA') {
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2">
-            <label class="block text-xs font-bold text-zinc-900 leading-snug">${f.label || 'Pertanyaan'}${reqBadge}</label>
-            ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed">${f.description}</p>` : ''}
+          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5">
+            ${mediaAbove}
+            <div>
+              <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${f.label || 'Pertanyaan'}${reqBadge}</label>
+              ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${f.description}</p>` : ''}
+            </div>
+            ${mediaBelow}
             <textarea 
               rows="3" 
               placeholder="${f.placeholder || 'Tuliskan ulasan atau jawaban lengkap Anda...'}" 
@@ -2170,14 +2406,18 @@
                 onchange="handleClientFieldInput('${f.id}', this.value)" 
                 class="w-4 h-4 text-zinc-900 focus:ring-zinc-900 cursor-pointer"
               >
-              <span class="text-zinc-800 font-medium">${opt}</span>
+              <span class="text-zinc-800 font-medium math-renderable">${opt}</span>
             </label>
           `;
         });
         return `
           <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5">
-            <label class="block text-xs font-bold text-zinc-900 leading-snug">${f.label || 'Pilihan'}${reqBadge}</label>
-            ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed">${f.description}</p>` : ''}
+            ${mediaAbove}
+            <div>
+              <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${f.label || 'Pilihan'}${reqBadge}</label>
+              ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${f.description}</p>` : ''}
+            </div>
+            ${mediaBelow}
             <div class="space-y-2">
               ${optsHtml}
             </div>
@@ -2206,14 +2446,18 @@
                 " 
                 class="w-4 h-4 rounded text-zinc-900 focus:ring-zinc-900 cursor-pointer"
               >
-              <span class="text-zinc-800 font-medium">${opt}</span>
+              <span class="text-zinc-800 font-medium math-renderable">${opt}</span>
             </label>
           `;
         });
         return `
           <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5">
-            <label class="block text-xs font-bold text-zinc-900 leading-snug">${f.label || 'Pilihan Kotak Centang'}${reqBadge}</label>
-            ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed">${f.description}</p>` : ''}
+            ${mediaAbove}
+            <div>
+              <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${f.label || 'Pilihan Kotak Centang'}${reqBadge}</label>
+              ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${f.description}</p>` : ''}
+            </div>
+            ${mediaBelow}
             <div class="space-y-2">
               ${optsHtml}
             </div>
@@ -2229,9 +2473,13 @@
           optsHtml += `<option value="${opt}" ${savedVal === opt ? 'selected' : ''}>${opt}</option>`;
         });
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2">
-            <label class="block text-xs font-bold text-zinc-900 leading-snug">${f.label || 'Pilih Menu Dropdown'}${reqBadge}</label>
-            ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed">${f.description}</p>` : ''}
+          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5">
+            ${mediaAbove}
+            <div>
+              <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${f.label || 'Pilih Menu Dropdown'}${reqBadge}</label>
+              ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${f.description}</p>` : ''}
+            </div>
+            ${mediaBelow}
             <select 
               ${f.required ? 'required' : ''} 
               onchange="handleClientFieldInput('${f.id}', this.value)" 
@@ -2266,15 +2514,19 @@
               <div class="scale-circle-${f.id} w-9 h-9 sm:w-10 sm:h-10 rounded-xl border ${isSelected ? 'bg-zinc-900 text-white border-zinc-900 shadow-sm' : 'bg-white text-zinc-700 border-zinc-300 hover:border-zinc-500 hover:bg-zinc-50'} font-mono font-bold text-xs sm:text-sm flex items-center justify-center transition active:scale-95">
                 ${i}
               </div>
-              ${pointLabel ? `<span class="text-[10px] sm:text-[11px] text-zinc-500 font-medium text-center leading-tight max-w-[70px]">${pointLabel}</span>` : ''}
+              ${pointLabel ? `<span class="text-[10px] sm:text-[11px] text-zinc-500 font-medium text-center leading-tight max-w-[70px] math-renderable">${pointLabel}</span>` : ''}
             </label>
           `;
         }
 
         return `
           <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5">
-            <label class="block text-xs font-bold text-zinc-900 leading-snug">${f.label || 'Skala Penilaian'}${reqBadge}</label>
-            ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed">${f.description}</p>` : ''}
+            ${mediaAbove}
+            <div>
+              <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${f.label || 'Skala Penilaian'}${reqBadge}</label>
+              ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${f.description}</p>` : ''}
+            </div>
+            ${mediaBelow}
             <div class="space-y-2 pt-1">
               <div class="flex items-start justify-between gap-1 overflow-x-auto pb-2 pt-1">
                 ${btnsHtml}
@@ -2286,12 +2538,12 @@
 
       // 7. FILE_UPLOAD
       if (f.type === 'FILE_UPLOAD') {
-        const fileObj = savedVal && typeof savedVal === 'object' ? savedVal : null;
+        const fileObj = (savedVal && typeof savedVal === 'object' && savedVal.name) ? savedVal : (customUploadedFilesMap[f.id] || null);
         return `
           <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-3">
             <div>
-              <label class="block text-xs font-bold text-zinc-900 leading-snug">${f.label || 'Unggah Berkas / Dokumen'}${reqBadge}</label>
-              <p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5">${f.description || 'Mendukung berkas PDF, PPTX, DOCX, Foto JPG/PNG (Maks 5 MB).'}</p>
+              <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${f.label || 'Unggah Berkas / Dokumen'}${reqBadge}</label>
+              <p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${f.description || 'Mendukung berkas PDF, PPTX, DOCX, Foto JPG/PNG (Maks 10 MB).'}</p>
             </div>
             <div class="p-4 bg-white rounded-xl border border-dashed border-zinc-300 hover:border-zinc-400 flex flex-col sm:flex-row items-center justify-between gap-3 transition">
               <div class="flex items-center gap-3 min-w-0">
@@ -2300,7 +2552,14 @@
                 </div>
                 <div id="fileStatus_${f.id}" class="min-w-0">
                   ${fileObj 
-                    ? `<span class="inline-flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 font-semibold text-xs"><svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg><span class="truncate max-w-[200px]">${fileObj.name}</span><span class="text-[10px] text-emerald-600 font-mono">(${(fileObj.size / 1024).toFixed(0)} KB)</span></span>`
+                    ? `<div class="flex items-center gap-2">
+                         ${fileObj.dataUrl && fileObj.type && fileObj.type.startsWith('image/') ? `<img src="${fileObj.dataUrl}" class="w-8 h-8 rounded-lg object-cover border border-emerald-300 shadow-2xs">` : ''}
+                         <span class="inline-flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 font-semibold text-xs">
+                           <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                           <span class="truncate max-w-[180px] sm:max-w-[240px]">${fileObj.name}</span>
+                           <span class="text-[10px] text-emerald-600 font-mono">(${((fileObj.size || 0) / 1024).toFixed(0)} KB)</span>
+                         </span>
+                       </div>`
                     : `<span class="text-xs text-zinc-500 font-medium">Belum ada berkas dipilih</span>`
                   }
                 </div>
@@ -4022,6 +4281,23 @@
 
       const customAnswers = collectCustomFieldsAnswers();
 
+      // Gather all uploaded files from both customAnswers and customUploadedFilesMap
+      const mergedUploadedFiles = Object.assign({}, customUploadedFilesMap);
+      if (clientCustomFormAnswers && typeof clientCustomFormAnswers === 'object') {
+        for (let k in clientCustomFormAnswers) {
+          const item = clientCustomFormAnswers[k];
+          if (item && typeof item === 'object' && item.name && (item.base64 || item.dataUrl)) {
+            mergedUploadedFiles[k] = {
+              name: item.name,
+              type: item.type || 'application/octet-stream',
+              size: item.size || 0,
+              base64: item.base64 || (item.dataUrl ? item.dataUrl.split(',')[1] : '')
+            };
+            customAnswers[k] = item.name;
+          }
+        }
+      }
+
       const payload = {
         action: "submitAssessment",
         formId: activeFormId,
@@ -4035,7 +4311,7 @@
         presentatorTerbaik: selectedBestPresenters,
         evaluasiDetail: evaluasiDetail,
         customAnswers: customAnswers,
-        uploadedFiles: customUploadedFilesMap
+        uploadedFiles: mergedUploadedFiles
       };
 
       const submitBtn = document.getElementById("submitBtn");
@@ -6275,5 +6551,15 @@
     </div>
   </div>
 
+  <!-- Modal Zoom Image Fullscreen -->
+  <div id="modalClientImageZoom" class="hidden fixed inset-0 z-[9999] bg-zinc-950/90 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer" onclick="closeClientImageZoom()">
+    <div class="max-w-4xl max-h-[90vh] flex flex-col items-center gap-3 cursor-default" onclick="event.stopPropagation()">
+      <img id="clientZoomedImg" src="" alt="Zoom Preview" class="max-h-[75vh] w-auto rounded-2xl object-contain shadow-2xl border border-zinc-800">
+      <p id="clientZoomedCaption" class="text-white text-xs sm:text-sm text-center font-medium max-w-lg leading-relaxed"></p>
+      <button type="button" onclick="closeClientImageZoom()" class="px-5 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-semibold transition cursor-pointer shadow-lg">
+        Tutup Gambar ✕
+      </button>
+    </div>
+  </div>
 </body>
 </html>
