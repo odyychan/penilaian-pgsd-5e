@@ -4,6 +4,25 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.32] - 2026-08-24
+
+### ⌨️ Pintasan Keyboard (*Keyboard Shortcuts*) Lengkap untuk Toolbar & Rumus
+- **Dukungan Pintasan Keyboard Menyeluruh (*Universal Keyboard Shortcuts*):**
+  - Menambahkan pintasan keyboard standar Google Forms & Rich Text Editor pada seluruh kolom input/textarea:
+    - **Tebal / Bold**: <kbd>Ctrl</kbd> + <kbd>B</kbd> (atau <kbd>Cmd</kbd> + <kbd>B</kbd>)
+    - **Miring / Italic**: <kbd>Ctrl</kbd> + <kbd>I</kbd> (atau <kbd>Cmd</kbd> + <kbd>I</kbd>)
+    - **Garis Bawah / Underline**: <kbd>Ctrl</kbd> + <kbd>U</kbd> (atau <kbd>Cmd</kbd> + <kbd>U</kbd>)
+    - **Sisipkan Tautan / Link**: <kbd>Ctrl</kbd> + <kbd>K</kbd> (atau <kbd>Cmd</kbd> + <kbd>K</kbd>)
+    - **Hapus Format / Clear Formatting**: <kbd>Ctrl</kbd> + <kbd>\</kbd> atau <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>X</kbd>
+    - **Rumus Matematika / Formula**: <kbd>Ctrl</kbd> + <kbd>M</kbd> atau <kbd>Alt</kbd> + <kbd>M</kbd> (otomatis mengonversi teks yang diblok menjadi KaTeX, atau membuka palet rumus jika tidak ada teks terpilih)
+    - **Tutup Palet & Popover**: <kbd>Escape</kbd>
+- **Pembaruan Tooltip & Panduan Visual:**
+  - Menampilkan petunjuk pintasan keyboard pada *tooltip hover* setiap tombol toolbar (`B`, `I`, `U`, `🔗`, `T̶`, `∑ Rumus`) dan *header* palet rumus cepat.
+- **Pengujian Headless Browser:**
+  - Terverifikasi 100% lolos uji simulasi keyboard event Playwright pada seluruh kombinasi tombol pintasan.
+
+---
+
 ## [2.2.31] - 2026-08-24
 
 ### 🛡️ Proteksi Teks Polos & Eliminasi Konflik Auto-Math KaTeX
