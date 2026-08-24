@@ -4,6 +4,24 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.28] - 2026-08-24
+
+### 🖋️ Universal Rich Text Toolbar di Seluruh Kolom Isian Teks Tab Pertanyaan
+- **Integrasi Universal Formatter:**
+  - Menghadirkan bilah alat pemformatan teks kaya (*B*, *I*, *U*, *🔗*, *T̶*, *∑ Rumus*) secara universal dan kontekstual pada setiap kolom penulisan/pengisian teks di Tab Pertanyaan:
+    1. Judul Formulir Penilaian (`#cfg_Judul_Form`)
+    2. Deskripsi & Panduan Pengisian (`#cfg_Deskripsi_Form`)
+    3. Judul Bagian (`stageTitleInput_${sIdx}`)
+    4. Deskripsi Bagian (`stageDescInput_${sIdx}`)
+    5. Label / Judul Pertanyaan (`fieldLabelInput_${sIdx}_${fIdx}`)
+    6. Deskripsi / Panduan Pertanyaan (`fieldDescInput_${sIdx}_${fIdx}`)
+- **Preservasi Fokus & KaTeX Math Quick Palette:**
+  - Dilengkapi pencegahan pelepasan fokus (*focus preservation*) `onmousedown="event.preventDefault()"` dan palet simbol matematika interaktif (`x²`, `√x`, `a/b`, `±`, `≤`, `≥`, `≠`, `π`, `$ Rumus $`).
+- **Verifikasi Multi-Perangkat:**
+  - Terverifikasi 100% menggunakan remote Playwright browser testing pada resolusi Desktop (1600px) dan Smartphone Mobile (425px).
+
+---
+
 ## [2.2.27] - 2026-08-24
 
 ### 🎨 Kartu Judul & Panduan Identik Asli Mahasiswa Serta Alur Tahapan Sinkron
