@@ -396,20 +396,9 @@
             <div id="progressBarFill" class="h-full bg-zinc-900 rounded-full transition-all duration-300 ease-out" style="width: 25%;"></div>
           </div>
 
-          <!-- Step Navigation Tabs -->
-          <div class="grid grid-cols-4 gap-1.5 pt-1 text-center">
-            <button type="button" onclick="goToStep(1)" id="stepTab_1" class="py-1.5 px-1 rounded text-[11px] font-medium transition text-zinc-900 bg-zinc-100 border border-zinc-300">
-              1. Identitas
-            </button>
-            <button type="button" onclick="goToStep(2)" id="stepTab_2" class="py-1.5 px-1 rounded text-[11px] font-medium transition text-zinc-400 bg-zinc-50 border border-transparent">
-              2. Kelompok
-            </button>
-            <button type="button" onclick="goToStep(3)" id="stepTab_3" class="py-1.5 px-1 rounded text-[11px] font-medium transition text-zinc-400 bg-zinc-50 border border-transparent">
-              3. Penilaian
-            </button>
-            <button type="button" onclick="goToStep(4)" id="stepTab_4" class="py-1.5 px-1 rounded text-[11px] font-medium transition text-zinc-400 bg-zinc-50 border border-transparent">
-              4. Evaluasi
-            </button>
+          <!-- Dynamic Step Navigation Tabs -->
+          <div id="dynamicStepTabsContainer" class="grid grid-cols-4 gap-1.5 pt-1 text-center">
+            <!-- Dynamically generated via renderDynamicStepTabs() -->
           </div>
         </div>
 
@@ -2267,19 +2256,26 @@
       document.getElementById("stepPercentLabel").textContent = `${meta.percent}%`;
       document.getElementById("progressBarFill").style.width = `${meta.percent}%`;
 
-      for (let i = 1; i <= 4; i++) {
+      const totalSteps = Object.keys(stepMetadata).length || 4;
+      for (let i = 1; i <= totalSteps; i++) {
         const sec = document.getElementById(`stepSection_${i}`);
         const tabBtn = document.getElementById(`stepTab_${i}`);
         
-        if (i === step) {
-          sec.classList.remove("hidden");
-          tabBtn.className = "py-1 px-1 rounded text-[11px] font-medium transition text-zinc-900 bg-zinc-100 border border-zinc-300";
-        } else {
-          sec.classList.add("hidden");
-          if (i < step) {
-            tabBtn.className = "py-1 px-1 rounded text-[11px] font-medium transition text-emerald-700 bg-emerald-50 border border-emerald-200 cursor-pointer";
+        if (sec) {
+          if (i === step) {
+            sec.classList.remove("hidden");
           } else {
-            tabBtn.className = "py-1 px-1 rounded text-[11px] font-medium transition text-zinc-400 bg-zinc-50 border border-transparent";
+            sec.classList.add("hidden");
+          }
+        }
+
+        if (tabBtn) {
+          if (i === step) {
+            tabBtn.className = "py-1.5 px-1 rounded text-[10px] sm:text-[11px] font-bold transition text-zinc-900 bg-zinc-100 border border-zinc-400 shadow-2xs truncate";
+          } else if (i < step) {
+            tabBtn.className = "py-1.5 px-1 rounded text-[10px] sm:text-[11px] font-semibold transition text-emerald-800 bg-emerald-50 border border-emerald-300 cursor-pointer truncate";
+          } else {
+            tabBtn.className = "py-1.5 px-1 rounded text-[10px] sm:text-[11px] font-medium transition text-zinc-400 bg-zinc-50 border border-transparent truncate";
           }
         }
       }

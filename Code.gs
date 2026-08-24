@@ -901,6 +901,123 @@ function adminDeleteForm(payload) {
 /**
  * Mengambil Data Awal Form untuk Mahasiswa
  */
+
+/**
+ * Helper Skema Tahapan Default Formulir (Standard 4-Tahap PGSD)
+ */
+function getDefaultFormSchema(config) {
+  config = config || {};
+  return {
+    tahapan: [
+      {
+        id: "tahap_1",
+        title: "Identitas & Akses Penilai",
+        description: "Lengkapi data identitas diri penilai sebelum memulai penilaian.",
+        fields: [
+          {
+            id: "fld_core_identity",
+            type: "CORE_IDENTITY",
+            label: "Identitas Penilai (Peran, NIM, Nama Lengkap, Email Kampus)",
+            description: "Merekam data penilai dan memvalidasi alamat email resmi mahasiswa serta format NIM.",
+            required: true,
+            scope: "GLOBAL",
+            config: {
+              allowedDomains: config["Domain_Email_Wajib"] || "mhs.ulm.ac.id, ulm.ac.id"
+            }
+          }
+        ]
+      },
+      {
+        id: "tahap_2",
+        title: "Pemilihan Kelompok Presentator",
+        description: "Pilih salah satu kelompok yang sedang presentasi di depan kelas.",
+        fields: [
+          {
+            id: "fld_core_group",
+            type: "CORE_GROUP_SELECT",
+            label: "Pemilihan Kelompok Presentator Tampil",
+            description: "Menampilkan daftar kelompok yang tampil pada sesi aktif minggu ini. Terhubung otomatis dengan data kelompok.",
+            required: true,
+            scope: "GLOBAL",
+            config: {}
+          }
+        ]
+      },
+      {
+        id: "tahap_3",
+        title: "Skor Rubrik & Voting Presentator",
+        description: "Penilaian performa materi presentasi dan pemilihan pemateri terbaik.",
+        fields: [
+          {
+            id: "fld_core_score",
+            type: "CORE_SCORE_RUBRIC",
+            label: "Nilai Presentasi Kelompok (Skala Skor)",
+            description: "Penilaian performa presentasi materi dengan slider skor, chip preset (70-100), dan input angka.",
+            required: true,
+            scope: "GLOBAL",
+            config: {
+              minScore: parseInt(config["Nilai_Kelompok_Min"] || 50),
+              maxScore: parseInt(config["Nilai_Kelompok_Max"] || 100)
+            }
+          },
+          {
+            id: "fld_core_voting",
+            type: "CORE_BEST_PRESENTER",
+            label: "Pemilihan Presentator Terbaik",
+            description: "Pemilihan anggota pemateri terbaik per kelompok dengan sistem checklist voting.",
+            required: true,
+            scope: "GLOBAL",
+            config: {
+              maxSelection: parseInt(config["Maksimal_Pilihan_Presentator_Terbaik"] || 2)
+            }
+          }
+        ]
+      },
+      {
+        id: "tahap_4",
+        title: "Evaluasi Masukan Kualitatif",
+        description: "Tuliskan masukan dan tanggapan objektif untuk setiap anggota pemateri kelompok.",
+        fields: [
+          {
+            id: "fld_core_feedback",
+            type: "CORE_MEMBER_FEEDBACK",
+            label: "Evaluasi Masukan Kualitatif Tiap Pemateri",
+            description: "Kolom ulasan tertulis terpisah untuk setiap anggota pemateri kelompok.",
+            required: true,
+            scope: "PER_KELOMPOK",
+            config: {
+              maxChars: parseInt(config["Maksimal_Karakter_Evaluasi"] || 500),
+              publicDisplay: config["Tampilkan_Ulasan_Publik"] || "AKTIF",
+              penyajiRule: config["Kewajiban_Menilai_Penyaji"] || "BEBAS_PENUH_DI_SESINYA"
+            }
+          }
+        ]
+      }
+    ]
+  };
+}
+
+/**
+ * Helper Normalisasi Skema Formulir (Menjamin Kompatibilitas 100%)
+ */
+function normalizeFormSchema(customFieldsRaw, config) {
+  if (customFieldsRaw && typeof customFieldsRaw === 'object' && Array.isArray(customFieldsRaw.tahapan)) {
+    return customFieldsRaw;
+  }
+  const defaultSchema = getDefaultFormSchema(config);
+  if (Array.isArray(customFieldsRaw) && customFieldsRaw.length > 0) {
+    // Masukkan custom fields flat ke Tahap 3 (Rubrik) atau Tahap 4 (Evaluasi)
+    customFieldsRaw.forEach(cf => {
+      if (cf.scope === 'PER_KELOMPOK') {
+        defaultSchema.tahapan[2].fields.push(cf);
+      } else {
+        defaultSchema.tahapan[3].fields.push(cf);
+      }
+    });
+  }
+  return defaultSchema;
+}
+
 function getFormInitialData(formId) {
   try {
     const ss = getSpreadsheet();
@@ -1440,11 +1557,13 @@ function adminGetFullData(formId) {
     const groupList = Object.keys(groupsMap).map(k => groupsMap[k]);
     const totalResponses = responsSheet && responsSheet.getLastRow() > 1 ? responsSheet.getLastRow() - 1 : 0;
 
+    const normalizedSchema = normalizeFormSchema(formMeta.customFields, config);
     return {
       success: true,
       formMeta: formMeta,
       config: config,
       customFields: formMeta.customFields || [],
+      formSchema: normalizedSchema,
       groups: groupList,
       totalResponses: totalResponses
     };

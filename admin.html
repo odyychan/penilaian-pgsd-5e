@@ -724,23 +724,37 @@
             </div>
           </div>
 
-          <!-- Section 3: FORM BUILDER & STRUKTUR LENGKAP FORMULIR -->
+          <!-- Section 3: DYNAMIC STAGE & FIELD FORM BUILDER CANVAS -->
           <div class="space-y-4 pt-4 border-t border-zinc-100">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <h3 class="text-[11px] sm:text-xs font-bold text-zinc-400 uppercase tracking-wider font-mono">3. Form Builder • Struktur Lengkap Formulir</h3>
-                <p class="text-[11px] text-zinc-500 mt-0.5">Pemetaan seluruh komponen formulir (5 Blok Inti + Pertanyaan Tambahan Kustom).</p>
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-zinc-900 text-white p-4 sm:p-5 rounded-2xl border border-zinc-800 shadow-sm">
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-indigo-500/30 text-indigo-300 border border-indigo-500/40">Multi-Stage Builder</span>
+                  <span id="builderStatsBadge" class="text-xs text-zinc-300 font-mono">4 Tahap • 5 Komponen</span>
+                </div>
+                <h3 class="text-sm sm:text-base font-bold text-white tracking-tight">Form Builder Dinamis • Tahapan &amp; Komponen Input</h3>
+                <p class="text-[11px] text-zinc-400">Tambah/ubah/hapus Tahap formulir dan atur komponen input di dalam setiap tahap secara bebas.</p>
               </div>
-              <div class="flex items-center gap-2 flex-wrap">
+              <div class="flex items-center gap-2 flex-wrap flex-shrink-0">
                 <button 
                   type="button" 
-                  onclick="openAddQuestionModal()" 
-                  class="px-3.5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold shadow-xs flex items-center gap-1.5 transition active:scale-98 cursor-pointer"
+                  onclick="openAddStageModal()" 
+                  class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-xs flex items-center gap-1.5 transition active:scale-98 cursor-pointer"
                 >
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
                   </svg>
-                  <span>+ Tambah Pertanyaan Kustom</span>
+                  <span>+ Tambah Tahap Baru</span>
+                </button>
+                <button 
+                  type="button" 
+                  onclick="openAddFieldModal()" 
+                  class="px-3.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-xs font-semibold shadow-xs flex items-center gap-1.5 transition active:scale-98 cursor-pointer border border-zinc-700"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <span>+ Tambah Input / Pertanyaan</span>
                 </button>
               </div>
             </div>
@@ -751,24 +765,24 @@
                 <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                 </svg>
-                <span>Template Instan Siap Pakai:</span>
+                <span>Aksi &amp; Template Instan Cepat:</span>
               </div>
               <div class="flex items-center gap-1.5 flex-wrap">
-                <button type="button" onclick="addQuestionPreset('UPLOAD_SLIDE')" class="px-2.5 py-1 rounded-md bg-white border border-zinc-300 text-zinc-800 hover:border-zinc-500 text-[11px] font-medium transition cursor-pointer">
-                  + Upload Slide (PDF)
+                <button type="button" onclick="addStagePreset('REFLEKSI_UPLOAD')" class="px-2.5 py-1 rounded-md bg-white border border-zinc-300 text-zinc-800 hover:border-zinc-500 text-[11px] font-medium transition cursor-pointer">
+                  + Tahap Refleksi &amp; Upload Berkas
                 </button>
-                <button type="button" onclick="addQuestionPreset('RUBRIK_QNA')" class="px-2.5 py-1 rounded-md bg-white border border-zinc-300 text-zinc-800 hover:border-zinc-500 text-[11px] font-medium transition cursor-pointer">
-                  + Rubrik Tanya Jawab (1-5)
+                <button type="button" onclick="addStagePreset('RUBRIK_QNA')" class="px-2.5 py-1 rounded-md bg-white border border-zinc-300 text-zinc-800 hover:border-zinc-500 text-[11px] font-medium transition cursor-pointer">
+                  + Input Rubrik Tanya Jawab (1-5)
                 </button>
-                <button type="button" onclick="addQuestionPreset('REFLEKSI')" class="px-2.5 py-1 rounded-md bg-white border border-zinc-300 text-zinc-800 hover:border-zinc-500 text-[11px] font-medium transition cursor-pointer">
-                  + Refleksi Perkuliahan
+                <button type="button" onclick="resetToDefaultStandardSchema()" class="px-2.5 py-1 rounded-md bg-white border border-rose-200 text-rose-700 hover:bg-rose-50 text-[11px] font-medium transition cursor-pointer">
+                  ↺ Reset 4-Tahap Standar PGSD
                 </button>
               </div>
             </div>
 
-            <!-- UNIFIED FORM CANVAS CONTAINER -->
-            <div id="unifiedFormCanvasContainer" class="space-y-3 pt-1">
-              <!-- Rendered via renderUnifiedFormCanvas() -->
+            <!-- DYNAMIC STAGES CANVAS CONTAINER -->
+            <div id="dynamicStagesCanvasContainer" class="space-y-4 pt-1">
+              <!-- Rendered dynamically via renderDynamicStagesCanvas() -->
             </div>
 
           </div>
@@ -1321,6 +1335,84 @@
     </div>
   </div>
 
+  <!-- ========================================================================= -->
+  <!-- MODAL: STAGE EDITOR (TAMBAH / UBAH TAHAP FORMULIR) -->
+  <!-- ========================================================================= -->
+  <div id="modalStageEditor" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-4 fade-enter">
+      <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 id="modalStageTitleText" class="font-bold text-sm sm:text-base text-zinc-900">Tambah Tahap Baru</h3>
+            <p class="text-[11px] text-zinc-500">Tentukan judul dan panduan tahap pada formulir.</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeStageEditorModal()" class="w-8 h-8 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <form id="formStageEditor" onsubmit="handleSaveStage(event)" class="space-y-3.5 text-xs">
+        <input type="hidden" id="stage_edit_id" value="">
+
+        <div class="space-y-1">
+          <label class="block font-semibold text-zinc-700">Judul Tahap <span class="text-rose-500">*</span></label>
+          <input 
+            type="text" 
+            id="stage_input_title" 
+            required 
+            placeholder="contoh: Dokumentasi &amp; Refleksi Presentasi" 
+            class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none"
+          >
+        </div>
+
+        <div class="space-y-1">
+          <label class="block font-semibold text-zinc-700">Deskripsi / Panduan Singkat Tahap</label>
+          <textarea 
+            id="stage_input_description" 
+            rows="3" 
+            placeholder="Tuliskan petunjuk pengisian bagi mahasiswa pada tahap ini..." 
+            class="w-full p-2.5 rounded-lg border border-zinc-300 text-xs outline-none focus:border-zinc-900"
+          ></textarea>
+        </div>
+
+        <div class="flex items-center justify-between gap-3 pt-3 border-t border-zinc-100">
+          <button type="button" onclick="closeStageEditorModal()" class="px-4 py-2 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 font-medium cursor-pointer">Batal</button>
+          <button type="submit" class="px-5 py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white font-semibold shadow-xs transition active:scale-98 cursor-pointer">Simpan Tahap</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: MOVE FIELD TO DIFFERENT STAGE -->
+  <div id="modalMoveFieldStage" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-4 fade-enter">
+      <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
+        <h3 class="font-bold text-sm text-zinc-900">Pindahkan Input ke Tahap Lain</h3>
+        <button type="button" onclick="closeMoveFieldModal()" class="w-8 h-8 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <form id="formMoveFieldStage" onsubmit="handleExecuteMoveField(event)" class="space-y-3.5 text-xs">
+        <input type="hidden" id="move_source_stage_idx" value="">
+        <input type="hidden" id="move_source_field_idx" value="">
+        <div class="space-y-1">
+          <label class="block font-semibold text-zinc-700">Pilih Tahap Tujuan:</label>
+          <select id="move_target_stage_select" required class="w-full px-3 py-2 rounded-lg border border-zinc-300 bg-white font-medium focus:border-zinc-900 outline-none cursor-pointer"></select>
+        </div>
+        <div class="flex items-center justify-between gap-3 pt-3 border-t border-zinc-100">
+          <button type="button" onclick="closeMoveFieldModal()" class="px-4 py-2 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 font-medium cursor-pointer">Batal</button>
+          <button type="submit" class="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-xs cursor-pointer">Pindahkan Sekarang</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- MODAL: FORM BUILDER QUESTION EDITOR -->
   <!-- ========================================================================= -->
   <div id="modalCustomQuestion" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4">
@@ -1838,7 +1930,8 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           bodyPayload.groups = task.payload;
         } else {
           bodyPayload.config = task.payload;
-          bodyPayload.customFields = adminCustomQuestions;
+          bodyPayload.customFields = adminFormSchema;
+          bodyPayload.formSchema = adminFormSchema;
         }
 
         try {
@@ -2209,6 +2302,8 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           adminMasterGroups = res.groups || [];
           adminAppConfig = res.config || {};
           adminCustomQuestions = res.customFields || [];
+          adminFormSchema = res.formSchema || (typeof res.customFields === 'object' && res.customFields.tahapan ? res.customFields : null);
+          initOrNormalizeFormSchema();
 
           document.getElementById("activeFormTitleBanner").textContent = currentFormMeta.judulForm || adminAppConfig["Judul_Form"] || "Penilaian Presentasi";
           document.getElementById("activeFormSubjectBanner").textContent = `${currentFormMeta.mataKuliah || adminAppConfig["Mata_Kuliah"] || ""} • ${currentFormMeta.dosen || adminAppConfig["Dosen_Pengampu"] || ""}`;
@@ -2381,186 +2476,551 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }
 
     // =========================================================================
-    // UNIFIED FORM BUILDER CANVAS & QUESTION BLOCKS ENGINE
+    // DYNAMIC MULTI-STAGE FORM BUILDER & INTELLIGENT WORKFLOW ENGINE
     // =========================================================================
-    function renderCustomQuestionsList() {
-      renderUnifiedFormCanvas();
+    let adminFormSchema = null;
+
+    function getDefaultFormSchema(config) {
+      config = config || adminAppConfig || {};
+      return {
+        tahapan: [
+          {
+            id: "tahap_1",
+            title: "Identitas & Akses Penilai",
+            description: "Lengkapi data identitas diri penilai sebelum memulai penilaian.",
+            fields: [
+              {
+                id: "fld_core_identity",
+                type: "CORE_IDENTITY",
+                label: "Identitas Penilai (Peran, NIM, Nama Lengkap, Email Kampus)",
+                description: "Merekam data penilai dan memvalidasi alamat email resmi mahasiswa serta format NIM.",
+                required: true,
+                scope: "GLOBAL",
+                config: {
+                  allowedDomains: config["Domain_Email_Wajib"] || "mhs.ulm.ac.id, ulm.ac.id"
+                }
+              }
+            ]
+          },
+          {
+            id: "tahap_2",
+            title: "Pemilihan Kelompok Presentator",
+            description: "Pilih salah satu kelompok yang sedang presentasi di depan kelas.",
+            fields: [
+              {
+                id: "fld_core_group",
+                type: "CORE_GROUP_SELECT",
+                label: "Pemilihan Kelompok Presentator Tampil",
+                description: "Menampilkan daftar kelompok yang tampil pada sesi aktif minggu ini. Terhubung otomatis dengan data kelompok.",
+                required: true,
+                scope: "GLOBAL",
+                config: {}
+              }
+            ]
+          },
+          {
+            id: "tahap_3",
+            title: "Skor Rubrik & Voting Presentator",
+            description: "Penilaian performa materi presentasi dan pemilihan pemateri terbaik.",
+            fields: [
+              {
+                id: "fld_core_score",
+                type: "CORE_SCORE_RUBRIC",
+                label: "Nilai Presentasi Kelompok (Skala Skor)",
+                description: "Penilaian performa presentasi materi dengan slider skor, chip preset (70-100), dan input angka.",
+                required: true,
+                scope: "GLOBAL",
+                config: {
+                  minScore: parseInt(config["Nilai_Kelompok_Min"] || 50),
+                  maxScore: parseInt(config["Nilai_Kelompok_Max"] || 100)
+                }
+              },
+              {
+                id: "fld_core_voting",
+                type: "CORE_BEST_PRESENTER",
+                label: "Pemilihan Presentator Terbaik",
+                description: "Pemilihan anggota pemateri terbaik per kelompok dengan sistem checklist voting.",
+                required: true,
+                scope: "GLOBAL",
+                config: {
+                  maxSelection: parseInt(config["Maksimal_Pilihan_Presentator_Terbaik"] || 2)
+                }
+              }
+            ]
+          },
+          {
+            id: "tahap_4",
+            title: "Evaluasi Masukan Kualitatif",
+            description: "Tuliskan masukan dan tanggapan objektif untuk setiap anggota pemateri kelompok.",
+            fields: [
+              {
+                id: "fld_core_feedback",
+                type: "CORE_MEMBER_FEEDBACK",
+                label: "Evaluasi Masukan Kualitatif Tiap Pemateri",
+                description: "Kolom ulasan tertulis terpisah untuk setiap anggota pemateri kelompok.",
+                required: true,
+                scope: "PER_KELOMPOK",
+                config: {
+                  maxChars: parseInt(config["Maksimal_Karakter_Evaluasi"] || 500),
+                  publicDisplay: config["Tampilkan_Ulasan_Publik"] || "AKTIF",
+                  penyajiRule: config["Kewajiban_Menilai_Penyaji"] || "BEBAS_PENUH_DI_SESINYA"
+                }
+              }
+            ]
+          }
+        ]
+      };
     }
 
-    function renderUnifiedFormCanvas() {
-      const container = document.getElementById("unifiedFormCanvasContainer");
+    function initOrNormalizeFormSchema() {
+      if (!adminFormSchema || !adminFormSchema.tahapan || !Array.isArray(adminFormSchema.tahapan)) {
+        adminFormSchema = getDefaultFormSchema(adminAppConfig);
+      }
+    }
+
+    function renderCustomQuestionsList() {
+      initOrNormalizeFormSchema();
+      renderDynamicStagesCanvas();
+    }
+
+    function renderDynamicStagesCanvas() {
+      initOrNormalizeFormSchema();
+      const container = document.getElementById("dynamicStagesCanvasContainer");
+      const statsBadge = document.getElementById("builderStatsBadge");
       if (!container) return;
       container.innerHTML = "";
 
-      const scoreMin = adminAppConfig["Nilai_Kelompok_Min"] || 50;
-      const scoreMax = adminAppConfig["Nilai_Kelompok_Max"] || 100;
-      const votingMax = adminAppConfig["Maksimal_Pilihan_Presentator_Terbaik"] || 2;
-      const reviewMaxChars = adminAppConfig["Maksimal_Karakter_Evaluasi"] || 500;
-      const reviewPublic = adminAppConfig["Tampilkan_Ulasan_Publik"] || "AKTIF";
-      const penyajiRule = adminAppConfig["Kewajiban_Menilai_Penyaji"] || "BEBAS_PENUH_DI_SESINYA";
-      const emailDomain = adminAppConfig["Domain_Email_Wajib"] || "mhs.ulm.ac.id, ulm.ac.id";
+      const tahapan = adminFormSchema.tahapan;
+      let totalFieldsCount = 0;
+      tahapan.forEach(t => { totalFieldsCount += (t.fields || []).length; });
 
-      // 1. BLOK 1: IDENTITAS PENILAI (CORE)
-      const block1 = document.createElement("div");
-      block1.className = "bg-white rounded-xl border border-zinc-200 p-4 shadow-xs space-y-2.5 transition hover:border-zinc-300";
-      block1.innerHTML = `
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-zinc-100 text-zinc-700 border border-zinc-200">Tahap 1 / 4</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">Field Sistem Inti</span>
-            <span class="text-xs font-bold text-zinc-900">Identitas Penilai (Peran, NIM, Nama Lengkap, Email Kampus)</span>
-            <span class="text-[10px] font-semibold text-rose-600 font-mono">*Wajib</span>
-          </div>
-          <button type="button" onclick="openEditCoreFieldModal('IDENTITY')" class="px-2.5 py-1 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-[11px] font-medium flex items-center gap-1 self-start sm:self-auto cursor-pointer">
-            <svg class="w-3 h-3 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
-            <span>Atur Domain Email</span>
-          </button>
-        </div>
-        <p class="text-[11px] text-zinc-500">Merekam data penilai dan memvalidasi alamat email resmi mahasiswa (${emailDomain}) serta format NIM.</p>
-      `;
-      container.appendChild(block1);
+      if (statsBadge) {
+        statsBadge.textContent = `${tahapan.length} Tahap • ${totalFieldsCount} Komponen`;
+      }
 
-      // 2. BLOK 2: PEMILIHAN KELOMPOK (CORE)
-      const block2 = document.createElement("div");
-      block2.className = "bg-white rounded-xl border border-zinc-200 p-4 shadow-xs space-y-2.5 transition hover:border-zinc-300";
-      block2.innerHTML = `
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-zinc-100 text-zinc-700 border border-zinc-200">Tahap 2 / 4</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">Field Sistem Inti</span>
-            <span class="text-xs font-bold text-zinc-900">Pemilihan Kelompok Presentator Tampil</span>
-            <span class="text-[10px] font-semibold text-rose-600 font-mono">*Wajib</span>
-          </div>
-          <button type="button" onclick="switchAdminTab('data')" class="px-2.5 py-1 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-[11px] font-medium flex items-center gap-1 self-start sm:self-auto cursor-pointer">
-            <svg class="w-3 h-3 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-            <span>Kelola di Tab Kelompok</span>
-          </button>
-        </div>
-        <p class="text-[11px] text-zinc-500">Menampilkan daftar kelompok yang tampil pada sesi aktif minggu ini. Terhubung otomatis dengan daftar anggota mahasiswa di Tab 1.</p>
-      `;
-      container.appendChild(block2);
+      tahapan.forEach((stage, sIdx) => {
+        const stageCard = document.createElement("div");
+        stageCard.className = "bg-white rounded-2xl border border-zinc-200 p-4 sm:p-5 shadow-xs space-y-3.5 transition hover:border-zinc-300";
 
-      // 3. BLOK 3: NILAI PRESENTASI KELOMPOK (CORE RUBRIC)
-      const block3 = document.createElement("div");
-      block3.className = "bg-white rounded-xl border border-zinc-200 p-4 shadow-xs space-y-2.5 transition hover:border-zinc-300";
-      block3.innerHTML = `
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-zinc-100 text-zinc-700 border border-zinc-200">Tahap 3 / 4</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Rubrik Nilai Inti</span>
-            <span class="text-xs font-bold text-zinc-900">Nilai Presentasi Kelompok (Skala Skor)</span>
-            <span class="text-[10px] font-semibold text-rose-600 font-mono">*Wajib</span>
-          </div>
-          <button type="button" onclick="openEditCoreFieldModal('SCORE')" class="px-2.5 py-1 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-[11px] font-medium flex items-center gap-1 self-start sm:self-auto cursor-pointer">
-            <svg class="w-3 h-3 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-            <span>Atur Rentang Skor</span>
-          </button>
-        </div>
-        <div class="flex items-center gap-2 text-[11px] text-zinc-600 flex-wrap">
-          <span>Penguasaan materi &amp; media.</span>
-          <span class="px-2 py-0.5 rounded bg-zinc-100 font-mono font-bold text-emerald-800 border border-zinc-200">Skor Min: ${scoreMin}</span>
-          <span class="px-2 py-0.5 rounded bg-zinc-100 font-mono font-bold text-emerald-800 border border-zinc-200">Skor Max: ${scoreMax}</span>
-        </div>
-      `;
-      container.appendChild(block3);
+        const fields = stage.fields || [];
 
-      // 4. BLOK 4: PRESENTATOR TERBAIK (CORE VOTING)
-      const block4 = document.createElement("div");
-      block4.className = "bg-white rounded-xl border border-zinc-200 p-4 shadow-xs space-y-2.5 transition hover:border-zinc-300";
-      block4.innerHTML = `
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-zinc-100 text-zinc-700 border border-zinc-200">Tahap 3 / 4</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">Voting Peer Inti</span>
-            <span class="text-xs font-bold text-zinc-900">Pemilihan Presentator Terbaik</span>
-            <span class="text-[10px] font-semibold text-rose-600 font-mono">*Wajib</span>
-          </div>
-          <button type="button" onclick="openEditCoreFieldModal('VOTING')" class="px-2.5 py-1 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-[11px] font-medium flex items-center gap-1 self-start sm:self-auto cursor-pointer">
-            <svg class="w-3 h-3 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-            <span>Atur Batas Pilihan</span>
-          </button>
-        </div>
-        <div class="flex items-center gap-2 text-[11px] text-zinc-600 flex-wrap">
-          <span>Voting pemateri terbaik per kelompok.</span>
-          <span class="px-2 py-0.5 rounded bg-zinc-100 font-mono font-bold text-blue-800 border border-zinc-200">Maksimal: ${votingMax} Orang</span>
-        </div>
-      `;
-      container.appendChild(block4);
-
-      // 5. BLOK 5: EVALUASI MASUKAN PEMATERI (CORE REVIEW)
-      const block5 = document.createElement("div");
-      block5.className = "bg-white rounded-xl border border-zinc-200 p-4 shadow-xs space-y-2.5 transition hover:border-zinc-300";
-      block5.innerHTML = `
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-zinc-100 text-zinc-700 border border-zinc-200">Tahap 4 / 4</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">Ulasan Kualitatif Inti</span>
-            <span class="text-xs font-bold text-zinc-900">Evaluasi Masukan Kualitatif Tiap Pemateri</span>
-            <span class="text-[10px] font-semibold text-rose-600 font-mono">*Wajib</span>
-          </div>
-          <button type="button" onclick="openEditCoreFieldModal('REVIEW')" class="px-2.5 py-1 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-[11px] font-medium flex items-center gap-1 self-start sm:self-auto cursor-pointer">
-            <svg class="w-3 h-3 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-            <span>Atur Aturan Ulasan</span>
-          </button>
-        </div>
-        <div class="flex items-center gap-2 text-[11px] text-zinc-600 flex-wrap">
-          <span class="px-2 py-0.5 rounded bg-zinc-100 font-mono font-bold text-amber-800 border border-zinc-200">Batas: ${reviewMaxChars} Karakter</span>
-          <span class="px-2 py-0.5 rounded bg-zinc-100 font-mono font-bold text-zinc-700 border border-zinc-200">Publikasi: ${reviewPublic}</span>
-          <span class="px-2 py-0.5 rounded bg-zinc-100 font-mono font-bold text-zinc-700 border border-zinc-200">Penyaji: ${penyajiRule === 'BEBAS_PENUH_DI_SESINYA' ? 'Bebas' : 'Wajib'}</span>
-        </div>
-      `;
-      container.appendChild(block5);
-
-      // 6. BLOK PERTANYAAN KUSTOM (DYNAMIC CUSTOM FIELDS)
-      if (adminCustomQuestions && adminCustomQuestions.length > 0) {
-        adminCustomQuestions.forEach((q, idx) => {
-          const item = document.createElement("div");
-          item.className = "bg-white rounded-xl border border-indigo-200 p-4 shadow-xs space-y-2.5 transition hover:border-indigo-400";
-
-          const typeLabels = {
-            'TEXTAREA': 'Paragraf Panjang',
-            'SHORT_TEXT': 'Teks Singkat',
-            'RATING_SCALE': `Skala Nilai (${q.minVal || 1}-${q.maxVal || 5})`,
-            'RADIO': 'Pilihan Ganda',
-            'CHECKBOX': 'Kotak Centang',
-            'FILE_UPLOAD': 'Unggah Berkas PDF/Gambar'
+        const fieldRowsHtml = fields.map((f, fIdx) => {
+          const typeBadgeMap = {
+            'CORE_IDENTITY': '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">Field Sistem Inti</span>',
+            'CORE_GROUP_SELECT': '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">Field Sistem Inti</span>',
+            'CORE_SCORE_RUBRIC': '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Rubrik Nilai Inti</span>',
+            'CORE_BEST_PRESENTER': '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">Voting Peer Inti</span>',
+            'CORE_MEMBER_FEEDBACK': '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">Ulasan Inti</span>',
+            'SHORT_TEXT': '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">Teks Singkat</span>',
+            'TEXTAREA': '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">Paragraf</span>',
+            'RATING_SCALE': `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">Skala Nilai (${f.minVal || 1}-${f.maxVal || 5})</span>`,
+            'RADIO': '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">Pilihan Ganda</span>',
+            'CHECKBOX': '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">Kotak Centang</span>',
+            'DROPDOWN': '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">Dropdown</span>',
+            'FILE_UPLOAD': '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">Unggah Berkas</span>',
+            'INFO_BANNER': '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-zinc-100 text-zinc-700 border border-zinc-200">Banner Teks</span>'
           };
 
-          const scopeBadge = q.scope === 'PER_KELOMPOK' 
-            ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">Rubrik Kelompok</span>'
-            : '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">Umum Form</span>';
+          const scopeBadge = f.scope === 'PER_KELOMPOK' 
+            ? '<span class="px-1.5 py-0.5 rounded text-[9.5px] font-bold bg-purple-50 text-purple-700 border border-purple-200">Rubrik Kelompok</span>'
+            : (f.scope === 'PER_PEMATERI' ? '<span class="px-1.5 py-0.5 rounded text-[9.5px] font-bold bg-amber-50 text-amber-700 border border-amber-200">Per Pemateri</span>' : '<span class="px-1.5 py-0.5 rounded text-[9.5px] font-bold bg-blue-50 text-blue-700 border border-blue-200">Umum Form</span>');
 
-          item.innerHTML = `
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div class="flex items-center gap-2 flex-wrap min-w-0">
-                <span class="w-6 h-6 rounded-md bg-indigo-50 font-mono font-bold text-indigo-700 border border-indigo-200 flex items-center justify-center flex-shrink-0 text-xs">
-                  ${idx + 6}
+          const reqBadge = f.required ? '<span class="text-[10px] font-semibold text-rose-600 font-mono">*Wajib</span>' : '<span class="text-[10px] text-zinc-400 font-mono">Opsional</span>';
+
+          const isCore = String(f.type || "").startsWith("CORE_");
+
+          return `
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 rounded-xl bg-zinc-50 border border-zinc-200/80 hover:bg-white hover:border-zinc-300 transition text-xs">
+              <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                <span class="w-5 h-5 rounded-md bg-white border border-zinc-200 font-mono font-bold text-zinc-600 flex items-center justify-center flex-shrink-0 text-[11px]">
+                  ${fIdx + 1}
                 </span>
-                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">Field Kustom</span>
-                ${scopeBadge}
-                <span class="font-bold text-xs text-zinc-900 truncate">${q.label}</span>
-                ${q.required ? '<span class="text-[10px] font-semibold text-rose-600 font-mono">*Wajib</span>' : ''}
+                <div class="min-w-0 flex-1 space-y-0.5">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    ${typeBadgeMap[f.type] || '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-zinc-100 text-zinc-700">Custom</span>'}
+                    ${scopeBadge}
+                    <span class="font-bold text-zinc-900 truncate">${f.label}</span>
+                    ${reqBadge}
+                  </div>
+                  <p class="text-[10.5px] text-zinc-400 truncate">${f.description || ''}</p>
+                </div>
               </div>
 
               <div class="flex items-center gap-1 flex-shrink-0 self-end sm:self-auto">
-                <button type="button" onclick="moveQuestion(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} class="p-1 rounded hover:bg-zinc-100 disabled:opacity-30 text-zinc-600 cursor-pointer" title="Naikkan Posisi">▲</button>
-                <button type="button" onclick="moveQuestion(${idx}, 1)" ${idx === adminCustomQuestions.length - 1 ? 'disabled' : ''} class="p-1 rounded hover:bg-zinc-100 disabled:opacity-30 text-zinc-600 cursor-pointer" title="Turunkan Posisi">▼</button>
-                <button type="button" onclick="openEditQuestionModal(${idx})" class="p-1.5 rounded hover:bg-zinc-100 text-zinc-700 cursor-pointer" title="Ubah Pertanyaan">
+                <button type="button" onclick="moveField(${sIdx}, ${fIdx}, -1)" ${fIdx === 0 ? 'disabled' : ''} class="p-1 rounded hover:bg-zinc-200 disabled:opacity-20 text-zinc-600 cursor-pointer" title="Naikkan Posisi">▲</button>
+                <button type="button" onclick="moveField(${sIdx}, ${fIdx}, 1)" ${fIdx === fields.length - 1 ? 'disabled' : ''} class="p-1 rounded hover:bg-zinc-200 disabled:opacity-20 text-zinc-600 cursor-pointer" title="Turunkan Posisi">▼</button>
+                <button type="button" onclick="openMoveFieldModal(${sIdx}, ${fIdx})" class="px-2 py-1 rounded-lg border border-zinc-200 hover:bg-zinc-100 text-zinc-700 text-[10.5px] font-medium flex items-center gap-1 cursor-pointer" title="Pindahkan ke Tahap Lain">
+                  <span>Pindah Tahap ↗</span>
+                </button>
+                <button type="button" onclick="${isCore ? `openEditCoreFieldDirect('${f.type}')` : `openEditFieldModal(${sIdx}, ${fIdx})`}" class="p-1.5 rounded hover:bg-zinc-200 text-zinc-700 cursor-pointer" title="Ubah Pengaturan Field">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                 </button>
-                <button type="button" onclick="deleteQuestion(${idx})" class="p-1.5 rounded hover:bg-rose-100 text-rose-600 cursor-pointer" title="Hapus Pertanyaan">
+                <button type="button" onclick="deleteField(${sIdx}, ${fIdx})" class="p-1.5 rounded hover:bg-rose-100 text-rose-600 cursor-pointer" title="Hapus Field">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
               </div>
             </div>
-            <p class="text-[11px] text-zinc-400 font-mono">Tipe Input: ${typeLabels[q.type] || q.type}</p>
           `;
+        }).join("");
 
-          container.appendChild(item);
-        });
-      }
+        stageCard.innerHTML = `
+          <!-- Stage Card Header -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-zinc-100 pb-3">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="px-2.5 py-1 rounded-lg bg-zinc-900 text-white font-mono font-bold text-xs flex-shrink-0">
+                Tahap ${sIdx + 1} / ${tahapan.length}
+              </span>
+              <div class="min-w-0">
+                <h4 class="font-bold text-sm text-zinc-900 truncate">${stage.title}</h4>
+                <p class="text-[11px] text-zinc-400 truncate">${stage.description || 'Tahapan pengisian formulir.'}</p>
+              </div>
+            </div>
+
+            <!-- Stage Control Buttons -->
+            <div class="flex items-center gap-1.5 flex-wrap flex-shrink-0 self-end sm:self-auto">
+              <button type="button" onclick="moveStage(${sIdx}, -1)" ${sIdx === 0 ? 'disabled' : ''} class="p-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 disabled:opacity-20 text-zinc-600 cursor-pointer" title="Geser Tahap Naik">▲</button>
+              <button type="button" onclick="moveStage(${sIdx}, 1)" ${sIdx === tahapan.length - 1 ? 'disabled' : ''} class="p-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 disabled:opacity-20 text-zinc-600 cursor-pointer" title="Geser Tahap Turun">▼</button>
+              <button type="button" onclick="openEditStageModal(${sIdx})" class="px-2.5 py-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold flex items-center gap-1 cursor-pointer">
+                <svg class="w-3 h-3 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                <span>Ubah Tahap</span>
+              </button>
+              <button type="button" onclick="duplicateStage(${sIdx})" class="p-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-600 cursor-pointer" title="Duplikasi Tahap">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+              </button>
+              <button type="button" onclick="deleteStage(${sIdx})" ${tahapan.length <= 1 ? 'disabled' : ''} class="p-1.5 rounded-lg border border-rose-200 hover:bg-rose-50 text-rose-600 disabled:opacity-20 cursor-pointer" title="Hapus Tahap">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Fields inside this Stage -->
+          <div class="space-y-2">
+            ${fields.length > 0 ? fieldRowsHtml : `
+              <div class="p-4 rounded-xl border border-dashed border-zinc-300 text-center text-xs text-zinc-400">
+                Tahap ini belum memiliki komponen input. Klik tombol "+ Tambah Input" di bawah.
+              </div>
+            `}
+          </div>
+
+          <!-- Quick Add Button at Bottom of Stage -->
+          <div class="pt-1">
+            <button 
+              type="button" 
+              onclick="openAddFieldModal(${sIdx})" 
+              class="w-full py-2 px-3 rounded-xl border border-dashed border-zinc-300 hover:border-zinc-500 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer"
+            >
+              <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              <span>+ Tambah Input ke Tahap ${sIdx + 1}</span>
+            </button>
+          </div>
+        `;
+
+        container.appendChild(stageCard);
+      });
     }
 
+    // STAGE CRUD ACTIONS
+    function openAddStageModal() {
+      document.getElementById("modalStageTitleText").textContent = "Tambah Tahap Baru";
+      document.getElementById("stage_edit_id").value = "";
+      document.getElementById("stage_input_title").value = `Tahap ${adminFormSchema.tahapan.length + 1}`;
+      document.getElementById("stage_input_description").value = "";
+      document.getElementById("modalStageEditor").classList.remove("hidden");
+    }
+
+    function openEditStageModal(sIdx) {
+      const stage = adminFormSchema.tahapan[sIdx];
+      if (!stage) return;
+      document.getElementById("modalStageTitleText").textContent = `Ubah Tahap ${sIdx + 1}`;
+      document.getElementById("stage_edit_id").value = stage.id || `tahap_${sIdx + 1}`;
+      document.getElementById("stage_input_title").value = stage.title || "";
+      document.getElementById("stage_input_description").value = stage.description || "";
+      document.getElementById("modalStageEditor").classList.remove("hidden");
+    }
+
+    function closeStageEditorModal() {
+      document.getElementById("modalStageEditor").classList.add("hidden");
+    }
+
+    function handleSaveStage(e) {
+      e.preventDefault();
+      const editId = document.getElementById("stage_edit_id").value;
+      const title = document.getElementById("stage_input_title").value.trim();
+      const desc = document.getElementById("stage_input_description").value.trim();
+
+      if (editId) {
+        const stage = adminFormSchema.tahapan.find(t => t.id === editId);
+        if (stage) {
+          stage.title = title;
+          stage.description = desc;
+        }
+      } else {
+        const newId = "tahap_" + Date.now().toString(36);
+        adminFormSchema.tahapan.push({
+          id: newId,
+          title: title,
+          description: desc,
+          fields: []
+        });
+      }
+
+      closeStageEditorModal();
+      renderDynamicStagesCanvas();
+      triggerAutoSaveSchema();
+      showAdminToast("Tahap formulir berhasil disimpan & disinkronkan.", "success");
+    }
+
+    function moveStage(sIdx, dir) {
+      const targetIdx = sIdx + dir;
+      if (targetIdx < 0 || targetIdx >= adminFormSchema.tahapan.length) return;
+      const temp = adminFormSchema.tahapan[sIdx];
+      adminFormSchema.tahapan[sIdx] = adminFormSchema.tahapan[targetIdx];
+      adminFormSchema.tahapan[targetIdx] = temp;
+      renderDynamicStagesCanvas();
+      triggerAutoSaveSchema();
+    }
+
+    function duplicateStage(sIdx) {
+      const stage = adminFormSchema.tahapan[sIdx];
+      if (!stage) return;
+      const copyFields = JSON.parse(JSON.stringify(stage.fields || [])).map(f => ({
+        ...f,
+        id: "fld_" + Date.now().toString(36) + "_" + Math.random().toString(36).substr(2, 4)
+      }));
+
+      const newStage = {
+        id: "tahap_" + Date.now().toString(36),
+        title: `${stage.title} (Salinan)`,
+        description: stage.description || "",
+        fields: copyFields
+      };
+
+      adminFormSchema.tahapan.splice(sIdx + 1, 0, newStage);
+      renderDynamicStagesCanvas();
+      triggerAutoSaveSchema();
+      showAdminToast(`Tahap '${stage.title}' berhasil diduplikasi!`, "success");
+    }
+
+    function deleteStage(sIdx) {
+      if (adminFormSchema.tahapan.length <= 1) {
+        alert("Formulir wajib memiliki minimal 1 Tahap pengisian.");
+        return;
+      }
+      const stage = adminFormSchema.tahapan[sIdx];
+      if (!confirm(`Hapus '${stage.title}' beserta seluruh (${(stage.fields||[]).length}) input di dalamnya?`)) return;
+      adminFormSchema.tahapan.splice(sIdx, 1);
+      renderDynamicStagesCanvas();
+      triggerAutoSaveSchema();
+      showAdminToast("Tahap berhasil dihapus.", "info");
+    }
+
+    // FIELD CRUD ACTIONS
+    let editingFieldStageIdx = -1;
+    let editingFieldIndex = -1;
+
+    function openAddFieldModal(targetStageIdx = 0) {
+      editingFieldStageIdx = targetStageIdx;
+      editingFieldIndex = -1;
+
+      document.getElementById("modalQuestionTitle").textContent = "Tambah Input / Pertanyaan Baru";
+      document.getElementById("q_edit_id").value = "";
+      document.getElementById("q_label").value = "";
+      document.getElementById("q_scope").value = "GLOBAL";
+      document.getElementById("q_type").value = "SHORT_TEXT";
+      document.getElementById("q_required").checked = false;
+
+      handleQuestionTypeChange();
+      document.getElementById("modalCustomQuestion").classList.remove("hidden");
+    }
+
+    function openEditFieldModal(sIdx, fIdx) {
+      editingFieldStageIdx = sIdx;
+      editingFieldIndex = fIdx;
+      const field = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
+      if (!field) return;
+
+      document.getElementById("modalQuestionTitle").textContent = "Ubah Input / Pertanyaan";
+      document.getElementById("q_edit_id").value = field.id;
+      document.getElementById("q_label").value = field.label || "";
+      document.getElementById("q_scope").value = field.scope || "GLOBAL";
+      document.getElementById("q_type").value = field.type || "SHORT_TEXT";
+      document.getElementById("q_required").checked = !!field.required;
+
+      if (field.options) document.getElementById("q_options_text").value = field.options.join(", ");
+      if (field.minVal) document.getElementById("q_min_val").value = field.minVal;
+      if (field.maxVal) document.getElementById("q_max_val").value = field.maxVal;
+
+      handleQuestionTypeChange();
+      document.getElementById("modalCustomQuestion").classList.remove("hidden");
+    }
+
+    function openEditCoreFieldDirect(coreType) {
+      if (coreType === 'CORE_IDENTITY') openEditCoreFieldModal('IDENTITY');
+      else if (coreType === 'CORE_GROUP_SELECT') switchAdminTab('data');
+      else if (coreType === 'CORE_SCORE_RUBRIC') openEditCoreFieldModal('SCORE');
+      else if (coreType === 'CORE_BEST_PRESENTER') openEditCoreFieldModal('VOTING');
+      else if (coreType === 'CORE_MEMBER_FEEDBACK') openEditCoreFieldModal('REVIEW');
+    }
+
+    function handleSaveCustomQuestion(e) {
+      e.preventDefault();
+      const editId = document.getElementById("q_edit_id").value;
+      const label = document.getElementById("q_label").value.trim();
+      const scope = document.getElementById("q_scope").value;
+      const type = document.getElementById("q_type").value;
+      const required = document.getElementById("q_required").checked;
+
+      let options = [];
+      if (type === 'RADIO' || type === 'CHECKBOX' || type === 'DROPDOWN') {
+        options = document.getElementById("q_options_text").value
+          .split(/[\n,]/)
+          .map(s => s.trim())
+          .filter(Boolean);
+      }
+
+      const minVal = parseInt(document.getElementById("q_min_val").value || 1);
+      const maxVal = parseInt(document.getElementById("q_max_val").value || 5);
+
+      const fieldObj = {
+        id: editId || ("fld_" + Date.now().toString(36)),
+        label: label,
+        scope: scope,
+        type: type,
+        required: required,
+        options: options,
+        minVal: minVal,
+        maxVal: maxVal
+      };
+
+      const sIdx = editingFieldStageIdx >= 0 ? editingFieldStageIdx : 0;
+      if (!adminFormSchema.tahapan[sIdx].fields) adminFormSchema.tahapan[sIdx].fields = [];
+
+      if (editingFieldIndex >= 0) {
+        adminFormSchema.tahapan[sIdx].fields[editingFieldIndex] = fieldObj;
+      } else {
+        adminFormSchema.tahapan[sIdx].fields.push(fieldObj);
+      }
+
+      closeCustomQuestionModal();
+      renderDynamicStagesCanvas();
+      triggerAutoSaveSchema();
+      showAdminToast("Input berhasil disimpan ke Tahap " + (sIdx + 1), "success");
+    }
+
+    function moveField(sIdx, fIdx, dir) {
+      const fields = adminFormSchema.tahapan[sIdx].fields;
+      const targetIdx = fIdx + dir;
+      if (targetIdx < 0 || targetIdx >= fields.length) return;
+      const temp = fields[fIdx];
+      fields[fIdx] = fields[targetIdx];
+      fields[targetIdx] = temp;
+      renderDynamicStagesCanvas();
+      triggerAutoSaveSchema();
+    }
+
+    function deleteField(sIdx, fIdx) {
+      const f = adminFormSchema.tahapan[sIdx].fields[fIdx];
+      if (!confirm(`Hapus input '${f.label}' dari Tahap ${sIdx + 1}?`)) return;
+      adminFormSchema.tahapan[sIdx].fields.splice(fIdx, 1);
+      renderDynamicStagesCanvas();
+      triggerAutoSaveSchema();
+      showAdminToast("Input dihapus.", "info");
+    }
+
+    // MOVE FIELD ACROSS STAGES
+    function openMoveFieldModal(sIdx, fIdx) {
+      document.getElementById("move_source_stage_idx").value = sIdx;
+      document.getElementById("move_source_field_idx").value = fIdx;
+      const sel = document.getElementById("move_target_stage_select");
+      sel.innerHTML = "";
+
+      adminFormSchema.tahapan.forEach((t, idx) => {
+        sel.innerHTML += `<option value="${idx}" ${idx === sIdx ? 'disabled' : ''}>Tahap ${idx + 1}: ${t.title} ${idx === sIdx ? '(Tahap Saat Ini)' : ''}</option>`;
+      });
+
+      document.getElementById("modalMoveFieldStage").classList.remove("hidden");
+    }
+
+    function closeMoveFieldModal() {
+      document.getElementById("modalMoveFieldStage").classList.add("hidden");
+    }
+
+    function handleExecuteMoveField(e) {
+      e.preventDefault();
+      const sIdx = parseInt(document.getElementById("move_source_stage_idx").value);
+      const fIdx = parseInt(document.getElementById("move_source_field_idx").value);
+      const targetStageIdx = parseInt(document.getElementById("move_target_stage_select").value);
+
+      if (isNaN(sIdx) || isNaN(fIdx) || isNaN(targetStageIdx) || sIdx === targetStageIdx) return;
+
+      const field = adminFormSchema.tahapan[sIdx].fields.splice(fIdx, 1)[0];
+      if (!adminFormSchema.tahapan[targetStageIdx].fields) adminFormSchema.tahapan[targetStageIdx].fields = [];
+      adminFormSchema.tahapan[targetStageIdx].fields.push(field);
+
+      closeMoveFieldModal();
+      renderDynamicStagesCanvas();
+      triggerAutoSaveSchema();
+      showAdminToast(`'${field.label}' berhasil dipindahkan ke Tahap ${targetStageIdx + 1}!`, "success");
+    }
+
+    // PRESETS & RESET
+    function addStagePreset(presetKey) {
+      initOrNormalizeFormSchema();
+      if (presetKey === 'REFLEKSI_UPLOAD') {
+        const newStage = {
+          id: "tahap_" + Date.now().toString(36),
+          title: "Refleksi & Unggah Dokumen Presentasi",
+          description: "Unggah berkas slide PDF materi kelompok dan sampaikan refleksi pembelajaran hari ini.",
+          fields: [
+            {
+              id: "fld_slide_" + Date.now().toString(36),
+              label: "Lampiran Dokumen / Slide PPT Materi (PDF)",
+              scope: "GLOBAL",
+              type: "FILE_UPLOAD",
+              required: false,
+              description: "Format PDF, PPTX, JPG, PNG (Maks 5 MB)."
+            },
+            {
+              id: "fld_refleksi_" + Date.now().toString(36),
+              label: "Kesan & Refleksi Perkuliahan Hari Ini",
+              scope: "GLOBAL",
+              type: "TEXTAREA",
+              required: false,
+              description: "Catatan atau evaluasi pengalaman presentasi."
+            }
+          ]
+        };
+        adminFormSchema.tahapan.push(newStage);
+        showAdminToast("Tahap baru 'Refleksi & Unggah Dokumen' berhasil ditambahkan!", "success");
+      } else if (presetKey === 'RUBRIK_QNA') {
+        const targetStage = adminFormSchema.tahapan[2] || adminFormSchema.tahapan[adminFormSchema.tahapan.length - 1];
+        targetStage.fields.push({
+          id: "fld_qna_" + Date.now().toString(36),
+          label: "Penguasaan Materi & Sesi Tanya Jawab",
+          scope: "PER_KELOMPOK",
+          type: "RATING_SCALE",
+          minVal: 1,
+          maxVal: 5,
+          required: true,
+          description: "Rubrik kemampuan menjawab pertanyaan audiens."
+        });
+        showAdminToast("Input 'Rubrik Tanya Jawab' berhasil ditambahkan!", "success");
+      }
+      renderDynamicStagesCanvas();
+      triggerAutoSaveSchema();
+    }
+
+    function resetToDefaultStandardSchema() {
+      if (!confirm("Kembalikan struktur formulir ke 4-Tahap Standar PGSD bawaan? Seluruh tahapan akan direset ke default.")) return;
+      adminFormSchema = getDefaultFormSchema(adminAppConfig);
+      renderDynamicStagesCanvas();
+      triggerAutoSaveSchema();
+      showAdminToast("Struktur formulir berhasil direset ke 4-Tahap Standar PGSD.", "info");
+    }
+
+    function triggerAutoSaveSchema() {
+      queueSyncTask('config', adminAppConfig);
+    }
     // CORE FIELD MODAL CONTROLLERS
     function openEditCoreFieldModal(mode) {
       document.getElementById("core_settings_mode").value = mode;

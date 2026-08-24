@@ -4,6 +4,22 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.77] - 2026-08-24
+
+### 🚀 Dynamic Multi-Stage Form Builder & Intelligent Workflow Engine (Melebihi Google Forms)
+- **Pengelolaan Tahapan Dinamis Penuh (*Dynamic Multi-Stage Canvas*):**
+  - Tahapan (Steps/Sections) formulir kini **100% dinamis**: Admin dapat menambah tahap baru (`+ Tambah Tahap Baru`), mengubah judul/deskripsi tahap (`✏️ Ubah Tahap`), menggeser urutan tahap naik/turun (`▲ / ▼`), menduplikasi tahap (`📑 Duplikasi`), dan menghapus tahap (`🗑️ Hapus`).
+  - Dilengkapi *Quick Presets* 1-klik: `+ Tahap Refleksi & Upload Berkas`, `+ Rubrik Tanya Jawab (1-5)`, dan `↺ Reset ke 4-Tahap Standar PGSD`.
+- **Kustomisasi Komponen Input Fleksibel di Setiap Tahap:**
+  - Setiap input di dalam setiap tahap dapat dipindahkan posisinya di dalam tahap yang sama maupun dipindahkan ke tahap lain (`Pindah Tahap ↗`).
+  - Mendukung komponen bawaan/sistem (*Identitas Penilai, Pemilihan Kelompok, Rubrik Skor Min-Max, Voting Presentator Terbaik, Evaluasi Masukan Pemateri*) dan komponen kustom (*Teks Singkat, Paragraf Panjang, Skala Nilai 1-5 / 0-100, Pilihan Ganda, Kotak Centang, Dropdown, Unggah Berkas Google Drive, Banner Panduan Teks*).
+- **Dynamic Client Stepper Engine (`index.html`):**
+  - Stepper pengisian mahasiswa otomatis mengkalkulasi dan merender jumlah tahap ($N$ Tahap) secara presisi, termasuk tab tahapan dinamis, *progress bar percentage*, indikator `01/0N`, navigasi pintar antartahap, dan validasi *required* per tahap.
+- **Sinkronisasi Atomik & Kompatibilitas 100%:**
+  - Struktur `formSchema` terintegrasi dengan penyimpanan Google Sheets (`Custom_Fields_JSON` / `Form_Schema_JSON`) dengan *backward-compatibility* penuh untuk seluruh data respons yang ada.
+
+---
+
 ## [2.1.76] - 2026-08-24
 
 ### 🎨 Pemetaan Terpadu Struktur Formulir Inti & Kustom (Unified Form Canvas Builder)
