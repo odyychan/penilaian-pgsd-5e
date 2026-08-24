@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.87] - 2026-08-24
+
+### 🛡️ Comprehensive UI Polish, Zero Redundancy & Full Mobile S/M/L Responsive Audit
+- **Pembersihan Redundansi & Duplikasi Teks (*Zero Redundancy*):**
+  - Menghapus teks `+` ganda pada seluruh tombol header dan tombol bawah bagian sehingga teks menjadi bersih dan profesional (`Tambah Pertanyaan`, `Tambah Bagian`, `Tambah Pertanyaan ke Bagian X`).
+- **Peningkatan Kontras & Keterbacaan Badge Status:**
+  - Badge status draf kini menggunakan `bg-amber-100 text-amber-950 border-amber-400 font-bold` sehingga kontras dan terbaca tajam tanpa silau.
+  - Badge status aktif menggunakan `bg-emerald-100 text-emerald-950 border-emerald-400 font-bold`.
+- **Audit Presisi Tata Letak Multi-Perangkat (Mobile S/M/L, Tablet, Desktop, 4K):**
+  - Mengatur susunan 4 tombol utama Form Builder menjadi grid 2×2 yang rapi di layar ponsel (*Mobile S 320px, Mobile M 375px, Mobile L 412px*) dan horizontal sejajar di layar Tablet/Desktop.
+  - Seluruh target sentuh tombol memenuhi standar aksesibilitas $\ge 44 	imes 44	ext{ px}$ dan terbebas dari tumpang tindih (*zero overlap*).
+
+---
+
 ## [2.1.86] - 2026-08-24
 
 ### 🧹 Form Builder Simplification, Natural Human Text & "Judul & Deskripsi Teks" Block
