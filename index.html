@@ -1810,7 +1810,11 @@
       if (!pin) return;
       localStorage.setItem("PGSD_ACTIVE_CLIENT_FORM_ID", pin);
       localStorage.removeItem("PGSD_FORM_DRAFT");
-      window.location.href = `/?id=${encodeURIComponent(pin)}`;
+      
+      const url = new URL(window.location.href);
+      url.searchParams.set('id', pin);
+      url.searchParams.delete('form');
+      window.location.href = url.toString();
     }
 
     function renderDynamicCustomFields() {
@@ -2188,48 +2192,99 @@
 
     function loadLocalCache() {
       try {
-        const cachedGroups = localStorage.getItem("PGSD_CACHE_GROUPS");
-        const cachedConfig = localStorage.getItem("PGSD_CACHE_CONFIG");
-        const cachedStudents = localStorage.getItem("PGSD_CACHE_ALL_STUDENTS");
-        const cachedRekap = localStorage.getItem("PGSD_CACHE_REKAP");
+        const isDefault = (activeFormId === 'BK5E' || !activeFormId);
+        
+        // 1. Check form-specific cache first
+        let cachedConfig = localStorage.getItem("PGSD_CACHE_CONFIG_" + activeFormId);
+        let cachedGroups = localStorage.getItem("PGSD_CACHE_GROUPS_" + activeFormId);
+        let cachedStudents = localStorage.getItem("PGSD_CACHE_ALL_STUDENTS_" + activeFormId);
+        let cachedSchema = localStorage.getItem("PGSD_CACHE_FORM_SCHEMA_" + activeFormId);
+
+        // 2. Check local forms registry if specific cache is not yet populated
+        const localRegistry = JSON.parse(localStorage.getItem("PGSD_CACHE_REGISTRY_FORMS") || "[]");
+        const foundMeta = localRegistry.find(f => (f.formId || 'BK5E').toUpperCase() === activeFormId);
+        if (foundMeta) {
+          currentFormMeta = foundMeta;
+        }
+
+        // 3. Fallback for default primary form BK5E
+        if (isDefault) {
+          if (!cachedConfig) cachedConfig = localStorage.getItem("PGSD_CACHE_CONFIG");
+          if (!cachedGroups) cachedGroups = localStorage.getItem("PGSD_CACHE_GROUPS");
+          if (!cachedStudents) cachedStudents = localStorage.getItem("PGSD_CACHE_ALL_STUDENTS");
+        }
 
         if (cachedStudents) {
           try { allStudentsData = JSON.parse(cachedStudents) || []; } catch(e) {}
         }
 
-        if (cachedGroups && cachedConfig) {
-          appConfig = JSON.parse(cachedConfig);
-          groupsData = JSON.parse(cachedGroups);
-
-          if (!allStudentsData || allStudentsData.length === 0) {
-            allStudentsData = [];
-            groupsData.forEach(g => {
-              (g.members || []).forEach(m => {
-                allStudentsData.push({
-                  nim: m.nim || "",
-                  name: m.name || "",
-                  kelompok: g.name || "",
-                  sesi: g.sesi || "Minggu 1"
-                });
-              });
-            });
-          }
-
-          renderConfigHeader();
-          renderGroupOptions();
-        } else {
-          mockLoadData();
+        if (cachedSchema) {
+          try { currentFormSchema = JSON.parse(cachedSchema); } catch(e) {}
         }
 
-        if (cachedRekap) {
-          currentRekapData = JSON.parse(cachedRekap);
-          if (currentRekapData && currentRekapData.summary) {
-            populateRekapFilter(currentRekapData.summary);
-            renderBothRekapViews();
+        if (cachedConfig) {
+          try { appConfig = JSON.parse(cachedConfig); } catch(e) {}
+        } else if (foundMeta) {
+          appConfig = {
+            "Judul_Form": foundMeta.judulForm || foundMeta.title || `PENILAIAN FORM ${activeFormId}`,
+            "Mata_Kuliah": foundMeta.mataKuliah || "",
+            "Dosen_Pengampu": foundMeta.dosen || "",
+            "Kelas": foundMeta.kelas || "",
+            "Sesi_Minggu_Aktif": foundMeta.sesiAktif || "SEMUA"
+          };
+        }
+
+        if (cachedGroups) {
+          try { groupsData = JSON.parse(cachedGroups); } catch(e) {}
+        } else if (!isDefault) {
+          const localMaster = localStorage.getItem("PGSD_CACHE_MASTER_" + activeFormId);
+          if (localMaster) {
+            try {
+              const rows = JSON.parse(localMaster);
+              const gMap = {};
+              const sList = [];
+              (rows || []).forEach(row => {
+                const kelompok = String(row[0] || '').trim();
+                const sesi = String(row[1] || '').trim();
+                const nim = String(row[2] !== undefined && row[2] !== null ? row[2] : '').trim();
+                const nama = String(row[3] || '').trim();
+                const status = String(row[4] || 'AKTIF').trim().toUpperCase();
+                if (!kelompok || !nama || status === 'NONAKTIF') return;
+                sList.push({ nim, name: nama, kelompok, sesi });
+                if (!gMap[kelompok]) gMap[kelompok] = { name: kelompok, sesi, members: [] };
+                gMap[kelompok].members.push({ nim, name: nama });
+              });
+              groupsData = Object.values(gMap);
+              allStudentsData = sList;
+            } catch(e) {}
+          } else {
+            groupsData = [];
+            allStudentsData = [];
           }
+        }
+
+        const pinEl = document.getElementById("navPinBadge");
+        if (pinEl) pinEl.textContent = `PIN: ${activeFormId}`;
+
+        renderConfigHeader();
+        renderGroupOptions();
+        renderDynamicCustomFields();
+
+        const cachedRekap = localStorage.getItem("PGSD_CACHE_REKAP_" + activeFormId) || (isDefault ? localStorage.getItem("PGSD_CACHE_REKAP") : null);
+        if (cachedRekap) {
+          try {
+            currentRekapData = JSON.parse(cachedRekap);
+            if (currentRekapData && currentRekapData.summary) {
+              populateRekapFilter(currentRekapData.summary);
+              renderBothRekapViews();
+            }
+          } catch(e) {}
         }
       } catch (e) {
-        mockLoadData();
+        console.warn("loadLocalCache fallback error:", e);
+        if (activeFormId === 'BK5E') {
+          mockLoadData();
+        }
       }
     }
 

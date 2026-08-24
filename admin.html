@@ -2557,7 +2557,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       document.getElementById("headerSubTitle").textContent = "Multi-Form Hub • Manajemen Seluruh Formulir";
       
       const btnBukaForm = document.getElementById("btnBukaFormActive");
-      if (btnBukaForm) btnBukaForm.href = "/";
+      if (btnBukaForm) { const u = new URL(window.location.href); u.pathname = u.pathname.replace(/admin\.html$/i, "index.html"); if (!u.pathname.endsWith("index.html")) u.pathname = u.pathname.replace(/\/?$/, "/index.html"); u.search = ""; btnBukaForm.href = u.toString(); }
 
       await fetchFormsRegistry();
     }
@@ -2772,7 +2772,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       document.getElementById("activeFormIdBadge").textContent = `ID: ${currentFormId}`;
 
       const btnBukaForm = document.getElementById("btnBukaFormActive");
-      if (btnBukaForm) btnBukaForm.href = `/?id=${currentFormId}`;
+      if (btnBukaForm) { const u = new URL(window.location.href); u.pathname = u.pathname.replace(/admin\.html$/i, "index.html"); if (!u.pathname.endsWith("index.html")) u.pathname = u.pathname.replace(/\/?$/, "/index.html"); u.search = `?id=${encodeURIComponent(currentFormId)}`; btnBukaForm.href = u.toString(); }
 
       const savedTab = localStorage.getItem("PGSD_ADMIN_ACTIVE_TAB") || "data";
       switchAdminTab(savedTab, false);
@@ -4574,7 +4574,11 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     function openLivePreviewInNewTab() {
       const formKey = currentFormId || DEFAULT_PRIMARY_FORM_ID;
       saveDraftSchemaLocally();
-      window.open(`/?id=${encodeURIComponent(formKey)}&preview=draft`, '_blank');
+      const u = new URL(window.location.href);
+      u.pathname = u.pathname.replace(/admin\.html$/i, "index.html");
+      if (!u.pathname.endsWith("index.html")) u.pathname = u.pathname.replace(/\/?$/, "/index.html");
+      u.search = `?id=${encodeURIComponent(formKey)}&preview=draft`;
+      window.open(u.toString(), '_blank');
     }
 
     function simStepNext() {
@@ -5817,8 +5821,11 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     // SHARE MODAL & QR CODE
     function openShareModal(formId) {
       const fId = formId || currentFormId || DEFAULT_PRIMARY_FORM_ID;
-      const origin = window.location.origin;
-      const fullUrl = `${origin}/?id=${fId}`;
+      const u = new URL(window.location.href);
+      u.pathname = u.pathname.replace(/admin\.html$/i, "index.html");
+      if (!u.pathname.endsWith("index.html")) u.pathname = u.pathname.replace(/\/?$/, "/index.html");
+      u.search = `?id=${encodeURIComponent(fId)}`;
+      const fullUrl = u.toString();
 
       document.getElementById("sharePinText").textContent = fId;
       document.getElementById("shareDirectLinkInput").value = fullUrl;

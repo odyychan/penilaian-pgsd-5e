@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.4] - 2026-08-24
+
+### 🔑 Robust Local & Remote Multi-Form PIN Switcher Engine
+- **Perbaikan Navigasi Ganti Formulir (PIN Switcher):**
+  - Mengubah mekanisme navigasi ganti formulir pada modal PIN agar mempertahankan *pathname* halaman saat ini (`index.html`), sehingga saat pengujian di lingkungan lokal (*localhost*, Live Server, atau subdirektori) pengguna tidak terlempar ke root `/` yang menyebabkan 404 atau kegagalan membuka form.
+- **Pemuatan Cache Formulir Multi-PIN Terisolasi (`loadLocalCache`):**
+  - `index.html` kini mendukung pemuatan data lokal terisolasi per kode PIN (`PGSD_CACHE_CONFIG_{PIN}`, `PGSD_CACHE_GROUPS_{PIN}`, `PGSD_CACHE_FORM_SCHEMA_{PIN}`, dan registry lokal `PGSD_CACHE_REGISTRY_FORMS`), sehingga form baru yang diuji di lokal langsung termuat lengkap dan akurat bahkan saat koneksi offline.
+- **Standarisasi Tautan Buka Formulir & Bagikan di Panel Admin:**
+  - Menyelaraskan seluruh tombol *Buka Formulir*, *Pratinjau Draf*, dan tautan *Bagikan QR & PIN* di `admin.html` agar selalu merujuk secara presisi ke berkas antarmuka pengguna (`index.html?id={PIN}`).
+
+---
+
 ## [2.2.3] - 2026-08-24
 
 ### 📐 Skala Linier Dinamis (Rentang 2 s.d. 10) & 💎 Universal Modern Popover Dropdown Engine
