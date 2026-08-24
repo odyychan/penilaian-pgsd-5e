@@ -4,6 +4,15 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.57] - 2026-08-25
+
+### 🛡️ Stabilisasi Siklus Rendering DOM & Debouncing Dropdown Mutation Observer
+- **Pembersihan Handler Mutation Observer Global:**
+  - Mengisolasi dan menerapkan mekanisme *debouncing* pada `globalDropdownObserver` untuk mencegah badai mutasi DOM (*infinite re-render storm*) yang dapat membatalkan proses render kartu formulir pada browser desktop dan Chromium.
+  - Memisahkan siklus inisialisasi sync engine dari DOM observer agar tidak mendaftarkan event listener berulang pada setiap manipulasi node.
+
+---
+
 ## [2.2.56] - 2026-08-25
 
 ### ⚡ Perbaikan Siklus Hidup Inisialisasi Lokal (Fix List Card Kosong pada Load Pertama)

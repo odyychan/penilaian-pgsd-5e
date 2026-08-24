@@ -4163,11 +4163,14 @@ function getOrCreateFolder(folderName) {
       });
     }
 
-    // Continuous auto-enhancer for dynamically injected select elements
+    // Continuous auto-enhancer for dynamically injected select elements (debounced)
     if (typeof MutationObserver !== 'undefined') {
+      let dropdownDebounceTimer = null;
       const globalDropdownObserver = new MutationObserver(() => {
-        initAllModernDropdowns();
-      initRealtimeSyncEngine();
+        if (dropdownDebounceTimer) clearTimeout(dropdownDebounceTimer);
+        dropdownDebounceTimer = setTimeout(() => {
+          initAllModernDropdowns();
+        }, 100);
       });
       document.addEventListener("DOMContentLoaded", () => {
         if (document.body) {
