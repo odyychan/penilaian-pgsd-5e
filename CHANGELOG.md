@@ -4,6 +4,21 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.23] - 2026-08-24
+
+### 🔄 Peningkatan Sistem Penggeseran Urutan Pertanyaan & Bagian Formulir
+- **Mesin Drag & Drop Interaktif (*Google Forms Authentic*):**
+  - Mengaktifkan fungsionalitas *HTML5 Drag & Drop* pada pegangan 6-titik (`:::`) untuk seluruh butir pertanyaan dan kartu bagian/tahapan formulir.
+  - Memberikan indikator visual (*ghosting*, *dashed border*, dan *highlight ring*) saat kartu digeser ke target baru.
+  - Mendukung penggeseran butir pertanyaan secara dinamis antar-bagian (*cross-stage moving*).
+- **Peningkatan Tombol Geser Panah (`▲` dan `▼`):**
+  - Mengoptimalkan fungsi `moveField` dan `moveStage` dengan proteksi indeks batas, status *disabled* otomatis saat berada di posisi ujung, notifikasi *toast* konfirmasi, dan pencatatan riwayat *Undo*.
+  - Memperbarui gaya tombol dengan ikon SVG presisi dan aksen warna interaktif.
+- **Pengujian Headless Browser:**
+  - Terverifikasi 100% lulus uji remote browser Playwright untuk simulasi klik panah dan *drag & drop*.
+
+---
+
 ## [2.2.22] - 2026-08-24
 
 ### ✨ Bilah Format Teks Kaya Kontekstual (Tampil Hanya Saat Input Aktif/Fokus)

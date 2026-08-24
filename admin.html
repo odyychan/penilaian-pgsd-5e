@@ -5658,6 +5658,12 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
       tahapan.forEach((stage, sIdx) => {
         const stageCard = document.createElement("div");
+        stageCard.id = `stageCard_${sIdx}`;
+        stageCard.setAttribute("data-stage-idx", sIdx);
+        stageCard.ondragover = (e) => handleStageCardDragOver(e, sIdx);
+        stageCard.ondragenter = (e) => handleStageCardDragEnter(e, sIdx);
+        stageCard.ondragleave = (e) => handleStageCardDragLeave(e);
+        stageCard.ondrop = (e) => handleStageCardDrop(e, sIdx);
         stageCard.className = "bg-white rounded-2xl border-2 border-zinc-200 shadow-xs space-y-0 transition hover:border-zinc-300 relative";
 
         const fields = stage.fields || [];
@@ -5668,11 +5674,26 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
           return `
             <!-- AUTHENTIC GOOGLE FORMS QUESTION CARD -->
-            <div class="group/qcard bg-white rounded-xl border border-zinc-200 border-l-4 border-l-indigo-600 shadow-sm p-4 sm:p-6 space-y-3.5 transition hover:shadow-md relative">
+            <div 
+              id="questionCard_${sIdx}_${fIdx}"
+              data-stage-idx="${sIdx}"
+              data-field-idx="${fIdx}"
+              ondragover="handleQuestionCardDragOver(event, ${sIdx}, ${fIdx})"
+              ondragenter="handleQuestionCardDragEnter(event, ${sIdx}, ${fIdx})"
+              ondragleave="handleQuestionCardDragLeave(event)"
+              ondrop="handleQuestionCardDrop(event, ${sIdx}, ${fIdx})"
+              class="group/qcard bg-white rounded-xl border border-zinc-200 border-l-4 border-l-indigo-600 shadow-sm p-4 sm:p-6 space-y-3.5 transition hover:shadow-md relative"
+            >
               
-              <!-- 6-Dots Drag Handle Centered (Google Forms Style) -->
-              <div class="flex justify-center -mt-1 -mb-1 text-zinc-300 hover:text-zinc-500 cursor-grab select-none">
-                <svg class="w-5 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <!-- 6-Dots Drag Handle Centered (Google Forms Style Drag & Drop) -->
+              <div 
+                draggable="true"
+                ondragstart="handleQuestionCardDragStart(event, ${sIdx}, ${fIdx})"
+                ondragend="handleQuestionCardDragEnd(event)"
+                class="flex justify-center -mt-1 -mb-1 text-zinc-300 hover:text-indigo-600 cursor-grab active:cursor-grabbing select-none p-1 rounded hover:bg-zinc-100 transition"
+                title="Tarik handle 6-titik ini untuk menggeser posisi pertanyaan"
+              >
+                <svg class="w-6 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M9 5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 7a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 7a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm6-14a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 7a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 7a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path>
                 </svg>
               </div>
@@ -5786,21 +5807,23 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
                       value="${f.description || ''}" 
                       placeholder="Teks deskripsi / panduan pengisian pertanyaan (opsional)..." 
                       oninput="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'description', this.value)"
-                      class="w-full text-xs text-zinc-500 bg-transparent border-b border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 px-2 py-1 outline-none transition"
+                      class="w-full text-xs text-zinc-600 bg-transparent border-b border-dashed border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 px-1 py-1 outline-none transition"
                     >
                     ${getLiveMathBadgeHtml(f.description, `liveMathQuestionDesc_${sIdx}_${fIdx}`)}
                   </div>
                 </div>
 
-                <!-- Right: Media Attach Button + Question Type Selector Dropdown -->
-                <div class="w-full md:w-auto shrink-0 flex items-center gap-1.5 sm:gap-2 self-start">
+                <!-- Right: Authentic Google Forms Question Type Selector Popover Button -->
+                <div class="shrink-0 flex items-center gap-1.5 self-start md:self-auto">
+                  
+                  <!-- Insert Media directly on question -->
                   <button 
                     type="button" 
                     onclick="openAttachMediaModal(${sIdx}, ${fIdx})" 
-                    class="p-2 sm:p-2.5 rounded-xl border ${f.media ? 'border-indigo-300 bg-indigo-50 text-indigo-700 font-semibold' : 'border-zinc-200 hover:border-zinc-400 bg-white hover:bg-zinc-50 text-zinc-600'} transition cursor-pointer shadow-2xs shrink-0" 
-                    title="${f.media ? 'Media Terlampir (Klik untuk kelola)' : 'Sisipkan Gambar / Video / Media'}"
+                    class="p-2 rounded-xl border border-zinc-200 hover:bg-zinc-100 text-zinc-500 hover:text-zinc-800 transition cursor-pointer shadow-2xs" 
+                    title="Sisipkan Media Gambar/Video untuk Pertanyaan ini"
                   >
-                    <svg class="w-4 h-4 ${f.media ? 'text-indigo-600' : 'text-zinc-600'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
                   </button>
@@ -5812,30 +5835,21 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
               </div>
 
-              <!-- Quick Math Symbol Palette (1-Click Insert) -->
-              <div id="quickMathPalette_${sIdx}_${fIdx}" class="hidden p-3 bg-indigo-50/70 rounded-xl border border-indigo-200 space-y-2 transition">
-                <div class="flex items-center justify-between">
-                  <span class="text-[11px] font-bold text-indigo-900 flex items-center gap-1.5">
-                    <span class="w-4 h-4 rounded bg-indigo-600 text-white font-mono text-[10px] flex items-center justify-center font-bold">∑</span>
-                    <span>Palet Simbol &amp; Rumus Matematika Cepat:</span>
-                  </span>
-                  <button type="button" onclick="toggleQuickMathPalette(${sIdx}, ${fIdx})" class="text-zinc-400 hover:text-zinc-700 text-xs font-bold px-1.5 py-0.5 rounded cursor-pointer">✕</button>
+              <!-- Quick Math Symbols Palette (Collapsible) -->
+              <div id="quickMathPalette_${sIdx}_${fIdx}" class="hidden p-2.5 bg-indigo-50/70 rounded-xl border border-indigo-100 space-y-2 text-xs animate-in fade-in duration-150">
+                <div class="flex items-center justify-between text-[11px] font-semibold text-indigo-900">
+                  <span>Palet Rumus &amp; Simbol Cepat:</span>
+                  <span class="text-[10px] text-indigo-600 font-normal">Klik simbol untuk menyisipkan ke pertanyaan</span>
                 </div>
-                <div class="flex items-center gap-1.5 flex-wrap text-xs">
-                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, 'x^2')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs" title="Pangkat Dua">x²</button>
-                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, 'x^3')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs" title="Pangkat Tiga">x³</button>
-                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, 'x^{n}')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs" title="Pangkat n">xⁿ</button>
-                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, 'x_1')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs" title="Indeks 1">x₁</button>
-                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, 'x_i')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs" title="Indeks i">xᵢ</button>
-                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, '\\frac{a}{b}')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs" title="Pecahan a/b">½ Pecahan</button>
-                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, '\\sqrt{x}')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs" title="Akar Kuadrat">√x</button>
+                <div class="flex flex-wrap gap-1 text-xs">
+                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, 'x^2')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">x² (x^2)</button>
+                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, '\\sqrt{x}')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">√x</button>
+                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, '\\frac{a}{b}')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">a/b (Pecahan)</button>
                   <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, '±')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">±</button>
                   <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, '≤')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">≤</button>
                   <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, '≥')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">≥</button>
                   <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, '≠')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">≠</button>
-                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, '≈')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">≈</button>
                   <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, 'π')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">π</button>
-                  <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, 'θ')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">θ</button>
                   <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, 'α')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">α</button>
                   <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, 'β')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">β</button>
                   <button type="button" onclick="insertMathSymbolAtField(${sIdx}, ${fIdx}, '∑')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">∑</button>
@@ -5858,8 +5872,12 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
               <!-- Bottom Row: Google Forms Action Toolbar -->
               <div class="flex items-center justify-between gap-3 pt-3.5 border-t border-zinc-200/80 text-xs">
                 <div class="flex items-center gap-1.5 flex-wrap">
-                  <button type="button" onclick="moveField(${sIdx}, ${fIdx}, -1)" ${fIdx === 0 ? 'disabled' : ''} class="p-1.5 rounded-lg hover:bg-zinc-100 disabled:opacity-20 text-zinc-600 cursor-pointer" title="Naikkan Posisi">▲</button>
-                  <button type="button" onclick="moveField(${sIdx}, ${fIdx}, 1)" ${fIdx === fields.length - 1 ? 'disabled' : ''} class="p-1.5 rounded-lg hover:bg-zinc-100 disabled:opacity-20 text-zinc-600 cursor-pointer" title="Turunkan Posisi">▼</button>
+                  <button type="button" onclick="moveField(${sIdx}, ${fIdx}, -1)" ${fIdx === 0 ? 'disabled' : ''} class="p-1.5 rounded-lg border border-zinc-200 hover:bg-indigo-50 hover:text-indigo-600 disabled:opacity-25 text-zinc-600 cursor-pointer transition shadow-2xs" title="Geser Pertanyaan Naik (▲)">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+                  </button>
+                  <button type="button" onclick="moveField(${sIdx}, ${fIdx}, 1)" ${fIdx === fields.length - 1 ? 'disabled' : ''} class="p-1.5 rounded-lg border border-zinc-200 hover:bg-indigo-50 hover:text-indigo-600 disabled:opacity-25 text-zinc-600 cursor-pointer transition shadow-2xs" title="Geser Pertanyaan Turun (▼)">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                  </button>
                   <button type="button" onclick="openAttachMediaModal(${sIdx}, ${fIdx})" class="px-2.5 py-1 rounded-lg border ${f.media ? 'border-indigo-300 bg-indigo-50 text-indigo-700 font-semibold' : 'border-zinc-200 hover:bg-zinc-100 text-zinc-700 font-medium'} text-[11px] flex items-center gap-1.5 cursor-pointer transition shadow-2xs" title="Lampirkan Media (Gambar, Video, Audio, Link)">
                     <svg class="w-3.5 h-3.5 ${f.media ? 'text-indigo-600' : 'text-zinc-500'}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     <span>${f.media ? 'Media Terlampir ✓' : '+ Media'}</span>
@@ -5935,12 +5953,29 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
               </div>
 
               <div class="flex items-center gap-1.5 shrink-0 self-end sm:self-auto">
-                <button type="button" onclick="moveStage(${sIdx}, -1)" ${sIdx === 0 ? 'disabled' : ''} class="p-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 disabled:opacity-20 text-zinc-600 cursor-pointer" title="Geser Bagian Naik">▲</button>
-                <button type="button" onclick="moveStage(${sIdx}, 1)" ${sIdx === tahapan.length - 1 ? 'disabled' : ''} class="p-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 disabled:opacity-20 text-zinc-600 cursor-pointer" title="Geser Bagian Turun">▼</button>
+                <!-- 6-Dots Drag Handle for Section -->
+                <div 
+                  draggable="true"
+                  ondragstart="handleStageCardDragStart(event, ${sIdx})"
+                  ondragend="handleStageCardDragEnd(event)"
+                  class="flex items-center text-zinc-300 hover:text-indigo-600 cursor-grab active:cursor-grabbing p-1.5 rounded hover:bg-zinc-100 transition mr-0.5"
+                  title="Tarik handle 6-titik ini untuk menggeser posisi bagian"
+                >
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 7a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 7a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm6-14a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 7a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 7a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path>
+                  </svg>
+                </div>
+
+                <button type="button" onclick="moveStage(${sIdx}, -1)" ${sIdx === 0 ? 'disabled' : ''} class="p-1.5 rounded-lg border border-zinc-200 hover:bg-indigo-50 hover:text-indigo-600 disabled:opacity-25 text-zinc-600 cursor-pointer transition shadow-2xs" title="Geser Bagian Naik (▲)">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+                </button>
+                <button type="button" onclick="moveStage(${sIdx}, 1)" ${sIdx === tahapan.length - 1 ? 'disabled' : ''} class="p-1.5 rounded-lg border border-zinc-200 hover:bg-indigo-50 hover:text-indigo-600 disabled:opacity-25 text-zinc-600 cursor-pointer transition shadow-2xs" title="Geser Bagian Turun (▼)">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
                 <button type="button" onclick="duplicateStage(${sIdx})" class="p-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-600 cursor-pointer" title="Duplikasi Bagian">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
                 </button>
-                <button type="button" onclick="deleteStage(${sIdx})" ${tahapan.length <= 1 ? 'disabled' : ''} class="p-1.5 rounded-lg border border-rose-200 hover:bg-rose-50 text-rose-600 disabled:opacity-20 cursor-pointer" title="Hapus Bagian">
+                <button type="button" onclick="deleteStage(${sIdx})" ${tahapan.length <= 1 ? 'disabled' : ''} class="p-1.5 rounded-lg border border-rose-200 hover:bg-rose-50 text-rose-600 disabled:opacity-25 cursor-pointer" title="Hapus Bagian">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                 </button>
               </div>
@@ -6389,14 +6424,15 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }
 
     function moveStage(sIdx, dir) {
-      pushUndoSnapshot('Pindah Posisi Bagian');
       const targetIdx = sIdx + dir;
       if (targetIdx < 0 || targetIdx >= adminFormSchema.tahapan.length) return;
+      pushUndoSnapshot('Pindah Posisi Bagian');
       const temp = adminFormSchema.tahapan[sIdx];
       adminFormSchema.tahapan[sIdx] = adminFormSchema.tahapan[targetIdx];
       adminFormSchema.tahapan[targetIdx] = temp;
       renderDynamicStagesCanvas();
       triggerAutoSaveSchema();
+      showAdminToast(`Bagian '${adminFormSchema.tahapan[targetIdx].title || (targetIdx + 1)}' dipindahkan ke Posisi ${targetIdx + 1}!`, "success");
     }
 
     function duplicateStage(sIdx) {
@@ -6537,15 +6573,169 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }
 
     function moveField(sIdx, fIdx, dir) {
-      pushUndoSnapshot('Pindah Posisi Pertanyaan');
-      const fields = adminFormSchema.tahapan[sIdx].fields;
+      const fields = adminFormSchema.tahapan[sIdx]?.fields;
+      if (!fields) return;
       const targetIdx = fIdx + dir;
       if (targetIdx < 0 || targetIdx >= fields.length) return;
+      pushUndoSnapshot('Pindah Posisi Pertanyaan');
       const temp = fields[fIdx];
       fields[fIdx] = fields[targetIdx];
       fields[targetIdx] = temp;
       renderDynamicStagesCanvas();
       triggerAutoSaveSchema();
+      showAdminToast(`Pertanyaan '${fields[targetIdx].label || 'tanpa judul'}' dipindahkan ke Nomor ${targetIdx + 1}!`, "success");
+    }
+
+    // =========================================================================
+    // DRAG AND DROP REORDERING ENGINE (GOOGLE FORMS AUTHENTIC)
+    // =========================================================================
+    let draggedQuestionData = null; // { sIdx, fIdx }
+    let draggedStageIdx = null; // sIdx
+
+    function handleQuestionCardDragStart(e, sIdx, fIdx) {
+      if (!adminFormSchema?.tahapan[sIdx]?.fields[fIdx]) return;
+      draggedQuestionData = { sIdx, fIdx };
+      draggedStageIdx = null;
+      if (e && e.dataTransfer) {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'QUESTION', sIdx, fIdx }));
+      }
+      const card = document.getElementById(`questionCard_${sIdx}_${fIdx}`);
+      if (card) {
+        setTimeout(() => {
+          card.classList.add("opacity-40", "border-dashed", "border-indigo-400", "scale-[0.99]");
+        }, 0);
+      }
+    }
+
+    function handleQuestionCardDragEnd(e) {
+      document.querySelectorAll(".group\\/qcard").forEach(c => {
+        c.classList.remove("opacity-40", "border-dashed", "border-indigo-400", "scale-[0.99]", "ring-2", "ring-indigo-500", "ring-offset-2", "bg-indigo-50/40");
+      });
+      draggedQuestionData = null;
+    }
+
+    function handleQuestionCardDragOver(e, sIdx, fIdx) {
+      if (!draggedQuestionData) return;
+      if (e && e.preventDefault) e.preventDefault();
+      if (e && e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+    }
+
+    function handleQuestionCardDragEnter(e, sIdx, fIdx) {
+      if (!draggedQuestionData) return;
+      if (e && e.preventDefault) e.preventDefault();
+      const card = document.getElementById(`questionCard_${sIdx}_${fIdx}`);
+      if (card && (draggedQuestionData.sIdx !== sIdx || draggedQuestionData.fIdx !== fIdx)) {
+        card.classList.add("ring-2", "ring-indigo-500", "ring-offset-2", "bg-indigo-50/40");
+      }
+    }
+
+    function handleQuestionCardDragLeave(e) {
+      const target = e?.currentTarget;
+      if (target) {
+        target.classList.remove("ring-2", "ring-indigo-500", "ring-offset-2", "bg-indigo-50/40");
+      }
+    }
+
+    function handleQuestionCardDrop(e, targetSIdx, targetFIdx) {
+      if (e && e.preventDefault) e.preventDefault();
+      if (!draggedQuestionData) return;
+      const { sIdx: srcSIdx, fIdx: srcFIdx } = draggedQuestionData;
+
+      const srcStage = adminFormSchema?.tahapan[srcSIdx];
+      const targetStage = adminFormSchema?.tahapan[targetSIdx];
+      if (!srcStage?.fields || !targetStage?.fields) {
+        draggedQuestionData = null;
+        return;
+      }
+      if (!srcStage.fields[srcFIdx]) {
+        draggedQuestionData = null;
+        return;
+      }
+      if (srcSIdx === targetSIdx && srcFIdx === targetFIdx) {
+        draggedQuestionData = null;
+        return;
+      }
+
+      pushUndoSnapshot('Pindah Urutan Pertanyaan');
+
+      const [movedField] = srcStage.fields.splice(srcFIdx, 1);
+      targetStage.fields.splice(targetFIdx, 0, movedField);
+
+      renderDynamicStagesCanvas();
+      triggerAutoSaveSchema();
+      showAdminToast(`Pertanyaan '${movedField.label || 'tanpa judul'}' berhasil dipindahkan ke Bagian ${targetSIdx + 1} (No. ${targetFIdx + 1})!`, "success");
+      draggedQuestionData = null;
+    }
+
+    // STAGE (BAGIAN) DRAG AND DROP
+    function handleStageCardDragStart(e, sIdx) {
+      if (!adminFormSchema?.tahapan[sIdx]) return;
+      draggedStageIdx = sIdx;
+      draggedQuestionData = null;
+      if (e && e.dataTransfer) {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'STAGE', sIdx }));
+      }
+      const stageCard = document.getElementById(`stageCard_${sIdx}`);
+      if (stageCard) {
+        setTimeout(() => {
+          stageCard.classList.add("opacity-40", "border-dashed", "border-indigo-400", "scale-[0.99]");
+        }, 0);
+      }
+    }
+
+    function handleStageCardDragEnd(e) {
+      document.querySelectorAll('[id^="stageCard_"]').forEach(c => {
+        c.classList.remove("opacity-40", "border-dashed", "border-indigo-400", "scale-[0.99]", "ring-2", "ring-indigo-500", "ring-offset-2", "bg-indigo-50/30");
+      });
+      draggedStageIdx = null;
+    }
+
+    function handleStageCardDragOver(e, sIdx) {
+      if (draggedStageIdx === null) return;
+      if (e && e.preventDefault) e.preventDefault();
+      if (e && e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+    }
+
+    function handleStageCardDragEnter(e, sIdx) {
+      if (draggedStageIdx === null || draggedStageIdx === sIdx) return;
+      if (e && e.preventDefault) e.preventDefault();
+      const stageCard = document.getElementById(`stageCard_${sIdx}`);
+      if (stageCard) {
+        stageCard.classList.add("ring-2", "ring-indigo-500", "ring-offset-2", "bg-indigo-50/30");
+      }
+    }
+
+    function handleStageCardDragLeave(e) {
+      const target = e?.currentTarget;
+      if (target) {
+        target.classList.remove("ring-2", "ring-indigo-500", "ring-offset-2", "bg-indigo-50/30");
+      }
+    }
+
+    function handleStageCardDrop(e, targetSIdx) {
+      if (e && e.preventDefault) e.preventDefault();
+      if (draggedStageIdx === null) return;
+
+      const tahapan = adminFormSchema?.tahapan;
+      if (!tahapan || !tahapan[draggedStageIdx] || !tahapan[targetSIdx]) {
+        draggedStageIdx = null;
+        return;
+      }
+      if (draggedStageIdx === targetSIdx) {
+        draggedStageIdx = null;
+        return;
+      }
+
+      pushUndoSnapshot('Pindah Urutan Bagian');
+      const [movedStage] = tahapan.splice(draggedStageIdx, 1);
+      tahapan.splice(targetSIdx, 0, movedStage);
+
+      renderDynamicStagesCanvas();
+      triggerAutoSaveSchema();
+      showAdminToast(`Bagian '${movedStage.title}' berhasil dipindahkan ke Urutan ${targetSIdx + 1}!`, "success");
+      draggedStageIdx = null;
     }
 
     async function deleteField(sIdx, fIdx) {
