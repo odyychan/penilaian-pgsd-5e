@@ -4,6 +4,21 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.47] - 2026-08-24
+
+### 🏛️ Standarisasi Arsitektur Skema Enterprise PostgreSQL di Supabase
+- **Hierarki Relasional Bersih & Integritas CASCADE:**
+  - Menetapkan relasi *Foreign Key* bertingkat `ON DELETE CASCADE` dan `ON UPDATE CASCADE` pada seluruh tabel (`pgsd_forms` ➔ `pgsd_form_configs`, `pgsd_groups` ➔ `pgsd_students`, `pgsd_responses`).
+  - Menambahkan *Constraint Check* ketat untuk integritas data (status form, nilai rentang 0-100, peran penilai).
+- **Penyematan Indeks GIN & Indeks Performa Tinggi:**
+  - Mengonfigurasi 28 indeks terpadu, termasuk indeks GIN pada kolom JSONB (`config_data`, `schema_data`, `evaluasi_detail`, `custom_answers`) untuk memastikan pembacaan kustom instan.
+- **Pembuatan Database Analytical Views:**
+  - Menambahkan View `pgsd_v_forms_summary` untuk ringkasan metadata agregasi formulir dan View `pgsd_v_rekap_nilai` untuk penghitungan otomatis rata-rata skor per kelompok.
+- **Penyematan Dokumentasi Metadata Skema:**
+  - Menambahkan *Table & Column Comments* standar PostgreSQL sehingga Table Editor di dashboard Supabase tertata rapi, jelas, dan profesional.
+
+---
+
 ## [2.2.46] - 2026-08-24
 
 ### 🔄 Sinkronisasi Penuh Spreadsheet ke Supabase & Fast-Path Hydration (< 30ms)
