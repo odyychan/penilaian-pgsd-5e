@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.92] - 2026-08-24
+
+### 🚀 Ergonomic Mobile Floating Action Dock & Zero-Clutter Workspace
+- **Floating Action Dock di Layar Mobile (*Thumb-Friendly Touch Ergonomics*):**
+  - Memindahkan seluruh tombol kontrol Form Builder (`Undo/Redo`, `Riwayat`, `Publikasikan`, `Pratinjau`, `Tambah Pertanyaan`, `Tambah Bagian`) ke **Floating Bottom Dock (`fixed bottom-3`)** yang elegan dan melayang di jangkauan ibu jari.
+  - Menghilangkan sepenuhnya header bertumpuk di bagian atas pada layar ponsel sehingga **100% ruang pandang layar ponsel bebas terbuka** untuk membaca, mengedit teks, dan mengelola opsi pertanyaan.
+- **Tampilan Desktop & Tablet Tetap Presisi:**
+  - Tetap menyajikan Sticky Toolbar 2-tier yang elegan dan stabil di layar desktop dan laptop tanpa saling mengganggu.
+
+---
+
 ## [2.1.91] - 2026-08-24
 
 ### 📐 Ultra-Compact Sticky Form Builder Toolbar & Mobile Space Optimization

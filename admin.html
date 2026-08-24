@@ -745,39 +745,40 @@
             </div>
           </div>
 
-          <!-- Section 3: Ultra-Compact Sticky Form Builder Toolbar -->
-          <div class="space-y-2.5 pt-2.5 border-t border-zinc-100">
-            <div class="sticky top-16 z-30 bg-white/95 backdrop-blur-md rounded-2xl border border-zinc-200/90 shadow-sm p-2.5 sm:p-3.5 space-y-2 transition-all duration-200">
+          <!-- Section 3: Clean Desktop Sticky Header & Ergonomic Mobile Floating Dock -->
+          <div class="space-y-3 pt-3 border-t border-zinc-100">
+            
+            <!-- DESKTOP / TABLET STICKY TOOLBAR (sm:block) -->
+            <div class="hidden sm:block sticky top-16 z-30 bg-white/95 backdrop-blur-md rounded-2xl border border-zinc-200 shadow-sm p-3.5 space-y-2.5 transition-all duration-200">
               
-              <!-- TIER 1: Ultra-Slim Status & Micro-Info Row -->
-              <div class="flex items-center justify-between gap-1.5 border-b border-zinc-100 pb-1.5">
-                <div class="flex items-center gap-1.5 flex-wrap min-w-0">
-                  <h3 class="text-xs sm:text-sm font-bold text-zinc-900 whitespace-nowrap">Susunan Pertanyaan</h3>
-                  <span id="builderStatsBadge" class="px-1.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-mono font-semibold bg-zinc-100 text-zinc-700 border border-zinc-200 whitespace-nowrap shrink-0">
+              <!-- Tier 1: Desktop Status & Stats -->
+              <div class="flex items-center justify-between gap-2 border-b border-zinc-100 pb-2">
+                <div class="flex items-center gap-2 flex-wrap min-w-0">
+                  <h3 class="text-sm font-bold text-zinc-900 whitespace-nowrap">Susunan Pertanyaan</h3>
+                  <span id="builderStatsBadge" class="px-2 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-zinc-100 text-zinc-700 border border-zinc-200 whitespace-nowrap shrink-0">
                     4 Bagian • 5 Pertanyaan
                   </span>
-                  <span id="builderPublishStatusBadge" class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-emerald-100 text-emerald-950 border border-emerald-400 shadow-2xs whitespace-nowrap shrink-0">
+                  <span id="builderPublishStatusBadge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-950 border border-emerald-400 shadow-2xs whitespace-nowrap shrink-0">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
                     <span>Form Aktif</span>
                   </span>
                 </div>
 
-                <div class="flex items-center gap-1.5 shrink-0 text-[10.5px] sm:text-xs text-zinc-400">
+                <div class="flex items-center gap-2 shrink-0 text-xs text-zinc-400">
                   <button 
                     type="button" 
                     onclick="resetToDefaultStandardSchema()" 
-                    class="text-zinc-500 hover:text-rose-600 transition cursor-pointer flex items-center gap-0.5 font-medium"
+                    class="text-zinc-500 hover:text-rose-600 transition cursor-pointer flex items-center gap-1 font-medium text-[11.5px]"
                     title="Kembalikan ke 4 tahap standar"
                   >
-                    <span>↺ Reset</span>
+                    <span>↺ Reset Standar</span>
                   </button>
                 </div>
               </div>
 
-              <!-- TIER 2: Ultra-Compact Action Toolbar Strip (Zero Ugly Scrollbar) -->
-              <div class="flex items-center justify-between gap-1.5 overflow-x-auto no-scrollbar py-0.5" style="scrollbar-width: none; -ms-overflow-style: none;">
+              <!-- Tier 2: Desktop Action Controls Strip -->
+              <div class="flex items-center justify-between gap-2">
                 
-                <!-- Left Action Controls: Undo, Redo & Version History -->
                 <div class="flex items-center gap-1.5 shrink-0">
                   <div class="flex items-center rounded-lg border border-zinc-200 bg-zinc-50 p-0.5 shadow-2xs">
                     <button 
@@ -805,7 +806,7 @@
                   <button 
                     type="button" 
                     onclick="openRevisionHistoryModal()" 
-                    class="px-2.5 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 active:scale-98 text-zinc-700 border border-zinc-200 text-[11px] sm:text-xs font-semibold shadow-2xs flex items-center gap-1 transition cursor-pointer shrink-0"
+                    class="px-2.5 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 active:scale-98 text-zinc-700 border border-zinc-200 text-xs font-semibold shadow-2xs flex items-center gap-1 transition cursor-pointer shrink-0"
                     title="Buka riwayat perubahan &amp; versi formulir"
                   >
                     <svg class="w-3.5 h-3.5 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -813,13 +814,12 @@
                   </button>
                 </div>
 
-                <!-- Right Action Controls: 4 Main Action Buttons (Compact Sleek Strip, No Double Plus) -->
                 <div class="flex items-center gap-1.5 shrink-0">
                   <button 
                     type="button" 
                     onclick="publishFormSchema()" 
                     id="btnPublishSchema"
-                    class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 active:scale-98 text-white text-[11px] sm:text-xs font-bold shadow-xs flex items-center justify-center gap-1 transition cursor-pointer whitespace-nowrap"
+                    class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 active:scale-98 text-white text-xs font-bold shadow-xs flex items-center justify-center gap-1 transition cursor-pointer whitespace-nowrap"
                     title="Publikasikan draf agar resmi tayang ke mahasiswa"
                   >
                     <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
@@ -829,7 +829,7 @@
                   <button 
                     type="button" 
                     onclick="openLiveFormSimulator()" 
-                    class="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 active:scale-98 text-zinc-100 text-[11px] sm:text-xs font-semibold shadow-xs flex items-center justify-center gap-1 transition cursor-pointer whitespace-nowrap"
+                    class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 active:scale-98 text-zinc-100 text-xs font-semibold shadow-xs flex items-center justify-center gap-1 transition cursor-pointer whitespace-nowrap"
                     title="Buka simulasi pratinjau formulir mahasiswa"
                   >
                     <svg class="w-3.5 h-3.5 text-zinc-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
@@ -839,7 +839,7 @@
                   <button 
                     type="button" 
                     onclick="addNewQuestionDirect(adminFormSchema ? adminFormSchema.tahapan.length - 1 : 0)" 
-                    class="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 active:scale-98 text-white text-[11px] sm:text-xs font-semibold shadow-xs flex items-center justify-center gap-1 transition cursor-pointer whitespace-nowrap"
+                    class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 active:scale-98 text-white text-xs font-semibold shadow-xs flex items-center justify-center gap-1 transition cursor-pointer whitespace-nowrap"
                     title="Tambah pertanyaan baru"
                   >
                     <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
@@ -849,7 +849,7 @@
                   <button 
                     type="button" 
                     onclick="addNewStageDirect()" 
-                    class="px-2.5 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 active:scale-98 text-zinc-800 border border-zinc-300 text-[11px] sm:text-xs font-semibold shadow-xs flex items-center justify-center gap-1 transition cursor-pointer whitespace-nowrap"
+                    class="px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 active:scale-98 text-zinc-800 border border-zinc-300 text-xs font-semibold shadow-xs flex items-center justify-center gap-1 transition cursor-pointer whitespace-nowrap"
                     title="Tambah tahap bagian baru"
                   >
                     <svg class="w-3.5 h-3.5 text-zinc-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -857,6 +857,111 @@
                   </button>
                 </div>
 
+              </div>
+
+            </div>
+
+            <!-- MOBILE STATIC HEADER INFO (sm:hidden - Takes no sticky height!) -->
+            <div class="sm:hidden bg-white rounded-xl border border-zinc-200 p-2.5 flex items-center justify-between gap-1 shadow-2xs">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span class="text-xs font-bold text-zinc-900">Susunan Form</span>
+                <span id="builderStatsBadgeMobile" class="px-1.5 py-0.5 rounded-md text-[10px] font-mono font-semibold bg-zinc-100 text-zinc-700 border border-zinc-200">
+                  4B • 5P
+                </span>
+                <span id="builderPublishStatusBadgeMobile" class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-950 border border-emerald-400">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                  <span>Aktif</span>
+                </span>
+              </div>
+              <button 
+                type="button" 
+                onclick="resetToDefaultStandardSchema()" 
+                class="text-[10px] text-zinc-400 hover:text-rose-600 transition shrink-0 font-medium"
+                title="Kembalikan ke 4 tahap standar"
+              >
+                ↺ Reset
+              </button>
+            </div>
+
+            <!-- MOBILE FLOATING BOTTOM ACTION DOCK (sm:hidden - Thumb-Friendly, Never Blocks Screen!) -->
+            <div class="sm:hidden fixed bottom-3 inset-x-3 z-40 bg-zinc-950/95 text-white border border-zinc-800 shadow-2xl backdrop-blur-md rounded-2xl p-1.5 flex items-center justify-between gap-1 fade-enter">
+              
+              <!-- Undo / Redo & Riwayat in Mobile Dock -->
+              <div class="flex items-center gap-1 shrink-0">
+                <div class="flex items-center rounded-lg bg-zinc-800 p-0.5">
+                  <button 
+                    type="button" 
+                    id="btnBuilderUndoMobile"
+                    onclick="formBuilderUndo()" 
+                    disabled
+                    class="w-7 h-7 rounded text-zinc-300 hover:text-white active:scale-95 disabled:opacity-30 flex items-center justify-center transition"
+                    title="Urungkan (Ctrl+Z)"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M3 10h10a5 5 0 015 5v2a5 5 0 01-5 5H6m-3-12l4-4m-4 4l4 4"></path></svg>
+                  </button>
+                  <button 
+                    type="button" 
+                    id="btnBuilderRedoMobile"
+                    onclick="formBuilderRedo()" 
+                    disabled
+                    class="w-7 h-7 rounded text-zinc-300 hover:text-white active:scale-95 disabled:opacity-30 flex items-center justify-center transition"
+                    title="Ulangi (Ctrl+Y)"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M21 10H11a5 5 0 00-5 5v2a5 5 0 005 5h7m3-12l-4-4m4 4l-4 4"></path></svg>
+                  </button>
+                </div>
+
+                <button 
+                  type="button" 
+                  onclick="openRevisionHistoryModal()" 
+                  class="w-7 h-7 rounded-lg bg-zinc-800 text-zinc-300 hover:text-white flex items-center justify-center active:scale-95 transition"
+                  title="Riwayat Perubahan"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </button>
+              </div>
+
+              <!-- Main Action Buttons in Mobile Dock -->
+              <div class="flex items-center gap-1 shrink-0">
+                <button 
+                  type="button" 
+                  onclick="publishFormSchema()" 
+                  id="btnPublishSchemaMobile"
+                  class="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold shadow-xs flex items-center gap-1 active:scale-95 transition"
+                  title="Publikasikan"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                  <span>Terbitkan</span>
+                </button>
+
+                <button 
+                  type="button" 
+                  onclick="openLiveFormSimulator()" 
+                  class="w-7 h-7 rounded-xl bg-zinc-800 text-zinc-300 hover:text-white flex items-center justify-center active:scale-95 transition"
+                  title="Pratinjau Simulasi"
+                >
+                  <svg class="w-3.5 h-3.5 text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                </button>
+
+                <button 
+                  type="button" 
+                  onclick="addNewQuestionDirect(adminFormSchema ? adminFormSchema.tahapan.length - 1 : 0)" 
+                  class="px-2.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-semibold shadow-xs flex items-center gap-1 active:scale-95 transition"
+                  title="Tambah Pertanyaan"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                  <span>Tanya</span>
+                </button>
+
+                <button 
+                  type="button" 
+                  onclick="addNewStageDirect()" 
+                  class="px-2.5 py-1.5 rounded-xl bg-zinc-800 text-zinc-200 border border-zinc-700 text-[11px] font-semibold shadow-xs flex items-center gap-1 active:scale-95 transition"
+                  title="Tambah Bagian"
+                >
+                  <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                  <span>Bagian</span>
+                </button>
               </div>
 
             </div>
@@ -2746,12 +2851,15 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     function updateUndoRedoButtonsState() {
       const undoBtn = document.getElementById("btnBuilderUndo");
       const redoBtn = document.getElementById("btnBuilderRedo");
-      if (undoBtn) {
-        undoBtn.disabled = undoHistoryStack.length === 0;
-      }
-      if (redoBtn) {
-        redoBtn.disabled = redoHistoryStack.length === 0;
-      }
+      const undoBtnM = document.getElementById("btnBuilderUndoMobile");
+      const redoBtnM = document.getElementById("btnBuilderRedoMobile");
+      const isUndoDisabled = undoHistoryStack.length === 0;
+      const isRedoDisabled = redoHistoryStack.length === 0;
+
+      if (undoBtn) undoBtn.disabled = isUndoDisabled;
+      if (redoBtn) redoBtn.disabled = isRedoDisabled;
+      if (undoBtnM) undoBtnM.disabled = isUndoDisabled;
+      if (redoBtnM) redoBtnM.disabled = isRedoDisabled;
     }
 
     // Global Shortcut Listener for Ctrl+Z and Ctrl+Y / Ctrl+Shift+Z
