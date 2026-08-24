@@ -3815,9 +3815,68 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       if ((newType === 'RADIO' || newType === 'CHECKBOX' || newType === 'DROPDOWN') && (!f.options || f.options.length === 0)) {
         f.options = ['Opsi 1', 'Opsi 2'];
       }
+      if (newType === 'RATING_SCALE') {
+        const minV = f.minVal !== undefined ? f.minVal : 1;
+        const maxV = f.maxVal !== undefined ? f.maxVal : 5;
+        f.minVal = minV;
+        f.maxVal = maxV;
+        f.pointLabels = getDefaultScalePointLabels(minV, maxV);
+        f.labelMin = f.pointLabels[String(minV)] || "Sangat Kurang";
+        f.labelMax = f.pointLabels[String(maxV)] || "Sangat Baik";
+      }
       renderDynamicStagesCanvas();
       markSchemaAsDirty();
       showAdminToast(`Tipe pertanyaan diubah menjadi '${newType}'.`, "info");
+    }
+
+    function getDefaultScalePointLabels(minVal, maxVal) {
+      const count = maxVal - minVal + 1;
+      const labels = {};
+
+      const presets = {
+        2: ["Kurang", "Baik"],
+        3: ["Kurang", "Cukup", "Baik"],
+        4: ["Sangat Kurang", "Kurang", "Baik", "Sangat Baik"],
+        5: ["Sangat Kurang", "Kurang", "Cukup", "Baik", "Sangat Baik"],
+        6: ["Sangat Kurang", "Kurang", "Agak Kurang", "Cukup Baik", "Baik", "Sangat Baik"],
+        7: ["Sangat Kurang", "Kurang", "Agak Kurang", "Netral / Cukup", "Agak Baik", "Baik", "Sangat Baik"],
+        8: ["Sangat Rendah", "Rendah", "Kurang", "Hampir Cukup", "Cukup", "Cukup Baik", "Baik", "Sangat Baik"],
+        9: ["Sangat Rendah", "Rendah", "Sangat Kurang", "Kurang", "Cukup / Sedang", "Cukup Baik", "Baik", "Sangat Baik", "Luar Biasa"],
+        10: ["Sangat Kurang", "Kurang Sekali", "Kurang", "Agak Kurang", "Hampir Cukup", "Cukup", "Cukup Baik", "Baik", "Sangat Baik", "Sempurna / Istimewa"],
+        11: ["Nol / Kosong", "Sangat Kurang", "Kurang Sekali", "Kurang", "Agak Kurang", "Hampir Cukup", "Cukup", "Cukup Baik", "Baik", "Sangat Baik", "Sempurna / Istimewa"]
+      };
+
+      const presetList = presets[count] || [];
+      let idx = 0;
+      for (let i = minVal; i <= maxVal; i++) {
+        if (idx < presetList.length) {
+          labels[String(i)] = presetList[idx];
+        } else {
+          labels[String(i)] = (i === minVal ? "Sangat Kurang" : (i === maxVal ? "Sangat Baik" : "Nilai " + i));
+        }
+        idx++;
+      }
+
+      return labels;
+    }
+
+    function handleScaleRangeChange(sIdx, fIdx, prop, val) {
+      pushUndoSnapshot('Ubah Rentang Skala Linier');
+      const f = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
+      if (!f) return;
+      
+      f[prop] = val;
+      const minV = f.minVal !== undefined ? f.minVal : 1;
+      const maxV = f.maxVal !== undefined ? f.maxVal : 5;
+
+      // Smart dynamic reassignment of point labels for the exact new scale length
+      f.pointLabels = getDefaultScalePointLabels(minV, maxV);
+      f.labelMin = f.pointLabels[String(minV)] || "Sangat Kurang";
+      f.labelMax = f.pointLabels[String(maxV)] || "Sangat Baik";
+
+      renderDynamicStagesCanvas();
+      markSchemaAsDirty();
+      showAdminToast(`Rentang skala diubah menjadi ${minV} s.d. ${maxV} dengan label cerdas.`, "info");
     }
 
     function handleInlineScalePointLabelUpdate(sIdx, fIdx, pointKey, val) {
@@ -4075,32 +4134,29 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         `;
       }
 
-      // 6. RATING SCALE / SKALA LINIER (MULTI-POINT LABELS 1 S.D. 5/10)
+      // 6. RATING SCALE / SKALA LINIER (SMART DYNAMIC LABELS FOR ALL RANGES)
       if (f.type === 'RATING_SCALE') {
         const minV = f.minVal !== undefined ? f.minVal : 1;
         const maxV = f.maxVal !== undefined ? f.maxVal : 5;
         
-        if (!f.pointLabels || typeof f.pointLabels !== 'object') {
-          f.pointLabels = {};
-          if (minV === 1 && maxV === 5) {
-            f.pointLabels["1"] = f.labelMin || "Sangat Kurang";
-            f.pointLabels["2"] = "Kurang";
-            f.pointLabels["3"] = "Cukup";
-            f.pointLabels["4"] = "Baik";
-            f.pointLabels["5"] = f.labelMax || "Sangat Baik";
-          }
+        if (!f.pointLabels || typeof f.pointLabels !== 'object' || Object.keys(f.pointLabels).length === 0) {
+          f.pointLabels = getDefaultScalePointLabels(minV, maxV);
+          f.labelMin = f.pointLabels[String(minV)] || "Sangat Kurang";
+          f.labelMax = f.pointLabels[String(maxV)] || "Sangat Baik";
         }
+
+        const defaultSmartMap = getDefaultScalePointLabels(minV, maxV);
 
         let pointInputsHtml = '';
         for (let i = minV; i <= maxV; i++) {
-          const currentLabel = f.pointLabels[String(i)] || (i === minV ? (f.labelMin || "Sangat Kurang") : (i === maxV ? (f.labelMax || "Sangat Baik") : ""));
+          const currentLabel = f.pointLabels[String(i)] !== undefined ? f.pointLabels[String(i)] : (defaultSmartMap[String(i)] || "");
           pointInputsHtml += `
             <div class="flex items-center gap-2 text-xs">
               <span class="w-7 h-7 rounded-lg bg-zinc-100 border border-zinc-300 font-mono font-bold text-zinc-700 flex items-center justify-center shrink-0 text-xs shadow-2xs">${i}</span>
               <input 
                 type="text" 
                 value="${currentLabel}" 
-                placeholder="Label teks nilai ${i} (contoh: ${i === 1 ? 'Sangat Kurang' : (i === maxV ? 'Sangat Baik' : 'Cukup')})..."
+                placeholder="Label teks nilai ${i} (contoh: ${defaultSmartMap[String(i)] || 'Keterangan...'})..."
                 oninput="handleInlineScalePointLabelUpdate(${sIdx}, ${fIdx}, '${i}', this.value)"
                 class="flex-1 px-3 py-1.5 rounded-lg border border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 bg-white text-xs text-zinc-800 outline-none transition shadow-2xs"
               >
@@ -4114,7 +4170,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
               <div class="flex items-center gap-1.5">
                 <span class="text-zinc-600 font-bold">Rentang Skala Angka:</span>
                 <select 
-                  onchange="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'minVal', parseInt(this.value)); renderDynamicStagesCanvas();"
+                  onchange="handleScaleRangeChange(${sIdx}, ${fIdx}, 'minVal', parseInt(this.value))"
                   class="px-2.5 py-1 rounded-lg border border-zinc-300 bg-white text-xs font-mono font-bold cursor-pointer"
                 >
                   <option value="1" ${minV === 1 ? 'selected' : ''}>1</option>
@@ -4122,7 +4178,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
                 </select>
                 <span class="text-zinc-400 font-medium">sampai</span>
                 <select 
-                  onchange="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'maxVal', parseInt(this.value)); renderDynamicStagesCanvas();"
+                  onchange="handleScaleRangeChange(${sIdx}, ${fIdx}, 'maxVal', parseInt(this.value))"
                   class="px-2.5 py-1 rounded-lg border border-zinc-300 bg-white text-xs font-mono font-bold cursor-pointer"
                 >
                   <option value="2" ${maxV === 2 ? 'selected' : ''}>2</option>

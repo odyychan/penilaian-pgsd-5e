@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.5] - 2026-08-24
+
+### 🧠 Smart Contextual Point Label Presets for Linear Scales (Skala Linier Cerdas)
+- **Preset Label Cerdas & Kontekstual untuk Setiap Panjang Rentang Skala:**
+  - Mengimplementasikan fungsi kecerdasan penataan label (`getDefaultScalePointLabels(minVal, maxVal)`) yang secara otomatis dan dinamis menghasilkan teks keterangan skala evaluasi baku bahasa Indonesia sesuai jumlah tingkat skala yang dipilih:
+    - **Rentang 2 Tingkat (1 s.d. 2):** `1: Kurang`, `2: Baik` (menghilangkan kekeliruan lama di mana nilai 2 berlabel 'Kurang').
+    - **Rentang 3 Tingkat (1 s.d. 3):** `1: Kurang`, `2: Cukup`, `3: Baik`.
+    - **Rentang 4 Tingkat (1 s.d. 4):** `1: Sangat Kurang`, `2: Kurang`, `3: Baik`, `4: Sangat Baik`.
+    - **Rentang 5 Tingkat (1 s.d. 5):** `1: Sangat Kurang`, `2: Kurang`, `3: Cukup`, `4: Baik`, `5: Sangat Baik`.
+    - **Rentang 6 s.d. 10 Tingkat:** Menyesuaikan secara presisi hingga tingkat 10 (`Sangat Rendah / Kurang` s.d. `Sempurna / Istimewa`).
+  - Setiap kali pengguna mengubah dropdown batas awal (*0 atau 1*) maupun batas akhir (*2 s.d. 10*), seluruh kotak input label langsung diselaraskan secara cerdas dan tetap dapat dikustomisasi manual oleh admin.
+
+---
+
 ## [2.2.4] - 2026-08-24
 
 ### 🔑 Robust Local & Remote Multi-Form PIN Switcher Engine
