@@ -371,16 +371,16 @@
               <span>Kelompok</span>
             </button>
 
-            <!-- 5. Sistem (System) -->
+            <!-- 5. Setelan Form (Form Settings) -->
             <button 
               id="adminTabBtn_system" 
               onclick="switchAdminTab('system')" 
               class="py-1.5 sm:py-2 px-2.5 sm:px-3 rounded-lg text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1 cursor-pointer text-center whitespace-nowrap shrink-0 text-xs"
             >
               <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
               </svg>
-              <span>Sistem</span>
+              <span>Setelan Form</span>
             </button>
           </div>
 
@@ -1237,31 +1237,37 @@
           </button>
         </div>
 
-        <!-- Cache & Ganti Password -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-          <div class="bg-white rounded-xl border border-zinc-200 p-3.5 sm:p-5 shadow-xs space-y-2.5 sm:space-y-3">
-            <div>
-              <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider font-mono">Cache &amp; Sinkronisasi Data</span>
-              <h3 class="text-xs sm:text-sm font-bold text-zinc-900 mt-0.5">Segarkan Cache Browser</h3>
-              <p class="text-[10.5px] sm:text-[11px] text-zinc-500 mt-0.5">Bersihkan cache lokal formulir ini jika terjadi perbedaan data tampilan.</p>
-            </div>
-            <button type="button" onclick="clearLocalAppCache()" class="px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg border border-zinc-200 hover:bg-zinc-100 text-zinc-700 text-xs font-medium transition cursor-pointer">
-              Bersihkan Cache &amp; Sinkronkan Ulang
-            </button>
+        <!-- Tindakan Khusus Formulir Ini (Kloning & Hapus) -->
+        <div class="bg-white rounded-2xl border border-zinc-200 p-4 sm:p-6 shadow-xs space-y-3">
+          <div>
+            <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider font-mono">Tindakan Lanjutan Formulir</span>
+            <h3 class="text-xs sm:text-sm font-bold text-zinc-900 mt-0.5">Kloning &amp; Manajemen Siklus Hidup Form</h3>
+            <p class="text-[10.5px] sm:text-xs text-zinc-500 mt-0.5">Duplikasi seluruh susunan pertanyaan dan kelompok form ini untuk semester/kelas baru, atau hapus jika sudah tidak digunakan.</p>
           </div>
 
-          <div class="bg-white rounded-xl border border-zinc-200 p-3.5 sm:p-5 shadow-xs space-y-2.5 sm:space-y-3">
-            <div>
-              <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider font-mono">Keamanan Portal</span>
-              <h3 class="text-xs sm:text-sm font-bold text-zinc-900 mt-0.5">Ubah Kata Sandi Admin</h3>
-              <p class="text-[10.5px] sm:text-[11px] text-zinc-500 mt-0.5">Ganti kata sandi login admin untuk perlindungan akses.</p>
-            </div>
-            <div class="flex items-center gap-2">
-              <input type="password" id="inputNewAdminPassword" placeholder="Kata sandi baru..." class="flex-1 px-3 py-1.5 rounded-lg border border-zinc-300 text-xs outline-none">
-              <button type="button" onclick="updateAdminPassword()" class="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold cursor-pointer">
-                Simpan
-              </button>
-            </div>
+          <div class="flex items-center gap-2 pt-1 flex-wrap">
+            <button 
+              type="button" 
+              onclick="handleCloneActiveWorkspaceForm()" 
+              class="px-4 py-2 rounded-xl border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shadow-2xs"
+            >
+              <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path>
+              </svg>
+              <span>Kloning Formulir Ini</span>
+            </button>
+
+            <button 
+              type="button" 
+              id="btnDeleteActiveWorkspaceForm"
+              onclick="handleDeleteActiveWorkspaceForm()" 
+              class="px-4 py-2 rounded-xl border border-rose-200 bg-rose-50/70 hover:bg-rose-100 text-rose-600 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shadow-2xs"
+            >
+              <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+              </svg>
+              <span>Hapus Formulir Ini Permanen</span>
+            </button>
           </div>
         </div>
 
@@ -2374,7 +2380,36 @@ function getOrCreateFolder(folderName) {
         </div>
       </div>
 
-      <!-- 3. Security & Maintenance Grid -->
+      <!-- 3. Full Database Backup & Restore Card -->
+      <div class="bg-white rounded-xl border border-zinc-200 p-3.5 sm:p-4 space-y-3 shadow-2xs">
+        <div class="border-b border-zinc-100 pb-2">
+          <h4 class="text-xs sm:text-sm font-bold text-zinc-900">Cadangkan &amp; Pulihkan Basis Data (Backup &amp; Restore)</h4>
+          <p class="text-[10.5px] text-zinc-500">Ekspor seluruh schema dan data Supabase menjadi berkas JSON atau pulihkan data secara utuh dari file cadangan.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 text-xs">
+          <button 
+            type="button" 
+            onclick="downloadGlobalDatabaseBackup()" 
+            class="px-3.5 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-semibold flex items-center justify-center gap-2 transition cursor-pointer shadow-xs"
+          >
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
+            <span>Unduh Cadangan Database (.json)</span>
+          </button>
+
+          <label class="px-3.5 py-2.5 rounded-xl border border-zinc-300 hover:bg-zinc-50 text-zinc-700 font-semibold flex items-center justify-center gap-2 transition cursor-pointer shadow-2xs">
+            <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+            </svg>
+            <span>Pulihkan Dari File Cadangan</span>
+            <input type="file" accept=".json" onchange="handleRestoreDatabaseFileInput(this)" class="sr-only">
+          </label>
+        </div>
+      </div>
+
+      <!-- 4. Security & Maintenance Grid -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
         <div class="bg-white rounded-xl border border-zinc-200 p-3.5 space-y-2 shadow-2xs">
           <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider font-mono">Keamanan Portal</span>
@@ -8701,15 +8736,145 @@ function getOrCreateFolder(folderName) {
       }
     }
 
-    function updateAdminPassword() {
-      const p = document.getElementById("inputNewAdminPassword").value.trim();
-      if (!p || p.length < 4) {
-        showAdminToast("Kata sandi minimal 4 karakter!", "warning");
-        return;
+    function handleCloneActiveWorkspaceForm() {
+      if (currentFormId) {
+        cloneFormAction(currentFormId);
       }
-      localStorage.setItem("PGSD_ADMIN_PASS", p);
-      document.getElementById("inputNewAdminPassword").value = "";
-      showAdminToast("Kata sandi admin berhasil diperbarui.", "success");
+    }
+
+    function handleDeleteActiveWorkspaceForm() {
+      if (currentFormId) {
+        openDeleteFormModal(currentFormId, currentFormMeta?.judulForm || currentFormId);
+      }
+    }
+
+    async function downloadGlobalDatabaseBackup() {
+      showGlobalLoadingProgress();
+      const sb = getSupabaseClient();
+      try {
+        let forms = [], configs = [], groups = [], students = [], responses = [];
+        if (sb) {
+          const [fRes, cRes, gRes, sRes, rRes] = await Promise.all([
+            sb.from('pgsd_forms').select('*'),
+            sb.from('pgsd_form_configs').select('*'),
+            sb.from('pgsd_groups').select('*'),
+            sb.from('pgsd_students').select('*'),
+            sb.from('pgsd_responses').select('*')
+          ]);
+          forms = fRes.data || [];
+          configs = cRes.data || [];
+          groups = gRes.data || [];
+          students = sRes.data || [];
+          responses = rRes.data || [];
+        }
+
+        const backupPayload = {
+          app: "PGSD_5E_ASSESSMENT_SYSTEM",
+          version: "2.2.50",
+          timestamp: new Date().toISOString(),
+          counts: {
+            forms: forms.length,
+            configs: configs.length,
+            groups: groups.length,
+            students: students.length,
+            responses: responses.length
+          },
+          data: {
+            forms: forms,
+            configs: configs,
+            groups: groups,
+            students: students,
+            responses: responses
+          }
+        };
+
+        const jsonStr = JSON.stringify(backupPayload, null, 2);
+        const blob = new Blob([jsonStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        const dateStr = new Date().toISOString().replace(/[:.]/g, "-").substring(0, 19);
+        a.href = url;
+        a.download = `pgsd_5e_backup_${dateStr}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        // Record in pgsd_backups
+        if (sb) {
+          sb.from('pgsd_backups').insert([{
+            backup_name: `Backup_${dateStr}`,
+            description: `Full manual backup of ${forms.length} forms and ${responses.length} responses`,
+            record_counts: backupPayload.counts,
+            payload: backupPayload,
+            created_by: 'Admin'
+          }]).then(() => {});
+        }
+
+        showAdminToast(`Cadangan database (${forms.length} form, ${students.length} mhs) berhasil diunduh!`, "success");
+      } catch (err) {
+        showAdminToast("Gagal membuat cadangan database: " + err, "error");
+      } finally {
+        hideGlobalLoadingProgress();
+      }
+    }
+
+    async function handleRestoreDatabaseFileInput(input) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+
+      try {
+        const text = await file.text();
+        const backupObj = JSON.parse(text);
+
+        if (!backupObj || backupObj.app !== "PGSD_5E_ASSESSMENT_SYSTEM" || !backupObj.data) {
+          showAdminToast("Format file cadangan tidak valid atau tidak cocok!", "error");
+          input.value = "";
+          return;
+        }
+
+        const counts = backupObj.counts || {};
+        const ok = await showAppConfirm({
+          title: "Pulihkan Basis Data?",
+          message: `File ini berisi: ${counts.forms || 0} Formulir, ${counts.groups || 0} Kelompok, ${counts.students || 0} Mahasiswa, ${counts.responses || 0} Respons. Lanjutkan pemulihan ke Supabase?`,
+          confirmText: "Ya, Pulihkan Sekarang",
+          type: "warning"
+        });
+
+        if (!ok) {
+          input.value = "";
+          return;
+        }
+
+        showGlobalLoadingProgress();
+        const sb = getSupabaseClient();
+        if (sb) {
+          const d = backupObj.data;
+          if (d.forms && d.forms.length > 0) {
+            await sb.from('pgsd_forms').upsert(d.forms);
+          }
+          if (d.configs && d.configs.length > 0) {
+            await sb.from('pgsd_form_configs').upsert(d.configs);
+          }
+          if (d.groups && d.groups.length > 0) {
+            await sb.from('pgsd_groups').upsert(d.groups);
+          }
+          if (d.students && d.students.length > 0) {
+            await sb.from('pgsd_students').upsert(d.students);
+          }
+          if (d.responses && d.responses.length > 0) {
+            await sb.from('pgsd_responses').upsert(d.responses);
+          }
+        }
+
+        showAdminToast("Basis data berhasil dipulihkan secara utuh!", "success");
+        await fetchFormsRegistry(true);
+      } catch (err) {
+        showAdminToast("Gagal memulihkan database: " + err, "error");
+      } finally {
+        input.value = "";
+        hideGlobalLoadingProgress();
+      }
     }
 
     // PRINT MODAL FUNCTIONS

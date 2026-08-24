@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.50] - 2026-08-24
+
+### 💾 Integrasi Cadangan & Pemulihan Database Penuh Serta Pemurnian Tab Setelan Form
+- **Penyematan Fitur Cadangkan & Pulihkan Database (Backup & Restore):**
+  - Mengintegrasikan modul ekspor snapshot JSON penuh dari seluruh tabel Supabase (`pgsd_forms`, `pgsd_form_configs`, `pgsd_groups`, `pgsd_students`, `pgsd_responses`) lengkap dengan verifikasi tanda tangan dan riwayat ke tabel `pgsd_backups`.
+  - Menyediakan fitur *Restore from Backup File* bertahap dengan validasi dialog konfirmasi dan *auto-upsert* ke Supabase PostgreSQL.
+- **Pemurnian Tab Setelan Form Workspace:**
+  - Mengeliminasi elemen setelan umum (seperti ganti password portal dan bersihkan cache) dari dalam form workspace dan memindahkannya seutuhnya ke *Setelan Sistem Global*.
+  - Mengganti label tab menjadi **Setelan Form** dengan fokus eksklusif pada kustomisasi per-form (Spreadsheet/Drive override), reset data penilaian per form, serta kloning/hapus siklus hidup form.
+
+---
+
 ## [2.2.49] - 2026-08-24
 
 ### 🎛️ Pemisahan Hierarkis Setelan Global Sistem vs Setelan Khusus Formulir (Cascading Fallback)
