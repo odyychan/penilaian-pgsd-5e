@@ -4,6 +4,28 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.78] - 2026-08-24
+
+### 🎨 True WYSIWYG Google Forms-Style Visual Form Builder & Live Simulator
+- **Kartu Pertanyaan Visual Nyata (*Realistic Input Mockups Canvas*):**
+  - Setiap pertanyaan pada kanvas Form Builder kini langsung merender tampilan visual aslinya:
+    - **Identitas Penilai:** Pilihan chip peran, input NIM, dan domain email resmi.
+    - **Pemilihan Kelompok:** Dropdown interaktif kelompok sesi aktif.
+    - **Nilai Presentasi:** Slider rentang skor aktif (*min-max*), preset chip angka, dan track progress skor.
+    - **Presentator Terbaik:** Kotak checklist pemilih dengan batasan kuota suara.
+    - **Evaluasi Masukan:** Textarea masukan per pemateri dengan batas karakter.
+    - **Teks Singkat / Paragraf:** Input bergaris visual dan box textarea.
+    - **Skala Linier (1-5):** Deretan tombol angka rating linier.
+    - **Pilihan Ganda & Checkbox:** Lingkaran radio dan kotak centang nyata.
+    - **Upload Berkas Drive:** Box drag-and-drop dokumen/slide PDF.
+    - **Banner Teks:** Kartu panduan edukatif beraksen.
+- **Google Forms-Style Quick Action Bar:**
+  - Setiap kartu dilengkapi saklar 1-klik `Wajib diisi (Required)`, tombol `Duplikasi`, `Hapus`, `Pindah Tahap ↗`, dan `Atur Parameter`.
+- **Fitur Pratinjau Interaktif Langsung (*Live Form Simulator*):**
+  - Tombol `👁️ Pratinjau Form Langsung` untuk mensimulasikan alur pengisian mahasiswa secara nyata dari tahap ke tahap.
+
+---
+
 ## [2.1.77] - 2026-08-24
 
 ### 🚀 Dynamic Multi-Stage Form Builder & Intelligent Workflow Engine (Melebihi Google Forms)
