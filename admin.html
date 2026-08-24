@@ -2595,11 +2595,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       renderDynamicStagesCanvas();
     }
 
-    // =========================================================================
-    // DIRECT INLINE LIVE EDITING FORM BUILDER CANVAS (GOOGLE FORMS STYLE)
-    // =========================================================================
     let inlineSaveTimeout = null;
-
     function triggerDebouncedAutoSave() {
       if (inlineSaveTimeout) clearTimeout(inlineSaveTimeout);
       inlineSaveTimeout = setTimeout(() => {
@@ -2622,6 +2618,18 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     function handleInlineConfigUpdate(key, val) {
       adminAppConfig[key] = val;
       triggerDebouncedAutoSave();
+    }
+
+    function handleQuestionTypeSwitch(sIdx, fIdx, newType) {
+      const f = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
+      if (!f) return;
+      f.type = newType;
+      if ((newType === 'RADIO' || newType === 'CHECKBOX' || newType === 'DROPDOWN') && (!f.options || f.options.length === 0)) {
+        f.options = ['Opsi 1', 'Opsi 2'];
+      }
+      renderDynamicStagesCanvas();
+      triggerDebouncedAutoSave();
+      showAdminToast(`Tipe pertanyaan diubah menjadi '${newType}'.`, "info");
     }
 
     function handleInlineOptionUpdate(sIdx, fIdx, optIdx, val) {
@@ -2660,104 +2668,108 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       tahapan.forEach(t => { totalFieldsCount += (t.fields || []).length; });
 
       if (statsBadge) {
-        statsBadge.textContent = `${tahapan.length} Tahap • ${totalFieldsCount} Komponen`;
+        statsBadge.textContent = `${tahapan.length} Bagian • ${totalFieldsCount} Pertanyaan`;
       }
 
       tahapan.forEach((stage, sIdx) => {
         const stageCard = document.createElement("div");
-        stageCard.className = "bg-white rounded-2xl border-2 border-zinc-200/90 p-4 sm:p-6 shadow-xs space-y-4 transition hover:border-zinc-300";
+        stageCard.className = "bg-white rounded-2xl border-2 border-zinc-200 shadow-xs overflow-hidden space-y-0 transition hover:border-zinc-300";
 
         const fields = stage.fields || [];
 
-        const fieldRowsHtml = fields.map((f, fIdx) => {
-          const typeBadgeMap = {
-            'CORE_IDENTITY': '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">Field Sistem Inti</span>',
-            'CORE_GROUP_SELECT': '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">Field Sistem Inti</span>',
-            'CORE_SCORE_RUBRIC': '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Rubrik Nilai Inti</span>',
-            'CORE_BEST_PRESENTER': '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">Voting Peer Inti</span>',
-            'CORE_MEMBER_FEEDBACK': '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">Ulasan Inti</span>',
-            'SHORT_TEXT': '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">Teks Singkat</span>',
-            'TEXTAREA': '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">Paragraf</span>',
-            'RATING_SCALE': `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">Skala Nilai</span>`,
-            'RADIO': '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">Pilihan Ganda</span>',
-            'CHECKBOX': '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">Kotak Centang</span>',
-            'DROPDOWN': '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">Dropdown</span>',
-            'FILE_UPLOAD': '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">Unggah Berkas</span>',
-            'INFO_BANNER': '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-zinc-100 text-zinc-700 border border-zinc-200">Banner Teks</span>'
-          };
-
-          const scopeBadge = f.scope === 'PER_KELOMPOK' 
-            ? '<span class="px-1.5 py-0.5 rounded text-[9.5px] font-bold bg-purple-50 text-purple-700 border border-purple-200">Rubrik Kelompok</span>'
-            : (f.scope === 'PER_PEMATERI' ? '<span class="px-1.5 py-0.5 rounded text-[9.5px] font-bold bg-amber-50 text-amber-700 border border-amber-200">Per Pemateri</span>' : '<span class="px-1.5 py-0.5 rounded text-[9.5px] font-bold bg-blue-50 text-blue-700 border border-blue-200">Umum Form</span>');
-
+        const fieldCardsHtml = fields.map((f, fIdx) => {
           const isCore = String(f.type || "").startsWith("CORE_");
-          const visualMockup = getFieldVisualMockupHtml(f, sIdx, fIdx);
+          const visualBody = getGoogleFormsVisualBodyHtml(f, sIdx, fIdx);
 
           return `
-            <!-- DIRECT INLINE EDITABLE QUESTION CARD -->
-            <div class="bg-zinc-50/80 rounded-xl border border-zinc-200 hover:border-indigo-500 hover:bg-white transition shadow-2xs p-4 sm:p-5 space-y-3.5 relative group">
+            <!-- AUTHENTIC GOOGLE FORMS QUESTION CARD -->
+            <div class="bg-white rounded-xl border border-zinc-200 border-l-4 border-l-indigo-600 shadow-sm p-4 sm:p-6 space-y-4 transition hover:shadow-md">
               
-              <!-- Card Question Top: Inline Editable Title & Description -->
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-100 pb-3">
-                <div class="flex items-start gap-2.5 min-w-0 flex-1">
-                  <span class="w-6 h-6 rounded-md bg-white border border-zinc-300 font-mono font-bold text-zinc-700 flex items-center justify-center flex-shrink-0 text-xs shadow-2xs mt-0.5">
-                    ${fIdx + 1}
-                  </span>
-                  <div class="min-w-0 flex-1 space-y-1">
-                    <div class="flex items-center gap-1.5 flex-wrap">
-                      <input 
-                        type="text" 
-                        value="${f.label}" 
-                        placeholder="Tuliskan label pertanyaan..."
-                        oninput="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'label', this.value)"
-                        class="font-bold text-xs sm:text-sm text-zinc-900 bg-transparent border-b border-transparent hover:border-zinc-300 focus:border-indigo-600 focus:bg-white px-1.5 py-0.5 rounded outline-none transition flex-1 min-w-[200px]"
-                      >
-                      ${f.required ? '<span class="text-rose-500 font-bold text-sm">*</span>' : ''}
-                      ${typeBadgeMap[f.type] || ''}
-                      ${scopeBadge}
-                    </div>
+              <!-- Top Row: Question Title & Dropdown Type Selector -->
+              <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                
+                <!-- Left: Underlined Question Title & Subtitle Inputs -->
+                <div class="flex-1 space-y-1.5 min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-md bg-indigo-50 border border-indigo-200 font-mono font-bold text-indigo-700 flex items-center justify-center flex-shrink-0 text-xs">
+                      ${fIdx + 1}
+                    </span>
                     <input 
                       type="text" 
-                      value="${f.description || ''}" 
-                      placeholder="Tambahkan petunjuk / deskripsi pertanyaan di sini (opsional)..."
-                      oninput="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'description', this.value)"
-                      class="text-[11px] text-zinc-500 bg-transparent border-b border-transparent hover:border-zinc-300 focus:border-indigo-600 focus:bg-white px-1.5 py-0.5 rounded outline-none transition w-full"
+                      value="${f.label}" 
+                      placeholder="Pertanyaan tanpa judul..."
+                      oninput="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'label', this.value)"
+                      class="w-full text-sm sm:text-base font-semibold text-zinc-900 bg-zinc-50/80 hover:bg-zinc-100/90 focus:bg-white border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 px-3 py-2 rounded-t-lg outline-none transition"
                     >
+                  </div>
+                  <input 
+                    type="text" 
+                    value="${f.description || ''}" 
+                    placeholder="Teks deskripsi / panduan pengisian pertanyaan (opsional)..."
+                    oninput="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'description', this.value)"
+                    class="w-full text-xs text-zinc-500 bg-transparent border-b border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 px-2 py-1 outline-none transition"
+                  >
+                </div>
+
+                <!-- Right: Google Forms Question Type Dropdown -->
+                <div class="relative w-full sm:w-60 shrink-0">
+                  <select 
+                    onchange="handleQuestionTypeSwitch(${sIdx}, ${fIdx}, this.value)" 
+                    class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 bg-white text-xs font-semibold text-zinc-800 shadow-2xs hover:border-zinc-500 focus:border-indigo-600 outline-none transition cursor-pointer pr-9 appearance-none"
+                  >
+                    <optgroup label="Tipe Pertanyaan Standar (Google Forms)">
+                      <option value="RADIO" ${f.type === 'RADIO' ? 'selected' : ''}> Pilihan ganda</option>
+                      <option value="CHECKBOX" ${f.type === 'CHECKBOX' ? 'selected' : ''}>☑️ Kotak centang</option>
+                      <option value="DROPDOWN" ${f.type === 'DROPDOWN' ? 'selected' : ''}>▾ Drop-down</option>
+                      <option value="SHORT_TEXT" ${f.type === 'SHORT_TEXT' ? 'selected' : ''}>─ Jawaban singkat</option>
+                      <option value="TEXTAREA" ${f.type === 'TEXTAREA' ? 'selected' : ''}>≡ Paragraf</option>
+                      <option value="RATING_SCALE" ${f.type === 'RATING_SCALE' ? 'selected' : ''}> Skala linier (1-5)</option>
+                      <option value="FILE_UPLOAD" ${f.type === 'FILE_UPLOAD' ? 'selected' : ''}>☁️ Upload file ke Drive</option>
+                    </optgroup>
+                    <optgroup label="Komponen Inti Penilaian Perkuliahan">
+                      <option value="CORE_IDENTITY" ${f.type === 'CORE_IDENTITY' ? 'selected' : ''}> Identitas &amp; Peran Penilai</option>
+                      <option value="CORE_GROUP_SELECT" ${f.type === 'CORE_GROUP_SELECT' ? 'selected' : ''}> Pemilihan Kelompok</option>
+                      <option value="CORE_SCORE_RUBRIC" ${f.type === 'CORE_SCORE_RUBRIC' ? 'selected' : ''}> Nilai Presentasi (Skor)</option>
+                      <option value="CORE_BEST_PRESENTER" ${f.type === 'CORE_BEST_PRESENTER' ? 'selected' : ''}>⭐ Voting Presentator Terbaik</option>
+                      <option value="CORE_MEMBER_FEEDBACK" ${f.type === 'CORE_MEMBER_FEEDBACK' ? 'selected' : ''}> Evaluasi Masukan Tiap Pemateri</option>
+                      <option value="INFO_BANNER" ${f.type === 'INFO_BANNER' ? 'selected' : ''}>ℹ️ Teks Informasi &amp; Panduan</option>
+                    </optgroup>
+                  </select>
+                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                   </div>
                 </div>
 
-                <div class="flex items-center gap-1 shrink-0 self-end sm:self-auto">
-                  <button type="button" onclick="moveField(${sIdx}, ${fIdx}, -1)" ${fIdx === 0 ? 'disabled' : ''} class="p-1.5 rounded hover:bg-zinc-200 disabled:opacity-20 text-zinc-600 cursor-pointer" title="Naikkan Posisi">▲</button>
-                  <button type="button" onclick="moveField(${sIdx}, ${fIdx}, 1)" ${fIdx === fields.length - 1 ? 'disabled' : ''} class="p-1.5 rounded hover:bg-zinc-200 disabled:opacity-20 text-zinc-600 cursor-pointer" title="Turunkan Posisi">▼</button>
-                  <button type="button" onclick="openMoveFieldModal(${sIdx}, ${fIdx})" class="px-2 py-1 rounded-md border border-zinc-200 hover:bg-zinc-100 text-zinc-700 text-[10.5px] font-medium flex items-center gap-1 cursor-pointer" title="Pindahkan ke Tahap Lain">
-                    <span>Pindah Tahap ↗</span>
-                  </button>
-                </div>
               </div>
 
-              <!-- Card Question Input Mockup Body (Directly Interactive & Inline Editable) -->
-              <div class="py-1">
-                ${visualMockup}
+              <!-- Middle: Authentic Google Forms Question Body -->
+              <div class="pt-1">
+                ${visualBody}
               </div>
 
-              <!-- Card Question Bottom Action Bar -->
-              <div class="flex items-center justify-between gap-2 pt-3 border-t border-zinc-100 text-xs">
-                <div class="flex items-center gap-1.5">
-                  <span class="text-[11px] font-mono text-zinc-400">Tersimpan otomatis saat diketik</span>
+              <!-- Bottom Row: Google Forms Action Toolbar -->
+              <div class="flex items-center justify-between gap-3 pt-3.5 border-t border-zinc-200/80 text-xs">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <button type="button" onclick="moveField(${sIdx}, ${fIdx}, -1)" ${fIdx === 0 ? 'disabled' : ''} class="p-1.5 rounded-lg hover:bg-zinc-100 disabled:opacity-20 text-zinc-600 cursor-pointer" title="Naikkan Posisi">▲</button>
+                  <button type="button" onclick="moveField(${sIdx}, ${fIdx}, 1)" ${fIdx === fields.length - 1 ? 'disabled' : ''} class="p-1.5 rounded-lg hover:bg-zinc-100 disabled:opacity-20 text-zinc-600 cursor-pointer" title="Turunkan Posisi">▼</button>
+                  <button type="button" onclick="openMoveFieldModal(${sIdx}, ${fIdx})" class="px-2.5 py-1 rounded-lg border border-zinc-200 hover:bg-zinc-100 text-zinc-700 text-[11px] font-medium flex items-center gap-1 cursor-pointer">
+                    <span>Pindah Bagian ↗</span>
+                  </button>
+                  <span class="text-[10px] font-mono text-zinc-400 hidden sm:inline">• Tersimpan otomatis</span>
                 </div>
 
-                <div class="flex items-center gap-2 shrink-0">
-                  <button type="button" onclick="duplicateField(${sIdx}, ${fIdx})" class="p-1.5 rounded-md hover:bg-zinc-200 text-zinc-600 cursor-pointer" title="Duplikasi Input">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+                <div class="flex items-center gap-2.5 shrink-0">
+                  <button type="button" onclick="duplicateField(${sIdx}, ${fIdx})" class="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-600 hover:text-zinc-900 cursor-pointer transition" title="Duplikasi Pertanyaan">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
                   </button>
-                  <button type="button" onclick="deleteField(${sIdx}, ${fIdx})" class="p-1.5 rounded-md hover:bg-rose-100 text-rose-600 cursor-pointer" title="Hapus Input">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                  <button type="button" onclick="deleteField(${sIdx}, ${fIdx})" class="p-1.5 rounded-lg hover:bg-rose-100 text-rose-600 cursor-pointer transition" title="Hapus Pertanyaan">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                   </button>
-                  <div class="h-4 w-px bg-zinc-200"></div>
-                  <!-- Required Toggle Switch (Google Forms Style) -->
-                  <label class="flex items-center gap-1.5 cursor-pointer select-none">
-                    <span class="text-[11px] font-medium text-zinc-600">Wajib diisi</span>
-                    <input type="checkbox" onchange="toggleFieldRequired(${sIdx}, ${fIdx})" ${f.required ? 'checked' : ''} class="w-3.5 h-3.5 rounded text-indigo-600 cursor-pointer">
+                  <div class="h-5 w-px bg-zinc-300"></div>
+                  <!-- Google Forms Required Switch -->
+                  <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <span class="text-xs font-semibold text-zinc-700">Wajib diisi</span>
+                    <input type="checkbox" onchange="toggleFieldRequired(${sIdx}, ${fIdx})" ${f.required ? 'checked' : ''} class="w-4 h-4 text-indigo-600 rounded cursor-pointer">
                   </label>
                 </div>
               </div>
@@ -2767,63 +2779,70 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         }).join("");
 
         stageCard.innerHTML = `
-          <!-- Stage Card Header: Direct Inline Editable Title & Description -->
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-zinc-100 pb-3.5">
-            <div class="flex items-start gap-2.5 min-w-0 flex-1">
-              <span class="px-2.5 py-1 rounded-lg bg-zinc-900 text-white font-mono font-bold text-xs flex-shrink-0 mt-0.5">
-                Tahap ${sIdx + 1} / ${tahapan.length}
-              </span>
-              <div class="min-w-0 flex-1 space-y-1">
-                <input 
-                  type="text" 
-                  value="${stage.title}" 
-                  placeholder="Judul Tahap..."
-                  oninput="handleInlineStageUpdate(${sIdx}, 'title', this.value)"
-                  class="font-bold text-sm text-zinc-900 bg-transparent border-b border-transparent hover:border-zinc-300 focus:border-indigo-600 focus:bg-white px-1.5 py-0.5 rounded outline-none transition w-full"
-                >
-                <input 
-                  type="text" 
-                  value="${stage.description || ''}" 
-                  placeholder="Tuliskan petunjuk/panduan pengisian tahap bagi mahasiswa..."
-                  oninput="handleInlineStageUpdate(${sIdx}, 'description', this.value)"
-                  class="text-[11px] text-zinc-500 bg-transparent border-b border-transparent hover:border-zinc-300 focus:border-indigo-600 focus:bg-white px-1.5 py-0.5 rounded outline-none transition w-full"
-                >
+          <!-- Section Top Accent Stripe -->
+          <div class="bg-indigo-600 h-2.5 w-full"></div>
+
+          <!-- Section Header Card (Google Forms Style) -->
+          <div class="p-5 sm:p-7 space-y-4 border-b border-zinc-100">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex items-center gap-2">
+                <span class="px-3 py-1 rounded-md bg-indigo-50 text-indigo-700 font-mono font-bold text-xs border border-indigo-200">
+                  Bagian ${sIdx + 1} dari ${tahapan.length}
+                </span>
+                <span class="text-xs text-zinc-400 font-mono">(${fields.length} Pertanyaan)</span>
+              </div>
+
+              <div class="flex items-center gap-1.5 shrink-0 self-end sm:self-auto">
+                <button type="button" onclick="moveStage(${sIdx}, -1)" ${sIdx === 0 ? 'disabled' : ''} class="p-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 disabled:opacity-20 text-zinc-600 cursor-pointer" title="Geser Bagian Naik">▲</button>
+                <button type="button" onclick="moveStage(${sIdx}, 1)" ${sIdx === tahapan.length - 1 ? 'disabled' : ''} class="p-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 disabled:opacity-20 text-zinc-600 cursor-pointer" title="Geser Bagian Turun">▼</button>
+                <button type="button" onclick="duplicateStage(${sIdx})" class="p-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-600 cursor-pointer" title="Duplikasi Bagian">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+                </button>
+                <button type="button" onclick="deleteStage(${sIdx})" ${tahapan.length <= 1 ? 'disabled' : ''} class="p-1.5 rounded-lg border border-rose-200 hover:bg-rose-50 text-rose-600 disabled:opacity-20 cursor-pointer" title="Hapus Bagian">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
               </div>
             </div>
 
-            <!-- Stage Control Buttons -->
-            <div class="flex items-center gap-1.5 flex-wrap flex-shrink-0 self-end sm:self-auto">
-              <button type="button" onclick="moveStage(${sIdx}, -1)" ${sIdx === 0 ? 'disabled' : ''} class="p-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 disabled:opacity-20 text-zinc-600 cursor-pointer" title="Geser Tahap Naik">▲</button>
-              <button type="button" onclick="moveStage(${sIdx}, 1)" ${sIdx === tahapan.length - 1 ? 'disabled' : ''} class="p-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 disabled:opacity-20 text-zinc-600 cursor-pointer" title="Geser Tahap Turun">▼</button>
-              <button type="button" onclick="duplicateStage(${sIdx})" class="p-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-600 cursor-pointer" title="Duplikasi Tahap">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
-              </button>
-              <button type="button" onclick="deleteStage(${sIdx})" ${tahapan.length <= 1 ? 'disabled' : ''} class="p-1.5 rounded-lg border border-rose-200 hover:bg-rose-50 text-rose-600 disabled:opacity-20 cursor-pointer" title="Hapus Tahap">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-              </button>
+            <!-- Underlined Section Title & Description -->
+            <div class="space-y-2">
+              <input 
+                type="text" 
+                value="${stage.title}" 
+                placeholder="Judul Bagian..."
+                oninput="handleInlineStageUpdate(${sIdx}, 'title', this.value)"
+                class="w-full text-base sm:text-xl font-bold text-zinc-900 bg-transparent border-b-2 border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 px-1 py-1.5 outline-none transition"
+              >
+              <input 
+                type="text" 
+                value="${stage.description || ''}" 
+                placeholder="Deskripsi Bagian (opsional)..."
+                oninput="handleInlineStageUpdate(${sIdx}, 'description', this.value)"
+                class="w-full text-xs sm:text-sm text-zinc-600 bg-transparent border-b border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 px-1 py-1 outline-none transition"
+              >
             </div>
           </div>
 
-          <!-- Fields inside this Stage -->
-          <div class="space-y-3">
-            ${fields.length > 0 ? fieldRowsHtml : `
-              <div class="p-6 rounded-xl border-2 border-dashed border-zinc-200 text-center text-xs text-zinc-400 space-y-1">
-                <p class="font-semibold text-zinc-600">Tahap ini belum memiliki komponen input.</p>
-                <p>Klik tombol "+ Tambah Input Visual ke Tahap ${sIdx + 1}" di bawah untuk membuat pertanyaan.</p>
+          <!-- Section Questions List Area -->
+          <div class="p-4 sm:p-6 space-y-4 bg-zinc-50/50">
+            ${fields.length > 0 ? fieldCardsHtml : `
+              <div class="p-8 rounded-xl border-2 border-dashed border-zinc-300 text-center text-xs text-zinc-400 space-y-2 bg-white">
+                <p class="font-bold text-zinc-700 text-sm">Bagian ini belum memiliki pertanyaan.</p>
+                <p>Klik tombol "+ Tambah Pertanyaan ke Bagian ${sIdx + 1}" di bawah untuk membuat pertanyaan.</p>
               </div>
             `}
-          </div>
 
-          <!-- Quick Add Button at Bottom of Stage -->
-          <div class="pt-1">
-            <button 
-              type="button" 
-              onclick="openAddFieldModal(${sIdx})" 
-              class="w-full py-2.5 px-4 rounded-xl border-2 border-dashed border-zinc-300 hover:border-indigo-500 hover:bg-indigo-50/50 text-zinc-700 hover:text-indigo-700 text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer"
-            >
-              <svg class="w-4 h-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-              <span>+ Tambah Input Visual ke Tahap ${sIdx + 1}</span>
-            </button>
+            <!-- Add Question Button at Bottom of Section -->
+            <div class="pt-2">
+              <button 
+                type="button" 
+                onclick="openAddFieldModal(${sIdx})" 
+                class="w-full py-3 px-4 rounded-xl border-2 border-dashed border-indigo-300 bg-white hover:bg-indigo-50/60 hover:border-indigo-500 text-indigo-700 text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer shadow-2xs"
+              >
+                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                <span>+ Tambah Pertanyaan ke Bagian ${sIdx + 1}</span>
+              </button>
+            </div>
           </div>
         `;
 
@@ -2831,14 +2850,231 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       });
     }
 
-    function getFieldVisualMockupHtml(f, sIdx, fIdx) {
-      const isCore = String(f.type || "").startsWith("CORE_");
+    function getGoogleFormsVisualBodyHtml(f, sIdx, fIdx) {
       const scoreMin = adminAppConfig["Nilai_Kelompok_Min"] || 50;
       const scoreMax = adminAppConfig["Nilai_Kelompok_Max"] || 100;
       const votingMax = adminAppConfig["Maksimal_Pilihan_Presentator_Terbaik"] || 2;
       const reviewMaxChars = adminAppConfig["Maksimal_Karakter_Evaluasi"] || 500;
       const emailDomain = adminAppConfig["Domain_Email_Wajib"] || "mhs.ulm.ac.id, ulm.ac.id";
 
+      // 1. RADIO / PILIHAN GANDA (100% GOOGLE FORMS STYLE)
+      if (f.type === 'RADIO') {
+        const options = (f.options && f.options.length > 0) ? f.options : ['Opsi 1', 'Opsi 2'];
+        const optsHtml = options.map((o, optIdx) => `
+          <div class="flex items-center gap-2.5 text-xs group">
+            <span class="w-4 h-4 rounded-full border-2 border-zinc-400 shrink-0"></span>
+            <input 
+              type="text" 
+              value="${o}" 
+              placeholder="Teks opsi..."
+              oninput="handleInlineOptionUpdate(${sIdx}, ${fIdx}, ${optIdx}, this.value)"
+              class="flex-1 px-2.5 py-1.5 rounded-md border-b border-transparent hover:border-zinc-300 focus:border-indigo-600 text-xs text-zinc-800 bg-transparent focus:bg-white outline-none transition"
+            >
+            <button 
+              type="button" 
+              onclick="handleInlineDeleteOption(${sIdx}, ${fIdx}, ${optIdx})" 
+              ${options.length <= 1 ? 'disabled' : ''}
+              class="w-6 h-6 rounded-full hover:bg-rose-100 text-zinc-400 hover:text-rose-600 disabled:opacity-20 flex items-center justify-center cursor-pointer transition" 
+              title="Hapus Opsi"
+            >✕</button>
+          </div>
+        `).join('');
+
+        return `
+          <div class="space-y-2 pt-1">
+            <div class="space-y-1.5">${optsHtml}</div>
+            <div class="flex items-center gap-2 pt-1">
+              <span class="w-4 h-4 rounded-full border-2 border-dashed border-zinc-300 shrink-0"></span>
+              <button 
+                type="button" 
+                onclick="handleInlineAddOption(${sIdx}, ${fIdx})"
+                class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition cursor-pointer"
+              >
+                + Tambahkan opsi
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      // 2. CHECKBOX / KOTAK CENTANG (100% GOOGLE FORMS STYLE)
+      if (f.type === 'CHECKBOX') {
+        const options = (f.options && f.options.length > 0) ? f.options : ['Pilihan 1', 'Pilihan 2'];
+        const optsHtml = options.map((o, optIdx) => `
+          <div class="flex items-center gap-2.5 text-xs group">
+            <span class="w-4 h-4 rounded border-2 border-zinc-400 shrink-0"></span>
+            <input 
+              type="text" 
+              value="${o}" 
+              placeholder="Teks opsi..."
+              oninput="handleInlineOptionUpdate(${sIdx}, ${fIdx}, ${optIdx}, this.value)"
+              class="flex-1 px-2.5 py-1.5 rounded-md border-b border-transparent hover:border-zinc-300 focus:border-indigo-600 text-xs text-zinc-800 bg-transparent focus:bg-white outline-none transition"
+            >
+            <button 
+              type="button" 
+              onclick="handleInlineDeleteOption(${sIdx}, ${fIdx}, ${optIdx})" 
+              ${options.length <= 1 ? 'disabled' : ''}
+              class="w-6 h-6 rounded-full hover:bg-rose-100 text-zinc-400 hover:text-rose-600 disabled:opacity-20 flex items-center justify-center cursor-pointer transition" 
+              title="Hapus Opsi"
+            >✕</button>
+          </div>
+        `).join('');
+
+        return `
+          <div class="space-y-2 pt-1">
+            <div class="space-y-1.5">${optsHtml}</div>
+            <div class="flex items-center gap-2 pt-1">
+              <span class="w-4 h-4 rounded border-2 border-dashed border-zinc-300 shrink-0"></span>
+              <button 
+                type="button" 
+                onclick="handleInlineAddOption(${sIdx}, ${fIdx})"
+                class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition cursor-pointer"
+              >
+                + Tambahkan opsi centang
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      // 3. DROPDOWN (100% GOOGLE FORMS STYLE)
+      if (f.type === 'DROPDOWN') {
+        const options = (f.options && f.options.length > 0) ? f.options : ['Pilihan 1', 'Pilihan 2'];
+        const optsHtml = options.map((o, optIdx) => `
+          <div class="flex items-center gap-2.5 text-xs group">
+            <span class="w-4 font-mono text-zinc-400 font-bold text-xs shrink-0 text-center">${optIdx + 1}.</span>
+            <input 
+              type="text" 
+              value="${o}" 
+              placeholder="Teks opsi dropdown..."
+              oninput="handleInlineOptionUpdate(${sIdx}, ${fIdx}, ${optIdx}, this.value)"
+              class="flex-1 px-2.5 py-1.5 rounded-md border-b border-transparent hover:border-zinc-300 focus:border-indigo-600 text-xs text-zinc-800 bg-transparent focus:bg-white outline-none transition"
+            >
+            <button 
+              type="button" 
+              onclick="handleInlineDeleteOption(${sIdx}, ${fIdx}, ${optIdx})" 
+              ${options.length <= 1 ? 'disabled' : ''}
+              class="w-6 h-6 rounded-full hover:bg-rose-100 text-zinc-400 hover:text-rose-600 disabled:opacity-20 flex items-center justify-center cursor-pointer transition" 
+              title="Hapus Opsi"
+            >✕</button>
+          </div>
+        `).join('');
+
+        return `
+          <div class="space-y-2 pt-1">
+            <div class="space-y-1.5">${optsHtml}</div>
+            <div class="flex items-center gap-2 pt-1">
+              <span class="w-4 font-mono text-zinc-300 font-bold text-xs shrink-0 text-center">•</span>
+              <button 
+                type="button" 
+                onclick="handleInlineAddOption(${sIdx}, ${fIdx})"
+                class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition cursor-pointer"
+              >
+                + Tambahkan opsi pilihan
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      // 4. SHORT TEXT / JAWABAN SINGKAT
+      if (f.type === 'SHORT_TEXT') {
+        return `
+          <div class="pt-2 pb-1">
+            <div class="w-full sm:w-3/4 pb-2 border-b-2 border-dotted border-zinc-300 text-zinc-400 text-xs italic">
+              ${f.placeholder || 'Teks jawaban singkat (diisi oleh responden)'}
+            </div>
+          </div>
+        `;
+      }
+
+      // 5. TEXTAREA / PARAGRAF
+      if (f.type === 'TEXTAREA') {
+        return `
+          <div class="pt-2 pb-1">
+            <div class="w-full pb-6 border-b-2 border-dotted border-zinc-300 text-zinc-400 text-xs italic">
+              ${f.placeholder || 'Teks jawaban panjang / paragraf (diisi oleh responden)'}
+            </div>
+          </div>
+        `;
+      }
+
+      // 6. RATING SCALE / SKALA LINIER
+      if (f.type === 'RATING_SCALE') {
+        const minV = f.minVal || 1;
+        const maxV = f.maxVal || 5;
+        return `
+          <div class="space-y-3 pt-2 text-xs">
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-1.5">
+                <span class="text-zinc-500 font-medium">Rentang Skala:</span>
+                <select 
+                  onchange="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'minVal', parseInt(this.value))"
+                  class="px-2.5 py-1 rounded-lg border border-zinc-300 bg-white text-xs font-mono font-bold"
+                >
+                  <option value="1" ${minV === 1 ? 'selected' : ''}>1</option>
+                  <option value="0" ${minV === 0 ? 'selected' : ''}>0</option>
+                </select>
+                <span class="text-zinc-400 font-medium">sampai</span>
+                <select 
+                  onchange="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'maxVal', parseInt(this.value))"
+                  class="px-2.5 py-1 rounded-lg border border-zinc-300 bg-white text-xs font-mono font-bold"
+                >
+                  <option value="5" ${maxV === 5 ? 'selected' : ''}>5</option>
+                  <option value="10" ${maxV === 10 ? 'selected' : ''}>10</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="space-y-1.5">
+              <div class="flex items-center gap-2">
+                <span class="w-6 font-mono text-zinc-500 font-bold">${minV}:</span>
+                <input 
+                  type="text" 
+                  value="${f.labelMin || 'Sangat Kurang'}" 
+                  placeholder="Label untuk nilai ${minV} (contoh: Sangat Kurang)..."
+                  oninput="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'labelMin', this.value)"
+                  class="flex-1 px-2.5 py-1.5 rounded-lg border border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 bg-zinc-50 focus:bg-white text-xs outline-none transition"
+                >
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-6 font-mono text-zinc-500 font-bold">${maxV}:</span>
+                <input 
+                  type="text" 
+                  value="${f.labelMax || 'Sangat Baik'}" 
+                  placeholder="Label untuk nilai ${maxV} (contoh: Sangat Baik)..."
+                  oninput="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'labelMax', this.value)"
+                  class="flex-1 px-2.5 py-1.5 rounded-lg border border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 bg-zinc-50 focus:bg-white text-xs outline-none transition"
+                >
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // 7. FILE UPLOAD / UNGGAH BERKAS KE DRIVE
+      if (f.type === 'FILE_UPLOAD') {
+        return `
+          <div class="pt-2">
+            <div class="p-5 rounded-2xl border-2 border-dashed border-zinc-300 bg-zinc-50/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                </div>
+                <div>
+                  <h5 class="font-bold text-zinc-800">Unggah Berkas ke Google Drive</h5>
+                  <p class="text-[11px] text-zinc-500">Mendukung berkas PDF, PPTX, DOCX, Foto JPG/PNG (Maks 5 MB).</p>
+                </div>
+              </div>
+              <span class="px-3 py-1.5 rounded-lg bg-white border border-zinc-300 font-semibold text-zinc-700 shadow-2xs">
+                Pilih Berkas
+              </span>
+            </div>
+          </div>
+        `;
+      }
+
+      // 8. CORE IDENTITY (PERAN & EMAIL VALIDASI)
       if (f.type === 'CORE_IDENTITY') {
         const peranMhsLabel = adminAppConfig["Peran_Mahasiswa_Label"] || "Mahasiswa (Anggota Kelas PGSD 5E)";
         const peranDosenLabel = adminAppConfig["Peran_Dosen_Label"] || "Dosen (Pengampu / Penguji)";
@@ -2846,116 +3082,108 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
         return `
           <div class="space-y-3 pt-1">
+            <span class="text-[11px] font-bold text-zinc-400 uppercase tracking-wider font-mono block">Opsi Pilihan Peran Penilai:</span>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
               
-              <!-- Inline Editable Peran 1 -->
-              <div class="p-3 rounded-xl border border-zinc-200 bg-white shadow-2xs space-y-1">
-                <span class="text-[10px] text-zinc-400 block font-mono font-semibold uppercase">Pilihan Peran 1 (Mahasiswa):</span>
+              <div class="p-3 rounded-xl border border-zinc-200 bg-zinc-50 space-y-1">
+                <span class="text-[10px] text-zinc-500 block font-mono font-semibold">1. Peran Mahasiswa:</span>
                 <input 
                   type="text" 
                   value="${peranMhsLabel}" 
-                  placeholder="Label peran mahasiswa..."
                   oninput="handleInlineConfigUpdate('Peran_Mahasiswa_Label', this.value)"
-                  class="w-full text-xs font-bold text-zinc-900 bg-zinc-50 hover:bg-white border border-zinc-200 hover:border-indigo-400 focus:border-indigo-600 px-2 py-1.5 rounded-lg outline-none transition"
+                  class="w-full text-xs font-bold text-zinc-900 bg-white border border-zinc-200 hover:border-indigo-400 focus:border-indigo-600 px-2.5 py-1.5 rounded-lg outline-none transition shadow-2xs"
                 >
               </div>
 
-              <!-- Inline Editable Peran 2 -->
-              <div class="p-3 rounded-xl border border-zinc-200 bg-white shadow-2xs space-y-1">
-                <span class="text-[10px] text-zinc-400 block font-mono font-semibold uppercase">Pilihan Peran 2 (Dosen):</span>
+              <div class="p-3 rounded-xl border border-zinc-200 bg-zinc-50 space-y-1">
+                <span class="text-[10px] text-zinc-500 block font-mono font-semibold">2. Peran Dosen:</span>
                 <input 
                   type="text" 
                   value="${peranDosenLabel}" 
-                  placeholder="Label peran dosen..."
                   oninput="handleInlineConfigUpdate('Peran_Dosen_Label', this.value)"
-                  class="w-full text-xs font-bold text-zinc-900 bg-zinc-50 hover:bg-white border border-zinc-200 hover:border-indigo-400 focus:border-indigo-600 px-2 py-1.5 rounded-lg outline-none transition"
+                  class="w-full text-xs font-bold text-zinc-900 bg-white border border-zinc-200 hover:border-indigo-400 focus:border-indigo-600 px-2.5 py-1.5 rounded-lg outline-none transition shadow-2xs"
                 >
               </div>
 
-              <!-- Inline Editable Peran 3 -->
-              <div class="p-3 rounded-xl border border-zinc-200 bg-white shadow-2xs space-y-1">
-                <span class="text-[10px] text-zinc-400 block font-mono font-semibold uppercase">Pilihan Peran 3 (Tamu):</span>
+              <div class="p-3 rounded-xl border border-zinc-200 bg-zinc-50 space-y-1">
+                <span class="text-[10px] text-zinc-500 block font-mono font-semibold">3. Peran Tamu:</span>
                 <input 
                   type="text" 
                   value="${peranTamuLabel}" 
-                  placeholder="Label peran tamu..."
                   oninput="handleInlineConfigUpdate('Peran_Lainnya_Label', this.value)"
-                  class="w-full text-xs font-bold text-zinc-900 bg-zinc-50 hover:bg-white border border-zinc-200 hover:border-indigo-400 focus:border-indigo-600 px-2 py-1.5 rounded-lg outline-none transition"
+                  class="w-full text-xs font-bold text-zinc-900 bg-white border border-zinc-200 hover:border-indigo-400 focus:border-indigo-600 px-2.5 py-1.5 rounded-lg outline-none transition shadow-2xs"
                 >
               </div>
 
             </div>
 
-            <!-- Inline Editable Domain Email -->
-            <div class="p-3 rounded-xl border border-zinc-200 bg-white shadow-2xs space-y-1">
-              <div class="flex items-center justify-between text-xs">
-                <span class="text-[10px] text-zinc-400 font-mono font-semibold uppercase">Domain Email Resmi yang Diizinkan:</span>
-                <span class="text-[10px] text-zinc-400">Pisahkan dengan koma</span>
-              </div>
+            <div class="p-3 rounded-xl border border-zinc-200 bg-zinc-50 space-y-1">
+              <span class="text-[10px] text-zinc-500 font-mono font-semibold block">Domain Email Kampus yang Diizinkan:</span>
               <input 
                 type="text" 
                 value="${emailDomain}" 
                 placeholder="mhs.ulm.ac.id, ulm.ac.id"
                 oninput="handleInlineConfigUpdate('Domain_Email_Wajib', this.value)"
-                class="w-full text-xs font-mono font-semibold text-indigo-700 bg-zinc-50 hover:bg-white border border-zinc-200 hover:border-indigo-400 focus:border-indigo-600 px-2.5 py-1.5 rounded-lg outline-none transition"
+                class="w-full text-xs font-mono font-semibold text-indigo-700 bg-white border border-zinc-200 hover:border-indigo-400 focus:border-indigo-600 px-3 py-1.5 rounded-lg outline-none transition shadow-2xs"
               >
             </div>
           </div>
         `;
       }
 
+      // 9. CORE GROUP SELECT
       if (f.type === 'CORE_GROUP_SELECT') {
         const groupLabel = adminAppConfig["Pilih_Kelompok_Label"] || "Pilih Kelompok Presentator yang Tampil Hari Ini...";
         return `
           <div class="space-y-2 pt-1">
-            <div class="p-3 rounded-xl border border-zinc-200 bg-white space-y-1.5 shadow-2xs">
-              <span class="text-[10px] text-zinc-400 font-mono font-semibold uppercase">Teks Petunjuk Pilihan Kelompok:</span>
+            <div class="p-3.5 rounded-xl border border-zinc-200 bg-zinc-50 space-y-1.5">
+              <span class="text-[10px] text-zinc-500 font-mono font-semibold block">Teks Petunjuk Pilihan Kelompok:</span>
               <input 
                 type="text" 
                 value="${groupLabel}" 
-                placeholder="Pilih Kelompok..."
                 oninput="handleInlineConfigUpdate('Pilih_Kelompok_Label', this.value)"
-                class="w-full text-xs font-semibold text-zinc-900 bg-zinc-50 hover:bg-white border border-zinc-200 hover:border-indigo-400 focus:border-indigo-600 px-2.5 py-1.5 rounded-lg outline-none transition"
+                class="w-full text-xs font-semibold text-zinc-900 bg-white border border-zinc-200 hover:border-indigo-400 focus:border-indigo-600 px-3 py-2 rounded-lg outline-none transition shadow-2xs"
               >
-              <p class="text-[10.5px] text-zinc-400">Daftar kelompok dan sesi aktif dikelola otomatis di Tab Kelompok.</p>
+              <p class="text-[11px] text-zinc-400">Daftar kelompok otomatis bersumber dari Tab Kelompok &amp; Mahasiswa.</p>
             </div>
           </div>
         `;
       }
 
+      // 10. CORE SCORE RUBRIC
       if (f.type === 'CORE_SCORE_RUBRIC') {
         return `
           <div class="space-y-2 pt-1">
-            <div class="p-3.5 rounded-xl border border-zinc-200 bg-white space-y-3 shadow-2xs">
+            <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50 space-y-3">
               <div class="flex items-center justify-between flex-wrap gap-2 text-xs">
-                <span class="font-semibold text-zinc-700">Atur Batas Rentang Nilai Presentasi:</span>
+                <span class="font-bold text-zinc-700">Rentang Batas Nilai Presentasi:</span>
                 <div class="flex items-center gap-2">
                   <div class="flex items-center gap-1">
-                    <span class="text-[11px] text-zinc-400 font-mono">Min:</span>
+                    <span class="text-[11px] text-zinc-400 font-mono">Skor Min:</span>
                     <input 
                       type="number" 
                       min="0" 
                       max="100" 
                       value="${scoreMin}" 
                       oninput="handleInlineConfigUpdate('Nilai_Kelompok_Min', parseInt(this.value || 50))"
-                      class="w-16 text-xs font-mono font-bold text-emerald-800 bg-emerald-50 border border-emerald-300 px-2 py-1 rounded-lg text-center outline-none"
+                      class="w-16 text-xs font-mono font-bold text-emerald-800 bg-white border border-emerald-300 px-2 py-1 rounded-lg text-center outline-none shadow-2xs"
                     >
                   </div>
                   <span class="text-zinc-400">s.d.</span>
                   <div class="flex items-center gap-1">
-                    <span class="text-[11px] text-zinc-400 font-mono">Max:</span>
+                    <span class="text-[11px] text-zinc-400 font-mono">Skor Max:</span>
                     <input 
                       type="number" 
                       min="0" 
                       max="100" 
                       value="${scoreMax}" 
                       oninput="handleInlineConfigUpdate('Nilai_Kelompok_Max', parseInt(this.value || 100))"
-                      class="w-16 text-xs font-mono font-bold text-emerald-800 bg-emerald-50 border border-emerald-300 px-2 py-1 rounded-lg text-center outline-none"
+                      class="w-16 text-xs font-mono font-bold text-emerald-800 bg-white border border-emerald-300 px-2 py-1 rounded-lg text-center outline-none shadow-2xs"
                     >
                   </div>
                 </div>
               </div>
-              <div class="relative w-full h-2 bg-zinc-100 rounded-full overflow-hidden">
+              <div class="relative w-full h-2 bg-zinc-200 rounded-full overflow-hidden">
                 <div class="h-full bg-emerald-500 rounded-full" style="width: 70%;"></div>
               </div>
             </div>
@@ -2963,12 +3191,13 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         `;
       }
 
+      // 11. CORE BEST PRESENTER
       if (f.type === 'CORE_BEST_PRESENTER') {
         return `
           <div class="space-y-2 pt-1">
-            <div class="p-3.5 rounded-xl border border-zinc-200 bg-white space-y-2.5 shadow-2xs">
+            <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50 space-y-2">
               <div class="flex items-center justify-between flex-wrap gap-2 text-xs">
-                <span class="text-zinc-700 font-semibold">Batas Maksimal Pilihan Suara:</span>
+                <span class="text-zinc-700 font-bold">Batas Maksimal Pilihan Suara:</span>
                 <div class="flex items-center gap-1.5">
                   <input 
                     type="number" 
@@ -2976,9 +3205,9 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
                     max="5" 
                     value="${votingMax}" 
                     oninput="handleInlineConfigUpdate('Maksimal_Pilihan_Presentator_Terbaik', parseInt(this.value || 2))"
-                    class="w-16 text-xs font-mono font-bold text-blue-800 bg-blue-50 border border-blue-300 px-2 py-1 rounded-lg text-center outline-none"
+                    class="w-16 text-xs font-mono font-bold text-blue-800 bg-white border border-blue-300 px-2 py-1 rounded-lg text-center outline-none shadow-2xs"
                   >
-                  <span class="text-xs text-zinc-500">Orang Pemateri</span>
+                  <span class="text-xs text-zinc-500 font-medium">Orang Pemateri Terbaik</span>
                 </div>
               </div>
             </div>
@@ -2986,32 +3215,33 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         `;
       }
 
+      // 12. CORE MEMBER FEEDBACK
       if (f.type === 'CORE_MEMBER_FEEDBACK') {
         const reviewPublic = adminAppConfig["Tampilkan_Ulasan_Publik"] || "AKTIF";
         const penyajiRule = adminAppConfig["Kewajiban_Menilai_Penyaji"] || "BEBAS_PENUH_DI_SESINYA";
 
         return `
           <div class="space-y-2 pt-1">
-            <div class="p-3.5 rounded-xl border border-zinc-200 bg-white space-y-3 shadow-2xs text-xs">
+            <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50 space-y-3 text-xs">
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                 
                 <div class="space-y-1">
-                  <span class="text-[10px] text-zinc-400 font-mono font-semibold uppercase">Batas Maks Karakter:</span>
+                  <span class="text-[10px] text-zinc-500 font-mono font-semibold block">Batas Maks Karakter:</span>
                   <input 
                     type="number" 
                     min="50" 
                     max="2000" 
                     value="${reviewMaxChars}" 
                     oninput="handleInlineConfigUpdate('Maksimal_Karakter_Evaluasi', parseInt(this.value || 500))"
-                    class="w-full text-xs font-mono font-bold text-amber-800 bg-amber-50 border border-amber-300 px-2 py-1.5 rounded-lg outline-none"
+                    class="w-full text-xs font-mono font-bold text-amber-800 bg-white border border-amber-300 px-2.5 py-1.5 rounded-lg outline-none shadow-2xs"
                   >
                 </div>
 
                 <div class="space-y-1">
-                  <span class="text-[10px] text-zinc-400 font-mono font-semibold uppercase">Tampilkan ke Publik:</span>
+                  <span class="text-[10px] text-zinc-500 font-mono font-semibold block">Tampilkan ke Publik:</span>
                   <select 
                     onchange="handleInlineConfigUpdate('Tampilkan_Ulasan_Publik', this.value)"
-                    class="w-full text-xs font-medium text-zinc-800 bg-zinc-50 border border-zinc-200 px-2 py-1.5 rounded-lg outline-none cursor-pointer"
+                    class="w-full text-xs font-medium text-zinc-800 bg-white border border-zinc-200 px-2.5 py-1.5 rounded-lg outline-none cursor-pointer shadow-2xs"
                   >
                     <option value="AKTIF" ${reviewPublic === 'AKTIF' ? 'selected' : ''}>Tampilkan di Rekap</option>
                     <option value="NONAKTIF" ${reviewPublic === 'NONAKTIF' ? 'selected' : ''}>Khusus Admin</option>
@@ -3019,10 +3249,10 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
                 </div>
 
                 <div class="space-y-1">
-                  <span class="text-[10px] text-zinc-400 font-mono font-semibold uppercase">Aturan Bagi Penyaji:</span>
+                  <span class="text-[10px] text-zinc-500 font-mono font-semibold block">Aturan Bagi Penyaji:</span>
                   <select 
                     onchange="handleInlineConfigUpdate('Kewajiban_Menilai_Penyaji', this.value)"
-                    class="w-full text-xs font-medium text-zinc-800 bg-zinc-50 border border-zinc-200 px-2 py-1.5 rounded-lg outline-none cursor-pointer"
+                    class="w-full text-xs font-medium text-zinc-800 bg-white border border-zinc-200 px-2.5 py-1.5 rounded-lg outline-none cursor-pointer shadow-2xs"
                   >
                     <option value="BEBAS_PENUH_DI_SESINYA" ${penyajiRule === 'BEBAS_PENUH_DI_SESINYA' ? 'selected' : ''}>Bebas Menilai</option>
                     <option value="WAJIB_NILAI_KELOMPOK_LAIN" ${penyajiRule === 'WAJIB_NILAI_KELOMPOK_LAIN' ? 'selected' : ''}>Wajib Nilai Kelompok Lain</option>
@@ -3035,121 +3265,16 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         `;
       }
 
-      if (f.type === 'SHORT_TEXT') {
-        return `
-          <div class="pt-1">
-            <input 
-              type="text" 
-              value="${f.placeholder || ''}" 
-              placeholder="Tuliskan contoh teks placeholder jawaban singkat..."
-              oninput="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'placeholder', this.value)"
-              class="w-full p-2.5 rounded-lg border border-zinc-300 bg-white text-zinc-700 text-xs focus:border-indigo-600 outline-none transition"
-            >
-          </div>
-        `;
-      }
-
-      if (f.type === 'TEXTAREA') {
-        return `
-          <div class="pt-1">
-            <textarea 
-              rows="2"
-              placeholder="Tuliskan contoh teks placeholder jawaban panjang..."
-              oninput="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'placeholder', this.value)"
-              class="w-full p-2.5 rounded-lg border border-zinc-300 bg-white text-zinc-700 text-xs focus:border-indigo-600 outline-none transition"
-            >${f.placeholder || ''}</textarea>
-          </div>
-        `;
-      }
-
-      if (f.type === 'RATING_SCALE') {
-        const minV = f.minVal || 1;
-        const maxV = f.maxVal || 5;
-        return `
-          <div class="space-y-2 pt-1 text-xs">
-            <div class="flex items-center gap-3">
-              <div class="flex items-center gap-1.5">
-                <span class="text-zinc-400 font-mono text-[11px]">Skala:</span>
-                <select 
-                  onchange="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'minVal', parseInt(this.value))"
-                  class="px-2 py-1 rounded border border-zinc-300 bg-white text-xs font-mono font-bold"
-                >
-                  <option value="1" ${minV === 1 ? 'selected' : ''}>1</option>
-                  <option value="0" ${minV === 0 ? 'selected' : ''}>0</option>
-                </select>
-                <span class="text-zinc-400">s.d.</span>
-                <select 
-                  onchange="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'maxVal', parseInt(this.value))"
-                  class="px-2 py-1 rounded border border-zinc-300 bg-white text-xs font-mono font-bold"
-                >
-                  <option value="5" ${maxV === 5 ? 'selected' : ''}>5</option>
-                  <option value="10" ${maxV === 10 ? 'selected' : ''}>10</option>
-                </select>
-              </div>
-            </div>
-            <div class="flex items-center justify-between text-[11px] text-zinc-400 font-medium">
-              <span>Sangat Kurang (${minV})</span>
-              <span>Sangat Baik (${maxV})</span>
-            </div>
-          </div>
-        `;
-      }
-
-      if (f.type === 'RADIO' || f.type === 'CHECKBOX' || f.type === 'DROPDOWN') {
-        const options = (f.options && f.options.length > 0) ? f.options : ['Opsi 1', 'Opsi 2'];
-        const iconType = f.type === 'RADIO' ? '○' : (f.type === 'CHECKBOX' ? '□' : '▾');
-
-        const optsHtml = options.map((o, optIdx) => `
-          <div class="flex items-center gap-2 text-xs">
-            <span class="w-4 h-4 rounded text-zinc-400 flex items-center justify-center font-bold text-xs">${iconType}</span>
-            <input 
-              type="text" 
-              value="${o}" 
-              placeholder="Teks opsi..."
-              oninput="handleInlineOptionUpdate(${sIdx}, ${fIdx}, ${optIdx}, this.value)"
-              class="flex-1 px-2 py-1 rounded-lg border border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 text-xs bg-white outline-none transition"
-            >
-            <button 
-              type="button" 
-              onclick="handleInlineDeleteOption(${sIdx}, ${fIdx}, ${optIdx})" 
-              ${options.length <= 1 ? 'disabled' : ''}
-              class="w-6 h-6 rounded hover:bg-rose-100 text-zinc-400 hover:text-rose-600 disabled:opacity-20 flex items-center justify-center cursor-pointer" 
-              title="Hapus Opsi"
-            >✕</button>
-          </div>
-        `).join('');
-
-        return `
-          <div class="space-y-2 pt-1">
-            <div class="space-y-1.5">${optsHtml}</div>
-            <button 
-              type="button" 
-              onclick="handleInlineAddOption(${sIdx}, ${fIdx})"
-              class="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 cursor-pointer pt-1"
-            >
-              <span>+ Tambah Opsi Pilihan</span>
-            </button>
-          </div>
-        `;
-      }
-
-      if (f.type === 'FILE_UPLOAD') {
-        return `
-          <div class="pt-1">
-            <div class="p-3.5 rounded-xl border border-dashed border-zinc-300 bg-white flex items-center justify-center gap-2 text-xs text-zinc-500">
-              <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-              <span class="font-medium text-zinc-700">Unggah berkas dokumen / slide PDF (Maks 5 MB)</span>
-            </div>
-          </div>
-        `;
-      }
-
+      // 13. INFO BANNER
       if (f.type === 'INFO_BANNER') {
         return `
           <div class="pt-1">
-            <div class="p-3 rounded-xl bg-indigo-50 border border-indigo-200 text-xs text-indigo-900 flex items-start gap-2">
-              <svg class="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-              <div>${f.description || 'Petunjuk atau panduan informatif.'}</div>
+            <div class="p-3.5 rounded-xl bg-indigo-50/80 border border-indigo-200 text-xs text-indigo-900 flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <div class="space-y-1 flex-1">
+                <span class="font-bold text-indigo-950 block">${f.label || 'Teks Informasi'}</span>
+                <p class="text-indigo-800">${f.description || 'Petunjuk edukatif atau panduan pengisian.'}</p>
+              </div>
             </div>
           </div>
         `;
@@ -3158,89 +3283,28 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       return '';
     }
 
-    let simCurrentStep = 1;
-    function openLiveFormSimulator() {
-      initOrNormalizeFormSchema();
-      simCurrentStep = 1;
-      renderSimulatorContent();
-      document.getElementById("modalLiveFormSimulator").classList.remove("hidden");
-    }
-
-    function closeLiveFormSimulator() {
-      document.getElementById("modalLiveFormSimulator").classList.add("hidden");
-    }
-
-    function renderSimulatorContent() {
-      const container = document.getElementById("simulatorScreenContainer");
-      if (!container) return;
-      container.innerHTML = "";
-
-      const tahapan = adminFormSchema.tahapan || [];
-      const totalSteps = tahapan.length;
-      if (simCurrentStep > totalSteps) simCurrentStep = totalSteps;
-
-      const stage = tahapan[simCurrentStep - 1];
-      const pct = Math.round((simCurrentStep / totalSteps) * 100);
-
-      const simCard = document.createElement("div");
-      simCard.className = "bg-white rounded-2xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5 fade-enter";
-
-      simCard.innerHTML = `
-        <!-- Simulator Stepper Header -->
-        <div class="space-y-2 border-b border-zinc-100 pb-4">
-          <div class="flex items-center justify-between text-xs">
-            <span class="px-2 py-0.5 rounded bg-zinc-900 text-white font-mono font-bold">
-              Tahap ${simCurrentStep < 10 ? '0' + simCurrentStep : simCurrentStep} / ${totalSteps < 10 ? '0' + totalSteps : totalSteps}
-            </span>
-            <span class="font-bold text-zinc-700">${pct}% Selesai</span>
-          </div>
-          <div class="w-full h-1.5 bg-zinc-100 rounded-full overflow-hidden">
-            <div class="h-full bg-zinc-900 rounded-full" style="width: ${pct}%;"></div>
-          </div>
-          <div class="pt-1">
-            <h3 class="font-bold text-base text-zinc-900">${stage.title}</h3>
-            <p class="text-xs text-zinc-500">${stage.description || ''}</p>
-          </div>
-        </div>
-
-        <!-- Simulator Fields Render -->
-        <div class="space-y-4">
-          ${(stage.fields || []).map((f, idx) => `
-            <div class="space-y-1.5 p-3.5 rounded-xl bg-zinc-50 border border-zinc-200/80">
-              <label class="block font-bold text-xs text-zinc-800">
-                ${idx + 1}. ${f.label} ${f.required ? '<span class="text-rose-500">*</span>' : ''}
-              </label>
-              ${f.description ? `<p class="text-[11px] text-zinc-500">${f.description}</p>` : ''}
-              <div>${getFieldVisualMockupHtml(f, simCurrentStep - 1, idx)}</div>
-            </div>
-          `).join('')}
-        </div>
-
-        <!-- Simulator Navigation Buttons -->
-        <div class="flex items-center justify-between gap-3 pt-4 border-t border-zinc-100">
-          <button type="button" onclick="navigateSimulatorStep(-1)" ${simCurrentStep === 1 ? 'disabled' : ''} class="px-4 py-2 rounded-lg border border-zinc-300 hover:bg-zinc-100 disabled:opacity-30 text-zinc-700 text-xs font-semibold cursor-pointer">
-            ← Tahap Sebelumnya
-          </button>
-          <button type="button" onclick="navigateSimulatorStep(1)" class="px-5 py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold shadow-xs cursor-pointer">
-            ${simCurrentStep === totalSteps ? 'Simulasi Kirim Penilaian ✓' : 'Lanjut ke Tahap Berikutnya →'}
-          </button>
-        </div>
-      `;
-
-      container.appendChild(simCard);
-    }
-
-    function navigateSimulatorStep(delta) {
-      const tahapan = adminFormSchema.tahapan || [];
-      const nextStep = simCurrentStep + delta;
-      if (nextStep > tahapan.length) {
-        alert("Simulasi Selesai! Ini adalah akhir dari alur formulir mahasiswa.");
-        return;
+    function toggleFieldRequired(sIdx, fIdx) {
+      const f = adminFormSchema.tahapan[sIdx].fields[fIdx];
+      if (f) {
+        f.required = !f.required;
+        renderDynamicStagesCanvas();
+        triggerAutoSaveSchema();
+        showAdminToast(`'${f.label}' sekarang ${f.required ? 'Wajib diisi' : 'Opsional'}.`, "info");
       }
-      if (nextStep < 1) return;
-      simCurrentStep = nextStep;
-      renderSimulatorContent();
     }
+
+    function duplicateField(sIdx, fIdx) {
+      const f = adminFormSchema.tahapan[sIdx].fields[fIdx];
+      if (!f) return;
+      const copy = JSON.parse(JSON.stringify(f));
+      copy.id = "fld_" + Date.now().toString(36);
+      copy.label = `${f.label} (Salinan)`;
+      adminFormSchema.tahapan[sIdx].fields.splice(fIdx + 1, 0, copy);
+      renderDynamicStagesCanvas();
+      triggerAutoSaveSchema();
+      showAdminToast(`Pertanyaan '${f.label}' berhasil diduplikasi!`, "success");
+    }
+
     // STAGE CRUD ACTIONS
     function openAddStageModal() {
       document.getElementById("modalStageTitleText").textContent = "Tambah Tahap Baru";

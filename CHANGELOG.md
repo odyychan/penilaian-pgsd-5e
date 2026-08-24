@@ -4,6 +4,34 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.80] - 2026-08-24
+
+### 🎨 100% Authentic Google Forms UI & Interactive Question Engine
+- **Tata Letak & Tipografi 100% Identik Google Forms (*Authentic Google Forms Canvas*):**
+  - **Kartu Bagian / Tahap (*Section Card*):** Garis aksen atas ungu/indigo (`h-2.5 bg-indigo-600`), badge `Bagian X dari Y`, judul bagian bergaris bawah (*underline input*), dan deskripsi bagian.
+  - **Kartu Pertanyaan (*Question Card*):** Garis vertikal ungu di sisi kiri (`border-l-4 border-indigo-600`), judul pertanyaan bergaris bawah, petunjuk/deskripsi bergaris bawah, dan **Dropdown Pemilih Tipe Pertanyaan** di sudut kanan atas kartu.
+- **Dropdown Pemilih Tipe Pertanyaan Langsung di Setiap Kartu:**
+  - Admin dapat mengganti tipe pertanyaan kapan saja langsung dari dropdown pada kartu:
+    - 🔘 *Pilihan ganda* (`RADIO`)
+    - ☑️ *Kotak centang* (`CHECKBOX`)
+    - ▾ *Drop-down* (`DROPDOWN`)
+    - ─ *Jawaban singkat* (`SHORT_TEXT`)
+    - ≡ *Paragraf* (`TEXTAREA`)
+    - 📏 *Skala linier 1-5* (`RATING_SCALE`)
+    - ☁️ *Upload file ke Google Drive* (`FILE_UPLOAD`)
+    - 👤 *Identitas & Peran Penilai* (`CORE_IDENTITY`)
+    - 👥 *Pemilihan Kelompok* (`CORE_GROUP_SELECT`)
+    - 📊 *Nilai Presentasi Skor* (`CORE_SCORE_RUBRIC`)
+    - ⭐ *Voting Presentator Terbaik* (`CORE_BEST_PRESENTER`)
+    - 📝 *Evaluasi Masukan Tiap Pemateri* (`CORE_MEMBER_FEEDBACK`)
+    - ℹ️ *Teks Informasi & Panduan* (`INFO_BANNER`)
+- **Interaksi Opsi Asli Google Forms:**
+  - Pilihan ganda & Kotak centang menampilkan lingkaran radio / kotak centang asli, tombol hapus `✕` per opsi, serta tombol `+ Tambahkan opsi`.
+- **Google Forms Bottom Toolbar:**
+  - Tombol pindah posisi (`▲ / ▼`), `Pindah Bagian ↗`, `📑 Duplikasi`, `🗑️ Hapus`, dan saklar toggle **`Wajib diisi`** khas Google Forms.
+
+---
+
 ## [2.1.79] - 2026-08-24
 
 ### ✍️ Direct Inline Live Editing (Google Forms Real-Time Canvas)
