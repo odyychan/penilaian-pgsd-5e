@@ -4,6 +4,23 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.36] - 2026-08-24
+
+### 📱 Perombakan Total Responsivitas Mobile-S, Mobile-M, & Mobile-L (320px – 430px)
+- **Top Header Bar & Navigasi Workspace 100% Anti-Overflow:**
+  - Menata ulang tata letak bilah atas (*top header bar*) pada resolusi ultra-kompak (320px Mobile-S) agar logo, tombol Hub (`←`), badge Form ID (`BK5E`), status online, tombol Bagikan QR, Buka Tab Baru, dan tombol Keluar berada dalam 1 baris terpadu tanpa patah kata atau tumpang tindih.
+  - Mengonfigurasi tab navigasi sticky (*Pertanyaan*, *Setelan*, *Respons*, *Kelompok*, *Sistem*) dengan dukungan sentuh gulir horizontal mulus (*touch-first smooth horizontal scroll*) dan tombol *compact padding* (`px-2.5 py-1.5`) yang mempertahankan teks penuh tanpa pemotongan kaku.
+- **Penyelarasan Kartu & Kontainer Workspace:**
+  - Mengoptimalkan *padding* kontainer dan kartu identitas perkuliahan (`px-2.5 sm:px-6`, `p-3.5 sm:p-7`) agar memanfaatkan ruang layar secara maksimal pada viewport 320px hingga 430px.
+  - Memperbaiki tata letak sub-grid informasi (*Mata Kuliah*, *Dosen*, *Kelas*, *Program Studi*) dan kartu alur tahapan pengisian untuk pencegahan pemotongan teks (*zero clipping*).
+- **Pengaturan & View Tab Responsif Lengkap:**
+  - Menyesuaikan seluruh kartu di Tab Setelan, Respons Penilaian, Manajemen Kelompok, dan Sistem Database agar tampil proporsional tanpa *horizontal scrolling page*.
+  - Menghapus elemen kartu ganda pada Tab Sistem untuk menjaga efisiensi kode dan DOM.
+- **Pengujian Multi-Resolusi Playwright:**
+  - Terverifikasi 100% via Playwright viewport tests pada **Mobile-S (320×642 px)**, **Mobile-M (375×667 px)**, dan **Mobile-L (428×926 px)**.
+
+---
+
 ## [2.2.35] - 2026-08-24
 
 ### 📱 Optimasi Responsif Mobile & Pencegahan Tumpang Tindih (*Zero Collisions*)

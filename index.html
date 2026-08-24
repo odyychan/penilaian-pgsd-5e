@@ -219,41 +219,41 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
       
       <!-- Brand & Title -->
-      <div class="flex items-center gap-3 min-w-0">
-        <div class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center flex-shrink-0">
+      <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+        <div class="w-7 h-7 sm:w-9 sm:h-9 flex items-center justify-center flex-shrink-0">
           <img src="assets/logo-ulm.png" alt="Logo ULM" class="w-full h-full object-contain" onerror="this.src='logo-ulm.png'" />
         </div>
-        <div class="min-w-0">
-          <div class="flex items-center gap-2">
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-1 sm:gap-2">
             <h1 class="font-bold text-xs sm:text-sm text-zinc-100 truncate" id="navTitle">
               Penilaian Presentasi PGSD 5E
             </h1>
-            <span class="hidden xs:inline-block px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-zinc-800 text-zinc-300 border border-zinc-700">
+            <span class="hidden xs:inline-block px-1.5 py-0.2 rounded text-[9.5px] font-mono font-semibold bg-zinc-800 text-zinc-300 border border-zinc-700 shrink-0">
               2026
             </span>
           </div>
-          <p class="text-[11px] text-zinc-400" id="navSubtitle">
+          <p class="text-[10px] sm:text-[11px] text-zinc-400 truncate" id="navSubtitle">
             Bimbingan Konseling di SD
           </p>
         </div>
       </div>
 
       <!-- PIN Badge & Sesi Pill -->
-      <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+      <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0">
         <button 
           type="button" 
           onclick="openSwitchFormModal()" 
           title="Ganti Formulir / Masukkan Kode PIN (4-5 Karakter)" 
-          class="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-full bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-700/80 text-indigo-300 hover:text-white text-[10px] sm:text-[11px] font-mono font-bold transition cursor-pointer active:scale-95 shadow-xs"
+          class="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-full bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-700/80 text-indigo-300 hover:text-white text-[9.5px] sm:text-[11px] font-mono font-bold transition cursor-pointer active:scale-95 shadow-xs shrink-0"
         >
-          <svg class="w-3 h-3 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-3 h-3 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
           </svg>
-          <span id="navPinBadge">PIN: BK5E</span>
+          <span id="navPinBadge">BK5E</span>
         </button>
 
-        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-[10px] sm:text-[11px] font-medium" id="badgeSesiTop">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        <div class="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-[9.5px] sm:text-[11px] font-medium shrink-0" id="badgeSesiTop">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
           <span id="badgeSesiTopText">Minggu 1</span>
         </div>
       </div>
@@ -261,19 +261,19 @@
     </div>
 
     <!-- Minimal View Switcher (Dark Nav Tabs) -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-2.5 pt-0.5">
+    <div class="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 pb-2 pt-0.5">
       <div class="grid grid-cols-2 p-1 bg-zinc-900 rounded-lg border border-zinc-800 text-xs font-semibold">
         <button 
           id="tabFormBtn" 
           onclick="switchTab('form')" 
-          class="py-1.5 px-3 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+          class="py-1.5 px-2 sm:px-3 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition-all flex items-center justify-center gap-1 cursor-pointer text-xs"
         >
           <span>Formulir Penilaian</span>
         </button>
         <button 
           id="tabRekapBtn" 
           onclick="switchTab('rekap')" 
-          class="py-1.5 px-3 rounded-md text-zinc-400 hover:text-zinc-100 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+          class="py-1.5 px-2 sm:px-3 rounded-md text-zinc-400 hover:text-zinc-100 transition-all flex items-center justify-center gap-1 cursor-pointer text-xs"
         >
           <span>Rekapitulasi Hasil</span>
         </button>
@@ -284,7 +284,7 @@
   <!-- ========================================================================= -->
   <!-- MAIN CONTAINER -->
   <!-- ========================================================================= -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7 space-y-6">
+  <main class="flex-1 max-w-7xl w-full mx-auto px-2.5 sm:px-6 lg:px-8 py-3.5 sm:py-7 space-y-4 sm:space-y-6">
 
     <!-- FLOATING TOAST NOTIFICATION -->
     <div id="toast" class="hidden fixed bottom-5 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-sm z-50 p-3.5 rounded-xl shadow-lg text-xs font-medium flex items-center gap-2.5 transition-all border">
@@ -295,17 +295,17 @@
     <!-- ========================================================================= -->
     <!-- TAB 1: FORM PENILAIAN (MODERN-MINIMALIST MULTI-STEP) -->
     <!-- ========================================================================= -->
-    <div id="viewForm" class="space-y-5">
+    <div id="viewForm" class="space-y-4 sm:space-y-5">
 
       <!-- =================================================================== -->
       <!-- 0: INFORMASI FORMULIR & IDENTITAS AKADEMIK (HALAMAN AWAL) -->
       <!-- =================================================================== -->
-      <div id="formOverviewSection" class="step-fade space-y-5">
-        <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5">
-          <div class="space-y-2 border-b border-zinc-100 pb-4">
-            <div class="flex items-center gap-2">
-              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-zinc-900 text-white">PANDUAN</span>
-              <span class="text-xs text-zinc-400 font-medium">Sistem Penilaian Peer-Assessment</span>
+      <div id="formOverviewSection" class="step-fade space-y-4 sm:space-y-5">
+        <div class="bg-white rounded-xl sm:rounded-2xl border border-zinc-200 p-3.5 sm:p-7 shadow-xs space-y-4 sm:space-y-5">
+          <div class="space-y-1.5 sm:space-y-2 border-b border-zinc-100 pb-3 sm:pb-4">
+            <div class="flex items-center gap-1.5">
+              <span class="px-1.5 py-0.5 rounded text-[9.5px] font-mono font-bold bg-zinc-900 text-white shrink-0">PANDUAN</span>
+              <span class="text-[11px] sm:text-xs text-zinc-400 font-medium">Sistem Penilaian Peer-Assessment</span>
             </div>
             <h2 id="overviewJudulForm" class="text-base sm:text-xl font-bold text-zinc-900 leading-snug">
               Penilaian Presentasi Mahasiswa
@@ -316,40 +316,40 @@
           </div>
 
           <!-- Rincian Mata Kuliah, Dosen, Kelas & Jurusan -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-            <div class="p-3 rounded-lg bg-zinc-50 border border-zinc-200/80">
-              <span class="text-zinc-400 block text-[11px] font-medium">Mata Kuliah:</span>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 text-xs">
+            <div class="p-2.5 sm:p-3 rounded-lg bg-zinc-50 border border-zinc-200/80">
+              <span class="text-zinc-400 block text-[10.5px] sm:text-[11px] font-medium">Mata Kuliah:</span>
               <span class="font-semibold text-zinc-900 mt-0.5 block truncate" id="infoMatkul">Bimbingan Konseling di SD</span>
             </div>
-            <div class="p-3 rounded-lg bg-zinc-50 border border-zinc-200/80">
-              <span class="text-zinc-400 block text-[11px] font-medium">Dosen Pengampu:</span>
+            <div class="p-2.5 sm:p-3 rounded-lg bg-zinc-50 border border-zinc-200/80">
+              <span class="text-zinc-400 block text-[10.5px] sm:text-[11px] font-medium">Dosen Pengampu:</span>
               <span class="font-semibold text-zinc-900 mt-0.5 block break-words leading-tight" id="infoDosen">Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.</span>
             </div>
-            <div class="p-3 rounded-lg bg-zinc-50 border border-zinc-200/80">
-              <span class="text-zinc-400 block text-[11px] font-medium">Kelas:</span>
+            <div class="p-2.5 sm:p-3 rounded-lg bg-zinc-50 border border-zinc-200/80">
+              <span class="text-zinc-400 block text-[10.5px] sm:text-[11px] font-medium">Kelas:</span>
               <span class="font-semibold text-zinc-900 mt-0.5 block truncate" id="infoKelas">5E</span>
             </div>
-            <div class="p-3 rounded-lg bg-zinc-50 border border-zinc-200/80">
-              <span class="text-zinc-400 block text-[11px] font-medium">Program Studi:</span>
+            <div class="p-2.5 sm:p-3 rounded-lg bg-zinc-50 border border-zinc-200/80">
+              <span class="text-zinc-400 block text-[10.5px] sm:text-[11px] font-medium">Program Studi:</span>
               <span class="font-semibold text-zinc-900 mt-0.5 block truncate" id="infoJurusan">PGSD</span>
             </div>
           </div>
 
           <!-- Alur Tahapan Pengisian (Dinamis dari Schema) -->
-          <div class="bg-zinc-50 rounded-xl p-4 border border-zinc-200/70 space-y-3">
-            <h4 class="text-xs font-bold text-zinc-800 uppercase tracking-wider font-mono">Alur Tahapan Pengisian:</h4>
-            <div id="overviewAlurTahapanGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-xs">
+          <div class="bg-zinc-50 rounded-xl p-3 sm:p-4 border border-zinc-200/70 space-y-2.5 sm:space-y-3">
+            <h4 class="text-[11px] sm:text-xs font-bold text-zinc-800 uppercase tracking-wider font-mono">Alur Tahapan Pengisian:</h4>
+            <div id="overviewAlurTahapanGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5 text-xs">
               <!-- Rendered dynamically via renderOverviewAlurTahapan() -->
             </div>
           </div>
 
           <!-- Tombol Mulai Penilaian -->
-          <div class="flex items-center justify-between pt-2">
-            <span class="text-xs text-zinc-500 hidden sm:inline">Pastikan data pengisian objektif & konstruktif.</span>
+          <div class="flex items-center justify-between pt-1 sm:pt-2">
+            <span class="text-[11px] sm:text-xs text-zinc-500 hidden sm:inline">Pastikan data pengisian objektif &amp; konstruktif.</span>
             <button 
               type="button" 
               onclick="startAssessmentForm()" 
-              class="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-semibold text-xs sm:text-sm shadow-md active:scale-98 transition flex items-center justify-center gap-2 cursor-pointer"
+              class="w-full sm:w-auto px-5 sm:px-7 py-2.5 sm:py-3.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-semibold text-xs sm:text-sm shadow-md active:scale-98 transition flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>Mulai Pengisian Penilaian</span>
               <span class="text-base">→</span>
