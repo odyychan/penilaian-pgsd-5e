@@ -7,15 +7,26 @@ Dokumen ini berfungsi sebagai instruksi inti, standar teknis, dan pedoman operas
 ## 🏛️ 1. Arsitektur Sistem & Backend Eksklusif Supabase
 
 1. **Database Utama (High-Performance PostgreSQL)**:
-   - Seluruh data transaksi penilaian, metadata formulir, konfigurasi form dinamis, kelompok, dan mahasiswa dikelola secara eksklusif di database **Supabase Dedicated**:
+   - Seluruh data transaksi penilaian, metadata formulir, konfigurasi form dinamis, kelompok, mahasiswa, dan berkas lampiran dikelola secara eksklusif di database **Supabase Dedicated**:
      - `Project ID`: `eychjnqmqpxzxukiwbqf`
      - `Project URL`: `https://eychjnqmqpxzxukiwbqf.supabase.co`
-     - `Tabel`: `pgsd_forms`, `pgsd_form_configs`, `pgsd_groups`, `pgsd_students`, `pgsd_responses`, `pgsd_backups`.
-2. **Autonomous Deployment Mandiri oleh Agent**:
-   - AI Agent memiliki wewenang dan kemampuan untuk melakukan deployment database Supabase (migrasi SQL, penambahan tabel, indeks, dan RLS) secara otomatis dan mandiri menggunakan kredensial yang tersimpan di file `.env`.
-3. **Pipa Asinkron ke Google Spreadsheet (Format Google Forms)**:
+     - `Tabel Master`: `pgsd_forms`, `pgsd_form_configs`, `pgsd_groups`, `pgsd_students`, `pgsd_responses`, `pgsd_backups`.
+     - `Storage Bucket`: `pgsd-media` (Public Read dengan folder terisolasi `{form_id}/{timestamp}_{filename}`).
+
+2. **Standar Kerapian & Struktur Skema Basis Data (Mandatory)**:
+   - **Integritas Relasi Berjenjang**: Seluruh tabel anak (`pgsd_form_configs`, `pgsd_groups`, `pgsd_students`, `pgsd_responses`) **WAJIB** memiliki relasi *Foreign Key* ke `pgsd_forms(form_id)` dengan *action* `ON DELETE CASCADE ON UPDATE CASCADE`.
+   - **Indeks Performa Tinggi**: Setiap kolom yang sering dicari, difilter, atau digabungkan (`form_slug`, `status`, `is_primary`, `nim_penilai`, `form_id + kelompok_dinilai`, `form_id + nim`) **WAJIB** memiliki indeks *B-Tree*.
+   - **PostgreSQL Views & Aggregation**: Gunakan View (`pgsd_v_forms_summary`, `pgsd_v_rekap_nilai`) untuk agregasi data agar beban query di sisi frontend tetap ringan dan waktu muat data `< 30 ms`.
+   - **Dokumentasi Skema**: Seluruh struktur DDL tabel dan view wajib selalu terdokumentasi dan diperbarui di file [`/docs/setup.sql`](file:///e:/Data/GitHub/Project%20Dede/docs/setup.sql).
+
+3. **Autonomous Auto-Deployment Supabase oleh AI Agent (Wajib Mandiri)**:
+   - Setiap ada pembaruan skema, penambahan tabel baru, penambahan kolom, perbaikan relasi, atau optimasi view di Supabase:
+     - **AI Agent WAJIB mengeksekusi dan menerapkan migrasi SQL secara otomatis dan mandiri** langsung ke server database Supabase melalui *Supabase Management API / Query Endpoint* menggunakan kredensial di file `.env`.
+     - Dilarang membebani pengguna dengan perintah manual copy-paste SQL ke SQL Editor Supabase, kecuali jika secara eksplisit diminta oleh pengguna.
+
+4. **Pipa Asinkron ke Google Spreadsheet (Format Google Forms)**:
    - Otak utama sistem adalah Supabase (pengiriman penilaian selesai dalam `< 50 ms`).
-   - Setiap respons baru disinkronkan secara asinkron (*background job*) ke Google Spreadsheet Dosen sehingga lembar kerja tetap terisi otomatis dengan format yang rapi seperti Google Forms tanpa membebani interaksi mahasiswa.
+   - Setiap respons baru disinkronkan secara asinkron (*background job*) ke Google Spreadsheet Dosen (via Google Sheets API v4 atau Service Account) sehingga lembar kerja tetap terisi otomatis dengan format yang rapi seperti Google Forms tanpa membebani interaksi mahasiswa.
 
 ---
 

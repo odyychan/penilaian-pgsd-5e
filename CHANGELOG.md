@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.55] - 2026-08-25
+
+### 📜 Formalisasi Standar Skema Database & Mandat Auto-Deployment Otonom (AGENTS.md)
+- **Pembakuan Pedoman Arsitektur Database di AGENTS.md:**
+  - Menetapkan aturan wajib kerapian skema database Supabase: relasi *Foreign Key* kaskade penuh, indeks *B-Tree*, dan *PostgreSQL Views* sub-detik.
+  - Menetapkan mandat resmi bahwa AI Agent wajib melakukan *auto-deployment* mandiri setiap kali ada perubahan skema database tanpa membebani pengguna dengan eksekusi SQL manual.
+  - Menyelaraskan panduan format spreadsheet multi-form kustom dan registri formulir untuk kemudahan operasional dosen.
+
+---
+
 ## [2.2.54] - 2026-08-25
 
 ### 🏛️ Optimasi Menyeluruh Skema Database Supabase, Indeks B-Tree & Views Terintegrasi
