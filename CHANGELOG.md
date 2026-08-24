@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.53] - 2026-08-24
+
+### 📊 Integrasi Penuh Master Spreadsheet Terpusat & Sinkronisasi Google Sheets API v4
+- **Koneksi Master Google Spreadsheet Terpusat:**
+  - Menghubungkan Master Spreadsheet Dosen (`1MAZqzRyau1mECqamnU9Bj3TALRJYDrA1WLQFesJ4wG4`) secara permanen melalui Google Sheets API v4 dan Service Account.
+  - Berhasil menginisialisasi tab master `Daftar_Formulir`, `Respons_BK5E`, dan `Respons_BBJX` secara mandiri.
+- **Otomatisasi Struktur Tab & Sinkronisasi Data:**
+  - Sistem secara otonom memetakan seluruh formulir aktif di Supabase ke dalam lembar kerja Google Sheets tanpa memerlukan deploy ulang Apps Script.
+  - Menambahkan kolom konfigurasi dan tautan langsung *Buka Master Sheet* pada modal *Setelan Sistem Global* di panel admin Master Hub.
+
+---
+
 ## [2.2.52] - 2026-08-24
 
 ### 🌍 Transformasi Platform Menjadi Universal Multi-Kelas & Multi-Prodi FKIP ULM
