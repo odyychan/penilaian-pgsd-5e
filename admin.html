@@ -296,87 +296,80 @@
             Keluar
           </button>
         </div>
-
       </div>
-
-      <!-- Main Navigation 4 Tabs (Visible ONLY inside Single Form Workspace) -->
+      <!-- Main Navigation Google Forms Sticky Bar (Visible ONLY inside Single Form Workspace) -->
       <div id="headerWorkspaceTabs" class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pb-2 pt-0.5 hidden">
         
-        <!-- VIEW 1: Standard 4 Main Navigation Tabs -->
-        <div id="headerTabsStandardView" class="grid grid-cols-2 sm:grid-cols-4 gap-1 p-1 bg-zinc-900 rounded-lg border border-zinc-800 text-[11px] sm:text-xs font-semibold transition-all duration-200">
-          <button 
-            id="adminTabBtn_data" 
-            onclick="switchAdminTab('data')" 
-            class="py-2 px-1.5 sm:px-2 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate font-bold"
-          >
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-            </svg>
-            <span>Kelompok</span>
-          </button>
-          <button 
-            id="adminTabBtn_config" 
-            onclick="switchAdminTab('config')" 
-            class="py-2 px-1.5 sm:px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate"
-          >
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-            </svg>
-            <span>Konfigurasi & Builder</span>
-          </button>
-          <button 
-            id="adminTabBtn_responses" 
-            onclick="switchAdminTab('responses')" 
-            class="py-2 px-1.5 sm:px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate"
-          >
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
-            </svg>
-            <span>Respons</span>
-          </button>
-          <button 
-            id="adminTabBtn_system" 
-            onclick="switchAdminTab('system')" 
-            class="py-2 px-1.5 sm:px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate"
-          >
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-            </svg>
-            <span>Sistem</span>
-          </button>
-        </div>
-
-        <!-- VIEW 2: Contextual Morphing Form Builder Toolbar (Active during scroll) -->
-        <div id="headerTabsBuilderToolbarView" class="hidden flex items-center justify-between gap-1.5 p-1 bg-zinc-900 rounded-lg border border-zinc-800 text-[11px] sm:text-xs overflow-x-auto no-scrollbar transition-all duration-200" style="scrollbar-width: none; -ms-overflow-style: none;">
+        <!-- AUTHENTIC GOOGLE FORMS STICKY TOP APP BAR -->
+        <div id="headerTabsStandardView" class="flex items-center justify-between gap-1 sm:gap-2 p-1 bg-zinc-900 rounded-xl border border-zinc-800 text-[11px] sm:text-xs font-semibold overflow-x-auto no-scrollbar" style="scrollbar-width: none;">
           
-          <!-- Left: Back to Menu + Stats & Publish Status -->
-          <div class="flex items-center gap-1.5 shrink-0">
+          <div class="flex items-center gap-1 shrink-0">
+            <!-- 1. Pertanyaan (Google Forms Canvas) -->
             <button 
-              type="button" 
-              onclick="jumpToConfigTop()" 
-              class="px-2 py-1 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[10.5px] sm:text-xs font-semibold flex items-center gap-1 cursor-pointer transition shrink-0"
-              title="Kembali ke Menu Tab / Gulir ke Atas"
+              id="adminTabBtn_config" 
+              onclick="switchAdminTab('config')" 
+              class="py-2 px-2.5 sm:px-3 rounded-lg bg-zinc-100 text-zinc-950 shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate font-bold"
             >
-              <svg class="w-3 h-3 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
-              <span>Menu</span>
+              <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <span>Pertanyaan</span>
             </button>
 
-            <span id="headerBuilderStatsBadge" class="px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-mono font-semibold bg-zinc-800 text-zinc-300 border border-zinc-700 whitespace-nowrap shrink-0">
-              4B • 5P
-            </span>
+            <!-- 2. Setelan (Form Settings) -->
+            <button 
+              id="adminTabBtn_settings" 
+              onclick="switchAdminTab('settings')" 
+              class="py-2 px-2.5 sm:px-3 rounded-lg text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+              <span>Setelan</span>
+            </button>
 
-            <span id="headerBuilderPublishStatusBadge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-700/80 shadow-2xs whitespace-nowrap shrink-0">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-              <span>Aktif</span>
-            </span>
+            <!-- 3. Respons (Responses) -->
+            <button 
+              id="adminTabBtn_responses" 
+              onclick="switchAdminTab('responses')" 
+              class="py-2 px-2.5 sm:px-3 rounded-lg text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+              </svg>
+              <span>Respons</span>
+            </button>
+
+            <!-- 4. Kelompok (Groups) -->
+            <button 
+              id="adminTabBtn_data" 
+              onclick="switchAdminTab('data')" 
+              class="py-2 px-2.5 sm:px-3 rounded-lg text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+              </svg>
+              <span>Kelompok</span>
+            </button>
+
+            <!-- 5. Sistem (System) -->
+            <button 
+              id="adminTabBtn_system" 
+              onclick="switchAdminTab('system')" 
+              class="py-2 px-2.5 sm:px-3 rounded-lg text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+              </svg>
+              <span>Sistem</span>
+            </button>
           </div>
 
-          <!-- Right: Action Controls Strip -->
+          <!-- Top Action Controls Strip (Always Unified & Accessible) -->
           <div class="flex items-center gap-1 shrink-0">
-            
             <!-- Undo / Redo in Header -->
-            <div class="flex items-center rounded-md bg-zinc-800 p-0.5 shrink-0 border border-zinc-700/60">
+            <div class="flex items-center rounded-lg bg-zinc-800 p-0.5 shrink-0 border border-zinc-700/60">
               <button 
                 type="button" 
                 id="btnHeaderBuilderUndo"
@@ -403,11 +396,22 @@
             <button 
               type="button" 
               onclick="openRevisionHistoryModal()" 
-              class="px-2 py-1 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-[10.5px] sm:text-xs font-semibold shadow-2xs flex items-center gap-1 transition cursor-pointer shrink-0"
+              class="px-2 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-[11px] font-semibold shadow-2xs flex items-center gap-1 transition cursor-pointer shrink-0"
               title="Riwayat Perubahan &amp; Versi Formulir"
             >
               <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-              <span class="hidden sm:inline">Riwayat</span>
+              <span class="hidden md:inline">Riwayat</span>
+            </button>
+
+            <!-- Pratinjau -->
+            <button 
+              type="button" 
+              onclick="openLiveFormSimulator()" 
+              class="px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] font-semibold shadow-xs flex items-center gap-1 transition cursor-pointer shrink-0"
+              title="Buka simulasi pratinjau formulir mahasiswa (👁️)"
+            >
+              <svg class="w-3.5 h-3.5 text-zinc-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+              <span class="hidden md:inline">Pratinjau</span>
             </button>
 
             <!-- Publikasikan -->
@@ -415,54 +419,11 @@
               type="button" 
               onclick="publishFormSchema()" 
               id="btnHeaderPublishSchema"
-              class="px-2.5 py-1 sm:px-3 sm:py-1 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white text-[10.5px] sm:text-xs font-bold shadow-xs flex items-center gap-1 transition cursor-pointer whitespace-nowrap shrink-0"
+              class="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold shadow-xs flex items-center gap-1 transition cursor-pointer whitespace-nowrap shrink-0"
               title="Publikasikan draf agar resmi tayang"
             >
               <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
               <span>Publikasikan</span>
-            </button>
-
-            <!-- Pratinjau -->
-            <button 
-              type="button" 
-              onclick="openLiveFormSimulator()" 
-              class="px-2 py-1 sm:px-2.5 sm:py-1 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[10.5px] sm:text-xs font-semibold shadow-xs flex items-center gap-1 transition cursor-pointer whitespace-nowrap shrink-0"
-              title="Buka simulasi pratinjau formulir mahasiswa"
-            >
-              <svg class="w-3.5 h-3.5 text-zinc-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-              <span class="hidden sm:inline">Pratinjau</span>
-            </button>
-
-            <!-- + Pertanyaan -->
-            <button 
-              type="button" 
-              onclick="addNewQuestionDirect(adminFormSchema ? adminFormSchema.tahapan.length - 1 : 0)" 
-              class="px-2 py-1 sm:px-2.5 sm:py-1 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white text-[10.5px] sm:text-xs font-semibold shadow-xs flex items-center gap-1 transition cursor-pointer whitespace-nowrap shrink-0"
-              title="Tambah pertanyaan baru"
-            >
-              <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-              <span>Pertanyaan</span>
-            </button>
-
-            <!-- + Bagian -->
-            <button 
-              type="button" 
-              onclick="addNewStageDirect()" 
-              class="px-2 py-1 sm:px-2.5 sm:py-1 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-[10.5px] sm:text-xs font-semibold shadow-xs flex items-center gap-1 transition cursor-pointer whitespace-nowrap shrink-0"
-              title="Tambah tahap bagian baru"
-            >
-              <svg class="w-3.5 h-3.5 text-zinc-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-              <span>Bagian</span>
-            </button>
-
-            <!-- Reset -->
-            <button 
-              type="button" 
-              onclick="resetToDefaultStandardSchema()" 
-              class="p-1 text-zinc-400 hover:text-rose-400 transition cursor-pointer text-[10.5px] font-medium shrink-0 flex items-center"
-              title="Kembalikan ke 4 tahap standar"
-            >
-              ↺
             </button>
           </div>
 
@@ -746,263 +707,127 @@
       </div>
 
       <!-- ===================================================================== -->
-      <!-- TAB 2: GOOGLE FORMS AUTHENTIC STUDIO (KONFIGURASI & BUILDER) -->
+      <!-- TAB 2: GOOGLE FORMS PERTANYAAN (QUESTION BUILDER CANVAS) -->
       <!-- ===================================================================== -->
       <div id="adminView_config" class="flex flex-col gap-4 sm:gap-6 hidden relative pb-20 sm:pb-12">
 
-        <!-- STUDIO SUB-TABS NAVIGATION (Google Forms Style: Pertanyaan & Setelan) -->
-        <div class="flex items-center justify-center border-b border-zinc-200 bg-white rounded-2xl p-1.5 shadow-2xs">
-          <div class="flex items-center gap-2">
-            <button 
-              type="button" 
-              id="studioSubTabBtn_questions"
-              onclick="switchStudioSubTab('questions')"
-              class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-indigo-50 text-indigo-700 border-b-2 border-indigo-600 transition flex items-center gap-2 cursor-pointer shadow-2xs"
-            >
-              <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-              </svg>
-              <span>Pertanyaan</span>
-            </button>
-
-            <button 
-              type="button" 
-              id="studioSubTabBtn_settings"
-              onclick="switchStudioSubTab('settings')"
-              class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 transition flex items-center gap-2 cursor-pointer"
-            >
-              <svg class="w-4 h-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-              </svg>
-              <span>Setelan Formulir</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- =================================================================== -->
-        <!-- SUB-VIEW A: KANVAS PERTANYAAN (100% IDENTIK GOOGLE FORMS) -->
-        <!-- =================================================================== -->
-        <div id="studioSubView_questions" class="space-y-4 sm:space-y-6">
+        <!-- KARTU UTAMA IDENTITAS PERKULIAHAN (GOOGLE FORMS HEADER CARD) -->
+        <div class="bg-white rounded-2xl border-2 border-zinc-200 border-t-8 border-t-indigo-600 shadow-sm p-5 sm:p-8 space-y-5 transition hover:shadow-md relative">
           
-          <!-- KARTU UTAMA IDENTITAS PERKULIAHAN (GOOGLE FORMS HEADER CARD) -->
-          <div class="bg-white rounded-2xl border-2 border-zinc-200 border-t-8 border-t-indigo-600 shadow-sm p-5 sm:p-8 space-y-5 transition hover:shadow-md relative">
-            
-            <div class="space-y-2">
+          <div class="space-y-2">
+            <input 
+              type="text" 
+              id="cfg_Judul_Form" 
+              required 
+              oninput="handleConfigInputAutoSave()"
+              placeholder="Judul Formulir Tanpa Judul" 
+              class="w-full text-xl sm:text-2xl md:text-3xl font-extrabold text-zinc-900 bg-transparent border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 pb-2.5 outline-none transition placeholder:text-zinc-400"
+            >
+          </div>
+
+          <!-- Identitas Perkuliahan Sub-Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-2 text-xs">
+            <div class="space-y-1">
+              <label class="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Mata Kuliah</label>
               <input 
                 type="text" 
-                id="cfg_Judul_Form" 
+                id="cfg_Mata_Kuliah" 
                 required 
                 oninput="handleConfigInputAutoSave()"
-                placeholder="Judul Formulir Tanpa Judul" 
-                class="w-full text-xl sm:text-2xl md:text-3xl font-extrabold text-zinc-900 bg-transparent border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 pb-2.5 outline-none transition placeholder:text-zinc-400"
+                placeholder="Bimbingan Konseling di SD" 
+                class="w-full px-3 py-2 rounded-lg bg-zinc-50 hover:bg-zinc-100/90 focus:bg-white border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 outline-none font-semibold text-zinc-800 transition"
               >
             </div>
 
-            <!-- Identitas Perkuliahan Sub-Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-2 text-xs">
-              <div class="space-y-1">
-                <label class="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Mata Kuliah</label>
-                <input 
-                  type="text" 
-                  id="cfg_Mata_Kuliah" 
-                  required 
-                  oninput="handleConfigInputAutoSave()"
-                  placeholder="Bimbingan Konseling di SD" 
-                  class="w-full px-3 py-2 rounded-lg bg-zinc-50 hover:bg-zinc-100/90 focus:bg-white border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 outline-none font-semibold text-zinc-800 transition"
-                >
-              </div>
-
-              <div class="space-y-1">
-                <label class="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Dosen Pengampu</label>
-                <input 
-                  type="text" 
-                  id="cfg_Dosen_Pengampu" 
-                  required 
-                  oninput="handleConfigInputAutoSave()"
-                  placeholder="Dr. Ririanti, M.Pd." 
-                  class="w-full px-3 py-2 rounded-lg bg-zinc-50 hover:bg-zinc-100/90 focus:bg-white border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 outline-none font-semibold text-zinc-800 transition"
-                >
-              </div>
-
-              <div class="space-y-1">
-                <label class="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Kelas</label>
-                <input 
-                  type="text" 
-                  id="cfg_Kelas" 
-                  oninput="handleConfigInputAutoSave()"
-                  placeholder="5E" 
-                  class="w-full px-3 py-2 rounded-lg bg-zinc-50 hover:bg-zinc-100/90 focus:bg-white border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 outline-none font-semibold text-zinc-800 transition"
-                >
-              </div>
-
-              <div class="space-y-1">
-                <label class="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Program Studi</label>
-                <input 
-                  type="text" 
-                  id="cfg_Jurusan" 
-                  oninput="handleConfigInputAutoSave()"
-                  placeholder="PGSD" 
-                  class="w-full px-3 py-2 rounded-lg bg-zinc-50 hover:bg-zinc-100/90 focus:bg-white border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 outline-none font-semibold text-zinc-800 transition"
-                >
-              </div>
-            </div>
-
-            <!-- Petunjuk Pengisian Formulir (Description) -->
-            <div class="pt-2 space-y-1.5">
-              <label class="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Deskripsi &amp; Panduan Pengisian Formulir</label>
-              <textarea 
-                id="cfg_Deskripsi_Form"
-                rows="2"
+            <div class="space-y-1">
+              <label class="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Dosen Pengampu</label>
+              <input 
+                type="text" 
+                id="cfg_Dosen_Pengampu" 
+                required 
                 oninput="handleConfigInputAutoSave()"
-                placeholder="Tuliskan petunjuk umum atau deskripsi formulir penilaian di sini (contoh: Berikan penilaian secara jujur dan objektif)..."
-                class="w-full text-xs sm:text-sm text-zinc-700 bg-zinc-50/80 hover:bg-zinc-100/90 focus:bg-white border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 px-3.5 py-2.5 rounded-t-lg outline-none transition"
-              ></textarea>
+                placeholder="Dr. Ririanti, M.Pd." 
+                class="w-full px-3 py-2 rounded-lg bg-zinc-50 hover:bg-zinc-100/90 focus:bg-white border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 outline-none font-semibold text-zinc-800 transition"
+              >
             </div>
 
-            <div class="flex items-center justify-between pt-1 border-t border-zinc-100 text-[11px] text-zinc-400">
-              <span class="flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                <span>Perubahan identitas tersimpan otomatis</span>
-              </span>
-              <span id="builderStatsBadgeBody" class="font-mono font-semibold text-zinc-600">
-                4 Bagian • 5 Pertanyaan
-              </span>
+            <div class="space-y-1">
+              <label class="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Kelas</label>
+              <input 
+                type="text" 
+                id="cfg_Kelas" 
+                oninput="handleConfigInputAutoSave()"
+                placeholder="5E" 
+                class="w-full px-3 py-2 rounded-lg bg-zinc-50 hover:bg-zinc-100/90 focus:bg-white border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 outline-none font-semibold text-zinc-800 transition"
+              >
+            </div>
+
+            <div class="space-y-1">
+              <label class="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Program Studi</label>
+              <input 
+                type="text" 
+                id="cfg_Jurusan" 
+                oninput="handleConfigInputAutoSave()"
+                placeholder="PGSD" 
+                class="w-full px-3 py-2 rounded-lg bg-zinc-50 hover:bg-zinc-100/90 focus:bg-white border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 outline-none font-semibold text-zinc-800 transition"
+              >
             </div>
           </div>
 
-          <!-- DYNAMIC STAGES & QUESTIONS CANVAS CONTAINER -->
-          <div id="dynamicStagesCanvasContainer" class="space-y-4 sm:space-y-6">
-            <!-- Rendered dynamically via renderDynamicStagesCanvas() -->
+          <!-- Petunjuk Pengisian Formulir (Description) -->
+          <div class="pt-2 space-y-1.5">
+            <label class="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Deskripsi &amp; Panduan Pengisian Formulir</label>
+            <textarea 
+              id="cfg_Deskripsi_Form"
+              rows="2"
+              oninput="handleConfigInputAutoSave()"
+              placeholder="Tuliskan petunjuk umum atau deskripsi formulir penilaian di sini (contoh: Berikan penilaian secara jujur dan objektif)..."
+              class="w-full text-xs sm:text-sm text-zinc-700 bg-zinc-50/80 hover:bg-zinc-100/90 focus:bg-white border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 px-3.5 py-2.5 rounded-t-lg outline-none transition"
+            ></textarea>
           </div>
 
-          <!-- BOTTOM ADD SECTION / QUESTION BAR -->
-          <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
-            <button 
-              type="button" 
-              onclick="addNewQuestionDirect(adminFormSchema ? adminFormSchema.tahapan.length - 1 : 0)" 
-              class="w-full sm:w-auto px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-bold shadow-md flex items-center justify-center gap-2 transition cursor-pointer active:scale-98"
-            >
-              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
-              </svg>
-              <span>+ Tambah Pertanyaan</span>
-            </button>
-
-            <button 
-              type="button" 
-              onclick="addNewStageDirect()" 
-              class="w-full sm:w-auto px-6 py-3 rounded-xl bg-white border border-zinc-300 hover:bg-zinc-50 text-zinc-800 text-xs sm:text-sm font-bold shadow-xs flex items-center justify-center gap-2 transition cursor-pointer active:scale-98"
-            >
-              <svg class="w-4 h-4 text-zinc-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-              </svg>
-              <span>+ Tambah Bagian Baru</span>
-            </button>
+          <div class="flex items-center justify-between pt-1 border-t border-zinc-100 text-[11px] text-zinc-400">
+            <span class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span>Perubahan identitas tersimpan otomatis</span>
+            </span>
+            <span id="builderStatsBadgeBody" class="font-mono font-semibold text-zinc-600">
+              4 Bagian • 5 Pertanyaan
+            </span>
           </div>
-
         </div>
 
-        <!-- =================================================================== -->
-        <!-- SUB-VIEW B: SETELAN FORMULIR (SETTINGS) -->
-        <!-- =================================================================== -->
-        <div id="studioSubView_settings" class="space-y-4 sm:space-y-6 hidden">
-          
-          <!-- Status Penerimaan Formulir Switch Card -->
-          <div id="workspaceFormStatusCard" class="bg-white rounded-2xl border border-zinc-200/90 p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all duration-200">
-            <div class="flex items-center gap-3.5">
-              <div id="workspaceStatusIconBox" class="w-11 h-11 rounded-xl flex items-center justify-center font-bold text-sm bg-emerald-50 text-emerald-600 border border-emerald-200 shrink-0">
-                <span class="w-3.5 h-3.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              </div>
-              <div>
-                <div class="flex items-center gap-2 flex-wrap">
-                  <h4 class="font-bold text-sm sm:text-base text-zinc-900">Status Penerimaan Formulir:</h4>
-                  <span id="workspaceStatusLabelBadge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-300">
-                    Aktif (Menerima Respons)
-                  </span>
-                </div>
-                <p id="workspaceStatusDescText" class="text-xs text-zinc-500 mt-0.5">
-                  Formulir terbuka dan dapat diakses mahasiswa/penilai untuk mengirimkan penilaian.
-                </p>
-              </div>
-            </div>
-            <div class="flex items-center gap-2 self-end sm:self-auto shrink-0">
-              <label class="relative inline-flex items-center cursor-pointer select-none">
-                <input type="checkbox" id="toggleWorkspaceFormStatus_config" onchange="handleWorkspaceStatusToggle(this.checked)" class="sr-only peer" checked>
-                <div class="w-12 h-6.5 bg-zinc-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5.5 after:w-5.5 after:transition-all peer-checked:bg-emerald-600"></div>
-              </label>
-            </div>
-          </div>
-
-          <!-- Nama Pembuat Web / Footer Settings Card -->
-          <div class="bg-white rounded-2xl border border-zinc-200/90 p-5 sm:p-6 shadow-xs space-y-4">
-            <div>
-              <h3 class="text-sm sm:text-base font-bold text-zinc-900">Kredit &amp; Footer Aplikasi</h3>
-              <p class="text-xs text-zinc-500 mt-0.5">Atur nama pengembang dan identitas yang tampil di bagian bawah halaman.</p>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4 text-xs pt-2">
-              <div class="space-y-1.5">
-                <label class="block font-semibold text-zinc-700">Label / Prefix</label>
-                <select 
-                  id="cfg_Pembuat_Web_Prefix" 
-                  onchange="handleConfigInputAutoSave(true)"
-                  class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs font-medium bg-white focus:border-zinc-900 outline-none cursor-pointer"
-                >
-                  <option value="Dibuat oleh">Dibuat oleh</option>
-                  <option value="Dikembangkan oleh">Dikembangkan oleh</option>
-                  <option value="Design & Development by">Design &amp; Development by</option>
-                  <option value="Kredit Sistem:">Kredit Sistem:</option>
-                </select>
-              </div>
-
-              <div class="space-y-1.5">
-                <label class="block font-semibold text-zinc-700">Nama Pembuat / Pengembang</label>
-                <input 
-                  type="text" 
-                  id="cfg_Pembuat_Web_Nama" 
-                  oninput="handleConfigInputAutoSave()"
-                  placeholder="Nama Anda" 
-                  class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs focus:border-zinc-900 outline-none font-semibold text-zinc-900"
-                >
-              </div>
-
-              <div class="space-y-1.5">
-                <label class="block font-semibold text-zinc-700">NIM / Identitas (Opsional)</label>
-                <input 
-                  type="text" 
-                  id="cfg_Pembuat_Web_Nim" 
-                  oninput="handleConfigInputAutoSave()"
-                  placeholder="2310125110001 (Opsional)" 
-                  class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs focus:border-zinc-900 outline-none font-mono"
-                >
-              </div>
-            </div>
-          </div>
-
-          <!-- Reset & Pemulihan Skema Standar Card -->
-          <div class="bg-white rounded-2xl border border-zinc-200/90 p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h3 class="text-sm font-bold text-zinc-900">Kembalikan ke 4 Tahap Standar</h3>
-              <p class="text-xs text-zinc-500 mt-0.5">Reset susunan pertanyaan ke bentuk default penilaian perkuliahan 5E.</p>
-            </div>
-            <button 
-              type="button" 
-              onclick="resetToDefaultStandardSchema()" 
-              class="px-4 py-2.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition cursor-pointer shrink-0 active:scale-98 flex items-center gap-1.5"
-            >
-              <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-              </svg>
-              <span>↺ Reset Standar</span>
-            </button>
-          </div>
-
+        <!-- DYNAMIC STAGES & QUESTIONS CANVAS CONTAINER -->
+        <div id="dynamicStagesCanvasContainer" class="space-y-4 sm:space-y-6">
+          <!-- Rendered dynamically via renderDynamicStagesCanvas() -->
         </div>
 
-        <!-- =================================================================== -->
+        <!-- BOTTOM ADD SECTION / QUESTION BAR -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
+          <button 
+            type="button" 
+            onclick="addNewQuestionDirect(adminFormSchema ? adminFormSchema.tahapan.length - 1 : 0)" 
+            class="w-full sm:w-auto px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-bold shadow-md flex items-center justify-center gap-2 transition cursor-pointer active:scale-98"
+          >
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
+            </svg>
+            <span>+ Tambah Pertanyaan</span>
+          </button>
+
+          <button 
+            type="button" 
+            onclick="addNewStageDirect()" 
+            class="w-full sm:w-auto px-6 py-3 rounded-xl bg-white border border-zinc-300 hover:bg-zinc-50 text-zinc-800 text-xs sm:text-sm font-bold shadow-xs flex items-center justify-center gap-2 transition cursor-pointer active:scale-98"
+          >
+            <svg class="w-4 h-4 text-zinc-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+            </svg>
+            <span>+ Tambah Bagian Baru</span>
+          </button>
+        </div>
+
         <!-- FLOATING ACTION DOCK (GOOGLE FORMS RIGHT ON DESKTOP, BOTTOM ON MOBILE) -->
-        <!-- =================================================================== -->
         <div id="googleFormsFloatingDock" class="fixed z-40 transition-all duration-200 bottom-3 inset-x-3 max-w-sm mx-auto sm:bottom-auto sm:inset-x-auto sm:right-6 sm:top-40 sm:w-12 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-zinc-200 p-1.5 sm:p-2 flex sm:flex-col items-center justify-around sm:justify-start gap-1">
           <!-- + Tambah Pertanyaan -->
           <button 
@@ -1048,6 +873,103 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
             </svg>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- TAB 2: SETELAN FORMULIR (SETTINGS VIEW) -->
+      <!-- ===================================================================== -->
+      <div id="adminView_settings" class="flex flex-col gap-4 sm:gap-6 hidden">
+        
+        <!-- Status Penerimaan Formulir Switch Card -->
+        <div id="workspaceFormStatusCard" class="bg-white rounded-2xl border border-zinc-200/90 p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all duration-200">
+          <div class="flex items-center gap-3.5">
+            <div id="workspaceStatusIconBox" class="w-11 h-11 rounded-xl flex items-center justify-center font-bold text-sm bg-emerald-50 text-emerald-600 border border-emerald-200 shrink-0">
+              <span class="w-3.5 h-3.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            </div>
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <h4 class="font-bold text-sm sm:text-base text-zinc-900">Status Penerimaan Formulir:</h4>
+                <span id="workspaceStatusLabelBadge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-300">
+                  Aktif (Menerima Respons)
+                </span>
+              </div>
+              <p id="workspaceStatusDescText" class="text-xs text-zinc-500 mt-0.5">
+                Formulir terbuka dan dapat diakses mahasiswa/penilai untuk mengirimkan penilaian.
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 self-end sm:self-auto shrink-0">
+            <label class="relative inline-flex items-center cursor-pointer select-none">
+              <input type="checkbox" id="toggleWorkspaceFormStatus_config" onchange="handleWorkspaceStatusToggle(this.checked)" class="sr-only peer" checked>
+              <div class="w-12 h-6.5 bg-zinc-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5.5 after:w-5.5 after:transition-all peer-checked:bg-emerald-600"></div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Nama Pembuat Web / Footer Settings Card -->
+        <div class="bg-white rounded-2xl border border-zinc-200/90 p-5 sm:p-6 shadow-xs space-y-4">
+          <div>
+            <h3 class="text-sm sm:text-base font-bold text-zinc-900">Kredit &amp; Footer Aplikasi</h3>
+            <p class="text-xs text-zinc-500 mt-0.5">Atur nama pengembang dan identitas yang tampil di bagian bawah halaman.</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4 text-xs pt-2">
+            <div class="space-y-1.5">
+              <label class="block font-semibold text-zinc-700">Label / Prefix</label>
+              <select 
+                id="cfg_Pembuat_Web_Prefix" 
+                onchange="handleConfigInputAutoSave(true)"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs font-medium bg-white focus:border-zinc-900 outline-none cursor-pointer"
+              >
+                <option value="Dibuat oleh">Dibuat oleh</option>
+                <option value="Dikembangkan oleh">Dikembangkan oleh</option>
+                <option value="Design & Development by">Design &amp; Development by</option>
+                <option value="Kredit Sistem:">Kredit Sistem:</option>
+              </select>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block font-semibold text-zinc-700">Nama Pembuat / Pengembang</label>
+              <input 
+                type="text" 
+                id="cfg_Pembuat_Web_Nama" 
+                oninput="handleConfigInputAutoSave()"
+                placeholder="Nama Anda" 
+                class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs focus:border-zinc-900 outline-none font-semibold text-zinc-900"
+              >
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block font-semibold text-zinc-700">NIM / Identitas (Opsional)</label>
+              <input 
+                type="text" 
+                id="cfg_Pembuat_Web_Nim" 
+                oninput="handleConfigInputAutoSave()"
+                placeholder="2310125110001 (Opsional)" 
+                class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs focus:border-zinc-900 outline-none font-mono"
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Reset & Pemulihan Skema Standar Card -->
+        <div class="bg-white rounded-2xl border border-zinc-200/90 p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 class="text-sm font-bold text-zinc-900">Kembalikan ke 4 Tahap Standar</h3>
+            <p class="text-xs text-zinc-500 mt-0.5">Reset susunan pertanyaan ke bentuk default penilaian perkuliahan 5E.</p>
+          </div>
+          <button 
+            type="button" 
+            onclick="resetToDefaultStandardSchema()" 
+            class="px-4 py-2.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition cursor-pointer shrink-0 active:scale-98 flex items-center gap-1.5"
+          >
+            <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            <span>↺ Reset Standar</span>
           </button>
         </div>
 
@@ -4043,49 +3965,33 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     function switchAdminTab(tabKey, updateHash = true) {
       currentAdminTab = tabKey;
       localStorage.setItem("PGSD_ADMIN_ACTIVE_TAB", tabKey);
-      const tabs = ['data', 'config', 'responses', 'system'];
+      const tabs = ['config', 'settings', 'responses', 'data', 'system'];
       
       tabs.forEach(t => {
         const view = document.getElementById(`adminView_${t}`);
         const btn = document.getElementById(`adminTabBtn_${t}`);
         
         if (t === tabKey) {
-          view.classList.remove("hidden");
-          btn.className = "py-2 px-1.5 sm:px-2 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate font-bold";
+          if (view) view.classList.remove("hidden");
+          if (btn) btn.className = "py-2 px-2.5 sm:px-3 rounded-lg bg-zinc-100 text-zinc-950 shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate font-bold";
         } else {
-          view.classList.add("hidden");
-          btn.className = "py-2 px-1.5 sm:px-2 rounded-md text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate";
+          if (view) view.classList.add("hidden");
+          if (btn) btn.className = "py-2 px-2.5 sm:px-3 rounded-lg text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1.5 cursor-pointer text-center truncate";
         }
       });
 
-      // Reinit morphing observer every time config tab is activated
-      requestAnimationFrame(() => initContextualHeaderMorphing());
+      // Floating action dock only visible on Question Canvas
+      const dock = document.getElementById("googleFormsFloatingDock");
+      if (dock) {
+        if (tabKey === 'config') {
+          dock.classList.remove("hidden");
+        } else {
+          dock.classList.add("hidden");
+        }
+      }
 
       if (tabKey === 'responses' && adminResponsesList.length === 0) {
         fetchAdminResponsesList();
-      }
-    }
-
-    // STUDIO SUB-TABS SWITCHER (Google Forms Studio: Pertanyaan & Setelan)
-    function switchStudioSubTab(subTabKey) {
-      const qView = document.getElementById("studioSubView_questions");
-      const sView = document.getElementById("studioSubView_settings");
-      const qBtn = document.getElementById("studioSubTabBtn_questions");
-      const sBtn = document.getElementById("studioSubTabBtn_settings");
-      const dock = document.getElementById("googleFormsFloatingDock");
-
-      if (subTabKey === 'questions') {
-        if (qView) qView.classList.remove("hidden");
-        if (sView) sView.classList.add("hidden");
-        if (dock) dock.classList.remove("hidden");
-        if (qBtn) qBtn.className = "px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-indigo-50 text-indigo-700 border-b-2 border-indigo-600 transition flex items-center gap-2 cursor-pointer shadow-2xs";
-        if (sBtn) sBtn.className = "px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 transition flex items-center gap-2 cursor-pointer";
-      } else {
-        if (qView) qView.classList.add("hidden");
-        if (sView) sView.classList.remove("hidden");
-        if (dock) dock.classList.add("hidden");
-        if (sBtn) sBtn.className = "px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-indigo-50 text-indigo-700 border-b-2 border-indigo-600 transition flex items-center gap-2 cursor-pointer shadow-2xs";
-        if (qBtn) qBtn.className = "px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 transition flex items-center gap-2 cursor-pointer";
       }
     }
 
@@ -4844,60 +4750,11 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }
 
     function initContextualHeaderMorphing() {
-      const anchor = document.getElementById("sectionFormBuilderAnchor");
-      const stdTabs = document.getElementById("headerTabsStandardView");
-      const builderToolbar = document.getElementById("headerTabsBuilderToolbarView");
-
-      if (!anchor || !stdTabs || !builderToolbar) return;
-
-      function applyMorphState() {
-        if (currentAdminTab !== 'config') {
-          stdTabs.classList.remove("hidden");
-          builderToolbar.classList.add("hidden");
-          return;
-        }
-        const rect = anchor.getBoundingClientRect();
-        // Show toolbar: anchor top edge is anywhere within the viewport
-        const anchorInView = rect.top < window.innerHeight && rect.bottom > 0;
-
-        if (anchorInView) {
-          stdTabs.classList.add("hidden");
-          builderToolbar.classList.remove("hidden");
-        } else {
-          stdTabs.classList.remove("hidden");
-          builderToolbar.classList.add("hidden");
-        }
-      }
-
-      // Scroll listener (for pages with enough content to scroll)
-      window.removeEventListener("scroll", window._headerMorphScrollHandler);
-      window._headerMorphScrollHandler = applyMorphState;
-      window.addEventListener("scroll", applyMorphState, { passive: true });
-
-      // IntersectionObserver (for short pages / blank forms where scroll may not be needed)
-      if (window._headerMorphObserver) {
-        window._headerMorphObserver.disconnect();
-      }
-      window._headerMorphObserver = new IntersectionObserver(
-        (entries) => {
-          entries.forEach(() => applyMorphState());
-        },
-        { root: null, threshold: 0, rootMargin: "0px 0px 0px 0px" }
-      );
-      window._headerMorphObserver.observe(anchor);
-
-      // Initial check
-      applyMorphState();
+      // Kept for backward compatibility; header is now permanently unified Google Forms style
     }
 
     function jumpToConfigTop() {
-      const stdTabs = document.getElementById("headerTabsStandardView");
-      const builderToolbar = document.getElementById("headerTabsBuilderToolbarView");
-      if (stdTabs) stdTabs.classList.remove("hidden");
-      if (builderToolbar) builderToolbar.classList.add("hidden");
-      window.scrollTo(0, 0);
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function saveDraftSchemaLocally() {

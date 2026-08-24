@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.20] - 2026-08-24
+
+### 💎 Penyatuan Bilah Navigasi Sticky Top Bar Google Forms & Pemisahan Tab Setelan
+- **Penyatuan Bilah Navigasi Sticky Google Forms (*Unified Top App Bar*):**
+  - Mengangkat tombol tab inti Google Forms (**`Pertanyaan`**, **`Setelan`**, **`Respons`**, **`Kelompok`**, **`Sistem`**) dan bilah alat aksi cepat (**`Urungkan/Ulangi`**, **`Riwayat`**, **`Pratinjau`**, **`Publikasikan`**) langsung ke *Sticky Top Bar*.
+  - Menghilangkan *sub-tab* redundan di dalam kanvas agar tidak terjadi benturan atau tab ganda saat pengguna menggulir (*scrolling*) ke bawah hingga ke pertanyaan.
+- **Pemisahan Mandiri Tampilan `Pertanyaan` vs `Setelan`:**
+  - Kanvas pertanyaan berfokus murni pada kartu formulir, butir soal, dan *Floating Action Dock*.
+  - Tampilan *Setelan* menampung status penerimaan respon, sesi aktif, kredit footer pengembang, dan opsi pemulihan skema standar.
+- **Verifikasi Headless Browser & Pengujian Gulir:**
+  - Pengujian remote scroll dan tab switching berhasil diverifikasi pada resolusi desktop (1280px) dan mobile (375px) dengan 0 galat konsol.
+
+---
+
 ## [2.2.19] - 2026-08-24
 
 ### 🌟 Studio Google Forms Fullscreen: Pengalaman WYSIWYG Zero-Gap & Mobile-First
