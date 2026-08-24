@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.93] - 2026-08-24
+
+### 🚀 Dynamic Contextual Header Morphing & Zero-Overhead Form Builder
+- **Dynamic Contextual Header Morphing (*In-Place Tab-to-Toolbar Transformation*):**
+  - Saat pengguna menggulir (*scroll*) ke area **Susunan Pertanyaan (Form Builder)**, baris TAB navigasi di header atas secara dinamis berganti (*morphing*) menjadi **Toolbar Form Builder**.
+  - Mengeliminasi total kebutuhan akan sticky header ganda di atas maupun bottom dock di bawah sehingga **100% ruang pandang layar ponsel dan desktop menjadi sangat bersih, luas, dan leluasa**.
+- **Tombol Pintas `[ ⬅️ Menu ]` & Sinkronisasi Dua Arah:**
+  - Tombol `[ ⬅️ Menu ]` pada toolbar yang aktif seketika mengembalikan posisi scroll ke atas dan memulihkan 4 Tab utama (`Kelompok`, `Konfigurasi & Builder`, `Respons`, `Sistem`).
+  - Mendukung swipe horizontal mulus di layar ponsel dengan kontrol penuh terhadap *Undo/Redo*, *Riwayat Versi*, *Publikasi*, *Pratinjau Simulasi*, *Tambah Pertanyaan*, dan *Tambah Bagian*.
+
+---
+
 ## [2.1.92] - 2026-08-24
 
 ### 🚀 Ergonomic Mobile Floating Action Dock & Zero-Clutter Workspace
