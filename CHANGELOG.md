@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.18] - 2026-08-24
+
+### 🚀 Perbaikan Sintaks Inisialisasi Skrip & Pengujian Remote Browser Otomatis
+- **Perbaikan Deklarasi Fungsi `smartMathFormat`:**
+  - Memperbaiki komentar pada deklarasi `function smartMathFormat` di `admin.html` yang sempat menyebabkan galat sintaksis (*Illegal return statement*) saat browser memuat skrip.
+- **Validasi Sintaksis Menyeluruh (Node VM & Playwright Headless Browser):**
+  - Menguji pemuatan skrip, parsing AST, dan rendering DOM di lingkungan server HTTP lokal menggunakan browser remote testing.
+  - Memverifikasi fungsi tombol format **Bold**, **Italic**, **Underline**, **Link**, **Hapus Format**, dan **Palet Rumus** berjalan lancar dengan 0 kesalahan konsol (*Zero Console Errors*).
+
+---
+
 ## [2.2.17] - 2026-08-24
 
 ### 🎨 100% Identik Google Forms: Bilah Pemformatan Teks Kaya (B, I, U, Link, Hapus Format) & Tata Letak Kartu Pertanyaan
