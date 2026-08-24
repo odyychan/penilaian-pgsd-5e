@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.62] - 2026-08-25
+
+### ✍️ Aktivasi Universal Floating Formatting Toolbar di Seluruh Input Field
+- **Ekspansi Cakupan Bilah Pemformatan Teks (B, I, U, 🔗, T̶, ∑ Rumus):**
+  - Menghapus pembatasan canvas lokal sehingga floating toolbar pemformatan teks muncul secara responsif pada **seluruh kolom isian teks dan textarea** (Judul Bagian, Deskripsi Bagian, Label Pertanyaan, Opsi Pilihan, Identitas Form, dan Setelan) saat pengguna fokus mengetik atau memblok teks.
+  - Menambahkan listener cerdas pada event `focusin`, `select`, `mouseup`, dan `keyup` untuk deteksi seleksi teks seketika.
+- **Peningkatan Layering & Stabilitas Fokus:**
+  - Meningkatkan z-index bilah pemformatan ke `z-[100]` dan palet rumus ke `z-[110]` agar selalu tampak jelas di atas seluruh komponen tanpa tertimpa elemen lain.
+  - Mempertahankan seleksi teks saat tombol format ditekan menggunakan `onmousedown="event.preventDefault()"`.
+
+---
+
 ## [2.2.61] - 2026-08-25
 
 ### 🚀 Penyederhanaan Alur Pembuatan Formulir Baru (One-Click Streamlined Creation)

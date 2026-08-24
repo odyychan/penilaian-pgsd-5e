@@ -2727,20 +2727,17 @@ function getOrCreateFolder(folderName) {
       if (tag !== 'INPUT' && tag !== 'TEXTAREA') return false;
       if (tag === 'INPUT') {
         const type = (el.type || 'text').toLowerCase();
-        if (type === 'checkbox' || type === 'radio' || type === 'button' || type === 'submit' || type === 'file') return false;
+        if (['checkbox', 'radio', 'button', 'submit', 'file', 'hidden', 'password'].includes(type)) return false;
+        if (el.id === 'inputPassword' || el.id === 'hubSearchFormsInput') return false;
       }
-      return true;
+      return !el.readOnly && !el.disabled;
     }
 
     function isInsideFormCanvas(el) {
-      if (!el) return false;
-      const viewConfig = document.getElementById("adminView_config");
-      return viewConfig ? viewConfig.contains(el) : false;
+      return isMathEligibleInput(el);
     }
 
     function showUniversalFloatingFormattingBar(targetInput) {
-      if (currentAdminTab !== 'config') return;
-      if (!isInsideFormCanvas(targetInput)) return;
       if (!isMathEligibleInput(targetInput)) return;
 
       currentActiveFormInput = targetInput;
@@ -2766,7 +2763,7 @@ function getOrCreateFolder(folderName) {
       if (floatingToolbarHideTimeout) clearTimeout(floatingToolbarHideTimeout);
       floatingToolbarHideTimeout = setTimeout(() => {
         const active = document.activeElement;
-        if (active && isInsideFormCanvas(active) && isMathEligibleInput(active)) {
+        if (active && isMathEligibleInput(active)) {
           currentActiveFormInput = active;
           return;
         }
@@ -2786,23 +2783,23 @@ function getOrCreateFolder(folderName) {
         if (actionDock) {
           actionDock.classList.remove("max-sm:hidden");
         }
-      }, 180);
+      }, 250);
     }
 
     function applyActiveFieldFormat(formatType) {
-      const target = currentActiveFormInput || (isInsideFormCanvas(document.activeElement) ? document.activeElement : null);
+      const target = currentActiveFormInput || (isMathEligibleInput(document.activeElement) ? document.activeElement : null);
       if (target && isMathEligibleInput(target)) {
         target.focus();
         applyUniversalTextFormat(target, formatType);
       } else {
-        showAdminToast("Pilih salah satu kolom isian pertanyaan terlebih dahulu.", "info");
+        showAdminToast("Pilih atau fokuskan salah satu kolom isian teks terlebih dahulu.", "info");
       }
     }
 
     function handleActiveFieldMathButtonClick() {
-      const target = currentActiveFormInput || (isInsideFormCanvas(document.activeElement) ? document.activeElement : null);
+      const target = currentActiveFormInput || (isMathEligibleInput(document.activeElement) ? document.activeElement : null);
       if (!target || !isMathEligibleInput(target)) {
-        showAdminToast("Pilih salah satu kolom isian pertanyaan terlebih dahulu.", "info");
+        showAdminToast("Pilih atau fokuskan salah satu kolom isian teks terlebih dahulu.", "info");
         return;
       }
 
@@ -2840,7 +2837,7 @@ function getOrCreateFolder(folderName) {
     }
 
     function insertActiveFieldMathSymbol(symbol) {
-      const target = currentActiveFormInput || (isInsideFormCanvas(document.activeElement) ? document.activeElement : null);
+      const target = currentActiveFormInput || (isMathEligibleInput(document.activeElement) ? document.activeElement : null);
       if (!target || !isMathEligibleInput(target)) return;
 
       target.focus();
@@ -2876,9 +2873,9 @@ function getOrCreateFolder(folderName) {
       }
     });
 
-    // Smart Focus Trackers: show bottom floating formatting bar ONLY when focused in Tab Pertanyaan
+    // Smart Universal Focus & Selection Trackers: show bottom floating formatting bar on ANY input focus / select / typing
     document.addEventListener('focusin', function(e) {
-      if (isInsideFormCanvas(e.target) && isMathEligibleInput(e.target)) {
+      if (isMathEligibleInput(e.target)) {
         showUniversalFloatingFormattingBar(e.target);
       }
     }, true);
@@ -2886,6 +2883,26 @@ function getOrCreateFolder(folderName) {
     document.addEventListener('focusout', function(e) {
       hideUniversalFloatingFormattingBar();
     }, true);
+
+    document.addEventListener('select', function(e) {
+      if (isMathEligibleInput(e.target)) {
+        showUniversalFloatingFormattingBar(e.target);
+      }
+    }, true);
+
+    document.addEventListener('mouseup', function(e) {
+      const active = document.activeElement;
+      if (isMathEligibleInput(active)) {
+        showUniversalFloatingFormattingBar(active);
+      }
+    });
+
+    document.addEventListener('keyup', function(e) {
+      const active = document.activeElement;
+      if (isMathEligibleInput(active)) {
+        showUniversalFloatingFormattingBar(active);
+      }
+    });
 
     // =========================================================================
     // UNIVERSAL KEYBOARD SHORTCUTS ENGINE (Ctrl+B, Ctrl+I, Ctrl+U, Ctrl+K, Ctrl+\, Ctrl+M)
@@ -9547,7 +9564,7 @@ function getOrCreateFolder(folderName) {
   <!-- UNIVERSAL FLOATING BOTTOM FORMATTING TOOLBAR (Pill-shaped Bottom-Center Overlay, Persistent on Scroll) -->
   <div 
     id="universalFloatingFormattingBar" 
-    class="hidden fixed bottom-3.5 sm:bottom-8 left-1/2 -translate-x-1/2 z-50 items-center gap-0.5 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-white/95 backdrop-blur-md rounded-2xl border border-zinc-200 shadow-2xl text-zinc-700 select-none transition-all duration-200 animate-in fade-in slide-in-from-bottom-4 ring-1 ring-black/5"
+    class="hidden fixed bottom-3.5 sm:bottom-8 left-1/2 -translate-x-1/2 z-[100] items-center gap-0.5 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-white/95 backdrop-blur-md rounded-2xl border border-zinc-200 shadow-2xl text-zinc-700 select-none transition-all duration-200 animate-in fade-in slide-in-from-bottom-4 ring-1 ring-black/5"
     style="box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.2), 0 6px 16px -4px rgba(0, 0, 0, 0.1);"
   >
     <!-- Bold (B) -->
@@ -9627,7 +9644,7 @@ function getOrCreateFolder(folderName) {
       <!-- Upward Floating Math Palette Overlay (Pops up above the bottom bar) -->
       <div 
         id="universalFloatingMathPalette" 
-        class="hidden absolute bottom-full mb-3 left-1/2 -translate-x-1/2 z-50 p-2.5 sm:p-3 bg-white/98 backdrop-blur-md rounded-2xl border border-zinc-200 shadow-2xl space-y-2 text-xs w-[calc(100vw-2.5rem)] max-w-[320px] sm:w-80 animate-in fade-in zoom-in-95 duration-150 ring-1 ring-black/5"
+        class="hidden absolute bottom-full mb-3 left-1/2 -translate-x-1/2 z-[110] p-2.5 sm:p-3 bg-white/98 backdrop-blur-md rounded-2xl border border-zinc-200 shadow-2xl space-y-2 text-xs w-[calc(100vw-2.5rem)] max-w-[320px] sm:w-80 animate-in fade-in zoom-in-95 duration-150 ring-1 ring-black/5"
         style="box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.25), 0 8px 18px -4px rgba(0, 0, 0, 0.12);"
       >
         <div class="flex items-center justify-between text-[11px] font-semibold text-indigo-950 pb-1.5 border-b border-zinc-100">
