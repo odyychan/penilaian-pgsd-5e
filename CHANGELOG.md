@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.26] - 2026-08-24
+
+### 📐 Tata Letak Header Penuh Ujung-ke-Ujung (*Full-Width Edge-to-Edge*)
+- **Penghapusan Pembatas Lebar Statis:**
+  - Mengubah kontainer `<header>` dan `#headerWorkspaceTabs` dari `max-w-7xl` menjadi `w-full px-3 sm:px-6 lg:px-8`.
+  - Memastikan bilah header utama dan bilah tab navigasi formulir membentang penuh 100% dari ujung kiri ke ujung kanan layar pada semua resolusi (termasuk layar ultrawide, 1080p, 2K, dan 4K).
+- **Pengujian Responsivitas Multi-Resolusi:**
+  - Terverifikasi pada pengujian layar lebar desktop (1600px) dan layar smartphone (425px) dengan gulir horizontal mulus dan tanpa *layout shift*.
+
+---
+
 ## [2.2.25] - 2026-08-24
 
 ### 💎 Integrasi Header Kompak & Eliminasi Banner Redundan 'Bagikan QR & PIN'
