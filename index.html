@@ -1587,6 +1587,10 @@
 
       selectEl.dataset.pgsdDropdownEnhanced = "true";
       selectEl.style.display = "none";
+      // Hide any legacy chevron indicator inside parent
+      if (selectEl.parentElement) {
+        selectEl.parentElement.querySelectorAll('.pointer-events-none').forEach(p => p.style.display = 'none');
+      }
 
       const wrapper = document.createElement("div");
       wrapper.className = `pgsd-dropdown-wrapper relative inline-block text-left ${selectEl.classList.contains('w-full') ? 'w-full' : ''}`;

@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.97] - 2026-08-24
+
+### 🔝 Sesi Aktif Dropdown Hierarchy & Single Chevron Polish
+- **Posisi Opsi `Semua Sesi` di Paling Atas:**
+  - Memindahkan opsi `Semua Sesi (Buka Semua Kelompok)` ke urutan paling atas (pilihan pertama sebelum Minggu 1 s.d. 10) pada pemilih sesi aktif formulir (`selectQuickSesiAktif`).
+- **Eliminasi Chevron Ganda:**
+  - Membersihkan elemen chevron legacy statis sehingga tombol pemicu dropdown popover kustom hanya menampilkan tepat 1 ikon panah chevron yang berotasi mulus 180° saat menu dibuka/ditutup.
+
+---
+
 ## [2.1.96] - 2026-08-24
 
 ### 📝 Human-Centered Text & UI Simplification (*Jargon-Free Natural Copywriting*)

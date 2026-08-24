@@ -623,8 +623,9 @@
             <select 
               id="selectQuickSesiAktif" 
               onchange="handleQuickSesiChange(this.value)"
-              class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 bg-white font-semibold text-xs text-zinc-800 shadow-xs focus:border-zinc-900 outline-none transition cursor-pointer appearance-none pr-8"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 bg-white font-semibold text-xs text-zinc-800 shadow-xs focus:border-zinc-900 outline-none transition cursor-pointer appearance-none"
             >
+              <option value="SEMUA">Semua Sesi (Buka Semua Kelompok)</option>
               <option value="Minggu 1">Minggu 1</option>
               <option value="Minggu 2">Minggu 2</option>
               <option value="Minggu 3">Minggu 3</option>
@@ -635,13 +636,7 @@
               <option value="Minggu 8">Minggu 8</option>
               <option value="Minggu 9">Minggu 9</option>
               <option value="Minggu 10">Minggu 10</option>
-              <option value="SEMUA">Semua Sesi (Buka Semua Kelompok)</option>
             </select>
-            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-zinc-500">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-              </svg>
-            </div>
           </div>
           
           <button 
@@ -2106,6 +2101,10 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
       selectEl.dataset.pgsdDropdownEnhanced = "true";
       selectEl.style.display = "none";
+      // Hide any legacy chevron indicator inside parent
+      if (selectEl.parentElement) {
+        selectEl.parentElement.querySelectorAll('.pointer-events-none').forEach(p => p.style.display = 'none');
+      }
 
       const wrapper = document.createElement("div");
       wrapper.className = `pgsd-dropdown-wrapper relative inline-block text-left ${selectEl.classList.contains('w-full') ? 'w-full' : ''}`;
