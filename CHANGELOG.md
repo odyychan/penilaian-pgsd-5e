@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.16] - 2026-08-24
+
+### 📐 Optimalisasi Tata Letak Form Builder: Relokasi Tools Rumus ke Header Kartu & Menu Titik Tiga (3-Dots) Pindah Bagian
+- **Relokasi Tombol Alat Rumus Matematika ke Bilah Atas (*Top Header Toolbar Placement*):**
+  - Memindahkan tombol aksi **`[ ∑ Rumus ]`** dari bilah bawah (*bottom action bar*) ke baris atas kartu pertanyaan berdampingan dengan pemilih tipe pertanyaan (*Question Type Popover*).
+  - Menempatkan panel **Palet Simbol & Rumus Matematika Cepat** tepat di bawah baris input judul/deskripsi sehingga proses penyusunan formula menjadi lebih intuitif dan langsung terlihat tanpa perlu menggulir ke bawah.
+- **Menu Opsi Titik Tiga Khas Google Forms (*3-Dots More Options Menu*):**
+  - Menambahkan tombol menu titik tiga (`⋮`) pada bilah bawah setiap kartu pertanyaan.
+  - Memasukkan fungsi **`Pindah Bagian`** ke dalam dropdown melayang menu titik tiga tersebut, menjaga tampilan bilah aksi pertanyaan tetap rapi, bersih, dan lapang di seluruh perangkat desktop dan mobile.
+- **Smart Popover Positioning & Outside Click Dismissal:**
+  - Mengintegrasikan deteksi posisi cerdas (*upward / downward detection*) dan penutup otomatis saat mengklik di luar area menu titik tiga.
+
+---
+
 ## [2.2.15] - 2026-08-24
 
 ### 🖱️ 100% Reliable Math Selection & Universal Right-Click Context Menu Engine
