@@ -4,6 +4,19 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.22] - 2026-08-24
+
+### ✨ Bilah Format Teks Kaya Kontekstual (Tampil Hanya Saat Input Aktif/Fokus)
+- **Perilaku Fokus Kontekstual (*Focus-Triggered Toolbar*):**
+  - Mengatur bilah alat pemformatan teks kaya (`B`, `I`, `U`, `Link`, `Tx`, `∑ Rumus`) agar tersembunyi secara *default* saat kanvas *idle* dan hanya muncul secara otomatis ketika pengguna mengklik/memfokuskan input pertanyaan.
+  - Memastikan antarmuka kanvas formulir selalu bersih, lega, rapi, dan 100% otentik seperti perilaku Google Forms asli.
+- **Proteksi Seleksi Teks (*Selection Preservation*):**
+  - Menerapkan `onmousedown="event.preventDefault()"` pada setiap tombol toolbar agar klik pada tombol pemformatan tidak membatalkan fokus atau seleksi teks pengguna.
+- **Pengujian Headless Browser:**
+  - Telah diverifikasi secara otomatis melalui browser remote testing pada status sebelum fokus (`display: none`) dan setelah fokus (`display: flex`).
+
+---
+
 ## [2.2.21] - 2026-08-24
 
 ### 🎯 Eliminasi Tombol Redundan di Dasar Kanvas Form Builder

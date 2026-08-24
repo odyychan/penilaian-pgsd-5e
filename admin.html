@@ -5668,7 +5668,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
           return `
             <!-- AUTHENTIC GOOGLE FORMS QUESTION CARD -->
-            <div class="bg-white rounded-xl border border-zinc-200 border-l-4 border-l-indigo-600 shadow-sm p-4 sm:p-6 space-y-3.5 transition hover:shadow-md relative">
+            <div class="group/qcard bg-white rounded-xl border border-zinc-200 border-l-4 border-l-indigo-600 shadow-sm p-4 sm:p-6 space-y-3.5 transition hover:shadow-md relative">
               
               <!-- 6-Dots Drag Handle Centered (Google Forms Style) -->
               <div class="flex justify-center -mt-1 -mb-1 text-zinc-300 hover:text-zinc-500 cursor-grab select-none">
@@ -5699,12 +5699,13 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
                     </div>
                   </div>
 
-                  <!-- Google Forms Authentic Rich Text Formatting Toolbar (Underneath Input) -->
-                  <div class="flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 bg-zinc-100/90 rounded-lg border border-zinc-200 w-fit text-zinc-700 select-none shadow-2xs">
+                  <!-- Google Forms Authentic Rich Text Formatting Toolbar (Shows ONLY when focused) -->
+                  <div class="hidden group-focus-within/qcard:flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 bg-zinc-100/90 rounded-lg border border-zinc-200 w-fit text-zinc-700 select-none shadow-2xs transition-all duration-150">
                     
                     <!-- Bold (B) -->
                     <button 
                       type="button" 
+                      onmousedown="event.preventDefault()"
                       onclick="applyFieldTextFormat(${sIdx}, ${fIdx}, 'bold')" 
                       class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center font-serif font-black hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer text-sm" 
                       title="Tebal (Ctrl + B)"
@@ -5715,6 +5716,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
                     <!-- Italic (I) -->
                     <button 
                       type="button" 
+                      onmousedown="event.preventDefault()"
                       onclick="applyFieldTextFormat(${sIdx}, ${fIdx}, 'italic')" 
                       class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center font-serif italic font-bold hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer text-sm" 
                       title="Miring (Ctrl + I)"
@@ -5725,6 +5727,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
                     <!-- Underline (U) -->
                     <button 
                       type="button" 
+                      onmousedown="event.preventDefault()"
                       onclick="applyFieldTextFormat(${sIdx}, ${fIdx}, 'underline')" 
                       class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center font-serif underline font-bold hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer text-sm" 
                       title="Garis Bawah (Ctrl + U)"
@@ -5735,6 +5738,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
                     <!-- Link (🔗) -->
                     <button 
                       type="button" 
+                      onmousedown="event.preventDefault()"
                       onclick="applyFieldTextFormat(${sIdx}, ${fIdx}, 'link')" 
                       class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer" 
                       title="Sisipkan Link"
@@ -5747,11 +5751,12 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
                     <!-- Remove Formatting (T̶ / Tx) -->
                     <button 
                       type="button" 
+                      onmousedown="event.preventDefault()"
                       onclick="applyFieldTextFormat(${sIdx}, ${fIdx}, 'remove_format')" 
                       class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer" 
                       title="Hapus format (Menghapus format)"
                     >
-                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                      <svg class="w-4 h-4 viewBox="0 0 24 24" fill="currentColor">
                         <path d="M6 4v3h4.5v13h3V7H18V4H6zm14.7 15.3l-1.4 1.4L4.3 5.7 5.7 4.3l15 15z"></path>
                       </svg>
                     </button>
@@ -5761,6 +5766,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
                     <!-- Rumus / Math Formula Palette Toggle -->
                     <button 
                       type="button" 
+                      onmousedown="event.preventDefault()"
                       onclick="toggleQuickMathPalette(${sIdx}, ${fIdx})" 
                       class="px-2 h-7 sm:h-8 rounded-md hover:bg-indigo-100 text-indigo-700 font-mono font-bold flex items-center gap-1 transition cursor-pointer text-xs" 
                       title="Palet Sisip Simbol &amp; Rumus Matematika"
