@@ -5005,6 +5005,15 @@ function getOrCreateFolder(folderName) {
     // TAB 2: CONFIG & FORM BUILDER
     // =========================================================================
     function populateConfigFormValues() {
+      // Synchronize config fallback with currentFormMeta
+      if (currentFormMeta) {
+        if (!adminAppConfig["Judul_Form"] && currentFormMeta.judulForm) adminAppConfig["Judul_Form"] = currentFormMeta.judulForm;
+        if (!adminAppConfig["Mata_Kuliah"] && currentFormMeta.mataKuliah) adminAppConfig["Mata_Kuliah"] = currentFormMeta.mataKuliah;
+        if (!adminAppConfig["Dosen_Pengampu"] && currentFormMeta.dosen) adminAppConfig["Dosen_Pengampu"] = currentFormMeta.dosen;
+        if (!adminAppConfig["Kelas"] && currentFormMeta.kelas) adminAppConfig["Kelas"] = currentFormMeta.kelas;
+        if (!adminAppConfig["Jurusan"] && currentFormMeta.jurusan) adminAppConfig["Jurusan"] = currentFormMeta.jurusan;
+      }
+
       const keys = [
         "Judul_Form", "Mata_Kuliah", "Dosen_Pengampu", "Kelas", "Jurusan", "Deskripsi_Form",
         "Pembuat_Web_Prefix", "Pembuat_Web_Nama", "Pembuat_Web_Nim",

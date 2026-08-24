@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.59] - 2026-08-25
+
+### 🔄 Sinkronisasi Fallback Metadata Formulir Kustom & Validasi Offline/Vercel Readiness
+- **Penyelarasan Nilai Default Builder Form Workspace:**
+  - Mengintegrasikan fallback otomatis dari metadata formulir (`judulForm`, `mataKuliah`, `dosen`, `kelas`, `jurusan`) ke dalam konfigurasi aplikasi builder pada fungsi `populateConfigFormValues()`.
+  - Menghilangkan placeholder kosong pada formulir baru yang belum memiliki kustomisasi teks khusus di database.
+- **Konfirmasi Kompatibilitas Backend Supabase Mandiri (Local & Vercel):**
+  - Memverifikasi arsitektur murni client-side Supabase yang tidak memerlukan pengaturan environment tambahan pada hosting Vercel maupun pengujian lokal.
+
+---
+
 ## [2.2.58] - 2026-08-25
 
 ### 🐞 Perbaikan Fatal Null Property Exception & Audit Menyeluruh DOM IDs
