@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.85] - 2026-08-24
+
+### 📐 Popover Overflow Fix, Internal Smooth Scroll & Smart Viewport Positioning
+- **Penanganan Terpotong (*Zero Clipping & Overflow Fix*):**
+  - Menghapus pembatas `overflow-hidden` pada kartu bagian (*stage card*) sehingga menu popover dapat mengambang bebas di atas batas kartu tanpa terpotong.
+  - Menambahkan batas tinggi `max-h-72 sm:max-h-80` dengan scrollbar internal yang halus (`overflow-y-auto custom-scrollbar`) sehingga seluruh 13 tipe pertanyaan dapat diakses dengan mudah.
+- **Penempatan Cerdas Menyesuaikan Layar (*Smart Dynamic Positioning*):**
+  - Menu popover secara otomatis mendeteksi ruang kosong di layar: akan mengambang ke atas (*pop upward*) jika berada di dekat batas bawah layar, atau mengambang ke bawah (*pop downward*) jika ruang di bawah mencukupi.
+
+---
+
 ## [2.1.84] - 2026-08-24
 
 ### 💎 Modern-Minimalist Custom Popover Menu & Universal Dropdown Refinement

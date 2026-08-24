@@ -2918,10 +2918,10 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
             <svg class="w-3.5 h-3.5 text-zinc-400 shrink-0 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
           </button>
 
-          <!-- Floating Popover Menu -->
+          <!-- Floating Popover Menu (Scrollable & Non-Clipping) -->
           <div 
             id="qTypeMenu_${sIdx}_${fIdx}" 
-            class="hidden absolute right-0 top-full mt-1.5 w-72 max-w-[90vw] rounded-2xl bg-white border border-zinc-200 shadow-2xl p-2 z-50 text-xs animate-in fade-in zoom-in-95 duration-150"
+            class="hidden absolute right-0 top-full mt-1.5 w-72 max-w-[92vw] max-h-72 sm:max-h-80 overflow-y-auto custom-scrollbar rounded-2xl bg-white border border-zinc-200 shadow-2xl p-2 z-50 text-xs animate-in fade-in zoom-in-95 duration-150"
             onclick="event.stopPropagation()"
           >
             ${menuItemsHtml}
@@ -2934,7 +2934,8 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       if (e) e.stopPropagation();
       const menuId = `qTypeMenu_${sIdx}_${fIdx}`;
       const menu = document.getElementById(menuId);
-      if (!menu) return;
+      const container = document.getElementById(`qTypeDropdownContainer_${sIdx}_${fIdx}`);
+      if (!menu || !container) return;
 
       const isHidden = menu.classList.contains("hidden");
       
@@ -2942,6 +2943,19 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       document.querySelectorAll("[id^='qTypeMenu_']").forEach(el => el.classList.add("hidden"));
 
       if (isHidden) {
+        // Smart Upward vs Downward positioning based on viewport space
+        const rect = container.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+
+        if (spaceBelow < 310 && spaceAbove > 310) {
+          menu.classList.remove("top-full", "mt-1.5");
+          menu.classList.add("bottom-full", "mb-1.5");
+        } else {
+          menu.classList.remove("bottom-full", "mb-1.5");
+          menu.classList.add("top-full", "mt-1.5");
+        }
+
         menu.classList.remove("hidden");
       }
     }
@@ -3528,7 +3542,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
       tahapan.forEach((stage, sIdx) => {
         const stageCard = document.createElement("div");
-        stageCard.className = "bg-white rounded-2xl border-2 border-zinc-200 shadow-xs overflow-hidden space-y-0 transition hover:border-zinc-300";
+        stageCard.className = "bg-white rounded-2xl border-2 border-zinc-200 shadow-xs space-y-0 transition hover:border-zinc-300 relative";
 
         const fields = stage.fields || [];
 
