@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.89] - 2026-08-24
+
+### 📌 Sticky Floating Builder Toolbar & Single-Row Status Badge Alignment
+- **Penataan Rapi Badge Status (*Single-Row Alignment*):**
+  - Menata `Susunan Pertanyaan`, `[ 4 Bagian • 5 Pertanyaan ]`, dan badge `[ 🟢 Form Aktif ]` / `[ 🟡 Draf Belum Terbit ]` sejajar dalam satu baris horisontal yang menyatu dan rapi tanpa ada baris bertumpuk canggung.
+- **Toolbar Form Builder Sticky Melayang (*Always Accessible on Scroll*):**
+  - Panel kontrol Form Builder (tombol **`Publikasikan`**, **`Pratinjau`**, **`Undo/Redo`**, **`Riwayat`**, **`Tambah Pertanyaan`**, dan **`Tambah Bagian`**) kini melayang mulus di bagian atas (*sticky top-16 z-30 with glassmorphism backdrop-blur*).
+  - Admin dapat men-*scroll* hingga pertanyaan terakhir tanpa kehilangan akses ke tombol aksi utama formulir.
+
+---
+
 ## [2.1.88] - 2026-08-24
 
 ### ⏪ Ctrl+Z Undo / Redo Engine & Form Revision History (Google Forms Style)
