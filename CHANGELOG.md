@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.94] - 2026-08-24
+
+### 💎 Master Form Hub Visual Polish & Modern-Minimalist Aesthetic Audit
+- **Pembersihan Hero Banner (*Double Plus Elimination & Typography Refinement*):**
+  - Menghapus redundansi teks `+ +` pada tombol banner dan modal menjadi `+ Buat Formulir Baru` yang proporsional.
+  - Memperbarui gradien banner dark glassmorphism, chip status `Multi-Form Hub`, dan tipografi judul agar lebih tajam dan elegan.
+- **Penyempurnaan Toolbar Pencarian & Filter Cerdas:**
+  - Input pencarian dan dropdown status menggunakan sudut melengkung `rounded-2xl` dan `rounded-xl`, latar belakang halus, serta transisi fokus yang presisi.
+- **Redesain Kartu Formulir (*Modern-Minimalist Form Cards*):**
+  - Penyempurnaan tata letak badge `PIN`, chip `Utama`, dan status `🟢 Aktif` yang simetris.
+  - Panel statistik respons 2 kolom yang bersih serta penataan tombol aksi `[ ⚙️ Kelola Formulir Ini ]`, `[ 🔗 Bagikan (QR) ]`, dan `[ 📑 Kloning ]` dengan target sentuh $\ge 44 	imes 44	ext{ px}$.
+
+---
+
 ## [2.1.93] - 2026-08-24
 
 ### 🚀 Dynamic Contextual Header Morphing & Zero-Overhead Form Builder

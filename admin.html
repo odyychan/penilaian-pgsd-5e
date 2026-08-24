@@ -473,42 +473,48 @@
     <main id="adminHubContainer" class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 flex flex-col gap-4 sm:gap-6 fade-enter">
       
       <!-- Hub Hero Banner -->
-      <div class="bg-gradient-to-r from-zinc-900 via-zinc-900 to-zinc-950 rounded-2xl border border-zinc-800 p-5 sm:p-7 text-white shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div class="space-y-1.5 max-w-2xl">
+      <div class="bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 rounded-2xl border border-zinc-800/80 p-5 sm:p-7 text-white shadow-md flex flex-col md:flex-row md:items-center justify-between gap-5">
+        <div class="space-y-2 max-w-2xl">
           <div class="flex items-center gap-2">
-            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">Multi-Form Hub</span>
-            <span id="hubTotalFormsCount" class="text-xs text-zinc-400 font-mono">1 Formulir Terdaftar</span>
+            <span class="px-2.5 py-0.5 rounded-full text-[10.5px] font-mono font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+              Multi-Form Hub
+            </span>
+            <span id="hubTotalFormsCount" class="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-zinc-800 text-zinc-300 border border-zinc-700">
+              1 Formulir Terdaftar
+            </span>
           </div>
-          <h2 class="text-base sm:text-xl font-bold text-white tracking-tight">Pusat Pengelolaan Seluruh Formulir Penilaian</h2>
-          <p class="text-xs sm:text-sm text-zinc-400 leading-relaxed">
-            Buat form baru terpisah untuk mata kuliah atau kelas lain. Setiap form memiliki kode PIN unik (4–5 karakter), tautan mandiri, dan database terisolasi.
+          <h2 class="text-lg sm:text-2xl font-bold text-white tracking-tight leading-tight">
+            Pusat Pengelolaan Seluruh Formulir Penilaian
+          </h2>
+          <p class="text-xs sm:text-sm text-zinc-400 leading-relaxed font-normal">
+            Buat formulir terpisah untuk setiap mata kuliah atau kelas perkuliahan. Setiap form memiliki kode PIN unik (4–5 karakter), tautan mandiri, dan basis data terisolasi.
           </p>
         </div>
         <div class="flex items-center gap-2.5 flex-shrink-0">
           <button 
             type="button" 
             onclick="openCreateFormModal()" 
-            class="w-full sm:w-auto px-4 sm:px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-semibold shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
+            class="w-full sm:w-auto px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-98 text-white text-xs sm:text-sm font-bold shadow-md flex items-center justify-center gap-2 transition cursor-pointer"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
             </svg>
-            <span>+ Buat Formulir Baru</span>
+            <span>Buat Formulir Baru</span>
           </button>
         </div>
       </div>
 
       <!-- Filter & Search Toolbar -->
-      <div class="bg-white rounded-xl border border-zinc-200 p-3 sm:p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+      <div class="bg-white rounded-2xl border border-zinc-200/90 p-3 sm:p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
         <div class="relative flex-1">
           <input 
             type="text" 
             id="searchHubFormsInput" 
             oninput="renderHubFormsGrid()" 
             placeholder="Cari judul formulir, mata kuliah, dosen, atau kode PIN (contoh: BK5E)..." 
-            class="w-full pl-9 pr-4 py-2 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none transition bg-zinc-50 focus:bg-white"
+            class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-zinc-200 text-xs focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900/10 outline-none transition bg-zinc-50/70 focus:bg-white text-zinc-900 placeholder:text-zinc-400"
           >
-          <svg class="w-4 h-4 text-zinc-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 text-zinc-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
           </svg>
         </div>
@@ -516,7 +522,7 @@
           <select 
             id="filterHubStatusSelect" 
             onchange="renderHubFormsGrid()" 
-            class="px-3 py-2 rounded-lg border border-zinc-300 bg-white text-xs font-medium focus:border-zinc-900 outline-none cursor-pointer"
+            class="px-3.5 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-700 focus:border-zinc-900 outline-none cursor-pointer hover:border-zinc-300 transition"
           >
             <option value="ALL">Semua Status</option>
             <option value="AKTIF">Aktif Saja</option>
@@ -526,7 +532,7 @@
             type="button" 
             onclick="fetchFormsRegistry(true)" 
             title="Segarkan Daftar Form" 
-            class="p-2 rounded-lg border border-zinc-200 hover:bg-zinc-100 text-zinc-600 transition cursor-pointer"
+            class="p-2.5 rounded-xl border border-zinc-200 hover:bg-zinc-100 hover:border-zinc-300 text-zinc-600 active:scale-95 transition cursor-pointer"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
@@ -2212,7 +2218,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       const statusFilter = document.getElementById("filterHubStatusSelect")?.value || "ALL";
 
       let visibleCount = 0;
-      countEl.textContent = `${formsRegistryList.length} Formulir Terdaftar`;
+      if (countEl) countEl.textContent = `${formsRegistryList.length} Formulir Terdaftar`;
 
       formsRegistryList.forEach(form => {
         const fId = form.formId || DEFAULT_PRIMARY_FORM_ID;
@@ -2237,63 +2243,63 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         visibleCount++;
 
         const isPrimary = fId === DEFAULT_PRIMARY_FORM_ID;
-        const statusBadgeColor = fStatus === 'AKTIF' ? 'bg-emerald-50 text-emerald-700 border-emerald-300' : 'bg-rose-50 text-rose-700 border-rose-300';
+        const statusBadge = fStatus === 'AKTIF'
+          ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10.5px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-300 shadow-2xs"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span><span>Aktif</span></span>`
+          : `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10.5px] font-bold bg-zinc-100 text-zinc-600 border border-zinc-300 shadow-2xs"><span class="w-1.5 h-1.5 rounded-full bg-zinc-400"></span><span>Ditutup</span></span>`;
 
         const card = document.createElement("div");
-        card.className = "bg-white rounded-2xl border border-zinc-200 p-5 shadow-xs flex flex-col justify-between space-y-4 hover:border-zinc-300 transition";
+        card.className = "bg-white rounded-2xl border border-zinc-200/90 p-5 shadow-xs flex flex-col justify-between space-y-4 hover:shadow-md hover:border-zinc-300 transition-all duration-200 group";
 
         card.innerHTML = `
-          <div class="space-y-2.5">
+          <div class="space-y-3">
             <div class="flex items-center justify-between gap-2">
               <div class="flex items-center gap-1.5">
-                <span class="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200 font-mono font-extrabold text-xs tracking-wider">
+                <span class="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200/80 font-mono font-bold text-xs tracking-wider">
                   PIN: ${fId}
                 </span>
-                ${isPrimary ? '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-zinc-100 text-zinc-600 border border-zinc-200">Utama</span>' : ''}
+                ${isPrimary ? '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-zinc-100 text-zinc-700 border border-zinc-200">Utama</span>' : ''}
               </div>
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ${statusBadgeColor}">
-                ${fStatus}
-              </span>
+              ${statusBadge}
             </div>
 
-            <div>
-              <h3 class="font-bold text-sm text-zinc-900 leading-snug line-clamp-2">${fTitle}</h3>
-              <p class="text-xs font-medium text-zinc-600 mt-0.5 truncate">${fMatkul}</p>
-              <p class="text-[11px] text-zinc-400 truncate mt-0.5">Dosen: ${fDosen} • Kelas ${form.kelas || '-'}</p>
+            <div class="space-y-1">
+              <h3 class="font-bold text-sm sm:text-base text-zinc-900 leading-snug line-clamp-2 group-hover:text-indigo-600 transition-colors">${fTitle}</h3>
+              <p class="text-xs font-semibold text-zinc-600 truncate">${fMatkul}</p>
+              <p class="text-[11.5px] text-zinc-400 truncate">Dosen: ${fDosen} • Kelas ${form.kelas || '-'}</p>
             </div>
 
-            <div class="grid grid-cols-2 gap-2 pt-2 border-t border-zinc-100 text-[11px]">
-              <div class="bg-zinc-50 p-2 rounded-lg border border-zinc-100">
-                <span class="text-zinc-400 block text-[10px]">Sesi Aktif:</span>
-                <span class="font-bold text-zinc-800">${fSesi}</span>
+            <div class="grid grid-cols-2 gap-2 pt-2.5 border-t border-zinc-100 text-xs">
+              <div class="bg-zinc-50/80 p-2.5 rounded-xl border border-zinc-100">
+                <span class="text-zinc-400 block text-[10px] font-medium">Sesi Aktif</span>
+                <span class="font-bold text-zinc-800 truncate block mt-0.5">${fSesi}</span>
               </div>
-              <div class="bg-zinc-50 p-2 rounded-lg border border-zinc-100">
-                <span class="text-zinc-400 block text-[10px]">Respons Masuk:</span>
-                <span class="font-bold text-emerald-700">${fResponses} Data</span>
+              <div class="bg-zinc-50/80 p-2.5 rounded-xl border border-zinc-100">
+                <span class="text-zinc-400 block text-[10px] font-medium">Respons Masuk</span>
+                <span class="font-bold text-emerald-700 truncate block mt-0.5">${fResponses} Data</span>
               </div>
             </div>
           </div>
 
-          <div class="space-y-2 pt-2 border-t border-zinc-100">
+          <div class="space-y-2 pt-2.5 border-t border-zinc-100">
             <button 
               type="button" 
               onclick="openFormWorkspace('${fId}')" 
-              class="w-full py-2.5 px-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-98 cursor-pointer shadow-xs"
+              class="w-full py-2.5 px-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 active:scale-98 text-white text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer shadow-xs"
             >
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
               </svg>
               <span>Kelola Formulir Ini</span>
             </button>
 
-            <div class="grid grid-cols-2 gap-1.5">
+            <div class="grid grid-cols-2 gap-2">
               <button 
                 type="button" 
                 onclick="openShareModal('${fId}')" 
-                class="py-1.5 px-2 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-[11px] font-medium flex items-center justify-center gap-1 cursor-pointer transition"
+                class="py-2 px-2.5 rounded-xl border border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300 active:scale-98 text-zinc-700 text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition shadow-2xs"
               >
-                <svg class="w-3 h-3 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
                 </svg>
                 <span>Bagikan (QR)</span>
@@ -2302,9 +2308,9 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
               <button 
                 type="button" 
                 onclick="cloneFormAction('${fId}')" 
-                class="py-1.5 px-2 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-[11px] font-medium flex items-center justify-center gap-1 cursor-pointer transition"
+                class="py-2 px-2.5 rounded-xl border border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300 active:scale-98 text-zinc-700 text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition shadow-2xs"
               >
-                <svg class="w-3 h-3 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path>
                 </svg>
                 <span>Kloning</span>
