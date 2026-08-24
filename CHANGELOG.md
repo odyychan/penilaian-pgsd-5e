@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.38] - 2026-08-24
+
+### 🛠️ Perbaikan Konflik Tampilan Tab Workspace & Relokasi Widget Sesi
+- **Relokasi Widget Kontrol Sesi Aktif (*Scoped Session Control Widget*):**
+  - Memindahkan komponen widget *Sesi Tampil Minggu Ini* ke dalam kontainer Tab Kelompok (`#adminView_data`).
+  - Menghilangkan konflik visual di mana widget kontrol sesi sebelumnya selalu muncul di atas semua tab (termasuk pada Tab *Pertanyaan*, *Setelan*, *Respons*, dan *Sistem*).
+- **Penyelarasan Tab Aktif Default Workspace:**
+  - Mengonfigurasi Tab **Pertanyaan** (`config`) sebagai tab aktif utama secara konsisten pada saat pertama kali membuka workspace form admin (`admin.html?id=...`).
+  - Memperbarui fungsi `switchAdminTab()` agar menyinkronkan status visual tombol (warna latar putih aktif, warna ikon indigo, teks tebal) dan visibilitas kontainer tampilan secara 100% harmonis dan bebas tumpang tindih.
+
+---
+
 ## [2.2.37] - 2026-08-24
 
 ### 🎯 Sinkronisasi Total Konsistensi Form Builder Canvas & Pratinjau Langsung (Simulator & Client View)
