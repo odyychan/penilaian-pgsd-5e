@@ -4,6 +4,24 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.14] - 2026-08-24
+
+### 🖱️ Right-Click Math Context Menu & Text Selection Math Converter
+- **Fitur Blok & Klik Kanan Konversi Formula Matematika (Smart Selection Menu):**
+  - Pengguna kini dapat memblok (*highlight/select*) teks apa pun di dalam input (judul pertanyaan, deskripsi bagian, atau opsi jawaban) lalu melakukan **Klik Kanan** untuk memunculkan menu konteks khusus:
+    - **`∑ Jadikan Formula ($...$)`**: Membungkus teks terpilih menjadi rumus matematika instan.
+    - **`x² Ubah ke Pangkat`**: Mengubah teks terpilih menjadi format eksponen `^{...}`.
+    - **`x₁ Ubah ke Indeks`**: Mengubah teks terpilih menjadi format subskrip `_{...}`.
+    - **`½ Ubah ke Pecahan`**: Mengubah teks terpilih menjadi pecahan `\frac{...}{b}`.
+    - **`√ Ubah ke Akar`**: Mengubah teks terpilih menjadi akar kuadrat `\sqrt{...}`.
+    - **`✕ Hapus Format Formula ($)`**: Mengembalikan rumus ke teks biasa.
+- **Gelembung Aksi Melayang (*Floating Selection Mini-Bubble*):**
+  - Menampilkan tombol aksi cepat melayang saat teks diblok di perangkat desktop maupun sentuhan mobile sehingga konversi formula dapat dilakukan dengan 1 kali ketuk tanpa klik kanan.
+- **Pencegahan Konflik Total dengan Teks Biasa (Zero Conflict):**
+  - Menghilangkan ambiguitas dan *false positives* pada kalimat bahasa Indonesia biasa dengan sistem berbasis *explicit selection* dan *safe math auto-formatting*.
+
+---
+
 ## [2.2.13] - 2026-08-24
 
 ### 🧠 Conflict-Free Smart Math UX, Quick Symbol Palette & Compact In-Place Live Preview

@@ -2080,13 +2080,14 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
     
     // =========================================================================
-    // UNIVERSAL SMART MATH & KATEX AUTO-RENDER ENGINE (ROCK-SOLID & CONFLICT-FREE)
+    // UNIVERSAL SMART MATH & KATEX AUTO-RENDER ENGINE (CONFLICT-FREE & ULTRA PRECISE)
     // =========================================================================
     function smartMathFormat(text) {
       if (!text || typeof text !== 'string') return "";
 
       // 0. Normalize unicode math from Microsoft Word / Mobile keyboards
       let res = text
+        // Superscripts: ⁰ ¹ ² ³ ⁴ ⁵ ⁶ ⁷ ⁸ ⁹ ⁺ ⁻ ⁼ ⁽ ⁾ ⁿ
         .replace(/([a-zA-Z0-9\)])[⁰]/g, '$1^{0}')
         .replace(/([a-zA-Z0-9\)])[¹]/g, '$1^{1}')
         .replace(/([a-zA-Z0-9\)])[²]/g, '$1^{2}')
@@ -2100,6 +2101,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         .replace(/([a-zA-Z0-9\)])[ⁿ]/g, '$1^{n}')
         .replace(/([a-zA-Z0-9\)])[⁺]/g, '$1^{+}')
         .replace(/([a-zA-Z0-9\)])[⁻]/g, '$1^{-}')
+        // Subscripts: ₀ ₁ ₂ ₃ ₄ ₅ ₆ ₇ ₈ ₉ ₊ ₋ ₌ ₍ ₎ ₐ ₑ ₒ ₓ ₕ ₖ ₗ ₘ ₙ ₚ ₛ ₜ
         .replace(/([a-zA-Z0-9\)])[₀]/g, '$1_{0}')
         .replace(/([a-zA-Z0-9\)])[₁]/g, '$1_{1}')
         .replace(/([a-zA-Z0-9\)])[₂]/g, '$1_{2}')
@@ -2114,6 +2116,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         .replace(/([a-zA-Z0-9\)])[ᵢ]/g, '$1_{i}')
         .replace(/([a-zA-Z0-9\)])[ⱼ]/g, '$1_{j}')
         .replace(/([a-zA-Z0-9\)])[ₓ]/g, '$1_{x}')
+        // Common Math Symbols
         .replace(/√\s*(\([^\)]+\)|[a-zA-Z0-9]+)/g, '\\sqrt{$1}')
         .replace(/√/g, '\\sqrt{}')
         .replace(/±/g, '\\pm ')
@@ -2137,41 +2140,19 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         .replace(/∑/g, '\\sum ')
         .replace(/∫/g, '\\int ');
 
+      // 1. Explicit math delimiters ($...$, $$...$$, \(...\), \[...\])
       if (res.includes('$') || res.includes('\\(') || res.includes('\\[') || res.includes('$$')) {
         return res;
       }
 
-      const hasLatexCommands = /\\(frac|sqrt|int|sum|prod|alpha|beta|gamma|theta|lambda|pi|pm|times|div|le|ge|ne|approx|infty|begin|mathbf|text|lim|det|log|ln|sin|cos|tan)\b/.test(res);
-      const hasCaretOrSubscript = /([a-zA-Z0-9\)]+[\^_][a-zA-Z0-9\{\}\(\)\+\-]+)/.test(res);
-
-      if (!hasLatexCommands && !hasCaretOrSubscript) {
-        return res;
-      }
-
-      const hasWordTokens = /\b(jika|dan|atau|adalah|nilai|hitunglah|apakah|pada|yang|dari|untuk|tentukan|sebuah|berapa|berapakah|bagaimana|mengapa|apa|tentang|hasil|persamaan|fungsi|berikut|grafik|diagram|rumus|soal|jawaban|pertanyaan|turunan|pertama|pilihlah|salah|satu|paling|tepat|di|bawah|ini)\b/i.test(res);
-
-      if (!hasWordTokens) {
+      // 2. Pure LaTeX commands without $ (e.g. \frac{a}{b}, \sqrt{x})
+      if (/\\(frac|sqrt|int|sum|prod|alpha|beta|gamma|theta|lambda|pi|pm|times|div|le|ge|ne|approx|infty|begin|mathbf|lim|det|log|ln|sin|cos|tan)\b/.test(res)) {
         return `$${res.trim()}$`;
       }
 
-      res = res.replace(/(\b[a-zA-Z]\([a-zA-Z0-9]\)\s*=\s*[a-zA-Z0-9\(\)\+\-\*/\^_\s\\]+?(?=[,\.?!;:]|\s+(?:di|pada|jika|dan|atau|untuk|dengan|yang|adalah|ini|bawah)\b|$))/g, function(m) {
-        return `$${m.trim()}$`;
-      });
-
-      res = res.replace(/(\b[a-zA-Z0-9\)]+[\^_][a-zA-Z0-9\{\}\(\)\+\-]+)/g, function(match, p1, offset, str) {
-        const before = str.slice(0, offset);
-        const dollarCount = (before.match(/\$/g) || []).length;
-        if (dollarCount % 2 === 1) return match;
-        return `$${match}$`;
-      });
-
-      if (hasLatexCommands) {
-        res = res.replace(/(\\[a-zA-Z]+(\{[^\}]*\}|\[[^\]]*\])*(\s*[\+\-\*\/=><]\s*[a-zA-Z0-9\\\{\}\^_]+)*)/g, function(match, p1, p2, p3, offset, str) {
-          const before = str.slice(0, offset);
-          const dollarCount = (before.match(/\$/g) || []).length;
-          if (dollarCount % 2 === 1) return match;
-          return `$${match}$`;
-        });
+      // 3. Standalone caret / subscript term (e.g. x^2, x^{2}, y_1, (a+b)^2)
+      if (/^[a-zA-Z0-9\(\)]+[\^_][a-zA-Z0-9\{\}\(\)\+\-]+$/.test(res.trim())) {
+        return `$${res.trim()}$`;
       }
 
       return res;
@@ -2220,8 +2201,8 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
                   delimiters: [
                     { left: '$$', right: '$$', display: true },
                     { left: '$', right: '$', display: false },
-                    { left: '\\(', right: '\\)', display: false },
-                    { left: '\\[', right: '\\]', display: true }
+                    { left: '\(', right: '\)', display: false },
+                    { left: '\[', right: '\]', display: true }
                   ],
                   throwOnError: false
                 });
@@ -2280,6 +2261,159 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       input.setSelectionRange(start + insertVal.length, start + insertVal.length);
 
       handleInlineFieldUpdate(sIdx, fIdx, 'label', input.value);
+    }
+
+
+    // =========================================================================
+    // SMART MATH SELECTION & CONTEXT MENU ENGINE
+    // =========================================================================
+    let activeMathSelectionTarget = null;
+    let activeMathSelectionRange = { start: 0, end: 0, text: "" };
+
+    function initMathContextMenuEvents() {
+      document.addEventListener('contextmenu', function(e) {
+        const input = e.target;
+        if (isMathEligibleInput(input)) {
+          const start = input.selectionStart;
+          const end = input.selectionEnd;
+          const selected = (input.value || '').substring(start, end).trim();
+          
+          if (selected.length > 0) {
+            e.preventDefault();
+            activeMathSelectionTarget = input;
+            activeMathSelectionRange = { start, end, text: selected };
+            showMathContextMenu(e.clientX, e.clientY, selected);
+            return;
+          }
+        }
+        hideMathContextMenu();
+      });
+
+      document.addEventListener('mouseup', function(e) {
+        setTimeout(() => {
+          const input = document.activeElement;
+          if (isMathEligibleInput(input)) {
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+            const selected = (input.value || '').substring(start, end).trim();
+            if (selected.length > 0 && !isContextMenuOpen()) {
+              activeMathSelectionTarget = input;
+              activeMathSelectionRange = { start, end, text: selected };
+              showFloatingSelectionBubble(e.clientX, e.clientY);
+              return;
+            }
+          }
+          hideFloatingSelectionBubble();
+        }, 50);
+      });
+
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('#mathSelectionContextMenu') && !e.target.closest('#mathSelectionFloatingBubble')) {
+          hideMathContextMenu();
+          hideFloatingSelectionBubble();
+        }
+      });
+
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          hideMathContextMenu();
+          hideFloatingSelectionBubble();
+        }
+      });
+    }
+
+    function isMathEligibleInput(el) {
+      if (!el || (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA')) return false;
+      return !!el.closest('#dynamicStagesCanvasContainer, #modalAttachQuestionMedia, #builderQuickEditContainer');
+    }
+
+    function showMathContextMenu(x, y, text) {
+      hideFloatingSelectionBubble();
+      const menu = document.getElementById("mathSelectionContextMenu");
+      const snippet = document.getElementById("mathContextMenuSelectedSnippet");
+      if (!menu) return;
+
+      if (snippet) snippet.textContent = `"${text.length > 25 ? text.slice(0, 25) + '...' : text}"`;
+
+      menu.classList.remove("hidden");
+      const rect = menu.getBoundingClientRect();
+      const posX = Math.min(x, window.innerWidth - rect.width - 12);
+      const posY = Math.min(y, window.innerHeight - rect.height - 12);
+
+      menu.style.left = `${Math.max(12, posX)}px`;
+      menu.style.top = `${Math.max(12, posY)}px`;
+    }
+
+    function hideMathContextMenu() {
+      const menu = document.getElementById("mathSelectionContextMenu");
+      if (menu) menu.classList.add("hidden");
+    }
+
+    function showFloatingSelectionBubble(x, y) {
+      const bubble = document.getElementById("mathSelectionFloatingBubble");
+      if (!bubble) return;
+      bubble.classList.remove("hidden");
+      const posX = Math.max(70, Math.min(window.innerWidth - 70, x));
+      const posY = Math.max(40, y - 35);
+      bubble.style.left = `${posX}px`;
+      bubble.style.top = `${posY}px`;
+    }
+
+    function hideFloatingSelectionBubble() {
+      const bubble = document.getElementById("mathSelectionFloatingBubble");
+      if (bubble) bubble.classList.add("hidden");
+    }
+
+    function isContextMenuOpen() {
+      const menu = document.getElementById("mathSelectionContextMenu");
+      return menu && !menu.classList.contains("hidden");
+    }
+
+    function openMathContextMenuFromBubble(e) {
+      e.stopPropagation();
+      const bubble = document.getElementById("mathSelectionFloatingBubble");
+      if (!bubble) return;
+      const rect = bubble.getBoundingClientRect();
+      showMathContextMenu(rect.left + rect.width / 2, rect.bottom + 5, activeMathSelectionRange.text);
+    }
+
+    function applyMathTransformation(type) {
+      const input = activeMathSelectionTarget;
+      if (!input) return;
+
+      const { start, end, text } = activeMathSelectionRange;
+      const fullVal = input.value || "";
+      let transformed = text;
+
+      if (type === 'WRAP_FORMULA') {
+        if (text.startsWith('$') && text.endsWith('$') && text.length >= 2) {
+          transformed = text.slice(1, -1);
+        } else {
+          transformed = `$${text}$`;
+        }
+      } else if (type === 'POWER') {
+        transformed = `$x^{${text.replace(/^\$|\$$/g, '')}}$`;
+      } else if (type === 'INDEX') {
+        transformed = `$x_{${text.replace(/^\$|\$$/g, '')}}$`;
+      } else if (type === 'FRACTION') {
+        transformed = `$\\frac{${text.replace(/^\$|\$$/g, '')}}{b}$`;
+      } else if (type === 'SQRT') {
+        transformed = `$\\sqrt{${text.replace(/^\$|\$$/g, '')}}$`;
+      } else if (type === 'UNWRAP') {
+        transformed = text.replace(/\$/g, '');
+      }
+
+      const newVal = fullVal.substring(0, start) + transformed + fullVal.substring(end);
+      input.value = newVal;
+      input.focus();
+      input.setSelectionRange(start, start + transformed.length);
+
+      // Trigger input event to update model and draft
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+
+      hideMathContextMenu();
+      hideFloatingSelectionBubble();
+      showAdminToast("Formula matematika diterapkan!", "info");
     }
 
     // =========================================================================
@@ -7639,6 +7773,81 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       </div>
 
     </div>
+  </div>
+
+
+  <!-- ========================================================================= -->
+  <!-- SMART MATH RIGHT-CLICK CONTEXT MENU & FLOATING SELECTION BUBBLE -->
+  <!-- ========================================================================= -->
+  <div id="mathSelectionContextMenu" class="fixed z-9999 hidden bg-white/95 backdrop-blur-md rounded-2xl border border-zinc-200/90 shadow-2xl p-1.5 min-w-[240px] text-xs transition-all duration-150 animate-in fade-in zoom-in-95">
+    <div class="px-3 py-2 border-b border-zinc-100 mb-1">
+      <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-1.5">
+        <span class="w-3.5 h-3.5 rounded bg-indigo-600 text-white font-mono text-[9px] flex items-center justify-center font-bold">∑</span>
+        <span>Konversi Formula Matematika</span>
+      </span>
+      <p id="mathContextMenuSelectedSnippet" class="text-[11px] text-zinc-600 font-mono truncate mt-0.5 max-w-[210px] font-medium">"x^2"</p>
+    </div>
+
+    <div class="space-y-0.5">
+      <button type="button" onclick="applyMathTransformation('WRAP_FORMULA')" class="w-full px-3 py-2 rounded-xl text-left hover:bg-indigo-50 text-indigo-950 hover:text-indigo-700 font-semibold flex items-center justify-between gap-2 transition cursor-pointer group">
+        <span class="flex items-center gap-2">
+          <span class="w-5 font-mono font-bold text-indigo-600 text-center">∑</span>
+          <span>Jadikan Formula ($...$)</span>
+        </span>
+        <span class="text-[10px] text-indigo-400 font-mono group-hover:text-indigo-600">$x$</span>
+      </button>
+
+      <button type="button" onclick="applyMathTransformation('POWER')" class="w-full px-3 py-2 rounded-xl text-left hover:bg-indigo-50 text-zinc-800 hover:text-indigo-700 font-medium flex items-center justify-between gap-2 transition cursor-pointer">
+        <span class="flex items-center gap-2">
+          <span class="w-5 font-mono font-bold text-zinc-500 text-center">x²</span>
+          <span>Ubah ke Pangkat</span>
+        </span>
+        <span class="text-[10px] text-zinc-400 font-mono">^{...}</span>
+      </button>
+
+      <button type="button" onclick="applyMathTransformation('INDEX')" class="w-full px-3 py-2 rounded-xl text-left hover:bg-indigo-50 text-zinc-800 hover:text-indigo-700 font-medium flex items-center justify-between gap-2 transition cursor-pointer">
+        <span class="flex items-center gap-2">
+          <span class="w-5 font-mono font-bold text-zinc-500 text-center">x₁</span>
+          <span>Ubah ke Indeks</span>
+        </span>
+        <span class="text-[10px] text-zinc-400 font-mono">_{...}</span>
+      </button>
+
+      <button type="button" onclick="applyMathTransformation('FRACTION')" class="w-full px-3 py-2 rounded-xl text-left hover:bg-indigo-50 text-zinc-800 hover:text-indigo-700 font-medium flex items-center justify-between gap-2 transition cursor-pointer">
+        <span class="flex items-center gap-2">
+          <span class="w-5 font-mono font-bold text-zinc-500 text-center">½</span>
+          <span>Ubah ke Pecahan</span>
+        </span>
+        <span class="text-[10px] text-zinc-400 font-mono">\\frac</span>
+      </button>
+
+      <button type="button" onclick="applyMathTransformation('SQRT')" class="w-full px-3 py-2 rounded-xl text-left hover:bg-indigo-50 text-zinc-800 hover:text-indigo-700 font-medium flex items-center justify-between gap-2 transition cursor-pointer">
+        <span class="flex items-center gap-2">
+          <span class="w-5 font-mono font-bold text-zinc-500 text-center">√</span>
+          <span>Ubah ke Akar</span>
+        </span>
+        <span class="text-[10px] text-zinc-400 font-mono">\\sqrt</span>
+      </button>
+    </div>
+
+    <div class="border-t border-zinc-100 mt-1 pt-1">
+      <button type="button" onclick="applyMathTransformation('UNWRAP')" class="w-full px-3 py-1.5 rounded-xl text-left hover:bg-rose-50 text-rose-600 font-medium flex items-center gap-2 transition cursor-pointer">
+        <span class="w-5 text-center">✕</span>
+        <span>Hapus Format Formula ($)</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Floating Selection Mini-Bubble (For 1-tap conversion) -->
+  <div id="mathSelectionFloatingBubble" class="fixed z-9998 hidden bg-zinc-900 text-white rounded-xl shadow-2xl px-2.5 py-1.5 text-xs flex items-center gap-2 transition-all duration-150">
+    <button type="button" onclick="applyMathTransformation('WRAP_FORMULA')" class="font-bold flex items-center gap-1 hover:text-indigo-300 transition cursor-pointer">
+      <span class="font-mono text-indigo-400 font-bold">∑</span>
+      <span>Jadikan Math</span>
+    </button>
+    <span class="text-zinc-600">|</span>
+    <button type="button" onclick="openMathContextMenuFromBubble(event)" class="text-zinc-400 hover:text-white transition cursor-pointer text-[11px]" title="Pilihan Rumus Lainnya">
+      <span>Opsi ▾</span>
+    </button>
   </div>
 
 </body>
