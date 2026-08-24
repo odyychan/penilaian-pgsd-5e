@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.90] - 2026-08-24
+
+### 🛡️ 2-Tier Anti-Collision Sticky Form Builder Toolbar & Cross-Device Responsive Layout
+- **Arsitektur 2-Tier Terisolasi (*Zero Overlap & Zero Collision*):**
+  - Memisahkan area judul & badge status (**Tier 1**) dari baris tombol kontrol aksi (**Tier 2**) dengan batas garis pemisah yang tegas.
+  - Menghilangkan sepenuhnya potensi tombol melompat ke atas badge atau teks pada seluruh resolusi laptop/tablet maupun tingkat zoom peramban.
+- **Responsivitas Sempurna di Layar Mobile (Mobile-S 320px, Mobile-M 375px, Mobile-L 412px):**
+  - Mengatur tombol kontrol utama dalam grid 2×2 yang seimbang dan lapang dengan target sentuh $\ge 44 	imes 44	ext{ px}$.
+  - Tombol Undo, Redo, dan Riwayat tersusun dalam toolstrip tersendiri yang ringkas di samping tombol aksi.
+
+---
+
 ## [2.1.89] - 2026-08-24
 
 ### 📌 Sticky Floating Builder Toolbar & Single-Row Status Badge Alignment
