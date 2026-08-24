@@ -4657,7 +4657,8 @@
         presentatorTerbaik: selectedBestPresenters,
         evaluasiDetail: evaluasiDetail,
         customAnswers: customAnswers,
-        uploadedFiles: mergedUploadedFiles
+        uploadedFiles: mergedUploadedFiles,
+        driveFolderName: appConfig["Google_Drive_Folder_Name"] || localStorage.getItem("PGSD_DRIVE_FOLDER_NAME") || "Penilaian PGSD 5E - Dokumen"
       };
 
       const submitBtn = document.getElementById("submitBtn");

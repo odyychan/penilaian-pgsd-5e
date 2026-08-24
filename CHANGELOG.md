@@ -4,6 +4,19 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.45] - 2026-08-24
+
+### 🎛️ Antarmuka Pengaturan Dinamis Spreadsheet & Drive Serta Modal Skrip Universal
+- **Pengaturan Integrasi Dinamis di Panel Admin:**
+  - Menambahkan modul *Setelan Integrasi Spreadsheet & Google Drive* pada tab Sistem di [admin.html](file:///e:/Data/GitHub/Project%20Dede/admin.html).
+  - Pengguna dapat mengganti URL Webhook Spreadsheet dan nama folder Google Drive kapan saja secara langsung dari peramban tanpa perlu mengubah atau mengedit baris kode program.
+- **Penyematan Modal Skrip Mini 30-Baris Universal (*Set-and-Forget*):**
+  - Menyediakan modal bantuan terintegrasi lengkap dengan fitur *1-Click Copy* kode skrip mini 30-baris untuk memudahkan pengaitan ke Google Spreadsheet baru hanya dalam 1 menit.
+- **Penyelarasan Payload Dinamis Pengiriman Mahasiswa:**
+  - Memperbarui [index.html](file:///e:/Data/GitHub/Project%20Dede/index.html) agar menyertakan target folder Google Drive dinamis saat melakukan duplikasi ke Spreadsheet dosen.
+
+---
+
 ## [2.2.44] - 2026-08-24
 
 ### 🚀 Eliminasi Total Ketergantungan Google Apps Script & Otonomi Penuh Agen (Supabase Murni)

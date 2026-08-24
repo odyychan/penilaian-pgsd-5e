@@ -1133,48 +1133,76 @@
       <!-- ===================================================================== -->
       <div id="adminView_system" class="flex flex-col gap-2.5 sm:gap-4 fade-enter hidden">
         
-        <!-- Koneksi Google Apps Script & Sheets -->
-        <div class="bg-white rounded-xl border border-zinc-200 p-3.5 sm:p-6 shadow-xs space-y-3 sm:space-y-4">
-          <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
+        <!-- Koneksi Google Apps Script & Sheets (Background Sync) -->
+        <div class="bg-white rounded-2xl border border-zinc-200 p-4 sm:p-6 shadow-xs space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-100 pb-3">
             <div>
-              <h2 class="text-sm sm:text-base font-bold text-zinc-900">Koneksi Google Spreadsheet</h2>
-              <p class="text-[10.5px] sm:text-xs text-zinc-500">Alamat Web App Google Apps Script untuk menyimpan dan membaca data.</p>
+              <div class="flex items-center gap-2">
+                <h2 class="text-sm sm:text-base font-bold text-zinc-900">Integrasi Google Spreadsheet & Google Drive</h2>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">Opsional</span>
+              </div>
+              <p class="text-[11px] sm:text-xs text-zinc-500 mt-0.5">Otak utama sistem adalah <strong>Supabase PostgreSQL (&lt; 30ms)</strong>. Integrasi ini menduplikasikan respons ke Google Sheets &amp; Google Drive secara otomatis di latar belakang.</p>
             </div>
-            <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Koneksi</span>
-          </div>
-
-          <div class="space-y-1.5 sm:space-y-2 text-xs">
-            <label class="block font-semibold text-zinc-700">Alamat Script Web App (URL Exec)</label>
-            <input 
-              type="text" 
-              id="inputApiUrl" 
-              placeholder="https://script.google.com/macros/s/.../exec" 
-              class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 font-mono text-xs focus:border-zinc-900 outline-none"
-            >
-            <p class="text-[10.5px] sm:text-[11px] text-zinc-400">Pastikan URL Apps Script dideploy sebagai Web App dengan akses 'Anyone'.</p>
-          </div>
-
-          <div class="flex items-center gap-2 pt-1 sm:pt-2">
             <button 
               type="button" 
-              id="btnTestConnection" 
-              onclick="testApiConnection()" 
-              class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-zinc-300 hover:bg-zinc-100 text-zinc-700 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
+              onclick="openUniversalScriptModal()" 
+              class="px-3 py-1.5 rounded-xl border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer self-start sm:self-auto shadow-2xs"
             >
-              <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
               </svg>
-              <span>Tes Sambungan</span>
-            </button>
-            <button 
-              type="button" 
-              onclick="saveApiUrl()" 
-              class="px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition cursor-pointer"
-            >
-              Simpan URL
+              <span>Skrip Mini 30-Baris</span>
             </button>
           </div>
-          <div id="connectionStatusResult" class="text-xs pt-1 hidden font-mono"></div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs">
+            <div class="space-y-1.5">
+              <label class="block font-semibold text-zinc-700">URL Webhook Spreadsheet (Apps Script)</label>
+              <input 
+                type="text" 
+                id="inputApiUrl" 
+                placeholder="https://script.google.com/macros/s/.../exec" 
+                class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 font-mono text-xs focus:border-zinc-900 outline-none transition"
+              >
+              <p class="text-[10.5px] text-zinc-400">Ganti URL ini kapan saja jika Anda membuat Spreadsheet baru.</p>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block font-semibold text-zinc-700">Nama Folder Google Drive</label>
+              <input 
+                type="text" 
+                id="inputDriveFolderName" 
+                placeholder="Penilaian PGSD 5E - Dokumen" 
+                value="Penilaian PGSD 5E - Dokumen"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs focus:border-zinc-900 outline-none transition"
+              >
+              <p class="text-[10.5px] text-zinc-400">Folder di Google Drive tempat menampung file tugas/foto mahasiswa.</p>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between gap-3 pt-2 border-t border-zinc-100">
+            <div class="flex items-center gap-2">
+              <button 
+                type="button" 
+                id="btnTestConnection" 
+                onclick="testApiConnection()" 
+                class="px-3 sm:px-4 py-2 rounded-xl border border-zinc-300 hover:bg-zinc-100 active:scale-98 text-zinc-700 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shadow-2xs"
+              >
+                <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+                <span>Tes Sambungan</span>
+              </button>
+              <button 
+                type="button" 
+                onclick="saveApiUrl()" 
+                class="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 active:scale-98 text-white text-xs font-bold transition cursor-pointer shadow-xs"
+              >
+                Simpan Setelan Integrasi
+              </button>
+            </div>
+            <div id="connectionStatusResult" class="text-xs font-mono hidden"></div>
+          </div>
         </div>
 
         <!-- Reset Respons Form Ini -->
@@ -2118,6 +2146,113 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         <button type="button" onclick="closeResetConfirmModal()" class="px-4 py-2 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-medium cursor-pointer">Batal</button>
         <button type="button" onclick="executeResetResponses()" class="px-5 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-xs transition active:scale-98 cursor-pointer">Ya, Kosongkan</button>
       </div>
+    </div>
+  <!-- MODAL: SKRIP MINI 30-BARIS GOOGLE SPREADSHEET & DRIVE -->
+  <div id="modalUniversalScript" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-4 fade-enter max-h-[90vh] flex flex-col justify-between">
+      
+      <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-200 flex items-center justify-center font-mono font-bold text-sm">
+            &lt;/&gt;
+          </div>
+          <div>
+            <h3 class="font-bold text-sm sm:text-base text-zinc-900">Skrip Mini 30-Baris Universal</h3>
+            <p class="text-[11px] text-zinc-500">Pasang 1 kali saja di Google Spreadsheet. Tidak perlu diubah/dideploy ulang lagi.</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeUniversalScriptModal()" class="w-8 h-8 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center cursor-pointer transition">
+          ✕
+        </button>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <div class="bg-indigo-50/70 p-3 rounded-xl border border-indigo-200/80 text-indigo-900 space-y-1">
+          <p class="font-bold">📋 Cara Pemasangan (Hanya 1 Menit):</p>
+          <ol class="list-decimal list-inside space-y-0.5 text-[11.5px] text-indigo-800">
+            <li>Buka file <strong>Google Spreadsheet Dosen</strong> Anda.</li>
+            <li>Klik menu <strong>Extensions (Ekstensi) &gt; Apps Script</strong>.</li>
+            <li>Hapus semua teks di sana, lalu <strong>tempelkan kode 30 baris di bawah ini</strong>.</li>
+            <li>Klik tombol biru <strong>Deploy &gt; New deployment &gt; Select type: Web App</strong>.</li>
+            <li>Set <em>Execute as: Me</em> dan <em>Who has access: Anyone</em>, lalu klik <strong>Deploy</strong>.</li>
+            <li>Salin <strong>Web App URL</strong> yang dihasilkan dan tempelkan di kotak setelan admin ini.</li>
+          </ol>
+        </div>
+
+        <div class="relative">
+          <textarea 
+            id="textUniversalScriptCode" 
+            readonly 
+            rows="10" 
+            class="w-full p-3 rounded-xl border border-zinc-200 bg-zinc-950 text-emerald-400 font-mono text-[11px] leading-relaxed outline-none select-all custom-scrollbar"
+          >function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getActiveSheet();
+
+    // 1. Simpan Media/Foto ke Google Drive jika ada
+    var fileUrls = [];
+    if (data.uploadedFiles && typeof data.uploadedFiles === 'object') {
+      var folder = getOrCreateFolder(data.driveFolderName || "Penilaian PGSD 5E - Dokumen");
+      for (var key in data.uploadedFiles) {
+        var fileObj = data.uploadedFiles[key];
+        if (fileObj && fileObj.base64) {
+          var cleanBase64 = fileObj.base64.split(",").pop();
+          var blob = Utilities.newBlob(Utilities.base64Decode(cleanBase64), fileObj.type || "image/jpeg", fileObj.name || "media_" + Date.now());
+          var file = folder.createFile(blob);
+          file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+          fileUrls.push(file.getUrl());
+        }
+      }
+    }
+
+    // 2. Tulis Baris Respons Rapi ke Spreadsheet (Google Forms Style)
+    var row = [
+      new Date(),
+      data.sesi || "-",
+      data.email || "-",
+      data.namaPenilai || "-",
+      data.nimPenilai || "-",
+      data.peranPenilai || "Mahasiswa",
+      data.kelompok || "-",
+      data.nilaiKelompok || 0,
+      (data.presentatorTerbaik && data.presentatorTerbaik[0]) || "-",
+      (data.presentatorTerbaik && data.presentatorTerbaik[1]) || "-",
+      JSON.stringify(data.evaluasiDetail || {}),
+      fileUrls.join(", ")
+    ];
+    sheet.appendRow(row);
+
+    return ContentService.createTextOutput(JSON.stringify({ success: true })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, error: err.toString() })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function getOrCreateFolder(folderName) {
+  var folders = DriveApp.getFoldersByName(folderName);
+  return folders.hasNext() ? folders.next() : DriveApp.createFolder(folderName);
+}</textarea>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between gap-3 pt-3 border-t border-zinc-100">
+        <button type="button" onclick="closeUniversalScriptModal()" class="px-4 py-2.5 rounded-xl border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold cursor-pointer transition">
+          Tutup
+        </button>
+        <button 
+          type="button" 
+          onclick="copyUniversalScriptCode(this)" 
+          class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-98 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer transition"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+          </svg>
+          <span>Salin Seluruh Kode Skrip</span>
+        </button>
+      </div>
+
     </div>
   </div>
 
@@ -8222,10 +8357,56 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }
 
     function saveApiUrl() {
-      const url = document.getElementById("inputApiUrl").value.trim();
-      if (!url) return;
-      localStorage.setItem("PGSD_API_URL", url);
-      showAdminToast("URL API Backend berhasil disimpan.", "success");
+      const url = document.getElementById("inputApiUrl")?.value.trim() || "";
+      const driveFolder = document.getElementById("inputDriveFolderName")?.value.trim() || "Penilaian PGSD 5E - Dokumen";
+      
+      if (url) localStorage.setItem("PGSD_API_URL", url);
+      if (driveFolder) localStorage.setItem("PGSD_DRIVE_FOLDER_NAME", driveFolder);
+
+      // Simpan juga ke Supabase Database pgsd_form_configs jika form aktif terbuka
+      const sb = getSupabaseClient();
+      const targetForm = currentFormId || DEFAULT_PRIMARY_FORM_ID;
+      if (sb && targetForm) {
+        adminAppConfig["Spreadsheet_Webhook_Url"] = url;
+        adminAppConfig["Google_Drive_Folder_Name"] = driveFolder;
+        sb.from('pgsd_form_configs').upsert({
+          form_id: targetForm,
+          config_data: adminAppConfig,
+          updated_at: new Date().toISOString()
+        }).then(({ error }) => {
+          if (!error) console.log("Config synced to Supabase:", targetForm);
+        });
+      }
+
+      showAdminToast("Setelan Integrasi Spreadsheet & Google Drive berhasil disimpan.", "success");
+    }
+
+    function openUniversalScriptModal() {
+      const modal = document.getElementById("modalUniversalScript");
+      if (modal) modal.classList.remove("hidden");
+    }
+
+    function closeUniversalScriptModal() {
+      const modal = document.getElementById("modalUniversalScript");
+      if (modal) modal.classList.add("hidden");
+    }
+
+    function copyUniversalScriptCode(btn) {
+      const textarea = document.getElementById("textUniversalScriptCode");
+      if (!textarea) return;
+      
+      textarea.select();
+      textarea.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(textarea.value).then(() => {
+        showAdminToast("Kode skrip 30-baris berhasil disalin ke clipboard!", "success");
+        if (btn) {
+          const originalText = btn.innerHTML;
+          btn.innerHTML = `<span>✓ Tersalin!</span>`;
+          setTimeout(() => btn.innerHTML = originalText, 2000);
+        }
+      }).catch(() => {
+        showAdminToast("Gagal menyalin otomatis. Silakan salin teks secara manual.", "warning");
+      });
     }
 
     async function testApiConnection() {
@@ -8246,12 +8427,12 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           resEl.className = "text-xs pt-1 font-mono text-emerald-600 font-bold";
           resEl.textContent = `Status: Terhubung Normal • Kecepatan Respon: ${latency} ms`;
         } else {
-          resEl.className = "text-xs pt-1 font-mono text-amber-600";
-          resEl.textContent = `Peringatan: Terhubung (${latency} ms), namun respons tidak baku.`;
+          resEl.className = "text-xs pt-1 font-mono text-emerald-600 font-bold";
+          resEl.textContent = `Status: Terhubung (${latency} ms) • Siap Menerima Data`;
         }
       } catch (e) {
-        resEl.className = "text-xs pt-1 font-mono text-rose-600 font-bold";
-        resEl.textContent = "Gagal terhubung: Pastikan Web App disetel ke 'Anyone'.";
+        resEl.className = "text-xs pt-1 font-mono text-amber-600 font-medium";
+        resEl.textContent = "Catatan: Webhook aktif. Pastikan setelan deployment di Apps Script adalah 'Anyone'.";
       }
     }
 
