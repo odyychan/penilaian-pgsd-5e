@@ -5816,14 +5816,14 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
                 <!-- Right: Authentic Google Forms Question Type Selector Popover Button -->
                 <div class="shrink-0 flex items-center gap-1.5 self-start md:self-auto">
                   
-                  <!-- Insert Media directly on question -->
+                  <!-- Insert Media directly on question (Google Forms Style) -->
                   <button 
                     type="button" 
                     onclick="openAttachMediaModal(${sIdx}, ${fIdx})" 
-                    class="p-2 rounded-xl border border-zinc-200 hover:bg-zinc-100 text-zinc-500 hover:text-zinc-800 transition cursor-pointer shadow-2xs" 
-                    title="Sisipkan Media Gambar/Video untuk Pertanyaan ini"
+                    class="p-2 rounded-xl border ${f.media ? 'border-indigo-300 bg-indigo-50 text-indigo-700 font-semibold' : 'border-zinc-200 hover:bg-zinc-100 text-zinc-500 hover:text-zinc-800'} transition cursor-pointer shadow-2xs shrink-0" 
+                    title="${f.media ? 'Media Terlampir (Klik untuk kelola)' : 'Sisipkan Media Gambar/Video untuk Pertanyaan ini'}"
                   >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 ${f.media ? 'text-indigo-600' : 'text-zinc-500'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
                   </button>
@@ -5878,11 +5878,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
                   <button type="button" onclick="moveField(${sIdx}, ${fIdx}, 1)" ${fIdx === fields.length - 1 ? 'disabled' : ''} class="p-1.5 rounded-lg border border-zinc-200 hover:bg-indigo-50 hover:text-indigo-600 disabled:opacity-25 text-zinc-600 cursor-pointer transition shadow-2xs" title="Geser Pertanyaan Turun (▼)">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
                   </button>
-                  <button type="button" onclick="openAttachMediaModal(${sIdx}, ${fIdx})" class="px-2.5 py-1 rounded-lg border ${f.media ? 'border-indigo-300 bg-indigo-50 text-indigo-700 font-semibold' : 'border-zinc-200 hover:bg-zinc-100 text-zinc-700 font-medium'} text-[11px] flex items-center gap-1.5 cursor-pointer transition shadow-2xs" title="Lampirkan Media (Gambar, Video, Audio, Link)">
-                    <svg class="w-3.5 h-3.5 ${f.media ? 'text-indigo-600' : 'text-zinc-500'}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    <span>${f.media ? 'Media Terlampir ✓' : '+ Media'}</span>
-                  </button>
-                  <span class="text-[10px] font-mono text-zinc-400 hidden sm:inline">• Tersimpan di Draf</span>
+                  <span class="text-[10px] font-mono text-zinc-400 hidden sm:inline ml-1">• Tersimpan di Draf</span>
                 </div>
 
                 <div class="flex items-center gap-2 sm:gap-2.5 shrink-0">

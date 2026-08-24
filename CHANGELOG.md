@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.24] - 2026-08-24
+
+### 🧹 Eliminasi Tombol Redundan Penyisipan Media pada Kartu Pertanyaan
+- **Penataan Posisi Tunggal Sisip Media (*Google Forms Style*):**
+  - Menghapus tombol redundan `+ Media` di bilah alat bawah kartu pertanyaan.
+  - Memusatkan tombol sisip media (`[ 🖼️ ]`) di baris atas pertanyaan (di samping kotak judul dan pemilih tipe pertanyaan).
+  - Memberikan status aktif (*highlight* indigo) pada tombol sisip media atas jika pertanyaan telah memiliki media terlampir.
+- **Pembersihan Tata Letak (*Layout Cleanup*):**
+  - Bilah alat bawah kartu pertanyaan kini jauh lebih lega, teratur, dan 100% konsisten dengan antarmuka Google Forms asli.
+- **Pengujian Headless Browser:**
+  - Terverifikasi melalui remote visual testing dengan 0 kesalahan konsol.
+
+---
+
 ## [2.2.23] - 2026-08-24
 
 ### 🔄 Peningkatan Sistem Penggeseran Urutan Pertanyaan & Bagian Formulir
