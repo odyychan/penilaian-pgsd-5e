@@ -2285,6 +2285,16 @@
       container.innerHTML = html;
     }
 
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
     function renderOverviewAlurTahapan() {
       const container = document.getElementById("overviewAlurTahapanGrid");
       if (!container) return;
@@ -2304,15 +2314,17 @@
       let html = '';
       tahapan.forEach((stage, idx) => {
         const num = idx + 1;
-        const stageTitle = stage.title || `Bagian ${num}`;
+        const stageTitle = stage.alurTitle || stage.title || `Bagian ${num}`;
         const fieldsCount = (stage.fields || []).length;
-        const stageDesc = stage.description || (fieldsCount > 0 ? `${fieldsCount} Pertanyaan / Input` : "Tahapan Formulir");
+        const stageDesc = (stage.alurDesc !== undefined && stage.alurDesc !== null && stage.alurDesc !== "")
+          ? stage.alurDesc
+          : (stage.description || (fieldsCount > 0 ? `${fieldsCount} Pertanyaan / Input` : "Tahapan Formulir"));
         html += `
           <div class="p-2.5 rounded-lg bg-white border border-zinc-200/60 flex items-start gap-2.5">
             <span class="w-5 h-5 rounded-full bg-zinc-900 text-white font-mono text-[10px] font-bold flex items-center justify-center flex-shrink-0">${num}</span>
             <div class="min-w-0">
-              <div class="font-semibold text-zinc-900 truncate" title="${stageTitle}">${stageTitle}</div>
-              <div class="text-[11px] text-zinc-500 line-clamp-1" title="${stageDesc}">${stageDesc}</div>
+              <div class="font-semibold text-zinc-900 truncate" title="${escapeHtml(stageTitle)}">${escapeHtml(stageTitle)}</div>
+              <div class="text-[11px] text-zinc-500 line-clamp-1" title="${escapeHtml(stageDesc)}">${escapeHtml(stageDesc)}</div>
             </div>
           </div>
         `;

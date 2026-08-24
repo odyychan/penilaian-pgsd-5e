@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.29] - 2026-08-24
+
+### 📝 Pengeditan Bebas Alur Tahapan Pengisian Tanpa Mengubah Isi Bagian
+- **Kustomisasi Judul & Keterangan Alur (*Independent Alur Text*):**
+  - Mengizinkan pengguna mengedit teks judul alur (`alurTitle`) dan keterangan alur (`alurDesc`) secara bebas langsung pada kartu **Alur Tahapan Pengisian**.
+  - Perubahan teks alur ini dirancang khusus untuk ringkasan panduan mahasiswa tanpa mengubah atau mengganggu judul bagian asli (`stage.title`) maupun daftar pertanyaan/isian di dalamnya.
+- **Sinkronisasi Otomatis Multi-Bagian & Tampilan Mahasiswa:**
+  - Penambahan, penghapusan, dan pengurutan bagian tetap otomatis menyinkronkan slot alur tahapan.
+  - Sisi mahasiswa (`index.html`) membaca dan menampilkan preferensi teks alur kustom tersebut dengan rapi.
+- **Pengujian Headless Browser:**
+  - Terverifikasi 100% menggunakan remote Playwright browser testing pada pengujian pengeditan in-place dan sinkronisasi formulir.
+
+---
+
 ## [2.2.28] - 2026-08-24
 
 ### 🖋️ Universal Rich Text Toolbar di Seluruh Kolom Isian Teks Tab Pertanyaan
