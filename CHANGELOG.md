@@ -4,6 +4,24 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.76] - 2026-08-24
+
+### 🎨 Pemetaan Terpadu Struktur Formulir Inti & Kustom (Unified Form Canvas Builder)
+- **Visualisasi Komprehensif Seluruh Struktur Formulir (*Form Canvas Mapping*):**
+  - Seluruh komponen formulir standar/bawaan (5 Blok Inti) kini dipetakan secara terstruktur di dalam kanvas Form Builder bersama pertanyaan kustom.
+  - **Blok 1 (Tahap 1): Identitas & Akses Penilai** (`[Field Sistem Inti]`) - Merekam peran, NIM, nama lengkap, dan validasi domain email kampus.
+  - **Blok 2 (Tahap 2): Pemilihan Kelompok Presentator** (`[Field Sistem Inti]`) - Menampilkan daftar kelompok yang tampil pada sesi aktif, terhubung langsung ke Master Kelompok di Tab 1.
+  - **Blok 3 (Tahap 3): Nilai Presentasi Kelompok** (`[Rubrik Nilai Inti]`) - Menampilkan rentang skor aktif (*min-max*) dengan modal pengaturan skor interaktif.
+  - **Blok 4 (Tahap 3): Pemilihan Presentator Terbaik** (`[Voting Peer Inti]`) - Menampilkan batas maksimal pemilih (*voting cap*) dengan modal penyesuaian batas suara.
+  - **Blok 5 (Tahap 4): Evaluasi Masukan Tiap Pemateri** (`[Ulasan Kualitatif Inti]`) - Menampilkan batas panjang karakter, visibilitas rekap publik, dan aturan kewajiban bagi kelompok penyaji.
+  - **Blok 6+ (Tahap 3/4 Dinamis): Pertanyaan & Input Tambahan Kustom** (`[Field Kustom]`) - Daftar pertanyaan kustom modular (Teks Singkat, Paragraf, Rubrik 1-5, Radio, Checkbox, Upload Berkas).
+- **Modal Pengaturan Blok Inti (*Interactive Core Field Settings Modal*):**
+  - Admin dapat mengklik tombol `Atur` pada masing-masing kartu blok inti untuk menyesuaikan parameter (skor, voting cap, ulasan, domain email) dalam satu dialog terfokus dengan sinkronisasi instan (*auto-save*).
+- **Presisi Tampilan & Hirarki Modular:**
+  - Antarmuka rapi, teratur, dan mudah dipahami oleh admin awam tanpa ambiguitas konfigurasi.
+
+---
+
 ## [2.1.75] - 2026-08-24
 
 ### 🚀 Dynamic Form Builder & Multi-Form Management Engine (Arsitektur Multi-Form Terpadu)
