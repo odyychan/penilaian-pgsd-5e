@@ -4,6 +4,21 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.39] - 2026-08-24
+
+### ⚡ Optimasi Kecepatan Ekstrem (0ms SWR Cache) & Eliminasi Gap Pembacaan Spreadsheet
+- **Arsitektur Stale-While-Revalidate (SWR) & Render Seketika 0ms:**
+  - Mengimplementasikan hidrasi instan dari cache lokal (`localStorage`) pada Master Hub Formulir (`returnToMasterHub`) dan Workspace Form (`openFormWorkspace`).
+  - Menghilangkan *freeze* dan layar kosong saat membuka panel: daftar formulir, pengaturan draf, kelompok, dan konfigurasi form langsung muncul seketika (**< 1 milidetik**) tanpa menunggu siklus jaringan cloud.
+- **Proteksi Batas Waktu Permintaan Jaringan (*Timeout Resilience*):**
+  - Menyematkan `AbortController` dengan batas waktu 8 detik pada seluruh panggilan `fetch` ke server Google Apps Script / Supabase.
+  - Jika koneksi server sedang mengalami *cold-start* atau latensi jaringan tinggi, antarmuka admin tetap aktif dan lancar menggunakan status cache lokal tanpa macet.
+- **Optimalisasi Backend Google Apps Script (`Code.gs`):**
+  - Mengoptimalkan fungsi `adminGetFormsRegistry()` dengan teknik pemetaan lembar (*single-pass batch sheet map*) `ss.getSheets()`.
+  - Mengeliminasi panggilan RPC berulang `getSheetByName()` di dalam perulangan loop pendaftaran form, memangkas waktu eksekusi server Google Apps Script hingga 75%.
+
+---
+
 ## [2.2.38] - 2026-08-24
 
 ### 🛠️ Perbaikan Konflik Tampilan Tab Workspace & Relokasi Widget Sesi

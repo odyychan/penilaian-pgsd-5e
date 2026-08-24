@@ -3937,17 +3937,22 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       const btnBukaForm = document.getElementById("btnBukaFormActive");
       if (btnBukaForm) { const u = new URL(window.location.href); u.pathname = u.pathname.replace(/admin\.html$/i, "index.html"); if (!u.pathname.endsWith("index.html")) u.pathname = u.pathname.replace(/\/?$/, "/index.html"); u.search = ""; btnBukaForm.href = u.toString(); }
 
+      // 🚀 Instant SWR Hydration: Tampilkan cache/fallback seketika (0 ms)
+      fallbackRegistryList();
+      renderHubFormsGrid();
+
+      // Kemudian sinkronkan dengan cloud di latar belakang
       await fetchFormsRegistry();
     }
 
     async function fetchFormsRegistry(forceFresh = false) {
       showGlobalLoadingProgress();
-      if (!formsRegistryList || formsRegistryList.length === 0) {
-        renderHubFormsSkeleton();
-      }
       const apiUrl = getApiUrl();
       try {
-        const response = await fetch(`${apiUrl}?action=adminGetFormsRegistry&_t=${Date.now()}`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        const response = await fetch(`${apiUrl}?action=adminGetFormsRegistry&_t=${Date.now()}`, { signal: controller.signal });
+        clearTimeout(timeoutId);
         const res = await response.json();
 
         if (res.success && Array.isArray(res.forms)) {
@@ -3974,7 +3979,13 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     function fallbackRegistryList() {
       const cached = localStorage.getItem("PGSD_CACHE_REGISTRY_FORMS");
       if (cached) {
-        try { formsRegistryList = JSON.parse(cached); return; } catch(e){}
+        try { 
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            formsRegistryList = parsed;
+            return;
+          }
+        } catch(e){}
       }
       formsRegistryList = [{
         formId: DEFAULT_PRIMARY_FORM_ID,
@@ -3988,6 +3999,9 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         status: "AKTIF",
         totalResponses: 0
       }];
+      try {
+        localStorage.setItem("PGSD_CACHE_REGISTRY_FORMS", JSON.stringify(formsRegistryList));
+      } catch(e){}
     }
 
     function renderHubFormsGrid() {
@@ -4174,6 +4188,28 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       switchAdminTab(savedTab, false);
       initContextualHeaderMorphing();
 
+      // 🚀 Instant SWR Hydration: Tampilkan draf & data lokal seketika (0 ms)
+      const cachedMeta = localStorage.getItem(`PGSD_CACHE_META_${currentFormId}`);
+      const cachedConfig = localStorage.getItem(`PGSD_CACHE_CONFIG_${currentFormId}`);
+      const cachedGroups = localStorage.getItem(`PGSD_CACHE_GROUPS_${currentFormId}`);
+      const localDraft = localStorage.getItem(`PGSD_DRAFT_SCHEMA_${currentFormId}`);
+      
+      if (cachedMeta) { try { currentFormMeta = JSON.parse(cachedMeta); } catch(e){} }
+      if (cachedConfig) { try { adminAppConfig = JSON.parse(cachedConfig); } catch(e){} }
+      if (cachedGroups) { try { adminMasterGroups = JSON.parse(cachedGroups); } catch(e){} }
+      if (localDraft) {
+        try { adminFormSchema = JSON.parse(localDraft); } catch(e){}
+      } else {
+        adminFormSchema = currentFormId === DEFAULT_PRIMARY_FORM_ID ? getDefaultFormSchema(adminAppConfig) : getBlankFormSchema();
+      }
+      initOrNormalizeFormSchema();
+      populateConfigFormValues();
+      renderCustomQuestionsList();
+      renderMasterGroups();
+      populateMasterSesiFilter();
+      populateResponseGroupFilter();
+
+      // Lanjutkan sinkronisasi penuh dengan server cloud di latar belakang
       await fetchAdminFullData();
     }
 
@@ -4249,7 +4285,10 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       const targetForm = currentFormId || DEFAULT_PRIMARY_FORM_ID;
       const apiUrl = getApiUrl();
       try {
-        const response = await fetch(`${apiUrl}?action=adminGetFullData&formId=${encodeURIComponent(targetForm)}&_t=${Date.now()}`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        const response = await fetch(`${apiUrl}?action=adminGetFullData&formId=${encodeURIComponent(targetForm)}&_t=${Date.now()}`, { signal: controller.signal });
+        clearTimeout(timeoutId);
         const res = await response.json();
 
         if (res.success) {
@@ -4274,6 +4313,14 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
             }
           }
           initOrNormalizeFormSchema();
+
+          // Simpan cache lokal agar pembukaan selanjutnya instan 0ms
+          try {
+            localStorage.setItem(`PGSD_CACHE_META_${targetForm}`, JSON.stringify(currentFormMeta));
+            localStorage.setItem(`PGSD_CACHE_CONFIG_${targetForm}`, JSON.stringify(adminAppConfig));
+            localStorage.setItem(`PGSD_CACHE_GROUPS_${targetForm}`, JSON.stringify(adminMasterGroups));
+            localStorage.setItem(`PGSD_DRAFT_SCHEMA_${targetForm}`, JSON.stringify(adminFormSchema));
+          } catch(e){}
 
           const titleBanner = document.getElementById("activeFormTitleBanner");
           if (titleBanner) titleBanner.textContent = currentFormMeta.judulForm || adminAppConfig["Judul_Form"] || "Penilaian Presentasi";
@@ -4305,7 +4352,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           renderCustomQuestionsList();
         }
       } catch (err) {
-        showAdminToast("Gagal terhubung ke server cloud: " + err, "error");
+        console.warn("Sync fetch timed out or offline, using local cached state:", err);
         const localDraft = localStorage.getItem(`PGSD_DRAFT_SCHEMA_${targetForm}`);
         if (localDraft) {
           try { adminFormSchema = JSON.parse(localDraft); } catch(e) { adminFormSchema = targetForm === DEFAULT_PRIMARY_FORM_ID ? getDefaultFormSchema(adminAppConfig) : getBlankFormSchema(); }
@@ -4315,8 +4362,8 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         initOrNormalizeFormSchema();
         renderMasterGroups();
         populateConfigFormValues();
-          const isFormCurrentlyActive = (currentFormMeta?.status || 'AKTIF') === 'AKTIF';
-          updateWorkspaceStatusUI(isFormCurrentlyActive);
+        const isFormCurrentlyActive = (currentFormMeta?.status || 'AKTIF') === 'AKTIF';
+        updateWorkspaceStatusUI(isFormCurrentlyActive);
         renderCustomQuestionsList();
       } finally {
         restoreBtnDefault();

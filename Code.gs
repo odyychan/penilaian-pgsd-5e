@@ -574,21 +574,21 @@ function adminGetFormsRegistry() {
     const data = regSheet.getDataRange().getValues();
     const forms = [];
 
+    // Batch map all sheets once to avoid slow repetitive RPC calls
+    const allSheets = ss.getSheets();
+    const sheetRowMap = {};
+    allSheets.forEach(s => {
+      sheetRowMap[s.getName()] = s.getLastRow();
+    });
+
     for (let i = 1; i < data.length; i++) {
       const row = data[i];
       const formId = String(row[0] || "").trim();
       if (!formId) continue;
 
       const meta = parseFormMetaRow(row);
-
-      // Hitung total respons pada sheet respons form ini
-      let totalResponses = 0;
-      try {
-        const respSheet = ss.getSheetByName(meta.responsSheetName);
-        if (respSheet && respSheet.getLastRow() > 1) {
-          totalResponses = respSheet.getLastRow() - 1;
-        }
-      } catch (e) {}
+      const lastRow = sheetRowMap[meta.responsSheetName] || 0;
+      const totalResponses = lastRow > 1 ? lastRow - 1 : 0;
 
       forms.push({
         ...meta,
