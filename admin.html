@@ -3484,13 +3484,12 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
       if (!anchor || !stdTabs || !builderToolbar) return;
 
-      function handleScroll() {
+      function applyMorphState() {
         if (currentAdminTab !== 'config') {
           stdTabs.classList.remove("hidden");
           builderToolbar.classList.add("hidden");
           return;
         }
-
         const rect = anchor.getBoundingClientRect();
         if (rect.top <= 120) {
           stdTabs.classList.add("hidden");
@@ -3501,10 +3500,25 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         }
       }
 
+      // Scroll listener (for pages with enough content to scroll)
       window.removeEventListener("scroll", window._headerMorphScrollHandler);
-      window._headerMorphScrollHandler = handleScroll;
-      window.addEventListener("scroll", handleScroll, { passive: true });
-      handleScroll();
+      window._headerMorphScrollHandler = applyMorphState;
+      window.addEventListener("scroll", applyMorphState, { passive: true });
+
+      // IntersectionObserver (for short pages / blank forms where scroll may not be needed)
+      if (window._headerMorphObserver) {
+        window._headerMorphObserver.disconnect();
+      }
+      window._headerMorphObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach(() => applyMorphState());
+        },
+        { root: null, threshold: 0, rootMargin: "-120px 0px 0px 0px" }
+      );
+      window._headerMorphObserver.observe(anchor);
+
+      // Initial check
+      applyMorphState();
     }
 
     function jumpToConfigTop() {
