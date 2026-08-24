@@ -4,6 +4,24 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.37] - 2026-08-24
+
+### 🎯 Sinkronisasi Total Konsistensi Form Builder Canvas & Pratinjau Langsung (Simulator & Client View)
+- **Penyelarasan Presisi Render Komponen Inti & Dinamis (*Core & Dynamic Parity*):**
+  - Mengintegrasikan blok komponen inti perkuliahan (`CORE_IDENTITY`, `CORE_GROUP_SELECT`, `CORE_SCORE_RUBRIC`, `CORE_BEST_PRESENTER`, `CORE_MEMBER_FEEDBACK`) ke dalam mesin render dinamis sisi klien (`renderSingleClientFieldHtml`).
+  - Menjamin bahwa seluruh jenis formulir—baik formulir baku 4-tahap maupun formulir multi-tahap kustom—merender seluruh elemen formulir (dropdown peran, NIM lookup, nama, email, kartu kelompok, slider nilai, chip skor, voting pemateri, dan evaluasi masukan) dengan 100% konsisten antara editor admin dan pratinjau simulator mahasiswa.
+- **Penyempurnaan Format KaTeX & Markdown Bebas Distorsi Teks:**
+  - Memperbaiki palet rumus matematika agar setiap tombol simbol matematika (`x²`, `√x`, `a/b`, `±`, `≤`, `≥`, `≠`, `π`) menyisipkan pembatas `$ ... $` yang valid secara otomatis.
+  - Memastikan teks biasa yang tidak menggunakan pembatas `$` tidak mengalami distorsi karakter, simbol panah tak sengaja, atau korupsi teks saat dirender di antarmuka mahasiswa.
+  - Menerapkan sanitasi atribut nilai (`escapeHtml`) pada seluruh input judul pertanyaan, deskripsi pertanyaan, dan nama tahapan untuk mencegah terpotongnya teks akibat tanda kutip atau karakter khusus.
+- **Sinkronisasi Draf Seketika (*Instant In-Memory Flush Prior to Preview*):**
+  - Mengaktifkan pembaruan paksa draf konfigurasi dan skema seketika (`handleConfigInputAutoSave(true)`) sesaat sebelum membuka jendela Simulator Pratinjau Langsung maupun Tab Baru.
+  - Menjamin bahwa perubahan teks yang sedang diketik admin langsung tercermin secara *real-time* tanpa jeda *debounce*.
+- **Pembaruan Navigasi Tahap Dinamis:**
+  - Mengonfigurasi `renderDynamicStepTabs()` dan `updateStepUI()` untuk menghitung jumlah tahap secara dinamis sesuai skema aktif, menampilkan badge nomor tahap yang akurat (misal `01/01` atau `01/04`), dan memperbarui indikator persentase kemajuan secara tepat.
+
+---
+
 ## [2.2.36] - 2026-08-24
 
 ### 📱 Perombakan Total Responsivitas Mobile-S, Mobile-M, & Mobile-L (320px – 430px)

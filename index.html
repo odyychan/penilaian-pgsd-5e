@@ -1563,7 +1563,6 @@
     // =========================================================================
     function isFormatOrMathPresent(text) {
       if (!text || typeof text !== 'string') return false;
-      // Math is present ONLY if explicitly enclosed in delimiters ($...$, $$...$$, \(...\), \[...\])
       const hasMath = /\$[^$]+\$|\$\$[\s\S]+\$\$|\\\([\s\S]+?\\\) |\\\[[\s\S]+?\\\]/.test(text) || (text.includes('$') && text.lastIndexOf('$') > text.indexOf('$'));
       // Markdown formatting: **bold**, *italic*, [link](url)
       const hasMarkdown = /\*\*[^*]+\*\*|(?:\b|[^\*])\*[^*]+\*(?:\b|[^\*])|\[[^\]]+\]\(((?:https?:\/\/|\/)[^\s\)]+)\)/.test(text);
@@ -2356,6 +2355,16 @@
 
       container.innerHTML = stagesHtml;
       initAllModernDropdowns();
+
+      // Populate core components if data exists
+      if (typeof renderGroupCards === 'function' && cachedDataKelompok && cachedDataKelompok.length > 0) {
+        renderGroupCards();
+      }
+      if (typeof renderPresenterCards === 'function' && selectedKelompokIndex !== null) {
+        renderPresenterCards();
+        if (typeof renderFeedbackTextareas === 'function') renderFeedbackTextareas();
+      }
+
       setTimeout(() => {
         renderAllMathInElement(container);
         renderAllMathInElement(document.getElementById("formOverviewSection"));
@@ -2646,6 +2655,245 @@
               oninput="handleClientFieldInput('${f.id}', this.value)" 
               class="w-full sm:w-auto px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm bg-white text-zinc-900 focus:border-zinc-900 outline-none transition shadow-2xs font-mono"
             >
+          </div>
+        `;
+      }
+
+      // 10. CORE_IDENTITY (Identitas Penilai)
+      if (f.type === 'CORE_IDENTITY') {
+        const peranMhsLabel = appConfig["Peran_Mahasiswa_Label"] || "Mahasiswa (Anggota Kelas PGSD 5E)";
+        const peranDosenLabel = appConfig["Peran_Dosen_Label"] || "Dosen (Pengampu / Penguji)";
+        const peranTamuLabel = appConfig["Peran_Lainnya_Label"] || "Lainnya / Penilai Tamu";
+        return `
+          <div class="bg-zinc-50/60 p-4 sm:p-6 rounded-2xl border border-zinc-200/80 space-y-4">
+            <div class="border-b border-zinc-200 pb-3">
+              <h3 class="text-sm sm:text-base font-bold text-zinc-900 math-renderable">${smartMathFormat(f.label || 'Identitas Penilai')}${reqBadge}</h3>
+              <p class="text-xs text-zinc-500 mt-0.5 math-renderable">${smartMathFormat(f.description || 'Pilih peran dan lengkapi data identitas Anda.')}</p>
+            </div>
+
+            <!-- 1. Peran Penilai Dropdown -->
+            <div class="space-y-1.5">
+              <label for="selectPeranPenilai" class="block text-xs font-bold uppercase tracking-wider text-zinc-700 font-mono">
+                Pilih Peran Penilai <span class="text-rose-500">*</span>
+              </label>
+              <div class="relative">
+                <select 
+                  id="selectPeranPenilai" 
+                  onchange="onRoleChange(this.value)" 
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm font-semibold text-zinc-900 bg-white focus:border-zinc-900 outline-none transition cursor-pointer appearance-none pr-9 shadow-2xs"
+                >
+                  <option value="" disabled>-- Pilih Peran Penilai Terlebih Dahulu --</option>
+                  <option value="Mahasiswa" selected>${escapeHtml(peranMhsLabel)}</option>
+                  <option value="Dosen">${escapeHtml(peranDosenLabel)}</option>
+                  <option value="Lainnya">${escapeHtml(peranTamuLabel)}</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. NIM Input Field -->
+            <div id="nimContainer" class="space-y-1.5">
+              <label class="block text-xs font-semibold text-zinc-700">
+                Nomor Induk Mahasiswa (NIM) <span class="text-rose-500">*</span>
+              </label>
+              <div class="relative">
+                <input 
+                  type="text" 
+                  id="inputNim" 
+                  inputmode="numeric"
+                  placeholder="Masukkan NIM Anda (contoh: 211012345)..." 
+                  class="w-full pl-3.5 pr-20 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm font-mono focus:border-zinc-900 outline-none transition bg-white placeholder-zinc-400"
+                  oninput="validateNimLive(this.value); saveFormDraft();"
+                >
+                <div id="nimStatusIcon" class="absolute right-3 top-2.5 hidden">
+                  <span class="inline-flex items-center gap-1 text-emerald-600 font-semibold text-xs">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                    <span>Valid</span>
+                  </span>
+                </div>
+              </div>
+              <div id="nimFeedbackBox" class="text-xs rounded-lg p-2.5 hidden space-y-1"></div>
+            </div>
+
+            <!-- 3. Nama & Email -->
+            <div id="identityFieldsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1">
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between">
+                  <label class="block text-xs font-semibold text-zinc-700">
+                    Nama Lengkap Penilai <span class="text-rose-500">*</span>
+                  </label>
+                  <span id="namaAutoFillNotice" class="text-[10px] text-emerald-700 font-medium hidden">Terisi otomatis</span>
+                </div>
+                <input 
+                  type="text" 
+                  id="inputNama" 
+                  required 
+                  autocapitalize="words"
+                  placeholder="Tuliskan nama lengkap Anda..." 
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 outline-none transition bg-white placeholder-zinc-400"
+                  oninput="saveFormDraft();"
+                >
+              </div>
+
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between">
+                  <label class="block text-xs font-semibold text-zinc-700">
+                    Email Penilai <span class="text-rose-500">*</span>
+                  </label>
+                  <button 
+                    type="button" 
+                    id="btnFillNimEmail" 
+                    onclick="fillNimEmailFormat()" 
+                    class="hidden text-[10px] font-mono font-semibold text-zinc-700 hover:text-zinc-950 bg-zinc-100 hover:bg-zinc-200 px-2 py-0.5 rounded border border-zinc-300 transition cursor-pointer flex items-center gap-1"
+                    title="Isi otomatis email format NIM@mhs.ulm.ac.id"
+                  >
+                    <span>Isi Otomatis</span>
+                  </button>
+                </div>
+                <input 
+                  type="email" 
+                  id="inputEmail" 
+                  required 
+                  inputmode="email"
+                  placeholder="nama.nim@email.ac.id" 
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 outline-none transition bg-white placeholder-zinc-400"
+                  oninput="validateEmailLive(this.value); saveFormDraft();"
+                >
+                <p id="emailValidationMsg" class="text-[11px] font-medium hidden"></p>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // 11. CORE_GROUP_SELECT (Pemilihan Kelompok)
+      if (f.type === 'CORE_GROUP_SELECT') {
+        return `
+          <div class="bg-zinc-50/60 p-4 sm:p-6 rounded-2xl border border-zinc-200/80 space-y-4">
+            <div class="flex items-center justify-between border-b border-zinc-200 pb-3">
+              <div>
+                <h3 class="text-sm sm:text-base font-bold text-zinc-900 math-renderable">${smartMathFormat(f.label || 'Kelompok yang Dinilai')}${reqBadge}</h3>
+                <p class="text-xs text-zinc-500 mt-0.5 math-renderable">${smartMathFormat(f.description || appConfig['Pilih_Kelompok_Label'] || 'Pilih salah satu kelompok yang sedang presentasi.')}</p>
+              </div>
+              <button type="button" onclick="fetchInitialFormData(true)" class="p-1.5 rounded-lg border border-zinc-200 hover:bg-white text-zinc-600 text-xs transition cursor-pointer" title="Perbarui daftar">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+              </button>
+            </div>
+
+            <!-- Loading State -->
+            <div id="groupsLoading" class="py-6 text-center text-xs text-zinc-500 flex flex-col items-center justify-center gap-2">
+              <svg class="animate-spin h-5 w-5 text-zinc-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+              <span>Memuat daftar kelompok...</span>
+            </div>
+
+            <!-- Group Cards -->
+            <div id="groupsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5"></div>
+
+            <!-- Empty State -->
+            <div id="groupsEmpty" class="hidden p-6 rounded-xl bg-white border border-zinc-200 text-center text-xs text-zinc-600 space-y-2">
+              <p>Belum ada kelompok aktif yang terdaftar.</p>
+              <button type="button" onclick="fetchInitialFormData(true)" class="px-3 py-1.5 rounded-lg bg-zinc-900 text-white font-medium text-xs">Coba Lagi</button>
+            </div>
+          </div>
+        `;
+      }
+
+      // 12. CORE_SCORE_RUBRIC (Skor Nilai)
+      if (f.type === 'CORE_SCORE_RUBRIC') {
+        const minVal = parseInt(appConfig["Nilai_Kelompok_Min"] || 50);
+        const maxVal = parseInt(appConfig["Nilai_Kelompok_Max"] || 100);
+        return `
+          <div class="bg-zinc-50/60 p-4 sm:p-6 rounded-2xl border border-zinc-200/80 space-y-4">
+            <div class="flex items-center justify-between border-b border-zinc-200 pb-3">
+              <div>
+                <h3 class="text-sm sm:text-base font-bold text-zinc-900 math-renderable">${smartMathFormat(f.label || 'Nilai Presentasi Kelompok')}${reqBadge}</h3>
+                <p class="text-xs text-zinc-500 mt-0.5 math-renderable">${smartMathFormat(f.description || 'Penilaian keseluruhan penguasaan materi dan performa.')}</p>
+              </div>
+              <span id="scoreGradeBadge" class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-zinc-100 text-zinc-800 border border-zinc-200">
+                Nilai A (4,00)
+              </span>
+            </div>
+
+            <div class="p-4 rounded-xl bg-white border border-zinc-200 space-y-4 shadow-2xs">
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span class="text-[11px] font-semibold text-zinc-400 mr-1 font-mono">Preset:</span>
+                <button type="button" onclick="setScoreValue(70)" class="px-2.5 py-1 rounded-lg bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-xs font-semibold text-zinc-700 transition cursor-pointer">70</button>
+                <button type="button" onclick="setScoreValue(75)" class="px-2.5 py-1 rounded-lg bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-xs font-semibold text-zinc-700 transition cursor-pointer">75</button>
+                <button type="button" onclick="setScoreValue(80)" class="px-2.5 py-1 rounded-lg bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-xs font-semibold text-zinc-700 transition cursor-pointer">80</button>
+                <button type="button" onclick="setScoreValue(85)" class="px-2.5 py-1 rounded-lg bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-xs font-semibold text-zinc-700 transition cursor-pointer">85</button>
+                <button type="button" onclick="setScoreValue(90)" class="px-2.5 py-1 rounded-lg bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-xs font-semibold text-zinc-700 transition cursor-pointer">90</button>
+                <button type="button" onclick="setScoreValue(95)" class="px-2.5 py-1 rounded-lg bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-xs font-semibold text-zinc-700 transition cursor-pointer">95</button>
+                <button type="button" onclick="setScoreValue(100)" class="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white font-semibold text-xs transition cursor-pointer">100</button>
+              </div>
+
+              <div class="flex flex-col sm:flex-row items-center gap-4 pt-1">
+                <div class="w-full flex-1 space-y-1.5">
+                  <div class="flex justify-between text-[11px] font-mono text-zinc-400">
+                    <span id="sliderMinLabel">Min: ${minVal}</span>
+                    <span id="sliderMaxLabel">Max: ${maxVal}</span>
+                  </div>
+                  <input 
+                    type="range" 
+                    id="inputNilaiSlider" 
+                    min="${minVal}" 
+                    max="${maxVal}" 
+                    value="85" 
+                    step="1"
+                    class="w-full cursor-pointer h-2 bg-zinc-200 rounded-lg appearance-none"
+                    oninput="syncScore(this.value, 'slider')"
+                  >
+                </div>
+
+                <div class="flex items-center gap-1 bg-zinc-50 border border-zinc-300 p-1 rounded-xl shrink-0">
+                  <button type="button" onclick="adjustScore(-1)" class="w-8 h-8 rounded-lg hover:bg-zinc-200 text-zinc-700 font-bold text-sm flex items-center justify-center transition cursor-pointer">−</button>
+                  <input 
+                    type="number" 
+                    id="inputNilaiNumber" 
+                    min="${minVal}" 
+                    max="${maxVal}" 
+                    value="85" 
+                    required 
+                    class="w-14 text-center font-bold text-base text-zinc-900 outline-none bg-transparent"
+                    oninput="syncScore(this.value, 'number')"
+                  >
+                  <button type="button" onclick="adjustScore(1)" class="w-8 h-8 rounded-lg hover:bg-zinc-200 text-zinc-700 font-bold text-sm flex items-center justify-center transition cursor-pointer">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // 13. CORE_BEST_PRESENTER (Voting Presentator)
+      if (f.type === 'CORE_BEST_PRESENTER') {
+        const maxVote = parseInt(appConfig["Maksimal_Pilihan_Presentator_Terbaik"] || 2);
+        return `
+          <div class="bg-zinc-50/60 p-4 sm:p-6 rounded-2xl border border-zinc-200/80 space-y-4">
+            <div class="flex items-center justify-between border-b border-zinc-200 pb-3">
+              <div>
+                <h3 class="text-sm sm:text-base font-bold text-zinc-900 math-renderable">${smartMathFormat(f.label || 'Presentator Terbaik')}${reqBadge}</h3>
+                <p class="text-xs text-zinc-500 mt-0.5 math-renderable">${smartMathFormat(f.description || `Pilih maksimal ${maxVote} pemateri terbaik.`)}</p>
+              </div>
+              <span id="bestPresenterCountBadge" class="text-xs font-mono font-semibold bg-zinc-100 text-zinc-700 border border-zinc-200 px-2.5 py-1 rounded-lg">
+                0/${maxVote} Terpilih
+              </span>
+            </div>
+            <div id="bestPresenterList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5"></div>
+          </div>
+        `;
+      }
+
+      // 14. CORE_MEMBER_FEEDBACK (Evaluasi Kualitatif)
+      if (f.type === 'CORE_MEMBER_FEEDBACK') {
+        return `
+          <div class="bg-zinc-50/60 p-4 sm:p-6 rounded-2xl border border-zinc-200/80 space-y-4">
+            <div class="border-b border-zinc-200 pb-3">
+              <h3 class="text-sm sm:text-base font-bold text-zinc-900 math-renderable">${smartMathFormat(f.label || 'Evaluasi Masukan Tiap Pemateri')}${reqBadge}</h3>
+              <p class="text-xs text-zinc-500 mt-0.5 math-renderable">${smartMathFormat(f.description || 'Berikan masukan apresiasi konstruktif untuk setiap anggota pemateri.')}</p>
+            </div>
+            <div id="memberFeedbackContainer" class="space-y-4"></div>
           </div>
         `;
       }
