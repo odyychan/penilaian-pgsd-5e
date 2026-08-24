@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.91] - 2026-08-24
+
+### 📐 Ultra-Compact Sticky Form Builder Toolbar & Mobile Space Optimization
+- **Pengurangan Jejak Vertikal Hingga 50% di Mobile (*Ultra-Compact Design*):**
+  - Mengurangi tinggi Sticky Toolbar Form Builder menjadi hanya ~65px di layar ponsel sehingga ruang pandang untuk membaca dan menyunting kartu pertanyaan menjadi jauh lebih luas dan nyaman.
+  - Menghilangkan scrollbar sistem horizontal yang kaku dengan utilitas `no-scrollbar` untuk pengalaman navigasi sentuh yang mulus.
+- **Micro Status Bar & Sleek Action Strip:**
+  - Status judul, badge, dan kontrol aksi utama tersusun ramping dengan tipografi mikro yang tajam dan proporsional.
+
+---
+
 ## [2.1.90] - 2026-08-24
 
 ### 🛡️ 2-Tier Anti-Collision Sticky Form Builder Toolbar & Cross-Device Responsive Layout
