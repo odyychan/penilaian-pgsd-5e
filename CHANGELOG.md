@@ -4,6 +4,19 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.54] - 2026-08-25
+
+### 🏛️ Optimasi Menyeluruh Skema Database Supabase, Indeks B-Tree & Views Terintegrasi
+- **Pembersihan & Penguatan Struktur Skema Basis Data:**
+  - Memverifikasi dan memperkuat relasi *foreign key* berjenjang (`ON DELETE CASCADE ON UPDATE CASCADE`) antar tabel `pgsd_forms`, `pgsd_form_configs`, `pgsd_groups`, `pgsd_students`, dan `pgsd_responses`.
+  - Menambahkan indeks *B-Tree* performa tinggi pada kolom pencarian dan filter (`form_slug`, `status`, `is_primary`, `nim_penilai`, `form_id + kelompok_dinilai`, `form_id + nim`).
+- **Penyempurnaan View Agregasi Real-Time (`pgsd_v_forms_summary` & `pgsd_v_rekap_nilai`):**
+  - Memperbarui View ringkasan formulir agar menyediakan metadata lengkap (`form_slug`, `jurusan`, `google_drive_folder`, `total_kelompok`, `total_mahasiswa`, `total_respons`, `nilai_rata_rata_keseluruhan`) dalam 1 tarikan kueri instan.
+- **Penyediaan Dokumentasi Skema Resmi (`/docs/setup.sql`):**
+  - Menyediakan berkas SQL master lengkap di direktori `/docs/setup.sql` yang mencakup seluruh skema tabel, indeks, view, dan kebijakan Row Level Security (RLS) untuk kemudahan audit dan skalabilitas masa depan.
+
+---
+
 ## [2.2.53] - 2026-08-24
 
 ### 📊 Integrasi Penuh Master Spreadsheet Terpusat & Sinkronisasi Google Sheets API v4
