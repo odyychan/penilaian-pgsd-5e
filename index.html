@@ -1618,6 +1618,12 @@
         .replace(/∑/g, '\\sum ')
         .replace(/∫/g, '\\int ');
 
+      // Convert Markdown formatting (Bold, Italic, Link)
+      res = res
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/(^|[^\*])\*([^*]+)\*([^\*]|$)/g, '$1<em>$2</em>$3')
+        .replace(/\[([^\]]+)\]\(((?:https?:\/\/|\/)[^\s\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-800 underline font-semibold">$1</a>');
+
       // 1. Explicit math delimiters ($...$, $$...$$, \(...\), \[...\])
       if (res.includes('$') || res.includes('\\(') || res.includes('\\[') || res.includes('$$')) {
         return res;

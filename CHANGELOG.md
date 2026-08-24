@@ -4,6 +4,27 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.17] - 2026-08-24
+
+### 🎨 100% Identik Google Forms: Bilah Pemformatan Teks Kaya (B, I, U, Link, Hapus Format) & Tata Letak Kartu Pertanyaan
+- **Bilah Pemformatan Teks Kaya (*Google Forms Authentic Rich Text Toolbar*):**
+  - Menghadirkan bilah toolbar pemformatan teks kaya tepat di bawah input pertanyaan dengan tombol aksi lengkap:
+    - **`B`** (Tebal / Bold)
+    - **`I`** (Miring / Italic)
+    - **`U`** (Garis Bawah / Underline)
+    - **`🔗`** (Sisipkan Link Tautan)
+    - **`T̶`** (Hapus Format / *Remove Formatting*)
+    - **`∑ Rumus`** (Palet Simbol & Rumus Matematika)
+  - Mendukung pintasan keyboard standar (**Ctrl+B**, **Ctrl+I**, **Ctrl+U**) saat fokus mengedit pertanyaan.
+- **Tata Letak Kartu Pertanyaan 100% Identik Google Forms:**
+  - Menambahkan *6-dots drag handle* (`:::`) di bagian tengah atas setiap kartu pertanyaan.
+  - Memperbarui gaya input judul pertanyaan dengan latar Material Form (`#f1f3f4` / `bg-zinc-100/90`) dan garis fokus aktif ungu/indigo.
+  - Menempatkan tombol lampiran media/gambar (`[ 🖼️ ]`) tepat di samping dropdown pemilih tipe pertanyaan (*Question Type Selector*).
+- **Perenderan Teks Kaya & Formula Lintas Halaman (`admin.html` & `index.html`):**
+  - Mengintegrasikan pemrosesan sintaks Markdown (**tebal**, *miring*, dan [tautan](url)) secara otomatis ke dalam mesin KaTeX dan pratinjau langsung formulir.
+
+---
+
 ## [2.2.16] - 2026-08-24
 
 ### 📐 Optimalisasi Tata Letak Form Builder: Relokasi Tools Rumus ke Header Kartu & Menu Titik Tiga (3-Dots) Pindah Bagian

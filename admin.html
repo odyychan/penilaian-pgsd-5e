@@ -2081,8 +2081,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     
     // =========================================================================
     // UNIVERSAL SMART MATH & KATEX AUTO-RENDER ENGINE (CONFLICT-FREE & ULTRA PRECISE)
-    // =========================================================================
-    function smartMathFormat(text) {
+    // =====================================    function smartMathFormat(text) {
       if (!text || typeof text !== 'string') return "";
 
       // 0. Normalize unicode math from Microsoft Word / Mobile keyboards
@@ -2140,6 +2139,12 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         .replace(/∑/g, '\\sum ')
         .replace(/∫/g, '\\int ');
 
+      // Convert Markdown formatting (Bold, Italic, Link)
+      res = res
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/(^|[^\*])\*([^*]+)\*([^\*]|$)/g, '$1<em>$2</em>$3')
+        .replace(/\[([^\]]+)\]\(((?:https?:\/\/|\/)[^\s\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-800 underline font-semibold">$1</a>');
+
       // 1. Explicit math delimiters ($...$, $$...$$, \(...\), \[...\])
       if (res.includes('$') || res.includes('\\(') || res.includes('\\[') || res.includes('$$')) {
         return res;
@@ -2183,9 +2188,18 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       let badge = document.getElementById(badgeId);
       if (!badge) return;
       const formatted = smartMathFormat(val || "");
-      const isMathPresent = !!val && (formatted.includes('$') || formatted.includes('\\(') || formatted.includes('\\[') || /\\(frac|sqrt|int|sum|alpha|beta|pi)/.test(formatted));
+      const isFormatPresent = !!val && (
+        formatted.includes('$') || 
+        formatted.includes('\\(') || 
+        formatted.includes('\\[') || 
+        formatted.includes('<strong>') || 
+        formatted.includes('<em>') || 
+        formatted.includes('<u>') || 
+        formatted.includes('<a ') || 
+        /\\(frac|sqrt|int|sum|alpha|beta|pi)/.test(formatted)
+      );
       
-      if (!isMathPresent) {
+      if (!isFormatPresent) {
         badge.classList.add("hidden");
       } else {
         badge.classList.remove("hidden");
@@ -2201,15 +2215,15 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
                   delimiters: [
                     { left: '$$', right: '$$', display: true },
                     { left: '$', right: '$', display: false },
-                    { left: '\(', right: '\)', display: false },
-                    { left: '\[', right: '\]', display: true }
+                    { left: '\\(', right: '\\)', display: false },
+                    { left: '\\[', right: '\\]', display: true }
                   ],
                   throwOnError: false
                 });
               }
             }
           } catch(e) {
-            span.textContent = formatted;
+            span.innerHTML = formatted;
           }
         }
       }
@@ -2217,21 +2231,125 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
     function getLiveMathBadgeHtml(rawText, containerId) {
       const formatted = smartMathFormat(rawText || "");
-      const isMathPresent = !!rawText && (formatted.includes('$') || formatted.includes('\\(') || formatted.includes('\\[') || /\\(frac|sqrt|int|sum|alpha|beta|pi)/.test(formatted));
+      const isFormatPresent = !!rawText && (
+        formatted.includes('$') || 
+        formatted.includes('\\(') || 
+        formatted.includes('\\[') || 
+        formatted.includes('<strong>') || 
+        formatted.includes('<em>') || 
+        formatted.includes('<u>') || 
+        formatted.includes('<a ') || 
+        /\\(frac|sqrt|int|sum|alpha|beta|pi)/.test(formatted)
+      );
 
       let mathRenderHtml = formatted;
-      if (isMathPresent && typeof katex !== 'undefined' && formatted.startsWith('$') && formatted.endsWith('$') && !formatted.slice(1, -1).includes('$')) {
+      if (isFormatPresent && typeof katex !== 'undefined' && formatted.startsWith('$') && formatted.endsWith('$') && !formatted.slice(1, -1).includes('$')) {
         try {
           mathRenderHtml = katex.renderToString(formatted.slice(1, -1), { throwOnError: false, displayMode: false });
         } catch(e) {}
       }
 
       return `
-        <div id="${containerId}" class="math-live-preview-badge inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50/90 border border-indigo-200/80 text-indigo-950 text-xs shadow-2xs mt-1 transition ${isMathPresent ? '' : 'hidden'}">
-          <span class="text-[9.5px] font-bold font-mono text-indigo-600 bg-indigo-100 px-1 py-0.5 rounded uppercase tracking-wider shrink-0">∑ Rumus:</span>
+        <div id="${containerId}" class="math-live-preview-badge inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50/90 border border-indigo-200/80 text-indigo-950 text-xs shadow-2xs mt-1 transition ${isFormatPresent ? '' : 'hidden'}">
+          <span class="text-[9.5px] font-bold font-mono text-indigo-600 bg-indigo-100 px-1 py-0.5 rounded uppercase tracking-wider shrink-0">✨ Pratinjau:</span>
           <span class="math-renderable font-medium leading-relaxed">${mathRenderHtml}</span>
         </div>
       `;
+    }
+
+    // Google Forms Authentic Rich Text Formatter (B, I, U, Link, Remove Format)
+    function applyFieldTextFormat(sIdx, fIdx, formatType) {
+      const field = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
+      if (!field) return;
+
+      const input = document.querySelector(`input[data-field-id="${field.id}"]`) || document.getElementById(`fieldLabelInput_${sIdx}_${fIdx}`) || document.querySelector(`#stepCard_${sIdx}_${fIdx} input[type="text"]`);
+      if (!input) return;
+
+      const start = typeof input.selectionStart === 'number' ? input.selectionStart : 0;
+      const end = typeof input.selectionEnd === 'number' ? input.selectionEnd : 0;
+      const val = input.value || "";
+      const selected = val.substring(start, end);
+
+      pushUndoSnapshot(`Format Teks (${formatType})`);
+
+      let replacement = "";
+
+      if (formatType === 'bold') {
+        if (selected) {
+          if (selected.startsWith('**') && selected.endsWith('**') && selected.length >= 4) {
+            replacement = selected.slice(2, -2);
+          } else {
+            replacement = `**${selected}**`;
+          }
+        } else {
+          replacement = `**teks tebal**`;
+        }
+      } else if (formatType === 'italic') {
+        if (selected) {
+          if (selected.startsWith('*') && selected.endsWith('*') && selected.length >= 2 && !selected.startsWith('**')) {
+            replacement = selected.slice(1, -1);
+          } else {
+            replacement = `*${selected}*`;
+          }
+        } else {
+          replacement = `*teks miring*`;
+        }
+      } else if (formatType === 'underline') {
+        if (selected) {
+          if (selected.startsWith('<u>') && selected.endsWith('</u>') && selected.length >= 7) {
+            replacement = selected.slice(3, -4);
+          } else {
+            replacement = `<u>${selected}</u>`;
+          }
+        } else {
+          replacement = `<u>${selected || 'teks garis bawah'}</u>`;
+        }
+      } else if (formatType === 'link') {
+        if (selected) {
+          const url = prompt("Masukkan URL Tautan (contoh: https://ulm.ac.id):", "https://");
+          if (url && url.trim() && url.trim() !== "https://") {
+            replacement = `[${selected}](${url.trim()})`;
+          } else {
+            return;
+          }
+        } else {
+          const text = prompt("Masukkan teks tautan:", "Tautan Website");
+          if (!text) return;
+          const url = prompt("Masukkan URL Tautan (contoh: https://ulm.ac.id):", "https://");
+          if (url && url.trim()) {
+            replacement = `[${text}](${url.trim()})`;
+          } else {
+            return;
+          }
+        }
+      } else if (formatType === 'remove_format') {
+        const cleanText = (str) => {
+          return str
+            .replace(/\*\*([^*]+)\*\*/g, '$1')
+            .replace(/(^|[^\*])\*([^*]+)\*([^\*]|$)/g, '$1$2$3')
+            .replace(/<u>([^<]+)<\/u>/gi, '$1')
+            .replace(/<b>([^<]+)<\/b>/gi, '$1')
+            .replace(/<i>([^<]+)<\/i>/gi, '$1')
+            .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+            .replace(/\$([^\$]+)\$/g, '$1');
+        };
+
+        if (selected) {
+          replacement = cleanText(selected);
+        } else {
+          input.value = cleanText(val);
+          handleInlineFieldUpdate(sIdx, fIdx, 'label', input.value);
+          showAdminToast("Format teks dibersihkan.", "info");
+          return;
+        }
+      }
+
+      input.value = val.substring(0, start) + replacement + val.substring(end);
+      input.focus();
+      const newCursor = start + replacement.length;
+      input.setSelectionRange(newCursor, newCursor);
+
+      handleInlineFieldUpdate(sIdx, fIdx, 'label', input.value);
     }
 
     // Quick Math Symbol Palette Inserter
@@ -2243,7 +2361,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }
 
     function insertMathSymbolAtField(sIdx, fIdx, symbol) {
-      const input = document.querySelector(`input[data-field-id="${adminFormSchema.tahapan[sIdx].fields[fIdx].id}"]`) || document.querySelector(`#stepCard_${sIdx}_${fIdx} input[type="text"]`);
+      const input = document.querySelector(`input[data-field-id="${adminFormSchema.tahapan[sIdx].fields[fIdx].id}"]`) || document.getElementById(`fieldLabelInput_${sIdx}_${fIdx}`) || document.querySelector(`#stepCard_${sIdx}_${fIdx} input[type="text"]`);
       if (!input) return;
 
       const start = input.selectionStart || 0;
@@ -4318,6 +4436,27 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           formBuilderRedo();
         }
       }
+
+      // Rich Text Formatting Shortcuts (Ctrl+B, Ctrl+I, Ctrl+U)
+      if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'b' || e.key.toLowerCase() === 'i' || e.key.toLowerCase() === 'u')) {
+        const activeEl = document.activeElement;
+        if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA')) {
+          const fieldId = activeEl.getAttribute('data-field-id');
+          if (fieldId && adminFormSchema && adminFormSchema.tahapan) {
+            let sIdx = -1, fIdx = -1;
+            adminFormSchema.tahapan.forEach((stg, si) => {
+              (stg.fields || []).forEach((fld, fi) => {
+                if (fld.id === fieldId) { sIdx = si; fIdx = fi; }
+              });
+            });
+            if (sIdx !== -1 && fIdx !== -1) {
+              e.preventDefault();
+              const type = e.key.toLowerCase() === 'b' ? 'bold' : (e.key.toLowerCase() === 'i' ? 'italic' : 'underline');
+              applyFieldTextFormat(sIdx, fIdx, type);
+            }
+          }
+        }
+      }
     });
 
     // =========================================================================
@@ -5528,32 +5667,117 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
           return `
             <!-- AUTHENTIC GOOGLE FORMS QUESTION CARD -->
-            <div class="bg-white rounded-xl border border-zinc-200 border-l-4 border-l-indigo-600 shadow-sm p-4 sm:p-6 space-y-4 transition hover:shadow-md">
+            <div class="bg-white rounded-xl border border-zinc-200 border-l-4 border-l-indigo-600 shadow-sm p-4 sm:p-6 space-y-3.5 transition hover:shadow-md relative">
               
-              <!-- Top Row: Question Title, Dropdown Type Selector & Rumus Tool -->
-              <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+              <!-- 6-Dots Drag Handle Centered (Google Forms Style) -->
+              <div class="flex justify-center -mt-1 -mb-1 text-zinc-300 hover:text-zinc-500 cursor-grab select-none">
+                <svg class="w-5 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M9 5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 7a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 7a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm6-14a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 7a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 7a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path>
+                </svg>
+              </div>
+
+              <!-- Top Row: Question Title & Dropdown Type Selector (Authentic Google Forms Layout) -->
+              <div class="flex flex-col md:flex-row md:items-start justify-between gap-3">
                 
-                <!-- Left: Underlined Question Title & Subtitle Inputs -->
+                <!-- Left: Question Title Input Box & Authentic Formatting Toolbar -->
                 <div class="flex-1 space-y-1.5 min-w-0">
                   <div class="flex items-center gap-2">
                     <span class="w-6 h-6 rounded-md bg-indigo-50 border border-indigo-200 font-mono font-bold text-indigo-700 flex items-center justify-center flex-shrink-0 text-xs">
                       ${fIdx + 1}
                     </span>
-                    <input 
-                      type="text" 
-                      data-field-id="${f.id}"
-                      value="${f.label}" 
-                      placeholder="Pertanyaan tanpa judul (contoh: x^2, \frac{a}{b}, dll)..."
-                      oninput="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'label', this.value)"
-                      class="w-full text-sm sm:text-base font-semibold text-zinc-900 bg-zinc-50/80 hover:bg-zinc-100/90 focus:bg-white border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 px-3 py-2 rounded-t-lg outline-none transition"
+                    <div class="flex-1 relative">
+                      <input 
+                        type="text" 
+                        id="fieldLabelInput_${sIdx}_${fIdx}"
+                        data-field-id="${f.id}"
+                        value="${f.label}" 
+                        placeholder="Pertanyaan tanpa judul"
+                        oninput="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'label', this.value)"
+                        class="w-full text-sm sm:text-base font-semibold text-zinc-900 bg-zinc-100/90 hover:bg-zinc-100 focus:bg-zinc-100 border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 px-3 py-2.5 rounded-t-lg outline-none transition"
+                      >
+                    </div>
+                  </div>
+
+                  <!-- Google Forms Authentic Rich Text Formatting Toolbar (Underneath Input) -->
+                  <div class="flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 bg-zinc-100/90 rounded-lg border border-zinc-200 w-fit text-zinc-700 select-none shadow-2xs">
+                    
+                    <!-- Bold (B) -->
+                    <button 
+                      type="button" 
+                      onclick="applyFieldTextFormat(${sIdx}, ${fIdx}, 'bold')" 
+                      class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center font-serif font-black hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer text-sm" 
+                      title="Tebal (Ctrl + B)"
                     >
+                      B
+                    </button>
+
+                    <!-- Italic (I) -->
+                    <button 
+                      type="button" 
+                      onclick="applyFieldTextFormat(${sIdx}, ${fIdx}, 'italic')" 
+                      class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center font-serif italic font-bold hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer text-sm" 
+                      title="Miring (Ctrl + I)"
+                    >
+                      I
+                    </button>
+
+                    <!-- Underline (U) -->
+                    <button 
+                      type="button" 
+                      onclick="applyFieldTextFormat(${sIdx}, ${fIdx}, 'underline')" 
+                      class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center font-serif underline font-bold hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer text-sm" 
+                      title="Garis Bawah (Ctrl + U)"
+                    >
+                      U
+                    </button>
+
+                    <!-- Link (🔗) -->
+                    <button 
+                      type="button" 
+                      onclick="applyFieldTextFormat(${sIdx}, ${fIdx}, 'link')" 
+                      class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer" 
+                      title="Sisipkan Link"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                      </svg>
+                    </button>
+
+                    <!-- Remove Formatting (T̶ / Tx) -->
+                    <button 
+                      type="button" 
+                      onclick="applyFieldTextFormat(${sIdx}, ${fIdx}, 'remove_format')" 
+                      class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer" 
+                      title="Hapus format (Menghapus format)"
+                    >
+                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M6 4v3h4.5v13h3V7H18V4H6zm14.7 15.3l-1.4 1.4L4.3 5.7 5.7 4.3l15 15z"></path>
+                      </svg>
+                    </button>
+
+                    <div class="h-4 w-px bg-zinc-300 mx-0.5"></div>
+
+                    <!-- Rumus / Math Formula Palette Toggle -->
+                    <button 
+                      type="button" 
+                      onclick="toggleQuickMathPalette(${sIdx}, ${fIdx})" 
+                      class="px-2 h-7 sm:h-8 rounded-md hover:bg-indigo-100 text-indigo-700 font-mono font-bold flex items-center gap-1 transition cursor-pointer text-xs" 
+                      title="Palet Sisip Simbol &amp; Rumus Matematika"
+                    >
+                      <span class="text-sm font-extrabold">∑</span>
+                      <span class="text-[11px] font-sans font-semibold">Rumus</span>
+                    </button>
+                  </div>
+
+                  <div>
                     ${getLiveMathBadgeHtml(f.label, `liveMathQuestionLabel_${sIdx}_${fIdx}`)}
                   </div>
-                  <div>
+
+                  <div class="pt-0.5">
                     <input 
                       type="text" 
                       value="${f.description || ''}" 
-                      placeholder="Teks deskripsi / panduan pengisian pertanyaan (contoh: x^2, dll)..."
+                      placeholder="Teks deskripsi / panduan pengisian pertanyaan (opsional)..." 
                       oninput="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'description', this.value)"
                       class="w-full text-xs text-zinc-500 bg-transparent border-b border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 px-2 py-1 outline-none transition"
                     >
@@ -5561,18 +5785,22 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
                   </div>
                 </div>
 
-                <!-- Right: Modern Question Type Popover Trigger & Rumus Tool Button -->
-                <div class="w-full sm:w-auto shrink-0 flex items-center gap-1.5 sm:gap-2">
-                  ${getModernQuestionTypePopoverHtml(f, sIdx, fIdx)}
+                <!-- Right: Media Attach Button + Question Type Selector Dropdown -->
+                <div class="w-full md:w-auto shrink-0 flex items-center gap-1.5 sm:gap-2 self-start">
                   <button 
                     type="button" 
-                    onclick="toggleQuickMathPalette(${sIdx}, ${fIdx})" 
-                    class="px-2.5 sm:px-3 py-2 rounded-xl border border-indigo-200 hover:border-indigo-400 bg-indigo-50/70 hover:bg-indigo-100/80 text-indigo-800 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition shadow-2xs shrink-0 active:scale-98" 
-                    title="Palet Sisip Simbol & Rumus Matematika"
+                    onclick="openAttachMediaModal(${sIdx}, ${fIdx})" 
+                    class="p-2 sm:p-2.5 rounded-xl border ${f.media ? 'border-indigo-300 bg-indigo-50 text-indigo-700 font-semibold' : 'border-zinc-200 hover:border-zinc-400 bg-white hover:bg-zinc-50 text-zinc-600'} transition cursor-pointer shadow-2xs shrink-0" 
+                    title="${f.media ? 'Media Terlampir (Klik untuk kelola)' : 'Sisipkan Gambar / Video / Media'}"
                   >
-                    <span class="font-bold font-mono text-sm leading-none text-indigo-600">∑</span>
-                    <span class="font-semibold text-xs">Rumus</span>
+                    <svg class="w-4 h-4 ${f.media ? 'text-indigo-600' : 'text-zinc-600'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
                   </button>
+
+                  <div class="flex-1 md:flex-initial min-w-0">
+                    ${getModernQuestionTypePopoverHtml(f, sIdx, fIdx)}
+                  </div>
                 </div>
 
               </div>
