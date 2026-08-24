@@ -1340,8 +1340,11 @@
   <!-- ========================================================================= -->
   <!-- MODAL: BUAT FORMULIR BARU (CREATION WIZARD) -->
   <!-- ========================================================================= -->
+  <!-- ========================================================================= -->
+  <!-- MODAL: BUAT FORMULIR BARU (CREATION CONFIRMATION / WIZARD) -->
+  <!-- ========================================================================= -->
   <div id="modalCreateForm" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-4 fade-enter max-h-[90vh] overflow-y-auto custom-scrollbar">
+    <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-4 fade-enter max-h-[90vh] overflow-y-auto custom-scrollbar">
       
       <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
         <div class="flex items-center gap-2.5">
@@ -1352,7 +1355,7 @@
           </div>
           <div>
             <h3 class="font-bold text-sm sm:text-base text-zinc-900">Buat Formulir Baru</h3>
-            <p class="text-[11px] text-zinc-500">Buat lembar penilaian baru untuk mata kuliah atau kelas perkuliahan lain.</p>
+            <p class="text-[11px] text-zinc-500">Pilih opsi awal formulir penilaian baru.</p>
           </div>
         </div>
         <button type="button" onclick="closeCreateFormModal()" class="w-8 h-8 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center cursor-pointer">
@@ -1363,137 +1366,67 @@
       </div>
 
       <form id="formWizardCreate" onsubmit="handleCreateFormSubmit(event)" class="space-y-3.5 text-xs">
-        <div class="space-y-1">
-          <label class="block font-semibold text-zinc-700">Judul Formulir <span class="text-rose-500">*</span></label>
-          <input 
-            type="text" 
-            id="wiz_Judul_Form" 
-            required 
-            oninput="handleWizTitleInput()"
-            placeholder="Misal: Penilaian Presentasi Kelompok 5A" 
-            class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none"
-          >
-        </div>
+        <!-- Hidden inputs for fallback compatibility -->
+        <input type="hidden" id="wiz_Judul_Form" value="Formulir Penilaian Baru">
+        <input type="hidden" id="wiz_Mata_Kuliah" value="-">
+        <input type="hidden" id="wiz_Dosen" value="-">
+        <input type="hidden" id="wiz_Kelas" value="5E">
+        <input type="hidden" id="wiz_Jurusan" value="PGSD">
+        <input type="hidden" id="wiz_Sesi" value="Minggu 1">
+        <input type="hidden" id="wiz_Form_Slug" value="">
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div class="space-y-1">
-            <label class="block font-semibold text-zinc-700">Nama Mata Kuliah <span class="text-rose-500">*</span></label>
-            <input 
-              type="text" 
-              id="wiz_Mata_Kuliah" 
-              required 
-              placeholder="Misal: Pembelajaran IPA di SD" 
-              class="w-full px-3 py-2 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none"
-            >
-          </div>
-          <div class="space-y-1">
-            <label class="block font-semibold text-zinc-700">Dosen Pengampu <span class="text-rose-500">*</span></label>
-            <input 
-              type="text" 
-              id="wiz_Dosen" 
-              required 
-              placeholder="Nama lengkap dosen pengampu..." 
-              class="w-full px-3 py-2 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none"
-            >
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          <div class="space-y-1">
-            <label class="block font-semibold text-zinc-700">Kelas</label>
-            <input 
-              type="text" 
-              id="wiz_Kelas" 
-              placeholder="5A" 
-              class="w-full px-3 py-2 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none"
-            >
-          </div>
-          <div class="space-y-1">
-            <label class="block font-semibold text-zinc-700">Program Studi</label>
-            <input 
-              type="text" 
-              id="wiz_Jurusan" 
-              value="PGSD" 
-              class="w-full px-3 py-2 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none"
-            >
-          </div>
-          <div class="space-y-1 col-span-2 sm:col-span-1">
-            <label class="block font-semibold text-zinc-700">Pertemuan / Sesi Awal</label>
-            <input 
-              type="text" 
-              id="wiz_Sesi" 
-              value="Minggu 1" 
-              class="w-full px-3 py-2 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none"
-            >
-          </div>
-        </div>
-
-        <!-- Custom Short ID (4-5 Karakter) & Slug -->
-        <div class="p-3 bg-zinc-50 rounded-xl border border-zinc-200 space-y-2.5">
+        <!-- Custom Short ID (4-5 Karakter) & PIN Preview -->
+        <div class="p-3.5 bg-zinc-50 rounded-xl border border-zinc-200 space-y-2">
           <div class="flex items-center justify-between">
-            <span class="font-semibold text-zinc-700">Kode Akses &amp; Link Formulir</span>
+            <span class="font-semibold text-zinc-700">Kode Akses PIN Formulir:</span>
             <button type="button" onclick="generateRandomWizPin()" class="text-[11px] text-indigo-600 hover:text-indigo-800 font-semibold cursor-pointer">
               Acak Kode Baru
             </button>
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <div>
-              <label class="block text-[11px] text-zinc-500 mb-0.5">Kode PIN Masuk (4–5 Huruf):</label>
-              <input 
-                type="text" 
-                id="wiz_Form_Id" 
-                maxlength="5" 
-                required 
-                class="w-full px-3 py-1.5 rounded-lg border border-zinc-300 font-mono font-bold text-xs uppercase focus:border-zinc-900 outline-none bg-white tracking-widest text-indigo-700"
-              >
-            </div>
-            <div>
-              <label class="block text-[11px] text-zinc-500 mb-0.5">Alamat Link Singkat:</label>
-              <input 
-                type="text" 
-                id="wiz_Form_Slug" 
-                required 
-                class="w-full px-3 py-1.5 rounded-lg border border-zinc-300 font-mono text-xs focus:border-zinc-900 outline-none bg-white text-zinc-700"
-              >
-            </div>
+          <div>
+            <input 
+              type="text" 
+              id="wiz_Form_Id" 
+              maxlength="5" 
+              required 
+              oninput="handleWizTitleInput()"
+              class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 font-mono font-bold text-sm uppercase focus:border-zinc-900 outline-none bg-white tracking-widest text-indigo-700 text-center"
+            >
           </div>
-          <p class="text-[10.5px] text-zinc-500">Mahasiswa dan penilai cukup memasukkan kode PIN ini atau membuka link: <code id="wizUrlPreview" class="text-indigo-600 font-semibold">/?id=...</code></p>
+          <p class="text-[10.5px] text-zinc-500 text-center">Mahasiswa dan penilai cukup memasukkan kode PIN ini atau membuka link: <code id="wizUrlPreview" class="text-indigo-600 font-semibold">/?id=...</code></p>
         </div>
 
         <!-- Opsi Template Roster -->
         <div class="space-y-1.5 pt-1">
           <label class="block font-semibold text-zinc-700">Pilihan Data Mahasiswa &amp; Kelompok:</label>
-          <div class="space-y-1.5">
-            <label class="flex items-start gap-2.5 p-2.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 cursor-pointer transition">
-              <input type="radio" name="wizRosterOption" value="empty" checked class="mt-0.5 text-zinc-900">
+          <div class="space-y-2">
+            <label class="flex items-start gap-2.5 p-3 rounded-xl border border-zinc-200 hover:bg-zinc-50 cursor-pointer transition">
+              <input type="radio" name="wizRosterOption" value="empty" checked class="mt-0.5 text-indigo-600">
               <div>
-                <p class="font-semibold text-zinc-900">Mulai dari Formulir Kosong</p>
-                <p class="text-[10.5px] text-zinc-500">Anda dapat mengisi nama kelompok dan mahasiswa secara manual nanti.</p>
+                <p class="font-semibold text-zinc-900 text-xs sm:text-sm">Mulai dari Formulir Kosong</p>
+                <p class="text-[11px] text-zinc-500 mt-0.5">Anda dapat mengisi nama kelompok dan mahasiswa secara manual nanti.</p>
               </div>
             </label>
-            <label class="flex items-start gap-2.5 p-2.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 cursor-pointer transition">
-              <input type="radio" name="wizRosterOption" value="clone_default" class="mt-0.5 text-zinc-900">
+            <label class="flex items-start gap-2.5 p-3 rounded-xl border border-zinc-200 hover:bg-zinc-50 cursor-pointer transition">
+              <input type="radio" name="wizRosterOption" value="clone_default" class="mt-0.5 text-indigo-600">
               <div>
-                <p class="font-semibold text-zinc-900">Gunakan Data Mahasiswa yang Ada (Salin dari Formulir Utama)</p>
-                <p class="text-[10.5px] text-zinc-500">Menyalin otomatis daftar nama mahasiswa dan kelompok agar tidak perlu mengetik ulang.</p>
+                <p class="font-semibold text-zinc-900 text-xs sm:text-sm">Gunakan Data Mahasiswa yang Ada (Salin dari Formulir Utama)</p>
+                <p class="text-[11px] text-zinc-500 mt-0.5">Menyalin otomatis daftar nama mahasiswa dan kelompok agar tidak perlu mengetik ulang.</p>
               </div>
             </label>
           </div>
         </div>
 
         <div class="flex items-center justify-between gap-3 pt-3 border-t border-zinc-100">
-          <button type="button" onclick="closeCreateFormModal()" class="px-4 py-2 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 font-medium cursor-pointer">
+          <button type="button" onclick="closeCreateFormModal()" class="px-4 py-2.5 rounded-xl border border-zinc-200 hover:bg-zinc-50 text-zinc-700 font-medium cursor-pointer min-h-[44px]">
             Batal
           </button>
           <button 
             type="submit" 
             id="btnSubmitCreateForm" 
-            class="px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-xs flex items-center gap-1.5 transition active:scale-98 cursor-pointer"
+            class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-xs flex items-center gap-1.5 transition active:scale-98 cursor-pointer min-h-[44px]"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
-            </svg>
-            <span>Simpan &amp; Buat Formulir</span>
+            <span>Buat Formulir Sekarang</span>
           </button>
         </div>
       </form>
@@ -8115,12 +8048,6 @@ function getOrCreateFolder(folderName) {
     // CREATION WIZARD & SHARE MODAL CONTROLLERS
     // =========================================================================
     function openCreateFormModal() {
-      document.getElementById("wiz_Judul_Form").value = "";
-      document.getElementById("wiz_Mata_Kuliah").value = "";
-      document.getElementById("wiz_Dosen").value = "";
-      document.getElementById("wiz_Kelas").value = "5A";
-      document.getElementById("wiz_Jurusan").value = "PGSD";
-      document.getElementById("wiz_Sesi").value = "Minggu 1";
       generateRandomWizPin();
       document.getElementById("modalCreateForm").classList.remove("hidden");
     }
@@ -8135,40 +8062,38 @@ function getOrCreateFolder(folderName) {
       for (let i = 0; i < 4; i++) {
         pin += chars.charAt(Math.floor(Math.random() * chars.length));
       }
-      document.getElementById("wiz_Form_Id").value = pin;
+      const pinInput = document.getElementById("wiz_Form_Id");
+      if (pinInput) pinInput.value = pin;
       handleWizTitleInput();
     }
 
     function handleWizTitleInput() {
-      const title = document.getElementById("wiz_Judul_Form").value.trim();
-      const pin = document.getElementById("wiz_Form_Id").value.trim().toUpperCase();
-      let slug = title.toLowerCase().replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-").substring(0, 30);
-      if (!slug) slug = pin.toLowerCase();
-      document.getElementById("wiz_Form_Slug").value = slug;
-      document.getElementById("wizUrlPreview").textContent = `/?id=${pin}`;
+      const pin = (document.getElementById("wiz_Form_Id")?.value || "").trim().toUpperCase();
+      const slugInput = document.getElementById("wiz_Form_Slug");
+      if (slugInput) slugInput.value = pin.toLowerCase();
+      const preview = document.getElementById("wizUrlPreview");
+      if (preview) preview.textContent = `/?id=${pin}`;
     }
 
     async function handleCreateFormSubmit(e) {
       e.preventDefault();
       const btn = document.getElementById("btnSubmitCreateForm");
       btn.disabled = true;
-      btn.innerHTML = `<span>Menyimpan ke Supabase...</span>`;
+      btn.innerHTML = `<span>Membuat Formulir...</span>`;
 
-      const judulForm = document.getElementById("wiz_Judul_Form").value.trim();
-      const mataKuliah = document.getElementById("wiz_Mata_Kuliah").value.trim();
-      const dosen = document.getElementById("wiz_Dosen").value.trim();
-      const kelas = document.getElementById("wiz_Kelas").value.trim();
-      const jurusan = document.getElementById("wiz_Jurusan").value.trim();
-      const sesi = document.getElementById("wiz_Sesi").value.trim();
-      let customFormId = document.getElementById("wiz_Form_Id").value.trim().toUpperCase();
-      let customSlug = document.getElementById("wiz_Form_Slug").value.trim().toLowerCase();
-      const rosterOption = document.querySelector('input[name="wizRosterOption"]:checked')?.value || 'empty';
-
+      let customFormId = document.getElementById("wiz_Form_Id")?.value?.trim()?.toUpperCase();
       if (!customFormId) {
         const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
         for (let i = 0; i < 4; i++) customFormId += chars.charAt(Math.floor(Math.random() * chars.length));
       }
-      if (!customSlug) customSlug = customFormId.toLowerCase();
+      let customSlug = customFormId.toLowerCase();
+      const judulForm = "Penilaian Perkuliahan";
+      const mataKuliah = "-";
+      const dosen = "-";
+      const kelas = "5E";
+      const jurusan = "PGSD";
+      const sesi = "Minggu 1";
+      const rosterOption = document.querySelector('input[name="wizRosterOption"]:checked')?.value || 'empty';
 
       try {
         // ⚡ FAST-PATH (< 30ms): Simpan langsung ke Supabase PostgreSQL
@@ -8182,8 +8107,8 @@ function getOrCreateFolder(folderName) {
           mata_kuliah: mataKuliah,
           dosen: dosen,
           kelas: kelas,
-          jurusan: jurusan || 'PGSD',
-          sesi_aktif: sesi || 'Minggu 1',
+          jurusan: jurusan,
+          sesi_aktif: sesi,
           status: 'AKTIF',
           is_primary: false,
           google_drive_folder: 'Arsip Penilaian FKIP ULM - Dokumen'
@@ -8197,9 +8122,9 @@ function getOrCreateFolder(folderName) {
           Mata_Kuliah: mataKuliah,
           Dosen_Pengampu: dosen,
           Kelas: kelas,
-          Jurusan: jurusan || 'PGSD',
+          Jurusan: jurusan,
           Deskripsi_Form: '',
-          Sesi_Minggu_Aktif: sesi || 'Minggu 1',
+          Sesi_Minggu_Aktif: sesi,
           Domain_Email_Wajib: 'mhs.ulm.ac.id, ulm.ac.id',
           Nilai_Kelompok_Min: '50',
           Nilai_Kelompok_Max: '100',
@@ -8247,7 +8172,7 @@ function getOrCreateFolder(folderName) {
         }
 
         closeCreateFormModal();
-        showAdminToast(`Formulir '${judulForm}' (PIN: ${customFormId}) berhasil dibuat di Supabase!`, "success");
+        showAdminToast(`Formulir PIN: ${customFormId} berhasil dibuat! Silakan atur mata kuliah, dosen, dan pertanyaan di sini.`, "success");
 
         localStorage.setItem(`PGSD_DRAFT_SCHEMA_${customFormId}`, JSON.stringify(initialSchema));
         localStorage.setItem(`PGSD_CACHE_CONFIG_${customFormId}`, JSON.stringify(initialConfig));

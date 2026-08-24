@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.61] - 2026-08-25
+
+### 🚀 Penyederhanaan Alur Pembuatan Formulir Baru (One-Click Streamlined Creation)
+- **Desain Ulang Dialog Pembuatan Formulir:**
+  - Mengubah modal "Buat Formulir Baru" menjadi ringkas dan langsung ke opsi konfirmasi PIN serta pilihan data mahasiswa/kelompok (Formulir Kosong vs Salin dari Formulir Utama).
+  - Menghilangkan input identitas panjang di awal (Judul, Mata Kuliah, Dosen, Kelas, Jurusan, Sesi) sehingga pengisian identitas dilakukan secara leluasa pada tab **Setelan Form** di dalam workspace.
+- **Optimasi Alur UX & Transisi Cepat:**
+  - Setelah tombol *Buat Formulir Sekarang* ditekan, formulir langsung terdaftar di Supabase dan pengguna seketika diarahkan ke workspace formulir baru.
+
+---
+
 ## [2.2.60] - 2026-08-25
 
 ### ⚡ Transisi Penuh CRUD Formulir Langsung ke Supabase (Fast-Path < 30ms)
