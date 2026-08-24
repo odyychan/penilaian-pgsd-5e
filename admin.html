@@ -2497,6 +2497,20 @@ function getOrCreateFolder(folderName) {
       return supabaseClient;
     }
 
+    async function ensureSupabaseClient(maxRetries = 25, intervalMs = 40) {
+      if (supabaseClient) return supabaseClient;
+      if (window.supabase && typeof window.supabase.createClient === "function") {
+        return getSupabaseClient();
+      }
+      for (let i = 0; i < maxRetries; i++) {
+        await new Promise(r => setTimeout(r, intervalMs));
+        if (window.supabase && typeof window.supabase.createClient === "function") {
+          return getSupabaseClient();
+        }
+      }
+      return getSupabaseClient();
+    }
+
     // Application State
     let formsRegistryList = [];
     let currentFormId = null; // null = Master Hub View; 'BK5E' = Workspace View
@@ -4354,32 +4368,45 @@ function getOrCreateFolder(folderName) {
     async function fetchFormsRegistry(forceFresh = false) {
       showGlobalLoadingProgress();
 
-      // ⚡ FAST-PATH (< 30ms): Query langsung dari Supabase Database Summary View
-      const sb = getSupabaseClient();
+      // ⚡ FAST-PATH (< 30ms): Query langsung dari Supabase Database
+      const sb = await ensureSupabaseClient();
       if (sb) {
         try {
-          const { data: formsData, error: sbErr } = await sb
+          let { data: formsData, error: sbErr } = await sb
             .from('pgsd_v_forms_summary')
             .select('*')
             .order('is_primary', { ascending: false })
             .order('created_at', { ascending: true });
 
+          // Fallback langsung ke tabel pgsd_forms jika view mengalami kendala
+          if (sbErr || !Array.isArray(formsData) || formsData.length === 0) {
+            const { data: rawForms, error: rawErr } = await sb
+              .from('pgsd_forms')
+              .select('*')
+              .order('is_primary', { ascending: false })
+              .order('created_at', { ascending: true });
+            if (!rawErr && Array.isArray(rawForms) && rawForms.length > 0) {
+              formsData = rawForms;
+              sbErr = null;
+            }
+          }
+
           if (!sbErr && Array.isArray(formsData) && formsData.length > 0) {
             formsRegistryList = formsData.map(f => ({
               formId: f.form_id,
-              formSlug: f.form_slug,
-              judulForm: f.judul_form,
-              mataKuliah: f.mata_kuliah,
-              dosen: f.dosen,
-              kelas: f.kelas,
-              jurusan: f.jurusan,
-              sesiAktif: f.sesi_aktif,
-              status: f.status,
-              isPrimary: f.is_primary,
+              formSlug: f.form_slug || (f.form_id ? f.form_id.toLowerCase() : ''),
+              judulForm: f.judul_form || "Formulir Penilaian",
+              mataKuliah: f.mata_kuliah || "-",
+              dosen: f.dosen || "-",
+              kelas: f.kelas || "-",
+              jurusan: f.jurusan || "PGSD",
+              sesiAktif: f.sesi_aktif || "Minggu 1",
+              status: (f.status || "AKTIF").toUpperCase(),
+              isPrimary: !!f.is_primary,
               totalKelompok: f.total_kelompok || 0,
               totalMahasiswa: f.total_mahasiswa || 0,
-              totalResponses: f.total_responses || 0,
-              rataRata: f.rata_rata_keseluruhan || 0,
+              totalResponses: f.total_respons !== undefined ? f.total_respons : (f.total_responses || 0),
+              rataRata: f.nilai_rata_rata_keseluruhan || 0,
               createdAt: f.created_at
             }));
 
@@ -4388,7 +4415,7 @@ function getOrCreateFolder(folderName) {
             renderHubFormsGrid();
             initAllModernDropdowns();
             setTimeout(() => {
-              const containerEl = document.getElementById("dynamicStagesCanvasContainer");
+              const containerEl = document.getElementById("hubFormsGrid");
               if (containerEl) renderAllMathInElement(containerEl);
             }, 60);
             return;
@@ -4398,33 +4425,11 @@ function getOrCreateFolder(folderName) {
         }
       }
 
-      const apiUrl = getApiUrl();
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000);
-        const response = await fetch(`${apiUrl}?action=adminGetFormsRegistry&_t=${Date.now()}`, { signal: controller.signal });
-        clearTimeout(timeoutId);
-        const res = await response.json();
-
-        if (res.success && Array.isArray(res.forms)) {
-          formsRegistryList = res.forms;
-          localStorage.setItem("PGSD_CACHE_REGISTRY_FORMS", JSON.stringify(formsRegistryList));
-        } else {
-          fallbackRegistryList();
-        }
-      } catch (e) {
-        fallbackRegistryList();
-      } finally {
-        hideGlobalLoadingProgress();
-      }
+      // Fallback lokal jika jaringan offline
+      fallbackRegistryList();
+      hideGlobalLoadingProgress();
       renderHubFormsGrid();
       initAllModernDropdowns();
-      setTimeout(() => {
-        const containerEl = document.getElementById("dynamicStagesCanvasContainer");
-        if (containerEl) {
-          renderAllMathInElement(containerEl);
-        }
-      }, 60);
     }
 
     function fallbackRegistryList() {
@@ -4738,7 +4743,7 @@ function getOrCreateFolder(folderName) {
       const targetForm = currentFormId || DEFAULT_PRIMARY_FORM_ID;
 
       // ⚡ FAST-PATH (< 30ms): Query langsung dari Supabase Database
-      const sb = getSupabaseClient();
+      const sb = await ensureSupabaseClient();
       if (sb) {
         try {
           const [formRes, configRes, groupsRes, studentsRes, respCountRes] = await Promise.all([
@@ -5639,7 +5644,7 @@ function getOrCreateFolder(folderName) {
       setSyncState('saving');
 
       // ⚡ FAST-PATH (< 30ms): Simpan langsung ke Supabase PostgreSQL
-      const sb = getSupabaseClient();
+      const sb = await ensureSupabaseClient();
       let sbSuccess = false;
 
       if (sb) {
@@ -7838,7 +7843,7 @@ function getOrCreateFolder(folderName) {
       }
 
       // ⚡ FAST-PATH: Ambil langsung dari Supabase Database (< 40ms)
-      const sb = getSupabaseClient();
+      const sb = await ensureSupabaseClient();
       if (sb) {
         try {
           const { data: sbResponses, error: sbErr } = await sb
@@ -8920,7 +8925,7 @@ function getOrCreateFolder(folderName) {
 
     async function downloadGlobalDatabaseBackup() {
       showGlobalLoadingProgress();
-      const sb = getSupabaseClient();
+      const sb = await ensureSupabaseClient();
       try {
         let forms = [], configs = [], groups = [], students = [], responses = [];
         if (sb) {

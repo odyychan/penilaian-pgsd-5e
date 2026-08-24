@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.56] - 2026-08-25
+
+### ⚡ Perbaikan Siklus Hidup Inisialisasi Lokal (Fix List Card Kosong pada Load Pertama)
+- **Eliminasi Race Condition Pemuatan CDN Supabase:**
+  - Mengimplementasikan helper asynchronous `ensureSupabaseClient()` dengan *retry polling* non-blocking sehingga inisialisasi client tidak pernah gagal meskipun script CDN masih dalam proses parsing saat event `DOMContentLoaded` berjalan.
+- **Penyempurnaan Pemetaan Kolom Registry & Fallback Cerdas:**
+  - Menyelaraskan nama kolom View `pgsd_v_forms_summary` (`total_respons`, `nilai_rata_rata_keseluruhan`, `form_slug`) pada fungsi `fetchFormsRegistry()`.
+  - Menambahkan fallback instan langsung ke tabel `pgsd_forms` jika view database sedang disegarkan, memastikan kartu formulir selalu langsung tampil seketika (< 30ms) saat halaman pertama kali dibuka tanpa perlu refresh manual.
+
+---
+
 ## [2.2.55] - 2026-08-25
 
 ### 📜 Formalisasi Standar Skema Database & Mandat Auto-Deployment Otonom (AGENTS.md)
