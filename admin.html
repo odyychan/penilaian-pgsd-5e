@@ -2097,7 +2097,148 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     // =========================================================================
     // AUTHENTICATION & ROUTING INIT
     // =========================================================================
+        // =========================================================================
+    // UNIVERSAL MODERN DROPDOWN POPOVER ENGINE (Zero OS Box Dropdowns)
+    // =========================================================================
+    function enhanceSelectToModernDropdown(selectEl) {
+      if (!selectEl || selectEl.dataset.pgsdDropdownEnhanced === "true") return;
+      if (selectEl.classList.contains("no-modernize")) return;
+
+      selectEl.dataset.pgsdDropdownEnhanced = "true";
+      selectEl.style.display = "none";
+
+      const wrapper = document.createElement("div");
+      wrapper.className = `pgsd-dropdown-wrapper relative inline-block text-left ${selectEl.classList.contains('w-full') ? 'w-full' : ''}`;
+      
+      const triggerBtn = document.createElement("button");
+      triggerBtn.type = "button";
+      triggerBtn.className = selectEl.className.replace(/hidden/g, '') + " flex items-center justify-between gap-2 shadow-2xs transition-all duration-150 select-none cursor-pointer";
+      triggerBtn.style.display = "flex";
+
+      const labelSpan = document.createElement("span");
+      labelSpan.className = "truncate flex-1 text-left";
+      
+      const selectedOption = selectEl.options[selectEl.selectedIndex] || selectEl.options[0];
+      labelSpan.textContent = selectedOption ? selectedOption.text : "Pilih...";
+
+      const chevronSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      chevronSvg.setAttribute("class", "w-3.5 h-3.5 text-zinc-400 shrink-0 transition-transform duration-200");
+      chevronSvg.setAttribute("fill", "none");
+      chevronSvg.setAttribute("stroke", "currentColor");
+      chevronSvg.setAttribute("viewBox", "0 0 24 24");
+      chevronSvg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>';
+
+      triggerBtn.appendChild(labelSpan);
+      triggerBtn.appendChild(chevronSvg);
+
+      const menu = document.createElement("div");
+      menu.className = "pgsd-dropdown-menu absolute left-0 right-0 sm:right-auto sm:min-w-[180px] mt-1.5 rounded-xl bg-white border border-zinc-200 shadow-xl p-1 space-y-0.5 z-50 text-xs hidden max-h-64 overflow-y-auto no-scrollbar";
+      menu.style.boxShadow = "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)";
+
+      function rebuildMenuOptions() {
+        menu.innerHTML = "";
+        Array.from(selectEl.options).forEach((opt, idx) => {
+          const isSelected = idx === selectEl.selectedIndex;
+          const itemBtn = document.createElement("button");
+          itemBtn.type = "button";
+          itemBtn.className = `w-full px-3 py-2 rounded-lg text-left font-medium flex items-center justify-between gap-2 transition cursor-pointer ${
+            isSelected 
+              ? 'bg-indigo-50 text-indigo-700 font-bold' 
+              : 'text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900'
+          }`;
+
+          const itemText = document.createElement("span");
+          itemText.className = "truncate";
+          itemText.textContent = opt.text;
+          itemBtn.appendChild(itemText);
+
+          if (isSelected) {
+            const checkSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            checkSvg.setAttribute("class", "w-3.5 h-3.5 text-indigo-600 shrink-0");
+            checkSvg.setAttribute("fill", "none");
+            checkSvg.setAttribute("stroke", "currentColor");
+            checkSvg.setAttribute("viewBox", "0 0 24 24");
+            checkSvg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>';
+            itemBtn.appendChild(checkSvg);
+          }
+
+          itemBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            selectEl.selectedIndex = idx;
+            selectEl.value = opt.value;
+            labelSpan.textContent = opt.text;
+            closeMenu();
+            selectEl.dispatchEvent(new Event("change", { bubbles: true }));
+            selectEl.dispatchEvent(new Event("input", { bubbles: true }));
+          });
+
+          menu.appendChild(itemBtn);
+        });
+      }
+
+      function openMenu() {
+        document.querySelectorAll(".pgsd-dropdown-menu").forEach(m => m.classList.add("hidden"));
+        document.querySelectorAll(".pgsd-dropdown-wrapper svg").forEach(s => s.classList.remove("rotate-180"));
+        
+        rebuildMenuOptions();
+        menu.classList.remove("hidden");
+        chevronSvg.classList.add("rotate-180");
+        triggerBtn.classList.add("ring-2", "ring-indigo-500/20", "border-indigo-500");
+      }
+
+      function closeMenu() {
+        menu.classList.add("hidden");
+        chevronSvg.classList.remove("rotate-180");
+        triggerBtn.classList.remove("ring-2", "ring-indigo-500/20", "border-indigo-500");
+      }
+
+      triggerBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (menu.classList.contains("hidden")) {
+          openMenu();
+        } else {
+          closeMenu();
+        }
+      });
+
+      const observer = new MutationObserver(() => {
+        const curOpt = selectEl.options[selectEl.selectedIndex];
+        if (curOpt) labelSpan.textContent = curOpt.text;
+      });
+      observer.observe(selectEl, { childList: true, subtree: true, attributes: true });
+
+      selectEl.addEventListener("change", () => {
+        const curOpt = selectEl.options[selectEl.selectedIndex];
+        if (curOpt) labelSpan.textContent = curOpt.text;
+      });
+
+      selectEl.parentNode.insertBefore(wrapper, selectEl);
+      wrapper.appendChild(selectEl);
+      wrapper.appendChild(triggerBtn);
+      wrapper.appendChild(menu);
+    }
+
+    function initAllModernDropdowns() {
+      document.querySelectorAll("select").forEach(sel => {
+        enhanceSelectToModernDropdown(sel);
+      });
+    }
+
+    document.addEventListener("click", () => {
+      document.querySelectorAll(".pgsd-dropdown-menu").forEach(m => m.classList.add("hidden"));
+      document.querySelectorAll(".pgsd-dropdown-wrapper svg.rotate-180").forEach(s => s.classList.remove("rotate-180"));
+      document.querySelectorAll(".pgsd-dropdown-wrapper button").forEach(b => b.classList.remove("ring-2", "ring-indigo-500/20", "border-indigo-500"));
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        document.querySelectorAll(".pgsd-dropdown-menu").forEach(m => m.classList.add("hidden"));
+        document.querySelectorAll(".pgsd-dropdown-wrapper svg.rotate-180").forEach(s => s.classList.remove("rotate-180"));
+      }
+    });
+
     document.addEventListener("DOMContentLoaded", function() {
+      initAllModernDropdowns();
       const isAuth = sessionStorage.getItem("PGSD_ADMIN_AUTH");
       if (isAuth === "true") {
         showDashboard();
@@ -2187,6 +2328,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         fallbackRegistryList();
       }
       renderHubFormsGrid();
+      initAllModernDropdowns();
     }
 
     function fallbackRegistryList() {

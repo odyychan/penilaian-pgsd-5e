@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.95] - 2026-08-24
+
+### 💎 Universal Modern Dropdown Popover Engine & System-Wide Dropdown Overhaul
+- **Universal Modern Dropdown Popover Engine (*Zero OS Box Dropdowns*):**
+  - Menggantikan seluruh dropdown elemen `<select>` bawaan sistem operasi yang kaku dan berwarna biru persegi dengan **Custom Floating Popover Dropdown** modern-minimalis (setara shadcn/ui / Tailwind UI).
+  - Dilengkapi animasi buka halus (*subtle zoom & fade*), rotasi ikon chevron 180°, bayangan lembut (*soft elevation shadow*), dan penanda centang aktif (*active checkmark*).
+- **Cakupan Total Seluruh Aplikasi (`admin.html` & `index.html`):**
+  - **Panel Admin:** Filter Status Master Hub, Prefix Footer Creator, Pemilih Aturan Review & Tipe Input Form Builder, Filter Sesi/Kelompok/Status Anggota, dan Scope Cetak Rekap.
+  - **Formulir Pengguna (Mahasiswa/Dosen/Tamu):** Pemilih Peran Penilai pada kartu identitas, Filter Rekapitulasi Sesi & Kelompok, Filter Presensi Kehadiran, dan Opsi Cetak Mahasiswa.
+- **Sinkronisasi 2-Arah Native:**
+  - Terintegrasi langsung dengan event listener `change` dan `input` native peramban, serta mendukung penutupan otomatis saat klik di luar area (*click-outside*) dan tombol `Escape`.
+
+---
+
 ## [2.1.94] - 2026-08-24
 
 ### 💎 Master Form Hub Visual Polish & Modern-Minimalist Aesthetic Audit
