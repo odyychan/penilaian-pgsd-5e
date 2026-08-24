@@ -2897,9 +2897,14 @@
             });
           }
           
-          localStorage.setItem("PGSD_CACHE_GROUPS", JSON.stringify(groupsData));
-          localStorage.setItem("PGSD_CACHE_ALL_STUDENTS", JSON.stringify(allStudentsData));
-          localStorage.setItem("PGSD_CACHE_CONFIG", JSON.stringify(appConfig));
+          localStorage.setItem("PGSD_CACHE_GROUPS_" + activeFormId, JSON.stringify(groupsData));
+          localStorage.setItem("PGSD_CACHE_ALL_STUDENTS_" + activeFormId, JSON.stringify(allStudentsData));
+          localStorage.setItem("PGSD_CACHE_CONFIG_" + activeFormId, JSON.stringify(appConfig));
+          if (activeFormId === 'BK5E') {
+            localStorage.setItem("PGSD_CACHE_GROUPS", JSON.stringify(groupsData));
+            localStorage.setItem("PGSD_CACHE_ALL_STUDENTS", JSON.stringify(allStudentsData));
+            localStorage.setItem("PGSD_CACHE_CONFIG", JSON.stringify(appConfig));
+          }
 
           renderConfigHeader();
           renderGroupOptions();
@@ -3674,7 +3679,7 @@
         });
         if (hasEval) return true;
 
-        const raw = localStorage.getItem("PGSD_FORM_DRAFT");
+        const raw = localStorage.getItem(getFormDraftKey());
         if (raw) {
           const d = JSON.parse(raw);
           if (d && (d.nim || d.nama || d.email || d.groupName || (d.bestPresenters && d.bestPresenters.length > 0) || (d.evaluasi && Object.keys(d.evaluasi).length > 0))) {
@@ -3724,6 +3729,7 @@
         }
 
         const draft = {
+          formId: activeFormId,
           peran: peran,
           nim: nim,
           email: email,
@@ -3732,11 +3738,12 @@
           nilai: nilai,
           bestPresenters: selectedBestPresenters,
           evaluasi: evaluasi,
+          customAnswers: clientCustomFormAnswers || {},
           step: currentStep,
           timestamp: Date.now()
         };
 
-        localStorage.setItem("PGSD_FORM_DRAFT", JSON.stringify(draft));
+        localStorage.setItem(getFormDraftKey(), JSON.stringify(draft));
 
         const indicator = document.getElementById("autoSaveIndicator");
         if (indicator) indicator.classList.remove("hidden");
@@ -3744,11 +3751,42 @@
       updateDraftResetButtonVisibility();
     }
 
+    function getFormDraftKey() {
+      return "PGSD_FORM_DRAFT_" + (activeFormId || 'BK5E').toUpperCase();
+    }
+
+    function resetInMemoryClientFormState() {
+      clientCustomFormAnswers = {};
+      selectedGroupObj = null;
+      selectedGroupIndex = -1;
+      selectedBestPresenters = [];
+      currentStep = 1;
+      currentRekapData = null;
+      appConfig = {};
+      groupsData = [];
+      allStudentsData = [];
+      currentFormSchema = null;
+      currentFormMeta = null;
+      isDraftAlreadyRestored = false;
+
+      // Clear DOM inputs
+      const inputNim = document.getElementById("inputNim");
+      const inputNama = document.getElementById("inputNama");
+      const inputEmail = document.getElementById("inputEmail");
+      if (inputNim) inputNim.value = "";
+      if (inputNama) inputNama.value = "";
+      if (inputEmail) inputEmail.value = "";
+      const nimFeedback = document.getElementById("nimFeedbackBox");
+      if (nimFeedback) nimFeedback.classList.add("hidden");
+      const nimStatus = document.getElementById("nimStatusIcon");
+      if (nimStatus) nimStatus.classList.add("hidden");
+    }
+
     let isDraftAlreadyRestored = false;
     function restoreFormDraft() {
       if (isDraftAlreadyRestored) return;
       try {
-        const raw = localStorage.getItem("PGSD_FORM_DRAFT");
+        const raw = localStorage.getItem(getFormDraftKey());
         if (!raw) {
           updateDraftResetButtonVisibility();
           return;
@@ -3860,6 +3898,11 @@
         if (indicator) indicator.classList.remove("hidden");
 
         if (draft.email || draft.nama || draft.nim || draft.groupName) {
+          if (draft.customAnswers && typeof draft.customAnswers === 'object') {
+            clientCustomFormAnswers = draft.customAnswers;
+            renderDynamicClientStages();
+          }
+
           isDraftAlreadyRestored = true;
           startAssessmentForm();
           showToast("Draf isian sebelumnya berhasil dipulihkan.", "info");
@@ -3876,7 +3919,8 @@
         type: "warning"
       });
       if (ok) {
-        localStorage.removeItem("PGSD_FORM_DRAFT");
+        localStorage.removeItem(getFormDraftKey());
+        clientCustomFormAnswers = {};
         window.location.reload();
       }
     }
@@ -4020,8 +4064,9 @@
 
         if (res && res.success) {
           // Bersihkan draf otomatis karena sudah resmi terkirim
-          localStorage.removeItem("PGSD_FORM_DRAFT");
-          localStorage.removeItem("PGSD_CACHE_REKAP");
+          localStorage.removeItem(getFormDraftKey());
+          clientCustomFormAnswers = {};
+          localStorage.removeItem("PGSD_CACHE_REKAP_" + activeFormId);
           localStorage.setItem("PGSD_LAST_SUBMISSION_EVENT", Date.now().toString());
           
           // Segarkan data rekapitulasi & presensi secara instan di background
@@ -4254,7 +4299,7 @@
         if (loading) loading.classList.add("hidden");
         if (res && res.success) {
           currentRekapData = res;
-          localStorage.setItem("PGSD_CACHE_REKAP", JSON.stringify(res));
+          localStorage.setItem("PGSD_CACHE_REKAP_" + activeFormId, JSON.stringify(res));
           renderGroupOptions();
 
           if (!res.summary || res.summary.length === 0) {

@@ -6103,6 +6103,13 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         // Remove local caches
         localStorage.removeItem(`PGSD_DRAFT_SCHEMA_${formIdToDelete}`);
         localStorage.removeItem(`PGSD_CACHE_FORM_SCHEMA_${formIdToDelete}`);
+        localStorage.removeItem(`PGSD_CACHE_CONFIG_${formIdToDelete}`);
+        localStorage.removeItem(`PGSD_CACHE_GROUPS_${formIdToDelete}`);
+        localStorage.removeItem(`PGSD_CACHE_MASTER_${formIdToDelete}`);
+        localStorage.removeItem(`PGSD_CACHE_RESPONSES_${formIdToDelete}`);
+        localStorage.removeItem(`PGSD_CACHE_REKAP_${formIdToDelete}`);
+        localStorage.removeItem(`PGSD_FORM_DRAFT_${formIdToDelete}`);
+        localStorage.removeItem(`PGSD_REVISIONS_${formIdToDelete}`);
 
         // Update local formsRegistryList
         formsRegistryList = formsRegistryList.filter(f => (f.formId || DEFAULT_PRIMARY_FORM_ID) !== formIdToDelete);
@@ -6120,6 +6127,13 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         // Fallback local cleanup if network error
         localStorage.removeItem(`PGSD_DRAFT_SCHEMA_${formIdToDelete}`);
         localStorage.removeItem(`PGSD_CACHE_FORM_SCHEMA_${formIdToDelete}`);
+        localStorage.removeItem(`PGSD_CACHE_CONFIG_${formIdToDelete}`);
+        localStorage.removeItem(`PGSD_CACHE_GROUPS_${formIdToDelete}`);
+        localStorage.removeItem(`PGSD_CACHE_MASTER_${formIdToDelete}`);
+        localStorage.removeItem(`PGSD_CACHE_RESPONSES_${formIdToDelete}`);
+        localStorage.removeItem(`PGSD_CACHE_REKAP_${formIdToDelete}`);
+        localStorage.removeItem(`PGSD_FORM_DRAFT_${formIdToDelete}`);
+        localStorage.removeItem(`PGSD_REVISIONS_${formIdToDelete}`);
         formsRegistryList = formsRegistryList.filter(f => (f.formId || DEFAULT_PRIMARY_FORM_ID) !== formIdToDelete);
         localStorage.setItem("PGSD_CACHE_REGISTRY_FORMS", JSON.stringify(formsRegistryList));
         

@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.10] - 2026-08-24
+
+### 🛡️ Strict Multi-PIN Data & Draft Isolation (Zero Cross-Form Data Leakage)
+- **Isolasi Mutlak Kunci Draf & Cache Penyimpanan Lokal per Kode PIN:**
+  - Mengubah seluruh penyimpanan draf formulir menjadi terisolasi ketat berdasarkan kode PIN aktif (`PGSD_FORM_DRAFT_{PIN}`), menghapus penggunaan kunci global tanpa ID yang sebelumnya berisiko memicu pencemaran data (*data crossover*) saat berganti formulir.
+  - Setiap kali responden atau admin berpindah form (misalnya dari `BK5E` ke `BBJX` atau sebaliknya):
+    - Draf isian formulir asal tetap tersimpan aman di ruang penyimpanannya sendiri tanpa tertimpa.
+    - Status memori internal aplikasi (*in-memory form state*) di-reset bersih (`resetInMemoryClientFormState`), memastikan formulir tujuan dimulai dari kondisi bersih (*clean slate*) dan hanya memuat data/draf yang sesuai dengan PIN miliknya.
+- **Isolasi Cache Rekapitulasi, Konfigurasi, & Mahasiswa:**
+  - Seluruh cache `PGSD_CACHE_CONFIG_{PIN}`, `PGSD_CACHE_GROUPS_{PIN}`, `PGSD_CACHE_ALL_STUDENTS_{PIN}`, `PGSD_CACHE_REKAP_{PIN}`, dan `PGSD_CACHE_RESPONSES_{PIN}` terikat 100% pada kode formulir aktif.
+  - Pembersihan cache saat penghapusan form di Admin panel diperluas untuk mencakup seluruh kunci data terkait secara menyeluruh.
+
+---
+
 ## [2.2.9] - 2026-08-24
 
 ### 🎯 100% Real-Time Dynamic Form Schema Engine for Secondary & Custom Forms
