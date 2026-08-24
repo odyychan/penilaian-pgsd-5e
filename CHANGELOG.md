@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.35] - 2026-08-24
+
+### 📱 Optimasi Responsif Mobile & Pencegahan Tumpang Tindih (*Zero Collisions*)
+- **Desain Kompak Floating Action Dock di Mobile:**
+  - Mengurangi dimensi tombol dock tindakan formulir (`+`, `TT`, `🖼`, `⎘`) pada layar perangkat mobile/smartphone menjadi proporsi ringkas (`w-8 h-8`, ikon `16×16 px`, padding `p-1`) dengan bayangan halus (*subtle shadow*).
+- **Transisi Bebas Tabrakan (*Zero Collision During Text Edit*):**
+  - Mengimplementasikan penyembunyian dinamis (*smart hide*) pada Floating Action Dock di perangkat mobile ketika pengguna memasuki mode pengeditan teks/fokus input.
+  - Menghilangkan tumpang tindih (*overlap*) antara dock aksi umum dan Universal Floating Formatting Toolbar (`B`, `I`, `U`, `🔗`, `T̶`, `∑ Rumus`).
+  - Saat pengguna selesai mengedit/melepaskan fokus (*blur*), Floating Action Dock otomatis muncul kembali dengan transisi halus.
+- **Pengujian Multi-Resolusi Mobile:**
+  - Terverifikasi 100% via remote Playwright browser testing pada resolusi mobile 390×844 px (iPhone / Android) untuk memastikan isolasi visual antara mode edit dan mode navigasi.
+
+---
+
 ## [2.2.34] - 2026-08-24
 
 ### 🎓 Format Teks & Rumus KaTeX Menyeluruh pada Identitas Perkuliahan & Footer

@@ -867,15 +867,19 @@
         </div>
 
         <!-- FLOATING ACTION DOCK (GOOGLE FORMS RIGHT ON DESKTOP, BOTTOM ON MOBILE) -->
-        <div id="googleFormsFloatingDock" class="fixed z-40 transition-all duration-200 bottom-3 inset-x-3 max-w-sm mx-auto sm:bottom-auto sm:inset-x-auto sm:right-6 sm:top-40 sm:w-12 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-zinc-200 p-1.5 sm:p-2 flex sm:flex-col items-center justify-around sm:justify-start gap-1">
+        <div 
+          id="googleFormsFloatingDock" 
+          class="fixed z-40 transition-all duration-200 bottom-3.5 left-1/2 -translate-x-1/2 sm:translate-x-0 sm:left-auto sm:bottom-auto sm:right-6 sm:top-40 w-fit sm:w-12 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-zinc-200 p-1 sm:p-1.5 flex sm:flex-col items-center justify-center gap-1 sm:gap-1.5 ring-1 ring-black/5"
+          style="box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.15), 0 4px 12px -2px rgba(0, 0, 0, 0.08);"
+        >
           <!-- + Tambah Pertanyaan -->
           <button 
             type="button" 
             onclick="addNewQuestionDirect(adminFormSchema ? adminFormSchema.tahapan.length - 1 : 0)" 
-            class="w-10 h-10 rounded-xl hover:bg-indigo-50 text-indigo-600 hover:text-indigo-800 flex items-center justify-center transition cursor-pointer active:scale-95 shadow-2xs" 
+            class="w-8 h-8 sm:w-9.5 sm:h-9.5 rounded-xl hover:bg-indigo-50 text-indigo-600 hover:text-indigo-800 flex items-center justify-center transition cursor-pointer active:scale-95 shadow-2xs" 
             title="Tambah Pertanyaan Baru (+)"
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
             </svg>
           </button>
@@ -884,7 +888,7 @@
           <button 
             type="button" 
             onclick="document.getElementById('cfg_Judul_Form')?.focus()" 
-            class="w-10 h-10 rounded-xl hover:bg-zinc-100 text-zinc-600 hover:text-zinc-900 flex items-center justify-center font-serif font-bold text-sm transition cursor-pointer active:scale-95 shadow-2xs" 
+            class="w-8 h-8 sm:w-9.5 sm:h-9.5 rounded-xl hover:bg-zinc-100 text-zinc-600 hover:text-zinc-900 flex items-center justify-center font-serif font-bold text-xs sm:text-sm transition cursor-pointer active:scale-95 shadow-2xs" 
             title="Fokus ke Judul &amp; Deskripsi Formulir (TT)"
           >
             TT
@@ -894,10 +898,10 @@
           <button 
             type="button" 
             onclick="openAttachMediaModal(0, 0)" 
-            class="w-10 h-10 rounded-xl hover:bg-zinc-100 text-zinc-600 hover:text-zinc-900 flex items-center justify-center transition cursor-pointer active:scale-95 shadow-2xs" 
+            class="w-8 h-8 sm:w-9.5 sm:h-9.5 rounded-xl hover:bg-zinc-100 text-zinc-600 hover:text-zinc-900 flex items-center justify-center transition cursor-pointer active:scale-95 shadow-2xs" 
             title="Sisipkan Media Gambar / Video"
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
             </svg>
           </button>
@@ -906,10 +910,10 @@
           <button 
             type="button" 
             onclick="addNewStageDirect()" 
-            class="w-10 h-10 rounded-xl hover:bg-zinc-100 text-zinc-600 hover:text-zinc-900 flex items-center justify-center transition cursor-pointer active:scale-95 shadow-2xs" 
+            class="w-8 h-8 sm:w-9.5 sm:h-9.5 rounded-xl hover:bg-zinc-100 text-zinc-600 hover:text-zinc-900 flex items-center justify-center transition cursor-pointer active:scale-95 shadow-2xs" 
             title="Tambahkan Bagian Baru (⎘)"
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
             </svg>
           </button>
@@ -2455,6 +2459,12 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         bar.classList.remove("hidden");
         bar.classList.add("flex");
       }
+
+      // Hide mobile action dock (+, TT, Media, Bagian) during active text edit so they never overlap
+      const actionDock = document.getElementById("googleFormsFloatingDock");
+      if (actionDock) {
+        actionDock.classList.add("max-sm:hidden");
+      }
     }
 
     function hideUniversalFloatingFormattingBar() {
@@ -2474,6 +2484,12 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         const palette = document.getElementById("universalFloatingMathPalette");
         if (palette) {
           palette.classList.add("hidden");
+        }
+
+        // Restore action dock when text edit mode ends
+        const actionDock = document.getElementById("googleFormsFloatingDock");
+        if (actionDock) {
+          actionDock.classList.remove("max-sm:hidden");
         }
       }, 180);
     }
@@ -8577,7 +8593,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
   <!-- UNIVERSAL FLOATING BOTTOM FORMATTING TOOLBAR (Pill-shaped Bottom-Center Overlay, Persistent on Scroll) -->
   <div 
     id="universalFloatingFormattingBar" 
-    class="hidden fixed bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-50 items-center gap-1 sm:gap-1.5 px-3 py-1.5 bg-white/95 backdrop-blur-md rounded-2xl border border-zinc-200 shadow-2xl text-zinc-700 select-none transition-all duration-200 animate-in fade-in slide-in-from-bottom-4 ring-1 ring-black/5"
+    class="hidden fixed bottom-3.5 sm:bottom-8 left-1/2 -translate-x-1/2 z-50 items-center gap-0.5 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-white/95 backdrop-blur-md rounded-2xl border border-zinc-200 shadow-2xl text-zinc-700 select-none transition-all duration-200 animate-in fade-in slide-in-from-bottom-4 ring-1 ring-black/5"
     style="box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.2), 0 6px 16px -4px rgba(0, 0, 0, 0.1);"
   >
     <!-- Bold (B) -->
@@ -8585,7 +8601,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       type="button" 
       onmousedown="event.preventDefault()"
       onclick="applyActiveFieldFormat('bold')" 
-      class="w-8 h-8 rounded-xl flex items-center justify-center font-serif font-black hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-sm" 
+      class="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center font-serif font-black hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-xs sm:text-sm" 
       title="Tebal (Ctrl + B)"
     >
       B
@@ -8596,7 +8612,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       type="button" 
       onmousedown="event.preventDefault()"
       onclick="applyActiveFieldFormat('italic')" 
-      class="w-8 h-8 rounded-xl flex items-center justify-center font-serif italic font-bold hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-sm" 
+      class="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center font-serif italic font-bold hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-xs sm:text-sm" 
       title="Miring (Ctrl + I)"
     >
       I
@@ -8607,7 +8623,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       type="button" 
       onmousedown="event.preventDefault()"
       onclick="applyActiveFieldFormat('underline')" 
-      class="w-8 h-8 rounded-xl flex items-center justify-center font-serif underline font-bold hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-sm" 
+      class="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center font-serif underline font-bold hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-xs sm:text-sm" 
       title="Garis Bawah (Ctrl + U)"
     >
       U
@@ -8618,10 +8634,10 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       type="button" 
       onmousedown="event.preventDefault()"
       onclick="applyActiveFieldFormat('link')" 
-      class="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-zinc-700" 
+      class="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-zinc-700" 
       title="Sisipkan Tautan (Ctrl + K)"
     >
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
       </svg>
     </button>
@@ -8631,15 +8647,15 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       type="button" 
       onmousedown="event.preventDefault()"
       onclick="applyActiveFieldFormat('remove_format')" 
-      class="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-zinc-700" 
+      class="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-zinc-700" 
       title="Hapus Format (Ctrl + \ atau Ctrl + Shift + X)"
     >
-      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+      <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="currentColor">
         <path d="M6 4v3h4.5v13h3V7H18V4H6zm14.7 15.3l-1.4 1.4L4.3 5.7 5.7 4.3l15 15z"></path>
       </svg>
     </button>
 
-    <div class="h-4 w-px bg-zinc-200 mx-1"></div>
+    <div class="h-4 w-px bg-zinc-200 mx-0.5 sm:mx-1"></div>
 
     <!-- Formula Button with Upward Floating Palette -->
     <div class="relative">
@@ -8647,17 +8663,17 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         type="button" 
         onmousedown="event.preventDefault()"
         onclick="handleActiveFieldMathButtonClick()" 
-        class="px-2.5 h-8 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-mono font-bold flex items-center gap-1.5 transition cursor-pointer text-xs border border-indigo-200/70" 
+        class="px-2 sm:px-2.5 h-7.5 sm:h-8 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-mono font-bold flex items-center gap-1 sm:gap-1.5 transition cursor-pointer text-xs border border-indigo-200/70" 
         title="Rumus Matematika (Ctrl + M) • Blok teks untuk otomatis ubah, atau klik untuk buka palet simbol"
       >
-        <span class="text-sm font-extrabold text-indigo-600">∑</span>
-        <span class="text-[11px] font-sans font-semibold">Rumus</span>
+        <span class="text-xs sm:text-sm font-extrabold text-indigo-600">∑</span>
+        <span class="text-[10.5px] sm:text-[11px] font-sans font-semibold">Rumus</span>
       </button>
 
       <!-- Upward Floating Math Palette Overlay (Pops up above the bottom bar) -->
       <div 
         id="universalFloatingMathPalette" 
-        class="hidden absolute bottom-full mb-3 left-1/2 -translate-x-1/2 z-50 p-3 bg-white/98 backdrop-blur-md rounded-2xl border border-zinc-200 shadow-2xl space-y-2 text-xs w-72 sm:w-80 animate-in fade-in zoom-in-95 duration-150 ring-1 ring-black/5"
+        class="hidden absolute bottom-full mb-3 left-1/2 -translate-x-1/2 z-50 p-2.5 sm:p-3 bg-white/98 backdrop-blur-md rounded-2xl border border-zinc-200 shadow-2xl space-y-2 text-xs w-[calc(100vw-2.5rem)] max-w-[320px] sm:w-80 animate-in fade-in zoom-in-95 duration-150 ring-1 ring-black/5"
         style="box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.25), 0 8px 18px -4px rgba(0, 0, 0, 0.12);"
       >
         <div class="flex items-center justify-between text-[11px] font-semibold text-indigo-950 pb-1.5 border-b border-zinc-100">
