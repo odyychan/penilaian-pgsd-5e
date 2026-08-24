@@ -4075,15 +4075,15 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
             </div>
 
             <div class="space-y-1">
-              <h3 class="font-bold text-sm sm:text-base text-zinc-900 leading-snug line-clamp-2 group-hover:text-indigo-600 transition-colors">${fTitle}</h3>
-              <p class="text-xs font-semibold text-zinc-600 truncate">${fMatkul}</p>
-              <p class="text-[11.5px] text-zinc-400 truncate">Dosen: ${fDosen} • Kelas ${form.kelas || '-'}</p>
+              <h3 class="font-bold text-sm sm:text-base text-zinc-900 leading-snug line-clamp-2 group-hover:text-indigo-600 transition-colors">${smartMathFormat(fTitle)}</h3>
+              <p class="text-xs font-semibold text-zinc-600 truncate">${smartMathFormat(fMatkul)}</p>
+              <p class="text-[11.5px] text-zinc-400 truncate">Dosen: ${smartMathFormat(fDosen)} • Kelas ${escapeHtml(form.kelas || '-')}</p>
             </div>
 
             <div class="grid grid-cols-2 gap-2 pt-2.5 border-t border-zinc-100 text-xs">
               <div class="bg-zinc-50/80 p-2.5 rounded-xl border border-zinc-100">
                 <span class="text-zinc-400 block text-[10px] font-medium">Sesi Aktif</span>
-                <span class="font-bold text-zinc-800 truncate block mt-0.5">${fSesi}</span>
+                <span class="font-bold text-zinc-800 truncate block mt-0.5">${escapeHtml(fSesi)}</span>
               </div>
               <div class="bg-zinc-50/80 p-2.5 rounded-xl border border-zinc-100">
                 <span class="text-zinc-400 block text-[10px] font-medium">Respons Masuk</span>
@@ -4152,6 +4152,8 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       } else {
         emptyEl.classList.add("hidden");
       }
+
+      renderAllMathInElement(container);
     }
 
     // =========================================================================
@@ -7272,16 +7274,39 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     // =========================================================================
     async function fetchAdminResponsesList(force = false) {
       const targetForm = currentFormId || DEFAULT_PRIMARY_FORM_ID;
+      
+      // 🚀 Instant SWR Hydration: Tampilkan cache respons seketika (0 ms)
+      if (!force && adminResponsesList.length === 0) {
+        const cached = localStorage.getItem(`PGSD_CACHE_RESPONSES_${targetForm}`);
+        if (cached) {
+          try {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              adminResponsesList = parsed;
+              renderAdminResponsesList();
+            }
+          } catch(e){}
+        }
+      }
+
       const apiUrl = getApiUrl();
       try {
-        const response = await fetch(`${apiUrl}?action=adminGetResponsesList&formId=${encodeURIComponent(targetForm)}&_t=${Date.now()}`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        const response = await fetch(`${apiUrl}?action=adminGetResponsesList&formId=${encodeURIComponent(targetForm)}&_t=${Date.now()}`, { signal: controller.signal });
+        clearTimeout(timeoutId);
         const res = await response.json();
 
         if (res.success && Array.isArray(res.responses)) {
           adminResponsesList = res.responses;
+          try {
+            localStorage.setItem(`PGSD_CACHE_RESPONSES_${targetForm}`, JSON.stringify(adminResponsesList));
+          } catch(e){}
           renderAdminResponsesList();
         }
-      } catch (e) {}
+      } catch (e) {
+        console.warn("fetchAdminResponsesList timed out or failed:", e);
+      }
     }
 
     function renderAdminResponsesList() {

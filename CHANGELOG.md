@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.40] - 2026-08-24
+
+### 📐 Rendering KaTeX & Format Kaya pada Kartu Hub & Akselerasi Respons
+- **Format Matematika KaTeX & Markdown pada Master Form Hub:**
+  - Mengintegrasikan `smartMathFormat()` pada judul formulir (`fTitle`), mata kuliah (`fMatkul`), dan nama dosen (`fDosen`) di dalam kartu pendaftaran formulir Multi-Form Hub.
+  - Memanggil `renderAllMathInElement(container)` segera setelah kartu disisipkan ke DOM, sehingga notasi matematika seperti $\sqrt{a^2+b^2}$, $x^2$, dan format tebal/miring terender dengan presisi tinggi tanpa menampilkan teks mentah rumus.
+- **Hidrasi Instan Tab Respons (0ms):**
+  - Mengimplementasikan *Instant SWR Hydration* pada fungsi `fetchAdminResponsesList()`, memuat respons penilaian dari cache lokal seketika saat tab *Respons* diklik.
+  - Menghilangkan *delay* layar kosong saat admin beralih ke tab Respons.
+
+---
+
 ## [2.2.39] - 2026-08-24
 
 ### ⚡ Optimasi Kecepatan Ekstrem (0ms SWR Cache) & Eliminasi Gap Pembacaan Spreadsheet
