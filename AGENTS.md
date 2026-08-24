@@ -1,6 +1,6 @@
 # 🤖 Antigravity Autonomous Agent Rules & Operating Guide (AGENTS.md)
 
-Dokumen ini berfungsi sebagai instruksi inti, standar teknis, dan pedoman operasional bagi AI Agent (Antigravity) dalam mengelola, mengembangkan, dan memelihara **Sistem Penilaian Peer-Assessment PGSD 5E FKIP Universitas Lambung Mangkurat**.
+Dokumen ini berfungsi sebagai instruksi inti, standar teknis, dan pedoman operasional bagi AI Agent (Antigravity) dalam mengelola, mengembangkan, dan memelihara **Platform Multi-Form Penilaian Peer-Assessment & Evaluasi Akademik FKIP Universitas Lambung Mangkurat**.
 
 ---
 

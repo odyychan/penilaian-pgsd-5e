@@ -1,6 +1,23 @@
 # 📜 Changelog
 
-Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer-Assessment PGSD Kelas 5E FKIP Universitas Lambung Mangkurat.
+Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
+
+---
+
+## [2.2.52] - 2026-08-24
+
+### 🌍 Transformasi Platform Menjadi Universal Multi-Kelas & Multi-Prodi FKIP ULM
+- **Perluasan Jangkauan Sistem (Universal Multi-Scope Academic Hub):**
+  - Mengubah paradigma sistem dari yang semula terfokus pada kelas 5E menjadi **Platform Penilaian Peer-Assessment & Evaluasi Akademik Seluruh Program Studi & Kelas FKIP ULM**.
+  - Menghapus pembatasan teks dan label *hardcoded* "5E" pada navbar, footer, form builder, template reset dialog, kartu formulir, dialog pembuatan form, hingga pesan validasi NIM.
+- **Pembaruan Identitas & Metadata PWA:**
+  - Memperbarui `manifest.json`, judul halaman, dan meta description menjadi **Sistem Penilaian Akademik • FKIP ULM** dengan short-name **Penilaian FKIP**.
+  - Menyesuaikan nama default folder Google Drive global menjadi **Arsip Penilaian FKIP ULM - Dokumen** sehingga rapi menampung seluruh berkas dari berbagai mata kuliah dan program studi.
+- **Fleksibilitas Template & Master Roster:**
+  - Opsi pembuatan form kini secara terbuka mendukung segala tingkatan kelas (*Contoh: 5E, 3A, Reguler B, Pascasarjana*) dan seluruh program studi (*PGSD, Pendidikan Matematika, Pendidikan Biologi, dll.*).
+  - Pilihan salin data mahasiswa diubah menjadi *Salin Data Mahasiswa dari Formulir Induk / Utama*.
+- **Keamanan Kredensial & Terintegrasi Service Account Test Suite:**
+  - Memastikan isolasi keamanan kunci rahasia Google Cloud Service Account pada `.gitignore` dan memverifikasi integrasi pipa Google Cloud API tanpa mengekspos kunci ke kode publik sisi klien.
 
 ---
 

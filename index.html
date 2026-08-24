@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-  <title>Penilaian Presentasi PGSD 5E • FKIP ULM</title>
+  <title>Sistem Penilaian Akademik • FKIP ULM</title>
   
   <!-- Official ULM Favicon & PWA Icons -->
   <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -228,14 +228,14 @@
         <div class="min-w-0 flex-1">
           <div class="flex items-center gap-1 sm:gap-2">
             <h1 class="font-bold text-xs sm:text-sm text-zinc-100 truncate" id="navTitle">
-              Penilaian Presentasi PGSD 5E
+              Penilaian Akademik Mahasiswa
             </h1>
             <span class="hidden xs:inline-block px-1.5 py-0.2 rounded text-[9.5px] font-mono font-semibold bg-zinc-800 text-zinc-300 border border-zinc-700 shrink-0">
-              2026
+              FKIP ULM
             </span>
           </div>
           <p class="text-[10px] sm:text-[11px] text-zinc-400 truncate" id="navSubtitle">
-            Bimbingan Konseling di SD
+            Universitas Lambung Mangkurat
           </p>
         </div>
       </div>
@@ -435,7 +435,7 @@
                     class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs sm:text-sm font-semibold text-zinc-900 bg-white focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 outline-none transition cursor-pointer appearance-none pr-9 shadow-2xs"
                   >
                     <option value="" disabled>-- Pilih Peran Penilai Terlebih Dahulu --</option>
-                    <option value="Mahasiswa" selected>Mahasiswa (Anggota Kelas PGSD 5E)</option>
+                    <option value="Mahasiswa" selected>Mahasiswa (Anggota Kelas)</option>
                     <option value="Dosen">Dosen (Dosen Pengampu / Penguji)</option>
                     <option value="Lainnya">Lainnya / Penilai Tamu</option>
                   </select>
@@ -1295,11 +1295,11 @@
   <footer class="w-full py-4 text-xs text-zinc-500 border-t border-zinc-200 bg-white mt-auto">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
       <div class="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-2">
-        <p>© 2026 PGSD <a href="/admin" class="font-bold text-emerald-700 hover:text-emerald-800 transition cursor-pointer no-underline">Kelas 5E</a></p>
+        <p>© 2026 FKIP Universitas Lambung Mangkurat • <a href="/admin" class="font-bold text-emerald-700 hover:text-emerald-800 transition cursor-pointer no-underline">Portal Admin</a></p>
         <span id="footerPembuatSep" class="hidden text-zinc-300">/</span>
         <span id="footerPembuat" class="hidden text-zinc-400 italic"></span>
       </div>
-      <p class="font-medium text-zinc-500">FKIP Universitas Lambung Mangkurat</p>
+      <p class="font-medium text-zinc-500">Sistem Penilaian Peer-Assessment &amp; Evaluasi Akademik</p>
     </div>
   </footer>
 
@@ -2681,7 +2681,7 @@
 
       // 10. CORE_IDENTITY (Identitas Penilai)
       if (f.type === 'CORE_IDENTITY') {
-        const peranMhsLabel = appConfig["Peran_Mahasiswa_Label"] || "Mahasiswa (Anggota Kelas PGSD 5E)";
+        const peranMhsLabel = appConfig["Peran_Mahasiswa_Label"] || "Mahasiswa (Anggota Kelas)";
         const peranDosenLabel = appConfig["Peran_Dosen_Label"] || "Dosen (Pengampu / Penguji)";
         const peranTamuLabel = appConfig["Peran_Lainnya_Label"] || "Lainnya / Penilai Tamu";
         return `
@@ -4156,7 +4156,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                 </svg>
               </span>
-              <span>NIM <strong>${cleanNim}</strong> tidak ditemukan di database kelas PGSD 5E. Pastikan digit NIM sudah benar atau pilih peran <em>Dosen / Lainnya</em>.</span>
+              <span>NIM <strong>${cleanNim}</strong> tidak ditemukan di daftar mahasiswa kelas ini. Pastikan digit NIM sudah benar atau pilih peran <em>Dosen / Lainnya</em>.</span>
             `;
             feedbackBox.classList.remove("hidden");
           }
@@ -4721,7 +4721,7 @@
         evaluasiDetail: evaluasiDetail,
         customAnswers: customAnswers,
         uploadedFiles: mergedUploadedFiles,
-        driveFolderName: (appConfig && appConfig["Google_Drive_Folder_Name"]) || localStorage.getItem("PGSD_GLOBAL_DRIVE_FOLDER") || localStorage.getItem("PGSD_DRIVE_FOLDER_NAME") || "Penilaian PGSD 5E - Dokumen"
+        driveFolderName: (appConfig && appConfig["Google_Drive_Folder_Name"]) || localStorage.getItem("PGSD_GLOBAL_DRIVE_FOLDER") || localStorage.getItem("PGSD_DRIVE_FOLDER_NAME") || "Arsip Penilaian FKIP ULM - Dokumen"
       };
 
       const effectiveSpreadsheetUrl = (appConfig && appConfig["Spreadsheet_Webhook_Url"]) || localStorage.getItem("PGSD_GLOBAL_API_URL") || getApiUrl();

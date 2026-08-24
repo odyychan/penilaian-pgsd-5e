@@ -1,7 +1,7 @@
 {
-  "name": "Penilaian Presentasi PGSD 5E • FKIP ULM",
-  "short_name": "PGSD 5E",
-  "description": "Sistem Penilaian Peer-Assessment Presentasi PGSD FKIP Universitas Lambung Mangkurat",
+  "name": "Sistem Penilaian Akademik • FKIP ULM",
+  "short_name": "Penilaian FKIP",
+  "description": "Platform Multi-Form Penilaian Peer-Assessment & Evaluasi Perkuliahan FKIP Universitas Lambung Mangkurat",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

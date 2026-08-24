@@ -505,7 +505,7 @@
             type="text" 
             id="searchHubFormsInput" 
             oninput="renderHubFormsGrid()" 
-            placeholder="Cari judul formulir, mata kuliah, dosen, atau kode PIN (contoh: BK5E)..." 
+            placeholder="Cari judul formulir, mata kuliah, dosen, kelas, atau kode PIN (contoh: BK5E, IPA1, MAT3)..." 
             class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-zinc-200 text-xs focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900/10 outline-none transition bg-zinc-50/70 focus:bg-white text-zinc-900 placeholder:text-zinc-400"
           >
           <svg class="w-4 h-4 text-zinc-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -797,7 +797,7 @@
                 type="text" 
                 id="cfg_Kelas" 
                 oninput="handleConfigInputAutoSave()"
-                placeholder="5E" 
+                placeholder="Contoh: 5E, 3A, Reguler B" 
                 class="w-full font-semibold text-zinc-900 bg-transparent border-b border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 outline-none pb-0.5 transition"
               >
               <div id="liveMathCfgKelas" class="math-live-preview-badge inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-indigo-50 border border-indigo-200 text-indigo-950 text-[10.5px] shadow-2xs mt-1 transition hidden">
@@ -812,7 +812,7 @@
                 type="text" 
                 id="cfg_Jurusan" 
                 oninput="handleConfigInputAutoSave()"
-                placeholder="PGSD" 
+                placeholder="Contoh: PGSD, Pendidikan Matematika" 
                 class="w-full font-semibold text-zinc-900 bg-transparent border-b border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 outline-none pb-0.5 transition"
               >
               <div id="liveMathCfgJurusan" class="math-live-preview-badge inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-indigo-50 border border-indigo-200 text-indigo-950 text-[10.5px] shadow-2xs mt-1 transition hidden">
@@ -1023,7 +1023,7 @@
         <div class="bg-white rounded-xl sm:rounded-2xl border border-zinc-200/90 p-3.5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
           <div>
             <h3 class="text-xs sm:text-sm font-bold text-zinc-900">Kembalikan ke 4 Tahap Standar</h3>
-            <p class="text-[10.5px] sm:text-xs text-zinc-500 mt-0.5">Reset susunan pertanyaan ke bentuk default penilaian perkuliahan 5E.</p>
+            <p class="text-[10.5px] sm:text-xs text-zinc-500 mt-0.5">Reset susunan pertanyaan ke bentuk template standar penilaian perkuliahan.</p>
           </div>
           <button 
             type="button" 
@@ -1474,7 +1474,7 @@
             <label class="flex items-start gap-2.5 p-2.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 cursor-pointer transition">
               <input type="radio" name="wizRosterOption" value="clone_default" class="mt-0.5 text-zinc-900">
               <div>
-                <p class="font-semibold text-zinc-900">Gunakan Data Mahasiswa yang Ada (Salin dari BK 5E)</p>
+                <p class="font-semibold text-zinc-900">Gunakan Data Mahasiswa yang Ada (Salin dari Formulir Utama)</p>
                 <p class="text-[10.5px] text-zinc-500">Menyalin otomatis daftar nama mahasiswa dan kelompok agar tidak perlu mengetik ulang.</p>
               </div>
             </label>
@@ -2212,7 +2212,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     // 1. Simpan Media/Foto ke Google Drive jika ada
     var fileUrls = [];
     if (data.uploadedFiles && typeof data.uploadedFiles === 'object') {
-      var folder = getOrCreateFolder(data.driveFolderName || "Penilaian PGSD 5E - Dokumen");
+      var folder = getOrCreateFolder(data.driveFolderName || "Arsip Penilaian FKIP ULM - Dokumen");
       for (var key in data.uploadedFiles) {
         var fileObj = data.uploadedFiles[key];
         if (fileObj && fileObj.base64) {
@@ -2358,8 +2358,8 @@ function getOrCreateFolder(folderName) {
             <input 
               type="text" 
               id="inputGlobalDriveFolder" 
-              placeholder="Penilaian PGSD 5E - Dokumen" 
-              value="Penilaian PGSD 5E - Dokumen"
+              placeholder="Arsip Penilaian FKIP ULM - Dokumen" 
+              value="Arsip Penilaian FKIP ULM - Dokumen"
               class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs focus:border-zinc-900 outline-none transition"
             >
           </div>
@@ -6329,7 +6329,7 @@ function getOrCreateFolder(folderName) {
 
       // 8. CORE IDENTITY
       if (f.type === 'CORE_IDENTITY') {
-        const peranMhsLabel = adminAppConfig["Peran_Mahasiswa_Label"] || "Mahasiswa (Anggota Kelas PGSD 5E)";
+        const peranMhsLabel = adminAppConfig["Peran_Mahasiswa_Label"] || "Mahasiswa (Anggota Kelas)";
         const peranDosenLabel = adminAppConfig["Peran_Dosen_Label"] || "Dosen (Pengampu / Penguji)";
         const peranTamuLabel = adminAppConfig["Peran_Lainnya_Label"] || "Penilai Tamu / Lainnya";
 
@@ -7555,7 +7555,7 @@ function getOrCreateFolder(folderName) {
       if (currentFormId === DEFAULT_PRIMARY_FORM_ID) {
         const ok = await showAppConfirm({
           title: "Reset ke Standar Perkuliahan?",
-          message: "Kembalikan formulir ini ke template 4 tahap standar perkuliahan PGSD BK 5E?",
+          message: "Kembalikan formulir ini ke template 4 tahap standar perkuliahan (Nilai Presentasi, Voting & Evaluasi)?",
           confirmText: "Ya, Kembalikan Standar",
           type: "warning"
         });
@@ -8728,7 +8728,7 @@ function getOrCreateFolder(folderName) {
 
     function openGlobalSettingsModal() {
       const globalUrl = localStorage.getItem("PGSD_GLOBAL_API_URL") || localStorage.getItem("PGSD_API_URL") || "";
-      const globalFolder = localStorage.getItem("PGSD_GLOBAL_DRIVE_FOLDER") || localStorage.getItem("PGSD_DRIVE_FOLDER_NAME") || "Penilaian PGSD 5E - Dokumen";
+      const globalFolder = localStorage.getItem("PGSD_GLOBAL_DRIVE_FOLDER") || localStorage.getItem("PGSD_DRIVE_FOLDER_NAME") || "Arsip Penilaian FKIP ULM - Dokumen";
       
       const inputUrl = document.getElementById("inputGlobalApiUrl");
       const inputFolder = document.getElementById("inputGlobalDriveFolder");
@@ -8751,7 +8751,7 @@ function getOrCreateFolder(folderName) {
 
     function saveGlobalSystemSettings() {
       const globalUrl = document.getElementById("inputGlobalApiUrl")?.value.trim() || "";
-      const globalFolder = document.getElementById("inputGlobalDriveFolder")?.value.trim() || "Penilaian PGSD 5E - Dokumen";
+      const globalFolder = document.getElementById("inputGlobalDriveFolder")?.value.trim() || "Arsip Penilaian FKIP ULM - Dokumen";
 
       if (globalUrl) {
         localStorage.setItem("PGSD_GLOBAL_API_URL", globalUrl);

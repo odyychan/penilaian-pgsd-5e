@@ -1,9 +1,9 @@
-# 🎓 Sistem Penilaian Presentasi Mahasiswa PGSD 5E (Vercel + Netlify + Google Sheets)
+# 🎓 Platform Penilaian Akademik & Peer-Assessment FKIP ULM (Supabase + Google Drive/Sheets + Vercel)
 
-Sistem ini adalah aplikasi **Web Peer-Assessment & Executive Leaderboard** modern dengan arsitektur:
-- **Frontend & Admin Portal:** Di-host di **Vercel** dan **Netlify** (100% responsif, SPA bersih, tanpa iframe, tanpa banner Google, loading instan).
-- **Backend API:** **Google Apps Script** (REST API Serverless yang aman, otomatis, dan tahan gangguan koneksi).
-- **Database:** **Google Spreadsheet** (`1D7nQcVEbmOKjgcJ6LzKeeDQPQxhAIiCELRC9eP9w7WU`).
+Sistem ini adalah aplikasi **Web Multi-Form Peer-Assessment & Executive Leaderboard** modern dengan arsitektur:
+- **Frontend & Admin Portal:** Di-host di **Vercel** / **Netlify** / **GitHub Pages** (100% responsif, SPA bersih, tanpa iframe, loading instan < 30ms).
+- **Backend & Database Utama:** **Supabase Dedicated Database (PostgreSQL)** berkecepatan tinggi dengan isolasi multi-form.
+- **Pipa Pencadangan Otomatis:** **Google Drive API** & **Google Sheets API** untuk duplikasi data dan penyimpanan berkas mahasiswa.
 
 ---
 
