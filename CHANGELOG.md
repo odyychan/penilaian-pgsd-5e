@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.63] - 2026-08-25
+
+### 🐞 Perbaikan Struktur DOM: Isolasi Unclosed Modal Container (Fix Floating Toolbar Visibility)
+- **Resolusi Masalah Bounding Box 0×0 pada Bilah Format Bawah:**
+  - Menutup elemen container `modalResetConfirm` yang sebelumnya tidak memiliki penutup `</div>` penutup pada baris 2100.
+  - Membebaskan seluruh overlay modal dan `universalFloatingFormattingBar` dari kontainer `display: none` tersembunyi sehingga bilah pemformatan teks (*B, I, U, Link, Remove Format, Rumus KaTeX*) kini terpasang langsung pada `<body>` dengan ukuran presisi 302×46 px dan `z-[100]`.
+- **Verifikasi Rendering Langsung:**
+  - Terbukti secara visual dan struktural melalui pengujian Playwright pada kolom Deskripsi Form dan Judul Bagian.
+
+---
+
 ## [2.2.62] - 2026-08-25
 
 ### ✍️ Aktivasi Universal Floating Formatting Toolbar di Seluruh Input Field
