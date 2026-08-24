@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.3] - 2026-08-24
+
+### 📐 Skala Linier Dinamis (Rentang 2 s.d. 10) & 💎 Universal Modern Popover Dropdown Engine
+- **Skala Linier Dinamis 2 s.d. 10 (Google Forms Standard):**
+  - Mengubah dropdown rentang nilai akhir (*sampai*) pada tipe pertanyaan **Skala Linier (`RATING_SCALE`)** menjadi rentang lengkap angka `2, 3, 4, 5, 6, 7, 8, 9, 10` (sebelumnya terbatas pada 5 dan 10).
+  - Kolom pengisian label keterangan setiap angka (*point labels*) menyesuaikan secara otomatis dan instan dari nilai awal (`0` atau `1`) hingga nilai akhir yang dipilih (`2` s.d. `10`).
+- **Universal Modern Dropdown Popover Engine (Zero Native OS Box):**
+  - Seluruh elemen dropdown `<select>` di seluruh project (`admin.html` dan `index.html`), baik yang dirender statis maupun dinamis (termasuk dropdown skala linier, filter rekapitulasi, filter presensi, pemilih peran penilai, dan tipe pertanyaan dinamis), kini otomatis ditingkatkan menjadi **Custom Floating Popover Dropdown** modern-minimalis dengan sudut `rounded-xl`, animasi rotasi chevron SVG, highlight opsi aktif bercentang, dan deteksi batasan viewport (*auto-align*).
+  - Dilengkapi continuous `MutationObserver` sehingga elemen `<select>` baru yang disisipkan melalui interaksi form builder atau modal langsung berubah menjadi popover modern seketika tanpa perlu reload.
+
+---
+
 ## [2.2.0] - 2026-08-24
 
 ### 🔘 Form Status Toggle Switch & 🔄 Standardized Refresh Animation
