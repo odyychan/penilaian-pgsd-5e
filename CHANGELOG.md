@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.84] - 2026-08-24
+
+### 💎 Modern-Minimalist Custom Popover Menu & Universal Dropdown Refinement
+- **Custom Floating Popover Question Type Menu (*Pure SVG & Zero Emoji*):**
+  - Menggantikan elemen `<select>` dropdown bawaan browser yang kaku dan tidak rapi dengan **Custom Floating Popover Menu** yang modern, bersih, dan elegan.
+  - Dikelompokkan dengan rapi:
+    - **Tipe Pertanyaan Standar:** Pilihan Ganda, Kotak Centang, Dropdown Pilihan, Jawaban Singkat, Paragraf / Ulasan, Skala Linier (1-5), dan Upload Berkas Drive.
+    - **Komponen Sistem Perkuliahan:** Identitas & Peran Penilai, Pemilihan Kelompok, Nilai Presentasi (Skor), Voting Presentator Terbaik, Evaluasi Masukan, dan Teks Informasi.
+  - Menggunakan ikon **100% SVG murni** yang presisi dengan tanda centang biru pada tipe yang sedang aktif.
+- **Universal Modern-Minimalist Select Styling:**
+  - Seluruh elemen `<select>` dropdown di seluruh aplikasi (`admin.html` dan `index.html`) dipercantik dengan custom SVG chevron down, rounded corners (0.75rem), subtle hover & focus rings, dan padding presisi.
+
+---
+
 ## [2.1.83] - 2026-08-24
 
 ### 🔍 Multi-Point Rating Scale Labels, "Lainnya" Options & 100% End-to-End Form Sync
