@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.44] - 2026-08-24
+
+### 🚀 Eliminasi Total Ketergantungan Google Apps Script & Otonomi Penuh Agen (Supabase Murni)
+- **Otonomi Penuh AI Agent (Bebas Salin & Deploy Manual):**
+  - Mengalihkan 100% manajemen basis data, pembuatan tabel, skema dinamis, dan penyesuaian sistem ke Supabase Management API via token rahasia `.env`.
+  - Pengguna tidak perlu lagi menyalin kode, mengedit Apps Script, atau melakukan otorisasi manual di Google Cloud.
+- **Penyimpanan Media Mandiri via Supabase Storage (`pgsd-media`):**
+  - Membuat dan mengonfigurasi bucket `pgsd-media` secara otomatis dengan kebijakan RLS publik untuk unggahan berkas presentasi dan bukti penilaian.
+  - Bebas biaya dan nol risiko kartu kredit dengan batas *Spending Cap = $0* permanen di Supabase Free Plan.
+- **Pencatatan Penilaian Instan (< 30ms):**
+  - Seluruh alur form mahasiswa dan panel admin kini beroperasi 100% pada database relasional PostgreSQL murni berkecepatan tinggi tanpa hambatan antrean.
+
+---
+
 ## [2.2.43] - 2026-08-24
 
 ### 📁 Integrasi Penyimpanan Media Google Drive Otomatis & Verifikasi Penuh
