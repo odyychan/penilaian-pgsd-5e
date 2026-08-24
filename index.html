@@ -1578,7 +1578,87 @@
       4: { badge: "04/04", title: "Evaluasi Masukan Pemateri", percent: 100 }
     };
 
-        // =========================================================================
+            // =========================================================================
+    // UNIVERSAL PROGRESS BAR & SKELETON LOADERS ENGINE
+    // =========================================================================
+    let activeGlobalLoadingCount = 0;
+
+    function showGlobalLoadingProgress() {
+      activeGlobalLoadingCount++;
+      const bar = document.getElementById("globalTopProgressBar");
+      if (bar) {
+        bar.classList.remove("opacity-0");
+        bar.classList.add("opacity-100");
+      }
+    }
+
+    function hideGlobalLoadingProgress() {
+      activeGlobalLoadingCount = Math.max(0, activeGlobalLoadingCount - 1);
+      if (activeGlobalLoadingCount === 0) {
+        const bar = document.getElementById("globalTopProgressBar");
+        if (bar) {
+          bar.classList.remove("opacity-100");
+          bar.classList.add("opacity-0");
+        }
+      }
+    }
+
+    function renderClientFormSkeleton() {
+      const container = document.getElementById("dynamicClientStagesContainer");
+      if (!container) return;
+      container.innerHTML = `
+        <div class="space-y-4 animate-pulse">
+          <div class="bg-white rounded-2xl border border-zinc-200 p-6 shadow-xs space-y-4">
+            <div class="h-6 w-52 bg-zinc-200 rounded-lg"></div>
+            <div class="h-4 w-3/4 bg-zinc-100 rounded"></div>
+            <div class="space-y-3 pt-2">
+              <div class="h-4 w-28 bg-zinc-200 rounded"></div>
+              <div class="h-11 w-full bg-zinc-100 rounded-xl"></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderRekapSkeleton() {
+      const tbody = document.getElementById("rekapTableBody");
+      const cardsContainer = document.getElementById("rankingCardsContainer");
+      if (tbody) {
+        let rowsHtml = '';
+        for (let i = 0; i < 4; i++) {
+          rowsHtml += `
+            <tr class="animate-pulse border-b border-zinc-100">
+              <td class="py-3.5 px-4"><div class="h-4 w-6 bg-zinc-200 rounded"></div></td>
+              <td class="py-3.5 px-4"><div class="h-4 w-32 bg-zinc-200 rounded"></div></td>
+              <td class="py-3.5 px-4"><div class="h-4 w-24 bg-zinc-200 rounded"></div></td>
+              <td class="py-3.5 px-4"><div class="h-4 w-16 bg-zinc-100 rounded"></div></td>
+              <td class="py-3.5 px-4"><div class="h-4 w-12 bg-zinc-200 rounded font-bold"></div></td>
+            </tr>
+          `;
+        }
+        tbody.innerHTML = rowsHtml;
+      }
+      if (cardsContainer) {
+        cardsContainer.innerHTML = `
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-pulse">
+            <div class="p-5 bg-white rounded-2xl border border-zinc-200 space-y-2">
+              <div class="h-4 w-20 bg-zinc-200 rounded"></div>
+              <div class="h-8 w-32 bg-zinc-200 rounded"></div>
+            </div>
+            <div class="p-5 bg-white rounded-2xl border border-zinc-200 space-y-2">
+              <div class="h-4 w-20 bg-zinc-200 rounded"></div>
+              <div class="h-8 w-32 bg-zinc-200 rounded"></div>
+            </div>
+            <div class="p-5 bg-white rounded-2xl border border-zinc-200 space-y-2">
+              <div class="h-4 w-20 bg-zinc-200 rounded"></div>
+              <div class="h-8 w-32 bg-zinc-200 rounded"></div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // =========================================================================
     // UNIVERSAL MODERN DROPDOWN POPOVER ENGINE (Zero OS Box Dropdowns)
     // =========================================================================
     function enhanceSelectToModernDropdown(selectEl) {

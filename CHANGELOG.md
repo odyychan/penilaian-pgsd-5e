@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.8] - 2026-08-24
+
+### ⏳ Universal Visual Loading Engine & Responsive Skeleton Shimmer Placeholders
+- **Penanganan Status Pemuatan Data Menyeluruh (*Zero Blank Wait States*):**
+  - Mengimplementasikan **Universal Top Indeterminate Progress Bar** (`#globalTopProgressBar`) di bagian paling atas peramban yang otomatis menyala selama proses *fetch* data asinkron berjalan di latar belakang.
+  - Menghilangkan tampilan area kosong (*blank space*) saat menunggu data dimuat dengan menambahkan komponen **Skeleton Shimmer Placeholders** modern beranimasi denyut halus (*smooth pulse animation*):
+    - **Multi-Form Hub Grid:** Menampilkan 3 kartu draf skeleton (*badge, title, metadata, & action button*) selama pendaftaran form di-load dari server/Google Sheets.
+    - **Panel Form Builder & Canvas:** Menampilkan placeholder bagian dan kotak pertanyaan bertingkat.
+    - **Manajemen Kelompok:** Menampilkan placeholder kartu kelompok beserta anggota tim.
+    - **Tabel Respons & Penilaian:** Menampilkan skeleton baris tabel berdenyut pada panel admin.
+    - **Antarmuka Mahasiswa (`index.html`):** Menampilkan skeleton tahapan formulir saat awal buka dan skeleton kartu peringkat / tabel rekapitulasi saat tab dibuka.
+
+---
+
 ## [2.2.7] - 2026-08-24
 
 ### 🔄 Real-Time Network Reconnection & Resilient Auto-Sync Engine
