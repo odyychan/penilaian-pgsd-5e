@@ -2823,6 +2823,23 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       showAdminToast(`Tipe pertanyaan diubah menjadi '${newType}'.`, "info");
     }
 
+    function handleInlineScalePointLabelUpdate(sIdx, fIdx, pointKey, val) {
+      const f = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
+      if (!f) return;
+      if (!f.pointLabels) f.pointLabels = {};
+      f.pointLabels[String(pointKey)] = val;
+      markSchemaAsDirty();
+    }
+
+    function handleInlineToggleOtherOption(sIdx, fIdx) {
+      const f = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
+      if (!f) return;
+      f.hasOtherOption = !f.hasOtherOption;
+      renderDynamicStagesCanvas();
+      markSchemaAsDirty();
+      showAdminToast(f.hasOtherOption ? "Opsi 'Lainnya' diaktifkan pada pertanyaan ini." : "Opsi 'Lainnya' dinonaktifkan.", "info");
+    }
+
     function handleInlineOptionUpdate(sIdx, fIdx, optIdx, val) {
       const f = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
       if (!f || !f.options) return;
@@ -2854,6 +2871,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       const reviewMaxChars = adminAppConfig["Maksimal_Karakter_Evaluasi"] || 500;
       const emailDomain = adminAppConfig["Domain_Email_Wajib"] || "mhs.ulm.ac.id, ulm.ac.id";
 
+      // 1. RADIO / PILIHAN GANDA
       if (f.type === 'RADIO') {
         const options = (f.options && f.options.length > 0) ? f.options : ['Opsi 1', 'Opsi 2'];
         const optsHtml = options.map((o, optIdx) => `
@@ -2879,20 +2897,40 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         return `
           <div class="space-y-2 pt-1">
             <div class="space-y-1.5">${optsHtml}</div>
-            <div class="flex items-center gap-2 pt-1">
-              <span class="w-4 h-4 rounded-full border-2 border-dashed border-zinc-300 shrink-0"></span>
+            
+            ${f.hasOtherOption ? `
+              <div class="flex items-center gap-2.5 text-xs">
+                <span class="w-4 h-4 rounded-full border-2 border-zinc-400 shrink-0"></span>
+                <span class="text-zinc-600 font-medium">Lainnya:</span>
+                <span class="text-zinc-400 italic flex-1 border-b border-dotted border-zinc-300 py-1">Teks jawaban bebas oleh responden</span>
+                <button type="button" onclick="handleInlineToggleOtherOption(${sIdx}, ${fIdx})" class="w-6 h-6 rounded-full hover:bg-rose-100 text-zinc-400 hover:text-rose-600 flex items-center justify-center cursor-pointer" title="Hapus Opsi Lainnya">✕</button>
+              </div>
+            ` : ''}
+
+            <div class="flex items-center gap-3 pt-1 text-xs">
               <button 
                 type="button" 
                 onclick="handleInlineAddOption(${sIdx}, ${fIdx})"
-                class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition cursor-pointer"
+                class="font-semibold text-indigo-600 hover:text-indigo-800 transition cursor-pointer flex items-center gap-1"
               >
-                + Tambahkan opsi
+                <span>+ Tambahkan opsi</span>
               </button>
+              ${!f.hasOtherOption ? `
+                <span class="text-zinc-300">atau</span>
+                <button 
+                  type="button" 
+                  onclick="handleInlineToggleOtherOption(${sIdx}, ${fIdx})"
+                  class="font-semibold text-indigo-600 hover:text-indigo-800 transition cursor-pointer"
+                >
+                  tambahkan "Lainnya"
+                </button>
+              ` : ''}
             </div>
           </div>
         `;
       }
 
+      // 2. CHECKBOX / KOTAK CENTANG
       if (f.type === 'CHECKBOX') {
         const options = (f.options && f.options.length > 0) ? f.options : ['Pilihan 1', 'Pilihan 2'];
         const optsHtml = options.map((o, optIdx) => `
@@ -2918,20 +2956,40 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         return `
           <div class="space-y-2 pt-1">
             <div class="space-y-1.5">${optsHtml}</div>
-            <div class="flex items-center gap-2 pt-1">
-              <span class="w-4 h-4 rounded border-2 border-dashed border-zinc-300 shrink-0"></span>
+
+            ${f.hasOtherOption ? `
+              <div class="flex items-center gap-2.5 text-xs">
+                <span class="w-4 h-4 rounded border-2 border-zinc-400 shrink-0"></span>
+                <span class="text-zinc-600 font-medium">Lainnya:</span>
+                <span class="text-zinc-400 italic flex-1 border-b border-dotted border-zinc-300 py-1">Teks jawaban bebas oleh responden</span>
+                <button type="button" onclick="handleInlineToggleOtherOption(${sIdx}, ${fIdx})" class="w-6 h-6 rounded-full hover:bg-rose-100 text-zinc-400 hover:text-rose-600 flex items-center justify-center cursor-pointer" title="Hapus Opsi Lainnya">✕</button>
+              </div>
+            ` : ''}
+
+            <div class="flex items-center gap-3 pt-1 text-xs">
               <button 
                 type="button" 
                 onclick="handleInlineAddOption(${sIdx}, ${fIdx})"
-                class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition cursor-pointer"
+                class="font-semibold text-indigo-600 hover:text-indigo-800 transition cursor-pointer flex items-center gap-1"
               >
-                + Tambahkan opsi centang
+                <span>+ Tambahkan opsi centang</span>
               </button>
+              ${!f.hasOtherOption ? `
+                <span class="text-zinc-300">atau</span>
+                <button 
+                  type="button" 
+                  onclick="handleInlineToggleOtherOption(${sIdx}, ${fIdx})"
+                  class="font-semibold text-indigo-600 hover:text-indigo-800 transition cursor-pointer"
+                >
+                  tambahkan "Lainnya"
+                </button>
+              ` : ''}
             </div>
           </div>
         `;
       }
 
+      // 3. DROPDOWN
       if (f.type === 'DROPDOWN') {
         const options = (f.options && f.options.length > 0) ? f.options : ['Pilihan 1', 'Pilihan 2'];
         const optsHtml = options.map((o, optIdx) => `
@@ -2971,45 +3029,91 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         `;
       }
 
+      // 4. SHORT TEXT
       if (f.type === 'SHORT_TEXT') {
         return `
-          <div class="pt-2 pb-1">
-            <div class="w-full sm:w-3/4 pb-2 border-b-2 border-dotted border-zinc-300 text-zinc-400 text-xs italic">
-              ${f.placeholder || 'Teks jawaban singkat (diisi oleh responden)'}
+          <div class="pt-2 pb-1 space-y-1.5">
+            <input 
+              type="text" 
+              value="${f.placeholder || ''}" 
+              placeholder="Ketik contoh placeholder teks bantuan jawaban..."
+              oninput="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'placeholder', this.value)"
+              class="w-full sm:w-3/4 px-3 py-2 rounded-lg border border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 text-xs text-zinc-800 bg-white outline-none transition shadow-2xs"
+            >
+            <div class="w-full sm:w-3/4 pb-1 border-b-2 border-dotted border-zinc-300 text-zinc-400 text-xs italic">
+              Teks jawaban singkat (akan diisi oleh responden)
             </div>
           </div>
         `;
       }
 
+      // 5. TEXTAREA
       if (f.type === 'TEXTAREA') {
         return `
-          <div class="pt-2 pb-1">
-            <div class="w-full pb-6 border-b-2 border-dotted border-zinc-300 text-zinc-400 text-xs italic">
-              ${f.placeholder || 'Teks jawaban panjang / paragraf (diisi oleh responden)'}
+          <div class="pt-2 pb-1 space-y-1.5">
+            <input 
+              type="text" 
+              value="${f.placeholder || ''}" 
+              placeholder="Ketik contoh placeholder teks bantuan ulasan/paragraf..."
+              oninput="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'placeholder', this.value)"
+              class="w-full px-3 py-2 rounded-lg border border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 text-xs text-zinc-800 bg-white outline-none transition shadow-2xs"
+            >
+            <div class="w-full pb-4 border-b-2 border-dotted border-zinc-300 text-zinc-400 text-xs italic">
+              Teks jawaban panjang / paragraf (akan diisi oleh responden)
             </div>
           </div>
         `;
       }
 
+      // 6. RATING SCALE / SKALA LINIER (MULTI-POINT LABELS 1 S.D. 5/10)
       if (f.type === 'RATING_SCALE') {
-        const minV = f.minVal || 1;
-        const maxV = f.maxVal || 5;
+        const minV = f.minVal !== undefined ? f.minVal : 1;
+        const maxV = f.maxVal !== undefined ? f.maxVal : 5;
+        
+        if (!f.pointLabels || typeof f.pointLabels !== 'object') {
+          f.pointLabels = {};
+          if (minV === 1 && maxV === 5) {
+            f.pointLabels["1"] = f.labelMin || "Sangat Kurang";
+            f.pointLabels["2"] = "Kurang";
+            f.pointLabels["3"] = "Cukup";
+            f.pointLabels["4"] = "Baik";
+            f.pointLabels["5"] = f.labelMax || "Sangat Baik";
+          }
+        }
+
+        let pointInputsHtml = '';
+        for (let i = minV; i <= maxV; i++) {
+          const currentLabel = f.pointLabels[String(i)] || (i === minV ? (f.labelMin || "Sangat Kurang") : (i === maxV ? (f.labelMax || "Sangat Baik") : ""));
+          pointInputsHtml += `
+            <div class="flex items-center gap-2 text-xs">
+              <span class="w-7 h-7 rounded-lg bg-zinc-100 border border-zinc-300 font-mono font-bold text-zinc-700 flex items-center justify-center shrink-0 text-xs shadow-2xs">${i}</span>
+              <input 
+                type="text" 
+                value="${currentLabel}" 
+                placeholder="Keterangan teks untuk nilai ${i} (contoh: ${i === 1 ? 'Sangat Kurang' : (i === maxV ? 'Sangat Baik' : 'Cukup')})..."
+                oninput="handleInlineScalePointLabelUpdate(${sIdx}, ${fIdx}, '${i}', this.value)"
+                class="flex-1 px-3 py-1.5 rounded-lg border border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 bg-white text-xs text-zinc-800 outline-none transition shadow-2xs"
+              >
+            </div>
+          `;
+        }
+
         return `
           <div class="space-y-3 pt-2 text-xs">
             <div class="flex items-center gap-3">
               <div class="flex items-center gap-1.5">
-                <span class="text-zinc-500 font-medium">Rentang Skala:</span>
+                <span class="text-zinc-600 font-bold">Rentang Skala Angka:</span>
                 <select 
-                  onchange="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'minVal', parseInt(this.value))"
-                  class="px-2.5 py-1 rounded-lg border border-zinc-300 bg-white text-xs font-mono font-bold"
+                  onchange="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'minVal', parseInt(this.value)); renderDynamicStagesCanvas();"
+                  class="px-2.5 py-1 rounded-lg border border-zinc-300 bg-white text-xs font-mono font-bold cursor-pointer"
                 >
                   <option value="1" ${minV === 1 ? 'selected' : ''}>1</option>
                   <option value="0" ${minV === 0 ? 'selected' : ''}>0</option>
                 </select>
                 <span class="text-zinc-400 font-medium">sampai</span>
                 <select 
-                  onchange="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'maxVal', parseInt(this.value))"
-                  class="px-2.5 py-1 rounded-lg border border-zinc-300 bg-white text-xs font-mono font-bold"
+                  onchange="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'maxVal', parseInt(this.value)); renderDynamicStagesCanvas();"
+                  class="px-2.5 py-1 rounded-lg border border-zinc-300 bg-white text-xs font-mono font-bold cursor-pointer"
                 >
                   <option value="5" ${maxV === 5 ? 'selected' : ''}>5</option>
                   <option value="10" ${maxV === 10 ? 'selected' : ''}>10</option>
@@ -3017,32 +3121,17 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
               </div>
             </div>
 
-            <div class="space-y-1.5">
-              <div class="flex items-center gap-2">
-                <span class="w-6 font-mono text-zinc-500 font-bold">${minV}:</span>
-                <input 
-                  type="text" 
-                  value="${f.labelMin || 'Sangat Kurang'}" 
-                  placeholder="Label untuk nilai ${minV} (contoh: Sangat Kurang)..."
-                  oninput="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'labelMin', this.value)"
-                  class="flex-1 px-2.5 py-1.5 rounded-lg border border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 bg-zinc-50 focus:bg-white text-xs outline-none transition"
-                >
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="w-6 font-mono text-zinc-500 font-bold">${maxV}:</span>
-                <input 
-                  type="text" 
-                  value="${f.labelMax || 'Sangat Baik'}" 
-                  placeholder="Label untuk nilai ${maxV} (contoh: Sangat Baik)..."
-                  oninput="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'labelMax', this.value)"
-                  class="flex-1 px-2.5 py-1.5 rounded-lg border border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 bg-zinc-50 focus:bg-white text-xs outline-none transition"
-                >
+            <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-2">
+              <span class="text-[10.5px] font-bold text-zinc-500 uppercase tracking-wider font-mono block">Keterangan Label Setiap Angka (1 s.d. ${maxV}):</span>
+              <div class="space-y-1.5">
+                ${pointInputsHtml}
               </div>
             </div>
           </div>
         `;
       }
 
+      // 7. FILE UPLOAD
       if (f.type === 'FILE_UPLOAD') {
         return `
           <div class="pt-2">
@@ -3064,6 +3153,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         `;
       }
 
+      // 8. CORE IDENTITY
       if (f.type === 'CORE_IDENTITY') {
         const peranMhsLabel = adminAppConfig["Peran_Mahasiswa_Label"] || "Mahasiswa (Anggota Kelas PGSD 5E)";
         const peranDosenLabel = adminAppConfig["Peran_Dosen_Label"] || "Dosen (Pengampu / Penguji)";
@@ -3120,6 +3210,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         `;
       }
 
+      // 9. CORE GROUP SELECT
       if (f.type === 'CORE_GROUP_SELECT') {
         const groupLabel = adminAppConfig["Pilih_Kelompok_Label"] || "Pilih Kelompok Presentator yang Tampil Hari Ini...";
         return `
@@ -3138,6 +3229,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         `;
       }
 
+      // 10. CORE SCORE RUBRIC
       if (f.type === 'CORE_SCORE_RUBRIC') {
         return `
           <div class="space-y-2 pt-1">
@@ -3178,6 +3270,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         `;
       }
 
+      // 11. CORE BEST PRESENTER
       if (f.type === 'CORE_BEST_PRESENTER') {
         return `
           <div class="space-y-2 pt-1">
@@ -3201,6 +3294,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         `;
       }
 
+      // 12. CORE MEMBER FEEDBACK
       if (f.type === 'CORE_MEMBER_FEEDBACK') {
         const reviewPublic = adminAppConfig["Tampilkan_Ulasan_Publik"] || "AKTIF";
         const penyajiRule = adminAppConfig["Kewajiban_Menilai_Penyaji"] || "BEBAS_PENUH_DI_SESINYA";
@@ -3250,6 +3344,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         `;
       }
 
+      // 13. INFO BANNER
       if (f.type === 'INFO_BANNER') {
         return `
           <div class="pt-1">

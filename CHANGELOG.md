@@ -4,6 +4,24 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.83] - 2026-08-24
+
+### 🔍 Multi-Point Rating Scale Labels, "Lainnya" Options & 100% End-to-End Form Sync
+- **Penyempurnaan Skala Linier Multi-Point (*Customizable Multi-Point Rating Labels*):**
+  - Kini **setiap angka skala dari 1 sampai 5 (atau 1 s.d. 10) memiliki kolom input teks labelnya masing-masing**:
+    - `1:` [ Sangat Kurang / Tidak Sesuai ]
+    - `2:` [ Kurang / Cukup Kurang ]
+    - `3:` [ Cukup / Sedang ]
+    - `4:` [ Baik / Sesuai ]
+    - `5:` [ Sangat Baik / Sangat Sesuai ]
+  - Pada formulir mahasiswa (`index.html`) dan simulator, setiap tombol rating menampilkan label deskriptif spesifik di bawah angkanya.
+- **Pilihan Ganda & Kotak Centang dengan Opsi "Lainnya" (*Other Option Support*):**
+  - Tombol **`+ Tambahkan opsi "Lainnya"`** memungkinkan responden mengetik jawaban terbuka bebas jika pilihan yang disediakan tidak mencukupi.
+- **Sinkronisasi 100% Penuh ke Formulir Mahasiswa Saat Di-Publish:**
+  - Menekan **`🚀 Publikasikan Perubahan`** langsung menyinkronkan seluruh tahapan dinamis, pertanyaan kustom, opsi ganda, dan skala nilai ke formulir mahasiswa (`index.html`).
+
+---
+
 ## [2.1.82] - 2026-08-24
 
 ### ⚡ 1-Click Zero-Modal Question & Section Creation (Google Forms Direct Workflow)
