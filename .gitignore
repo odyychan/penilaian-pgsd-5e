@@ -17,3 +17,9 @@ Thumbs.db
 # Local Netlify & Vercel folders
 .netlify
 .vercel
+
+# Environment & Secrets (NEVER COMMIT)
+.env
+.env.local
+.env.*.local
+*.env

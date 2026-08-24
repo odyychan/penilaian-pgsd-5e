@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.42] - 2026-08-24
+
+### 🤖 Standarisasi Autonomous Agent (AGENTS.md) & Eksekusi Migrasi Database Mandiri
+- **Penyusunan Pedoman Agen Mandiri (`AGENTS.md`):**
+  - Menyusun dokumen [AGENTS.md](file:///e:/Data/GitHub/Project%20Dede/AGENTS.md) sebagai panduan operasional AI Agent dalam mengelola basis data Supabase, deployment mandiri, background sync, standar keamanan `.env`, dan rekayasa antarmuka *mobile-first*.
+- **Eksekusi Migrasi Database Otomatis:**
+  - Melakukan deployment skema tabel PostgreSQL (`pgsd_forms`, `pgsd_form_configs`, `pgsd_groups`, `pgsd_students`, `pgsd_responses`, `pgsd_backups`) secara mandiri ke proyek Supabase terisolasi (`eychjnqmqpxzxukiwbqf`).
+- **Pengamanan Kredensial `.env` & `.gitignore`:**
+  - Mengonfigurasi `.gitignore` untuk melindungi seluruh file kredensial dan rahasia lingkungan agar tidak ter-commit ke repositori publik.
+
+---
+
 ## [2.2.41] - 2026-08-24
 
 ### ⚡ Integrasi Basis Data Dedicated Supabase PostgreSQL & Pipa Background Sync Spreadsheet
