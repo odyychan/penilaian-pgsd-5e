@@ -2751,6 +2751,9 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         }
       });
 
+      // Reinit morphing observer every time config tab is activated
+      requestAnimationFrame(() => initContextualHeaderMorphing());
+
       if (tabKey === 'responses' && adminResponsesList.length === 0) {
         fetchAdminResponsesList();
       }
@@ -3491,7 +3494,10 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           return;
         }
         const rect = anchor.getBoundingClientRect();
-        if (rect.top <= 120) {
+        // Show toolbar: anchor top edge is anywhere within the viewport
+        const anchorInView = rect.top < window.innerHeight && rect.bottom > 0;
+
+        if (anchorInView) {
           stdTabs.classList.add("hidden");
           builderToolbar.classList.remove("hidden");
         } else {
@@ -3513,7 +3519,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         (entries) => {
           entries.forEach(() => applyMorphState());
         },
-        { root: null, threshold: 0, rootMargin: "-120px 0px 0px 0px" }
+        { root: null, threshold: 0, rootMargin: "0px 0px 0px 0px" }
       );
       window._headerMorphObserver.observe(anchor);
 
