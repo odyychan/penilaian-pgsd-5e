@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.25] - 2026-08-24
+
+### 💎 Integrasi Header Kompak & Eliminasi Banner Redundan 'Bagikan QR & PIN'
+- **Header Atas Kompak & Terpadu (*Unified Top Header*):**
+  - Mengintegrasikan tombol **`[ 🔗 Bagikan QR & PIN ]`** secara tunggal dan presisi di bilah header atas panel admin.
+  - Menempatkan tombol navigasi **`[ ← Hub ]`** dan lencana PIN formulir (**`ID: [PIN]`**) langsung di sebelah logo header saat admin sedang mengelola suatu formulir.
+- **Pembersihan Banner Redundan (*Banner Cleanup*):**
+  - Menghapus banner kartu hitam besar di bawah bilah tab navigasi yang sebelumnya menduplikasi tombol `Bagikan QR & PIN` dan judul formulir.
+  - Membuka ruang vertikal kanvas formulir menjadi lebih luas, lega, dan modern.
+- **Pengujian Headless Browser:**
+  - Telah diverifikasi via remote Playwright browser testing dengan 0 kesalahan konsol.
+
+---
+
 ## [2.2.24] - 2026-08-24
 
 ### 🧹 Eliminasi Tombol Redundan Penyisipan Media pada Kartu Pertanyaan
