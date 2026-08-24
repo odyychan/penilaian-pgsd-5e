@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.58] - 2026-08-25
+
+### 🐞 Perbaikan Fatal Null Property Exception & Audit Menyeluruh DOM IDs
+- **Resolusi Uncaught TypeError pada Header State Router:**
+  - Menghapus dan mengamankan pemanggilan `document.getElementById("headerSubTitle")` dengan *null-check guards* di dalam fungsi `returnToMasterHub()` dan `openFormWorkspace()`.
+  - Melakukan audit otomatis pada 201 referensi elemen DOM di seluruh skrip JavaScript untuk memastikan seluruh interaksi tombol, navigasi antar-halaman, dan modal berfungsi 100% tanpa error di konsol browser.
+- **Verifikasi Interaktivitas UI End-to-End:**
+  - Menguji kelancaran seluruh tombol aksi (*Setelan Sistem Global*, *Buat Formulir Baru*, *Kelola Formulir Ini*, dan *Kembali ke Hub*) melalui simulasi browser headless tanpa kendala.
+
+---
+
 ## [2.2.57] - 2026-08-25
 
 ### 🛡️ Stabilisasi Siklus Rendering DOM & Debouncing Dropdown Mutation Observer

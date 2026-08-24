@@ -4354,8 +4354,8 @@ function getOrCreateFolder(folderName) {
       document.getElementById("headerBtnReturnToHub")?.classList.remove("flex");
       document.getElementById("activeFormIdBadge")?.classList.add("hidden");
 
-      document.getElementById("headerMainTitle").textContent = "Panel Admin Pusat";
-      document.getElementById("headerSubTitle").textContent = "Multi-Form Hub • Manajemen Seluruh Formulir";
+      if (document.getElementById("headerMainTitle")) document.getElementById("headerMainTitle").textContent = "Panel Admin Pusat";
+      if (document.getElementById("headerSubTitle")) document.getElementById("headerSubTitle").textContent = "Multi-Form Hub • Manajemen Seluruh Formulir";
       
       const btnBukaForm = document.getElementById("btnBukaFormActive");
       if (btnBukaForm) { const u = new URL(window.location.href); u.pathname = u.pathname.replace(/admin\.html$/i, "index.html"); if (!u.pathname.endsWith("index.html")) u.pathname = u.pathname.replace(/\/?$/, "/index.html"); u.search = ""; btnBukaForm.href = u.toString(); }
@@ -4636,8 +4636,8 @@ function getOrCreateFolder(folderName) {
       document.getElementById("activeFormIdBadge")?.classList.remove("hidden");
 
       // Update Form Title & Headers
-      document.getElementById("headerMainTitle").textContent = "Panel Admin Form";
-      document.getElementById("headerSubTitle").textContent = `Mengelola Form PIN: ${currentFormId}`;
+      if (document.getElementById("headerMainTitle")) document.getElementById("headerMainTitle").textContent = "Panel Admin Form";
+      if (document.getElementById("headerSubTitle")) document.getElementById("headerSubTitle").textContent = `Mengelola Form PIN: ${currentFormId}`;
       if (document.getElementById("activeFormIdBadge")) {
         document.getElementById("activeFormIdBadge").textContent = `ID: ${currentFormId}`;
       }
