@@ -4,6 +4,21 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.7] - 2026-08-24
+
+### 🔄 Real-Time Network Reconnection & Resilient Auto-Sync Engine
+- **Penanganan Otomatis Pemulihan Koneksi Jaringan (*Online / Offline Lifecycle*):**
+  - Mengintegrasikan pendengar event jaringan peramban (*`online`* dan *`offline`*) di `admin.html` dan `index.html`.
+  - Saat koneksi internet terputus, sistem secara elegan beralih ke mode offline, mengamankan seluruh perubahan draf lokal, dan menyelaraskan status badge di seluruh antarmuka.
+  - Saat koneksi internet tersambung kembali, sistem secara otomatis mengeksekusi antrean draf (*auto-flush queue*) ke Google Apps Script / database, memperbarui data live tanpa memerlukan tindakan manual dari pengguna.
+- **Deteksi Berkala Heartbeat & Auto-Retry Cerdas (15s):**
+  - Menerapkan mekanisme pemantauan periodik (*heartbeat*) setiap 15 detik serta pemicu pemulihan saat tab kembali aktif (*visibilitychange / focus*), memastikan sinkronisasi draf yang tertunda selalu terkirim seketika saat jaringan normal.
+- **Harmonisasi Status Indikator Header & Interaktivitas Tombol 'Kirim Sekarang':**
+  - Menghilangkan inkonsistensi badge status: badge header kiri (*Online / Offline / Syncing*) dan badge awan kanan (*Tersinkronisasi / Menyimpan / Offline (Tersimpan Lokal)*) kini terpadu dan selaras 100%.
+  - Tombol aksi *"Kirim Sekarang"* pada banner peringatan offline kini dilengkapi indikator loading (*spinner*) dan notifikasi umpan balik real-time yang informatif.
+
+---
+
 ## [2.2.6] - 2026-08-24
 
 ### 💎 Universal In-App Confirmation Modal Engine (Zero Browser Native Popups)

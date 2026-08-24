@@ -185,7 +185,7 @@
     </div>
     <button 
       type="button" 
-      onclick="processPendingSyncQueue()" 
+      id="btnOfflineSyncRetry" onclick="handleManualSyncRetry(this)" 
       class="w-full sm:w-auto px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-zinc-950 font-bold rounded-lg shadow-xs flex-shrink-0 cursor-pointer flex items-center justify-center gap-1.5 transition active:scale-98 text-xs whitespace-nowrap"
     >
       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2077,11 +2077,30 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     // =========================================================================
     // SYNC STATE & OFFLINE RECOVERY ENGINE
     // =========================================================================
+    let realtimeAdminSyncTimer = null;
+
     function setSyncState(state, customText) {
       const badge = document.getElementById("cloudSyncBadge");
       const dot = document.getElementById("cloudSyncDot");
       const text = document.getElementById("cloudSyncText");
       const banner = document.getElementById("offlineSyncBanner");
+      const headerOnlineBadge = document.getElementById("headerOnlineBadge");
+
+      const isOnline = navigator.onLine;
+
+      // Harmonize Header Online/Offline Indicator
+      if (headerOnlineBadge) {
+        if (!isOnline || state === 'offline') {
+          headerOnlineBadge.className = "px-1.5 py-0.2 rounded text-[9px] sm:text-[10px] font-mono font-semibold bg-rose-950/80 text-rose-300 border border-rose-800 flex-shrink-0";
+          headerOnlineBadge.textContent = "Offline";
+        } else if (state === 'saving') {
+          headerOnlineBadge.className = "px-1.5 py-0.2 rounded text-[9px] sm:text-[10px] font-mono font-semibold bg-amber-950/80 text-amber-300 border border-amber-800 flex-shrink-0";
+          headerOnlineBadge.textContent = "Syncing";
+        } else {
+          headerOnlineBadge.className = "px-1.5 py-0.2 rounded text-[9px] sm:text-[10px] font-mono font-semibold bg-zinc-800 text-emerald-400 border border-zinc-700 flex-shrink-0";
+          headerOnlineBadge.textContent = "Online";
+        }
+      }
 
       if (!badge || !dot || !text) return;
       badge.classList.remove("hidden");
@@ -2098,7 +2117,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       } else if (state === 'offline' || state === 'error') {
         badge.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-rose-950/60 text-rose-300 border border-rose-800/80 transition-all";
         dot.className = "w-2 h-2 rounded-full bg-rose-500 flex-shrink-0";
-        text.textContent = customText || (state === 'offline' ? "Terputus (Offline)" : "Gagal Kirim");
+        text.textContent = customText || (state === 'offline' ? "Offline (Tersimpan Lokal)" : "Gagal Kirim");
         if (banner) banner.classList.remove("hidden");
       }
     }
@@ -2133,18 +2152,24 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       processPendingSyncQueue();
     }
 
-    async function processPendingSyncQueue() {
-      if (isSyncingQueue) return;
+    async function processPendingSyncQueue(isManualTrigger = false) {
+      if (isSyncingQueue) return false;
       const queue = getPendingSyncQueue();
       if (queue.length === 0) {
         setSyncState('synced');
-        return;
+        return true;
+      }
+
+      if (!navigator.onLine) {
+        setSyncState('offline', 'Offline (Tersimpan Lokal)');
+        return false;
       }
 
       isSyncingQueue = true;
       setSyncState('saving');
 
       const apiUrl = getApiUrl();
+      let allSuccess = true;
 
       while (queue.length > 0) {
         const task = queue[0];
@@ -2177,19 +2202,102 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           } else {
             console.error("Sync API error:", res.error);
             isSyncingQueue = false;
+            allSuccess = false;
             setSyncState('error', 'Gagal Simpan');
-            showAdminToast("Gagal menyimpan ke Google Sheets: " + (res.error || "Error"), "error");
-            return;
+            if (isManualTrigger) {
+              showAdminToast("Gagal menyimpan ke Google Sheets: " + (res.error || "Error"), "error");
+            }
+            return false;
           }
         } catch (err) {
           isSyncingQueue = false;
+          allSuccess = false;
           setSyncState('offline', 'Offline (Tersimpan Lokal)');
-          return;
+          return false;
         }
       }
 
       isSyncingQueue = false;
       setSyncState('synced');
+      return allSuccess;
+    }
+
+    // =========================================================================
+    // REALTIME RECONNECTION & AUTO-SYNC ENGINE
+    // =========================================================================
+    function initRealtimeSyncEngine() {
+      // 1. Online / Offline Window Events
+      window.addEventListener("online", async () => {
+        setSyncState('saving', 'Menyambungkan...');
+        showAdminToast("Koneksi internet terhubung kembali. Memulai sinkronisasi otomatis...", "info");
+        const ok = await processPendingSyncQueue(true);
+        if (ok) {
+          showAdminToast("Sinkronisasi otomatis berhasil. Seluruh data telah diperbarui!", "success");
+        }
+      });
+
+      window.addEventListener("offline", () => {
+        setSyncState('offline', 'Offline (Tersimpan Lokal)');
+        showAdminToast("Koneksi internet terputus. Seluruh perubahan tersimpan aman di browser Anda.", "warning");
+      });
+
+      // 2. Periodic Background Heartbeat & Auto-Retry (Every 15s)
+      if (realtimeAdminSyncTimer) clearInterval(realtimeAdminSyncTimer);
+      realtimeAdminSyncTimer = setInterval(async () => {
+        if (navigator.onLine && !isSyncingQueue) {
+          const pending = getPendingSyncQueue();
+          if (pending.length > 0) {
+            await processPendingSyncQueue();
+          }
+        }
+      }, 15000);
+
+      // 3. Tab Visibility Change / Revisit Sync
+      document.addEventListener("visibilitychange", async () => {
+        if (document.visibilityState === "visible" && navigator.onLine) {
+          const pending = getPendingSyncQueue();
+          if (pending.length > 0) {
+            await processPendingSyncQueue();
+          }
+        }
+      });
+
+      // 4. Cross-Tab Storage Event (Multi-Tab Sync)
+      window.addEventListener("storage", (e) => {
+        if (e.key === "PGSD_CACHE_CONFIG_" + currentFormId || e.key === "PGSD_CACHE_CONFIG") {
+          try {
+            adminAppConfig = JSON.parse(e.newValue || "{}");
+            renderWorkspaceConfigDetails();
+          } catch(err) {}
+        }
+      });
+    }
+
+    async function handleManualSyncRetry(btn) {
+      if (isSyncingQueue) return;
+      const originalContent = btn ? btn.innerHTML : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `
+          <svg class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span>Mengirim...</span>
+        `;
+      }
+
+      const success = await processPendingSyncQueue(true);
+      if (success) {
+        showAdminToast("Koneksi berhasil! Seluruh draf tersinkronkan ke Google Sheets.", "success");
+      } else {
+        showAdminToast("Server belum dapat dijangkau. Data Anda tetap tersimpan aman di browser dan akan otomatis dikirim saat koneksi pulih.", "warning");
+      }
+
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = originalContent;
+      }
     }
 
     function triggerAutoSaveMasterData() {
@@ -2374,6 +2482,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     if (typeof MutationObserver !== 'undefined') {
       const globalDropdownObserver = new MutationObserver(() => {
         initAllModernDropdowns();
+      initRealtimeSyncEngine();
       });
       document.addEventListener("DOMContentLoaded", () => {
         if (document.body) {

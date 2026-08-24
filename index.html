@@ -2140,6 +2140,18 @@
     let lastConfigSyncTimestamp = Date.now();
 
     function initRealtimeSyncEngine() {
+      // 0. Online / Offline Connection Event Handlers
+      window.addEventListener("online", () => {
+        showToast("Koneksi internet terhubung kembali. Memperbarui data penilaian...", "info");
+        fetchInitialFormData(false);
+        const curTab = localStorage.getItem("PGSD_ACTIVE_MAIN_TAB") || "form";
+        if (curTab === 'rekap') loadRekapData(true);
+      });
+
+      window.addEventListener("offline", () => {
+        showToast("Koneksi internet terputus. Isian formulir Anda tetap tersimpan aman di peramban.", "warning");
+      });
+
       // 1. Periodic Background Heartbeat (Near Realtime Sync)
       if (realtimeHeartbeatTimer) clearInterval(realtimeHeartbeatTimer);
       realtimeHeartbeatTimer = setInterval(() => {
