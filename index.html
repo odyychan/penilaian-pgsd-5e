@@ -209,6 +209,8 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  <!-- Supabase High-Performance Database Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="min-h-screen flex flex-col bg-zinc-50 font-sans antialiased text-zinc-900">
 
@@ -1528,6 +1530,24 @@
     
     function getApiUrl() {
       return localStorage.getItem("PGSD_API_URL") || DEFAULT_API_URL;
+    }
+
+    // High-Performance Supabase Backend Configuration
+    const SUPABASE_CONFIG = {
+      url: "https://eychjnqmqpxzxukiwbqf.supabase.co",
+      anonKey: "sb_publishable__vL9IPWnyC8uJRSQYLN_yg_qDHDflEp"
+    };
+
+    let supabaseClient = null;
+    function getSupabaseClient() {
+      if (!supabaseClient && window.supabase && typeof window.supabase.createClient === "function") {
+        try {
+          supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+        } catch(e) {
+          console.warn("Supabase init error:", e);
+        }
+      }
+      return supabaseClient;
     }
 
     // Multi-Form & Dynamic Questions State
@@ -4646,6 +4666,68 @@
       spinner.classList.remove("hidden");
 
       const apiUrl = getApiUrl();
+      const sb = getSupabaseClient();
+      let sbSuccess = false;
+      const idRespons = "RESP-" + activeFormId + "-" + Date.now() + "-" + Math.random().toString(36).substring(2, 6).toUpperCase();
+
+      // ⚡ FAST-PATH (< 50ms): Simpan langsung ke Supabase PostgreSQL
+      if (sb) {
+        try {
+          const respRow = {
+            id_respons: idRespons,
+            form_id: activeFormId,
+            sesi: payload.sesi,
+            email: payload.email,
+            nama_penilai: payload.namaPenilai,
+            nim_penilai: payload.nimPenilai || "-",
+            peran_penilai: payload.peranPenilai || "Mahasiswa",
+            kelompok_dinilai: payload.kelompok,
+            nilai_kelompok: parseFloat(payload.nilaiKelompok) || 0,
+            best_presenter_1: (selectedBestPresenters && selectedBestPresenters[0]) || "-",
+            best_presenter_2: (selectedBestPresenters && selectedBestPresenters[1]) || "-",
+            evaluasi_detail: payload.evaluasiDetail || {},
+            custom_answers: payload.customAnswers || {},
+            synced_to_sheets: false
+          };
+          const { error: sbErr } = await sb.from('pgsd_responses').insert([respRow]);
+          if (!sbErr) {
+            sbSuccess = true;
+          }
+        } catch (err) {
+          console.warn("Supabase fast-path fallback notice:", err);
+        }
+      }
+
+      if (sbSuccess) {
+        // ✨ Respons instan: Mahasiswa langsung sukses tanpa menunggu Google Sheets
+        submitBtn.disabled = false;
+        spinner.classList.add("hidden");
+
+        localStorage.removeItem(getFormDraftKey());
+        clientCustomFormAnswers = {};
+        localStorage.removeItem("PGSD_CACHE_REKAP_" + activeFormId);
+        localStorage.setItem("PGSD_LAST_SUBMISSION_EVENT", Date.now().toString());
+
+        loadRekapData(true);
+        showSuccessModal(payload.kelompok);
+
+        // 🔄 Background Pipeline: Sinkronkan ke Google Spreadsheet Dosen secara asinkron
+        fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        }).then(r => r.json()).then(res => {
+          if (res && res.success && sb) {
+            sb.from('pgsd_responses').update({ 
+              synced_to_sheets: true, 
+              synced_at: new Date().toISOString() 
+            }).eq('id_respons', idRespons);
+          }
+        }).catch(e => console.warn("Background sheet sync notice:", e));
+        return;
+      }
+
+      // 🛡️ Fallback Standar: Jika Supabase belum aktif, simpan via Apps Script
       const fetchWithTimeout = (url, opts, ms = 12000) => {
         return Promise.race([
           fetch(url, opts),
@@ -4665,13 +4747,11 @@
         spinner.classList.add("hidden");
 
         if (res && res.success) {
-          // Bersihkan draf otomatis karena sudah resmi terkirim
           localStorage.removeItem(getFormDraftKey());
           clientCustomFormAnswers = {};
           localStorage.removeItem("PGSD_CACHE_REKAP_" + activeFormId);
           localStorage.setItem("PGSD_LAST_SUBMISSION_EVENT", Date.now().toString());
           
-          // Segarkan data rekapitulasi & presensi secara instan di background
           loadRekapData(true);
           showSuccessModal(payload.kelompok);
         } else {

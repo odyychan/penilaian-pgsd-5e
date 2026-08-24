@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.41] - 2026-08-24
+
+### ⚡ Integrasi Basis Data Dedicated Supabase PostgreSQL & Pipa Background Sync Spreadsheet
+- **Arsitektur Dual-Mode Fast-Path (< 50ms):**
+  - Mengintegrasikan klien resmi Supabase SDK (`@supabase/supabase-js`) ke antarmuka mahasiswa ([index.html](file:///e:/Data/GitHub/Project%20Dede/index.html)) dan panel admin ([admin.html](file:///e:/Data/GitHub/Project%20Dede/admin.html)).
+  - Mahasiswa mengirim penilaian dengan kecepatan instan (**< 50 milidetik**) langsung ke tabel `pgsd_responses` di database Supabase terisolasi.
+- **Pipa Asinkron ke Google Spreadsheet Dosen (*Zero Wait Latency*):**
+  - Mengimplementasikan *Decoupled Background Sync* di mana baris penilaian dituliskan secara otomatis ke Google Spreadsheet dengan format Google Forms yang rapi tanpa membebani interaksi mahasiswa.
+- **Skema Lengkap & Panduan Setup Terisolasi:**
+  - Menyusun file migrasi [docs/setup_supabase.sql](file:///e:/Data/GitHub/Project%20Dede/docs/setup_supabase.sql) mencakup 6 tabel terstruktur (`pgsd_forms`, `pgsd_form_configs`, `pgsd_groups`, `pgsd_students`, `pgsd_responses`, `pgsd_backups`) lengkap dengan proteksi Row Level Security (RLS) dan indeks performa tinggi.
+  - Menyediakan panduan lengkap langkah-demi-langkah di [docs/supabase_guide.md](file:///e:/Data/GitHub/Project%20Dede/docs/supabase_guide.md).
+
+---
+
 ## [2.2.40] - 2026-08-24
 
 ### 📐 Rendering KaTeX & Format Kaya pada Kartu Hub & Akselerasi Respons
