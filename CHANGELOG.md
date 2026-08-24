@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.64] - 2026-08-25
+
+### 📐 Auto-Growing Textarea & Transisi Integrasi Spreadsheet Kolaborasi Bot
+- **Auto-Expanding Textarea (Zero Vertical Scrollbars):**
+  - Menerapkan mesin elastis otomatis pada seluruh textarea formulir (Deskripsi & Panduan Pengisian, Deskripsi Bagian, Label Pertanyaan, Opsi Pilihan, dll.) sehingga kotak memanjang otomatis ke bawah sesuai jumlah baris teks tanpa memunculkan bilah gulir (*scrollbar*).
+- **Integrasi Google Spreadsheet Dosen Berbasis Bot Service Account:**
+  - Memperbarui tab **Setelan Form** dengan kartu kolaborasi Google Cloud Bot resmi (`form-web-bot@form-web-506515.iam.gserviceaccount.com`) dilengkapi tombol 1-klik *Salin Email Bot*.
+  - Mengubah kolom input webhook lama menjadi **Tautan / URL Google Spreadsheet Biasa** (`https://docs.google.com/spreadsheets/d/...`) dengan validasi instan ID spreadsheet dan penyimpanan langsung ke tabel `pgsd_forms` & `pgsd_form_configs` di Supabase.
+
+---
+
 ## [2.2.63] - 2026-08-25
 
 ### 🐞 Perbaikan Struktur DOM: Isolasi Unclosed Modal Container (Fix Floating Toolbar Visibility)

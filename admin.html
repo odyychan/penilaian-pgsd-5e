@@ -76,6 +76,10 @@
       background-color: #d4d4d8;
       border-radius: 9999px;
     }
+    textarea:not(#textUniversalScriptCode):not(#backupJsonTextarea) {
+      overflow-y: hidden !important;
+      resize: none !important;
+    }
     @keyframes toastSlideIn {
       from { opacity: 0; transform: translate3d(0, -14px, 0) scale(0.95); }
       to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
@@ -1144,40 +1148,64 @@
       <!-- ===================================================================== -->
       <div id="adminView_system" class="flex flex-col gap-2.5 sm:gap-4 fade-enter hidden">
         
-        <!-- Integrasi Spreadsheet & Drive Khusus Formulir Ini (Per-Form Override) -->
+        <!-- Integrasi Spreadsheet & Drive Khusus Formulir Ini (Google Cloud Direct) -->
         <div class="bg-white rounded-2xl border border-zinc-200 p-4 sm:p-6 shadow-xs space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-100 pb-3">
             <div>
               <div class="flex items-center gap-2">
-                <h2 class="text-sm sm:text-base font-bold text-zinc-900">Integrasi Spreadsheet &amp; Google Drive (Formulir Ini)</h2>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">Kustomisasi Form</span>
+                <h2 class="text-sm sm:text-base font-bold text-zinc-900">Integrasi Google Spreadsheet Dosen (Formulir Ini)</h2>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Google Cloud Direct</span>
               </div>
               <p class="text-[11px] sm:text-xs text-zinc-500 mt-0.5">
-                Secara default, form ini menggunakan <strong>Setelan Sistem Global</strong>. Isi kolom di bawah jika ingin mengarahkan form ini ke file Spreadsheet atau Folder Drive dosen yang berbeda.
+                Data penilaian tersimpan instan di Supabase (&lt; 30 ms) dan otomatis disinkronkan ke file <strong>Google Spreadsheet Dosen</strong> pribadi Anda.
               </p>
             </div>
-            <button 
-              type="button" 
-              onclick="openUniversalScriptModal()" 
-              class="px-3 py-1.5 rounded-xl border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer self-start sm:self-auto shadow-2xs"
-            >
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
-              </svg>
-              <span>Skrip Mini 30-Baris</span>
-            </button>
+          </div>
+
+          <!-- Bot Collaboration Card -->
+          <div class="bg-emerald-50/80 border border-emerald-200/90 rounded-2xl p-3.5 sm:p-4 text-xs space-y-2.5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-base shadow-xs shrink-0">
+                  🤖
+                </div>
+                <div>
+                  <h4 class="font-bold text-emerald-950 text-xs sm:text-sm">Email Bot Layanan Google Spreadsheet FKIP:</h4>
+                  <p class="text-[11px] text-emerald-800 font-mono select-all font-semibold break-all">form-web-bot@form-web-506515.iam.gserviceaccount.com</p>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                onclick="copyBotEmailToClipboard(this)" 
+                class="px-3.5 py-1.5 rounded-xl bg-white border border-emerald-300 hover:bg-emerald-100 text-emerald-900 font-bold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition cursor-pointer shrink-0 active:scale-98"
+              >
+                <svg class="w-3.5 h-3.5 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                </svg>
+                <span>Salin Email Bot</span>
+              </button>
+            </div>
+            <div class="text-[11px] text-emerald-900/90 pt-2 border-t border-emerald-200/60 space-y-1">
+              <p class="font-semibold">📋 Langkah Mudah Menghubungkan Spreadsheet Dosen:</p>
+              <ol class="list-decimal list-inside space-y-0.5 text-[11px] text-emerald-900/80">
+                <li>Buka file <strong>Google Spreadsheet</strong> lembar penilaian Anda.</li>
+                <li>Klik tombol <strong>Bagikan (Share)</strong> di pojok kanan atas spreadsheet.</li>
+                <li>Masukkan email bot di atas, pilih peran <strong>Editor (Dapat Mengedit)</strong>, lalu klik <strong>Kirim / Bagikan</strong>.</li>
+                <li>Salin <strong>URL Tautan Spreadsheet</strong> dari address bar browser Anda dan tempelkan pada kolom di bawah.</li>
+              </ol>
+            </div>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs">
             <div class="space-y-1.5">
-              <label class="block font-semibold text-zinc-700">URL Webhook Spreadsheet Khusus Form Ini (Opsional)</label>
+              <label class="block font-semibold text-zinc-700">Tautan / URL Google Spreadsheet Khusus Form Ini (Opsional)</label>
               <input 
                 type="text" 
                 id="inputApiUrl" 
-                placeholder="Kosongkan jika menggunakan Default Global..." 
+                placeholder="https://docs.google.com/spreadsheets/d/1.../edit" 
                 class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 font-mono text-xs focus:border-zinc-900 outline-none transition"
               >
-              <p class="text-[10.5px] text-zinc-400">Jika dikosongkan, data akan otomatis dikirim ke Spreadsheet Global.</p>
+              <p class="text-[10.5px] text-zinc-400">Jika dikosongkan, data otomatis diarsipkan ke Spreadsheet Master Utama FKIP.</p>
             </div>
 
             <div class="space-y-1.5">
@@ -1188,7 +1216,7 @@
                 placeholder="Kosongkan jika menggunakan Default Global..." 
                 class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs focus:border-zinc-900 outline-none transition"
               >
-              <p class="text-[10.5px] text-zinc-400">Jika dikosongkan, file akan masuk ke Folder Drive Global.</p>
+              <p class="text-[10.5px] text-zinc-400">Jika dikosongkan, berkas lampiran akan masuk ke Folder Drive Global.</p>
             </div>
           </div>
 
@@ -1203,7 +1231,7 @@
                 <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                 </svg>
-                <span>Tes Sambungan</span>
+                <span>Tes Tautan Spreadsheet</span>
               </button>
               <button 
                 type="button" 
@@ -2903,6 +2931,36 @@ function getOrCreateFolder(folderName) {
       const active = document.activeElement;
       if (isMathEligibleInput(active)) {
         showUniversalFloatingFormattingBar(active);
+      }
+    });
+
+    // =========================================================================
+    // AUTO-GROWING TEXTAREA ENGINE (NO SCROLLBARS, ELASTIC EXPANSION)
+    // =========================================================================
+    function autoResizeTextarea(el) {
+      if (!el || el.tagName !== 'TEXTAREA') return;
+      if (el.id === 'textUniversalScriptCode' || el.id === 'backupJsonTextarea') return;
+      el.style.height = 'auto';
+      const newHeight = Math.max(el.scrollHeight, 38);
+      el.style.height = newHeight + 'px';
+      el.style.overflowY = 'hidden';
+    }
+
+    function triggerGlobalAutoResize() {
+      requestAnimationFrame(() => {
+        document.querySelectorAll('textarea').forEach(autoResizeTextarea);
+      });
+    }
+
+    document.addEventListener('input', function(e) {
+      if (e.target && e.target.tagName === 'TEXTAREA') {
+        autoResizeTextarea(e.target);
+      }
+    });
+
+    document.addEventListener('focusin', function(e) {
+      if (e.target && e.target.tagName === 'TEXTAREA') {
+        autoResizeTextarea(e.target);
       }
     });
 
@@ -5005,11 +5063,22 @@ function getOrCreateFolder(folderName) {
         updateLiveMathBadge(adminAppConfig["Pembuat_Web_Nim"] || "", 'liveMathCfgPembuatNim');
       }
 
+      // Populate Spreadsheet & Drive custom settings
+      if (document.getElementById("inputApiUrl")) {
+        document.getElementById("inputApiUrl").value = adminAppConfig["Spreadsheet_Url"] || adminAppConfig["Spreadsheet_Webhook_Url"] || (currentFormMeta?.spreadsheetUrl || "");
+      }
+      if (document.getElementById("inputDriveFolderName")) {
+        document.getElementById("inputDriveFolderName").value = adminAppConfig["Google_Drive_Folder_Name"] || "";
+      }
+
       const currentSesi = adminAppConfig["Sesi_Minggu_Aktif"] || "Minggu 1";
       const lblSesi = document.getElementById("labelCurrentActiveSesi");
       const selSesi = document.getElementById("selectQuickSesiAktif");
       if (lblSesi) lblSesi.textContent = currentSesi;
       if (selSesi) selSesi.value = currentSesi;
+
+      // Automatically expand all textareas to content height without scrollbars
+      triggerGlobalAutoResize();
     }
 
     function handleConfigInputAutoSave(immediate = false) {
@@ -8902,17 +8971,32 @@ function getOrCreateFolder(folderName) {
       }
     }
 
+    function copyBotEmailToClipboard(btn) {
+      const email = "form-web-bot@form-web-506515.iam.gserviceaccount.com";
+      navigator.clipboard.writeText(email).then(() => {
+        showAdminToast("Email Bot Google Cloud berhasil disalin ke clipboard!", "success");
+        if (btn) {
+          const originalText = btn.innerHTML;
+          btn.innerHTML = `<span class="text-emerald-700 font-bold">✓ Email Tersalin!</span>`;
+          setTimeout(() => btn.innerHTML = originalText, 2500);
+        }
+      }).catch(() => {
+        showAdminToast("Gagal menyalin otomatis. Silakan salin manual: " + email, "info");
+      });
+    }
+
     function saveApiUrl() {
       const url = document.getElementById("inputApiUrl")?.value.trim() || "";
       const driveFolder = document.getElementById("inputDriveFolderName")?.value.trim() || "";
       
       const targetForm = currentFormId || DEFAULT_PRIMARY_FORM_ID;
+      adminAppConfig["Spreadsheet_Url"] = url;
       adminAppConfig["Spreadsheet_Webhook_Url"] = url;
       adminAppConfig["Google_Drive_Folder_Name"] = driveFolder;
 
       localStorage.setItem(`PGSD_CACHE_CONFIG_${targetForm}`, JSON.stringify(adminAppConfig));
 
-      // Simpan ke Supabase Database pgsd_form_configs
+      // Simpan ke Supabase Database pgsd_form_configs & pgsd_forms
       const sb = getSupabaseClient();
       if (sb && targetForm) {
         sb.from('pgsd_form_configs').upsert({
@@ -8922,9 +9006,16 @@ function getOrCreateFolder(folderName) {
         }).then(({ error }) => {
           if (!error) console.log("Per-form custom config synced to Supabase:", targetForm);
         });
+
+        sb.from('pgsd_forms').update({
+          spreadsheet_url: url || null,
+          updated_at: new Date().toISOString()
+        }).eq('form_id', targetForm).then(({ error }) => {
+          if (!error) console.log("Form spreadsheet_url updated in pgsd_forms:", targetForm);
+        });
       }
 
-      showAdminToast(url || driveFolder ? `Setelan khusus formulir '${targetForm}' berhasil disimpan.` : `Formulir '${targetForm}' kini menggunakan Default Global.`, "success");
+      showAdminToast(url || driveFolder ? `Setelan Google Spreadsheet formulir '${targetForm}' berhasil disimpan.` : `Formulir '${targetForm}' kini menggunakan Default Master FKIP.`, "success");
     }
 
     function openUniversalScriptModal() {
@@ -8959,20 +9050,28 @@ function getOrCreateFolder(folderName) {
       const resEl = document.getElementById("connectionStatusResult");
       resEl.classList.remove("hidden");
       resEl.className = "text-xs pt-1 font-mono text-zinc-500";
-      resEl.textContent = "Menguji koneksi ke endpoint Google Apps Script...";
+      resEl.textContent = "Memeriksa tautan Google Spreadsheet & format ID...";
 
       const customUrl = document.getElementById("inputApiUrl")?.value.trim();
-      const apiUrl = customUrl || localStorage.getItem("PGSD_GLOBAL_API_URL") || getApiUrl();
-      const startTime = Date.now();
+      if (!customUrl) {
+        resEl.className = "text-xs pt-1 font-mono text-indigo-600 font-semibold";
+        resEl.textContent = "Status: Menggunakan Spreadsheet Master Utama FKIP (Tersambung Otomatis).";
+        return;
+      }
 
-      try {
-        const response = await fetch(`${apiUrl}?action=adminGetFormsRegistry&_t=${Date.now()}`);
-        const latency = Date.now() - startTime;
+      const match = customUrl.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+      if (match && match[1]) {
         resEl.className = "text-xs pt-1 font-mono text-emerald-600 font-bold";
-        resEl.textContent = `Status: Terhubung (${latency} ms) • ${customUrl ? 'Menggunakan URL Khusus' : 'Menggunakan Default Global'}`;
-      } catch (e) {
-        resEl.className = "text-xs pt-1 font-mono text-amber-600 font-medium";
-        resEl.textContent = "Catatan: Webhook aktif. Pastikan setelan deployment di Apps Script adalah 'Anyone'.";
+        resEl.textContent = `✓ Format Spreadsheet Valid (ID: ${match[1].slice(0, 10)}...). Pastikan email bot diundang sebagai Editor.`;
+        showAdminToast("Format Google Spreadsheet valid!", "success");
+      } else if (customUrl.startsWith("http")) {
+        resEl.className = "text-xs pt-1 font-mono text-emerald-600 font-bold";
+        resEl.textContent = "✓ Tautan kustom terdaftar. Pastikan bot diundang sebagai Editor.";
+        showAdminToast("Tautan kustom berhasil didaftarkan.", "success");
+      } else {
+        resEl.className = "text-xs pt-1 font-mono text-rose-600 font-bold";
+        resEl.textContent = "✕ Format URL tidak valid. Gunakan link Google Spreadsheet: https://docs.google.com/spreadsheets/d/...";
+        showAdminToast("Format tautan tidak valid.", "warning");
       }
     }
 
