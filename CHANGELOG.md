@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.9] - 2026-08-24
+
+### 🎯 100% Real-Time Dynamic Form Schema Engine for Secondary & Custom Forms
+- **Sinkronisasi Total Tampilan Formulir Klien (`index.html`) dengan Form Builder Admin:**
+  - Menghilangkan struktur statis pada halaman awal (*landing hero*) dan form wizard:
+    - **Judul & Deskripsi Dinamis:** Judul hero utama, deskripsi formulir, serta informasi akademik (*Mata Kuliah, Dosen, Kelas, Jurusan*) kini membaca langsung konfigurasi aktif dari form yang dibuka (seperti `BBJX`).
+    - **Alur Tahapan Pengisian Dinamis:** Kotak alur langkah pengisian di halaman panduan kini membaca langsung susunan `tahapan` yang dibuat di Admin, merefleksikan jumlah bagian, judul bagian, dan deskripsinya secara presisi.
+    - **Dynamic Multi-Stage Wizard Generator:** Tahapan pengisian (*Step 1, Step 2, dst.*), bilah indikator progres (*01/02, 02/02*), navigasi tab, serta seluruh komponen pertanyaan kustom (*Teks Singkat, Paragraf, Radio, Checkbox, Dropdown, Skala Linier, Unggah Berkas, Tanggal, Waktu*) dirender secara dinamis 100% sesuai skema formulir dari Admin.
+    - **Validasi Tahapan Bertingkat:** Memastikan kelengkapan input wajib (*required*) pada setiap tahap sebelum pengguna dapat melangkah ke bagian berikutnya atau mengirim penilaian akhir.
+
+---
+
 ## [2.2.8] - 2026-08-24
 
 ### ⏳ Universal Visual Loading Engine & Responsive Skeleton Shimmer Placeholders

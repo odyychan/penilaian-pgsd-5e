@@ -303,11 +303,11 @@
               <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-zinc-900 text-white">PANDUAN</span>
               <span class="text-xs text-zinc-400 font-medium">Sistem Penilaian Peer-Assessment</span>
             </div>
-            <h2 class="text-base sm:text-xl font-bold text-zinc-900 leading-snug">
-              Penilaian Presentasi Mahasiswa Kelas 5E PGSD
+            <h2 id="overviewJudulForm" class="text-base sm:text-xl font-bold text-zinc-900 leading-snug">
+              Penilaian Presentasi Mahasiswa
             </h2>
-            <p class="text-xs sm:text-sm text-zinc-600 leading-relaxed">
-              Formulir ini digunakan oleh mahasiswa untuk memberikan penilaian terhadap presentasi kelompok serta menyampaikan masukan evaluatif kepada setiap pemateri.
+            <p id="overviewDeskripsiForm" class="text-xs sm:text-sm text-zinc-600 leading-relaxed">
+              Formulir ini digunakan untuk memberikan penilaian terhadap perkuliahan serta menyampaikan masukan evaluatif.
             </p>
           </div>
 
@@ -331,38 +331,11 @@
             </div>
           </div>
 
-          <!-- Alur 4 Langkah Pengisian -->
+          <!-- Alur Tahapan Pengisian (Dinamis dari Schema) -->
           <div class="bg-zinc-50 rounded-xl p-4 border border-zinc-200/70 space-y-3">
             <h4 class="text-xs font-bold text-zinc-800 uppercase tracking-wider font-mono">Alur Tahapan Pengisian:</h4>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-xs">
-              <div class="p-2.5 rounded-lg bg-white border border-zinc-200/60 flex items-start gap-2">
-                <span class="w-5 h-5 rounded-full bg-zinc-900 text-white font-mono text-[10px] font-bold flex items-center justify-center flex-shrink-0">1</span>
-                <div>
-                  <div class="font-semibold text-zinc-900">Identitas Penilai</div>
-                  <div class="text-[11px] text-zinc-500">Email & nama mahasiswa</div>
-                </div>
-              </div>
-              <div class="p-2.5 rounded-lg bg-white border border-zinc-200/60 flex items-start gap-2">
-                <span class="w-5 h-5 rounded-full bg-zinc-900 text-white font-mono text-[10px] font-bold flex items-center justify-center flex-shrink-0">2</span>
-                <div>
-                  <div class="font-semibold text-zinc-900">Pilih Kelompok</div>
-                  <div class="text-[11px] text-zinc-500">Kelompok yang tampil</div>
-                </div>
-              </div>
-              <div class="p-2.5 rounded-lg bg-white border border-zinc-200/60 flex items-start gap-2">
-                <span class="w-5 h-5 rounded-full bg-zinc-900 text-white font-mono text-[10px] font-bold flex items-center justify-center flex-shrink-0">3</span>
-                <div>
-                  <div class="font-semibold text-zinc-900">Skor & Voting</div>
-                  <div class="text-[11px] text-zinc-500">Nilai & pemateri terbaik</div>
-                </div>
-              </div>
-              <div class="p-2.5 rounded-lg bg-white border border-zinc-200/60 flex items-start gap-2">
-                <span class="w-5 h-5 rounded-full bg-zinc-900 text-white font-mono text-[10px] font-bold flex items-center justify-center flex-shrink-0">4</span>
-                <div>
-                  <div class="font-semibold text-zinc-900">Evaluasi Masukan</div>
-                  <div class="text-[11px] text-zinc-500">Ulasan & kirim nilai</div>
-                </div>
-              </div>
+            <div id="overviewAlurTahapanGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-xs">
+              <!-- Rendered dynamically via renderOverviewAlurTahapan() -->
             </div>
           </div>
 
@@ -423,6 +396,7 @@
 
         <!-- FORM CONTAINER -->
         <form id="assessmentForm" onsubmit="handleFinalSubmit(event)" class="space-y-5">
+          <div id="dynamicClientStagesContainer" class="space-y-5"></div>
 
           <!-- =================================================================== -->
           <!-- 1: IDENTITAS PENILAI (SMART ROLE & NIM-DRIVEN IDENTITY) -->
@@ -1571,7 +1545,7 @@
     let isEmailValidState = false;
 
 
-    const stepMetadata = {
+    let stepMetadata = {
       1: { badge: "01/04", title: "Identitas Penilai", percent: 25 },
       2: { badge: "02/04", title: "Pilih Kelompok Tampil", percent: 50 },
       3: { badge: "03/04", title: "Skor Nilai & Presentator", percent: 75 },
@@ -1895,6 +1869,492 @@
       url.searchParams.set('id', pin);
       url.searchParams.delete('form');
       window.location.href = url.toString();
+    }
+
+
+    // =========================================================================
+    // UNIVERSAL DYNAMIC FORM WIZARD & STAGE ENGINE
+    // =========================================================================
+    let clientCustomFormAnswers = {};
+
+    function handleClientFieldInput(fieldId, value) {
+      clientCustomFormAnswers[fieldId] = value;
+      saveFormDraft();
+    }
+
+    function handleClientFileUpload(fieldId, fileInput) {
+      const file = fileInput.files ? fileInput.files[0] : null;
+      const statusEl = document.getElementById(`fileStatus_${fieldId}`);
+      if (!file) return;
+
+      if (file.size > 5 * 1024 * 1024) {
+        showToast("Ukuran berkas melebihi batas maksimal 5 MB!", "error");
+        fileInput.value = "";
+        if (statusEl) statusEl.innerHTML = `<span class="text-rose-600 font-bold">Gagal: Ukuran file > 5 MB</span>`;
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        clientCustomFormAnswers[fieldId] = {
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          dataUrl: e.target.result
+        };
+        if (statusEl) {
+          statusEl.innerHTML = `
+            <span class="inline-flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 font-semibold text-xs">
+              <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+              <span class="truncate max-w-[200px]">${file.name}</span>
+              <span class="text-[10px] text-emerald-600 font-mono">(${(file.size / 1024).toFixed(0)} KB)</span>
+            </span>
+          `;
+        }
+        saveFormDraft();
+        showToast(`Berkas '${file.name}' siap diunggah.`, "success");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function updateRatingScaleUI(fieldId) {
+      const selectedVal = clientCustomFormAnswers[fieldId];
+      document.querySelectorAll(`.scale-circle-${fieldId}`).forEach(el => {
+        const inputVal = el.parentElement.querySelector('input').value;
+        if (String(inputVal) === String(selectedVal)) {
+          el.className = `scale-circle-${fieldId} w-9 h-9 sm:w-10 sm:h-10 rounded-xl border bg-zinc-900 text-white border-zinc-900 shadow-sm font-mono font-bold text-xs sm:text-sm flex items-center justify-center transition active:scale-95`;
+        } else {
+          el.className = `scale-circle-${fieldId} w-9 h-9 sm:w-10 sm:h-10 rounded-xl border bg-white text-zinc-700 border-zinc-300 hover:border-zinc-500 hover:bg-zinc-50 font-mono font-bold text-xs sm:text-sm flex items-center justify-center transition active:scale-95`;
+        }
+      });
+    }
+
+    function updateStepMetadataFromSchema() {
+      stepMetadata = {};
+      const tahapan = (currentFormSchema && Array.isArray(currentFormSchema.tahapan) && currentFormSchema.tahapan.length > 0)
+        ? currentFormSchema.tahapan
+        : [
+            { id: "t1", title: "Identitas Penilai", description: "Lengkapi data identitas Anda.", fields: [{ type: "CORE_IDENTITY" }] },
+            { id: "t2", title: "Pilih Kelompok", description: "Pilih kelompok yang tampil.", fields: [{ type: "CORE_GROUP_SELECT" }] },
+            { id: "t3", title: "Skor & Voting", description: "Beri nilai dan pilih pemateri terbaik.", fields: [{ type: "CORE_SCORE_RUBRIC" }, { type: "CORE_BEST_PRESENTER" }] },
+            { id: "t4", title: "Evaluasi Masukan", description: "Ulasan konstruktif dan kirim nilai.", fields: [{ type: "CORE_MEMBER_FEEDBACK" }] }
+          ];
+
+      const total = tahapan.length;
+      tahapan.forEach((stage, idx) => {
+        const num = idx + 1;
+        const padNum = num < 10 ? `0${num}` : `${num}`;
+        const padTotal = total < 10 ? `0${total}` : `${total}`;
+        const pct = Math.round((num / total) * 100);
+        stepMetadata[num] = {
+          badge: `${padNum}/${padTotal}`,
+          title: stage.title || `Bagian ${num}`,
+          percent: pct,
+          description: stage.description || ""
+        };
+      });
+    }
+
+    function renderDynamicStepTabs() {
+      const container = document.getElementById("dynamicStepTabsContainer");
+      if (!container) return;
+      
+      const total = Object.keys(stepMetadata).length || 4;
+      const cols = Math.min(total, 4);
+      container.className = `grid grid-cols-${cols} sm:grid-cols-${total} gap-1.5 pt-1 text-center`;
+      
+      let html = '';
+      for (let i = 1; i <= total; i++) {
+        const meta = stepMetadata[i] || { title: `Tahap ${i}` };
+        const shortTitle = meta.title.length > 18 ? meta.title.substring(0, 16) + '…' : meta.title;
+        html += `
+          <button 
+            type="button" 
+            id="stepTab_${i}" 
+            onclick="goToStep(${i})" 
+            class="py-1.5 px-1 rounded text-[10px] sm:text-[11px] font-medium transition text-zinc-400 bg-zinc-50 border border-transparent truncate"
+            title="${meta.title}"
+          >
+            ${i}. ${shortTitle}
+          </button>
+        `;
+      }
+      container.innerHTML = html;
+    }
+
+    function renderOverviewAlurTahapan() {
+      const container = document.getElementById("overviewAlurTahapanGrid");
+      if (!container) return;
+
+      const tahapan = (currentFormSchema && Array.isArray(currentFormSchema.tahapan) && currentFormSchema.tahapan.length > 0)
+        ? currentFormSchema.tahapan
+        : [
+            { id: "t1", title: "Identitas Penilai", description: "Email & nama mahasiswa" },
+            { id: "t2", title: "Pilih Kelompok", description: "Kelompok yang tampil" },
+            { id: "t3", title: "Skor & Voting", description: "Nilai & pemateri terbaik" },
+            { id: "t4", title: "Evaluasi Masukan", description: "Ulasan & kirim nilai" }
+          ];
+
+      const colsClass = tahapan.length <= 2 ? 'sm:grid-cols-2' : (tahapan.length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2 lg:grid-cols-4');
+      container.className = `grid grid-cols-1 ${colsClass} gap-2.5 text-xs`;
+
+      let html = '';
+      tahapan.forEach((stage, idx) => {
+        const num = idx + 1;
+        const stageTitle = stage.title || `Bagian ${num}`;
+        const fieldsCount = (stage.fields || []).length;
+        const stageDesc = stage.description || (fieldsCount > 0 ? `${fieldsCount} Pertanyaan / Input` : "Tahapan Formulir");
+        html += `
+          <div class="p-2.5 rounded-lg bg-white border border-zinc-200/60 flex items-start gap-2.5">
+            <span class="w-5 h-5 rounded-full bg-zinc-900 text-white font-mono text-[10px] font-bold flex items-center justify-center flex-shrink-0">${num}</span>
+            <div class="min-w-0">
+              <div class="font-semibold text-zinc-900 truncate" title="${stageTitle}">${stageTitle}</div>
+              <div class="text-[11px] text-zinc-500 line-clamp-1" title="${stageDesc}">${stageDesc}</div>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function renderDynamicClientStages() {
+      const container = document.getElementById("dynamicClientStagesContainer");
+      if (!container) return;
+
+      const tahapan = (currentFormSchema && Array.isArray(currentFormSchema.tahapan) && currentFormSchema.tahapan.length > 0)
+        ? currentFormSchema.tahapan
+        : null;
+
+      // If no custom tahapan or default primary with standard core structure, let standard stepSections handle
+      const isCustomForm = !!(tahapan && (activeFormId !== 'BK5E' || tahapan.some(s => (s.fields || []).some(f => !String(f.type||'').startsWith('CORE_')))));
+
+      if (!isCustomForm) {
+        container.innerHTML = "";
+        // Unhide standard legacy step sections
+        for (let i = 1; i <= 4; i++) {
+          const el = document.getElementById(`stepSection_${i}`);
+          if (el) el.style.display = "";
+        }
+        return;
+      }
+
+      // Hide legacy static sections
+      for (let i = 1; i <= 4; i++) {
+        const el = document.getElementById(`stepSection_${i}`);
+        if (el) el.style.display = "none";
+      }
+
+      const totalSteps = tahapan.length;
+      let stagesHtml = '';
+
+      tahapan.forEach((stage, sIdx) => {
+        const stepNum = sIdx + 1;
+        let fieldsHtml = '';
+
+        (stage.fields || []).forEach(f => {
+          fieldsHtml += renderSingleClientFieldHtml(f);
+        });
+
+        stagesHtml += `
+          <div id="stepSection_${stepNum}" class="step-fade space-y-4 ${stepNum === 1 ? '' : 'hidden'}">
+            <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5">
+              
+              <div class="border-b border-zinc-100 pb-3.5 flex items-center justify-between gap-2">
+                <div>
+                  <h2 class="text-base sm:text-lg font-bold text-zinc-900">${stage.title || `Bagian ${stepNum}`}</h2>
+                  ${stage.description ? `<p class="text-xs text-zinc-500 mt-0.5">${stage.description}</p>` : ''}
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-[10px] font-mono text-zinc-400 bg-zinc-100 px-2 py-0.5 rounded border border-zinc-200">
+                    Bagian ${stepNum} dari ${totalSteps}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Fields Container -->
+              <div class="space-y-4">
+                ${fieldsHtml || '<p class="text-xs text-zinc-400 italic py-4 text-center">Belum ada pertanyaan pada bagian ini.</p>'}
+              </div>
+
+            </div>
+
+            <!-- Stage Navigation Actions -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
+              ${stepNum > 1 
+                ? `<button type="button" onclick="goToStep(${stepNum - 1})" class="min-h-[44px] px-5 py-3 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5"><span>← Sebelumnya</span></button>`
+                : `<button type="button" onclick="goToInfoOverview()" class="min-h-[44px] px-5 py-3 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5"><span>← Info Formulir</span></button>`
+              }
+
+              <div class="flex items-center gap-2 sm:gap-2.5 flex-1 sm:flex-none justify-end">
+                ${stepNum < totalSteps 
+                  ? `<button type="button" onclick="goToStep(${stepNum + 1})" class="flex-1 sm:flex-none min-h-[44px] px-6 py-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 flex items-center justify-center gap-2 cursor-pointer shadow-xs"><span>Lanjut ke Bagian ${stepNum + 1}</span><span>→</span></button>`
+                  : `<button type="submit" class="flex-1 sm:flex-none min-h-[44px] px-7 py-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition active:scale-98 flex items-center justify-center gap-2 cursor-pointer shadow-md"><span>Kirim Penilaian Sekarang</span><span>✓</span></button>`
+                }
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = stagesHtml;
+      initAllModernDropdowns();
+    }
+
+    function renderSingleClientFieldHtml(f) {
+      if (!f) return '';
+      const reqBadge = f.required ? '<span class="text-rose-500 font-bold ml-0.5">*</span>' : '';
+      const savedVal = clientCustomFormAnswers[f.id] || '';
+
+      // 0. TITLE_DESC
+      if (f.type === 'TITLE_DESC') {
+        return `
+          <div class="bg-indigo-50/60 p-4 sm:p-5 rounded-2xl border border-indigo-100 space-y-1.5">
+            <div class="flex items-center gap-2 text-indigo-900 font-bold text-xs sm:text-sm">
+              <svg class="w-4 h-4 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <span>${f.label || 'Informasi'}</span>
+            </div>
+            ${f.description ? `<p class="text-xs text-indigo-950/80 leading-relaxed">${f.description}</p>` : ''}
+          </div>
+        `;
+      }
+
+      // 1. SHORT_TEXT
+      if (f.type === 'SHORT_TEXT') {
+        return `
+          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2">
+            <label class="block text-xs font-bold text-zinc-900 leading-snug">${f.label || 'Pertanyaan'}${reqBadge}</label>
+            ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed">${f.description}</p>` : ''}
+            <input 
+              type="text" 
+              value="${savedVal}" 
+              placeholder="${f.placeholder || 'Jawaban Anda...'}" 
+              ${f.required ? 'required' : ''} 
+              oninput="handleClientFieldInput('${f.id}', this.value)" 
+              class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm bg-white text-zinc-900 focus:border-zinc-900 outline-none transition shadow-2xs"
+            >
+          </div>
+        `;
+      }
+
+      // 2. PARAGRAPH / TEXTAREA
+      if (f.type === 'PARAGRAPH' || f.type === 'TEXTAREA') {
+        return `
+          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2">
+            <label class="block text-xs font-bold text-zinc-900 leading-snug">${f.label || 'Pertanyaan'}${reqBadge}</label>
+            ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed">${f.description}</p>` : ''}
+            <textarea 
+              rows="3" 
+              placeholder="${f.placeholder || 'Tuliskan ulasan atau jawaban lengkap Anda...'}" 
+              ${f.required ? 'required' : ''} 
+              oninput="handleClientFieldInput('${f.id}', this.value)" 
+              class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm bg-white text-zinc-900 focus:border-zinc-900 outline-none transition shadow-2xs leading-relaxed"
+            >${savedVal}</textarea>
+          </div>
+        `;
+      }
+
+      // 3. RADIO
+      if (f.type === 'RADIO') {
+        const opts = f.options || ['Opsi 1', 'Opsi 2'];
+        let optsHtml = '';
+        opts.forEach((opt, oIdx) => {
+          const isChecked = savedVal === opt;
+          optsHtml += `
+            <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white border border-zinc-200 hover:border-zinc-400 cursor-pointer transition text-xs">
+              <input 
+                type="radio" 
+                name="fld_radio_${f.id}" 
+                value="${opt}" 
+                ${isChecked ? 'checked' : ''} 
+                ${f.required ? 'required' : ''} 
+                onchange="handleClientFieldInput('${f.id}', this.value)" 
+                class="w-4 h-4 text-zinc-900 focus:ring-zinc-900 cursor-pointer"
+              >
+              <span class="text-zinc-800 font-medium">${opt}</span>
+            </label>
+          `;
+        });
+        return `
+          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5">
+            <label class="block text-xs font-bold text-zinc-900 leading-snug">${f.label || 'Pilihan'}${reqBadge}</label>
+            ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed">${f.description}</p>` : ''}
+            <div class="space-y-2">
+              ${optsHtml}
+            </div>
+          </div>
+        `;
+      }
+
+      // 4. CHECKBOX
+      if (f.type === 'CHECKBOX') {
+        const opts = f.options || ['Opsi 1', 'Opsi 2'];
+        let checkedList = Array.isArray(savedVal) ? savedVal : [];
+        let optsHtml = '';
+        opts.forEach((opt, oIdx) => {
+          const isChecked = checkedList.includes(opt);
+          optsHtml += `
+            <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white border border-zinc-200 hover:border-zinc-400 cursor-pointer transition text-xs">
+              <input 
+                type="checkbox" 
+                value="${opt}" 
+                ${isChecked ? 'checked' : ''} 
+                onchange="
+                  let cur = Array.isArray(clientCustomFormAnswers['${f.id}']) ? clientCustomFormAnswers['${f.id}'] : [];
+                  if (this.checked) cur.push(this.value);
+                  else cur = cur.filter(v => v !== this.value);
+                  handleClientFieldInput('${f.id}', cur);
+                " 
+                class="w-4 h-4 rounded text-zinc-900 focus:ring-zinc-900 cursor-pointer"
+              >
+              <span class="text-zinc-800 font-medium">${opt}</span>
+            </label>
+          `;
+        });
+        return `
+          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5">
+            <label class="block text-xs font-bold text-zinc-900 leading-snug">${f.label || 'Pilihan Kotak Centang'}${reqBadge}</label>
+            ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed">${f.description}</p>` : ''}
+            <div class="space-y-2">
+              ${optsHtml}
+            </div>
+          </div>
+        `;
+      }
+
+      // 5. DROPDOWN
+      if (f.type === 'DROPDOWN') {
+        const opts = f.options || ['Opsi 1', 'Opsi 2'];
+        let optsHtml = '<option value="" disabled selected>-- Pilih Opsi --</option>';
+        opts.forEach(opt => {
+          optsHtml += `<option value="${opt}" ${savedVal === opt ? 'selected' : ''}>${opt}</option>`;
+        });
+        return `
+          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2">
+            <label class="block text-xs font-bold text-zinc-900 leading-snug">${f.label || 'Pilih Menu Dropdown'}${reqBadge}</label>
+            ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed">${f.description}</p>` : ''}
+            <select 
+              ${f.required ? 'required' : ''} 
+              onchange="handleClientFieldInput('${f.id}', this.value)" 
+              class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm bg-white text-zinc-900 focus:border-zinc-900 outline-none transition shadow-2xs"
+            >
+              ${optsHtml}
+            </select>
+          </div>
+        `;
+      }
+
+      // 6. RATING_SCALE / SKALA LINIER
+      if (f.type === 'RATING_SCALE') {
+        const minV = f.minVal !== undefined ? f.minVal : 1;
+        const maxV = f.maxVal !== undefined ? f.maxVal : 5;
+        const labels = f.pointLabels || {};
+        let btnsHtml = '';
+        for (let i = minV; i <= maxV; i++) {
+          const pointLabel = labels[String(i)] || (i === minV ? (f.labelMin || "Kurang") : (i === maxV ? (f.labelMax || "Baik") : ""));
+          const isSelected = String(savedVal) === String(i);
+          btnsHtml += `
+            <label class="flex flex-col items-center gap-1.5 cursor-pointer group flex-1 min-w-[48px]">
+              <input 
+                type="radio" 
+                name="scale_${f.id}" 
+                value="${i}" 
+                ${isSelected ? 'checked' : ''} 
+                ${f.required ? 'required' : ''} 
+                onchange="handleClientFieldInput('${f.id}', this.value); updateRatingScaleUI('${f.id}');" 
+                class="sr-only"
+              >
+              <div class="scale-circle-${f.id} w-9 h-9 sm:w-10 sm:h-10 rounded-xl border ${isSelected ? 'bg-zinc-900 text-white border-zinc-900 shadow-sm' : 'bg-white text-zinc-700 border-zinc-300 hover:border-zinc-500 hover:bg-zinc-50'} font-mono font-bold text-xs sm:text-sm flex items-center justify-center transition active:scale-95">
+                ${i}
+              </div>
+              ${pointLabel ? `<span class="text-[10px] sm:text-[11px] text-zinc-500 font-medium text-center leading-tight max-w-[70px]">${pointLabel}</span>` : ''}
+            </label>
+          `;
+        }
+
+        return `
+          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5">
+            <label class="block text-xs font-bold text-zinc-900 leading-snug">${f.label || 'Skala Penilaian'}${reqBadge}</label>
+            ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed">${f.description}</p>` : ''}
+            <div class="space-y-2 pt-1">
+              <div class="flex items-start justify-between gap-1 overflow-x-auto pb-2 pt-1">
+                ${btnsHtml}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // 7. FILE_UPLOAD
+      if (f.type === 'FILE_UPLOAD') {
+        const fileObj = savedVal && typeof savedVal === 'object' ? savedVal : null;
+        return `
+          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-3">
+            <div>
+              <label class="block text-xs font-bold text-zinc-900 leading-snug">${f.label || 'Unggah Berkas / Dokumen'}${reqBadge}</label>
+              <p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5">${f.description || 'Mendukung berkas PDF, PPTX, DOCX, Foto JPG/PNG (Maks 5 MB).'}</p>
+            </div>
+            <div class="p-4 bg-white rounded-xl border border-dashed border-zinc-300 hover:border-zinc-400 flex flex-col sm:flex-row items-center justify-between gap-3 transition">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-200 flex items-center justify-center shrink-0">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                </div>
+                <div id="fileStatus_${f.id}" class="min-w-0">
+                  ${fileObj 
+                    ? `<span class="inline-flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 font-semibold text-xs"><svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg><span class="truncate max-w-[200px]">${fileObj.name}</span><span class="text-[10px] text-emerald-600 font-mono">(${(fileObj.size / 1024).toFixed(0)} KB)</span></span>`
+                    : `<span class="text-xs text-zinc-500 font-medium">Belum ada berkas dipilih</span>`
+                  }
+                </div>
+              </div>
+              <label class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-xs font-semibold cursor-pointer transition active:scale-95 shadow-xs shrink-0">
+                <span>Pilih Berkas</span>
+                <input 
+                  type="file" 
+                  accept=".pdf,.pptx,.ppt,.docx,.doc,.jpg,.jpeg,.png" 
+                  onchange="handleClientFileUpload('${f.id}', this)" 
+                  class="sr-only" 
+                  ${f.required && !fileObj ? 'required' : ''}
+                >
+              </label>
+            </div>
+          </div>
+        `;
+      }
+
+      // 8. DATE
+      if (f.type === 'DATE') {
+        return `
+          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2">
+            <label class="block text-xs font-bold text-zinc-900 leading-snug">${f.label || 'Tanggal'}${reqBadge}</label>
+            ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed">${f.description}</p>` : ''}
+            <input 
+              type="date" 
+              value="${savedVal}" 
+              ${f.required ? 'required' : ''} 
+              oninput="handleClientFieldInput('${f.id}', this.value)" 
+              class="w-full sm:w-auto px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm bg-white text-zinc-900 focus:border-zinc-900 outline-none transition shadow-2xs font-mono"
+            >
+          </div>
+        `;
+      }
+
+      // 9. TIME
+      if (f.type === 'TIME') {
+        return `
+          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2">
+            <label class="block text-xs font-bold text-zinc-900 leading-snug">${f.label || 'Waktu'}${reqBadge}</label>
+            ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed">${f.description}</p>` : ''}
+            <input 
+              type="time" 
+              value="${savedVal}" 
+              ${f.required ? 'required' : ''} 
+              oninput="handleClientFieldInput('${f.id}', this.value)" 
+              class="w-full sm:w-auto px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm bg-white text-zinc-900 focus:border-zinc-900 outline-none transition shadow-2xs font-mono"
+            >
+          </div>
+        `;
+      }
+
+      return '';
     }
 
     function renderDynamicCustomFields() {
@@ -2406,14 +2866,15 @@
           customFieldsData = result.customFields || [];
           currentFormMeta = result.formMeta || null;
           
-          // Check preview mode vs published schema
-          const urlParams = new URLSearchParams(window.location.search);
-          const isPreviewMode = urlParams.get('preview') === 'draft';
+          const localSchemaStr = localStorage.getItem('PGSD_CACHE_FORM_SCHEMA_' + activeFormId) || localStorage.getItem('PGSD_DRAFT_SCHEMA_' + activeFormId);
+          let localSchema = null;
+          try { if (localSchemaStr) localSchema = JSON.parse(localSchemaStr); } catch(e){}
+
           if (isPreviewMode) {
             const draft = localStorage.getItem('PGSD_DRAFT_SCHEMA_' + activeFormId);
-            currentFormSchema = draft ? JSON.parse(draft) : (result.formSchema || null);
+            currentFormSchema = draft ? JSON.parse(draft) : (result.formSchema || localSchema || null);
           } else {
-            currentFormSchema = result.formSchema || (result.formMeta && result.formMeta.customFields) || null;
+            currentFormSchema = result.formSchema || (result.formMeta && result.formMeta.customFields) || localSchema || null;
           }
 
           const pinEl = document.getElementById("navPinBadge");
@@ -2460,14 +2921,22 @@
     }
 
     function renderConfigHeader() {
-      const title = appConfig["Judul_Form"] || "Penilaian Presentasi PGSD 5E";
-      const matkul = appConfig["Mata_Kuliah"] || "Bimbingan Konseling di SD";
-      const dosen = appConfig["Dosen_Pengampu"] || "Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.";
-      const sesi = appConfig["Sesi_Minggu_Aktif"] || "Minggu 1";
+      const title = appConfig["Judul_Form"] || (currentFormMeta && currentFormMeta.judulForm) || `Penilaian Presentasi ${activeFormId}`;
+      const matkul = appConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || "Mata Kuliah";
+      const dosen = appConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || "-";
+      const sesi = appConfig["Sesi_Minggu_Aktif"] || (currentFormMeta && currentFormMeta.sesiAktif) || "Minggu 1";
 
       document.getElementById("navTitle").textContent = title;
       document.getElementById("navSubtitle").textContent = matkul;
       document.getElementById("badgeSesiTopText").textContent = sesi;
+
+      // Update Landing Hero Title & Description
+      const overviewJudulEl = document.getElementById("overviewJudulForm");
+      const overviewDescEl = document.getElementById("overviewDeskripsiForm");
+      if (overviewJudulEl) overviewJudulEl.textContent = title;
+      if (overviewDescEl) {
+        overviewDescEl.textContent = appConfig["Deskripsi_Form"] || (currentFormMeta && currentFormMeta.deskripsi) || (currentFormSchema && currentFormSchema.tahapan && currentFormSchema.tahapan[0] && currentFormSchema.tahapan[0].description) || `Formulir penilaian perkuliahan ${matkul} (${appConfig["Kelas"] || ''}) yang diisi oleh mahasiswa/penilai.`;
+      }
       
       // Update Academic Card
       const infoMatkulEl = document.getElementById("infoMatkul");
@@ -2476,8 +2945,13 @@
       const infoJurusanEl = document.getElementById("infoJurusan");
       if (infoMatkulEl) infoMatkulEl.textContent = matkul;
       if (infoDosenEl) infoDosenEl.textContent = dosen;
-      if (infoKelasEl) infoKelasEl.textContent = appConfig["Kelas"] || "5E";
-      if (infoJurusanEl) infoJurusanEl.textContent = appConfig["Jurusan"] || "PGSD";
+      if (infoKelasEl) infoKelasEl.textContent = appConfig["Kelas"] || (currentFormMeta && currentFormMeta.kelas) || "5E";
+      if (infoJurusanEl) infoJurusanEl.textContent = appConfig["Jurusan"] || (currentFormMeta && currentFormMeta.jurusan) || "PGSD";
+
+      renderOverviewAlurTahapan();
+      updateStepMetadataFromSchema();
+      renderDynamicStepTabs();
+      renderDynamicClientStages();
 
       const minVal = parseInt(appConfig["Nilai_Kelompok_Min"] || 50);
       const maxVal = parseInt(appConfig["Nilai_Kelompok_Max"] || 100);
@@ -2792,6 +3266,28 @@
 
     function goToStep(targetStep) {
       if (targetStep === currentStep) return;
+
+      const isCustomForm = !!(currentFormSchema && Array.isArray(currentFormSchema.tahapan) && currentFormSchema.tahapan.length > 0 && (activeFormId !== 'BK5E' || currentFormSchema.tahapan.some(s => (s.fields || []).some(f => !String(f.type||'').startsWith('CORE_')))));
+
+      if (isCustomForm) {
+        if (targetStep > currentStep) {
+          // Validate required fields inside current stage
+          const currentStageSec = document.getElementById(`stepSection_${currentStep}`);
+          if (currentStageSec) {
+            const requiredInputs = currentStageSec.querySelectorAll('input[required], textarea[required], select[required]');
+            for (let input of requiredInputs) {
+              if (!input.value || !input.value.trim()) {
+                input.focus();
+                showToast("Mohon lengkapi seluruh pertanyaan bertanda wajib (*) sebelum melanjutkan.", "warning");
+                return;
+              }
+            }
+          }
+        }
+        updateStepUI(targetStep);
+        return;
+      }
+
       if (targetStep > currentStep) {
         if (currentStep === 1) nextFromStep1();
         else if (currentStep === 2) nextFromStep2();
