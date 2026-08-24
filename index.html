@@ -1559,101 +1559,28 @@
 
         
     // =========================================================================
-    // UNIVERSAL SMART MATH & KATEX AUTO-RENDER ENGINE (CONFLICT-FREE & ULTRA PRECISE)
+    // UNIVERSAL SMART MATH & KATEX AUTO-RENDER ENGINE (EXPLICIT & CONFLICT-FREE)
     // =========================================================================
     function isFormatOrMathPresent(text) {
       if (!text || typeof text !== 'string') return false;
-      const formatted = smartMathFormat(text);
-      return (
-        formatted.includes('$') || 
-        formatted.includes('\\(') || 
-        formatted.includes('\\[') || 
-        formatted.includes('<strong>') || 
-        formatted.includes('<em>') || 
-        formatted.includes('<u>') || 
-        formatted.includes('<a ') || 
-        formatted.includes('<sup>') || 
-        formatted.includes('<sub>') ||
-        /[\\^_{}±≤≥≠≈∞×÷πθαβγλμσΔ∑∫]/.test(text) ||
-        /\\(frac|sqrt|int|sum|prod|alpha|beta|gamma|Delta|theta|lambda|pi|mu|sigma|pm|le|ge|ne|approx|times|div|infty)\b/.test(text)
-      );
+      // Math is present ONLY if explicitly enclosed in delimiters ($...$, $$...$$, \(...\), \[...\])
+      const hasMath = /\$[^$]+\$|\$\$[\s\S]+\$\$|\\\([\s\S]+?\\\) |\\\[[\s\S]+?\\\]/.test(text) || (text.includes('$') && text.lastIndexOf('$') > text.indexOf('$'));
+      // Markdown formatting: **bold**, *italic*, [link](url)
+      const hasMarkdown = /\*\*[^*]+\*\*|(?:\b|[^\*])\*[^*]+\*(?:\b|[^\*])|\[[^\]]+\]\(((?:https?:\/\/|\/)[^\s\)]+)\)/.test(text);
+      return hasMath || hasMarkdown;
     }
 
     function smartMathFormat(text) {
       if (!text || typeof text !== 'string') return "";
 
-      // 0. Normalize unicode math from Microsoft Word / Mobile keyboards
-      let res = text
-        // Superscripts: ⁰ ¹ ² ³ ⁴ ⁵ ⁶ ⁷ ⁸ ⁹ ⁺ ⁻ ⁼ ⁽ ⁾ ⁿ
-        .replace(/([a-zA-Z0-9\)])[⁰]/g, '$1^{0}')
-        .replace(/([a-zA-Z0-9\)])[¹]/g, '$1^{1}')
-        .replace(/([a-zA-Z0-9\)])[²]/g, '$1^{2}')
-        .replace(/([a-zA-Z0-9\)])[³]/g, '$1^{3}')
-        .replace(/([a-zA-Z0-9\)])[⁴]/g, '$1^{4}')
-        .replace(/([a-zA-Z0-9\)])[⁵]/g, '$1^{5}')
-        .replace(/([a-zA-Z0-9\)])[⁶]/g, '$1^{6}')
-        .replace(/([a-zA-Z0-9\)])[⁷]/g, '$1^{7}')
-        .replace(/([a-zA-Z0-9\)])[⁸]/g, '$1^{8}')
-        .replace(/([a-zA-Z0-9\)])[⁹]/g, '$1^{9}')
-        .replace(/([a-zA-Z0-9\)])[ⁿ]/g, '$1^{n}')
-        .replace(/([a-zA-Z0-9\)])[⁺]/g, '$1^{+}')
-        .replace(/([a-zA-Z0-9\)])[⁻]/g, '$1^{-}')
-        // Subscripts: ₀ ₁ ₂ ₃ ₄ ₅ ₆ ₇ ₈ ₉ ₊ ₋ ₌ ₍ ₎ ₐ ₑ ₒ ₓ ₕ ₖ ₗ ₘ ₙ ₚ ₛ ₜ
-        .replace(/([a-zA-Z0-9\)])[₀]/g, '$1_{0}')
-        .replace(/([a-zA-Z0-9\)])[₁]/g, '$1_{1}')
-        .replace(/([a-zA-Z0-9\)])[₂]/g, '$1_{2}')
-        .replace(/([a-zA-Z0-9\)])[₃]/g, '$1_{3}')
-        .replace(/([a-zA-Z0-9\)])[₄]/g, '$1_{4}')
-        .replace(/([a-zA-Z0-9\)])[₅]/g, '$1_{5}')
-        .replace(/([a-zA-Z0-9\)])[₆]/g, '$1_{6}')
-        .replace(/([a-zA-Z0-9\)])[₇]/g, '$1_{7}')
-        .replace(/([a-zA-Z0-9\)])[₈]/g, '$1_{8}')
-        .replace(/([a-zA-Z0-9\)])[₉]/g, '$1_{9}')
-        .replace(/([a-zA-Z0-9\)])[ₙ]/g, '$1_{n}')
-        .replace(/([a-zA-Z0-9\)])[ᵢ]/g, '$1_{i}')
-        .replace(/([a-zA-Z0-9\)])[ⱼ]/g, '$1_{j}')
-        .replace(/([a-zA-Z0-9\)])[ₓ]/g, '$1_{x}')
-        // Common Math Symbols
-        .replace(/√\s*(\([^\)]+\)|[a-zA-Z0-9]+)/g, '\\sqrt{$1}')
-        .replace(/√/g, '\\sqrt{}')
-        .replace(/±/g, '\\pm ')
-        .replace(/≤/g, '\\le ')
-        .replace(/≥/g, '\\ge ')
-        .replace(/≠/g, '\\ne ')
-        .replace(/≈/g, '\\approx ')
-        .replace(/≡/g, '\\equiv ')
-        .replace(/∞/g, '\\infty ')
-        .replace(/×/g, '\\times ')
-        .replace(/÷/g, '\\div ')
-        .replace(/π/g, '\\pi ')
-        .replace(/θ/g, '\\theta ')
-        .replace(/α/g, '\\alpha ')
-        .replace(/β/g, '\\beta ')
-        .replace(/γ/g, '\\gamma ')
-        .replace(/λ/g, '\\lambda ')
-        .replace(/μ/g, '\\mu ')
-        .replace(/σ/g, '\\sigma ')
-        .replace(/Δ/g, '\\Delta ')
-        .replace(/∑/g, '\\sum ')
-        .replace(/∫/g, '\\int ');
-
       // Convert Markdown formatting (Bold, Italic, Link)
-      res = res
+      let res = text
         .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
         .replace(/(^|[^\*])\*([^*]+)\*([^\*]|$)/g, '$1<em>$2</em>$3')
         .replace(/\[([^\]]+)\]\(((?:https?:\/\/|\/)[^\s\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-800 underline font-semibold">$1</a>');
 
-      // 1. Explicit math delimiters ($...$, $$...$$, \(...\), \[...\])
-      if (res.includes('$') || res.includes('\\(') || res.includes('\\[') || res.includes('$$')) {
-        return res;
-      }
-
-      // 2. Pure LaTeX commands without $ (e.g. \frac{a}{b}, \sqrt{x}, \alpha, \beta, \pm)
-      res = res.replace(/(\\(?:frac\{[^}]+\}\{[^}]+\}|sqrt\{[^}]*\}|pm|times|div|le|ge|ne|approx|infty|alpha|beta|gamma|delta|Delta|theta|lambda|pi|mu|sigma|sum|int|lim|sin|cos|tan)\b)/g, '$$$1$$');
-
-      // 3. Standalone or inline caret / subscript term (e.g. x^2, x^{2}, y_1, (a+b)^2, a^2+b^2)
-      res = res.replace(/\b([a-zA-Z0-9\)]+[\^_]\{?[a-zA-Z0-9\+\-]+\}?)/g, '$$$1$$');
-
+      // Note: We do NOT auto-hijack plain text like x^2 without explicit $ delimiters.
+      // Math is parsed only when explicitly wrapped in $...$, $$...$$, \(...\), or \[...\]
       return res;
     }
 

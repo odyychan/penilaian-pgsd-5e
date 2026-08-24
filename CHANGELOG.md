@@ -4,6 +4,23 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.31] - 2026-08-24
+
+### 🛡️ Proteksi Teks Polos & Eliminasi Konflik Auto-Math KaTeX
+- **Preservasi Teks Polos Pengguna (*Conflict-Free Plain Text Mode*):**
+  - Menonaktifkan pembajakan teks otomatis (*auto-hijack* regex) pada penulisan biasa seperti `x^2`, tanda kurung, garis bawah `_`, atau teks biasa lainnya tanpa sengaja dianggap rumus.
+  - Teks yang diketik polos oleh pengguna dipertahankan 100% apa adanya tanpa memunculkan lencana pratinjau matematika palsu.
+- **Peralihan Rumus Eksklusif & Terkontrol:**
+  - Rumus matematika KaTeX hanya aktif dan dirender secara eksklusif jika:
+    1. Pengguna memblok/menyeleksi teks lalu menekan tombol `∑ Rumus` (otomatis membungkus `$teks$`).
+    2. Pengguna memilih formula/simbol melalui palet `∑ Rumus` cepat.
+    3. Pengguna secara eksplisit mengetik pembatas matematika resmi (`$...$`, `$$...$$`, `\(...\)`, `\[...\]`).
+- **Sinkronisasi Seluruh Sisi Formulir & Pengujian Browser:**
+  - Diintegrasikan merata pada `admin.html` dan `index.html`.
+  - Terverifikasi 100% via remote Playwright browser testing pada kasus teks polos dan konversi seleksi formula.
+
+---
+
 ## [2.2.30] - 2026-08-24
 
 ### 🚀 Pratinjau Live Identik Draf, Compact Math Popover & Sinkronisasi Alur Dinamis
