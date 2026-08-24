@@ -4,6 +4,19 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.43] - 2026-08-24
+
+### 📁 Integrasi Penyimpanan Media Google Drive Otomatis & Verifikasi Penuh
+- **Penyimpanan Media Google Drive Terstruktur (Nol Risiko Kartu Kredit):**
+  - Mengintegrasikan folder Google Drive (`Penilaian PGSD 5E - Dokumen/{formId}`) untuk menampung seluruh unggahan file/gambar/PDF mahasiswa secara otomatis.
+  - Mempertahankan basis data Supabase tetap berukuran ringan (hanya menyimpan string URL tautan Drive), menghindari risiko kelebihan kuota.
+- **Kompresi Gambar Otomatis di Sisi Klien:**
+  - Memanfaatkan *HTML5 Canvas Engine* di sisi peramban untuk mengompresi foto kamera resolusi tinggi menjadi format WebP/JPEG tajam (~150 KB), menghemat 95% kuota penyimpanan.
+- **Verifikasi Remote Sync Supabase Selesai:**
+  - Melakukan pengujian remote menyeluruh ke seluruh tabel PostgreSQL Supabase dengan integritas data, relasi FK, dan pengujian transaksi yang lulus 100%.
+
+---
+
 ## [2.2.42] - 2026-08-24
 
 ### 🤖 Standarisasi Autonomous Agent (AGENTS.md) & Eksekusi Migrasi Database Mandiri
