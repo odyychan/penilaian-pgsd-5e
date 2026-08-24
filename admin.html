@@ -2080,8 +2080,105 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
     
     // =========================================================================
-    // UNIVERSAL MATH & KATEX AUTO-RENDER ENGINE
+    // UNIVERSAL SMART MATH & KATEX AUTO-RENDER ENGINE
     // =========================================================================
+    function smartMathFormat(text) {
+      if (!text || typeof text !== 'string') return "";
+
+      // 0. Normalize unicode math from Word / Mobile keyboards
+      let res = text
+        .replace(/([a-zA-Z0-9\)])[⁰]/g, '$1^{0}')
+        .replace(/([a-zA-Z0-9\)])[¹]/g, '$1^{1}')
+        .replace(/([a-zA-Z0-9\)])[²]/g, '$1^{2}')
+        .replace(/([a-zA-Z0-9\)])[³]/g, '$1^{3}')
+        .replace(/([a-zA-Z0-9\)])[⁴]/g, '$1^{4}')
+        .replace(/([a-zA-Z0-9\)])[⁵]/g, '$1^{5}')
+        .replace(/([a-zA-Z0-9\)])[⁶]/g, '$1^{6}')
+        .replace(/([a-zA-Z0-9\)])[⁷]/g, '$1^{7}')
+        .replace(/([a-zA-Z0-9\)])[⁸]/g, '$1^{8}')
+        .replace(/([a-zA-Z0-9\)])[⁹]/g, '$1^{9}')
+        .replace(/([a-zA-Z0-9\)])[ⁿ]/g, '$1^{n}')
+        .replace(/([a-zA-Z0-9\)])[⁺]/g, '$1^{+}')
+        .replace(/([a-zA-Z0-9\)])[⁻]/g, '$1^{-}')
+        .replace(/([a-zA-Z0-9\)])[₀]/g, '$1_{0}')
+        .replace(/([a-zA-Z0-9\)])[₁]/g, '$1_{1}')
+        .replace(/([a-zA-Z0-9\)])[₂]/g, '$1_{2}')
+        .replace(/([a-zA-Z0-9\)])[₃]/g, '$1_{3}')
+        .replace(/([a-zA-Z0-9\)])[₄]/g, '$1_{4}')
+        .replace(/([a-zA-Z0-9\)])[₅]/g, '$1_{5}')
+        .replace(/([a-zA-Z0-9\)])[₆]/g, '$1_{6}')
+        .replace(/([a-zA-Z0-9\)])[₇]/g, '$1_{7}')
+        .replace(/([a-zA-Z0-9\)])[₈]/g, '$1_{8}')
+        .replace(/([a-zA-Z0-9\)])[₉]/g, '$1_{9}')
+        .replace(/([a-zA-Z0-9\)])[ₙ]/g, '$1_{n}')
+        .replace(/([a-zA-Z0-9\)])[ᵢ]/g, '$1_{i}')
+        .replace(/([a-zA-Z0-9\)])[ⱼ]/g, '$1_{j}')
+        .replace(/([a-zA-Z0-9\)])[ₓ]/g, '$1_{x}')
+        .replace(/√\s*(\([^\)]+\)|[a-zA-Z0-9]+)/g, '\\sqrt{$1}')
+        .replace(/√/g, '\\sqrt{}')
+        .replace(/±/g, '\\pm ')
+        .replace(/≤/g, '\\le ')
+        .replace(/≥/g, '\\ge ')
+        .replace(/≠/g, '\\ne ')
+        .replace(/≈/g, '\\approx ')
+        .replace(/≡/g, '\\equiv ')
+        .replace(/∞/g, '\\infty ')
+        .replace(/×/g, '\\times ')
+        .replace(/÷/g, '\\div ')
+        .replace(/π/g, '\\pi ')
+        .replace(/θ/g, '\\theta ')
+        .replace(/α/g, '\\alpha ')
+        .replace(/β/g, '\\beta ')
+        .replace(/γ/g, '\\gamma ')
+        .replace(/λ/g, '\\lambda ')
+        .replace(/μ/g, '\\mu ')
+        .replace(/σ/g, '\\sigma ')
+        .replace(/Δ/g, '\\Delta ')
+        .replace(/∑/g, '\\sum ')
+        .replace(/∫/g, '\\int ');
+
+      if (res.includes('$') || res.includes('\\(') || res.includes('\\[') || res.includes('$$')) {
+        return res;
+      }
+
+      const hasLatexCommands = /\\(frac|sqrt|int|sum|prod|alpha|beta|gamma|theta|lambda|pi|pm|times|div|le|ge|ne|approx|infty|begin|mathbf|text|lim|det|log|ln|sin|cos|tan)\b/.test(res);
+      const hasCaretOrSubscript = /([a-zA-Z0-9\)]+[\^_][a-zA-Z0-9\{\}\(\)\+\-]+)/.test(res);
+
+      if (!hasLatexCommands && !hasCaretOrSubscript) {
+        return res;
+      }
+
+      const hasWordTokens = /\b(jika|dan|atau|adalah|nilai|hitunglah|apakah|pada|yang|dari|untuk|tentukan|sebuah|berapa|berapakah|bagaimana|mengapa|apa|tentang|hasil|persamaan|fungsi|berikut|grafik|diagram|rumus|soal|jawaban|pertanyaan|turunan|pertama|pilihlah|salah|satu|paling|tepat|di|bawah|ini)\b/i.test(res);
+
+      if (!hasWordTokens) {
+        return `$${res}$`;
+      }
+
+      // Match function equation: f(x) = x^2 + 2x + 1
+      res = res.replace(/(\b[a-zA-Z]\([a-zA-Z0-9]\)\s*=\s*[a-zA-Z0-9\(\)\+\-\*/\^_\s\\]+?(?=[,\.?!;:]|\s+(?:di|pada|jika|dan|atau|untuk|dengan|yang|adalah|ini|bawah)\b|$))/g, function(m) {
+        return `$${m.trim()}$`;
+      });
+
+      // Match remaining standalone caret/subscript terms
+      res = res.replace(/(\b[a-zA-Z0-9\)]+[\^_][a-zA-Z0-9\{\}\(\)\+\-]+)/g, function(match, p1, offset, str) {
+        const before = str.slice(0, offset);
+        const dollarCount = (before.match(/\$/g) || []).length;
+        if (dollarCount % 2 === 1) return match;
+        return `$${match}$`;
+      });
+
+      if (hasLatexCommands) {
+        res = res.replace(/(\\[a-zA-Z]+(\{[^\}]*\}|\[[^\]]*\])*(\s*[\+\-\*\/=><]\s*[a-zA-Z0-9\\\{\}\^_]+)*)/g, function(match, p1, p2, p3, offset, str) {
+          const before = str.slice(0, offset);
+          const dollarCount = (before.match(/\$/g) || []).length;
+          if (dollarCount % 2 === 1) return match;
+          return `$${match}$`;
+        });
+      }
+
+      return res;
+    }
+
     function renderAllMathInElement(domElement) {
       if (!domElement) return;
       if (typeof renderMathInElement === 'function') {
@@ -2101,6 +2198,55 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           console.warn("KaTeX render error:", e);
         }
       }
+    }
+
+
+    function updateLiveMathBadge(val, badgeId) {
+      let badge = document.getElementById(badgeId);
+      if (!badge) return;
+      const formatted = smartMathFormat(val || "");
+      const isMathPresent = !!val && (formatted.includes('$') || formatted.includes('\\(') || formatted.includes('\\[') || /\\(frac|sqrt|int|sum|alpha|beta|pi)/.test(formatted));
+      
+      if (!isMathPresent) {
+        badge.classList.add("hidden");
+      } else {
+        badge.classList.remove("hidden");
+        const span = badge.querySelector('.math-renderable');
+        if (span) {
+          try {
+            if (typeof katex !== 'undefined' && formatted.startsWith('$') && formatted.endsWith('$') && !formatted.slice(1, -1).includes('$')) {
+              katex.render(formatted.slice(1, -1), span, { throwOnError: false, displayMode: false });
+            } else {
+              span.innerHTML = formatted;
+              if (typeof renderMathInElement === 'function') {
+                renderMathInElement(span, {
+                  delimiters: [
+                    { left: '$$', right: '$$', display: true },
+                    { left: '$', right: '$', display: false },
+                    { left: '\\(', right: '\\)', display: false },
+                    { left: '\\[', right: '\\]', display: true }
+                  ],
+                  throwOnError: false
+                });
+              }
+            }
+          } catch(e) {
+            span.textContent = formatted;
+          }
+        }
+      }
+    }
+
+    function getLiveMathBadgeHtml(rawText, containerId) {
+      const formatted = smartMathFormat(rawText || "");
+      const isMathPresent = !!rawText && (formatted.includes('$') || formatted.includes('\\(') || formatted.includes('\\[') || /\\(frac|sqrt|int|sum|alpha|beta|pi)/.test(formatted));
+
+      return `
+        <div id="${containerId}" class="math-live-preview-badge flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-50/80 border border-indigo-200 text-indigo-950 text-xs shadow-2xs mt-1 transition ${isMathPresent ? '' : 'hidden'}">
+          <span class="text-[10px] font-bold font-mono text-indigo-600 bg-indigo-100/80 px-1.5 py-0.5 rounded border border-indigo-200 uppercase tracking-wider shrink-0">Rumus Ter-render:</span>
+          <span class="math-renderable font-medium leading-relaxed">${formatted}</span>
+        </div>
+      `;
     }
 
     // =========================================================================
@@ -3206,8 +3352,11 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       renderHubFormsGrid();
       initAllModernDropdowns();
       setTimeout(() => {
-        renderAllMathInElement(document.getElementById("dynamicStagesCanvasContainer"));
-      }, 50);
+        const containerEl = document.getElementById("dynamicStagesCanvasContainer");
+        if (containerEl) {
+          renderAllMathInElement(containerEl);
+        }
+      }, 60);
     }
 
     function fallbackRegistryList() {
@@ -4281,12 +4430,18 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       if (!adminFormSchema || !adminFormSchema.tahapan[sIdx]) return;
       adminFormSchema.tahapan[sIdx][prop] = val;
       markSchemaAsDirty();
+
+      if (prop === 'title') updateLiveMathBadge(val, `liveMathStageTitle_${sIdx}`);
+      else if (prop === 'description') updateLiveMathBadge(val, `liveMathStageDesc_${sIdx}`);
     }
 
     function handleInlineFieldUpdate(sIdx, fIdx, prop, val) {
       if (!adminFormSchema || !adminFormSchema.tahapan[sIdx]?.fields[fIdx]) return;
       adminFormSchema.tahapan[sIdx].fields[fIdx][prop] = val;
       markSchemaAsDirty();
+
+      if (prop === 'label') updateLiveMathBadge(val, `liveMathQuestionLabel_${sIdx}_${fIdx}`);
+      else if (prop === 'description') updateLiveMathBadge(val, `liveMathQuestionDesc_${sIdx}_${fIdx}`);
     }
 
     function handleInlineConfigUpdate(key, val) {
@@ -5109,18 +5264,22 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
                       type="text" 
                       data-field-id="${f.id}"
                       value="${f.label}" 
-                      placeholder="Pertanyaan tanpa judul..."
+                      placeholder="Pertanyaan tanpa judul (contoh: x^2, \frac{a}{b}, dll)..."
                       oninput="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'label', this.value)"
                       class="w-full text-sm sm:text-base font-semibold text-zinc-900 bg-zinc-50/80 hover:bg-zinc-100/90 focus:bg-white border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 px-3 py-2 rounded-t-lg outline-none transition"
                     >
+                    ${getLiveMathBadgeHtml(f.label, `liveMathQuestionLabel_${sIdx}_${fIdx}`)}
                   </div>
-                  <input 
-                    type="text" 
-                    value="${f.description || ''}" 
-                    placeholder="Teks deskripsi / panduan pengisian pertanyaan (opsional)..."
-                    oninput="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'description', this.value)"
-                    class="w-full text-xs text-zinc-500 bg-transparent border-b border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 px-2 py-1 outline-none transition"
-                  >
+                  <div>
+                    <input 
+                      type="text" 
+                      value="${f.description || ''}" 
+                      placeholder="Teks deskripsi / panduan pengisian pertanyaan (contoh: x^2, dll)..."
+                      oninput="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'description', this.value)"
+                      class="w-full text-xs text-zinc-500 bg-transparent border-b border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 px-2 py-1 outline-none transition"
+                    >
+                    ${getLiveMathBadgeHtml(f.description, `liveMathQuestionDesc_${sIdx}_${fIdx}`)}
+                  </div>
                 </div>
 
                 <!-- Right: Modern Question Type Popover Trigger -->
@@ -5204,21 +5363,27 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
             <!-- Underlined Section Title & Description -->
             <div class="space-y-2">
-              <input 
-                type="text" 
-                data-stage-id="${stage.id || ('tahap_' + (sIdx+1))}"
-                value="${stage.title}" 
-                placeholder="Judul Bagian..."
-                oninput="handleInlineStageUpdate(${sIdx}, 'title', this.value)"
-                class="w-full text-base sm:text-xl font-bold text-zinc-900 bg-transparent border-b-2 border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 px-1 py-1.5 outline-none transition"
-              >
-              <input 
-                type="text" 
-                value="${stage.description || ''}" 
-                placeholder="Deskripsi Bagian (opsional)..."
-                oninput="handleInlineStageUpdate(${sIdx}, 'description', this.value)"
-                class="w-full text-xs sm:text-sm text-zinc-600 bg-transparent border-b border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 px-1 py-1 outline-none transition"
-              >
+              <div>
+                <input 
+                  type="text" 
+                  data-stage-id="${stage.id || ('tahap_' + (sIdx+1))}"
+                  value="${stage.title}" 
+                  placeholder="Judul Bagian (contoh: x^2, dll)..."
+                  oninput="handleInlineStageUpdate(${sIdx}, 'title', this.value)"
+                  class="w-full text-base sm:text-xl font-bold text-zinc-900 bg-transparent border-b-2 border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 px-1 py-1.5 outline-none transition"
+                >
+                ${getLiveMathBadgeHtml(stage.title, `liveMathStageTitle_${sIdx}`)}
+              </div>
+              <div>
+                <input 
+                  type="text" 
+                  value="${stage.description || ''}" 
+                  placeholder="Deskripsi Bagian (opsional, contoh: x^2, dll)..."
+                  oninput="handleInlineStageUpdate(${sIdx}, 'description', this.value)"
+                  class="w-full text-xs sm:text-sm text-zinc-600 bg-transparent border-b border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 px-1 py-1 outline-none transition"
+                >
+                ${getLiveMathBadgeHtml(stage.description, `liveMathStageDesc_${sIdx}`)}
+              </div>
             </div>
           </div>
 

@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.12] - 2026-08-24
+
+### 📐 Smart Auto-Math Engine & Live Math Preview Badges (Word Equation, Superscripts & Caret Notation)
+- **Otomatisasi Deteksi & Normalisasi Rumus Matematika (Smart Math Preprocessor):**
+  - Mengonversi notasi pangkat/pangkat-indeks biasa seperti `x^2`, `y^3`, `(a+b)^2`, `x_1`, `a_n` menjadi format rumus LaTeX yang dapat dirender KaTeX secara instan tanpa mewajibkan pengguna mengetik pembatas `$...$` manual.
+  - Mendukung konversi karakter *Unicode Superscript/Subscript* hasil *copy-paste* langsung dari **Microsoft Word Equation** (seperti $x²$, $x³$, $y₁$, $y₂$, $\sqrt{x}$, $\pm$, $\le$, $\ge$, $\ne$, $\approx$, $\infty$, $\pi$, $\theta$, $\alpha$, $\beta$, $\sum$, $\int$).
+  - Perataan batas regex cerdas yang mengisolasi ekspresi matematika di dalam kalimat bahasa Indonesia tanpa menyerap kata-kata sekitarnya.
+- **Pratinjau Rumus Interaktif Real-Time di Form Builder (`admin.html`):**
+  - Menampilkan lencana *Live Math Preview* bertuliskan `Rumus Ter-render: [ KaTeX Math ]` tepat di bawah input judul bagian, deskripsi bagian, judul pertanyaan, dan deskripsi pertanyaan secara instan saat mengetik atau menempel teks.
+- **Perenderan Penuh di Sisi Formulir Klien (`index.html`):**
+  - Mengintegrasikan `smartMathFormat` pada seluruh tipe pertanyaan (*Short Text, Paragraph, Radio, Checkbox, Dropdown, Rating Scale/Skala Linier, Core Group Grade, Core Best Presenter*), opsi pilihan ganda, dan deskripsi tahapan formulir.
+
+---
+
 ## [2.2.11] - 2026-08-24
 
 ### 🎬 Rich Multi-Media & Universal KaTeX Math Formula Engine + Google Drive Uploader Fix
