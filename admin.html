@@ -764,13 +764,48 @@
                   </p>
                 </div>
 
-                <!-- 4 Responsive Action Buttons (2-col grid on Mobile, Flex on Tablet/Desktop) -->
-                <div class="grid grid-cols-2 sm:flex sm:items-center gap-2 shrink-0">
+                <!-- Action Buttons & Undo/Redo Controls -->
+                <div class="flex items-center gap-2 flex-wrap shrink-0">
+                  
+                  <!-- Undo & Redo Toolbar Buttons (Google Forms Style) -->
+                  <div class="flex items-center rounded-xl border border-zinc-200 bg-zinc-50 p-0.5 shadow-2xs">
+                    <button 
+                      type="button" 
+                      id="btnBuilderUndo"
+                      onclick="formBuilderUndo()" 
+                      disabled
+                      class="w-8 h-8 rounded-lg text-zinc-700 hover:bg-white hover:text-zinc-900 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition cursor-pointer"
+                      title="Urungkan Perubahan (Ctrl + Z)"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M3 10h10a5 5 0 015 5v2a5 5 0 01-5 5H6m-3-12l4-4m-4 4l4 4"></path></svg>
+                    </button>
+                    <button 
+                      type="button" 
+                      id="btnBuilderRedo"
+                      onclick="formBuilderRedo()" 
+                      disabled
+                      class="w-8 h-8 rounded-lg text-zinc-700 hover:bg-white hover:text-zinc-900 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition cursor-pointer"
+                      title="Ulangi Perubahan (Ctrl + Y)"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M21 10H11a5 5 0 00-5 5v2a5 5 0 005 5h7m3-12l-4-4m4 4l-4 4"></path></svg>
+                    </button>
+                  </div>
+
+                  <button 
+                    type="button" 
+                    onclick="openRevisionHistoryModal()" 
+                    class="px-3 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 active:scale-98 text-zinc-700 border border-zinc-200 text-xs font-semibold shadow-2xs flex items-center gap-1.5 transition cursor-pointer"
+                    title="Buka riwayat perubahan &amp; versi formulir"
+                  >
+                    <svg class="w-3.5 h-3.5 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>Riwayat</span>
+                  </button>
+
                   <button 
                     type="button" 
                     onclick="publishFormSchema()" 
                     id="btnPublishSchema"
-                    class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-98 text-white text-xs font-bold shadow-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                    class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-98 text-white text-xs font-bold shadow-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                     title="Publikasikan draf agar resmi tayang ke mahasiswa"
                   >
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
@@ -780,7 +815,7 @@
                   <button 
                     type="button" 
                     onclick="openLiveFormSimulator()" 
-                    class="w-full sm:w-auto px-3.5 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 active:scale-98 text-zinc-100 text-xs font-semibold shadow-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                    class="px-3.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 active:scale-98 text-zinc-100 text-xs font-semibold shadow-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                     title="Buka simulasi pratinjau formulir mahasiswa"
                   >
                     <svg class="w-4 h-4 text-zinc-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
@@ -790,7 +825,7 @@
                   <button 
                     type="button" 
                     onclick="addNewQuestionDirect(adminFormSchema ? adminFormSchema.tahapan.length - 1 : 0)" 
-                    class="w-full sm:w-auto px-3.5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-98 text-white text-xs font-semibold shadow-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                    class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-98 text-white text-xs font-semibold shadow-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                     title="Tambah pertanyaan baru"
                   >
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
@@ -800,7 +835,7 @@
                   <button 
                     type="button" 
                     onclick="addNewStageDirect()" 
-                    class="w-full sm:w-auto px-3.5 py-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 active:scale-98 text-zinc-800 border border-zinc-300 text-xs font-semibold shadow-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                    class="px-3.5 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 active:scale-98 text-zinc-800 border border-zinc-300 text-xs font-semibold shadow-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                     title="Tambah tahap bagian baru"
                   >
                     <svg class="w-4 h-4 text-zinc-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -2631,7 +2666,232 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     // =========================================================================
     // 1-CLICK INSTANT DIRECT CREATION (ZERO MODAL - GOOGLE FORMS STYLE)
     // =========================================================================
+
+    // =========================================================================
+    // UNDO / REDO ENGINE & VERSION HISTORY (GOOGLE FORMS EXPERIENCE)
+    // =========================================================================
+    let undoHistoryStack = [];
+    let redoHistoryStack = [];
+    const MAX_HISTORY_LIMIT = 30;
+
+    function pushUndoSnapshot(actionName = "Perubahan Formulir") {
+      if (!adminFormSchema) return;
+      const snapshot = {
+        action: actionName,
+        timestamp: Date.now(),
+        schema: JSON.parse(JSON.stringify(adminFormSchema)),
+        config: JSON.parse(JSON.stringify(adminAppConfig || {}))
+      };
+      undoHistoryStack.push(snapshot);
+      if (undoHistoryStack.length > MAX_HISTORY_LIMIT) {
+        undoHistoryStack.shift();
+      }
+      redoHistoryStack = [];
+      updateUndoRedoButtonsState();
+    }
+
+    function formBuilderUndo() {
+      if (undoHistoryStack.length === 0) {
+        showAdminToast("Tidak ada perubahan untuk diurungkan (Undo).", "info");
+        return;
+      }
+
+      const currentSnapshot = {
+        action: "Sebelum Urungkan",
+        timestamp: Date.now(),
+        schema: JSON.parse(JSON.stringify(adminFormSchema)),
+        config: JSON.parse(JSON.stringify(adminAppConfig || {}))
+      };
+      redoHistoryStack.push(currentSnapshot);
+
+      const prevSnapshot = undoHistoryStack.pop();
+      adminFormSchema = JSON.parse(JSON.stringify(prevSnapshot.schema));
+      if (prevSnapshot.config) {
+        adminAppConfig = JSON.parse(JSON.stringify(prevSnapshot.config));
+      }
+
+      renderDynamicStagesCanvas();
+      markSchemaAsDirty();
+      updateUndoRedoButtonsState();
+      showAdminToast("Perubahan berhasil diurungkan (Undo).", "info");
+    }
+
+    function formBuilderRedo() {
+      if (redoHistoryStack.length === 0) {
+        showAdminToast("Tidak ada perubahan untuk diulangi (Redo).", "info");
+        return;
+      }
+
+      const currentSnapshot = {
+        action: "Sebelum Ulangi",
+        timestamp: Date.now(),
+        schema: JSON.parse(JSON.stringify(adminFormSchema)),
+        config: JSON.parse(JSON.stringify(adminAppConfig || {}))
+      };
+      undoHistoryStack.push(currentSnapshot);
+
+      const nextSnapshot = redoHistoryStack.pop();
+      adminFormSchema = JSON.parse(JSON.stringify(nextSnapshot.schema));
+      if (nextSnapshot.config) {
+        adminAppConfig = JSON.parse(JSON.stringify(nextSnapshot.config));
+      }
+
+      renderDynamicStagesCanvas();
+      markSchemaAsDirty();
+      updateUndoRedoButtonsState();
+      showAdminToast("Perubahan berhasil diulangi (Redo).", "info");
+    }
+
+    function updateUndoRedoButtonsState() {
+      const undoBtn = document.getElementById("btnBuilderUndo");
+      const redoBtn = document.getElementById("btnBuilderRedo");
+      if (undoBtn) {
+        undoBtn.disabled = undoHistoryStack.length === 0;
+      }
+      if (redoBtn) {
+        redoBtn.disabled = redoHistoryStack.length === 0;
+      }
+    }
+
+    // Global Shortcut Listener for Ctrl+Z and Ctrl+Y / Ctrl+Shift+Z
+    document.addEventListener("keydown", function(e) {
+      const isConfigTabActive = !document.getElementById("adminTab_config")?.classList.contains("hidden");
+      if (!isConfigTabActive) return;
+
+      const activeTag = document.activeElement?.tagName;
+      const isTyping = activeTag === 'INPUT' || activeTag === 'TEXTAREA';
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) {
+        if (!isTyping || document.activeElement.type === 'checkbox' || document.activeElement.type === 'radio') {
+          e.preventDefault();
+          formBuilderUndo();
+        }
+      }
+
+      if (((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') || 
+          ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'z')) {
+        if (!isTyping || document.activeElement.type === 'checkbox' || document.activeElement.type === 'radio') {
+          e.preventDefault();
+          formBuilderRedo();
+        }
+      }
+    });
+
+    // =========================================================================
+    // REVISION HISTORY SNAPSHOTS ENGINE
+    // =========================================================================
+    function recordRevisionSnapshot(label = "Publikasi Formulir") {
+      const formKey = currentFormId || DEFAULT_PRIMARY_FORM_ID;
+      const revKey = `PGSD_FORM_REVISIONS_${formKey}`;
+      let revs = [];
+      try {
+        revs = JSON.parse(localStorage.getItem(revKey) || "[]");
+      } catch(e) { revs = []; }
+
+      const newRev = {
+        id: "rev_" + Date.now().toString(36),
+        label: label,
+        timestamp: Date.now(),
+        dateStr: new Date().toLocaleString("id-ID", { dateStyle: 'medium', timeStyle: 'short' }),
+        stagesCount: (adminFormSchema?.tahapan || []).length,
+        fieldsCount: (adminFormSchema?.tahapan || []).reduce((acc, s) => acc + (s.fields?.length || 0), 0),
+        schema: JSON.parse(JSON.stringify(adminFormSchema)),
+        config: JSON.parse(JSON.stringify(adminAppConfig || {}))
+      };
+
+      revs.unshift(newRev);
+      if (revs.length > 30) revs = revs.slice(0, 30);
+      localStorage.setItem(revKey, JSON.stringify(revs));
+    }
+
+    function openRevisionHistoryModal() {
+      renderRevisionHistoryList();
+      document.getElementById("modalRevisionHistory").classList.remove("hidden");
+    }
+
+    function closeRevisionHistoryModal() {
+      document.getElementById("modalRevisionHistory").classList.add("hidden");
+    }
+
+    function renderRevisionHistoryList() {
+      const formKey = currentFormId || DEFAULT_PRIMARY_FORM_ID;
+      const revKey = `PGSD_FORM_REVISIONS_${formKey}`;
+      let revs = [];
+      try {
+        revs = JSON.parse(localStorage.getItem(revKey) || "[]");
+      } catch(e) { revs = []; }
+
+      const listContainer = document.getElementById("revisionListContainer");
+      if (!listContainer) return;
+
+      if (revs.length === 0) {
+        listContainer.innerHTML = `
+          <div class="p-8 text-center bg-white rounded-2xl border border-zinc-200 space-y-2">
+            <div class="w-12 h-12 rounded-2xl bg-zinc-100 text-zinc-400 mx-auto flex items-center justify-center">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <h5 class="font-bold text-zinc-700 text-xs">Belum Ada Riwayat Tersimpan</h5>
+            <p class="text-[11px] text-zinc-400">Riwayat revisi akan otomatis tercatat setiap kali Anda mempublikasikan formulir atau mereset susunan.</p>
+          </div>
+        `;
+        return;
+      }
+
+      listContainer.innerHTML = revs.map((r, idx) => `
+        <div class="p-4 rounded-2xl bg-white border border-zinc-200 hover:border-indigo-300 transition shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10.5px] font-mono font-bold">
+                ${idx === 0 ? 'Terkini' : '#' + (revs.length - idx)}
+              </span>
+              <span class="font-bold text-zinc-900 text-xs">${r.label || 'Revisi Formulir'}</span>
+            </div>
+            <p class="text-[11px] text-zinc-500">
+               ${r.dateStr} • <span class="font-mono">${r.stagesCount} Bagian, ${r.fieldsCount} Pertanyaan</span>
+            </p>
+          </div>
+
+          <button 
+            type="button" 
+            onclick="restoreRevisionVersion('${r.id}')"
+            class="px-3 py-1.5 rounded-xl bg-zinc-100 hover:bg-indigo-600 hover:text-white text-zinc-700 text-xs font-semibold transition active:scale-95 cursor-pointer flex items-center justify-center gap-1 shrink-0"
+            title="Kembalikan formulir ke versi ini"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            <span>Pulihkan Versi Ini</span>
+          </button>
+        </div>
+      `).join("");
+    }
+
+    function restoreRevisionVersion(revId) {
+      const formKey = currentFormId || DEFAULT_PRIMARY_FORM_ID;
+      const revKey = `PGSD_FORM_REVISIONS_${formKey}`;
+      let revs = [];
+      try {
+        revs = JSON.parse(localStorage.getItem(revKey) || "[]");
+      } catch(e) { revs = []; }
+
+      const targetRev = revs.find(r => r.id === revId);
+      if (!targetRev || !targetRev.schema) {
+        showAdminToast("Gagal memuat versi revisi.", "error");
+        return;
+      }
+
+      pushUndoSnapshot("Sebelum Pulihkan Versi " + targetRev.dateStr);
+      adminFormSchema = JSON.parse(JSON.stringify(targetRev.schema));
+      if (targetRev.config) {
+        adminAppConfig = JSON.parse(JSON.stringify(targetRev.config));
+      }
+
+      renderDynamicStagesCanvas();
+      markSchemaAsDirty();
+      closeRevisionHistoryModal();
+      showAdminToast(`Formulir berhasil dipulihkan ke versi (${targetRev.dateStr})!`, "success");
+    }
+
     function addNewQuestionDirect(sIdx = 0) {
+      pushUndoSnapshot('Tambah Pertanyaan');
       initOrNormalizeFormSchema();
       if (sIdx === undefined || sIdx === null || sIdx < 0) sIdx = 0;
       if (!adminFormSchema.tahapan[sIdx]) {
@@ -2670,6 +2930,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }
 
     function addNewStageDirect() {
+      pushUndoSnapshot('Tambah Bagian');
       initOrNormalizeFormSchema();
       const newStageIdx = adminFormSchema.tahapan.length;
       const newStageId = "tahap_" + (newStageIdx + 1) + "_" + Date.now().toString(36);
@@ -2792,6 +3053,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           updatePublishStatusBadge();
           setSyncState('synced');
           localStorage.setItem(`PGSD_CACHE_FORM_SCHEMA_${formKey}`, JSON.stringify(adminFormSchema));
+          recordRevisionSnapshot("Publikasi Form: " + (adminFormSchema.tahapan.length) + " Bagian");
           localStorage.setItem(`PGSD_CACHE_CONFIG_${formKey}`, JSON.stringify(adminAppConfig));
           localStorage.removeItem(`PGSD_DRAFT_SCHEMA_${formKey}`);
           
@@ -2968,6 +3230,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     });
 
     function handleQuestionTypeSwitch(sIdx, fIdx, newType) {
+      pushUndoSnapshot('Ganti Tipe Pertanyaan');
       const f = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
       if (!f) return;
       f.type = newType;
@@ -4024,6 +4287,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }
 
     function duplicateField(sIdx, fIdx) {
+      pushUndoSnapshot('Duplikat Pertanyaan');
       const f = adminFormSchema.tahapan[sIdx].fields[fIdx];
       if (!f) return;
       const copy = JSON.parse(JSON.stringify(f));
@@ -4087,6 +4351,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }
 
     function moveStage(sIdx, dir) {
+      pushUndoSnapshot('Pindah Posisi Bagian');
       const targetIdx = sIdx + dir;
       if (targetIdx < 0 || targetIdx >= adminFormSchema.tahapan.length) return;
       const temp = adminFormSchema.tahapan[sIdx];
@@ -4097,6 +4362,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }
 
     function duplicateStage(sIdx) {
+      pushUndoSnapshot('Duplikat Bagian');
       const stage = adminFormSchema.tahapan[sIdx];
       if (!stage) return;
       const copyFields = JSON.parse(JSON.stringify(stage.fields || [])).map(f => ({
@@ -4118,6 +4384,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }
 
     function deleteStage(sIdx) {
+      pushUndoSnapshot('Hapus Bagian');
       if (adminFormSchema.tahapan.length <= 1) {
         alert("Formulir wajib memiliki minimal 1 Tahap pengisian.");
         return;
@@ -4224,6 +4491,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }
 
     function moveField(sIdx, fIdx, dir) {
+      pushUndoSnapshot('Pindah Posisi Pertanyaan');
       const fields = adminFormSchema.tahapan[sIdx].fields;
       const targetIdx = fIdx + dir;
       if (targetIdx < 0 || targetIdx >= fields.length) return;
@@ -4235,6 +4503,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }
 
     function deleteField(sIdx, fIdx) {
+      pushUndoSnapshot('Hapus Pertanyaan');
       const f = adminFormSchema.tahapan[sIdx].fields[fIdx];
       if (!confirm(`Hapus input '${f.label}' dari Tahap ${sIdx + 1}?`)) return;
       adminFormSchema.tahapan[sIdx].fields.splice(fIdx, 1);
@@ -4327,6 +4596,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }
 
     function resetToDefaultStandardSchema() {
+      pushUndoSnapshot('Reset Susunan Standar');
       if (!confirm("Kembalikan struktur formulir ke 4-Tahap Standar PGSD bawaan? Seluruh tahapan akan direset ke default.")) return;
       adminFormSchema = getDefaultFormSchema(adminAppConfig);
       renderDynamicStagesCanvas();
@@ -5398,6 +5668,45 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         <span class="text-[11px] font-mono text-zinc-400">Mode Simulasi Draf (Tidak mempengaruhi data respons)</span>
         <button type="button" onclick="closeLiveFormSimulator()" class="px-3 py-1.5 rounded-lg bg-zinc-900 text-white text-xs font-semibold hover:bg-zinc-800 transition cursor-pointer">
           Tutup Simulasi
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: REVISION HISTORY (GOOGLE FORMS VERSION HISTORY) -->
+  <!-- ========================================================================= -->
+  <div id="modalRevisionHistory" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-zinc-200 overflow-hidden fade-enter">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/80">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+          <div>
+            <h4 class="font-bold text-zinc-900 text-sm sm:text-base">Riwayat Perubahan Formulir</h4>
+            <p class="text-[11px] text-zinc-500">Lihat rekaman versi dan pulihkan formulir ke susunan sebelumnya.</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeRevisionHistoryModal()" class="w-8 h-8 rounded-full hover:bg-zinc-200 text-zinc-500 flex items-center justify-center transition cursor-pointer">
+          ✕
+        </button>
+      </div>
+
+      <!-- Revision List Container -->
+      <div id="revisionListContainer" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3 custom-scrollbar bg-zinc-50/40">
+        <!-- Rendered via renderRevisionHistoryList() -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-6 py-3.5 border-t border-zinc-100 bg-zinc-50 flex items-center justify-between text-xs text-zinc-500">
+        <span>Tekan <strong>Ctrl + Z</strong> untuk membatalkan aksi terkini.</span>
+        <button type="button" onclick="closeRevisionHistoryModal()" class="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-semibold transition cursor-pointer">
+          Tutup
         </button>
       </div>
 

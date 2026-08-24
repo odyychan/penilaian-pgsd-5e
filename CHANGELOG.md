@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.88] - 2026-08-24
+
+### ⏪ Ctrl+Z Undo / Redo Engine & Form Revision History (Google Forms Style)
+- **Mesin Undo / Redo Global (*Ctrl+Z & Ctrl+Y Support*):**
+  - Mendukung pintasan keyboard global `Ctrl + Z` (atau `Cmd + Z`) untuk mengurungkan aksi dan `Ctrl + Y` / `Ctrl + Shift + Z` untuk mengulangi aksi di Form Builder.
+  - Menghadirkan tombol toolbar **`↺ Urungkan`** dan **`↻ Ulangi`** di header Form Builder yang aktif secara dinamis sesuai tumpukan riwayat (*undo/redo stack up to 30 states*).
+  - Bekerja pada semua aksi: penambahan pertanyaan/bagian, penghapusan, duplikasi, perubahan urutan/posisi, dan perubahan tipe pertanyaan.
+- **Panel Histori Revisi Formulir (*Form Version History Modal*):**
+  - Tombol **`📜 Riwayat`** di header Form Builder membuka modal kronologi versi formulir.
+  - Menampilkan rekaman versi, timestamp, jumlah bagian, dan jumlah pertanyaan.
+  - Tombol **`Pulihkan Versi Ini` (*Restore Version*)**: Mengembalikan formulir ke snapshot versi sebelumnya dalam 1-klik dengan notifikasi toast konfirmasi.
+
+---
+
 ## [2.1.87] - 2026-08-24
 
 ### 🛡️ Comprehensive UI Polish, Zero Redundancy & Full Mobile S/M/L Responsive Audit
