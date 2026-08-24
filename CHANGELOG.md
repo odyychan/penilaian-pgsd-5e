@@ -4,6 +4,21 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.81] - 2026-08-24
+
+### 🚀 Draft vs Published Workflow & Interactive Live Form Simulator
+- **Alur Kerja Draf vs Publikasi (*Draft vs Published State*):**
+  - Seluruh penambahan, modifikasi, dan penghapusan tahap, pertanyaan, maupun opsi di Form Builder kini **disimpan sebagai Draf terlebih dahulu** dan **tidak langsung tayang ke mahasiswa**.
+  - **Indikator Status Real-Time:** Menampilkan badge `🟡 Draf Belum Dipublikasikan` saat ada perubahan draf, dan `🟢 Form Terpublikasi & Aktif` saat sinkron.
+  - **Tombol Publikasi Resmi:** Tombol **`🚀 Publikasikan Perubahan`** di header Form Builder untuk menyinkronkan draf ke Google Sheets dan resmi menayangkannya ke formulir mahasiswa.
+- **Penyempurnaan Pratinjau Interaktif (*Live Form Simulator*):**
+  - Tombol **`👁️ Pratinjau Form Langsung`** membuka simulator yang membaca Draf terkini yang sedang disusun admin.
+  - Navigasi interaktif penuh dari tahap ke tahap (`← Tahap Sebelumnya` dan `Lanjut ke Tahap Berikutnya →`) lengkap dengan persentase progres (`25%`, `50%`, `75%`, `100%`).
+  - Simulasi interaktif untuk seluruh tipe isian: pilihan peran, NIM, kelompok, slider skor dinamis, voting presentator, textarea ulasan, pilihan ganda/checkbox, dan upload berkas.
+  - Tombol **`Buka Tab Baru ↗`** untuk menguji simulasi draf langsung pada tab browser terpisah.
+
+---
+
 ## [2.1.80] - 2026-08-24
 
 ### 🎨 100% Authentic Google Forms UI & Interactive Question Engine
