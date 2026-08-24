@@ -4,6 +4,19 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.15] - 2026-08-24
+
+### 🖱️ 100% Reliable Math Selection & Universal Right-Click Context Menu Engine
+- **Penyempurnaan Penangkapan Seleksi Teks (Universal Input Selection Listener):**
+  - Memperbaiki penanganan event seleksi teks (`select`, `selectionchange`, `mouseup`, dan `contextmenu`) di seluruh tipe input dan textarea pada Form Builder tanpa dibatasi oleh ID kontainer tertentu.
+  - Mengatasi masalah deselect otomatis pada browser berbasis Chromium di lingkungan sistem operasi Windows saat melakukan klik kanan.
+- **Gelembung Aksi Melayang & Menu Konteks Instan:**
+  - Menampilkan menu konteks pilihan konversi rumus lengkap (`$...$ Formula`, `x² Pangkat`, `x₁ Indeks`, `\frac Pecahan`, `\sqrt Akar`) saat klik kanan atau melalui gelembung aksi melayang.
+- **Perenderan Real-Time Otomatis di Kanvas Admin:**
+  - Menambahkan *auto-render trigger* KaTeX pada siklus akhir `renderDynamicStagesCanvas` sehingga setiap perubahan rumus matematika langsung dirender visual tanpa jeda.
+
+---
+
 ## [2.2.14] - 2026-08-24
 
 ### 🖱️ Right-Click Math Context Menu & Text Selection Math Converter

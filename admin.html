@@ -2265,66 +2265,112 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
 
     // =========================================================================
-    // SMART MATH SELECTION & CONTEXT MENU ENGINE
+    // SMART MATH SELECTION, RIGHT-CLICK & FLOATING ACTION ENGINE (100% RELIABLE)
     // =========================================================================
     let activeMathSelectionTarget = null;
     let activeMathSelectionRange = { start: 0, end: 0, text: "" };
 
-    function initMathContextMenuEvents() {
-      document.addEventListener('contextmenu', function(e) {
-        const input = e.target;
-        if (isMathEligibleInput(input)) {
-          const start = input.selectionStart;
-          const end = input.selectionEnd;
-          const selected = (input.value || '').substring(start, end).trim();
-          
+    function isMathEligibleInput(el) {
+      if (!el) return false;
+      const tag = el.tagName ? el.tagName.toUpperCase() : '';
+      if (tag !== 'INPUT' && tag !== 'TEXTAREA') return false;
+      if (tag === 'INPUT') {
+        const type = (el.type || 'text').toLowerCase();
+        if (type === 'checkbox' || type === 'radio' || type === 'button' || type === 'submit' || type === 'file') return false;
+      }
+      return true;
+    }
+
+    function captureActiveSelection(el) {
+      if (!isMathEligibleInput(el)) return null;
+      try {
+        const start = typeof el.selectionStart === 'number' ? el.selectionStart : 0;
+        const end = typeof el.selectionEnd === 'number' ? el.selectionEnd : 0;
+        const val = el.value || '';
+        if (end > start) {
+          const selected = val.substring(start, end).trim();
           if (selected.length > 0) {
-            e.preventDefault();
-            activeMathSelectionTarget = input;
+            activeMathSelectionTarget = el;
             activeMathSelectionRange = { start, end, text: selected };
-            showMathContextMenu(e.clientX, e.clientY, selected);
-            return;
+            return activeMathSelectionRange;
+          }
+        }
+      } catch(e) {}
+      return null;
+    }
+
+    function initMathContextMenuEvents() {
+      // 1. Capture selection as user drags / selects with mouse or keyboard
+      document.addEventListener('select', function(e) {
+        if (isMathEligibleInput(e.target)) {
+          captureActiveSelection(e.target);
+        }
+      }, true);
+
+      document.addEventListener('selectionchange', function() {
+        const el = document.activeElement;
+        if (isMathEligibleInput(el)) {
+          captureActiveSelection(el);
+        }
+      });
+
+      // 2. Mouseup: check if text was selected, show floating bubble
+      document.addEventListener('mouseup', function(e) {
+        if (e.target.closest('#mathSelectionContextMenu') || e.target.closest('#mathSelectionFloatingBubble')) {
+          return;
+        }
+
+        setTimeout(() => {
+          const el = document.activeElement;
+          const sel = captureActiveSelection(el);
+          if (sel && sel.text.length > 0 && !isContextMenuOpen()) {
+            showFloatingSelectionBubble(e.clientX, e.clientY, el);
+          } else {
+            hideFloatingSelectionBubble();
+          }
+        }, 40);
+      });
+
+      // 3. Right-Click (contextmenu): capture selection and show context menu
+      document.addEventListener('contextmenu', function(e) {
+        let el = e.target;
+        if (!isMathEligibleInput(el)) {
+          el = document.activeElement;
+        }
+
+        if (isMathEligibleInput(el)) {
+          let sel = null;
+          if (activeMathSelectionTarget === el && activeMathSelectionRange.text && activeMathSelectionRange.end > activeMathSelectionRange.start) {
+            sel = activeMathSelectionRange;
+          } else {
+            sel = captureActiveSelection(el);
+          }
+
+          if (sel && sel.text.length > 0) {
+            e.preventDefault();
+            e.stopPropagation();
+            showMathContextMenu(e.clientX, e.clientY, sel.text);
+            return false;
           }
         }
         hideMathContextMenu();
-      });
+      }, true);
 
-      document.addEventListener('mouseup', function(e) {
-        setTimeout(() => {
-          const input = document.activeElement;
-          if (isMathEligibleInput(input)) {
-            const start = input.selectionStart;
-            const end = input.selectionEnd;
-            const selected = (input.value || '').substring(start, end).trim();
-            if (selected.length > 0 && !isContextMenuOpen()) {
-              activeMathSelectionTarget = input;
-              activeMathSelectionRange = { start, end, text: selected };
-              showFloatingSelectionBubble(e.clientX, e.clientY);
-              return;
-            }
-          }
-          hideFloatingSelectionBubble();
-        }, 50);
-      });
-
-      document.addEventListener('click', function(e) {
+      // 4. Click outside to dismiss
+      document.addEventListener('mousedown', function(e) {
         if (!e.target.closest('#mathSelectionContextMenu') && !e.target.closest('#mathSelectionFloatingBubble')) {
           hideMathContextMenu();
           hideFloatingSelectionBubble();
         }
       });
 
+      // 5. Escape key to dismiss
       document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
           hideMathContextMenu();
           hideFloatingSelectionBubble();
         }
       });
-    }
-
-    function isMathEligibleInput(el) {
-      if (!el || (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA')) return false;
-      return !!el.closest('#dynamicStagesCanvasContainer, #modalAttachQuestionMedia, #builderQuickEditContainer');
     }
 
     function showMathContextMenu(x, y, text) {
@@ -2337,8 +2383,8 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
       menu.classList.remove("hidden");
       const rect = menu.getBoundingClientRect();
-      const posX = Math.min(x, window.innerWidth - rect.width - 12);
-      const posY = Math.min(y, window.innerHeight - rect.height - 12);
+      const posX = Math.min(x, window.innerWidth - rect.width - 16);
+      const posY = Math.min(y, window.innerHeight - rect.height - 16);
 
       menu.style.left = `${Math.max(12, posX)}px`;
       menu.style.top = `${Math.max(12, posY)}px`;
@@ -2349,12 +2395,24 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       if (menu) menu.classList.add("hidden");
     }
 
-    function showFloatingSelectionBubble(x, y) {
+    function showFloatingSelectionBubble(x, y, el) {
       const bubble = document.getElementById("mathSelectionFloatingBubble");
       if (!bubble) return;
+
       bubble.classList.remove("hidden");
-      const posX = Math.max(70, Math.min(window.innerWidth - 70, x));
-      const posY = Math.max(40, y - 35);
+
+      let targetX = x;
+      let targetY = y - 45;
+
+      if (el) {
+        const elRect = el.getBoundingClientRect();
+        targetX = Math.max(elRect.left + 50, Math.min(elRect.right - 50, x));
+        targetY = Math.max(20, elRect.top - 42);
+      }
+
+      const posX = Math.max(80, Math.min(window.innerWidth - 80, targetX));
+      const posY = Math.max(10, targetY);
+
       bubble.style.left = `${posX}px`;
       bubble.style.top = `${posY}px`;
     }
@@ -2370,50 +2428,69 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     }
 
     function openMathContextMenuFromBubble(e) {
-      e.stopPropagation();
+      if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
       const bubble = document.getElementById("mathSelectionFloatingBubble");
       if (!bubble) return;
       const rect = bubble.getBoundingClientRect();
-      showMathContextMenu(rect.left + rect.width / 2, rect.bottom + 5, activeMathSelectionRange.text);
+      showMathContextMenu(rect.left + rect.width / 2, rect.bottom + 6, activeMathSelectionRange.text || "Rumus");
     }
 
     function applyMathTransformation(type) {
-      const input = activeMathSelectionTarget;
-      if (!input) return;
+      const input = activeMathSelectionTarget || document.activeElement;
+      if (!input || !isMathEligibleInput(input)) return;
 
       const { start, end, text } = activeMathSelectionRange;
+      if (typeof start !== 'number' || typeof end !== 'number' || end <= start) return;
+
       const fullVal = input.value || "";
-      let transformed = text;
+      const selectedPart = fullVal.substring(start, end);
+      const cleanCore = selectedPart.replace(/^\$|\$$/g, '').trim();
+
+      let transformed = selectedPart;
 
       if (type === 'WRAP_FORMULA') {
-        if (text.startsWith('$') && text.endsWith('$') && text.length >= 2) {
-          transformed = text.slice(1, -1);
+        if (selectedPart.startsWith('$') && selectedPart.endsWith('$') && selectedPart.length >= 2) {
+          transformed = selectedPart.slice(1, -1);
         } else {
-          transformed = `$${text}$`;
+          transformed = `$${cleanCore}$`;
         }
       } else if (type === 'POWER') {
-        transformed = `$x^{${text.replace(/^\$|\$$/g, '')}}$`;
+        transformed = `$x^{${cleanCore}}$`;
       } else if (type === 'INDEX') {
-        transformed = `$x_{${text.replace(/^\$|\$$/g, '')}}$`;
+        transformed = `$x_{${cleanCore}}$`;
       } else if (type === 'FRACTION') {
-        transformed = `$\\frac{${text.replace(/^\$|\$$/g, '')}}{b}$`;
+        transformed = `$\\frac{${cleanCore}}{b}$`;
       } else if (type === 'SQRT') {
-        transformed = `$\\sqrt{${text.replace(/^\$|\$$/g, '')}}$`;
+        transformed = `$\\sqrt{${cleanCore}}$`;
       } else if (type === 'UNWRAP') {
-        transformed = text.replace(/\$/g, '');
+        transformed = cleanCore;
       }
 
       const newVal = fullVal.substring(0, start) + transformed + fullVal.substring(end);
       input.value = newVal;
       input.focus();
-      input.setSelectionRange(start, start + transformed.length);
+      
+      const newSelStart = start;
+      const newSelEnd = start + transformed.length;
+      try {
+        input.setSelectionRange(newSelStart, newSelEnd);
+      } catch(e) {}
 
-      // Trigger input event to update model and draft
-      input.dispatchEvent(new Event('input', { bubbles: true }));
+      // Trigger input & change events
+      const inputEvt = new Event('input', { bubbles: true, cancelable: true });
+      input.dispatchEvent(inputEvt);
+      input.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
+
+      if (typeof input.oninput === 'function') {
+        input.oninput.call(input, inputEvt);
+      }
 
       hideMathContextMenu();
       hideFloatingSelectionBubble();
-      showAdminToast("Formula matematika diterapkan!", "info");
+      showAdminToast("Formula matematika diterapkan: " + transformed, "info");
     }
 
     // =========================================================================
@@ -5617,6 +5694,9 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         container.appendChild(stageCard);
       });
       initAllModernDropdowns(container);
+      setTimeout(() => {
+        renderAllMathInElement(container);
+      }, 40);
     }
 
     // LIVE FORM SIMULATOR ENGINE (INTERACTIVE PREVIEW)
