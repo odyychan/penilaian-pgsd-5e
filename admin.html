@@ -691,71 +691,36 @@
       <div id="adminView_config" class="flex flex-col gap-4 sm:gap-6 hidden relative pb-20 sm:pb-12">
 
         <!-- KARTU UTAMA IDENTITAS PERKULIAHAN (GOOGLE FORMS HEADER CARD) -->
-        <div class="bg-white rounded-2xl border-2 border-zinc-200 border-t-8 border-t-indigo-600 shadow-sm p-5 sm:p-8 space-y-5 transition hover:shadow-md relative">
+        <div class="bg-white rounded-2xl border-2 border-zinc-200 border-t-8 border-t-indigo-600 shadow-sm p-5 sm:p-7 space-y-5 transition hover:shadow-md relative">
           
-          <div class="space-y-2">
+          <!-- Top Badge Bar (Identik dengan Tampilan Panduan Mahasiswa) -->
+          <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-zinc-900 text-white">PANDUAN</span>
+              <span class="text-xs text-zinc-400 font-medium">Sistem Penilaian Peer-Assessment</span>
+            </div>
+            <span class="flex items-center gap-1.5 text-[11px] text-emerald-600 font-medium">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span>Tersimpan otomatis</span>
+            </span>
+          </div>
+
+          <!-- Judul Formulir -->
+          <div class="space-y-1.5">
+            <label class="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider font-mono">Judul Formulir Penilaian</label>
             <input 
               type="text" 
               id="cfg_Judul_Form" 
               required 
               oninput="handleConfigInputAutoSave()"
-              placeholder="Judul Formulir Tanpa Judul" 
-              class="w-full text-xl sm:text-2xl md:text-3xl font-extrabold text-zinc-900 bg-transparent border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 pb-2.5 outline-none transition placeholder:text-zinc-400"
+              placeholder="Judul Formulir Penilaian" 
+              class="w-full text-xl sm:text-2xl font-extrabold text-zinc-900 bg-transparent border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 pb-1.5 outline-none transition placeholder:text-zinc-400"
             >
           </div>
 
-          <!-- Identitas Perkuliahan Sub-Grid -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-2 text-xs">
-            <div class="space-y-1">
-              <label class="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Mata Kuliah</label>
-              <input 
-                type="text" 
-                id="cfg_Mata_Kuliah" 
-                required 
-                oninput="handleConfigInputAutoSave()"
-                placeholder="Bimbingan Konseling di SD" 
-                class="w-full px-3 py-2 rounded-lg bg-zinc-50 hover:bg-zinc-100/90 focus:bg-white border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 outline-none font-semibold text-zinc-800 transition"
-              >
-            </div>
-
-            <div class="space-y-1">
-              <label class="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Dosen Pengampu</label>
-              <input 
-                type="text" 
-                id="cfg_Dosen_Pengampu" 
-                required 
-                oninput="handleConfigInputAutoSave()"
-                placeholder="Dr. Ririanti, M.Pd." 
-                class="w-full px-3 py-2 rounded-lg bg-zinc-50 hover:bg-zinc-100/90 focus:bg-white border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 outline-none font-semibold text-zinc-800 transition"
-              >
-            </div>
-
-            <div class="space-y-1">
-              <label class="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Kelas</label>
-              <input 
-                type="text" 
-                id="cfg_Kelas" 
-                oninput="handleConfigInputAutoSave()"
-                placeholder="5E" 
-                class="w-full px-3 py-2 rounded-lg bg-zinc-50 hover:bg-zinc-100/90 focus:bg-white border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 outline-none font-semibold text-zinc-800 transition"
-              >
-            </div>
-
-            <div class="space-y-1">
-              <label class="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Program Studi</label>
-              <input 
-                type="text" 
-                id="cfg_Jurusan" 
-                oninput="handleConfigInputAutoSave()"
-                placeholder="PGSD" 
-                class="w-full px-3 py-2 rounded-lg bg-zinc-50 hover:bg-zinc-100/90 focus:bg-white border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 outline-none font-semibold text-zinc-800 transition"
-              >
-            </div>
-          </div>
-
-          <!-- Petunjuk Pengisian Formulir (Description) -->
-          <div class="pt-2 space-y-1.5">
-            <label class="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Deskripsi &amp; Panduan Pengisian Formulir</label>
+          <!-- Deskripsi & Panduan Pengisian Formulir -->
+          <div class="space-y-1.5">
+            <label class="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider font-mono">Deskripsi &amp; Panduan Pengisian</label>
             <textarea 
               id="cfg_Deskripsi_Form"
               rows="2"
@@ -765,15 +730,90 @@
             ></textarea>
           </div>
 
-          <div class="flex items-center justify-between pt-1 border-t border-zinc-100 text-[11px] text-zinc-400">
-            <span class="flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-              <span>Perubahan identitas tersimpan otomatis</span>
-            </span>
-            <span id="builderStatsBadgeBody" class="font-mono font-semibold text-zinc-600">
-              4 Bagian • 5 Pertanyaan
-            </span>
+          <!-- Identitas Perkuliahan Sub-Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+            <div class="p-3 rounded-lg bg-zinc-50/90 border border-zinc-200/80 space-y-1">
+              <span class="text-zinc-400 block text-[11px] font-medium">Mata Kuliah:</span>
+              <input 
+                type="text" 
+                id="cfg_Mata_Kuliah" 
+                required 
+                oninput="handleConfigInputAutoSave()"
+                placeholder="Bimbingan Konseling di SD" 
+                class="w-full font-semibold text-zinc-900 bg-transparent border-b border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 outline-none pb-0.5 transition"
+              >
+            </div>
+
+            <div class="p-3 rounded-lg bg-zinc-50/90 border border-zinc-200/80 space-y-1">
+              <span class="text-zinc-400 block text-[11px] font-medium">Dosen Pengampu:</span>
+              <input 
+                type="text" 
+                id="cfg_Dosen_Pengampu" 
+                required 
+                oninput="handleConfigInputAutoSave()"
+                placeholder="Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd." 
+                class="w-full font-semibold text-zinc-900 bg-transparent border-b border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 outline-none pb-0.5 transition"
+              >
+            </div>
+
+            <div class="p-3 rounded-lg bg-zinc-50/90 border border-zinc-200/80 space-y-1">
+              <span class="text-zinc-400 block text-[11px] font-medium">Kelas:</span>
+              <input 
+                type="text" 
+                id="cfg_Kelas" 
+                oninput="handleConfigInputAutoSave()"
+                placeholder="5E" 
+                class="w-full font-semibold text-zinc-900 bg-transparent border-b border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 outline-none pb-0.5 transition"
+              >
+            </div>
+
+            <div class="p-3 rounded-lg bg-zinc-50/90 border border-zinc-200/80 space-y-1">
+              <span class="text-zinc-400 block text-[11px] font-medium">Program Studi:</span>
+              <input 
+                type="text" 
+                id="cfg_Jurusan" 
+                oninput="handleConfigInputAutoSave()"
+                placeholder="PGSD" 
+                class="w-full font-semibold text-zinc-900 bg-transparent border-b border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 outline-none pb-0.5 transition"
+              >
+            </div>
           </div>
+
+          <!-- Alur Tahapan Pengisian (Dinamis dari Schema & Sinkron Langsung) -->
+          <div class="bg-zinc-50 rounded-xl p-4 border border-zinc-200/70 space-y-3">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-2">
+                <h4 class="text-xs font-bold text-zinc-800 uppercase tracking-wider font-mono">Alur Tahapan Pengisian:</h4>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 font-semibold font-mono">Sinkron Otomatis</span>
+              </div>
+              <span class="text-[11px] text-zinc-400">Klik kartu alur untuk langsung melompat ke bagian tersebut</span>
+            </div>
+            <div id="builderAlurTahapanGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-xs">
+              <!-- Rendered dynamically via renderBuilderAlurTahapan() -->
+            </div>
+          </div>
+
+          <!-- Footer Kartu Identitas -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-zinc-100 text-xs">
+            <div class="flex items-center gap-2 text-zinc-500 text-xs">
+              <span>Pastikan data pengisian objektif &amp; konstruktif.</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span id="builderStatsBadgeBody" class="font-mono font-semibold text-zinc-600 text-xs">
+                1 Bagian • 1 Pertanyaan
+              </span>
+              <button 
+                type="button" 
+                onclick="openLiveFormSimulator()" 
+                class="px-5 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-semibold text-xs shadow-xs active:scale-98 transition flex items-center gap-1.5 cursor-pointer"
+                title="Buka simulasi pratinjau tampilan alur mahasiswa"
+              >
+                <span>Mulai Pengisian Penilaian</span>
+                <span>→</span>
+              </button>
+            </div>
+          </div>
+
         </div>
 
         <!-- DYNAMIC STAGES & QUESTIONS CANVAS CONTAINER -->
@@ -4806,8 +4846,13 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       adminFormSchema.tahapan[sIdx][prop] = val;
       markSchemaAsDirty();
 
-      if (prop === 'title') updateLiveMathBadge(val, `liveMathStageTitle_${sIdx}`);
-      else if (prop === 'description') updateLiveMathBadge(val, `liveMathStageDesc_${sIdx}`);
+      if (prop === 'title') {
+        updateLiveMathBadge(val, `liveMathStageTitle_${sIdx}`);
+        renderBuilderAlurTahapan();
+      } else if (prop === 'description') {
+        updateLiveMathBadge(val, `liveMathStageDesc_${sIdx}`);
+        renderBuilderAlurTahapan();
+      }
     }
 
     function handleInlineFieldUpdate(sIdx, fIdx, prop, val) {
@@ -5629,9 +5674,71 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       return '';
     }
 
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function renderBuilderAlurTahapan() {
+      const container = document.getElementById("builderAlurTahapanGrid");
+      if (!container) return;
+
+      const tahapan = (adminFormSchema && Array.isArray(adminFormSchema.tahapan) && adminFormSchema.tahapan.length > 0)
+        ? adminFormSchema.tahapan
+        : [];
+
+      if (tahapan.length === 0) {
+        container.className = "p-3 rounded-lg bg-zinc-100/80 text-center text-xs text-zinc-500 italic";
+        container.innerHTML = "Belum ada bagian alur yang dibuat. Tambahkan bagian baru di bawah.";
+        return;
+      }
+
+      const colsClass = tahapan.length <= 2 ? 'sm:grid-cols-2' : (tahapan.length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2 lg:grid-cols-4');
+      container.className = `grid grid-cols-1 ${colsClass} gap-2.5 text-xs`;
+
+      let html = '';
+      tahapan.forEach((stage, idx) => {
+        const num = idx + 1;
+        const stageTitle = stage.title || `Bagian ${num}`;
+        const fieldsCount = (stage.fields || []).length;
+        const stageDesc = stage.description || (fieldsCount > 0 ? `${fieldsCount} Pertanyaan / Input` : "Tahapan Formulir");
+        html += `
+          <div 
+            onclick="scrollToStageCard(${idx})"
+            class="group/alur p-2.5 rounded-lg bg-white border border-zinc-200/80 hover:border-indigo-400 hover:shadow-xs flex items-start gap-2.5 cursor-pointer transition"
+            title="Klik untuk langsung menuju Bagian ${num}"
+          >
+            <span class="w-5 h-5 rounded-full bg-zinc-900 group-hover/alur:bg-indigo-600 text-white font-mono text-[10px] font-bold flex items-center justify-center flex-shrink-0 transition-colors">${num}</span>
+            <div class="min-w-0 flex-1">
+              <div class="font-semibold text-zinc-900 group-hover/alur:text-indigo-700 truncate transition-colors" title="${escapeHtml(stageTitle)}">${escapeHtml(stageTitle)}</div>
+              <div class="text-[11px] text-zinc-500 line-clamp-1" title="${escapeHtml(stageDesc)}">${escapeHtml(stageDesc)}</div>
+            </div>
+            <svg class="w-3.5 h-3.5 text-zinc-300 group-hover/alur:text-indigo-500 shrink-0 mt-0.5 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function scrollToStageCard(stageIdx) {
+      const card = document.getElementById(`stageCard_${stageIdx}`);
+      if (card) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        card.classList.add('ring-2', 'ring-indigo-500');
+        setTimeout(() => card.classList.remove('ring-2', 'ring-indigo-500'), 1500);
+      }
+    }
 
     function renderDynamicStagesCanvas() {
       initOrNormalizeFormSchema();
+      renderBuilderAlurTahapan();
       const container = document.getElementById("dynamicStagesCanvasContainer");
       const statsBadgeHeader = document.getElementById("headerBuilderStatsBadge");
       const statsBadgeBody = document.getElementById("builderStatsBadgeBody");

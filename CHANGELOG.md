@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.27] - 2026-08-24
+
+### 🎨 Kartu Judul & Panduan Identik Asli Mahasiswa Serta Alur Tahapan Sinkron
+- **Tampilan Header Builder Identik 100% (*Student Landing Mirror*):**
+  - Menyelaraskan struktur visual kartu atas form builder dengan halaman depan pengisian penilaian mahasiswa, lengkap dengan lencana `PANDUAN`, subgrid identitas 4-kolom (*Mata Kuliah*, *Dosen*, *Kelas*, *Program Studi*), serta catatan evaluatif di bagian bawah.
+  - Semua field identitas tetap dapat diedit langsung di tempat (*in-place editable*) dengan penyimpanan otomatis seketika.
+- **Sinkronisasi Dinamis Alur Tahapan Pengisian (*Live-Synced Workflow Grid*):**
+  - Menghadirkan kotak alur tahapan dinamis yang otomatis membaca seluruh daftar bagian (*stages*) yang ada di formulir.
+  - Setiap kartu alur dilengkapi fungsionalitas interaktif (*quick jump*) yang menggulirkan kanvas ke bagian terkait saat diklik.
+- **Pengujian Headless Browser:**
+  - Terverifikasi 100% melalui remote Playwright browser testing pada pengujian sinkronisasi multi-bagian.
+
+---
+
 ## [2.2.26] - 2026-08-24
 
 ### 📐 Tata Letak Header Penuh Ujung-ke-Ujung (*Full-Width Edge-to-Edge*)
