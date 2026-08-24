@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.1.96] - 2026-08-24
+
+### 📝 Human-Centered Text & UI Simplification (*Jargon-Free Natural Copywriting*)
+- **Penyederhanaan Total Teks Modal Pembuatan Formulir (*Buat Formulir Baru*):**
+  - Mengubah seluruh label, placeholder contoh, dan deskripsi menjadi bahasa Indonesia yang natural, hangat, dan mudah dipahami orang awam.
+  - **Kode Akses & Link:** Menggantikan istilah teknis seperti "Slug URL" dengan label yang jelas: `Kode PIN Masuk (4–5 Huruf)` dan `Alamat Link Singkat`, serta panduan akses yang gamblang bagi mahasiswa dan penilai.
+  - **Pilihan Data Awal Mahasiswa:** Menyajikan opsi secara komunikatif (`Mulai dari Formulir Kosong` vs `Gunakan Data Mahasiswa yang Ada (Salin dari BK 5E)`).
+- **Penyempurnaan Modal Pendukung:**
+  - Pembaruan teks panduan pada Modal Bagikan QR, Modal Pengaturan Blok Inti, dan Modal Kloning agar bebas dari istilah teknis rumit.
+
+---
+
 ## [2.1.95] - 2026-08-24
 
 ### 💎 Universal Modern Dropdown Popover Engine & System-Wide Dropdown Overhaul
