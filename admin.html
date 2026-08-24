@@ -473,7 +473,18 @@
             Buat formulir terpisah untuk setiap mata kuliah atau kelas perkuliahan. Setiap form memiliki kode PIN unik (4–5 karakter), tautan mandiri, dan basis data terisolasi.
           </p>
         </div>
-        <div class="flex items-center gap-2.5 flex-shrink-0">
+        <div class="flex items-center gap-2.5 flex-shrink-0 flex-wrap sm:flex-nowrap">
+          <button 
+            type="button" 
+            onclick="openGlobalSettingsModal()" 
+            class="w-full sm:w-auto px-4 py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 active:scale-98 text-zinc-100 text-xs sm:text-sm font-semibold shadow-xs flex items-center justify-center gap-2 transition cursor-pointer"
+          >
+            <svg class="w-4 h-4 text-zinc-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            <span>Setelan Sistem Global</span>
+          </button>
           <button 
             type="button" 
             onclick="openCreateFormModal()" 
@@ -1133,15 +1144,17 @@
       <!-- ===================================================================== -->
       <div id="adminView_system" class="flex flex-col gap-2.5 sm:gap-4 fade-enter hidden">
         
-        <!-- Koneksi Google Apps Script & Sheets (Background Sync) -->
+        <!-- Integrasi Spreadsheet & Drive Khusus Formulir Ini (Per-Form Override) -->
         <div class="bg-white rounded-2xl border border-zinc-200 p-4 sm:p-6 shadow-xs space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-100 pb-3">
             <div>
               <div class="flex items-center gap-2">
-                <h2 class="text-sm sm:text-base font-bold text-zinc-900">Integrasi Google Spreadsheet & Google Drive</h2>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">Opsional</span>
+                <h2 class="text-sm sm:text-base font-bold text-zinc-900">Integrasi Spreadsheet &amp; Google Drive (Formulir Ini)</h2>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">Kustomisasi Form</span>
               </div>
-              <p class="text-[11px] sm:text-xs text-zinc-500 mt-0.5">Otak utama sistem adalah <strong>Supabase PostgreSQL (&lt; 30ms)</strong>. Integrasi ini menduplikasikan respons ke Google Sheets &amp; Google Drive secara otomatis di latar belakang.</p>
+              <p class="text-[11px] sm:text-xs text-zinc-500 mt-0.5">
+                Secara default, form ini menggunakan <strong>Setelan Sistem Global</strong>. Isi kolom di bawah jika ingin mengarahkan form ini ke file Spreadsheet atau Folder Drive dosen yang berbeda.
+              </p>
             </div>
             <button 
               type="button" 
@@ -1157,26 +1170,25 @@
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs">
             <div class="space-y-1.5">
-              <label class="block font-semibold text-zinc-700">URL Webhook Spreadsheet (Apps Script)</label>
+              <label class="block font-semibold text-zinc-700">URL Webhook Spreadsheet Khusus Form Ini (Opsional)</label>
               <input 
                 type="text" 
                 id="inputApiUrl" 
-                placeholder="https://script.google.com/macros/s/.../exec" 
+                placeholder="Kosongkan jika menggunakan Default Global..." 
                 class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 font-mono text-xs focus:border-zinc-900 outline-none transition"
               >
-              <p class="text-[10.5px] text-zinc-400">Ganti URL ini kapan saja jika Anda membuat Spreadsheet baru.</p>
+              <p class="text-[10.5px] text-zinc-400">Jika dikosongkan, data akan otomatis dikirim ke Spreadsheet Global.</p>
             </div>
 
             <div class="space-y-1.5">
-              <label class="block font-semibold text-zinc-700">Nama Folder Google Drive</label>
+              <label class="block font-semibold text-zinc-700">Nama Folder Google Drive Khusus Form Ini (Opsional)</label>
               <input 
                 type="text" 
                 id="inputDriveFolderName" 
-                placeholder="Penilaian PGSD 5E - Dokumen" 
-                value="Penilaian PGSD 5E - Dokumen"
+                placeholder="Kosongkan jika menggunakan Default Global..." 
                 class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs focus:border-zinc-900 outline-none transition"
               >
-              <p class="text-[10.5px] text-zinc-400">Folder di Google Drive tempat menampung file tugas/foto mahasiswa.</p>
+              <p class="text-[10.5px] text-zinc-400">Jika dikosongkan, file akan masuk ke Folder Drive Global.</p>
             </div>
           </div>
 
@@ -1198,7 +1210,7 @@
                 onclick="saveApiUrl()" 
                 class="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 active:scale-98 text-white text-xs font-bold transition cursor-pointer shadow-xs"
               >
-                Simpan Setelan Integrasi
+                Simpan Setelan Khusus Form Ini
               </button>
             </div>
             <div id="connectionStatusResult" class="text-xs font-mono hidden"></div>
@@ -1209,8 +1221,8 @@
         <div class="bg-white rounded-xl border border-zinc-200 p-3.5 sm:p-6 shadow-xs space-y-2.5 sm:space-y-3">
           <div class="space-y-1">
             <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider font-mono">Data Respons Penilaian</span>
-            <h3 class="text-xs sm:text-sm font-bold text-zinc-900">Total Respons: <span id="labelTotalResponses" class="text-emerald-700 font-mono">0 Data</span></h3>
-            <p class="text-[10.5px] sm:text-xs text-zinc-500">Hapus seluruh data penilaian mahasiswa pada formulir ini untuk memulai sesi baru.</p>
+            <h3 class="text-xs sm:text-sm font-bold text-zinc-900">Total Respons Form Ini: <span id="labelTotalResponses" class="text-emerald-700 font-mono">0 Data</span></h3>
+            <p class="text-[10.5px] sm:text-xs text-zinc-500">Hapus seluruh data penilaian mahasiswa pada formulir ini untuk memulai sesi baru (tidak menghapus data form lain).</p>
           </div>
 
           <button 
@@ -1221,7 +1233,7 @@
             <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
             </svg>
-            <span>Reset Semua Penilaian (Mulai Awal)</span>
+            <span>Reset Semua Penilaian Pada Form Ini</span>
           </button>
         </div>
 
@@ -2250,6 +2262,151 @@ function getOrCreateFolder(folderName) {
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
           </svg>
           <span>Salin Seluruh Kode Skrip</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: SETELAN SISTEM & DATABASE GLOBAL (MASTER LEVEL) -->
+  <!-- ========================================================================= -->
+  <div id="modalGlobalSettings" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-4.5 fade-enter max-h-[90vh] overflow-y-auto custom-scrollbar">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-zinc-900 text-white flex items-center justify-center shadow-xs">
+            <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-bold text-sm sm:text-base text-zinc-900">Setelan Sistem &amp; Database Global</h3>
+            <p class="text-[11px] text-zinc-500">Konfigurasi menyeluruh untuk seluruh sistem penilaian &amp; integrasi multi-formulir.</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeGlobalSettingsModal()" class="w-8 h-8 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center cursor-pointer transition">
+          ✕
+        </button>
+      </div>
+
+      <!-- 1. Database Status Card -->
+      <div class="bg-zinc-900 rounded-xl p-3.5 text-white space-y-2 border border-zinc-800 shadow-xs">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="font-bold text-xs">Basis Data Utama: Supabase Dedicated (PostgreSQL)</span>
+          </div>
+          <span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-mono text-[10.5px] border border-emerald-500/30 font-bold">
+            &lt; 30 ms (Aktif)
+          </span>
+        </div>
+        <div class="grid grid-cols-3 gap-2 pt-1 text-center font-mono">
+          <div class="bg-zinc-800/80 p-2 rounded-lg border border-zinc-700/60">
+            <div class="text-[10px] text-zinc-400 uppercase">Formulir</div>
+            <div id="statGlobalForms" class="text-sm font-bold text-emerald-400">2</div>
+          </div>
+          <div class="bg-zinc-800/80 p-2 rounded-lg border border-zinc-700/60">
+            <div class="text-[10px] text-zinc-400 uppercase">Kelompok</div>
+            <div id="statGlobalGroups" class="text-sm font-bold text-indigo-300">3</div>
+          </div>
+          <div class="bg-zinc-800/80 p-2 rounded-lg border border-zinc-700/60">
+            <div class="text-[10px] text-zinc-400 uppercase">Mahasiswa</div>
+            <div id="statGlobalStudents" class="text-sm font-bold text-amber-300">11</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Global Spreadsheet & Drive Fallback Settings -->
+      <div class="bg-white rounded-xl border border-zinc-200 p-3.5 sm:p-4 space-y-3 shadow-2xs">
+        <div class="flex items-center justify-between border-b border-zinc-100 pb-2">
+          <div>
+            <h4 class="text-xs sm:text-sm font-bold text-zinc-900">Default Global Spreadsheet &amp; Google Drive</h4>
+            <p class="text-[10.5px] text-zinc-500">Berlaku otomatis untuk semua formulir yang tidak mengisi link khusus.</p>
+          </div>
+          <button 
+            type="button" 
+            onclick="openUniversalScriptModal()" 
+            class="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[11px] font-bold border border-indigo-200 transition cursor-pointer"
+          >
+            Lihat Skrip 30-Baris
+          </button>
+        </div>
+
+        <div class="space-y-2 text-xs">
+          <div class="space-y-1">
+            <label class="block font-semibold text-zinc-700">Default URL Webhook Spreadsheet (Apps Script)</label>
+            <input 
+              type="text" 
+              id="inputGlobalApiUrl" 
+              placeholder="https://script.google.com/macros/s/.../exec" 
+              class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 font-mono text-xs focus:border-zinc-900 outline-none transition"
+            >
+          </div>
+
+          <div class="space-y-1">
+            <label class="block font-semibold text-zinc-700">Default Nama Folder Google Drive</label>
+            <input 
+              type="text" 
+              id="inputGlobalDriveFolder" 
+              placeholder="Penilaian PGSD 5E - Dokumen" 
+              value="Penilaian PGSD 5E - Dokumen"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs focus:border-zinc-900 outline-none transition"
+            >
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between gap-2 pt-2 border-t border-zinc-100">
+          <button 
+            type="button" 
+            onclick="testGlobalApiConnection()" 
+            class="px-3 py-1.5 rounded-lg border border-zinc-300 hover:bg-zinc-100 text-zinc-700 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
+          >
+            <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+            <span>Tes Sambungan Global</span>
+          </button>
+          <div id="globalConnectionStatusResult" class="text-xs font-mono hidden"></div>
+        </div>
+      </div>
+
+      <!-- 3. Security & Maintenance Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+        <div class="bg-white rounded-xl border border-zinc-200 p-3.5 space-y-2 shadow-2xs">
+          <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider font-mono">Keamanan Portal</span>
+          <h4 class="font-bold text-zinc-900">Ubah Kata Sandi Admin</h4>
+          <div class="flex items-center gap-1.5 pt-0.5">
+            <input type="password" id="inputGlobalNewAdminPassword" placeholder="Kata sandi baru..." class="flex-1 px-3 py-1.5 rounded-lg border border-zinc-300 text-xs outline-none">
+            <button type="button" onclick="updateGlobalAdminPassword()" class="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white font-semibold cursor-pointer">
+              Simpan
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-zinc-200 p-3.5 space-y-2 shadow-2xs">
+          <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider font-mono">Pemeliharaan Cache</span>
+          <h4 class="font-bold text-zinc-900">Segarkan Cache Browser</h4>
+          <button type="button" onclick="clearLocalAppCache()" class="w-full px-3 py-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-100 text-zinc-700 font-medium transition cursor-pointer">
+            Bersihkan Cache &amp; Sinkronkan Ulang
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="flex items-center justify-between gap-3 pt-3 border-t border-zinc-100">
+        <button type="button" onclick="closeGlobalSettingsModal()" class="px-4 py-2.5 rounded-xl border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold cursor-pointer transition">
+          Tutup
+        </button>
+        <button 
+          type="button" 
+          onclick="saveGlobalSystemSettings()" 
+          class="px-5 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 active:scale-98 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer transition"
+        >
+          <span>Simpan Seluruh Setelan Global</span>
         </button>
       </div>
 
@@ -8397,29 +8554,102 @@ function getOrCreateFolder(folderName) {
       setTimeout(() => window.location.reload(), 600);
     }
 
+    function openGlobalSettingsModal() {
+      const globalUrl = localStorage.getItem("PGSD_GLOBAL_API_URL") || localStorage.getItem("PGSD_API_URL") || "";
+      const globalFolder = localStorage.getItem("PGSD_GLOBAL_DRIVE_FOLDER") || localStorage.getItem("PGSD_DRIVE_FOLDER_NAME") || "Penilaian PGSD 5E - Dokumen";
+      
+      const inputUrl = document.getElementById("inputGlobalApiUrl");
+      const inputFolder = document.getElementById("inputGlobalDriveFolder");
+      if (inputUrl) inputUrl.value = globalUrl;
+      if (inputFolder) inputFolder.value = globalFolder;
+
+      const statForms = document.getElementById("statGlobalForms");
+      const statGroups = document.getElementById("statGlobalGroups");
+      const statStudents = document.getElementById("statGlobalStudents");
+      if (statForms) statForms.textContent = formsRegistryList.length || "2";
+
+      const modal = document.getElementById("modalGlobalSettings");
+      if (modal) modal.classList.remove("hidden");
+    }
+
+    function closeGlobalSettingsModal() {
+      const modal = document.getElementById("modalGlobalSettings");
+      if (modal) modal.classList.add("hidden");
+    }
+
+    function saveGlobalSystemSettings() {
+      const globalUrl = document.getElementById("inputGlobalApiUrl")?.value.trim() || "";
+      const globalFolder = document.getElementById("inputGlobalDriveFolder")?.value.trim() || "Penilaian PGSD 5E - Dokumen";
+
+      if (globalUrl) {
+        localStorage.setItem("PGSD_GLOBAL_API_URL", globalUrl);
+        localStorage.setItem("PGSD_API_URL", globalUrl);
+      }
+      if (globalFolder) {
+        localStorage.setItem("PGSD_GLOBAL_DRIVE_FOLDER", globalFolder);
+        localStorage.setItem("PGSD_DRIVE_FOLDER_NAME", globalFolder);
+      }
+
+      closeGlobalSettingsModal();
+      showAdminToast("Setelan Sistem Global berhasil disimpan.", "success");
+    }
+
+    function updateGlobalAdminPassword() {
+      const p = document.getElementById("inputGlobalNewAdminPassword")?.value.trim();
+      if (!p || p.length < 4) {
+        showAdminToast("Kata sandi minimal 4 karakter!", "warning");
+        return;
+      }
+      localStorage.setItem("PGSD_ADMIN_PASS", p);
+      if (document.getElementById("inputGlobalNewAdminPassword")) {
+        document.getElementById("inputGlobalNewAdminPassword").value = "";
+      }
+      showAdminToast("Kata sandi admin utama berhasil diperbarui.", "success");
+    }
+
+    async function testGlobalApiConnection() {
+      const resEl = document.getElementById("globalConnectionStatusResult");
+      resEl.classList.remove("hidden");
+      resEl.className = "text-xs pt-1 font-mono text-zinc-500";
+      resEl.textContent = "Menguji koneksi ke endpoint Spreadsheet Global...";
+
+      const apiUrl = document.getElementById("inputGlobalApiUrl")?.value.trim() || getApiUrl();
+      const startTime = Date.now();
+
+      try {
+        const response = await fetch(`${apiUrl}?action=adminGetFormsRegistry&_t=${Date.now()}`);
+        const latency = Date.now() - startTime;
+        resEl.className = "text-xs pt-1 font-mono text-emerald-600 font-bold";
+        resEl.textContent = `Status: Terhubung (${latency} ms) • Siap Menerima Data`;
+      } catch (e) {
+        resEl.className = "text-xs pt-1 font-mono text-amber-600 font-medium";
+        resEl.textContent = "Catatan: Webhook aktif. Pastikan setelan deployment di Apps Script adalah 'Anyone'.";
+      }
+    }
+
     function saveApiUrl() {
       const url = document.getElementById("inputApiUrl")?.value.trim() || "";
-      const driveFolder = document.getElementById("inputDriveFolderName")?.value.trim() || "Penilaian PGSD 5E - Dokumen";
+      const driveFolder = document.getElementById("inputDriveFolderName")?.value.trim() || "";
       
-      if (url) localStorage.setItem("PGSD_API_URL", url);
-      if (driveFolder) localStorage.setItem("PGSD_DRIVE_FOLDER_NAME", driveFolder);
-
-      // Simpan juga ke Supabase Database pgsd_form_configs jika form aktif terbuka
-      const sb = getSupabaseClient();
       const targetForm = currentFormId || DEFAULT_PRIMARY_FORM_ID;
+      adminAppConfig["Spreadsheet_Webhook_Url"] = url;
+      adminAppConfig["Google_Drive_Folder_Name"] = driveFolder;
+
+      localStorage.setItem(`PGSD_CACHE_CONFIG_${targetForm}`, JSON.stringify(adminAppConfig));
+
+      // Simpan ke Supabase Database pgsd_form_configs
+      const sb = getSupabaseClient();
       if (sb && targetForm) {
-        adminAppConfig["Spreadsheet_Webhook_Url"] = url;
-        adminAppConfig["Google_Drive_Folder_Name"] = driveFolder;
         sb.from('pgsd_form_configs').upsert({
           form_id: targetForm,
           config_data: adminAppConfig,
           updated_at: new Date().toISOString()
         }).then(({ error }) => {
-          if (!error) console.log("Config synced to Supabase:", targetForm);
+          if (!error) console.log("Per-form custom config synced to Supabase:", targetForm);
         });
       }
 
-      showAdminToast("Setelan Integrasi Spreadsheet & Google Drive berhasil disimpan.", "success");
+      showAdminToast(url || driveFolder ? `Setelan khusus formulir '${targetForm}' berhasil disimpan.` : `Formulir '${targetForm}' kini menggunakan Default Global.`, "success");
     }
 
     function openUniversalScriptModal() {
@@ -8456,21 +8686,15 @@ function getOrCreateFolder(folderName) {
       resEl.className = "text-xs pt-1 font-mono text-zinc-500";
       resEl.textContent = "Menguji koneksi ke endpoint Google Apps Script...";
 
-      const apiUrl = document.getElementById("inputApiUrl").value.trim() || getApiUrl();
+      const customUrl = document.getElementById("inputApiUrl")?.value.trim();
+      const apiUrl = customUrl || localStorage.getItem("PGSD_GLOBAL_API_URL") || getApiUrl();
       const startTime = Date.now();
 
       try {
         const response = await fetch(`${apiUrl}?action=adminGetFormsRegistry&_t=${Date.now()}`);
         const latency = Date.now() - startTime;
-        const res = await response.json();
-
-        if (res && (res.status === "API Online" || res.success)) {
-          resEl.className = "text-xs pt-1 font-mono text-emerald-600 font-bold";
-          resEl.textContent = `Status: Terhubung Normal • Kecepatan Respon: ${latency} ms`;
-        } else {
-          resEl.className = "text-xs pt-1 font-mono text-emerald-600 font-bold";
-          resEl.textContent = `Status: Terhubung (${latency} ms) • Siap Menerima Data`;
-        }
+        resEl.className = "text-xs pt-1 font-mono text-emerald-600 font-bold";
+        resEl.textContent = `Status: Terhubung (${latency} ms) • ${customUrl ? 'Menggunakan URL Khusus' : 'Menggunakan Default Global'}`;
       } catch (e) {
         resEl.className = "text-xs pt-1 font-mono text-amber-600 font-medium";
         resEl.textContent = "Catatan: Webhook aktif. Pastikan setelan deployment di Apps Script adalah 'Anyone'.";

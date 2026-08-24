@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.49] - 2026-08-24
+
+### 🎛️ Pemisahan Hierarkis Setelan Global Sistem vs Setelan Khusus Formulir (Cascading Fallback)
+- **Pemisahan Logis Setelan Global vs Per-Form:**
+  - Mengisolasi konfigurasi general (status database Supabase, default webhook Spreadsheet global, default folder Google Drive global, kata sandi admin utama, pemeliharaan cache sistem) ke dalam modal **Setelan Sistem Global** di Master Hub.
+  - Menyederhanakan tab **Setelan Formulir** di workspace agar murni hanya menangani kustomisasi *override* khusus form tersebut (link Spreadsheet dosen khusus, nama folder Drive khusus, dan reset data penilaian form terkait).
+- **Mekanisme Pewarisan Cerdas (*Cascading Default Fallback*):**
+  - Jika formulir tidak mengisi link spreadsheet atau folder Google Drive khusus, sistem di [index.html](file:///e:/Data/GitHub/Project%20Dede/index.html) dan [admin.html](file:///e:/Data/GitHub/Project%20Dede/admin.html) secara otomatis mewarisi *Default Global Spreadsheet & Google Drive*.
+
+---
+
 ## [2.2.48] - 2026-08-24
 
 ### 🧪 Pengujian Remote Menyeluruh Murni Supabase (Zero Spreadsheet Dependency)

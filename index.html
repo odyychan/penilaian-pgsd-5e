@@ -4721,15 +4721,16 @@
         evaluasiDetail: evaluasiDetail,
         customAnswers: customAnswers,
         uploadedFiles: mergedUploadedFiles,
-        driveFolderName: appConfig["Google_Drive_Folder_Name"] || localStorage.getItem("PGSD_DRIVE_FOLDER_NAME") || "Penilaian PGSD 5E - Dokumen"
+        driveFolderName: (appConfig && appConfig["Google_Drive_Folder_Name"]) || localStorage.getItem("PGSD_GLOBAL_DRIVE_FOLDER") || localStorage.getItem("PGSD_DRIVE_FOLDER_NAME") || "Penilaian PGSD 5E - Dokumen"
       };
 
+      const effectiveSpreadsheetUrl = (appConfig && appConfig["Spreadsheet_Webhook_Url"]) || localStorage.getItem("PGSD_GLOBAL_API_URL") || getApiUrl();
       const submitBtn = document.getElementById("submitBtn");
       const spinner = document.getElementById("submitSpinner");
       submitBtn.disabled = true;
       spinner.classList.remove("hidden");
 
-      const apiUrl = getApiUrl();
+      const apiUrl = effectiveSpreadsheetUrl;
       const sb = getSupabaseClient();
       let sbSuccess = false;
       const idRespons = "RESP-" + activeFormId + "-" + Date.now() + "-" + Math.random().toString(36).substring(2, 6).toUpperCase();
