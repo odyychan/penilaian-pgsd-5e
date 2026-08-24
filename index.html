@@ -3316,7 +3316,8 @@
       const footerSep = document.getElementById("footerPembuatSep");
       if (footerEl) {
         if (pembuatNama) {
-          footerEl.textContent = `${pembuatPrefix} ${pembuatNama}`;
+          footerEl.innerHTML = `${smartMathFormat(pembuatPrefix)} ${smartMathFormat(pembuatNama)}`;
+          footerEl.classList.add("math-renderable");
           footerEl.classList.remove("hidden");
           if (footerSep) footerSep.classList.remove("hidden");
         } else {

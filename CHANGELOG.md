@@ -4,6 +4,25 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.34] - 2026-08-24
+
+### 🎓 Format Teks & Rumus KaTeX Menyeluruh pada Identitas Perkuliahan & Footer
+- **Dukungan Format Lengkap Seluruh Input Form:**
+  - Memperluas integrasi format kaya (*rich text*) dan rumus matematika KaTeX ke seluruh kolom input identitas perkuliahan dan footer:
+    - **Mata Kuliah** (`cfg_Mata_Kuliah`)
+    - **Dosen Pengampu** (`cfg_Dosen_Pengampu`)
+    - **Kelas** (`cfg_Kelas`)
+    - **Program Studi** (`cfg_Jurusan`)
+    - **Kredit Pengembang / Pembuat Web** (`cfg_Pembuat_Web_Nama` & `cfg_Pembuat_Web_Nim`)
+- **Badge Pratinjau Langsung (*Live KaTeX Preview Badge*):**
+  - Menambahkan wadah badge pratinjau instan pada setiap kolom identitas perkuliahan di Tab Pertanyaan yang otomatis merender pemformatan tebal, miring, garis bawah, serta rumus matematika KaTeX saat ditulis atau diedit.
+- **Sinkronisasi Header & Tampilan Mahasiswa:**
+  - Memastikan *banner header* admin dan antarmuka pengisian mahasiswa (`index.html`) merender teks berformat dan KaTeX secara konsisten pada bagian identitas mata kuliah, dosen, kelas, jurusan, hingga footer aplikasi.
+- **Pengujian Headless Browser:**
+  - Terverifikasi 100% via remote Playwright browser testing untuk rendering live badge pada seluruh kolom identitas perkuliahan.
+
+---
+
 ## [2.2.33] - 2026-08-24
 
 ### 🎯 Universal Floating Bottom Toolbar (Overlay Tetap Tengah Bawah Layar)
