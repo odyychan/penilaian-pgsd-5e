@@ -4,6 +4,21 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.0] - 2026-08-24
+
+### 🔘 Form Status Toggle Switch & 🔄 Standardized Refresh Animation
+- **Toggle Switch Pengaktifan Formulir (Interactive Status Pill):**
+  - Menggantikan badge status statis pada setiap kartu Master Form Hub dengan **Interactive Toggle Pill** bergaya modern yang dapat diklik langsung untuk membuka (`AKTIF`) atau menutup (`TUTUP`) penerimaan respons formulir secara instan.
+  - Formulir utama (`BK5E`) dan formulir sekunder sama-sama mendapatkan kontrol status penuh.
+- **Kartu Switch Status di Tab Konfigurasi & Builder:**
+  - Menambahkan kartu kontrol status ber-toggle iOS/Tailwind (*Aktif / Ditutup*) di bagian paling atas Tab Konfigurasi & Builder dengan indikator live pulse (emerald/hijau untuk aktif, abu-abu untuk ditutup).
+- **Sinkronisasi Cloud Backend (`adminUpdateFormMeta`):**
+  - Status formulir tersinkronisasi otomatis ke Google Sheets melalui `adminUpdateFormMeta`, sehingga perubahan aktif/tutup segera berdampak pada kemampuan mahasiswa mengisi formulir.
+- **Tombol Segarkan Daftar Formulir — Animasi Standar Baru:**
+  - Tombol refresh Hub (`[ refresh icon ]`) kini memiliki animasi `animate-spin` yang mulus selama proses pemuatan, dengan `active:scale-90` dan warna ikon berubah sementara menjadi indigo, mengikuti standar animasi modern yang konsisten.
+
+---
+
 ## [2.1.99] - 2026-08-24
 
 ### 🗑️ Full Form Deletion Feature & Multi-Form Management Lifecycle
