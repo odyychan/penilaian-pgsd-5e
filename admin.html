@@ -711,33 +711,38 @@
               <label class="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider font-mono">Judul Formulir Penilaian</label>
               
               <!-- Toolbar -->
-              <div class="hidden group-focus-within/fieldBlock:flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 bg-zinc-100/90 rounded-lg border border-zinc-200 w-fit text-zinc-700 select-none shadow-2xs transition-all duration-150 animate-in fade-in">
+              <div class="hidden group-focus-within/fieldBlock:flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 bg-zinc-100/90 rounded-lg border border-zinc-200 w-fit text-zinc-700 select-none shadow-2xs transition-all duration-150 animate-in fade-in relative">
                 <button type="button" onmousedown="event.preventDefault()" onclick="applyUniversalTextFormat('#cfg_Judul_Form', 'bold')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center font-serif font-black hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer text-sm" title="Tebal (Ctrl + B)">B</button>
                 <button type="button" onmousedown="event.preventDefault()" onclick="applyUniversalTextFormat('#cfg_Judul_Form', 'italic')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center font-serif italic font-bold hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer text-sm" title="Miring (Ctrl + I)">I</button>
                 <button type="button" onmousedown="event.preventDefault()" onclick="applyUniversalTextFormat('#cfg_Judul_Form', 'underline')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center font-serif underline font-bold hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer text-sm" title="Garis Bawah (Ctrl + U)">U</button>
                 <button type="button" onmousedown="event.preventDefault()" onclick="applyUniversalTextFormat('#cfg_Judul_Form', 'link')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer" title="Sisipkan Link"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg></button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="applyUniversalTextFormat('#cfg_Judul_Form', 'remove_format')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer" title="Hapus format"><svg class="w-4 h-4 viewBox="0 0 24 24" fill="currentColor"><path d="M6 4v3h4.5v13h3V7H18V4H6zm14.7 15.3l-1.4 1.4L4.3 5.7 5.7 4.3l15 15z"></path></svg></button>
+                <button type="button" onmousedown="event.preventDefault()" onclick="applyUniversalTextFormat('#cfg_Judul_Form', 'remove_format')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer" title="Hapus format"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4v3h4.5v13h3V7H18V4H6zm14.7 15.3l-1.4 1.4L4.3 5.7 5.7 4.3l15 15z"></path></svg></button>
                 <div class="h-4 w-px bg-zinc-300 mx-0.5"></div>
-                <button type="button" onmousedown="event.preventDefault()" onclick="toggleUniversalMathPalette('cfg_Judul_Form')" class="px-2 h-7 sm:h-8 rounded-md hover:bg-indigo-100 text-indigo-700 font-mono font-bold flex items-center gap-1 transition cursor-pointer text-xs" title="Palet Sisip Simbol &amp; Rumus Matematika"><span class="text-sm font-extrabold">∑</span><span class="text-[11px] font-sans font-semibold">Rumus</span></button>
-              </div>
-            </div>
+                
+                <div class="relative inline-block">
+                  <button type="button" onmousedown="event.preventDefault()" onclick="handleUniversalMathButtonClick('cfg_Judul_Form')" class="px-2 h-7 sm:h-8 rounded-md hover:bg-indigo-100 text-indigo-700 font-mono font-bold flex items-center gap-1 transition cursor-pointer text-xs" title="Format Rumus Matematika"><span class="text-sm font-extrabold">∑</span><span class="text-[11px] font-sans font-semibold">Rumus</span></button>
+                  
+                  <div id="quickMathPalette_cfg_Judul_Form" class="math-floating-palette hidden absolute right-0 top-full mt-1.5 z-50 p-2.5 bg-white/95 backdrop-blur-md rounded-2xl border border-zinc-200 shadow-2xl space-y-2 text-xs w-72 sm:w-80 animate-in fade-in zoom-in-95 duration-150" style="box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.15), 0 4px 10px -2px rgba(0, 0, 0, 0.08);">
+                    <div class="flex items-center justify-between text-[11px] font-semibold text-indigo-950 pb-1.5 border-b border-zinc-100">
+                      <span class="flex items-center gap-1 font-bold text-indigo-900"><span class="text-indigo-600 font-extrabold">∑</span> Palet Simbol Cepat:</span>
+                      <button type="button" onmousedown="event.preventDefault()" onclick="toggleUniversalMathPalette('cfg_Judul_Form')" class="w-5 h-5 rounded-full hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center text-xs transition cursor-pointer">✕</button>
+                    </div>
+                    <div class="grid grid-cols-4 gap-1 text-xs">
+                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Judul_Form', 'x^2'); toggleUniversalMathPalette('cfg_Judul_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs">x²</button>
+                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Judul_Form', '\\\\sqrt{x}'); toggleUniversalMathPalette('cfg_Judul_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs">√x</button>
+                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Judul_Form', '\\\\frac{a}{b}'); toggleUniversalMathPalette('cfg_Judul_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs">a/b</button>
+                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Judul_Form', '±'); toggleUniversalMathPalette('cfg_Judul_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs">±</button>
+                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Judul_Form', '≤'); toggleUniversalMathPalette('cfg_Judul_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs">≤</button>
+                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Judul_Form', '≥'); toggleUniversalMathPalette('cfg_Judul_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs">≥</button>
+                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Judul_Form', '≠'); toggleUniversalMathPalette('cfg_Judul_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs">≠</button>
+                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Judul_Form', 'π'); toggleUniversalMathPalette('cfg_Judul_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs">π</button>
+                    </div>
+                    <div class="pt-1">
+                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Judul_Form', '$...$'); toggleUniversalMathPalette('cfg_Judul_Form');" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-mono font-bold text-xs transition cursor-pointer shadow-xs text-center">$ Sisipkan Rumus KaTeX $</button>
+                    </div>
+                  </div>
+                </div>
 
-            <!-- Quick Math Symbols Palette -->
-            <div id="quickMathPalette_cfg_Judul_Form" class="hidden p-2.5 bg-indigo-50/70 rounded-xl border border-indigo-100 space-y-2 text-xs animate-in fade-in duration-150">
-              <div class="flex items-center justify-between text-[11px] font-semibold text-indigo-900">
-                <span>Palet Rumus &amp; Simbol Cepat:</span>
-                <span class="text-[10px] text-indigo-600 font-normal">Klik simbol untuk menyisipkan</span>
-              </div>
-              <div class="flex flex-wrap gap-1 text-xs">
-                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Judul_Form', 'x^2')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">x² (x^2)</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Judul_Form', '\\\\sqrt{x}')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">√x</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Judul_Form', '\\\\frac{a}{b}')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">a/b (Pecahan)</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Judul_Form', '±')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">±</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Judul_Form', '≤')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">≤</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Judul_Form', '≥')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">≥</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Judul_Form', '≠')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">≠</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Judul_Form', 'π')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">π</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Judul_Form', '$...$')" class="px-2 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md font-mono font-bold transition cursor-pointer shadow-2xs">$ Rumus KaTeX $</button>
               </div>
             </div>
 
@@ -749,6 +754,10 @@
               placeholder="Judul Formulir Penilaian" 
               class="w-full text-xl sm:text-2xl font-extrabold text-zinc-900 bg-transparent border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 pb-1.5 outline-none transition placeholder:text-zinc-400"
             >
+            <div id="liveMathCfgJudul" class="math-live-preview-badge inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50/90 border border-indigo-200/80 text-indigo-950 text-xs shadow-2xs mt-1 transition hidden">
+              <span class="text-[9.5px] font-bold font-mono text-indigo-600 bg-indigo-100 px-1 py-0.5 rounded uppercase tracking-wider shrink-0">✨ Pratinjau:</span>
+              <span class="math-renderable font-medium leading-relaxed"></span>
+            </div>
           </div>
 
           <!-- Deskripsi & Panduan Pengisian Formulir -->
@@ -757,33 +766,38 @@
               <label class="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider font-mono">Deskripsi &amp; Panduan Pengisian</label>
 
               <!-- Toolbar -->
-              <div class="hidden group-focus-within/fieldBlock:flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 bg-zinc-100/90 rounded-lg border border-zinc-200 w-fit text-zinc-700 select-none shadow-2xs transition-all duration-150 animate-in fade-in">
+              <div class="hidden group-focus-within/fieldBlock:flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 bg-zinc-100/90 rounded-lg border border-zinc-200 w-fit text-zinc-700 select-none shadow-2xs transition-all duration-150 animate-in fade-in relative">
                 <button type="button" onmousedown="event.preventDefault()" onclick="applyUniversalTextFormat('#cfg_Deskripsi_Form', 'bold')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center font-serif font-black hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer text-sm" title="Tebal (Ctrl + B)">B</button>
                 <button type="button" onmousedown="event.preventDefault()" onclick="applyUniversalTextFormat('#cfg_Deskripsi_Form', 'italic')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center font-serif italic font-bold hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer text-sm" title="Miring (Ctrl + I)">I</button>
                 <button type="button" onmousedown="event.preventDefault()" onclick="applyUniversalTextFormat('#cfg_Deskripsi_Form', 'underline')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center font-serif underline font-bold hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer text-sm" title="Garis Bawah (Ctrl + U)">U</button>
                 <button type="button" onmousedown="event.preventDefault()" onclick="applyUniversalTextFormat('#cfg_Deskripsi_Form', 'link')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer" title="Sisipkan Link"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg></button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="applyUniversalTextFormat('#cfg_Deskripsi_Form', 'remove_format')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer" title="Hapus format"><svg class="w-4 h-4 viewBox="0 0 24 24" fill="currentColor"><path d="M6 4v3h4.5v13h3V7H18V4H6zm14.7 15.3l-1.4 1.4L4.3 5.7 5.7 4.3l15 15z"></path></svg></button>
+                <button type="button" onmousedown="event.preventDefault()" onclick="applyUniversalTextFormat('#cfg_Deskripsi_Form', 'remove_format')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center hover:bg-zinc-200/90 active:bg-zinc-300 transition cursor-pointer" title="Hapus format"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4v3h4.5v13h3V7H18V4H6zm14.7 15.3l-1.4 1.4L4.3 5.7 5.7 4.3l15 15z"></path></svg></button>
                 <div class="h-4 w-px bg-zinc-300 mx-0.5"></div>
-                <button type="button" onmousedown="event.preventDefault()" onclick="toggleUniversalMathPalette('cfg_Deskripsi_Form')" class="px-2 h-7 sm:h-8 rounded-md hover:bg-indigo-100 text-indigo-700 font-mono font-bold flex items-center gap-1 transition cursor-pointer text-xs" title="Palet Sisip Simbol &amp; Rumus Matematika"><span class="text-sm font-extrabold">∑</span><span class="text-[11px] font-sans font-semibold">Rumus</span></button>
-              </div>
-            </div>
+                
+                <div class="relative inline-block">
+                  <button type="button" onmousedown="event.preventDefault()" onclick="handleUniversalMathButtonClick('cfg_Deskripsi_Form')" class="px-2 h-7 sm:h-8 rounded-md hover:bg-indigo-100 text-indigo-700 font-mono font-bold flex items-center gap-1 transition cursor-pointer text-xs" title="Format Rumus Matematika"><span class="text-sm font-extrabold">∑</span><span class="text-[11px] font-sans font-semibold">Rumus</span></button>
+                  
+                  <div id="quickMathPalette_cfg_Deskripsi_Form" class="math-floating-palette hidden absolute right-0 top-full mt-1.5 z-50 p-2.5 bg-white/95 backdrop-blur-md rounded-2xl border border-zinc-200 shadow-2xl space-y-2 text-xs w-72 sm:w-80 animate-in fade-in zoom-in-95 duration-150" style="box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.15), 0 4px 10px -2px rgba(0, 0, 0, 0.08);">
+                    <div class="flex items-center justify-between text-[11px] font-semibold text-indigo-950 pb-1.5 border-b border-zinc-100">
+                      <span class="flex items-center gap-1 font-bold text-indigo-900"><span class="text-indigo-600 font-extrabold">∑</span> Palet Simbol Cepat:</span>
+                      <button type="button" onmousedown="event.preventDefault()" onclick="toggleUniversalMathPalette('cfg_Deskripsi_Form')" class="w-5 h-5 rounded-full hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center text-xs transition cursor-pointer">✕</button>
+                    </div>
+                    <div class="grid grid-cols-4 gap-1 text-xs">
+                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Deskripsi_Form', 'x^2'); toggleUniversalMathPalette('cfg_Deskripsi_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs">x²</button>
+                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Deskripsi_Form', '\\\\sqrt{x}'); toggleUniversalMathPalette('cfg_Deskripsi_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs">√x</button>
+                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Deskripsi_Form', '\\\\frac{a}{b}'); toggleUniversalMathPalette('cfg_Deskripsi_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs">a/b</button>
+                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Deskripsi_Form', '±'); toggleUniversalMathPalette('cfg_Deskripsi_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs">±</button>
+                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Deskripsi_Form', '≤'); toggleUniversalMathPalette('cfg_Deskripsi_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs">≤</button>
+                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Deskripsi_Form', '≥'); toggleUniversalMathPalette('cfg_Deskripsi_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs">≥</button>
+                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Deskripsi_Form', '≠'); toggleUniversalMathPalette('cfg_Deskripsi_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs">≠</button>
+                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Deskripsi_Form', 'π'); toggleUniversalMathPalette('cfg_Deskripsi_Form');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs">π</button>
+                    </div>
+                    <div class="pt-1">
+                      <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Deskripsi_Form', '$...$'); toggleUniversalMathPalette('cfg_Deskripsi_Form');" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-mono font-bold text-xs transition cursor-pointer shadow-xs text-center">$ Sisipkan Rumus KaTeX $</button>
+                    </div>
+                  </div>
+                </div>
 
-            <!-- Quick Math Symbols Palette -->
-            <div id="quickMathPalette_cfg_Deskripsi_Form" class="hidden p-2.5 bg-indigo-50/70 rounded-xl border border-indigo-100 space-y-2 text-xs animate-in fade-in duration-150">
-              <div class="flex items-center justify-between text-[11px] font-semibold text-indigo-900">
-                <span>Palet Rumus &amp; Simbol Cepat:</span>
-                <span class="text-[10px] text-indigo-600 font-normal">Klik simbol untuk menyisipkan</span>
-              </div>
-              <div class="flex flex-wrap gap-1 text-xs">
-                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Deskripsi_Form', 'x^2')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">x² (x^2)</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Deskripsi_Form', '\\\\sqrt{x}')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">√x</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Deskripsi_Form', '\\\\frac{a}{b}')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">a/b (Pecahan)</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Deskripsi_Form', '±')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">±</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Deskripsi_Form', '≤')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">≤</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Deskripsi_Form', '≥')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">≥</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Deskripsi_Form', '≠')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">≠</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Deskripsi_Form', 'π')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">π</button>
-                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#cfg_Deskripsi_Form', '$...$')" class="px-2 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md font-mono font-bold transition cursor-pointer shadow-2xs">$ Rumus KaTeX $</button>
               </div>
             </div>
 
@@ -794,6 +808,10 @@
               placeholder="Tuliskan petunjuk umum atau deskripsi formulir penilaian di sini (contoh: Berikan penilaian secara jujur dan objektif)..."
               class="w-full text-xs sm:text-sm text-zinc-700 bg-zinc-50/80 hover:bg-zinc-100/90 focus:bg-white border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 px-3.5 py-2.5 rounded-t-lg outline-none transition"
             ></textarea>
+            <div id="liveMathCfgDesc" class="math-live-preview-badge inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50/90 border border-indigo-200/80 text-indigo-950 text-xs shadow-2xs mt-1 transition hidden">
+              <span class="text-[9.5px] font-bold font-mono text-indigo-600 bg-indigo-100 px-1 py-0.5 rounded uppercase tracking-wider shrink-0">✨ Pratinjau:</span>
+              <span class="math-renderable font-medium leading-relaxed"></span>
+            </div>
           </div>
 
           <!-- Identitas Perkuliahan Sub-Grid -->
@@ -2197,6 +2215,24 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     // =========================================================================
     // UNIVERSAL SMART MATH & KATEX AUTO-RENDER ENGINE (CONFLICT-FREE & ULTRA PRECISE)
     // =========================================================================
+    function isFormatOrMathPresent(text) {
+      if (!text || typeof text !== 'string') return false;
+      const formatted = smartMathFormat(text);
+      return (
+        formatted.includes('$') || 
+        formatted.includes('\\(') || 
+        formatted.includes('\\[') || 
+        formatted.includes('<strong>') || 
+        formatted.includes('<em>') || 
+        formatted.includes('<u>') || 
+        formatted.includes('<a ') || 
+        formatted.includes('<sup>') || 
+        formatted.includes('<sub>') ||
+        /[\\^_{}±≤≥≠≈∞×÷πθαβγλμσΔ∑∫]/.test(text) ||
+        /\\(frac|sqrt|int|sum|prod|alpha|beta|gamma|Delta|theta|lambda|pi|mu|sigma|pm|le|ge|ne|approx|times|div|infty)\b/.test(text)
+      );
+    }
+
     function smartMathFormat(text) {
       if (!text || typeof text !== 'string') return "";
 
@@ -2266,15 +2302,11 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         return res;
       }
 
-      // 2. Pure LaTeX commands without $ (e.g. \frac{a}{b}, \sqrt{x})
-      if (/\\(frac|sqrt|int|sum|prod|alpha|beta|gamma|theta|lambda|pi|pm|times|div|le|ge|ne|approx|infty|begin|mathbf|lim|det|log|ln|sin|cos|tan)\b/.test(res)) {
-        return `$${res.trim()}$`;
-      }
+      // 2. Pure LaTeX commands without $ (e.g. \frac{a}{b}, \sqrt{x}, \alpha, \beta, \pm)
+      res = res.replace(/(\\(?:frac\{[^}]+\}\{[^}]+\}|sqrt\{[^}]*\}|pm|times|div|le|ge|ne|approx|infty|alpha|beta|gamma|delta|Delta|theta|lambda|pi|mu|sigma|sum|int|lim|sin|cos|tan)\b)/g, '$$$1$$');
 
-      // 3. Standalone caret / subscript term (e.g. x^2, x^{2}, y_1, (a+b)^2)
-      if (/^[a-zA-Z0-9\(\)]+[\^_][a-zA-Z0-9\{\}\(\)\+\-]+$/.test(res.trim())) {
-        return `$${res.trim()}$`;
-      }
+      // 3. Standalone or inline caret / subscript term (e.g. x^2, x^{2}, y_1, (a+b)^2, a^2+b^2)
+      res = res.replace(/\b([a-zA-Z0-9\)]+[\^_]\{?[a-zA-Z0-9\+\-]+\}?)/g, '$$$1$$');
 
       return res;
     }
@@ -2304,16 +2336,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       let badge = document.getElementById(badgeId);
       if (!badge) return;
       const formatted = smartMathFormat(val || "");
-      const isFormatPresent = !!val && (
-        formatted.includes('$') || 
-        formatted.includes('\\(') || 
-        formatted.includes('\\[') || 
-        formatted.includes('<strong>') || 
-        formatted.includes('<em>') || 
-        formatted.includes('<u>') || 
-        formatted.includes('<a ') || 
-        /\\(frac|sqrt|int|sum|alpha|beta|pi)/.test(formatted)
-      );
+      const isFormatPresent = isFormatOrMathPresent(val || "");
       
       if (!isFormatPresent) {
         badge.classList.add("hidden");
@@ -2347,16 +2370,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
     function getLiveMathBadgeHtml(rawText, containerId) {
       const formatted = smartMathFormat(rawText || "");
-      const isFormatPresent = !!rawText && (
-        formatted.includes('$') || 
-        formatted.includes('\\(') || 
-        formatted.includes('\\[') || 
-        formatted.includes('<strong>') || 
-        formatted.includes('<em>') || 
-        formatted.includes('<u>') || 
-        formatted.includes('<a ') || 
-        /\\(frac|sqrt|int|sum|alpha|beta|pi)/.test(formatted)
-      );
+      const isFormatPresent = isFormatOrMathPresent(rawText || "");
 
       let mathRenderHtml = formatted;
       if (isFormatPresent && typeof katex !== 'undefined' && formatted.startsWith('$') && formatted.endsWith('$') && !formatted.slice(1, -1).includes('$')) {
@@ -2471,11 +2485,55 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       }
     }
 
+    function handleUniversalMathButtonClick(targetInputId) {
+      const input = document.getElementById(targetInputId) || document.querySelector(targetInputId);
+      if (!input) {
+        toggleUniversalMathPalette(targetInputId);
+        return;
+      }
+
+      const start = typeof input.selectionStart === 'number' ? input.selectionStart : 0;
+      const end = typeof input.selectionEnd === 'number' ? input.selectionEnd : 0;
+      const val = input.value || "";
+      const selected = val.substring(start, end);
+
+      // If text is blocked / selected by user:
+      if (selected && selected.trim()) {
+        pushUndoSnapshot('Format Rumus Matematika');
+        let formattedMath = "";
+        const trimmed = selected.trim();
+        
+        if (trimmed.startsWith('$') && trimmed.endsWith('$') && trimmed.length >= 2) {
+          // Unwrap if already wrapped
+          formattedMath = trimmed.slice(1, -1);
+        } else {
+          // Wrap into KaTeX formula
+          formattedMath = `$${trimmed}$`;
+        }
+
+        input.value = val.substring(0, start) + formattedMath + val.substring(end);
+        input.focus();
+        const newCursor = start + formattedMath.length;
+        input.setSelectionRange(newCursor, newCursor);
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        showAdminToast("Teks terpilih berhasil diubah menjadi rumus matematika KaTeX!", "success");
+        return;
+      }
+
+      // If NO text selected: toggle the compact floating popover/overlay!
+      toggleUniversalMathPalette(targetInputId);
+    }
+
     function toggleUniversalMathPalette(targetInputId) {
       const palette = document.getElementById(`quickMathPalette_${targetInputId}`);
-      if (palette) {
-        palette.classList.toggle("hidden");
-      }
+      if (!palette) return;
+
+      // Close all other open palettes first
+      document.querySelectorAll('.math-floating-palette').forEach(p => {
+        if (p.id !== `quickMathPalette_${targetInputId}`) p.classList.add("hidden");
+      });
+
+      palette.classList.toggle("hidden");
     }
 
     function insertUniversalMathSymbol(inputSelector, symbol, callback) {
@@ -2505,7 +2563,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
     function getRichTextToolbarHtml(targetInputId, customClass = '') {
       return `
         <!-- Google Forms Authentic Rich Text Formatting Toolbar (Shows ONLY when focused) -->
-        <div class="hidden group-focus-within/fieldBlock:flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 bg-zinc-100/90 rounded-lg border border-zinc-200 w-fit text-zinc-700 select-none shadow-2xs transition-all duration-150 animate-in fade-in ${customClass}">
+        <div class="hidden group-focus-within/fieldBlock:flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 bg-zinc-100/90 rounded-lg border border-zinc-200 w-fit text-zinc-700 select-none shadow-2xs transition-all duration-150 animate-in fade-in relative ${customClass}">
           
           <!-- Bold (B) -->
           <button 
@@ -2568,36 +2626,51 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
           <div class="h-4 w-px bg-zinc-300 mx-0.5"></div>
 
-          <!-- Rumus / Math Formula Palette Toggle -->
-          <button 
-            type="button" 
-            onmousedown="event.preventDefault()"
-            onclick="toggleUniversalMathPalette('${targetInputId}')" 
-            class="px-2 h-7 sm:h-8 rounded-md hover:bg-indigo-100 text-indigo-700 font-mono font-bold flex items-center gap-1 transition cursor-pointer text-xs" 
-            title="Palet Sisip Simbol &amp; Rumus Matematika"
-          >
-            <span class="text-sm font-extrabold">∑</span>
-            <span class="text-[11px] font-sans font-semibold">Rumus</span>
-          </button>
-        </div>
+          <!-- Rumus / Math Formula Button with Compact Floating Overlay -->
+          <div class="relative inline-block">
+            <button 
+              type="button" 
+              onmousedown="event.preventDefault()"
+              onclick="handleUniversalMathButtonClick('${targetInputId}')" 
+              class="px-2 h-7 sm:h-8 rounded-md hover:bg-indigo-100 text-indigo-700 font-mono font-bold flex items-center gap-1 transition cursor-pointer text-xs" 
+              title="Format Rumus Matematika (Blok teks untuk otomatis ubah, atau klik untuk buka palet simbol)"
+            >
+              <span class="text-sm font-extrabold">∑</span>
+              <span class="text-[11px] font-sans font-semibold">Rumus</span>
+            </button>
 
-        <!-- Quick Math Symbols Palette (Collapsible) -->
-        <div id="quickMathPalette_${targetInputId}" class="hidden p-2.5 bg-indigo-50/70 rounded-xl border border-indigo-100 space-y-2 text-xs animate-in fade-in duration-150">
-          <div class="flex items-center justify-between text-[11px] font-semibold text-indigo-900">
-            <span>Palet Rumus &amp; Simbol Cepat:</span>
-            <span class="text-[10px] text-indigo-600 font-normal">Klik simbol untuk menyisipkan</span>
+            <!-- Compact Floating Overlay Popover (Does NOT push layout) -->
+            <div 
+              id="quickMathPalette_${targetInputId}" 
+              class="math-floating-palette hidden absolute right-0 top-full mt-1.5 z-50 p-2.5 bg-white/95 backdrop-blur-md rounded-2xl border border-zinc-200 shadow-2xl space-y-2 text-xs w-72 sm:w-80 animate-in fade-in zoom-in-95 duration-150"
+              style="box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.15), 0 4px 10px -2px rgba(0, 0, 0, 0.08);"
+            >
+              <div class="flex items-center justify-between text-[11px] font-semibold text-indigo-950 pb-1.5 border-b border-zinc-100">
+                <span class="flex items-center gap-1 font-bold text-indigo-900">
+                  <span class="text-indigo-600 font-extrabold">∑</span> Palet Simbol Cepat:
+                </span>
+                <button type="button" onmousedown="event.preventDefault()" onclick="toggleUniversalMathPalette('${targetInputId}')" class="w-5 h-5 rounded-full hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center text-xs transition cursor-pointer">✕</button>
+              </div>
+
+              <div class="grid grid-cols-4 gap-1 text-xs">
+                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#${targetInputId}', 'x^2'); toggleUniversalMathPalette('${targetInputId}');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Pangkat Dua">x²</button>
+                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#${targetInputId}', '\\\\sqrt{x}'); toggleUniversalMathPalette('${targetInputId}');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Akar Kuadrat">√x</button>
+                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#${targetInputId}', '\\\\frac{a}{b}'); toggleUniversalMathPalette('${targetInputId}');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Pecahan">a/b</button>
+                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#${targetInputId}', '±'); toggleUniversalMathPalette('${targetInputId}');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Plus Minus">±</button>
+                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#${targetInputId}', '≤'); toggleUniversalMathPalette('${targetInputId}');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Kurang Dari Sama Dengan">≤</button>
+                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#${targetInputId}', '≥'); toggleUniversalMathPalette('${targetInputId}');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Lebih Dari Sama Dengan">≥</button>
+                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#${targetInputId}', '≠'); toggleUniversalMathPalette('${targetInputId}');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Tidak Sama Dengan">≠</button>
+                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#${targetInputId}', 'π'); toggleUniversalMathPalette('${targetInputId}');" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Pi">π</button>
+              </div>
+
+              <div class="pt-1">
+                <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#${targetInputId}', '$...$'); toggleUniversalMathPalette('${targetInputId}');" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-mono font-bold text-xs transition cursor-pointer shadow-xs text-center">
+                  $ Sisipkan Rumus KaTeX $
+                </button>
+              </div>
+            </div>
           </div>
-          <div class="flex flex-wrap gap-1 text-xs">
-            <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#${targetInputId}', 'x^2')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">x² (x^2)</button>
-            <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#${targetInputId}', '\\\\sqrt{x}')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">√x</button>
-            <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#${targetInputId}', '\\\\frac{a}{b}')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">a/b (Pecahan)</button>
-            <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#${targetInputId}', '±')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">±</button>
-            <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#${targetInputId}', '≤')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">≤</button>
-            <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#${targetInputId}', '≥')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">≥</button>
-            <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#${targetInputId}', '≠')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">≠</button>
-            <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#${targetInputId}', 'π')" class="px-2 py-1 bg-white hover:bg-indigo-100 text-indigo-900 rounded-md border border-indigo-200 font-mono font-bold transition cursor-pointer shadow-2xs">π</button>
-            <button type="button" onmousedown="event.preventDefault()" onclick="insertUniversalMathSymbol('#${targetInputId}', '$...$')" class="px-2 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md font-mono font-bold transition cursor-pointer shadow-2xs">$ Rumus KaTeX $</button>
-          </div>
+
         </div>
       `;
     }
@@ -2613,6 +2686,11 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       insertUniversalMathSymbol(`#fieldLabelInput_${sIdx}_${fIdx}`, symbol);
     }
 
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest('.math-floating-palette') && !e.target.closest('button[title*="Format Rumus Matematika"]') && !e.target.closest('button[onclick*="handleUniversalMathButtonClick"]') && !e.target.closest('button[onclick*="toggleUniversalMathPalette"]')) {
+        document.querySelectorAll('.math-floating-palette').forEach(p => p.classList.add("hidden"));
+      }
+    });
 
     // =========================================================================
     // SMART MATH SELECTION, RIGHT-CLICK & FLOATING ACTION ENGINE (100% RELIABLE)
@@ -4411,6 +4489,13 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         }
       });
 
+      if (document.getElementById('cfg_Judul_Form')) {
+        updateLiveMathBadge(adminAppConfig["Judul_Form"] || "", 'liveMathCfgJudul');
+      }
+      if (document.getElementById('cfg_Deskripsi_Form')) {
+        updateLiveMathBadge(adminAppConfig["Deskripsi_Form"] || "", 'liveMathCfgDesc');
+      }
+
       const currentSesi = adminAppConfig["Sesi_Minggu_Aktif"] || "Minggu 1";
       const lblSesi = document.getElementById("labelCurrentActiveSesi");
       const selSesi = document.getElementById("selectQuickSesiAktif");
@@ -4433,6 +4518,13 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           adminAppConfig[k] = el.value;
         }
       });
+
+      if (document.getElementById('cfg_Judul_Form')) {
+        updateLiveMathBadge(document.getElementById('cfg_Judul_Form').value, 'liveMathCfgJudul');
+      }
+      if (document.getElementById('cfg_Deskripsi_Form')) {
+        updateLiveMathBadge(document.getElementById('cfg_Deskripsi_Form').value, 'liveMathCfgDesc');
+      }
 
       // Synchronize top banner in real-time
       const activeTitleBanner = document.getElementById("activeFormTitleBanner");
@@ -5025,15 +5117,30 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
     function handleInlineStageUpdate(sIdx, prop, val) {
       if (!adminFormSchema || !adminFormSchema.tahapan[sIdx]) return;
-      adminFormSchema.tahapan[sIdx][prop] = val;
+      const stage = adminFormSchema.tahapan[sIdx];
+      stage[prop] = val;
       markSchemaAsDirty();
 
       if (prop === 'title') {
         updateLiveMathBadge(val, `liveMathStageTitle_${sIdx}`);
-        renderBuilderAlurTahapan();
+        // If alurTitle was NOT explicitly customized by user, sync the alur title in real-time
+        if (!stage.isCustom_alurTitle) {
+          const alurTitleInput = document.getElementById(`alurTitleInput_${sIdx}`);
+          if (alurTitleInput && document.activeElement !== alurTitleInput) {
+            alurTitleInput.value = val || `Bagian ${sIdx + 1}`;
+          }
+          updateLiveMathBadge(val || `Bagian ${sIdx + 1}`, `liveMathAlurTitle_${sIdx}`);
+        }
       } else if (prop === 'description') {
         updateLiveMathBadge(val, `liveMathStageDesc_${sIdx}`);
-        renderBuilderAlurTahapan();
+        // If alurDesc was NOT explicitly customized by user, sync the alur desc in real-time
+        if (!stage.isCustom_alurDesc) {
+          const alurDescInput = document.getElementById(`alurDescInput_${sIdx}`);
+          if (alurDescInput && document.activeElement !== alurDescInput) {
+            alurDescInput.value = val || "";
+          }
+          updateLiveMathBadge(val || "", `liveMathAlurDesc_${sIdx}`);
+        }
       }
     }
 
@@ -5306,6 +5413,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       if (!f.pointLabels) f.pointLabels = {};
       f.pointLabels[String(pointKey)] = val;
       markSchemaAsDirty();
+      updateLiveMathBadge(val, `liveMathScalePoint_${sIdx}_${fIdx}_${pointKey}`);
     }
 
     function handleInlineToggleOtherOption(sIdx, fIdx) {
@@ -5322,6 +5430,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       if (!f || !f.options) return;
       f.options[optIdx] = val;
       markSchemaAsDirty();
+      updateLiveMathBadge(val, `liveMathOpt_${sIdx}_${fIdx}_${optIdx}`);
     }
 
     function handleInlineAddOption(sIdx, fIdx) {
@@ -5365,22 +5474,25 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       if (f.type === 'RADIO') {
         const options = (f.options && f.options.length > 0) ? f.options : ['Opsi 1', 'Opsi 2'];
         const optsHtml = options.map((o, optIdx) => `
-          <div class="flex items-center gap-2.5 text-xs group">
-            <span class="w-4 h-4 rounded-full border-2 border-zinc-400 shrink-0"></span>
-            <input 
-              type="text" 
-              value="${o}" 
-              placeholder="Teks opsi..."
-              oninput="handleInlineOptionUpdate(${sIdx}, ${fIdx}, ${optIdx}, this.value)"
-              class="flex-1 px-2.5 py-1.5 rounded-md border-b border-transparent hover:border-zinc-300 focus:border-indigo-600 text-xs text-zinc-800 bg-transparent focus:bg-white outline-none transition"
-            >
-            <button 
-              type="button" 
-              onclick="handleInlineDeleteOption(${sIdx}, ${fIdx}, ${optIdx})" 
-              ${options.length <= 1 ? 'disabled' : ''}
-              class="w-6 h-6 rounded-full hover:bg-rose-100 text-zinc-400 hover:text-rose-600 disabled:opacity-20 flex items-center justify-center cursor-pointer transition" 
-              title="Hapus Opsi"
-            >✕</button>
+          <div class="space-y-1 group">
+            <div class="flex items-center gap-2.5 text-xs">
+              <span class="w-4 h-4 rounded-full border-2 border-zinc-400 shrink-0"></span>
+              <input 
+                type="text" 
+                value="${escapeHtml(o)}" 
+                placeholder="Teks opsi..."
+                oninput="handleInlineOptionUpdate(${sIdx}, ${fIdx}, ${optIdx}, this.value)"
+                class="flex-1 px-2.5 py-1.5 rounded-md border-b border-transparent hover:border-zinc-300 focus:border-indigo-600 text-xs text-zinc-800 bg-transparent focus:bg-white outline-none transition"
+              >
+              <button 
+                type="button" 
+                onclick="handleInlineDeleteOption(${sIdx}, ${fIdx}, ${optIdx})" 
+                ${options.length <= 1 ? 'disabled' : ''}
+                class="w-6 h-6 rounded-full hover:bg-rose-100 text-zinc-400 hover:text-rose-600 disabled:opacity-20 flex items-center justify-center cursor-pointer transition" 
+                title="Hapus Opsi"
+              >✕</button>
+            </div>
+            ${getLiveMathBadgeHtml(o, `liveMathOpt_${sIdx}_${fIdx}_${optIdx}`)}
           </div>
         `).join('');
 
@@ -5424,22 +5536,25 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       if (f.type === 'CHECKBOX') {
         const options = (f.options && f.options.length > 0) ? f.options : ['Pilihan 1', 'Pilihan 2'];
         const optsHtml = options.map((o, optIdx) => `
-          <div class="flex items-center gap-2.5 text-xs group">
-            <span class="w-4 h-4 rounded border-2 border-zinc-400 shrink-0"></span>
-            <input 
-              type="text" 
-              value="${o}" 
-              placeholder="Teks opsi..."
-              oninput="handleInlineOptionUpdate(${sIdx}, ${fIdx}, ${optIdx}, this.value)"
-              class="flex-1 px-2.5 py-1.5 rounded-md border-b border-transparent hover:border-zinc-300 focus:border-indigo-600 text-xs text-zinc-800 bg-transparent focus:bg-white outline-none transition"
-            >
-            <button 
-              type="button" 
-              onclick="handleInlineDeleteOption(${sIdx}, ${fIdx}, ${optIdx})" 
-              ${options.length <= 1 ? 'disabled' : ''}
-              class="w-6 h-6 rounded-full hover:bg-rose-100 text-zinc-400 hover:text-rose-600 disabled:opacity-20 flex items-center justify-center cursor-pointer transition" 
-              title="Hapus Opsi"
-            >✕</button>
+          <div class="space-y-1 group">
+            <div class="flex items-center gap-2.5 text-xs">
+              <span class="w-4 h-4 rounded border-2 border-zinc-400 shrink-0"></span>
+              <input 
+                type="text" 
+                value="${escapeHtml(o)}" 
+                placeholder="Teks opsi..."
+                oninput="handleInlineOptionUpdate(${sIdx}, ${fIdx}, ${optIdx}, this.value)"
+                class="flex-1 px-2.5 py-1.5 rounded-md border-b border-transparent hover:border-zinc-300 focus:border-indigo-600 text-xs text-zinc-800 bg-transparent focus:bg-white outline-none transition"
+              >
+              <button 
+                type="button" 
+                onclick="handleInlineDeleteOption(${sIdx}, ${fIdx}, ${optIdx})" 
+                ${options.length <= 1 ? 'disabled' : ''}
+                class="w-6 h-6 rounded-full hover:bg-rose-100 text-zinc-400 hover:text-rose-600 disabled:opacity-20 flex items-center justify-center cursor-pointer transition" 
+                title="Hapus Opsi"
+              >✕</button>
+            </div>
+            ${getLiveMathBadgeHtml(o, `liveMathOpt_${sIdx}_${fIdx}_${optIdx}`)}
           </div>
         `).join('');
 
@@ -5483,22 +5598,25 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       if (f.type === 'DROPDOWN') {
         const options = (f.options && f.options.length > 0) ? f.options : ['Pilihan 1', 'Pilihan 2'];
         const optsHtml = options.map((o, optIdx) => `
-          <div class="flex items-center gap-2.5 text-xs group">
-            <span class="w-4 font-mono text-zinc-400 font-bold text-xs shrink-0 text-center">${optIdx + 1}.</span>
-            <input 
-              type="text" 
-              value="${o}" 
-              placeholder="Teks opsi dropdown..."
-              oninput="handleInlineOptionUpdate(${sIdx}, ${fIdx}, ${optIdx}, this.value)"
-              class="flex-1 px-2.5 py-1.5 rounded-md border-b border-transparent hover:border-zinc-300 focus:border-indigo-600 text-xs text-zinc-800 bg-transparent focus:bg-white outline-none transition"
-            >
-            <button 
-              type="button" 
-              onclick="handleInlineDeleteOption(${sIdx}, ${fIdx}, ${optIdx})" 
-              ${options.length <= 1 ? 'disabled' : ''}
-              class="w-6 h-6 rounded-full hover:bg-rose-100 text-zinc-400 hover:text-rose-600 disabled:opacity-20 flex items-center justify-center cursor-pointer transition" 
-              title="Hapus Opsi"
-            >✕</button>
+          <div class="space-y-1 group">
+            <div class="flex items-center gap-2.5 text-xs">
+              <span class="w-4 font-mono text-zinc-400 font-bold text-xs shrink-0 text-center">${optIdx + 1}.</span>
+              <input 
+                type="text" 
+                value="${escapeHtml(o)}" 
+                placeholder="Teks opsi dropdown..."
+                oninput="handleInlineOptionUpdate(${sIdx}, ${fIdx}, ${optIdx}, this.value)"
+                class="flex-1 px-2.5 py-1.5 rounded-md border-b border-transparent hover:border-zinc-300 focus:border-indigo-600 text-xs text-zinc-800 bg-transparent focus:bg-white outline-none transition"
+              >
+              <button 
+                type="button" 
+                onclick="handleInlineDeleteOption(${sIdx}, ${fIdx}, ${optIdx})" 
+                ${options.length <= 1 ? 'disabled' : ''}
+                class="w-6 h-6 rounded-full hover:bg-rose-100 text-zinc-400 hover:text-rose-600 disabled:opacity-20 flex items-center justify-center cursor-pointer transition" 
+                title="Hapus Opsi"
+              >✕</button>
+            </div>
+            ${getLiveMathBadgeHtml(o, `liveMathOpt_${sIdx}_${fIdx}_${optIdx}`)}
           </div>
         `).join('');
 
@@ -5572,15 +5690,18 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         for (let i = minV; i <= maxV; i++) {
           const currentLabel = f.pointLabels[String(i)] !== undefined ? f.pointLabels[String(i)] : (defaultSmartMap[String(i)] || "");
           pointInputsHtml += `
-            <div class="flex items-center gap-2 text-xs">
-              <span class="w-7 h-7 rounded-lg bg-zinc-100 border border-zinc-300 font-mono font-bold text-zinc-700 flex items-center justify-center shrink-0 text-xs shadow-2xs">${i}</span>
-              <input 
-                type="text" 
-                value="${currentLabel}" 
-                placeholder="Label teks nilai ${i} (contoh: ${defaultSmartMap[String(i)] || 'Keterangan...'})..."
-                oninput="handleInlineScalePointLabelUpdate(${sIdx}, ${fIdx}, '${i}', this.value)"
-                class="flex-1 px-3 py-1.5 rounded-lg border border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 bg-white text-xs text-zinc-800 outline-none transition shadow-2xs"
-              >
+            <div class="space-y-1">
+              <div class="flex items-center gap-2 text-xs">
+                <span class="w-7 h-7 rounded-lg bg-zinc-100 border border-zinc-300 font-mono font-bold text-zinc-700 flex items-center justify-center shrink-0 text-xs shadow-2xs">${i}</span>
+                <input 
+                  type="text" 
+                  value="${escapeHtml(currentLabel)}" 
+                  placeholder="Label teks nilai ${i} (contoh: ${defaultSmartMap[String(i)] || 'Keterangan...'})..."
+                  oninput="handleInlineScalePointLabelUpdate(${sIdx}, ${fIdx}, '${i}', this.value)"
+                  class="flex-1 px-3 py-1.5 rounded-lg border border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 bg-white text-xs text-zinc-800 outline-none transition shadow-2xs"
+                >
+              </div>
+              ${getLiveMathBadgeHtml(currentLabel, `liveMathScalePoint_${sIdx}_${fIdx}_${i}`)}
             </div>
           `;
         }
@@ -5868,14 +5989,20 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
 
     function handleInlineAlurUpdate(sIdx, prop, val) {
       if (!adminFormSchema || !adminFormSchema.tahapan[sIdx]) return;
-      adminFormSchema.tahapan[sIdx][prop] = val;
-      markSchemaAsDirty();
+      const stage = adminFormSchema.tahapan[sIdx];
+      const trimmed = (val || "").trim();
 
-      if (prop === 'alurTitle') {
-        updateLiveMathBadge(val, `liveMathAlurTitle_${sIdx}`);
-      } else if (prop === 'alurDesc') {
-        updateLiveMathBadge(val, `liveMathAlurDesc_${sIdx}`);
+      if (trimmed === '') {
+        delete stage[prop];
+        stage['isCustom_' + prop] = false;
+        const defaultVal = prop === 'alurTitle' ? (stage.title || `Bagian ${sIdx + 1}`) : (stage.description || "");
+        updateLiveMathBadge(defaultVal, prop === 'alurTitle' ? `liveMathAlurTitle_${sIdx}` : `liveMathAlurDesc_${sIdx}`);
+      } else {
+        stage[prop] = val;
+        stage['isCustom_' + prop] = true;
+        updateLiveMathBadge(val, prop === 'alurTitle' ? `liveMathAlurTitle_${sIdx}` : `liveMathAlurDesc_${sIdx}`);
       }
+      markSchemaAsDirty();
     }
 
     function renderBuilderAlurTahapan() {
@@ -5961,6 +6088,9 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         `;
       });
       container.innerHTML = html;
+      setTimeout(() => {
+        renderAllMathInElement(container);
+      }, 40);
     }
 
     function scrollToStageCard(stageIdx) {
@@ -6293,314 +6423,80 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
       }, 40);
     }
 
-    // LIVE FORM SIMULATOR ENGINE (INTERACTIVE PREVIEW)
+    // LIVE FORM SIMULATOR ENGINE (EXACT AUTHENTIC DRAFT PREVIEW & RESPONSIVE DEVICE MODES)
+    function setSimulatorDevice(mode) {
+      const wrapper = document.getElementById("simulatorDeviceWrapper");
+      const btnD = document.getElementById("simDevBtnDesktop");
+      const btnT = document.getElementById("simDevBtnTablet");
+      const btnM = document.getElementById("simDevBtnMobile");
+      if (!wrapper) return;
+
+      [btnD, btnT, btnM].forEach(b => {
+        if (b) {
+          b.className = "px-2.5 py-1 rounded-md font-medium text-zinc-400 hover:text-white transition cursor-pointer";
+        }
+      });
+
+      if (mode === 'mobile') {
+        wrapper.className = "w-[390px] max-w-full h-full bg-white rounded-2xl overflow-hidden shadow-2xl border-4 border-zinc-700 transition-all duration-300";
+        if (btnM) btnM.className = "px-2.5 py-1 rounded-md font-medium text-white bg-zinc-800 transition cursor-pointer shadow-xs";
+      } else if (mode === 'tablet') {
+        wrapper.className = "w-[768px] max-w-full h-full bg-white rounded-2xl overflow-hidden shadow-2xl border-4 border-zinc-700 transition-all duration-300";
+        if (btnT) btnT.className = "px-2.5 py-1 rounded-md font-medium text-white bg-zinc-800 transition cursor-pointer shadow-xs";
+      } else {
+        wrapper.className = "w-full h-full bg-white rounded-2xl overflow-hidden shadow-2xl border border-zinc-800 transition-all duration-300";
+        if (btnD) btnD.className = "px-2.5 py-1 rounded-md font-medium text-white bg-zinc-800 transition cursor-pointer shadow-xs";
+      }
+    }
+
     function openLiveFormSimulator() {
       initOrNormalizeFormSchema();
-      currentSimulatorStage = 0;
+      const formKey = currentFormId || DEFAULT_PRIMARY_FORM_ID;
+      
+      // Save current in-memory draft state into sessionStorage and localStorage
+      try {
+        sessionStorage.setItem("PGSD_DRAFT_SCHEMA_" + formKey, JSON.stringify(adminFormSchema));
+        sessionStorage.setItem("PGSD_DRAFT_CONFIG_" + formKey, JSON.stringify(adminAppConfig));
+        localStorage.setItem("PGSD_DRAFT_SCHEMA_" + formKey, JSON.stringify(adminFormSchema));
+        localStorage.setItem("PGSD_DRAFT_CONFIG_" + formKey, JSON.stringify(adminAppConfig));
+      } catch(e) {
+        console.warn("Error saving draft before simulator:", e);
+      }
+
+      const activeTitle = document.getElementById("simActiveTitle");
+      if (activeTitle) activeTitle.textContent = adminAppConfig["Judul_Form"] || "Formulir";
+
       const modal = document.getElementById("modalLiveFormSimulator");
+      const iframe = document.getElementById("simulatorIframe");
       if (!modal) return;
       modal.classList.remove("hidden");
-      renderSimulatorContent();
+
+      if (iframe) {
+        iframe.src = `index.html?id=${encodeURIComponent(formKey)}&preview=draft&t=${Date.now()}`;
+      }
     }
 
     function closeLiveFormSimulator() {
       const modal = document.getElementById("modalLiveFormSimulator");
+      const iframe = document.getElementById("simulatorIframe");
       if (modal) modal.classList.add("hidden");
+      if (iframe) iframe.src = "about:blank";
     }
 
     function openLivePreviewInNewTab() {
       const formKey = currentFormId || DEFAULT_PRIMARY_FORM_ID;
-      saveDraftSchemaLocally();
+      try {
+        sessionStorage.setItem("PGSD_DRAFT_SCHEMA_" + formKey, JSON.stringify(adminFormSchema));
+        sessionStorage.setItem("PGSD_DRAFT_CONFIG_" + formKey, JSON.stringify(adminAppConfig));
+        localStorage.setItem("PGSD_DRAFT_SCHEMA_" + formKey, JSON.stringify(adminFormSchema));
+        localStorage.setItem("PGSD_DRAFT_CONFIG_" + formKey, JSON.stringify(adminAppConfig));
+      } catch(e) {}
+      
       const u = new URL(window.location.href);
       u.pathname = u.pathname.replace(/admin\.html$/i, "index.html");
       if (!u.pathname.endsWith("index.html")) u.pathname = u.pathname.replace(/\/?$/, "/index.html");
-      u.search = `?id=${encodeURIComponent(formKey)}&preview=draft`;
+      u.search = `?id=${encodeURIComponent(formKey)}&preview=draft&t=${Date.now()}`;
       window.open(u.toString(), '_blank');
-    }
-
-    function simStepNext() {
-      const tahapan = adminFormSchema.tahapan || [];
-      if (currentSimulatorStage < tahapan.length - 1) {
-        currentSimulatorStage++;
-        renderSimulatorContent();
-        const contentEl = document.getElementById("simulatorScreenContainer");
-        if (contentEl) contentEl.scrollTo({ top: 0, behavior: 'smooth' });
-      } else {
-        showAdminToast("Simulasi Selesai! Seluruh alur pengisian dari Tahap 1 hingga Tahap " + tahapan.length + " berjalan lancar.", "success");
-        closeLiveFormSimulator();
-      }
-    }
-
-    function simStepPrev() {
-      if (currentSimulatorStage > 0) {
-        currentSimulatorStage--;
-        renderSimulatorContent();
-        const contentEl = document.getElementById("simulatorScreenContainer");
-        if (contentEl) contentEl.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    }
-
-    function renderSimulatorContent() {
-      const container = document.getElementById("simulatorScreenContainer");
-      if (!container) return;
-
-      const tahapan = adminFormSchema.tahapan || [];
-      if (tahapan.length === 0) {
-        container.innerHTML = "<p class='text-center text-zinc-400 py-8'>Belum ada tahap formulir.</p>";
-        return;
-      }
-
-      if (currentSimulatorStage >= tahapan.length) currentSimulatorStage = 0;
-      const stage = tahapan[currentSimulatorStage];
-      const percent = Math.round(((currentSimulatorStage + 1) / tahapan.length) * 100);
-      const isLast = currentSimulatorStage === tahapan.length - 1;
-
-      let fieldsHtml = (stage.fields || []).map((f, idx) => {
-        return `
-          <div class="bg-white p-4 sm:p-5 rounded-2xl border border-zinc-200 shadow-2xs space-y-2.5">
-            <div>
-              <h4 class="font-bold text-xs sm:text-sm text-zinc-900 flex items-center gap-1.5">
-                <span>${idx + 1}. ${f.label}</span>
-                ${f.required ? '<span class="text-rose-500 font-bold">*</span>' : ''}
-              </h4>
-              ${f.description ? `<p class="text-[11px] text-zinc-500 mt-0.5">${f.description}</p>` : ''}
-            </div>
-            <div class="pt-1">
-              ${getSimulatorFieldInputHtml(f)}
-            </div>
-          </div>
-        `;
-      }).join("");
-
-      container.innerHTML = `
-        <!-- Stage Header & Progress Bar -->
-        <div class="bg-zinc-900 text-white p-4 sm:p-5 rounded-2xl space-y-2.5 shadow-xs">
-          <div class="flex items-center justify-between text-xs">
-            <span class="font-mono font-bold px-2 py-0.5 rounded bg-zinc-800 text-zinc-200">
-              Tahap ${currentSimulatorStage + 1} / ${tahapan.length}
-            </span>
-            <span class="font-mono font-semibold text-indigo-300">${percent}% Selesai</span>
-          </div>
-          <div class="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-            <div class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-300" style="width: ${percent}%;"></div>
-          </div>
-          <div class="pt-1">
-            <h3 class="font-bold text-sm sm:text-base text-white">${stage.title}</h3>
-            ${stage.description ? `<p class="text-xs text-zinc-400 mt-0.5">${stage.description}</p>` : ''}
-          </div>
-        </div>
-
-        <!-- Questions in this Stage -->
-        <div class="space-y-3.5">
-          ${fieldsHtml || '<p class="text-center text-zinc-400 py-4 text-xs">Tahap ini belum memiliki komponen isian.</p>'}
-        </div>
-
-        <!-- Stage Stepping Controls -->
-        <div class="flex items-center justify-between gap-3 pt-4 border-t border-zinc-200">
-          <button 
-            type="button" 
-            onclick="simStepPrev()" 
-            ${currentSimulatorStage === 0 ? 'disabled' : ''}
-            class="px-4 py-2.5 rounded-xl border border-zinc-300 bg-white hover:bg-zinc-50 disabled:opacity-30 text-zinc-700 text-xs font-semibold transition cursor-pointer shadow-2xs"
-          >
-            ← Tahap Sebelumnya
-          </button>
-
-          <button 
-            type="button" 
-            onclick="simStepNext()" 
-            class="px-5 py-2.5 rounded-xl ${isLast ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-zinc-900 hover:bg-zinc-800'} text-white text-xs font-bold transition cursor-pointer shadow-sm"
-          >
-            ${isLast ? '✓ Selesai Simulasi (Kirim Formulir)' : 'Lanjut ke Tahap Berikutnya →'}
-          </button>
-        </div>
-      `;
-    }
-
-    function getSimulatorFieldInputHtml(f) {
-      if (f.type === 'CORE_IDENTITY') {
-        const peranMhs = adminAppConfig["Peran_Mahasiswa_Label"] || "Mahasiswa (Anggota Kelas PGSD 5E)";
-        const peranDosen = adminAppConfig["Peran_Dosen_Label"] || "Dosen (Pengampu / Penguji)";
-        const peranTamu = adminAppConfig["Peran_Lainnya_Label"] || "Penilai Tamu / Lainnya";
-
-        return `
-          <div class="space-y-2.5">
-            <div class="space-y-1">
-              <label class="block text-[11px] font-semibold text-zinc-600">Pilih Peran Penilai:</label>
-              <select class="w-full px-3 py-2 rounded-lg border border-zinc-300 text-xs bg-white font-medium text-zinc-800">
-                <option value="Mahasiswa">${peranMhs}</option>
-                <option value="Dosen">${peranDosen}</option>
-                <option value="Lainnya">${peranTamu}</option>
-              </select>
-            </div>
-            <div class="space-y-1">
-              <label class="block text-[11px] font-semibold text-zinc-600">NIM Mahasiswa:</label>
-              <input type="text" placeholder="Contoh: 2310125110001" class="w-full px-3 py-2 rounded-lg border border-zinc-300 text-xs bg-white font-mono">
-            </div>
-            <div class="space-y-1">
-              <label class="block text-[11px] font-semibold text-zinc-600">Email Resmi Kampus:</label>
-              <input type="email" placeholder="nama@mhs.ulm.ac.id" class="w-full px-3 py-2 rounded-lg border border-zinc-300 text-xs bg-white">
-            </div>
-          </div>
-        `;
-      }
-
-      if (f.type === 'CORE_GROUP_SELECT') {
-        return `
-          <div class="space-y-1">
-            <select class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs bg-white font-semibold text-zinc-800">
-              <option value="" disabled selected>${adminAppConfig["Pilih_Kelompok_Label"] || "Pilih Kelompok Presentator yang Tampil..."}</option>
-              <option value="Kelompok 1">Kelompok 1 • Teori Bimbingan Konseling</option>
-              <option value="Kelompok 2">Kelompok 2 • Pendekatan Humanistik di SD</option>
-            </select>
-          </div>
-        `;
-      }
-
-      if (f.type === 'CORE_SCORE_RUBRIC') {
-        const minS = adminAppConfig["Nilai_Kelompok_Min"] || 50;
-        const maxS = adminAppConfig["Nilai_Kelompok_Max"] || 100;
-        return `
-          <div class="space-y-2.5 p-3 rounded-xl bg-zinc-50 border border-zinc-200">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-semibold text-zinc-700">Skor Penilaian Presentasi:</span>
-              <span id="simScoreVal" class="font-mono font-extrabold text-base text-emerald-700 px-2.5 py-0.5 rounded bg-emerald-50 border border-emerald-200">85</span>
-            </div>
-            <input 
-              type="range" 
-              min="${minS}" 
-              max="${maxS}" 
-              value="85" 
-              oninput="document.getElementById('simScoreVal').textContent = this.value"
-              class="w-full accent-emerald-600 cursor-pointer"
-            >
-            <div class="flex items-center justify-between text-[10px] text-zinc-400 font-mono">
-              <span>Min: ${minS}</span>
-              <span>Max: ${maxS}</span>
-            </div>
-          </div>
-        `;
-      }
-
-      if (f.type === 'CORE_BEST_PRESENTER') {
-        const maxV = adminAppConfig["Maksimal_Pilihan_Presentator_Terbaik"] || 2;
-        return `
-          <div class="space-y-2">
-            <p class="text-[11px] text-zinc-500">Pilih maksimal ${maxV} orang pemateri terbaik:</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <label class="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 cursor-pointer">
-                <input type="checkbox" class="w-4 h-4 text-blue-600 rounded">
-                <span class="text-xs font-semibold text-zinc-800">Ahmad Fauzi (2310125110001)</span>
-              </label>
-              <label class="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 cursor-pointer">
-                <input type="checkbox" class="w-4 h-4 text-blue-600 rounded">
-                <span class="text-xs font-semibold text-zinc-800">Siti Nurhaliza (2310125110002)</span>
-              </label>
-            </div>
-          </div>
-        `;
-      }
-
-      if (f.type === 'CORE_MEMBER_FEEDBACK') {
-        const maxC = adminAppConfig["Maksimal_Karakter_Evaluasi"] || 500;
-        return `
-          <div class="space-y-2">
-            <div class="p-3 rounded-xl border border-zinc-200 bg-white space-y-1.5">
-              <span class="text-xs font-bold text-zinc-800">Masukan untuk Ahmad Fauzi:</span>
-              <textarea rows="2" placeholder="Tuliskan ulasan apresiasi dan masukan membangun..." maxlength="${maxC}" class="w-full p-2.5 rounded-lg border border-zinc-200 text-xs outline-none focus:border-zinc-900"></textarea>
-              <div class="text-right text-[10px] text-zinc-400">0 / ${maxC} karakter</div>
-            </div>
-          </div>
-        `;
-      }
-
-      if (f.type === 'RADIO') {
-        const opts = (f.options && f.options.length > 0) ? f.options : ['Opsi 1', 'Opsi 2'];
-        return `
-          <div class="space-y-1.5">
-            ${opts.map(o => `
-              <label class="flex items-center gap-2 p-2 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 cursor-pointer text-xs">
-                <input type="radio" name="sim_rad_${f.id}" class="text-indigo-600">
-                <span class="text-zinc-800 font-medium">${o}</span>
-              </label>
-            `).join('')}
-          </div>
-        `;
-      }
-
-      if (f.type === 'CHECKBOX') {
-        const opts = (f.options && f.options.length > 0) ? f.options : ['Opsi 1', 'Opsi 2'];
-        return `
-          <div class="space-y-1.5">
-            ${opts.map(o => `
-              <label class="flex items-center gap-2 p-2 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 cursor-pointer text-xs">
-                <input type="checkbox" class="w-4 h-4 text-indigo-600 rounded">
-                <span class="text-zinc-800 font-medium">${o}</span>
-              </label>
-            `).join('')}
-          </div>
-        `;
-      }
-
-      if (f.type === 'DROPDOWN') {
-        const opts = (f.options && f.options.length > 0) ? f.options : ['Opsi 1', 'Opsi 2'];
-        return `
-          <select class="w-full px-3 py-2 rounded-lg border border-zinc-300 text-xs bg-white font-medium text-zinc-800">
-            <option value="" disabled selected>-- Pilih Salah Satu --</option>
-            ${opts.map(o => `<option value="${o}">${o}</option>`).join('')}
-          </select>
-        `;
-      }
-
-      if (f.type === 'SHORT_TEXT') {
-        return `<input type="text" placeholder="${f.placeholder || 'Tuliskan jawaban Anda...'}" class="w-full px-3 py-2 rounded-lg border border-zinc-300 text-xs bg-white">`;
-      }
-
-      if (f.type === 'TEXTAREA') {
-        return `<textarea rows="3" placeholder="${f.placeholder || 'Tuliskan penjelasan lengkap Anda...'}" class="w-full p-2.5 rounded-lg border border-zinc-300 text-xs bg-white"></textarea>`;
-      }
-
-      if (f.type === 'RATING_SCALE') {
-        const minV = f.minVal || 1;
-        const maxV = f.maxVal || 5;
-        let btns = '';
-        for (let i = minV; i <= maxV; i++) {
-          btns += `
-            <label class="flex-1 text-center py-2 px-1 rounded-lg border border-zinc-200 bg-white hover:bg-indigo-50 cursor-pointer">
-              <input type="radio" name="sim_rate_${f.id}" value="${i}" class="sr-only peer">
-              <span class="block font-mono font-bold text-xs text-zinc-700 peer-checked:text-indigo-600 peer-checked:font-extrabold">${i}</span>
-            </label>
-          `;
-        }
-        return `
-          <div class="space-y-1.5">
-            <div class="flex items-center gap-1.5">${btns}</div>
-            <div class="flex items-center justify-between text-[10px] text-zinc-400">
-              <span>${f.labelMin || 'Sangat Kurang'}</span>
-              <span>${f.labelMax || 'Sangat Baik'}</span>
-            </div>
-          </div>
-        `;
-      }
-
-      if (f.type === 'FILE_UPLOAD') {
-        return `
-          <div class="p-3.5 rounded-xl border border-dashed border-zinc-300 bg-zinc-50 flex items-center justify-between gap-2 text-xs">
-            <span class="text-zinc-600 font-medium">Unggah Berkas PDF / Gambar / Dokumen</span>
-            <span class="px-2.5 py-1 rounded bg-white border border-zinc-300 font-semibold text-zinc-700 text-[11px]">Pilih Berkas</span>
-          </div>
-        `;
-      }
-
-      if (f.type === 'INFO_BANNER') {
-        return `
-          <div class="p-3 rounded-xl bg-indigo-50 border border-indigo-200 text-xs text-indigo-900">
-            ${f.description || 'Panduan dan instruksi pengisian.'}
-          </div>
-        `;
-      }
-
-      return '';
     }
 
     function toggleFieldRequired(sIdx, fIdx) {
@@ -8353,42 +8249,59 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
   </script>
 
   <!-- ========================================================================= -->
-  <!-- MODAL: LIVE FORM SIMULATOR (SIMULASI INTERAKTIF MAHASISWA WYSIWYG) -->
+  <!-- MODAL: LIVE FORM SIMULATOR (SIMULASI INTERAKTIF MAHASISWA WYSIWYG EXACT DRAFT) -->
   <!-- ========================================================================= -->
-  <div id="modalLiveFormSimulator" class="hidden fixed inset-0 z-50 bg-zinc-950/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
-    <div class="bg-zinc-100 rounded-3xl max-w-2xl w-full max-h-[95vh] flex flex-col shadow-2xl border border-zinc-700 overflow-hidden fade-enter">
+  <div id="modalLiveFormSimulator" class="hidden fixed inset-0 z-50 bg-zinc-950/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4">
+    <div class="bg-zinc-900 rounded-3xl max-w-5xl w-full h-[92vh] max-h-[92vh] flex flex-col shadow-2xl border border-zinc-700 overflow-hidden fade-enter">
       
       <!-- Simulator Top Control Bar -->
-      <div class="bg-zinc-900 text-white px-4 py-3 flex items-center justify-between border-b border-zinc-800 flex-shrink-0">
-        <div class="flex items-center gap-2">
-          <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
-          <span class="font-bold text-xs sm:text-sm font-mono tracking-tight">Simulasi Formulir Mahasiswa • Live Preview</span>
+      <div class="bg-zinc-950 text-white px-4 py-2.5 flex items-center justify-between border-b border-zinc-800 flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2">
+            <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
+            <span class="font-bold text-xs sm:text-sm font-mono tracking-tight text-white">Simulasi Draf Formulir Mahasiswa</span>
+          </div>
+          <span class="hidden sm:inline text-[10px] px-2 py-0.5 rounded-full bg-indigo-950 text-indigo-300 border border-indigo-800 font-medium">100% Identik Tampilan Asli</span>
         </div>
+
         <div class="flex items-center gap-2">
+          <!-- Device Preview Toggles -->
+          <div class="hidden sm:flex items-center bg-zinc-900 rounded-lg p-0.5 border border-zinc-800 text-xs">
+            <button type="button" onclick="setSimulatorDevice('desktop')" id="simDevBtnDesktop" class="px-2.5 py-1 rounded-md font-medium text-white bg-zinc-800 transition cursor-pointer shadow-xs" title="Tampilan Desktop">Desktop</button>
+            <button type="button" onclick="setSimulatorDevice('tablet')" id="simDevBtnTablet" class="px-2.5 py-1 rounded-md font-medium text-zinc-400 hover:text-white transition cursor-pointer" title="Tampilan Tablet">Tablet</button>
+            <button type="button" onclick="setSimulatorDevice('mobile')" id="simDevBtnMobile" class="px-2.5 py-1 rounded-md font-medium text-zinc-400 hover:text-white transition cursor-pointer" title="Tampilan Mobile">Mobile</button>
+          </div>
+
           <button 
             type="button" 
             onclick="openLivePreviewInNewTab()" 
-            class="px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white text-xs font-medium border border-zinc-700 flex items-center gap-1 transition cursor-pointer"
-            title="Buka Pratinjau di Tab Baru"
+            class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-xs flex items-center gap-1.5 transition cursor-pointer"
+            title="Buka Pratinjau Draf di Tab Baru"
           >
-            <span>Buka Tab Baru ↗</span>
+            <span>Buka Tab Baru</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
           </button>
-          <button type="button" onclick="closeLiveFormSimulator()" class="w-8 h-8 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center cursor-pointer transition">
+          <button type="button" onclick="closeLiveFormSimulator()" class="w-8 h-8 rounded-xl hover:bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center cursor-pointer transition" title="Tutup">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
           </button>
         </div>
       </div>
 
-      <!-- Simulator Device Frame / Screen Area -->
-      <div id="simulatorScreenContainer" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-zinc-100">
-        <!-- Rendered dynamically via renderSimulatorContent() -->
+      <!-- Simulator Device Frame / Screen Area with Authentic Iframe -->
+      <div class="flex-1 bg-zinc-950/60 p-2 sm:p-4 flex items-center justify-center overflow-hidden">
+        <div id="simulatorDeviceWrapper" class="w-full h-full bg-white rounded-2xl overflow-hidden shadow-2xl border border-zinc-800 transition-all duration-300">
+          <iframe id="simulatorIframe" src="about:blank" class="w-full h-full border-0 bg-white" title="Simulasi Formulir Mahasiswa"></iframe>
+        </div>
       </div>
 
       <!-- Simulator Bottom Footer -->
-      <div class="bg-white px-4 py-2.5 border-t border-zinc-200 flex items-center justify-between text-xs text-zinc-500 flex-shrink-0">
-        <span class="text-[11px] font-mono text-zinc-400">Mode Simulasi Draf (Tidak mempengaruhi data respons)</span>
-        <button type="button" onclick="closeLiveFormSimulator()" class="px-3 py-1.5 rounded-lg bg-zinc-900 text-white text-xs font-semibold hover:bg-zinc-800 transition cursor-pointer">
-          Tutup Simulasi
+      <div class="bg-zinc-950 px-4 py-2 border-t border-zinc-800 flex items-center justify-between text-xs text-zinc-400 flex-shrink-0">
+        <div class="flex items-center gap-2 text-[11px]">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span>Draf Sedang Disimulasikan: <strong class="text-white" id="simActiveTitle">Penilaian</strong> (Tidak mengubah respons database)</span>
+        </div>
+        <button type="button" onclick="closeLiveFormSimulator()" class="px-3 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold transition cursor-pointer">
+          Tutup
         </button>
       </div>
 

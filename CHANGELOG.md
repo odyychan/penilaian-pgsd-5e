@@ -4,6 +4,24 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Sistem Peer
 
 ---
 
+## [2.2.30] - 2026-08-24
+
+### 🚀 Pratinjau Live Identik Draf, Compact Math Popover & Sinkronisasi Alur Dinamis
+- **Pratinjau Live Identik Draf 100% (*Exact WYSIWYG In-Memory Simulator*):**
+  - Mengintegrasikan pratinjau formulir mahasiswa dengan iframe responsif interaktif langsung di dalam modal admin maupun di jendela baru ("Buka Tab Baru").
+  - Menampilkan secara presisi data draf yang sedang diedit pengguna saat ini (*in-memory editing draft state* via `PGSD_DRAFT_SCHEMA` & `PGSD_DRAFT_CONFIG`), terisolasi penuh tanpa menunggu publikasi database.
+  - Dilengkapi fitur pengalih pratinjau perangkat multi-platform: **Desktop 💻**, **Tablet 📱**, dan **Mobile 📲**.
+- **Palet Rumus Compact Floating Overlay & Konversi Blok Teks Instan:**
+  - Mengubah palet simbol matematika menjadi popover melayang (*compact floating overlay*) yang tidak menggeser atau merusak tata letak formulir.
+  - Menghadirkan deteksi seleksi teks pintar: memblok teks lalu menekan `∑ Rumus` akan otomatis mengonversi teks tersebut menjadi format matematika KaTeX (`$teks$`) lengkap dengan lencana pratinjau rumus *real-time*.
+- **Sinkronisasi Dinamis Alur & Reordering Presisi:**
+  - Judul bagian yang belum dikustomisasi otomatis sinkron secara *real-time* ke kartu alur tahapan.
+  - Kustomisasi teks alur tersimpan aman saat tahapan dipindah naik/turun (*reorder*), dan tombol pintasan gulir (*quick jump*) selalu mengarah ke posisi bagian yang benar.
+- **Pengujian Headless Browser:**
+  - Terverifikasi 100% lolos uji interaksi seleksi teks, floating popover, pengurutan tahapan alur, dan rendering pratinjau draf pada pengujian remote Playwright.
+
+---
+
 ## [2.2.29] - 2026-08-24
 
 ### 📝 Pengeditan Bebas Alur Tahapan Pengisian Tanpa Mengubah Isi Bagian

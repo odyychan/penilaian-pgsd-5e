@@ -1532,6 +1532,7 @@
 
     // Multi-Form & Dynamic Questions State
     const urlParams = new URLSearchParams(window.location.search);
+    const isPreviewMode = urlParams.get('preview') === 'draft' || urlParams.get('preview') === 'true';
     let activeFormId = (urlParams.get('id') || urlParams.get('form') || localStorage.getItem('PGSD_ACTIVE_CLIENT_FORM_ID') || 'BK5E').toUpperCase();
     let currentFormMeta = null;
     let customFieldsData = [];
@@ -1560,6 +1561,24 @@
     // =========================================================================
     // UNIVERSAL SMART MATH & KATEX AUTO-RENDER ENGINE (CONFLICT-FREE & ULTRA PRECISE)
     // =========================================================================
+    function isFormatOrMathPresent(text) {
+      if (!text || typeof text !== 'string') return false;
+      const formatted = smartMathFormat(text);
+      return (
+        formatted.includes('$') || 
+        formatted.includes('\\(') || 
+        formatted.includes('\\[') || 
+        formatted.includes('<strong>') || 
+        formatted.includes('<em>') || 
+        formatted.includes('<u>') || 
+        formatted.includes('<a ') || 
+        formatted.includes('<sup>') || 
+        formatted.includes('<sub>') ||
+        /[\\^_{}±≤≥≠≈∞×÷πθαβγλμσΔ∑∫]/.test(text) ||
+        /\\(frac|sqrt|int|sum|prod|alpha|beta|gamma|Delta|theta|lambda|pi|mu|sigma|pm|le|ge|ne|approx|times|div|infty)\b/.test(text)
+      );
+    }
+
     function smartMathFormat(text) {
       if (!text || typeof text !== 'string') return "";
 
@@ -1629,15 +1648,11 @@
         return res;
       }
 
-      // 2. Pure LaTeX commands without $ (e.g. \frac{a}{b}, \sqrt{x})
-      if (/\\(frac|sqrt|int|sum|prod|alpha|beta|gamma|theta|lambda|pi|pm|times|div|le|ge|ne|approx|infty|begin|mathbf|lim|det|log|ln|sin|cos|tan)\b/.test(res)) {
-        return `$${res.trim()}$`;
-      }
+      // 2. Pure LaTeX commands without $ (e.g. \frac{a}{b}, \sqrt{x}, \alpha, \beta, \pm)
+      res = res.replace(/(\\(?:frac\{[^}]+\}\{[^}]+\}|sqrt\{[^}]*\}|pm|times|div|le|ge|ne|approx|infty|alpha|beta|gamma|delta|Delta|theta|lambda|pi|mu|sigma|sum|int|lim|sin|cos|tan)\b)/g, '$$$1$$');
 
-      // 3. Standalone caret / subscript term (e.g. x^2, x^{2}, y_1, (a+b)^2)
-      if (/^[a-zA-Z0-9\(\)]+[\^_][a-zA-Z0-9\{\}\(\)\+\-]+$/.test(res.trim())) {
-        return `$${res.trim()}$`;
-      }
+      // 3. Standalone or inline caret / subscript term (e.g. x^2, x^{2}, y_1, (a+b)^2, a^2+b^2)
+      res = res.replace(/\b([a-zA-Z0-9\)]+[\^_]\{?[a-zA-Z0-9\+\-]+\}?)/g, '$$$1$$');
 
       return res;
     }
@@ -2323,13 +2338,14 @@
           <div class="p-2.5 rounded-lg bg-white border border-zinc-200/60 flex items-start gap-2.5">
             <span class="w-5 h-5 rounded-full bg-zinc-900 text-white font-mono text-[10px] font-bold flex items-center justify-center flex-shrink-0">${num}</span>
             <div class="min-w-0">
-              <div class="font-semibold text-zinc-900 truncate" title="${escapeHtml(stageTitle)}">${escapeHtml(stageTitle)}</div>
-              <div class="text-[11px] text-zinc-500 line-clamp-1" title="${escapeHtml(stageDesc)}">${escapeHtml(stageDesc)}</div>
+              <div class="font-semibold text-zinc-900 truncate math-renderable" title="${escapeHtml(stageTitle)}">${smartMathFormat(stageTitle)}</div>
+              <div class="text-[11px] text-zinc-500 line-clamp-1 math-renderable" title="${escapeHtml(stageDesc)}">${smartMathFormat(stageDesc)}</div>
             </div>
           </div>
         `;
       });
       container.innerHTML = html;
+      renderAllMathInElement(container);
     }
 
     function renderDynamicClientStages() {
@@ -2428,11 +2444,11 @@
       if (f.type === 'TITLE_DESC') {
         return `
           <div class="bg-indigo-50/60 p-4 sm:p-5 rounded-2xl border border-indigo-100 space-y-1.5">
-            <div class="flex items-center gap-2 text-indigo-900 font-bold text-xs sm:text-sm">
+            <div class="flex items-center gap-2 text-indigo-900 font-bold text-xs sm:text-sm math-renderable">
               <svg class="w-4 h-4 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-              <span>${f.label || 'Informasi'}</span>
+              <span>${smartMathFormat(f.label || 'Informasi')}</span>
             </div>
-            ${f.description ? `<p class="text-xs text-indigo-950/80 leading-relaxed">${f.description}</p>` : ''}
+            ${f.description ? `<p class="text-xs text-indigo-950/80 leading-relaxed math-renderable">${smartMathFormat(f.description)}</p>` : ''}
           </div>
         `;
       }
@@ -2608,7 +2624,7 @@
               <div class="scale-circle-${f.id} w-9 h-9 sm:w-10 sm:h-10 rounded-xl border ${isSelected ? 'bg-zinc-900 text-white border-zinc-900 shadow-sm' : 'bg-white text-zinc-700 border-zinc-300 hover:border-zinc-500 hover:bg-zinc-50'} font-mono font-bold text-xs sm:text-sm flex items-center justify-center transition active:scale-95">
                 ${i}
               </div>
-              ${pointLabel ? `<span class="text-[10px] sm:text-[11px] text-zinc-500 font-medium text-center leading-tight max-w-[70px] math-renderable">${pointLabel}</span>` : ''}
+              ${pointLabel ? `<span class="text-[10px] sm:text-[11px] text-zinc-500 font-medium text-center leading-tight max-w-[70px] math-renderable">${smartMathFormat(pointLabel)}</span>` : ''}
             </label>
           `;
         }
@@ -2637,7 +2653,7 @@
           <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-3">
             <div>
               <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Unggah Berkas / Dokumen')}${reqBadge}</label>
-              <p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${f.description || 'Mendukung berkas PDF, PPTX, DOCX, Foto JPG/PNG (Maks 10 MB).'}</p>
+              <p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description || 'Mendukung berkas PDF, PPTX, DOCX, Foto JPG/PNG (Maks 10 MB).')}</p>
             </div>
             <div class="p-4 bg-white rounded-xl border border-dashed border-zinc-300 hover:border-zinc-400 flex flex-col sm:flex-row items-center justify-between gap-3 transition">
               <div class="flex items-center gap-3 min-w-0">
@@ -2677,8 +2693,8 @@
       if (f.type === 'DATE') {
         return `
           <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2">
-            <label class="block text-xs font-bold text-zinc-900 leading-snug">${f.label || 'Tanggal'}${reqBadge}</label>
-            ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed">${f.description}</p>` : ''}
+            <label class="block text-xs font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Tanggal')}${reqBadge}</label>
+            ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed math-renderable">${smartMathFormat(f.description)}</p>` : ''}
             <input 
               type="date" 
               value="${savedVal}" 
@@ -2694,8 +2710,8 @@
       if (f.type === 'TIME') {
         return `
           <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2">
-            <label class="block text-xs font-bold text-zinc-900 leading-snug">${f.label || 'Waktu'}${reqBadge}</label>
-            ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed">${f.description}</p>` : ''}
+            <label class="block text-xs font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Waktu')}${reqBadge}</label>
+            ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed math-renderable">${smartMathFormat(f.description)}</p>` : ''}
             <input 
               type="time" 
               value="${savedVal}" 
@@ -3139,6 +3155,18 @@
           };
         }
 
+        // Exact In-Memory / Local Draft Schema & Config for Preview Mode
+        if (isPreviewMode) {
+          const draftSchemaStr = sessionStorage.getItem("PGSD_DRAFT_SCHEMA_" + activeFormId) || localStorage.getItem("PGSD_DRAFT_SCHEMA_" + activeFormId);
+          const draftConfigStr = sessionStorage.getItem("PGSD_DRAFT_CONFIG_" + activeFormId) || localStorage.getItem("PGSD_DRAFT_CONFIG_" + activeFormId);
+          if (draftSchemaStr) {
+            try { currentFormSchema = JSON.parse(draftSchemaStr); } catch(e) {}
+          }
+          if (draftConfigStr) {
+            try { appConfig = JSON.parse(draftConfigStr); } catch(e) {}
+          }
+        }
+
         if (cachedGroups) {
           try { groupsData = JSON.parse(cachedGroups); } catch(e) {}
         } else if (!isDefault) {
@@ -3214,19 +3242,28 @@
         const result = await response.json();
 
         if (result && result.success) {
-          appConfig = result.config || {};
           groupsData = result.groups || [];
           customFieldsData = result.customFields || [];
           currentFormMeta = result.formMeta || null;
-          
-          const localSchemaStr = localStorage.getItem('PGSD_CACHE_FORM_SCHEMA_' + activeFormId) || localStorage.getItem('PGSD_DRAFT_SCHEMA_' + activeFormId);
-          let localSchema = null;
-          try { if (localSchemaStr) localSchema = JSON.parse(localSchemaStr); } catch(e){}
 
           if (isPreviewMode) {
-            const draft = localStorage.getItem('PGSD_DRAFT_SCHEMA_' + activeFormId);
-            currentFormSchema = draft ? JSON.parse(draft) : (result.formSchema || localSchema || null);
+            const draftSchemaStr = sessionStorage.getItem("PGSD_DRAFT_SCHEMA_" + activeFormId) || localStorage.getItem("PGSD_DRAFT_SCHEMA_" + activeFormId);
+            const draftConfigStr = sessionStorage.getItem("PGSD_DRAFT_CONFIG_" + activeFormId) || localStorage.getItem("PGSD_DRAFT_CONFIG_" + activeFormId);
+            if (draftSchemaStr) {
+              try { currentFormSchema = JSON.parse(draftSchemaStr); } catch(e) {}
+            } else {
+              currentFormSchema = result.formSchema || (result.formMeta && result.formMeta.customFields) || null;
+            }
+            if (draftConfigStr) {
+              try { appConfig = JSON.parse(draftConfigStr); } catch(e) {}
+            } else {
+              appConfig = result.config || {};
+            }
           } else {
+            appConfig = result.config || {};
+            const localSchemaStr = localStorage.getItem('PGSD_CACHE_FORM_SCHEMA_' + activeFormId);
+            let localSchema = null;
+            try { if (localSchemaStr) localSchema = JSON.parse(localSchemaStr); } catch(e){}
             currentFormSchema = result.formSchema || (result.formMeta && result.formMeta.customFields) || localSchema || null;
           }
 
@@ -3284,16 +3321,24 @@
       const dosen = appConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || "-";
       const sesi = appConfig["Sesi_Minggu_Aktif"] || (currentFormMeta && currentFormMeta.sesiAktif) || "Minggu 1";
 
-      document.getElementById("navTitle").textContent = title;
-      document.getElementById("navSubtitle").textContent = matkul;
+      const formattedTitle = smartMathFormat(title);
+      const rawDesc = appConfig["Deskripsi_Form"] || (currentFormMeta && currentFormMeta.deskripsi) || (currentFormSchema && currentFormSchema.tahapan && currentFormSchema.tahapan[0] && currentFormSchema.tahapan[0].description) || `Formulir penilaian perkuliahan ${matkul} (${appConfig["Kelas"] || ''}) yang diisi oleh mahasiswa/penilai.`;
+      const formattedDesc = smartMathFormat(rawDesc);
+
+      document.getElementById("navTitle").innerHTML = formattedTitle;
+      document.getElementById("navSubtitle").innerHTML = smartMathFormat(matkul);
       document.getElementById("badgeSesiTopText").textContent = sesi;
 
       // Update Landing Hero Title & Description
       const overviewJudulEl = document.getElementById("overviewJudulForm");
       const overviewDescEl = document.getElementById("overviewDeskripsiForm");
-      if (overviewJudulEl) overviewJudulEl.textContent = title;
+      if (overviewJudulEl) {
+        overviewJudulEl.innerHTML = formattedTitle;
+        overviewJudulEl.classList.add("math-renderable");
+      }
       if (overviewDescEl) {
-        overviewDescEl.textContent = appConfig["Deskripsi_Form"] || (currentFormMeta && currentFormMeta.deskripsi) || (currentFormSchema && currentFormSchema.tahapan && currentFormSchema.tahapan[0] && currentFormSchema.tahapan[0].description) || `Formulir penilaian perkuliahan ${matkul} (${appConfig["Kelas"] || ''}) yang diisi oleh mahasiswa/penilai.`;
+        overviewDescEl.innerHTML = formattedDesc;
+        overviewDescEl.classList.add("math-renderable");
       }
       
       // Update Academic Card
@@ -3301,15 +3346,20 @@
       const infoDosenEl = document.getElementById("infoDosen");
       const infoKelasEl = document.getElementById("infoKelas");
       const infoJurusanEl = document.getElementById("infoJurusan");
-      if (infoMatkulEl) infoMatkulEl.textContent = matkul;
-      if (infoDosenEl) infoDosenEl.textContent = dosen;
-      if (infoKelasEl) infoKelasEl.textContent = appConfig["Kelas"] || (currentFormMeta && currentFormMeta.kelas) || "5E";
-      if (infoJurusanEl) infoJurusanEl.textContent = appConfig["Jurusan"] || (currentFormMeta && currentFormMeta.jurusan) || "PGSD";
+      if (infoMatkulEl) infoMatkulEl.innerHTML = smartMathFormat(matkul);
+      if (infoDosenEl) infoDosenEl.innerHTML = smartMathFormat(dosen);
+      if (infoKelasEl) infoKelasEl.innerHTML = smartMathFormat(appConfig["Kelas"] || (currentFormMeta && currentFormMeta.kelas) || "5E");
+      if (infoJurusanEl) infoJurusanEl.innerHTML = smartMathFormat(appConfig["Jurusan"] || (currentFormMeta && currentFormMeta.jurusan) || "PGSD");
 
       renderOverviewAlurTahapan();
       updateStepMetadataFromSchema();
       renderDynamicStepTabs();
       renderDynamicClientStages();
+
+      setTimeout(() => {
+        renderAllMathInElement(document.getElementById("formOverviewSection"));
+        renderAllMathInElement(document.body);
+      }, 50);
 
       const minVal = parseInt(appConfig["Nilai_Kelompok_Min"] || 50);
       const maxVal = parseInt(appConfig["Nilai_Kelompok_Max"] || 100);
