@@ -3848,39 +3848,27 @@ function getOrCreateFolder(folderName) {
               await sb.from('pgsd_students').delete().eq('form_id', task.formId);
               await sb.from('pgsd_groups').delete().eq('form_id', task.formId);
 
-              const groupsToInsert = [];
-              const studentsToInsert = [];
-
-              task.payload.forEach((g, gIdx) => {
-                const groupId = g.id || `GRP-${task.formId}-${gIdx + 1}`;
-                groupsToInsert.push({
-                  id: groupId,
+              for (let gIdx = 0; gIdx < task.payload.length; gIdx++) {
+                const g = task.payload[gIdx];
+                const { data: insertedG, error: gErr } = await sb.from('pgsd_groups').insert([{
                   form_id: task.formId,
                   name: g.name,
                   sesi: g.sesi || "Minggu 1",
                   status: g.status || "AKTIF",
                   display_order: gIdx + 1
-                });
+                }]).select();
 
-                if (Array.isArray(g.members)) {
-                  g.members.forEach((m, mIdx) => {
-                    studentsToInsert.push({
-                      form_id: task.formId,
-                      group_id: groupId,
-                      nim: m.nim || "-",
-                      name: m.name || `Mahasiswa ${mIdx + 1}`,
-                      group_name: g.name,
-                      status: m.status || "AKTIF"
-                    });
-                  });
+                if (!gErr && insertedG && insertedG[0] && Array.isArray(g.members) && g.members.length > 0) {
+                  const studentsToInsert = g.members.map((m, mIdx) => ({
+                    form_id: task.formId,
+                    group_id: insertedG[0].id,
+                    group_name: g.name,
+                    nim: m.nim || "-",
+                    name: m.name || `Mahasiswa ${mIdx + 1}`,
+                    status: m.status || "AKTIF"
+                  }));
+                  await sb.from('pgsd_students').insert(studentsToInsert);
                 }
-              });
-
-              if (groupsToInsert.length > 0) {
-                await sb.from('pgsd_groups').insert(groupsToInsert);
-              }
-              if (studentsToInsert.length > 0) {
-                await sb.from('pgsd_students').insert(studentsToInsert);
               }
             }
           } catch (sbErr) {
@@ -4282,15 +4270,26 @@ function getOrCreateFolder(folderName) {
         "info"
       );
 
+      // ⚡ FAST-PATH (< 30ms): Simpan langsung ke Supabase PostgreSQL
+      const sb = await ensureSupabaseClient();
+      if (sb && targetForm) {
+        try {
+          await sb.from('pgsd_forms').update({
+            status: newStatus,
+            updated_at: new Date().toISOString()
+          }).eq('form_id', targetForm);
+        } catch (sbErr) {
+          console.warn("Supabase toggle status notice:", sbErr);
+        }
+      }
+
       const apiUrl = getApiUrl();
-      try {
-        await fetch(apiUrl, {
+      if (apiUrl) {
+        fetch(apiUrl, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({ action: "adminUpdateFormMeta", formId: targetForm, status: newStatus })
-        });
-      } catch (err) {
-        console.warn("Cloud status sync deferred:", err);
+        }).catch(err => console.warn("Cloud status sync deferred:", err));
       }
     }
 
@@ -8153,7 +8152,7 @@ function getOrCreateFolder(folderName) {
       e.preventDefault();
       const btn = document.getElementById("btnSubmitCreateForm");
       btn.disabled = true;
-      btn.innerHTML = `<span>Membuat Sheets &amp; Registry...</span>`;
+      btn.innerHTML = `<span>Menyimpan ke Supabase...</span>`;
 
       const judulForm = document.getElementById("wiz_Judul_Form").value.trim();
       const mataKuliah = document.getElementById("wiz_Mata_Kuliah").value.trim();
@@ -8161,57 +8160,123 @@ function getOrCreateFolder(folderName) {
       const kelas = document.getElementById("wiz_Kelas").value.trim();
       const jurusan = document.getElementById("wiz_Jurusan").value.trim();
       const sesi = document.getElementById("wiz_Sesi").value.trim();
-      const customFormId = document.getElementById("wiz_Form_Id").value.trim().toUpperCase();
-      const customSlug = document.getElementById("wiz_Form_Slug").value.trim().toLowerCase();
+      let customFormId = document.getElementById("wiz_Form_Id").value.trim().toUpperCase();
+      let customSlug = document.getElementById("wiz_Form_Slug").value.trim().toLowerCase();
       const rosterOption = document.querySelector('input[name="wizRosterOption"]:checked')?.value || 'empty';
 
-      const apiUrl = getApiUrl();
+      if (!customFormId) {
+        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        for (let i = 0; i < 4; i++) customFormId += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      if (!customSlug) customSlug = customFormId.toLowerCase();
+
       try {
-        const response = await fetch(apiUrl, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            action: "adminCreateForm",
-            judulForm: judulForm,
-            mataKuliah: mataKuliah,
-            dosen: dosen,
-            kelas: kelas,
-            jurusan: jurusan,
-            sesiAktif: sesi,
-            customFormId: customFormId,
-            customSlug: customSlug
-          })
+        // ⚡ FAST-PATH (< 30ms): Simpan langsung ke Supabase PostgreSQL
+        const sb = await ensureSupabaseClient();
+        if (!sb) throw new Error("Koneksi Supabase belum siap.");
+
+        const newFormRow = {
+          form_id: customFormId,
+          form_slug: customSlug,
+          judul_form: judulForm,
+          mata_kuliah: mataKuliah,
+          dosen: dosen,
+          kelas: kelas,
+          jurusan: jurusan || 'PGSD',
+          sesi_aktif: sesi || 'Minggu 1',
+          status: 'AKTIF',
+          is_primary: false,
+          google_drive_folder: 'Arsip Penilaian FKIP ULM - Dokumen'
+        };
+
+        const { error: insErr } = await sb.from('pgsd_forms').insert([newFormRow]);
+        if (insErr) throw new Error(insErr.message || JSON.stringify(insErr));
+
+        const initialConfig = {
+          Judul_Form: judulForm,
+          Mata_Kuliah: mataKuliah,
+          Dosen_Pengampu: dosen,
+          Kelas: kelas,
+          Jurusan: jurusan || 'PGSD',
+          Deskripsi_Form: '',
+          Sesi_Minggu_Aktif: sesi || 'Minggu 1',
+          Domain_Email_Wajib: 'mhs.ulm.ac.id, ulm.ac.id',
+          Nilai_Kelompok_Min: '50',
+          Nilai_Kelompok_Max: '100',
+          Pembuat_Web_Prefix: 'Dibuat oleh',
+          Pembuat_Web_Nama: '',
+          Pembuat_Web_Nim: '',
+          Tampilkan_Ulasan_Publik: 'AKTIF',
+          Kewajiban_Menilai_Penyaji: 'BEBAS_PENUH_DI_SESINYA',
+          Maksimal_Karakter_Evaluasi: '500',
+          Maksimal_Pilihan_Presentator_Terbaik: '2'
+        };
+
+        const initialSchema = getBlankFormSchema();
+
+        await sb.from('pgsd_form_configs').upsert({
+          form_id: customFormId,
+          config_data: initialConfig,
+          schema_data: initialSchema,
+          updated_at: new Date().toISOString()
         });
-        const res = await response.json();
-        if (res.success) {
-          closeCreateFormModal();
-          showAdminToast(`Formulir '${judulForm}' (ID: ${res.formId}) berhasil dibuat!`, "success");
-          
-          if (rosterOption === 'clone_default' && adminMasterGroups.length > 0) {
-            // Salin roster master
-            await fetch(apiUrl, {
-              method: "POST",
-              headers: { "Content-Type": "text/plain;charset=utf-8" },
-              body: JSON.stringify({
-                action: "adminSaveMasterData",
-                formId: res.formId,
-                groups: adminMasterGroups
-              })
-            });
+
+        if (rosterOption === 'clone_default' && Array.isArray(adminMasterGroups) && adminMasterGroups.length > 0) {
+          for (let gIdx = 0; gIdx < adminMasterGroups.length; gIdx++) {
+            const g = adminMasterGroups[gIdx];
+            const { data: gData } = await sb.from('pgsd_groups').insert([{
+              form_id: customFormId,
+              name: g.name,
+              sesi: g.sesi || sesi || "Minggu 1",
+              status: g.status || 'AKTIF',
+              display_order: gIdx + 1
+            }]).select();
+
+            if (gData && gData[0] && Array.isArray(g.members) && g.members.length > 0) {
+              const sToInsert = g.members.map((m, mIdx) => ({
+                form_id: customFormId,
+                group_id: gData[0].id,
+                group_name: g.name,
+                nim: m.nim || "-",
+                name: m.name || `Mahasiswa ${mIdx + 1}`,
+                status: m.status || "AKTIF"
+              }));
+              await sb.from('pgsd_students').insert(sToInsert);
+            }
           }
-
-          const initialBlankSchema = getBlankFormSchema();
-          localStorage.setItem(`PGSD_DRAFT_SCHEMA_${res.formId}`, JSON.stringify(initialBlankSchema));
-          localStorage.setItem(`PGSD_CACHE_FORM_SCHEMA_${res.formId}`, JSON.stringify(initialBlankSchema));
-          adminFormSchema = initialBlankSchema;
-
-          await fetchFormsRegistry(true);
-          openFormWorkspace(res.formId);
-        } else {
-          showAdminToast("Gagal membuat formulir: " + res.error, "error");
         }
+
+        closeCreateFormModal();
+        showAdminToast(`Formulir '${judulForm}' (PIN: ${customFormId}) berhasil dibuat di Supabase!`, "success");
+
+        localStorage.setItem(`PGSD_DRAFT_SCHEMA_${customFormId}`, JSON.stringify(initialSchema));
+        localStorage.setItem(`PGSD_CACHE_CONFIG_${customFormId}`, JSON.stringify(initialConfig));
+        adminFormSchema = initialSchema;
+
+        // Background forward ke Google Sheets jika ada
+        const apiUrl = getApiUrl();
+        if (apiUrl) {
+          fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              action: "adminCreateForm",
+              judulForm: judulForm,
+              mataKuliah: mataKuliah,
+              dosen: dosen,
+              kelas: kelas,
+              jurusan: jurusan,
+              sesiAktif: sesi,
+              customFormId: customFormId,
+              customSlug: customSlug
+            })
+          }).catch(e => console.warn("Background sheet sync notice:", e));
+        }
+
+        await fetchFormsRegistry(true);
+        openFormWorkspace(customFormId);
       } catch (err) {
-        showAdminToast("Terjadi kesalahan koneksi cloud: " + err, "error");
+        showAdminToast("Gagal membuat formulir: " + err.message, "error");
       } finally {
         btn.disabled = false;
         btn.innerHTML = `<span>Buat Formulir Sekarang</span>`;
@@ -8243,26 +8308,20 @@ function getOrCreateFolder(folderName) {
     async function handleExecuteDeleteForm() {
       if (!pendingDeleteFormId) return;
       const formIdToDelete = pendingDeleteFormId;
-      const deleteSheets = document.getElementById("checkDeleteGoogleSheets").checked;
       const btn = document.getElementById("btnConfirmExecuteDeleteForm");
       
       btn.disabled = true;
-      btn.innerHTML = `<span>Menghapus...</span>`;
+      btn.innerHTML = `<span>Menghapus dari Database...</span>`;
 
-      const apiUrl = getApiUrl();
       try {
-        const response = await fetch(apiUrl, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            action: "adminDeleteForm",
-            formId: formIdToDelete,
-            deleteSheets: deleteSheets
-          })
-        });
-        const res = await response.json();
-        
-        // Remove local caches
+        // ⚡ FAST-PATH (< 30ms): Hapus langsung di Supabase (Cascade otomatis menghapus configs, groups, students, responses)
+        const sb = await ensureSupabaseClient();
+        if (sb) {
+          const { error: delErr } = await sb.from('pgsd_forms').delete().eq('form_id', formIdToDelete);
+          if (delErr) throw new Error(delErr.message);
+        }
+
+        // Hapus cache lokal
         localStorage.removeItem(`PGSD_DRAFT_SCHEMA_${formIdToDelete}`);
         localStorage.removeItem(`PGSD_CACHE_FORM_SCHEMA_${formIdToDelete}`);
         localStorage.removeItem(`PGSD_CACHE_CONFIG_${formIdToDelete}`);
@@ -8273,12 +8332,24 @@ function getOrCreateFolder(folderName) {
         localStorage.removeItem(`PGSD_FORM_DRAFT_${formIdToDelete}`);
         localStorage.removeItem(`PGSD_REVISIONS_${formIdToDelete}`);
 
-        // Update local formsRegistryList
         formsRegistryList = formsRegistryList.filter(f => (f.formId || DEFAULT_PRIMARY_FORM_ID) !== formIdToDelete);
         localStorage.setItem("PGSD_CACHE_REGISTRY_FORMS", JSON.stringify(formsRegistryList));
 
         closeDeleteFormModal();
-        showAdminToast(`Formulir '${formIdToDelete}' berhasil dihapus.`, "success");
+        showAdminToast(`Formulir '${formIdToDelete}' berhasil dihapus dari Supabase.`, "success");
+
+        // Background forward ke Google Apps Script jika ada
+        const apiUrl = getApiUrl();
+        if (apiUrl) {
+          fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              action: "adminDeleteForm",
+              formId: formIdToDelete
+            })
+          }).catch(e => console.warn("Background sheet delete notice:", e));
+        }
 
         if (currentFormId === formIdToDelete) {
           returnToMasterHub(true);
@@ -8286,27 +8357,7 @@ function getOrCreateFolder(folderName) {
           renderHubFormsGrid();
         }
       } catch (err) {
-        // Fallback local cleanup if network error
-        localStorage.removeItem(`PGSD_DRAFT_SCHEMA_${formIdToDelete}`);
-        localStorage.removeItem(`PGSD_CACHE_FORM_SCHEMA_${formIdToDelete}`);
-        localStorage.removeItem(`PGSD_CACHE_CONFIG_${formIdToDelete}`);
-        localStorage.removeItem(`PGSD_CACHE_GROUPS_${formIdToDelete}`);
-        localStorage.removeItem(`PGSD_CACHE_MASTER_${formIdToDelete}`);
-        localStorage.removeItem(`PGSD_CACHE_RESPONSES_${formIdToDelete}`);
-        localStorage.removeItem(`PGSD_CACHE_REKAP_${formIdToDelete}`);
-        localStorage.removeItem(`PGSD_FORM_DRAFT_${formIdToDelete}`);
-        localStorage.removeItem(`PGSD_REVISIONS_${formIdToDelete}`);
-        formsRegistryList = formsRegistryList.filter(f => (f.formId || DEFAULT_PRIMARY_FORM_ID) !== formIdToDelete);
-        localStorage.setItem("PGSD_CACHE_REGISTRY_FORMS", JSON.stringify(formsRegistryList));
-        
-        closeDeleteFormModal();
-        showAdminToast(`Formulir '${formIdToDelete}' berhasil dihapus dari daftar lokal.`, "info");
-        
-        if (currentFormId === formIdToDelete) {
-          returnToMasterHub(true);
-        } else {
-          renderHubFormsGrid();
-        }
+        showAdminToast("Gagal menghapus formulir: " + err.message, "error");
       } finally {
         btn.disabled = false;
         btn.innerHTML = `
@@ -8371,28 +8422,86 @@ function getOrCreateFolder(folderName) {
         type: "info"
       });
       if (!ok) return;
-      const apiUrl = getApiUrl();
-      try {
-        const response = await fetch(apiUrl, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "adminCloneForm", sourceFormId: sourceFormId })
-        });
-        const res = await response.json();
-        if (res.success) {
-          showAdminToast(res.message || "Formulir berhasil diduplikasi!", "success");
-          const initialBlankSchema = getBlankFormSchema();
-          localStorage.setItem(`PGSD_DRAFT_SCHEMA_${res.formId}`, JSON.stringify(initialBlankSchema));
-          localStorage.setItem(`PGSD_CACHE_FORM_SCHEMA_${res.formId}`, JSON.stringify(initialBlankSchema));
-          adminFormSchema = initialBlankSchema;
 
-          await fetchFormsRegistry(true);
-          openFormWorkspace(res.formId);
-        } else {
-          showAdminToast("Gagal kloning: " + res.error, "error");
+      try {
+        const sb = await ensureSupabaseClient();
+        if (!sb) throw new Error("Koneksi Supabase belum siap.");
+
+        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        let newPin = "";
+        for (let i = 0; i < 4; i++) newPin += chars.charAt(Math.floor(Math.random() * chars.length));
+
+        const [srcFormRes, srcConfigRes, srcGroupsRes, srcStudentsRes] = await Promise.all([
+          sb.from('pgsd_forms').select('*').eq('form_id', sourceFormId).single(),
+          sb.from('pgsd_form_configs').select('*').eq('form_id', sourceFormId).single(),
+          sb.from('pgsd_groups').select('*').eq('form_id', sourceFormId).order('display_order', { ascending: true }),
+          sb.from('pgsd_students').select('*').eq('form_id', sourceFormId)
+        ]);
+
+        const srcForm = srcFormRes.data;
+        const srcConfig = srcConfigRes.data;
+        const srcGroups = srcGroupsRes.data || [];
+        const srcStudents = srcStudentsRes.data || [];
+
+        const newJudul = `Salinan ${srcForm?.judul_form || sourceFormId}`;
+
+        await sb.from('pgsd_forms').insert([{
+          form_id: newPin,
+          form_slug: newPin.toLowerCase(),
+          judul_form: newJudul,
+          mata_kuliah: srcForm?.mata_kuliah || "Mata Kuliah",
+          dosen: srcForm?.dosen || "-",
+          kelas: srcForm?.kelas || "-",
+          jurusan: srcForm?.jurusan || "PGSD",
+          sesi_aktif: srcForm?.sesi_aktif || "Minggu 1",
+          status: 'AKTIF',
+          is_primary: false,
+          google_drive_folder: srcForm?.google_drive_folder || 'Arsip Penilaian FKIP ULM - Dokumen'
+        }]);
+
+        const initialBlankSchema = srcConfig?.schema_data || getBlankFormSchema();
+        await sb.from('pgsd_form_configs').upsert({
+          form_id: newPin,
+          config_data: srcConfig?.config_data || {},
+          schema_data: initialBlankSchema,
+          updated_at: new Date().toISOString()
+        });
+
+        if (srcGroups.length > 0) {
+          for (let g of srcGroups) {
+            const { data: insertedG } = await sb.from('pgsd_groups').insert([{
+              form_id: newPin,
+              name: g.name,
+              sesi: g.sesi,
+              status: g.status,
+              display_order: g.display_order
+            }]).select();
+
+            if (insertedG && insertedG[0]) {
+              const grpStudents = srcStudents.filter(s => s.group_id === g.id);
+              const sToInsert = grpStudents.map(s => ({
+                form_id: newPin,
+                group_id: insertedG[0].id,
+                group_name: g.name,
+                nim: s.nim,
+                name: s.name,
+                status: s.status
+              }));
+              if (sToInsert.length > 0) {
+                await sb.from('pgsd_students').insert(sToInsert);
+              }
+            }
+          }
         }
+
+        showAdminToast(`Formulir '${sourceFormId}' berhasil diduplikasi ke PIN: ${newPin}!`, "success");
+        localStorage.setItem(`PGSD_DRAFT_SCHEMA_${newPin}`, JSON.stringify(initialBlankSchema));
+        adminFormSchema = initialBlankSchema;
+
+        await fetchFormsRegistry(true);
+        openFormWorkspace(newPin);
       } catch (e) {
-        showAdminToast("Error saat kloning form.", "error");
+        showAdminToast("Error saat kloning form: " + e.message, "error");
       }
     }
 

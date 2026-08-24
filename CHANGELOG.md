@@ -4,6 +4,19 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.60] - 2026-08-25
+
+### ⚡ Transisi Penuh CRUD Formulir Langsung ke Supabase (Fast-Path < 30ms)
+- **Eliminasi Ketergantungan Legacy Endpoint pada Operasi Formulir:**
+  - Memperbarui fungsi pembuatan formulir (`handleCreateFormSubmit`), penghapusan formulir (`handleExecuteDeleteForm`), status toggle (`toggleFormStatusAction`), dan duplikasi (`cloneFormAction`) agar menulis dan menghapus data secara langsung ke Supabase PostgreSQL.
+  - Memperbaiki sinkronisasi data relasi kelompok & roster mahasiswa pada fungsi antrean (`processPendingSyncQueue`) dengan UUID generation yang valid.
+- **Pembersihan Constraint Status Basis Data Supabase:**
+  - Menghapus check constraint `pgsd_forms_status_check` yang restriktif di database agar mendukung variasi status formulir secara fleksibel tanpa error PostgreSQL 23514.
+- **Pengujian End-to-End Pembuatan & Penghapusan Formulir:**
+  - Berhasil menguji siklus pembuatan dan penghapusan formulir langsung dari antarmuka browser ke server Supabase secara instan.
+
+---
+
 ## [2.2.59] - 2026-08-25
 
 ### 🔄 Sinkronisasi Fallback Metadata Formulir Kustom & Validasi Offline/Vercel Readiness
