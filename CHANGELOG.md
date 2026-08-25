@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.72] - 2026-08-25
+
+### 🌐 Redesain Elegan & Panduan Lengkap Integrasi Google Spreadsheet & Drive Perkuliahan
+- **Penjelasan Fungsi & Tujuan Pengintegrasian:**
+  - Menyajikan fungsi integrasi secara gamblang: pencatatan nilai otomatis ke Spreadsheet dosen secara instan serta penyimpanan dan penataan berkas tugas/lampiran mahasiswa langsung ke folder Google Drive dosen.
+- **Tutorial Langkah Penghubungan 2-Kolom Lengkap (Spreadsheet & Drive):**
+  - Menyusun instruksi langkah penghubungan (*sharing service account bot*) secara terstruktur dan terpisah antara Google Spreadsheet dan Google Drive.
+- **Penyempurnaan Bahasa & Tata Letak Minimalis:**
+  - Merombak seluruh kalimat menjadi ringkas, padat, profesional, dan bebas dari gaya bahasa generik (*non-AI generated*).
+
+---
+
 ## [2.2.71] - 2026-08-25
 
 ### 📄 Perbaikan Responsivitas Total Modal Cetak Dokumen Rekapitulasi (PDF/A4)
