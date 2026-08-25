@@ -127,7 +127,6 @@ async function getOrCreateDriveFolder(token: string, folderName: string, parentF
 // Helper Drive: Unlink & Trash Folder/File secara tuntas
 async function unlinkAndTrashDriveItem(token: string, fileId: string, parentFolderId: string): Promise<void> {
   try {
-    // 1. Lepaskan hubungan dengan parent folder (bekerja meskipun berkas dimiliki akun pengguna)
     await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?removeParents=${parentFolderId}&supportsAllDrives=true`, {
       method: "PATCH",
       headers: {
@@ -139,7 +138,6 @@ async function unlinkAndTrashDriveItem(token: string, fileId: string, parentFold
   } catch(e) {}
 
   try {
-    // 2. Set status trashed jika bot memiliki izin
     await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
       method: "PATCH",
       headers: {
@@ -149,6 +147,70 @@ async function unlinkAndTrashDriveItem(token: string, fileId: string, parentFold
       body: JSON.stringify({ trashed: true })
     });
   } catch(e) {}
+}
+
+// Helper Sheets: Dapatkan daftar sheets yang ada di spreadsheet
+async function getSpreadsheetSheets(token: string, spreadsheetId: string): Promise<any[]> {
+  try {
+    const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?fields=sheets.properties`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+    return data.sheets || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+// Helper Sheets: Buat sheet baru jika belum ada
+async function ensureSheetExists(token: string, spreadsheetId: string, sheetTitle: string, headerRow: string[]): Promise<void> {
+  try {
+    const existing = await getSpreadsheetSheets(token, spreadsheetId);
+    const found = existing.find((s: any) => s.properties?.title === sheetTitle);
+    if (!found) {
+      // 1. Buat sheet baru
+      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          requests: [{ addSheet: { properties: { title: sheetTitle } } }]
+        })
+      });
+
+      // 2. Isi header
+      if (headerRow && headerRow.length > 0) {
+        await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(sheetTitle)}!A1?valueInputOption=USER_ENTERED`, {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ values: [headerRow] })
+        });
+      }
+    }
+  } catch (e) {}
+}
+
+// Helper Sheets: Hapus sheets berdasarkan form ID
+async function deleteSheetsForForm(token: string, spreadsheetId: string, formId: string): Promise<number> {
+  try {
+    const existing = await getSpreadsheetSheets(token, spreadsheetId);
+    const prefixes = [`Master_${formId}`, `Config_${formId}`, `Respons_${formId}`, `Rekap_${formId}`];
+    const toDelete = existing.filter((s: any) => prefixes.includes(s.properties?.title));
+
+    if (toDelete.length > 0) {
+      const requests = toDelete.map((s: any) => ({
+        deleteSheet: { sheetId: s.properties.sheetId }
+      }));
+      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ requests })
+      });
+      return toDelete.length;
+    }
+    return 0;
+  } catch (e) {
+    return 0;
+  }
 }
 
 // Main Handler
@@ -173,6 +235,8 @@ serve(async (req: Request) => {
     const action = payload.action || "status";
     const token = await getGoogleOAuthToken();
     const sa = getServiceAccount();
+    const spreadsheetId = payload.spreadsheetId || DEFAULT_SPREADSHEET_ID;
+    const rootFolderId = payload.driveFolderId || payload.driveFolderName || DEFAULT_DRIVE_FOLDER_ID;
 
     // 1. Action: Status Check
     if (action === "status" || action === "test") {
@@ -208,7 +272,6 @@ serve(async (req: Request) => {
         );
       }
 
-      const rootFolderId = payload.driveFolderId || DEFAULT_DRIVE_FOLDER_ID;
       await unlinkAndTrashDriveItem(token, fileId, rootFolderId);
 
       return new Response(
@@ -221,10 +284,9 @@ serve(async (req: Request) => {
       );
     }
 
-    // 3. Action: Hapus Formulir & Folder Drive Formulir
+    // 3. Action: Hapus Formulir & Folder Drive & Sheet Terkait (Total Zero-Orphan Deletion)
     if (action === "adminDeleteForm") {
       const targetFormId = String(payload.formId || "").trim().toUpperCase();
-      const rootFolderId = payload.driveFolderId || DEFAULT_DRIVE_FOLDER_ID;
 
       if (!targetFormId) {
         return new Response(
@@ -233,7 +295,7 @@ serve(async (req: Request) => {
         );
       }
 
-      // Cari folder form di Google Drive dan unparent/trash
+      // A. Cari folder form di Google Drive dan unparent/trash
       const query = `name = '${targetFormId}' and mimeType = 'application/vnd.google-apps.folder' and '${rootFolderId}' in parents and trashed = false`;
       const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name)`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -247,25 +309,55 @@ serve(async (req: Request) => {
         }
       }
 
+      // B. Hapus sheet terisolasi di Google Spreadsheet
+      const deletedSheetsCount = await deleteSheetsForForm(token, spreadsheetId, targetFormId);
+
       return new Response(
         JSON.stringify({
           success: true,
           formId: targetFormId,
           trashedFolderCount: trashedCount,
-          message: `Formulir '${targetFormId}' dan ${trashedCount} folder Google Drive berhasil dibersihkan secara total.`
+          deletedSheetsCount: deletedSheetsCount,
+          message: `Formulir '${targetFormId}', ${trashedCount} folder Google Drive, dan ${deletedSheetsCount} sheet berhasil dibersihkan secara total.`
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // 4. Action: Pembersihan Massal Folder Sampah / Yatim (Zero-Orphan Cleanup)
+    // 4. Action: Buat / Kloning Form Baru (Create Drive Folder & Isolated Sheets)
+    if (action === "adminCreateForm" || action === "adminCloneForm") {
+      const formId = String(payload.customFormId || payload.formId || "BARU").trim().toUpperCase();
+
+      // A. Buat Struktur Folder di Google Drive
+      const formFolderId = await getOrCreateDriveFolder(token, formId, rootFolderId);
+      const mediaFolderId = await getOrCreateDriveFolder(token, "Media_Formulir", formFolderId);
+      const lampiranFolderId = await getOrCreateDriveFolder(token, "Lampiran_Mahasiswa", formFolderId);
+
+      // B. Buat Sheet Terisolasi di Google Spreadsheet
+      await ensureSheetExists(token, spreadsheetId, `Master_${formId}`, ["Kelompok", "Sesi_Minggu", "NIM", "Nama_Lengkap", "Status_Aktif"]);
+      await ensureSheetExists(token, spreadsheetId, `Config_${formId}`, ["PARAMETER", "NILAI_PENGATURAN", "KETERANGAN"]);
+      await ensureSheetExists(token, spreadsheetId, `Respons_${formId}`, ["Timestamp", "Form_ID", "ID_Kelompok", "Kelompok_Dinilai", "NIM_Penilai", "Nama_Penilai", "Total_Skor"]);
+      await ensureSheetExists(token, spreadsheetId, `Rekap_${formId}`, ["Kelompok", "Sesi", "Jumlah_Penilai", "Rata_Rata_Skor", "Nilai_Akhir", "Grade"]);
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          formId: formId,
+          driveFolderId: formFolderId,
+          mediaFolderId: mediaFolderId,
+          lampiranFolderId: lampiranFolderId,
+          message: `Formulir '${formId}' beserta struktur folder Google Drive dan sheet berhasil disiapkan secara real-time!`
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // 5. Action: Pembersihan Massal Folder & Sheet Sampah / Yatim (Zero-Orphan Cleanup)
     if (action === "adminCleanupOrphanedFolders") {
       const activeForms = Array.isArray(payload.activeFormIds) 
         ? payload.activeFormIds.map((f: any) => String(f).trim().toUpperCase()).filter(Boolean)
-        : ["BK5E", "RF5P"];
+        : ["BK5E"];
       if (!activeForms.includes("BK5E")) activeForms.push("BK5E");
-
-      const rootFolderId = payload.driveFolderId || DEFAULT_DRIVE_FOLDER_ID;
 
       const query = `'${rootFolderId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
       const listRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name)`, {
@@ -284,21 +376,51 @@ serve(async (req: Request) => {
         }
       }
 
+      // Cleanup Orphaned Sheets in Spreadsheet
+      const existingSheets = await getSpreadsheetSheets(token, spreadsheetId);
+      const defaultPreserved = ["SHEET1", "REGISTRY_FORMS", "KONFIGURASI", "MASTER_KELOMPOK", "DAFTAR_FORMULIR", "RESPONS_PENILAIAN", "REKAP_NILAI"];
+      const sheetsToDelete: any[] = [];
+
+      for (const s of existingSheets) {
+        const title = s.properties?.title || "";
+        const titleUpper = title.trim().toUpperCase();
+        const prefixes = ["MASTER_", "CONFIG_", "RESPONS_", "REKAP_"];
+        for (const pfx of prefixes) {
+          if (titleUpper.startsWith(pfx)) {
+            const potId = titleUpper.replace(pfx, "").trim();
+            if (potId && !activeForms.includes(potId) && !defaultPreserved.includes(titleUpper)) {
+              sheetsToDelete.push(s.properties);
+              break;
+            }
+          }
+        }
+      }
+
+      if (sheetsToDelete.length > 0) {
+        const requests = sheetsToDelete.map((sp: any) => ({
+          deleteSheet: { sheetId: sp.sheetId }
+        }));
+        await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ requests })
+        });
+      }
+
       return new Response(
         JSON.stringify({
           success: true,
           trashedFolders: trashedNames,
-          message: `Berhasil memindahkan ${trashedNames.length} folder sampah (${trashedNames.join(', ') || 'tidak ada'}) dari folder Google Drive.`
+          deletedSheetsCount: sheetsToDelete.length,
+          message: `Berhasil membersihkan ${trashedNames.length} folder sampah dan ${sheetsToDelete.length} sheet yatim di Google Drive & Spreadsheet.`
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // 5. Action: Sinkronisasi Massal Semua Form
+    // 6. Action: Sinkronisasi Massal Semua Form
     if (action === "adminSyncAllForms") {
       const forms = Array.isArray(payload.forms) ? payload.forms : [];
-      const rootFolderId = payload.driveFolderId || DEFAULT_DRIVE_FOLDER_ID;
-
       const syncedResults = [];
 
       for (let i = 0; i < forms.length; i++) {
@@ -310,13 +432,18 @@ serve(async (req: Request) => {
         await getOrCreateDriveFolder(token, "Media_Formulir", formFolderId);
         await getOrCreateDriveFolder(token, "Lampiran_Mahasiswa", formFolderId);
 
+        await ensureSheetExists(token, spreadsheetId, `Master_${formId}`, ["Kelompok", "Sesi_Minggu", "NIM", "Nama_Lengkap", "Status_Aktif"]);
+        await ensureSheetExists(token, spreadsheetId, `Config_${formId}`, ["PARAMETER", "NILAI_PENGATURAN", "KETERANGAN"]);
+        await ensureSheetExists(token, spreadsheetId, `Respons_${formId}`, ["Timestamp", "Form_ID", "ID_Kelompok", "Kelompok_Dinilai", "NIM_Penilai", "Nama_Penilai", "Total_Skor"]);
+        await ensureSheetExists(token, spreadsheetId, `Rekap_${formId}`, ["Kelompok", "Sesi", "Jumlah_Penilai", "Rata_Rata_Skor", "Nilai_Akhir", "Grade"]);
+
         syncedResults.push({
           formId: formId,
           driveFolderId: formFolderId
         });
       }
 
-      // Auto-cleanup orphaned subfolders on Drive
+      // Auto-cleanup orphaned subfolders on Drive & Spreadsheet
       const activeIds = forms.map((f: any) => String(f.form_id || f.formId || "").trim().toUpperCase()).filter(Boolean);
       if (!activeIds.includes("BK5E")) activeIds.push("BK5E");
 
@@ -340,30 +467,10 @@ serve(async (req: Request) => {
       return new Response(
         JSON.stringify({
           success: true,
-          message: `Berhasil menyinkronkan ${syncedResults.length} formulir dan membersihkan ${trashedNames.length} folder sampah di Google Drive!`,
+          message: `Berhasil menyinkronkan ${syncedResults.length} formulir dan membersihkan ${trashedNames.length} folder sampah di Google Drive & Spreadsheet!`,
           syncedCount: syncedResults.length,
           trashedFolders: trashedNames,
           results: syncedResults
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // 6. Action: Buat Form Baru
-    if (action === "adminCreateForm") {
-      const formId = String(payload.customFormId || payload.formId || "BARU").trim().toUpperCase();
-      const rootFolderId = payload.driveFolderId || DEFAULT_DRIVE_FOLDER_ID;
-
-      const formFolderId = await getOrCreateDriveFolder(token, formId, rootFolderId);
-      await getOrCreateDriveFolder(token, "Media_Formulir", formFolderId);
-      await getOrCreateDriveFolder(token, "Lampiran_Mahasiswa", formFolderId);
-
-      return new Response(
-        JSON.stringify({
-          success: true,
-          formId: formId,
-          driveFolderId: formFolderId,
-          message: `Formulir '${formId}' berhasil disiapkan di Google Drive & Spreadsheet!`
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );

@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.92] - 2026-08-25
+
+### ⚡ Sinkronisasi Penuh 2-Arah Real-Time Siklus Hidup Formulir (Create, Clone, Edit, Delete)
+- **Otomatisasi Struktur Folder & Sheet Baru (*Create & Clone Form*):**
+  - Setiap kali formulir baru dibuat (`handleCreateFormSubmit`) atau dikloning (`cloneFormAction`), sistem secara *real-time* otomatis membuat folder `{PIN}/` di Google Drive beserta subfolder `Media_Formulir/` dan `Lampiran_Mahasiswa/`, serta membuat 4 lembar kerja terisolasi (`Master_{PIN}`, `Config_{PIN}`, `Respons_{PIN}`, `Rekap_{PIN}`) di Google Spreadsheet secara instan.
+- **Pembersihan Bersih Tanpa Sisa (*Zero-Orphan Deletion*):**
+  - Setiap penghapusan formulir langsung memutus hubungan folder Google Drive (`removeParents`), menghapus 4 lembar kerja terkait di Spreadsheet, dan membersihkan seluruh sisa cache lokal tanpa jeda (*zero gap*).
+
+---
+
 ## [2.2.91] - 2026-08-25
 
 ### 🚀 Sinkronisasi Pembersihan Folder Google Drive Instan Saat Form Dihapus

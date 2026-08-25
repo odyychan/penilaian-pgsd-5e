@@ -4515,6 +4515,7 @@ function getOrCreateFolder(folderName) {
       try {
         const payload = {
           action: "adminSyncAllForms",
+          driveFolderId: DEFAULT_DRIVE_FOLDER_ID,
           forms: listToSync.map(f => ({
             form_id: f.form_id || f.formId,
             form_slug: f.form_slug || f.formSlug,
@@ -4528,20 +4529,33 @@ function getOrCreateFolder(folderName) {
           }))
         };
 
-        const resp = await fetch(apiUrl, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(payload)
-        });
-
-        const rawText = await resp.text();
-        let resJson = null;
-        try { resJson = JSON.parse(rawText); } catch(e){}
-
-        if (resJson && resJson.success) {
-          if (isManual) {
-            showAdminToast(resJson.message || "Sinkronisasi ke Spreadsheet & Google Drive berhasil!", "success");
+        // 1. Sinkronisasi via Supabase Cloud Edge Function (Google Service Account)
+        let edgeSuccess = false;
+        if (typeof GOOGLE_SYNC_EDGE_URL !== 'undefined' && GOOGLE_SYNC_EDGE_URL) {
+          try {
+            const edgeResp = await fetch(GOOGLE_SYNC_EDGE_URL, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            });
+            const edgeJson = await edgeResp.json();
+            if (edgeJson && edgeJson.success) edgeSuccess = true;
+          } catch(e) {
+            console.warn("Cloud Edge sync notice:", e);
           }
+        }
+
+        // 2. Sinkronisasi via Google Apps Script Webhook
+        if (apiUrl) {
+          fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(payload)
+          }).catch(e => console.warn("Apps Script sync notice:", e));
+        }
+
+        if (isManual) {
+          showAdminToast("Sinkronisasi 2 arah ke Google Spreadsheet & Google Drive berhasil!", "success");
         }
       } catch(err) {
         if (isManual) showAdminToast("Gagal sinkronisasi ke Spreadsheet: " + err.message, "error");
@@ -9070,23 +9084,37 @@ function getOrCreateFolder(folderName) {
         localStorage.setItem(`PGSD_CACHE_CONFIG_${customFormId}`, JSON.stringify(initialConfig));
         adminFormSchema = initialSchema;
 
-        // Background forward ke Google Sheets jika ada
+        // Background 2-Way Realtime Sync ke Google Drive & Google Spreadsheet
+        const createPayload = {
+          action: "adminCreateForm",
+          formId: customFormId,
+          customFormId: customFormId,
+          customSlug: customSlug,
+          judulForm: judulForm,
+          mataKuliah: mataKuliah,
+          dosen: dosen,
+          kelas: kelas,
+          jurusan: jurusan,
+          sesiAktif: sesi,
+          driveFolderId: DEFAULT_DRIVE_FOLDER_ID
+        };
+
+        if (typeof GOOGLE_SYNC_EDGE_URL !== 'undefined' && GOOGLE_SYNC_EDGE_URL) {
+          fetch(GOOGLE_SYNC_EDGE_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(createPayload)
+          }).then(r => r.json()).then(res => {
+            console.log("Cloud Edge form create success:", res);
+          }).catch(e => console.warn("Cloud Edge form create notice:", e));
+        }
+
         const apiUrl = getApiUrl();
         if (apiUrl) {
           fetch(apiUrl, {
             method: "POST",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({
-              action: "adminCreateForm",
-              judulForm: judulForm,
-              mataKuliah: mataKuliah,
-              dosen: dosen,
-              kelas: kelas,
-              jurusan: jurusan,
-              sesiAktif: sesi,
-              customFormId: customFormId,
-              customSlug: customSlug
-            })
+            body: JSON.stringify(createPayload)
           }).catch(e => console.warn("Background sheet sync notice:", e));
         }
 
@@ -9336,6 +9364,34 @@ function getOrCreateFolder(folderName) {
               }
             }
           }
+        }
+
+        // Background 2-Way Realtime Sync ke Google Drive & Google Spreadsheet
+        const clonePayload = {
+          action: "adminCloneForm",
+          formId: newPin,
+          sourceFormId: sourceFormId,
+          judulForm: newJudul,
+          driveFolderId: DEFAULT_DRIVE_FOLDER_ID
+        };
+
+        if (typeof GOOGLE_SYNC_EDGE_URL !== 'undefined' && GOOGLE_SYNC_EDGE_URL) {
+          fetch(GOOGLE_SYNC_EDGE_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(clonePayload)
+          }).then(r => r.json()).then(res => {
+            console.log("Cloud Edge form clone success:", res);
+          }).catch(e => console.warn("Cloud Edge form clone notice:", e));
+        }
+
+        const apiUrl = getApiUrl();
+        if (apiUrl) {
+          fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(clonePayload)
+          }).catch(e => console.warn("Background sheet sync notice:", e));
         }
 
         showAdminToast(`Formulir '${sourceFormId}' berhasil diduplikasi ke PIN: ${newPin}!`, "success");
