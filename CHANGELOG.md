@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.99] - 2026-08-25
+
+### ⚡ Restorasi & Akselerasi Penuh Tombol Unggah File (*Direct Button Trigger & Value Reset*)
+- **Perbaikan Interaksi Tombol Unggah File:**
+  - Mengubah pembungkus `<label>` file upload menjadi `<button type="button">` eksplisit dengan pemicu `.click()` langsung pada elemen `<input type="file">` tersembunyi. Hal ini mengatasi masalah *event propagation* di mana tombol tidak merespons klik pada peramban tertentu atau perangkat layar sentuh.
+- **Pembersihan State File Input (*Zero-Stall Re-Upload*):**
+  - Menambahkan event `onclick="this.value=null"` pada input file modal builder (`admin.html`) dan form mahasiswa (`index.html`) agar pengguna dapat memilih ulang berkas yang sama tanpa kendala *stuck*.
+
+---
+
 ## [2.2.98] - 2026-08-25
 
 ### 🧹 Harmonisasi DOM, Eliminasi Duplikasi ID, & Standardisasi Interaksi Modal

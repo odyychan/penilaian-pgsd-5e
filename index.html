@@ -2345,16 +2345,18 @@
                   }
                 </div>
               </div>
-              <label class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-xs font-semibold cursor-pointer transition active:scale-95 shadow-xs shrink-0">
+              <button type="button" onclick="document.getElementById('input_file_${f.id}').click()" class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-xs font-semibold cursor-pointer transition active:scale-95 shadow-xs shrink-0">
                 <span>Pilih Berkas</span>
-                <input 
-                  type="file" 
-                  accept=".pdf,.pptx,.ppt,.docx,.doc,.jpg,.jpeg,.png" 
-                  onchange="handleClientFileUpload('${f.id}', this)" 
-                  class="sr-only" 
-                  ${f.required && !fileObj ? 'required' : ''}
-                >
-              </label>
+              </button>
+              <input 
+                type="file" 
+                id="input_file_${f.id}"
+                accept=".pdf,.pptx,.ppt,.docx,.doc,.jpg,.jpeg,.png" 
+                onchange="handleClientFileUpload('${f.id}', this)" 
+                onclick="this.value=null"
+                class="hidden" 
+                ${f.required && !fileObj ? 'required' : ''}
+              >
             </div>
           </div>
         `;
