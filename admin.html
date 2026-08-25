@@ -761,68 +761,37 @@
             </div>
           </div>
 
-          <!-- Identitas Perkuliahan Sub-Grid -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3 text-xs">
-            <div class="p-2.5 sm:p-3 rounded-lg bg-zinc-50/90 border border-zinc-200/80 space-y-1">
-              <span class="text-zinc-400 block text-[10.5px] sm:text-[11px] font-medium">Mata Kuliah:</span>
-              <input 
-                type="text" 
-                id="cfg_Mata_Kuliah" 
-                required 
-                oninput="handleConfigInputAutoSave()"
-                placeholder="Bimbingan Konseling di SD" 
-                class="w-full font-semibold text-zinc-900 bg-transparent border-b border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 outline-none pb-0.5 transition"
-              >
-              <div id="liveMathCfgMataKuliah" class="math-live-preview-badge inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-indigo-50 border border-indigo-200 text-indigo-950 text-[10.5px] shadow-2xs mt-1 transition hidden">
-                <span class="text-[8.5px] font-bold font-mono text-indigo-600 bg-indigo-100 px-1 py-0.2 rounded uppercase tracking-wider shrink-0">✨ Pratinjau:</span>
-                <span class="math-renderable font-medium truncate"></span>
+          <!-- Identitas Perkuliahan Sub-Grid (Dynamic & Customizable Info Cards) -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] sm:text-[11px] font-bold text-zinc-500 uppercase tracking-wider font-mono">Informasi Tambahan / Identitas Perkuliahan:</span>
+              <div class="flex items-center gap-1.5">
+                <button 
+                  type="button" 
+                  onclick="resetHeaderInfoCards()" 
+                  class="text-[10.5px] px-2 py-0.5 rounded-lg border border-zinc-200 hover:bg-zinc-100 text-zinc-500 hover:text-zinc-800 font-semibold transition cursor-pointer flex items-center gap-1"
+                  title="Kembalikan ke susunan 4 kartu standar (Mata Kuliah, Dosen, Kelas, Prodi)"
+                >
+                  <svg class="w-3 h-3 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                  </svg>
+                  <span>Reset Info</span>
+                </button>
+                <button 
+                  type="button" 
+                  onclick="addNewHeaderInfoCard()" 
+                  class="text-[10.5px] px-2.5 py-0.5 rounded-lg bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 text-indigo-700 font-bold transition cursor-pointer flex items-center gap-1 shadow-2xs active:scale-95"
+                >
+                  <svg class="w-3 h-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
+                  </svg>
+                  <span>Tambah Info</span>
+                </button>
               </div>
             </div>
 
-            <div class="p-2.5 sm:p-3 rounded-lg bg-zinc-50/90 border border-zinc-200/80 space-y-1">
-              <span class="text-zinc-400 block text-[10.5px] sm:text-[11px] font-medium">Dosen Pengampu:</span>
-              <input 
-                type="text" 
-                id="cfg_Dosen_Pengampu" 
-                required 
-                oninput="handleConfigInputAutoSave()"
-                placeholder="Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd." 
-                class="w-full font-semibold text-zinc-900 bg-transparent border-b border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 outline-none pb-0.5 transition"
-              >
-              <div id="liveMathCfgDosenPengampu" class="math-live-preview-badge inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-indigo-50 border border-indigo-200 text-indigo-950 text-[10.5px] shadow-2xs mt-1 transition hidden">
-                <span class="text-[8.5px] font-bold font-mono text-indigo-600 bg-indigo-100 px-1 py-0.2 rounded uppercase tracking-wider shrink-0">✨ Pratinjau:</span>
-                <span class="math-renderable font-medium truncate"></span>
-              </div>
-            </div>
-
-            <div class="p-2.5 sm:p-3 rounded-lg bg-zinc-50/90 border border-zinc-200/80 space-y-1">
-              <span class="text-zinc-400 block text-[10.5px] sm:text-[11px] font-medium">Kelas:</span>
-              <input 
-                type="text" 
-                id="cfg_Kelas" 
-                oninput="handleConfigInputAutoSave()"
-                placeholder="Contoh: 5E, 3A, Reguler B" 
-                class="w-full font-semibold text-zinc-900 bg-transparent border-b border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 outline-none pb-0.5 transition"
-              >
-              <div id="liveMathCfgKelas" class="math-live-preview-badge inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-indigo-50 border border-indigo-200 text-indigo-950 text-[10.5px] shadow-2xs mt-1 transition hidden">
-                <span class="text-[8.5px] font-bold font-mono text-indigo-600 bg-indigo-100 px-1 py-0.2 rounded uppercase tracking-wider shrink-0">✨ Pratinjau:</span>
-                <span class="math-renderable font-medium truncate"></span>
-              </div>
-            </div>
-
-            <div class="p-2.5 sm:p-3 rounded-lg bg-zinc-50/90 border border-zinc-200/80 space-y-1">
-              <span class="text-zinc-400 block text-[10.5px] sm:text-[11px] font-medium">Program Studi:</span>
-              <input 
-                type="text" 
-                id="cfg_Jurusan" 
-                oninput="handleConfigInputAutoSave()"
-                placeholder="Contoh: PGSD, Pendidikan Matematika" 
-                class="w-full font-semibold text-zinc-900 bg-transparent border-b border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 outline-none pb-0.5 transition"
-              >
-              <div id="liveMathCfgJurusan" class="math-live-preview-badge inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-indigo-50 border border-indigo-200 text-indigo-950 text-[10.5px] shadow-2xs mt-1 transition hidden">
-                <span class="text-[8.5px] font-bold font-mono text-indigo-600 bg-indigo-100 px-1 py-0.2 rounded uppercase tracking-wider shrink-0">✨ Pratinjau:</span>
-                <span class="math-renderable font-medium truncate"></span>
-              </div>
+            <div id="builderHeaderInfoGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3 text-xs">
+              <!-- Rendered dynamically via renderBuilderHeaderInfoCards() -->
             </div>
           </div>
 
@@ -5022,6 +4991,150 @@ function getOrCreateFolder(folderName) {
     }
 
     // =========================================================================
+    // DYNAMIC HEADER INFO CARDS ENGINE (CUSTOMIZABLE METADATA CARDS)
+    // =========================================================================
+    function getStandardDefaultHeaderCards() {
+      return [
+        { id: 'matkul', label: 'Mata Kuliah:', value: adminAppConfig["Mata_Kuliah"] || (currentFormMeta?.mataKuliah || ""), placeholder: 'Nama Mata Kuliah' },
+        { id: 'dosen', label: 'Dosen Pengampu:', value: adminAppConfig["Dosen_Pengampu"] || (currentFormMeta?.dosen || ""), placeholder: 'Nama Dosen Pengampu' },
+        { id: 'kelas', label: 'Kelas:', value: adminAppConfig["Kelas"] || (currentFormMeta?.kelas || "5E"), placeholder: '5E' },
+        { id: 'jurusan', label: 'Program Studi:', value: adminAppConfig["Jurusan"] || (currentFormMeta?.jurusan || "PGSD"), placeholder: 'PGSD' }
+      ];
+    }
+
+    function initOrGetHeaderInfoCards() {
+      if (!adminAppConfig.Header_Info_Cards || !Array.isArray(adminAppConfig.Header_Info_Cards) || adminAppConfig.Header_Info_Cards.length === 0) {
+        adminAppConfig.Header_Info_Cards = getStandardDefaultHeaderCards();
+      }
+      return adminAppConfig.Header_Info_Cards;
+    }
+
+    function renderBuilderHeaderInfoCards() {
+      const container = document.getElementById("builderHeaderInfoGrid");
+      if (!container) return;
+
+      const cards = initOrGetHeaderInfoCards();
+      if (cards.length === 0) {
+        container.className = "p-3 rounded-lg bg-zinc-100/80 text-center text-xs text-zinc-500 italic";
+        container.innerHTML = 'Belum ada kartu informasi tambahan. Klik tombol "+ Tambah Info" di atas.';
+        return;
+      }
+
+      const colsClass = cards.length === 1 ? 'grid-cols-1' : (cards.length === 2 ? 'grid-cols-1 sm:grid-cols-2' : (cards.length === 3 ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'));
+      container.className = `grid ${colsClass} gap-2.5 sm:gap-3 text-xs`;
+
+      let html = '';
+      cards.forEach((card, idx) => {
+        html += `
+          <div class="group/hdrCard p-2.5 sm:p-3 rounded-xl bg-zinc-50/90 border border-zinc-200/80 hover:border-indigo-300 focus-within:border-indigo-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-indigo-100/50 transition shadow-2xs relative flex flex-col justify-between">
+            <div class="flex items-center justify-between gap-1 mb-1">
+              <input 
+                type="text" 
+                value="${escapeHtml(card.label || '')}" 
+                placeholder="Label (contoh: Dosen:)" 
+                title="Klik untuk mengubah label informasi ini"
+                oninput="handleHeaderCardLabelChange(${idx}, this.value)" 
+                class="text-zinc-500 font-bold text-[10.5px] sm:text-[11px] bg-transparent border-b border-dashed border-transparent hover:border-zinc-300 focus:border-indigo-600 focus:text-indigo-900 outline-none w-full px-0.5 py-0.5 rounded transition"
+              >
+              <button 
+                type="button" 
+                onclick="deleteHeaderInfoCard(${idx})" 
+                class="w-5 h-5 rounded-md hover:bg-rose-50 text-zinc-400 hover:text-rose-600 flex items-center justify-center text-xs opacity-0 group-hover/hdrCard:opacity-100 focus:opacity-100 transition cursor-pointer shrink-0" 
+                title="Hapus kotak informasi ini"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div class="space-y-0.5">
+              <input 
+                type="text" 
+                id="headerCardInput_${idx}"
+                value="${escapeHtml(card.value || '')}" 
+                placeholder="${escapeHtml(card.placeholder || 'Isi nilai...')}" 
+                oninput="handleHeaderCardValueChange(${idx}, this.value)" 
+                class="w-full font-semibold text-zinc-900 bg-transparent border-b border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 outline-none pb-0.5 transition"
+              >
+              ${getLiveMathBadgeHtml(card.value, `liveMathHeaderCard_${idx}`)}
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+      setTimeout(() => {
+        renderAllMathInElement(container);
+      }, 40);
+    }
+
+    function handleHeaderCardLabelChange(idx, val) {
+      const cards = initOrGetHeaderInfoCards();
+      if (!cards[idx]) return;
+      cards[idx].label = val;
+      syncLegacyConfigFromHeaderCards();
+      handleConfigInputAutoSave();
+    }
+
+    function handleHeaderCardValueChange(idx, val) {
+      const cards = initOrGetHeaderInfoCards();
+      if (!cards[idx]) return;
+      cards[idx].value = val;
+      updateLiveMathBadge(val, `liveMathHeaderCard_${idx}`);
+      syncLegacyConfigFromHeaderCards();
+      handleConfigInputAutoSave();
+    }
+
+    function addNewHeaderInfoCard() {
+      pushUndoSnapshot('Tambah Kotak Info');
+      const cards = initOrGetHeaderInfoCards();
+      cards.push({
+        id: 'info_' + Date.now().toString(36),
+        label: 'Info Baru:',
+        value: '',
+        placeholder: 'Isi nilai...'
+      });
+      renderBuilderHeaderInfoCards();
+      handleConfigInputAutoSave();
+      showAdminToast("Kotak informasi baru berhasil ditambahkan.", "success");
+    }
+
+    function deleteHeaderInfoCard(idx) {
+      pushUndoSnapshot('Hapus Kotak Info');
+      const cards = initOrGetHeaderInfoCards();
+      if (!cards[idx]) return;
+      const removed = cards.splice(idx, 1);
+      renderBuilderHeaderInfoCards();
+      syncLegacyConfigFromHeaderCards();
+      handleConfigInputAutoSave();
+      showAdminToast(`Kotak '${removed[0]?.label || 'Info'}' berhasil dihapus.`, "info");
+    }
+
+    function resetHeaderInfoCards() {
+      pushUndoSnapshot('Reset Kotak Info');
+      adminAppConfig.Header_Info_Cards = getStandardDefaultHeaderCards();
+      renderBuilderHeaderInfoCards();
+      syncLegacyConfigFromHeaderCards();
+      handleConfigInputAutoSave();
+      showAdminToast("Kotak informasi dikembalikan ke susunan 4 identitas standar.", "success");
+    }
+
+    function syncLegacyConfigFromHeaderCards() {
+      const cards = initOrGetHeaderInfoCards();
+      cards.forEach(c => {
+        const lbl = (c.label || '').toLowerCase();
+        if (c.id === 'matkul' || lbl.includes('mata kuliah') || lbl.includes('matkul')) {
+          adminAppConfig["Mata_Kuliah"] = c.value;
+        } else if (c.id === 'dosen' || lbl.includes('dosen')) {
+          adminAppConfig["Dosen_Pengampu"] = c.value;
+        } else if (c.id === 'kelas' || lbl.includes('kelas')) {
+          adminAppConfig["Kelas"] = c.value;
+        } else if (c.id === 'jurusan' || lbl.includes('prodi') || lbl.includes('program studi') || lbl.includes('jurusan')) {
+          adminAppConfig["Jurusan"] = c.value;
+        }
+      });
+    }
+
+    // =========================================================================
     // TAB 2: CONFIG & FORM BUILDER
     // =========================================================================
     function populateConfigFormValues() {
@@ -5073,6 +5186,9 @@ function getOrCreateFolder(folderName) {
       if (document.getElementById('cfg_Pembuat_Web_Nim')) {
         updateLiveMathBadge(adminAppConfig["Pembuat_Web_Nim"] || "", 'liveMathCfgPembuatNim');
       }
+
+      // Render Dynamic Header Info Cards in form header
+      renderBuilderHeaderInfoCards();
 
       // Populate Spreadsheet & Drive custom settings
       if (document.getElementById("inputApiUrl")) {

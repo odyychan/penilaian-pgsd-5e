@@ -317,24 +317,9 @@
             </p>
           </div>
 
-          <!-- Rincian Mata Kuliah, Dosen, Kelas & Jurusan -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 text-xs">
-            <div class="p-2.5 sm:p-3 rounded-lg bg-zinc-50 border border-zinc-200/80">
-              <span class="text-zinc-400 block text-[10.5px] sm:text-[11px] font-medium">Mata Kuliah:</span>
-              <span class="font-semibold text-zinc-900 mt-0.5 block truncate" id="infoMatkul">Bimbingan Konseling di SD</span>
-            </div>
-            <div class="p-2.5 sm:p-3 rounded-lg bg-zinc-50 border border-zinc-200/80">
-              <span class="text-zinc-400 block text-[10.5px] sm:text-[11px] font-medium">Dosen Pengampu:</span>
-              <span class="font-semibold text-zinc-900 mt-0.5 block break-words leading-tight" id="infoDosen">Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.</span>
-            </div>
-            <div class="p-2.5 sm:p-3 rounded-lg bg-zinc-50 border border-zinc-200/80">
-              <span class="text-zinc-400 block text-[10.5px] sm:text-[11px] font-medium">Kelas:</span>
-              <span class="font-semibold text-zinc-900 mt-0.5 block truncate" id="infoKelas">5E</span>
-            </div>
-            <div class="p-2.5 sm:p-3 rounded-lg bg-zinc-50 border border-zinc-200/80">
-              <span class="text-zinc-400 block text-[10.5px] sm:text-[11px] font-medium">Program Studi:</span>
-              <span class="font-semibold text-zinc-900 mt-0.5 block truncate" id="infoJurusan">PGSD</span>
-            </div>
+          <!-- Rincian Identitas / Informasi Tambahan (Dinamis dari Config) -->
+          <div id="overviewHeaderInfoGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 text-xs">
+            <!-- Rendered dynamically via renderOverviewHeaderInfoGrid() -->
           </div>
 
           <!-- Alur Tahapan Pengisian (Dinamis dari Schema) -->
@@ -2256,6 +2241,48 @@
         .replace(/'/g, '&#039;');
     }
 
+    function renderOverviewHeaderInfoGrid() {
+      const container = document.getElementById("overviewHeaderInfoGrid");
+      if (!container) return;
+
+      let cards = appConfig.Header_Info_Cards;
+      if (!cards || !Array.isArray(cards) || cards.length === 0) {
+        cards = [
+          { label: 'Mata Kuliah:', value: appConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || "" },
+          { label: 'Dosen Pengampu:', value: appConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || "" },
+          { label: 'Kelas:', value: appConfig["Kelas"] || (currentFormMeta && currentFormMeta.kelas) || "" },
+          { label: 'Program Studi:', value: appConfig["Jurusan"] || (currentFormMeta && currentFormMeta.jurusan) || "" }
+        ];
+      }
+
+      // Filter out cards that have completely empty label and value
+      const activeCards = cards.filter(c => (c.label && c.label.trim()) || (c.value && c.value.trim()));
+      if (activeCards.length === 0) {
+        container.classList.add("hidden");
+        return;
+      }
+      container.classList.remove("hidden");
+
+      const colsClass = activeCards.length === 1 ? 'grid-cols-1' : (activeCards.length === 2 ? 'grid-cols-1 sm:grid-cols-2' : (activeCards.length === 3 ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'));
+      container.className = `grid ${colsClass} gap-2.5 sm:gap-3 text-xs`;
+
+      let html = '';
+      activeCards.forEach(card => {
+        const val = card.value || '-';
+        html += `
+          <div class="p-2.5 sm:p-3 rounded-xl bg-zinc-50 border border-zinc-200/80 space-y-0.5">
+            <span class="text-zinc-400 block text-[10.5px] sm:text-[11px] font-medium math-renderable">${smartMathFormat(card.label || 'Info:')}</span>
+            <span class="font-semibold text-zinc-900 mt-0.5 block break-words leading-tight math-renderable">${smartMathFormat(val)}</span>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+      setTimeout(() => {
+        renderAllMathInElement(container);
+      }, 30);
+    }
+
     function renderOverviewAlurTahapan() {
       const container = document.getElementById("overviewAlurTahapanGrid");
       if (!container) return;
@@ -3599,15 +3626,8 @@
         overviewDescEl.classList.add("math-renderable");
       }
       
-      // Update Academic Card
-      const infoMatkulEl = document.getElementById("infoMatkul");
-      const infoDosenEl = document.getElementById("infoDosen");
-      const infoKelasEl = document.getElementById("infoKelas");
-      const infoJurusanEl = document.getElementById("infoJurusan");
-      if (infoMatkulEl) infoMatkulEl.innerHTML = smartMathFormat(matkul);
-      if (infoDosenEl) infoDosenEl.innerHTML = smartMathFormat(dosen);
-      if (infoKelasEl) infoKelasEl.innerHTML = smartMathFormat(appConfig["Kelas"] || (currentFormMeta && currentFormMeta.kelas) || "5E");
-      if (infoJurusanEl) infoJurusanEl.innerHTML = smartMathFormat(appConfig["Jurusan"] || (currentFormMeta && currentFormMeta.jurusan) || "PGSD");
+      // Update Academic & Additional Info Cards (Dynamic Grid)
+      renderOverviewHeaderInfoGrid();
 
       renderOverviewAlurTahapan();
       updateStepMetadataFromSchema();

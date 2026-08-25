@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.66] - 2026-08-25
+
+### 🎴 Kotak Informasi Tambahan Dinamis & Dukungan Math KaTeX Universal di Seluruh UI Preview
+- **Kustomisasi Penuh Kotak Identitas/Informasi Header:**
+  - Mengubah kotak statis (Mata Kuliah, Dosen, Kelas, Prodi) menjadi sistem kartu dinamis yang dapat **diedit labelnya** (misal: "Dosen Pembimbing:", "Instruktur:"), **diedit nilainya**, **dihapus (`✕`)**, serta **ditambahkan kotak baru (`+ Tambah Info`)** sesuai kebutuhan formulir.
+  - Menyediakan tombol **"↺ Reset Info"** untuk mengembalikan susunan ke 4 identitas perkuliahan standar.
+- **Dukungan KaTeX & Floating Format Tools Penuh di Seluruh Antarmuka & Pratinjau:**
+  - Seluruh kolom isian identitas baru dan pratinjau antarmuka (Landing Overview & Simulator Mahasiswa) kini mendukung pemformatan rumus matematika KaTeX (`$x^2$`, `\sqrt{x}`), teks tebal, miring, dan garis bawah secara konsisten dan real-time.
+
+---
+
 ## [2.2.65] - 2026-08-25
 
 ### 🔄 Tombol Sinkronisasi Ulang & Reset Teks Alur Tahapan Pengisian
