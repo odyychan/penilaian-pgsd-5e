@@ -124,6 +124,33 @@ async function getOrCreateDriveFolder(token: string, folderName: string, parentF
   return createData.id;
 }
 
+// Helper Drive: Unlink & Trash Folder/File secara tuntas
+async function unlinkAndTrashDriveItem(token: string, fileId: string, parentFolderId: string): Promise<void> {
+  try {
+    // 1. Lepaskan hubungan dengan parent folder (bekerja meskipun berkas dimiliki akun pengguna)
+    await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?removeParents=${parentFolderId}&supportsAllDrives=true`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({})
+    });
+  } catch(e) {}
+
+  try {
+    // 2. Set status trashed jika bot memiliki izin
+    await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ trashed: true })
+    });
+  } catch(e) {}
+}
+
 // Main Handler
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -181,14 +208,8 @@ serve(async (req: Request) => {
         );
       }
 
-      const trashRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ trashed: true })
-      });
+      const rootFolderId = payload.driveFolderId || DEFAULT_DRIVE_FOLDER_ID;
+      await unlinkAndTrashDriveItem(token, fileId, rootFolderId);
 
       return new Response(
         JSON.stringify({
@@ -212,7 +233,7 @@ serve(async (req: Request) => {
         );
       }
 
-      // Cari folder form di Google Drive dan pindahkan ke Sampah
+      // Cari folder form di Google Drive dan unparent/trash
       const query = `name = '${targetFormId}' and mimeType = 'application/vnd.google-apps.folder' and '${rootFolderId}' in parents and trashed = false`;
       const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name)`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -222,14 +243,7 @@ serve(async (req: Request) => {
 
       if (searchData.files && searchData.files.length > 0) {
         for (const f of searchData.files) {
-          await fetch(`https://www.googleapis.com/drive/v3/files/${f.id}`, {
-            method: "PATCH",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ trashed: true })
-          });
+          await unlinkAndTrashDriveItem(token, f.id, rootFolderId);
         }
       }
 
@@ -238,7 +252,7 @@ serve(async (req: Request) => {
           success: true,
           formId: targetFormId,
           trashedFolderCount: trashedCount,
-          message: `Formulir '${targetFormId}' dan ${trashedCount} folder Google Drive berhasil dipindahkan ke Sampah.`
+          message: `Formulir '${targetFormId}' dan ${trashedCount} folder Google Drive berhasil dibersihkan secara total.`
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
@@ -248,7 +262,7 @@ serve(async (req: Request) => {
     if (action === "adminCleanupOrphanedFolders") {
       const activeForms = Array.isArray(payload.activeFormIds) 
         ? payload.activeFormIds.map((f: any) => String(f).trim().toUpperCase()).filter(Boolean)
-        : ["BK5E"];
+        : ["BK5E", "RF5P"];
       if (!activeForms.includes("BK5E")) activeForms.push("BK5E");
 
       const rootFolderId = payload.driveFolderId || DEFAULT_DRIVE_FOLDER_ID;
@@ -264,14 +278,7 @@ serve(async (req: Request) => {
         for (const f of listData.files) {
           const fName = String(f.name || "").trim().toUpperCase();
           if (!activeForms.includes(fName) && fName !== "ARSIP" && fName !== "BACKUP" && fName !== "MEDIA") {
-            await fetch(`https://www.googleapis.com/drive/v3/files/${f.id}`, {
-              method: "PATCH",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json"
-              },
-              body: JSON.stringify({ trashed: true })
-            });
+            await unlinkAndTrashDriveItem(token, f.id, rootFolderId);
             trashedNames.push(fName);
           }
         }
@@ -281,7 +288,7 @@ serve(async (req: Request) => {
         JSON.stringify({
           success: true,
           trashedFolders: trashedNames,
-          message: `Berhasil memindahkan ${trashedNames.length} folder sampah (${trashedNames.join(', ') || 'tidak ada'}) ke Sampah Google Drive.`
+          message: `Berhasil memindahkan ${trashedNames.length} folder sampah (${trashedNames.join(', ') || 'tidak ada'}) dari folder Google Drive.`
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
@@ -324,14 +331,7 @@ serve(async (req: Request) => {
         for (const f of listData.files) {
           const fName = String(f.name || "").trim().toUpperCase();
           if (!activeIds.includes(fName) && fName !== "ARSIP" && fName !== "BACKUP" && fName !== "MEDIA") {
-            await fetch(`https://www.googleapis.com/drive/v3/files/${f.id}`, {
-              method: "PATCH",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json"
-              },
-              body: JSON.stringify({ trashed: true })
-            });
+            await unlinkAndTrashDriveItem(token, f.id, rootFolderId);
             trashedNames.push(fName);
           }
         }

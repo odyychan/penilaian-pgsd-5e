@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.89] - 2026-08-25
+
+### 🗑️ Peningkatan Penghapusan & Pelepasan Folder Google Drive (*Cross-Ownership Unlink & Trash*)
+- **Pelepasan Parent Folder Dual-Pipeline (`removeParents` + `trashed`):**
+  - Mengimplementasikan `unlinkAndTrashDriveItem` pada Supabase Edge Functions yang secara otomatis melepaskan hubungan folder (*unlink parents*) dari direktori utama Google Drive (`Form Web`) meskipun folder tersebut awalnya dibuat oleh akun pengguna, lalu memindahkannya ke Sampah.
+- **Penyelesaian Total Folder Sisa `TST1` & `DHVK`:**
+  - Folder `TST1` dan `DHVK` telah terhapus dan dilepaskan sepenuhnya dari folder Google Drive utama.
+
+---
+
 ## [2.2.88] - 2026-08-25
 
 ### 🧮 Penanganan Universal & Presisi Tinggi Simbol Matematika KaTeX & Smart Auto-Wrap
