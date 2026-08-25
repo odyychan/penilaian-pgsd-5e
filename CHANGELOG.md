@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.7] - 2026-08-25
+
+### 💬 Penyederhanaan Total Redaksi Teks & Deskripsi Panel Admin (*Human-First Copywriting*)
+- **Pembersihan Istilah Teknis & Frasa Backend/AI:**
+  - Menghapus frasa yang terkesan kaku, teknis, atau berbasis istilah backend internal (*Service Account, Studio Multi-Media, Engine, Payload, API Endpoint*) dan menggantinya dengan bahasa Indonesia baku yang sederhana, ramah pengguna, dan mudah dipahami.
+- **Penyempurnaan Teks Modal Media & Integrasi:**
+  - Menyederhanakan modal lampiran media (*"Lampirkan Foto atau Video"*, *"Media Terpilih"*, *"Unggah dari Komputer"*).
+  - Menyederhanakan instruksi penghubung Google Sheets & Drive (*"Hubungkan ke Google Sheets & Google Drive"*, *"Email Layanan Penghubung"*, *"Uji Sambungan"*).
+
+---
+
 ## [2.3.6] - 2026-08-25
 
 ### 🧭 Restrukturisasi & Penamaan Presisi Tab Navigasi Workspace (*Zero Ambiguity Tabs*)

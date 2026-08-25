@@ -768,14 +768,14 @@
           <!-- Deskripsi & Panduan Pengisian Formulir -->
           <div class="group/fieldBlock space-y-1 sm:space-y-1.5">
             <div class="flex items-center justify-between">
-              <label class="block text-[10px] sm:text-[11px] font-bold text-zinc-500 uppercase tracking-wider font-mono">Deskripsi &amp; Panduan Pengisian</label>
+              <label class="block text-[10px] sm:text-[11px] font-bold text-zinc-500 uppercase tracking-wider font-mono">Petunjuk &amp; Deskripsi Formulir</label>
             </div>
 
             <textarea 
               id="cfg_Deskripsi_Form"
               rows="2"
               oninput="handleConfigInputAutoSave()"
-              placeholder="Tuliskan petunjuk umum atau deskripsi formulir penilaian di sini (contoh: Berikan penilaian secara jujur dan objektif)..."
+              placeholder="Tuliskan petunjuk umum pengisian formulir di sini (contoh: Berikan penilaian secara jujur dan objektif)..."
               class="w-full text-xs sm:text-sm text-zinc-700 bg-zinc-50/80 hover:bg-zinc-100/90 focus:bg-white border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-t-lg outline-none transition"
             ></textarea>
             <div id="liveMathCfgDesc" class="math-live-preview-badge inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-50/90 border border-indigo-200/80 text-indigo-950 text-xs shadow-2xs mt-1 transition hidden">
@@ -787,7 +787,7 @@
           <!-- Identitas Perkuliahan Sub-Grid (Dynamic & Customizable Info Cards) -->
           <div class="space-y-2">
             <div class="flex items-center justify-between">
-              <span class="text-[10px] sm:text-[11px] font-bold text-zinc-500 uppercase tracking-wider font-mono">Informasi Tambahan / Identitas Perkuliahan:</span>
+              <span class="text-[10px] sm:text-[11px] font-bold text-zinc-500 uppercase tracking-wider font-mono">Informasi Perkuliahan:</span>
               <div class="flex items-center gap-1.5">
                 <button 
                   type="button" 
@@ -975,8 +975,8 @@
         <!-- Nama Pembuat Web / Footer Settings Card -->
         <div class="bg-white rounded-xl sm:rounded-2xl border border-zinc-200/90 p-3.5 sm:p-6 shadow-xs space-y-3 sm:space-y-4">
           <div>
-            <h3 class="text-xs sm:text-base font-bold text-zinc-900">Kredit &amp; Footer Aplikasi</h3>
-            <p class="text-[10.5px] sm:text-xs text-zinc-500 mt-0.5">Atur nama pengembang dan identitas yang tampil di bagian bawah halaman.</p>
+            <h3 class="text-xs sm:text-base font-bold text-zinc-900">Kredit &amp; Identitas Footer</h3>
+            <p class="text-[10.5px] sm:text-xs text-zinc-500 mt-0.5">Atur teks nama pembuat atau pengembang yang tampil di bagian bawah formulir.</p>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-xs pt-1 sm:pt-2">
@@ -1051,8 +1051,8 @@
         <!-- Reset & Pemulihan Skema Standar Card -->
         <div class="bg-white rounded-xl sm:rounded-2xl border border-zinc-200/90 p-3.5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
           <div>
-            <h3 class="text-xs sm:text-sm font-bold text-zinc-900">Kembalikan ke 4 Tahap Standar</h3>
-            <p class="text-[10.5px] sm:text-xs text-zinc-500 mt-0.5">Reset susunan pertanyaan ke bentuk template standar penilaian perkuliahan.</p>
+            <h3 class="text-xs sm:text-sm font-bold text-zinc-900">Kembalikan ke Struktur Bawaan</h3>
+            <p class="text-[10.5px] sm:text-xs text-zinc-500 mt-0.5">Kembalikan susunan pertanyaan ke template bawaan penilaian perkuliahan.</p>
           </div>
           <button 
             type="button" 
@@ -1062,7 +1062,7 @@
             <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
             </svg>
-            <span>↺ Reset Standar</span>
+            <span>↺ Reset ke Bawaan</span>
           </button>
         </div>
 
@@ -1076,7 +1076,7 @@
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-zinc-100 pb-3">
             <div>
               <h2 class="text-sm sm:text-base font-bold text-zinc-900">Daftar Respons Masuk</h2>
-              <p class="text-[10.5px] sm:text-xs text-zinc-500 mt-0.5">Pantau penilaian masuk dan kelola data evaluasi mahasiswa.</p>
+              <p class="text-[10.5px] sm:text-xs text-zinc-500 mt-0.5">Lihat seluruh nilai masuk, pantau ringkasan evaluasi, dan unduh data ke Excel.</p>
             </div>
             
             <div class="flex items-center gap-2 flex-wrap">
@@ -1180,12 +1180,12 @@
           <div class="border-b border-zinc-100 pb-3.5 space-y-1">
             <div class="flex items-center justify-between flex-wrap gap-2">
               <div class="flex items-center gap-2">
-                <h2 class="text-sm sm:text-base font-bold text-zinc-900">Integrasi Google Spreadsheet &amp; Drive Perkuliahan</h2>
+                <h2 class="text-sm sm:text-base font-bold text-zinc-900">Hubungkan ke Google Sheets &amp; Google Drive</h2>
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono">Google Cloud API</span>
               </div>
             </div>
             <p class="text-xs text-zinc-500 leading-relaxed">
-              Hubungkan formulir penilaian ke <strong>Google Spreadsheet</strong> dan <strong>Google Drive</strong> dosen untuk pencatatan nilai otomatis dan pengarsipan berkas terpusat.
+              Hubungkan formulir ke Google Sheets dan Google Drive agar hasil penilaian serta berkas mahasiswa tersimpan rapi secara otomatis.
             </p>
           </div>
 
@@ -1196,9 +1196,9 @@
                 📊
               </div>
               <div class="space-y-0.5">
-                <h4 class="font-bold text-emerald-950 text-xs">Tujuan Google Spreadsheet:</h4>
+                <h4 class="font-bold text-emerald-950 text-xs">Google Sheets:</h4>
                 <p class="text-[11.5px] text-emerald-900/85 leading-relaxed">
-                  Setiap respon penilaian mahasiswa otomatis tercatat rapi ke baris spreadsheet dosen secara <em>real-time</em> seperti Google Forms.
+                  Setiap penilaian dari mahasiswa akan langsung masuk menjadi baris data di spreadsheet Anda.
                 </p>
               </div>
             </div>
@@ -1208,9 +1208,9 @@
                 📁
               </div>
               <div class="space-y-0.5">
-                <h4 class="font-bold text-indigo-950 text-xs">Tujuan Google Drive:</h4>
+                <h4 class="font-bold text-indigo-950 text-xs">Google Drive:</h4>
                 <p class="text-[11.5px] text-indigo-900/85 leading-relaxed">
-                  Berkas lampiran dokumen, gambar, atau tugas mahasiswa langsung terorganisir ke dalam folder Drive yang Anda tentukan.
+                  Berkas tugas, dokumen, atau foto yang diunggah mahasiswa otomatis tersimpan di folder Drive Anda.
                 </p>
               </div>
             </div>
@@ -1224,7 +1224,7 @@
               <div class="flex items-center gap-2.5 min-w-0">
                 <span class="w-7 h-7 rounded-lg bg-zinc-900 text-white flex items-center justify-center font-bold text-xs shrink-0">🤖</span>
                 <div class="min-w-0">
-                  <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider font-mono block">Email Bot Layanan (Service Account FKIP):</span>
+                  <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider font-mono block">Email Layanan Penghubung:</span>
                   <span class="text-xs font-mono font-bold text-zinc-900 select-all truncate block">form-web-bot@form-web-506515.iam.gserviceaccount.com</span>
                 </div>
               </div>
@@ -1236,7 +1236,7 @@
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
                 </svg>
-                <span>Salin Email Bot</span>
+                <span>Salin Email Layanan</span>
               </button>
             </div>
 
@@ -1247,13 +1247,13 @@
               <div class="p-3 rounded-xl bg-white border border-zinc-200 space-y-2">
                 <div class="flex items-center gap-2 font-bold text-zinc-900 text-xs">
                   <span class="w-5 h-5 rounded-md bg-emerald-100 text-emerald-800 flex items-center justify-center text-[10.5px] font-mono">1</span>
-                  <span>Panduan Google Spreadsheet:</span>
+                  <span>Cara Menghubungkan Google Sheets:</span>
                 </div>
                 <ol class="list-decimal list-inside space-y-1 text-[11px] text-zinc-600 pl-1 leading-relaxed">
-                  <li>Buka file <strong>Google Spreadsheet</strong> lembar penilaian Anda.</li>
+                  <li>Buka file <strong>Google Sheets</strong> lembar penilaian Anda.</li>
                   <li>Klik tombol <strong>Bagikan (Share)</strong> di pojok kanan atas.</li>
-                  <li>Undang <strong>Email Bot</strong> di atas dengan akses <strong>Editor</strong>.</li>
-                  <li>Salin tautan spreadsheet dari browser dan tempelkan pada kolom di bawah.</li>
+                  <li>Masukkan <strong>Email Layanan</strong> di atas dengan izin akses <strong>Editor</strong>.</li>
+                  <li>Salin link spreadsheet dari browser dan tempel pada kolom di bawah.</li>
                 </ol>
               </div>
 
@@ -1261,13 +1261,13 @@
               <div class="p-3 rounded-xl bg-white border border-zinc-200 space-y-2">
                 <div class="flex items-center gap-2 font-bold text-zinc-900 text-xs">
                   <span class="w-5 h-5 rounded-md bg-indigo-100 text-indigo-800 flex items-center justify-center text-[10.5px] font-mono">2</span>
-                  <span>Panduan Google Drive:</span>
+                  <span>Cara Menghubungkan Google Drive:</span>
                 </div>
                 <ol class="list-decimal list-inside space-y-1 text-[11px] text-zinc-600 pl-1 leading-relaxed">
-                  <li>Buka <strong>Google Drive</strong> dan siapkan folder penyimpanan berkas.</li>
+                  <li>Buka <strong>Google Drive</strong> dan siapkan folder penyimpanan.</li>
                   <li>Klik kanan folder $\rightarrow$ pilih <strong>Bagikan (Share)</strong>.</li>
                   <li>Undang <strong>Email Bot</strong> di atas dengan akses <strong>Editor</strong>.</li>
-                  <li>Tuliskan <strong>Nama Folder</strong> pada kolom Google Drive di bawah.</li>
+                  <li>Salin link folder dari browser dan tempel pada kolom Google Drive di bawah.</li>
                 </ol>
               </div>
 
@@ -1278,25 +1278,25 @@
           <!-- Input Fields -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs pt-1">
             <div class="space-y-1.5">
-              <label class="block font-bold text-zinc-700 text-[11px] font-mono">Tautan / URL Google Spreadsheet (Opsional):</label>
+              <label class="block font-bold text-zinc-700 text-[11px] font-mono">Link Google Sheets (Opsional):</label>
               <input 
                 type="text" 
                 id="inputApiUrl" 
                 placeholder="https://docs.google.com/spreadsheets/d/1MAZqzRyau1mECqamnU9Bj3TALRJYDrA1WLQFesJ4wG4/edit" 
                 class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 font-mono text-xs focus:border-indigo-600 outline-none transition shadow-2xs bg-white"
               >
-              <p class="text-[10.5px] text-zinc-400">Kosongkan jika menggunakan Spreadsheet Utama FKIP.</p>
+              <p class="text-[10.5px] text-zinc-400">Kosongkan jika menggunakan spreadsheet bawaan.</p>
             </div>
 
             <div class="space-y-1.5">
-              <label class="block font-bold text-zinc-700 text-[11px] font-mono">Tautan / Nama Folder Google Drive (Opsional):</label>
+              <label class="block font-bold text-zinc-700 text-[11px] font-mono">Link Folder Google Drive (Opsional):</label>
               <input 
                 type="text" 
                 id="inputDriveFolderName" 
                 placeholder="https://drive.google.com/drive/folders/1ZYnP40AaCoaqu6-H2ZNfYuS-RshCWURK" 
                 class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 font-mono text-xs focus:border-indigo-600 outline-none transition shadow-2xs bg-white"
               >
-              <p class="text-[10.5px] text-zinc-400">Kosongkan jika menggunakan Folder Google Drive Utama.</p>
+              <p class="text-[10.5px] text-zinc-400">Kosongkan jika menggunakan folder Drive bawaan.</p>
             </div>
           </div>
 
@@ -1312,14 +1312,14 @@
                 <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                 </svg>
-                <span>Uji Format Spreadsheet</span>
+                <span>Uji Sambungan</span>
               </button>
               <button 
                 type="button" 
                 onclick="saveApiUrl()" 
                 class="px-5 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 active:scale-98 text-white text-xs font-bold transition cursor-pointer shadow-xs"
               >
-                Simpan Setelan Integrasi
+                Simpan Pengaturan
               </button>
             </div>
             <div id="connectionStatusResult" class="text-xs font-mono hidden"></div>
@@ -1330,9 +1330,9 @@
         <!-- Reset Respons Form Ini -->
         <div class="bg-white rounded-xl border border-zinc-200 p-3.5 sm:p-6 shadow-xs space-y-2.5 sm:space-y-3">
           <div class="space-y-1">
-            <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider font-mono">Data Respons Penilaian</span>
-            <h3 class="text-xs sm:text-sm font-bold text-zinc-900">Total Respons Form Ini: <span id="labelTotalResponses" class="text-emerald-700 font-mono">0 Data</span></h3>
-            <p class="text-[10.5px] sm:text-xs text-zinc-500">Hapus seluruh data penilaian mahasiswa pada formulir ini untuk memulai sesi baru (tidak menghapus data form lain).</p>
+            <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider font-mono">Rekap Respons Penilaian</span>
+            <h3 class="text-xs sm:text-sm font-bold text-zinc-900">Total Respons Masuk: <span id="labelTotalResponses" class="text-emerald-700 font-mono">0 Data</span></h3>
+            <p class="text-[10.5px] sm:text-xs text-zinc-500">Hapus seluruh data jawaban pada form ini untuk memulai sesi penilaian baru.</p>
           </div>
 
           <button 
@@ -1343,16 +1343,16 @@
             <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
             </svg>
-            <span>Reset Semua Penilaian Pada Form Ini</span>
+            <span>Kosongkan Seluruh Respons Form Ini</span>
           </button>
         </div>
 
         <!-- Tindakan Khusus Formulir Ini (Kloning & Hapus) -->
         <div class="bg-white rounded-2xl border border-zinc-200 p-4 sm:p-6 shadow-xs space-y-3">
           <div>
-            <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider font-mono">Tindakan Lanjutan Formulir</span>
-            <h3 class="text-xs sm:text-sm font-bold text-zinc-900 mt-0.5">Kloning &amp; Manajemen Siklus Hidup Form</h3>
-            <p class="text-[10.5px] sm:text-xs text-zinc-500 mt-0.5">Duplikasi seluruh susunan pertanyaan dan kelompok form ini untuk semester/kelas baru, atau hapus jika sudah tidak digunakan.</p>
+            <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider font-mono">Pengelolaan Formulir</span>
+            <h3 class="text-xs sm:text-sm font-bold text-zinc-900 mt-0.5">Duplikasi &amp; Pengelolaan Form</h3>
+            <p class="text-[10.5px] sm:text-xs text-zinc-500 mt-0.5">Duplikasi susunan pertanyaan untuk semester/kelas baru, bersihkan berkas yang tidak terpakai, atau hapus form jika sudah selesai.</p>
           </div>
 
           <div class="flex items-center gap-2 pt-1 flex-wrap">
@@ -1364,7 +1364,7 @@
               <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path>
               </svg>
-              <span>Kloning Formulir Ini</span>
+              <span>Duplikat Formulir</span>
             </button>
 
             <button 
@@ -1376,7 +1376,7 @@
               <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
               </svg>
-              <span>Bersihkan Media Sampah</span>
+              <span>Bersihkan Berkas Tak Terpakai</span>
             </button>
 
             <button 
@@ -1388,7 +1388,7 @@
               <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
               </svg>
-              <span>Hapus Formulir Ini Permanen</span>
+              <span>Hapus Formulir Ini</span>
             </button>
           </div>
         </div>
@@ -4117,8 +4117,8 @@ function getOrCreateFolder(folderName) {
             <div class="w-10 h-10 rounded-full bg-zinc-100 text-zinc-400 flex items-center justify-center mx-auto">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
             </div>
-            <p class="text-xs font-semibold text-zinc-700">Belum ada berkas media terlampir</p>
-            <p class="text-[11px] text-zinc-400">Pilih opsi di bawah untuk mengunggah banyak foto/video/audio sekaligus atau masukkan link URL.</p>
+            <p class="text-xs font-semibold text-zinc-700">Belum ada foto atau video yang dilampirkan</p>
+            <p class="text-[11px] text-zinc-400">Pilih berkas dari komputer atau masukkan tautan di bawah.</p>
           </div>
         `;
         updateMediaModalLivePreview();
@@ -4200,7 +4200,7 @@ function getOrCreateFolder(folderName) {
 
       const mediaList = currentMediaEditing.mediaList || [];
       if (mediaList.length === 0) {
-        container.innerHTML = '<span class="text-zinc-400 italic">Belum ada media dalam pratinjau</span>';
+        container.innerHTML = '<span class="text-zinc-400 italic">Pratinjau media akan tampil di sini.</span>';
         return;
       }
 
@@ -6877,7 +6877,7 @@ function getOrCreateFolder(folderName) {
         ]
       },
       {
-        category: "Komponen Sistem Perkuliahan",
+        category: "Komponen Khusus Penilaian",
         items: [
           { type: "CORE_IDENTITY", label: "Identitas & Peran Penilai", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>` },
           { type: "CORE_GROUP_SELECT", label: "Pemilihan Kelompok", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>` },
@@ -6936,7 +6936,7 @@ function getOrCreateFolder(folderName) {
             type="button" 
             onclick="toggleQTypeDropdown(${sIdx}, ${fIdx}, event)" 
             class="w-full sm:w-auto px-3.5 py-2 rounded-xl border ${isCore ? 'border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 text-indigo-950' : 'border-zinc-200 hover:border-indigo-400 bg-white hover:bg-zinc-50 text-zinc-800'} text-xs font-semibold flex items-center justify-between gap-3 transition shadow-2xs cursor-pointer active:scale-98"
-            title="Ubah tipe pertanyaan formulir"
+            title="Ubah tipe pertanyaan"
           >
             <div class="flex items-center gap-2">
               <span class="w-5 h-5 rounded-lg ${isCore ? 'bg-indigo-600 text-white' : 'bg-zinc-100 text-zinc-700'} flex items-center justify-center shrink-0">
@@ -10994,8 +10994,8 @@ function getOrCreateFolder(folderName) {
             </svg>
           </div>
           <div>
-            <h3 class="font-bold text-sm sm:text-base text-zinc-900">Studio Multi-Media Pertanyaan</h3>
-            <p class="text-[11.5px] text-zinc-500">Lampirkan banyak foto, video, rekaman audio, atau link interaktif sekaligus.</p>
+            <h3 class="font-bold text-sm sm:text-base text-zinc-900">Lampirkan Foto atau Video</h3>
+            <p class="text-[11.5px] text-zinc-500">Tambahkan gambar, video YouTube/MP4, rekaman audio, atau tautan pendukung.</p>
           </div>
         </div>
         <button type="button" onclick="closeAttachMediaModal(false)" class="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 cursor-pointer">
@@ -11006,8 +11006,8 @@ function getOrCreateFolder(folderName) {
       <!-- DAFTAR MEDIA TERLAMPIR (MULTI-MEDIA LIST) -->
       <div class="space-y-2">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-zinc-800 uppercase tracking-wider font-mono">Daftar Berkas Terlampir:</span>
-          <span class="text-[11px] text-zinc-400">Dapat diatur urutan &amp; keterangannya</span>
+          <span class="text-xs font-bold text-zinc-800 uppercase tracking-wider font-mono">Media Terlampir:</span>
+          <span class="text-[11px] text-zinc-400">(Urutan dan keterangan gambar bisa diatur)</span>
         </div>
         <div id="mediaItemsListContainer" class="space-y-2.5 max-h-56 overflow-y-auto p-1 border border-zinc-100 rounded-xl bg-zinc-50/50">
           <!-- Dynamically generated via renderMediaModalList() -->
@@ -11018,7 +11018,7 @@ function getOrCreateFolder(folderName) {
       <div class="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-3.5">
         <span class="text-xs font-bold text-zinc-900 flex items-center gap-1.5">
           <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-          <span>Tambah Berkas Media Baru</span>
+          <span>Pilih atau Unggah Media</span>
         </span>
 
         <!-- Media Type Tabs -->
@@ -11040,12 +11040,12 @@ function getOrCreateFolder(folderName) {
         <!-- Inputs -->
         <div class="space-y-2 text-xs">
           <div class="space-y-1">
-            <label class="block font-bold text-zinc-700" id="mediaUrlLabel">Tautan / URL Media:</label>
+            <label class="block font-bold text-zinc-700" id="mediaUrlLabel">Link Media (Opsional):</label>
             <div class="flex items-center gap-2">
               <input 
                 type="text" 
                 id="inputMediaUrl" 
-                placeholder="https://... (URL gambar, YouTube, Google Drive, MP4, MP3)" 
+                placeholder="Tempel link gambar, YouTube, Google Drive, atau audio..." 
                 class="flex-1 px-3 py-2 rounded-xl border border-zinc-300 text-xs bg-white focus:border-indigo-600 outline-none transition"
               >
               <button 
@@ -11053,7 +11053,7 @@ function getOrCreateFolder(folderName) {
                 onclick="handleAddLinkMedia()" 
                 class="px-3.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-semibold cursor-pointer shrink-0 transition flex items-center gap-1 shadow-2xs"
               >
-                <span>+ Link</span>
+                <span>+ Tambah Link</span>
               </button>
               <button 
                 type="button" 
@@ -11063,7 +11063,7 @@ function getOrCreateFolder(folderName) {
                 title="Pilih satu atau banyak berkas sekaligus"
               >
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                <span>Unggah Berkas (Bisa Banyak)</span>
+                <span>Unggah dari Komputer</span>
               </button>
               <input 
                 type="file" 
@@ -11075,7 +11075,7 @@ function getOrCreateFolder(folderName) {
                 class="hidden"
               >
             </div>
-            <p class="text-[10.5px] text-zinc-400" id="mediaUrlHelp">Mendukung unggah banyak berkas sekaligus atau tautan langsung YouTube/Drive.</p>
+            <p class="text-[10.5px] text-zinc-400" id="mediaUrlHelp">Bisa memilih beberapa berkas sekaligus dari komputer atau memasukkan link langsung.</p>
           </div>
 
           <!-- Upload Progress Indicator Bar -->
@@ -11107,7 +11107,7 @@ function getOrCreateFolder(folderName) {
       <!-- Posisi & Pratinjau -->
       <div class="space-y-3 text-xs">
         <div class="space-y-1">
-          <label class="block font-bold text-zinc-800">Posisi Media pada Pertanyaan:</label>
+          <label class="block font-bold text-zinc-800">Posisi Tampilan Media:</label>
           <select id="selectMediaPosition" class="w-full px-3 py-2 rounded-xl border border-zinc-300 bg-white font-semibold text-xs">
             <option value="ABOVE_QUESTION">Di Atas Pertanyaan</option>
             <option value="BELOW_QUESTION">Di Bawah Pertanyaan</option>
@@ -11115,7 +11115,7 @@ function getOrCreateFolder(folderName) {
         </div>
 
         <div class="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-2">
-          <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider font-mono block">Pratinjau Galeri Langsung:</span>
+          <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider font-mono block">Pratinjau Tampilan:</span>
           <div id="mediaModalPreviewContainer" class="min-h-[90px] flex items-center justify-center p-3 bg-white rounded-xl border border-zinc-200/80 text-zinc-400 text-xs italic">
             Belum ada media dalam pratinjau
           </div>
@@ -11145,7 +11145,7 @@ function getOrCreateFolder(folderName) {
             onclick="handleSaveModalMedia()" 
             class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md cursor-pointer transition"
           >
-            Simpan Galeri Media
+            Simpan Media
           </button>
         </div>
       </div>
