@@ -7769,12 +7769,64 @@ function getOrCreateFolder(folderName) {
     }
 
     // =========================================================================
-    // DRAG AND DROP REORDERING ENGINE (GOOGLE FORMS AUTHENTIC)
+    // DRAG AND DROP REORDERING & AUTO-SCROLL ENGINE (GOOGLE FORMS AUTHENTIC)
     // =========================================================================
     let draggedQuestionData = null; // { sIdx, fIdx }
     let draggedStageIdx = null; // sIdx
+    let dragAutoScrollTimer = null;
+    let dragAutoScrollVelocity = 0; // -speed for up, +speed for down
+
+    function startDragAutoScrollLoop() {
+      if (dragAutoScrollTimer) return;
+      dragAutoScrollTimer = setInterval(() => {
+        if (dragAutoScrollVelocity !== 0) {
+          window.scrollBy(0, dragAutoScrollVelocity);
+          if (document.documentElement) {
+            document.documentElement.scrollTop += dragAutoScrollVelocity;
+          }
+          if (document.body) {
+            document.body.scrollTop += dragAutoScrollVelocity;
+          }
+        }
+      }, 16);
+    }
+
+    function handleGlobalDragOverForAutoScroll(e) {
+      if (!draggedQuestionData && draggedStageIdx === null) {
+        dragAutoScrollVelocity = 0;
+        return;
+      }
+
+      if (e && e.preventDefault) e.preventDefault();
+
+      const clientY = e.clientY;
+      const windowH = window.innerHeight || document.documentElement.clientHeight;
+      const edgeThreshold = 140; // 140px from top / bottom edge
+
+      if (clientY < edgeThreshold) {
+        // Upper edge proximity: smooth progressive acceleration
+        const intensity = Math.max(0, Math.min(1, (edgeThreshold - clientY) / edgeThreshold));
+        dragAutoScrollVelocity = -Math.round(5 + intensity * 25); // -5px to -30px per frame
+      } else if (clientY > windowH - edgeThreshold) {
+        // Lower edge proximity: smooth progressive acceleration
+        const intensity = Math.max(0, Math.min(1, (clientY - (windowH - edgeThreshold)) / edgeThreshold));
+        dragAutoScrollVelocity = Math.round(5 + intensity * 25); // +5px to +30px per frame
+      } else {
+        dragAutoScrollVelocity = 0;
+      }
+    }
+
+    // Attach global dragover and end listeners for auto-scrolling
+    window.addEventListener("dragover", handleGlobalDragOverForAutoScroll, { passive: false });
+    window.addEventListener("dragend", cleanupQuestionDragClasses);
+    window.addEventListener("drop", cleanupQuestionDragClasses);
 
     function cleanupQuestionDragClasses() {
+      dragAutoScrollVelocity = 0;
+      if (dragAutoScrollTimer) {
+        clearInterval(dragAutoScrollTimer);
+        dragAutoScrollTimer = null;
+      }
       document.body.classList.remove("cursor-grabbing", "select-none");
       document.querySelectorAll(".group\\/qcard").forEach(c => {
         c.classList.remove(
@@ -7795,6 +7847,7 @@ function getOrCreateFolder(folderName) {
       draggedQuestionData = { sIdx, fIdx };
       draggedStageIdx = null;
       document.body.classList.add("cursor-grabbing", "select-none");
+      startDragAutoScrollLoop();
 
       const card = document.getElementById(`questionCard_${sIdx}_${fIdx}`);
       if (e && e.dataTransfer) {
@@ -7824,6 +7877,8 @@ function getOrCreateFolder(folderName) {
       if (!draggedQuestionData) return;
       if (e && e.preventDefault) e.preventDefault();
       if (e && e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+
+      handleGlobalDragOverForAutoScroll(e);
 
       const card = document.getElementById(`questionCard_${sIdx}_${fIdx}`);
       if (card) {
@@ -7920,6 +7975,7 @@ function getOrCreateFolder(folderName) {
       draggedStageIdx = sIdx;
       draggedQuestionData = null;
       document.body.classList.add("cursor-grabbing", "select-none");
+      startDragAutoScrollLoop();
 
       const stageCard = document.getElementById(`stageCard_${sIdx}`);
       if (e && e.dataTransfer) {
@@ -7949,6 +8005,8 @@ function getOrCreateFolder(folderName) {
       if (draggedStageIdx === null) return;
       if (e && e.preventDefault) e.preventDefault();
       if (e && e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+
+      handleGlobalDragOverForAutoScroll(e);
 
       const stageCard = document.getElementById(`stageCard_${sIdx}`);
       if (stageCard) {

@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.75] - 2026-08-25
+
+### 🚀 Implementasi Drag Auto-Scroll Engine (Auto-Scroll Halaman saat Menggeser Kartu)
+- **Engine Auto-Scroll 60 FPS saat Drag Pertanyaan & Bagian:**
+  - Mengimplementasikan sistem *viewport edge detection* (jarak 140px dari tepi atas/bawah layar) dengan percepatan dinamis (*progressive acceleration*) sehingga halaman secara otomatis dan mulus bergulir ke atas atau ke bawah saat kartu ditarik melewati tepi layar.
+- **Pembersihan & Reset Status Aman:**
+  - Timer gulir otomatis langsung berhenti secara instan begitu proses drag selesai (*drop* atau dilepas), mencegah halaman terus berjalan sendiri tanpa kendali.
+
+---
+
 ## [2.2.74] - 2026-08-25
 
 ### 🎛️ Peningkatan Visual & Interaktivitas Penuh Drag & Drop Reordering (Pertanyaan & Bagian)
