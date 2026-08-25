@@ -4071,9 +4071,19 @@ function getOrCreateFolder(folderName) {
       showAdminToast(`${totalFiles} berkas media berhasil dilampirkan!`, "success");
     }
 
+    function detectLinkMediaType(url) {
+      if (!url) return 'IMAGE';
+      url = String(url).trim();
+      if (url.startsWith('<iframe') || url.includes('iframe') || /docs.google.com/(presentation|document)/i.test(url)) return 'EMBED';
+      if (/youtube\.com|youtu\.be|vimeo\.com|\.(mp4|webm|mov|m4v|mkv)(\?.*)?$/i.test(url)) return 'VIDEO';
+      if (/\.(mp3|wav|ogg|m4a|aac)(\?.*)?$/i.test(url)) return 'AUDIO';
+      if (/\.(pdf)(\?.*)?$/i.test(url)) return 'EMBED';
+      return 'IMAGE';
+    }
+
     function handleAddLinkMedia() {
       const urlEl = document.getElementById("inputMediaUrl");
-      const url = (urlEl?.value || "").trim();
+      let url = (urlEl?.value || "").trim();
       const capEl = document.getElementById("inputMediaCaption");
       const caption = (capEl?.value || "").trim();
       const alignEl = document.getElementById("selectMediaAlign");
@@ -4084,9 +4094,18 @@ function getOrCreateFolder(folderName) {
         return;
       }
 
+      let detectedType = detectLinkMediaType(url);
+      if (url.startsWith('<iframe')) {
+        const srcMatch = url.match(/src=["']([^"']+)["']/i);
+        if (srcMatch && srcMatch[1]) {
+          url = srcMatch[1];
+          detectedType = 'EMBED';
+        }
+      }
+
       const newItem = {
         id: "med_" + Date.now() + "_" + Math.random().toString(36).substring(2, 6),
-        type: currentMediaEditing.type,
+        type: detectedType,
         url: url,
         fileId: "",
         storagePath: "",
@@ -4098,7 +4117,7 @@ function getOrCreateFolder(folderName) {
       if (urlEl) urlEl.value = "";
       if (capEl) capEl.value = "";
       renderMediaModalList();
-      showAdminToast("Media tautan berhasil ditambahkan ke daftar!", "success");
+      showAdminToast("Tautan media berhasil ditambahkan!", "success");
     }
 
     function renderMediaModalList() {
@@ -11015,69 +11034,65 @@ function getOrCreateFolder(folderName) {
         </div>
       </div>
 
-      <!-- TAMBAH BERKAS BARU -->
+      <!-- TAMBAH BERKAS MEDIA TERPADU -->
       <div class="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-3.5">
-        <span class="text-xs font-bold text-zinc-900 flex items-center gap-1.5">
-          <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-          <span>Pilih atau Unggah Media</span>
-        </span>
-
-        <!-- Media Type Tabs -->
-        <div class="grid grid-cols-4 gap-1 p-1 bg-zinc-200/70 rounded-xl text-xs font-semibold">
-          <button type="button" id="mediaTab_IMAGE" onclick="switchMediaModalType('IMAGE')" class="py-1.5 rounded-lg bg-white text-zinc-950 shadow-2xs text-center transition cursor-pointer font-bold">
-            Gambar
-          </button>
-          <button type="button" id="mediaTab_VIDEO" onclick="switchMediaModalType('VIDEO')" class="py-1.5 rounded-lg text-zinc-600 hover:text-zinc-900 text-center transition cursor-pointer">
-            Video
-          </button>
-          <button type="button" id="mediaTab_AUDIO" onclick="switchMediaModalType('AUDIO')" class="py-1.5 rounded-lg text-zinc-600 hover:text-zinc-900 text-center transition cursor-pointer">
-            Audio
-          </button>
-          <button type="button" id="mediaTab_EMBED" onclick="switchMediaModalType('EMBED')" class="py-1.5 rounded-lg text-zinc-600 hover:text-zinc-900 text-center transition cursor-pointer">
-            Embed
-          </button>
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-zinc-900 flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+            <span>Tambah Berkas Media</span>
+          </span>
+          <span class="text-[10.5px] text-zinc-400">Otomatis deteksi Foto, Video, Audio</span>
         </div>
 
-        <!-- Inputs -->
-        <div class="space-y-2 text-xs">
-          <div class="space-y-1">
-            <label class="block font-bold text-zinc-700" id="mediaUrlLabel">Link Media (Opsional):</label>
-            <div class="flex items-center gap-2">
-              <input 
-                type="text" 
-                id="inputMediaUrl" 
-                placeholder="Tempel link gambar, YouTube, Google Drive, atau audio..." 
-                class="flex-1 px-3 py-2 rounded-xl border border-zinc-300 text-xs bg-white focus:border-indigo-600 outline-none transition"
-              >
-              <button 
-                type="button" 
-                onclick="handleAddLinkMedia()" 
-                class="px-3.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-semibold cursor-pointer shrink-0 transition flex items-center gap-1 shadow-2xs"
-              >
-                <span>+ Tambah Link</span>
-              </button>
-              <button 
-                type="button" 
-                id="btnMediaDirectUpload" 
-                onclick="document.getElementById('inputDirectMediaFile').click()" 
-                class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-semibold cursor-pointer shrink-0 transition flex items-center gap-1.5 shadow-xs"
-                title="Pilih satu atau banyak berkas sekaligus"
-              >
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                <span>Unggah dari Komputer</span>
-              </button>
-              <input 
-                type="file" 
-                id="inputDirectMediaFile" 
-                multiple
-                accept="image/*,audio/*,video/*,.mp4,.webm,.ogg,.mov,.m4v,.mp3,.wav,.pdf" 
-                onchange="handleModalDirectFileUpload(this)" 
-                onclick="this.value=null" 
-                class="hidden"
-              >
-            </div>
-            <p class="text-[10.5px] text-zinc-400" id="mediaUrlHelp">Bisa memilih beberapa berkas sekaligus dari komputer atau memasukkan link langsung.</p>
+        <!-- 1. Tombol Utama: Unggah dari Komputer -->
+        <div>
+          <button 
+            type="button" 
+            id="btnMediaDirectUpload" 
+            onclick="document.getElementById('inputDirectMediaFile').click()" 
+            class="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-98 text-white font-bold text-xs shadow-xs flex items-center justify-center gap-2 cursor-pointer transition"
+            title="Pilih satu atau banyak foto/video/audio sekaligus"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+            <span>Pilih Berkas dari Komputer (Foto, Video, Audio)</span>
+          </button>
+          <input 
+            type="file" 
+            id="inputDirectMediaFile" 
+            multiple
+            accept="image/*,audio/*,video/*,.mp4,.webm,.ogg,.mov,.m4v,.mp3,.wav,.pdf" 
+            onchange="handleModalDirectFileUpload(this)" 
+            onclick="this.value=null" 
+            class="hidden"
+          >
+        </div>
+
+        <!-- Pemisah -->
+        <div class="flex items-center gap-2 text-zinc-400 text-[10.5px]">
+          <div class="flex-1 h-px bg-zinc-200"></div>
+          <span>atau tempel tautan online</span>
+          <div class="flex-1 h-px bg-zinc-200"></div>
+        </div>
+
+        <!-- 2. Tempel Tautan Online -->
+        <div class="space-y-1.5 text-xs">
+          <div class="flex items-center gap-2">
+            <input 
+              type="text" 
+              id="inputMediaUrl" 
+              placeholder="Tempel link YouTube, Google Drive, gambar, audio, atau embed..." 
+              class="flex-1 px-3 py-2 rounded-xl border border-zinc-300 text-xs bg-white focus:border-indigo-600 outline-none transition shadow-2xs"
+            >
+            <button 
+              type="button" 
+              onclick="handleAddLinkMedia()" 
+              class="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-xs cursor-pointer shrink-0 transition flex items-center gap-1.5 shadow-xs"
+            >
+              <span>+ Tambah Link</span>
+            </button>
           </div>
+          <p class="text-[10px] text-zinc-400">Mendukung link YouTube/Vimeo, Google Drive, foto online, audio MP3, atau kode embed.</p>
+        </div>
 
           <!-- Upload Progress Indicator Bar -->
           <div id="mediaUploadProgressBarContainer" class="hidden p-3.5 rounded-2xl bg-indigo-50/80 border border-indigo-200/90 space-y-2.5 transition-all">

@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.9] - 2026-08-25
+
+### 📦 Penyatuan & Penyederhanaan Area Pengunggahan Media (*Unified Compact Media Bar*)
+- **Penyatuan Input Pengunggahan Berkas Media:**
+  - Menghapus tab pemisah kategori media (*Gambar, Video, Audio*) yang sebelumnya redundant dan membingungkan.
+  - Menghadirkan **1 Tombol Utama Terpadu: "Pilih Berkas dari Komputer"** yang dapat menerima foto, video MP4, maupun audio secara serentak dengan deteksi tipe berkas otomatis.
+- **Deteksi Tautan Otomatis (*Smart Link Type Recognizer*):**
+  - Menyediakan 1 kolom tempel tautan (*URL/Embed*) cerdas yang otomatis mengidentifikasi tipe media (video YouTube/Vimeo, berkas Google Drive, foto daring, rekaman audio, atau kode *iframe embed*).
+  - Tampilan modal kini 50% lebih ringkas, bebas tombol bertumpuk, dan mudah digunakan.
+
+---
+
 ## [2.3.8] - 2026-08-25
 
 ### 🖼️ Optimasi Skala & Dimensi Galeri Foto (*Zero-Cropping Responsive Gallery*)
