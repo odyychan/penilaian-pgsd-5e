@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.84] - 2026-08-25
+
+### 🚀 Integrasi Penuh Google Cloud Service Account & Supabase Edge Functions
+- **Penyebaran Supabase Edge Function `google-sync`:**
+  - Menghubungkan Google Service Account `form-web-bot@form-web-506515.iam.gserviceaccount.com` secara permanen dan aman melalui Supabase Edge Functions dengan enkripsi kredensial di Supabase Secrets.
+- **Pembersihan & Pengujian Siklus Hidup Media Penuh:**
+  - Pengujian pembuatan form baru, unggah media soal, pratinjau instan, dan pembersihan bersih ke Google Drive Trash telah diverifikasi 100% aktif dan berjalan mulus tanpa hambatan.
+
+---
+
 ## [2.2.83] - 2026-08-25
 
 ### 🔄 Sinkronisasi 2-Arah Real-Time Multi-Form ke Google Spreadsheet & Google Drive
