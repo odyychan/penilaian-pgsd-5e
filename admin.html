@@ -1417,7 +1417,7 @@
   <!-- ========================================================================= -->
   <!-- MODAL: KONFIRMASI HAPUS FORMULIR (DANGER MODAL) -->
   <!-- ========================================================================= -->
-  <div id="modalDeleteFormConfirm" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+  <div id="modalDeleteFormConfirm" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target === this) closeDeleteFormModal()">
     <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-4 fade-enter">
       
       <div class="flex items-center gap-3">
@@ -1477,7 +1477,7 @@
   <!-- ========================================================================= -->
   <!-- MODAL: BUAT FORMULIR BARU (CREATION CONFIRMATION / WIZARD) -->
   <!-- ========================================================================= -->
-  <div id="modalCreateForm" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+  <div id="modalCreateForm" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target === this) closeCreateFormModal()">
     <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-4 fade-enter max-h-[90vh] overflow-y-auto custom-scrollbar">
       
       <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
@@ -1571,7 +1571,7 @@
   <!-- ========================================================================= -->
   <!-- MODAL: BAGIKAN FORMULIR (QR CODE, PIN 4-5 KARAKTER & TAUTAN) -->
   <!-- ========================================================================= -->
-  <div id="modalShareForm" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+  <div id="modalShareForm" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target === this) closeShareModal()">
     <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-4 fade-enter text-center">
       
       <div class="flex items-center justify-between border-b border-zinc-100 pb-2.5 text-left">
@@ -1657,7 +1657,7 @@
   <!-- ========================================================================= -->
   <!-- MODAL: PENGATURAN BLOK INTI FORMULIR (SCORE, VOTING, REVIEW, IDENTITY) -->
   <!-- ========================================================================= -->
-  <div id="modalCoreFieldSettings" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+  <div id="modalCoreFieldSettings" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target === this) closeCoreFieldSettingsModal()">
     <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-4 fade-enter">
       
       <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
@@ -1750,7 +1750,7 @@
   <!-- ========================================================================= -->
   <!-- MODAL: STAGE EDITOR (TAMBAH / UBAH TAHAP FORMULIR) -->
   <!-- ========================================================================= -->
-  <div id="modalStageEditor" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+  <div id="modalStageEditor" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target === this) closeStageEditorModal()">
     <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-4 fade-enter">
       <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
         <div class="flex items-center gap-2">
@@ -1802,7 +1802,7 @@
   </div>
 
   <!-- MODAL: MOVE FIELD TO DIFFERENT STAGE -->
-  <div id="modalMoveFieldStage" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+  <div id="modalMoveFieldStage" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target === this) closeMoveFieldModal()">
     <div class="bg-white rounded-2xl max-w-sm w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-4 fade-enter">
       <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
         <h3 class="font-bold text-sm text-zinc-900">Pindahkan Input ke Tahap Lain</h3>
@@ -1827,7 +1827,7 @@
 
   <!-- MODAL: FORM BUILDER QUESTION EDITOR -->
   <!-- ========================================================================= -->
-  <div id="modalCustomQuestion" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+  <div id="modalCustomQuestion" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target === this) closeCustomQuestionModal()">
     <div class="bg-white rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-4 fade-enter max-h-[90vh] overflow-y-auto custom-scrollbar">
       
       <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
@@ -1936,7 +1936,7 @@
   <!-- ========================================================================= -->
 
   <!-- MODAL EDIT / TAMBAH KELOMPOK -->
-  <div id="modalEditGroup" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+  <div id="modalEditGroup" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target === this) closeGroupModal()">
     <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-4 fade-enter">
       <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
         <h3 id="modalGroupTitle" class="font-bold text-sm sm:text-base text-zinc-900">Tambah Kelompok Baru</h3>
@@ -1983,7 +1983,7 @@
   </div>
 
   <!-- MODAL EDIT / TAMBAH ANGGOTA -->
-  <div id="modalEditMember" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+  <div id="modalEditMember" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target === this) closeMemberModal()">
     <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-4 fade-enter">
       <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
         <h3 id="modalMemberTitle" class="font-bold text-sm sm:text-base text-zinc-900">Tambah Mahasiswa</h3>
@@ -2020,7 +2020,7 @@
   </div>
 
   <!-- MODAL BATCH GROUP IMPORT -->
-  <div id="modalBatchGroup" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+  <div id="modalBatchGroup" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target === this) closeBatchModal()">
     <div class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 flex flex-col max-h-[90vh] space-y-4 fade-enter">
       <div class="flex items-center justify-between border-b border-zinc-100 pb-3 flex-shrink-0">
         <h3 class="font-bold text-sm sm:text-base text-zinc-900">Impor Banyak Sekaligus (Kelompok &amp; Mahasiswa)</h3>
@@ -2230,7 +2230,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
   </div>
 
   <!-- MODAL RESET SEMUA PENILAIAN -->
-  <div id="modalResetConfirm" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+  <div id="modalResetConfirm" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target === this) closeResetConfirmModal()">
     <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-4 fade-enter text-center">
       <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2249,7 +2249,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
   </div>
 
   <!-- MODAL: SKRIP MINI 30-BARIS GOOGLE SPREADSHEET & DRIVE -->
-  <div id="modalUniversalScript" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+  <div id="modalUniversalScript" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target === this) closeUniversalScriptModal()">
     <div class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-4 fade-enter max-h-[90vh] flex flex-col justify-between">
       
       <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
@@ -2360,7 +2360,7 @@ function getOrCreateFolder(folderName) {
   <!-- ========================================================================= -->
   <!-- MODAL: SETELAN SISTEM & DATABASE GLOBAL (MASTER LEVEL) -->
   <!-- ========================================================================= -->
-  <div id="modalGlobalSettings" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+  <div id="modalGlobalSettings" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target === this) closeGlobalSettingsModal()">
     <div class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-4.5 fade-enter max-h-[90vh] overflow-y-auto custom-scrollbar">
       
       <!-- Modal Header -->
@@ -10589,7 +10589,7 @@ function getOrCreateFolder(folderName) {
   <!-- ========================================================================= -->
   <!-- MODAL: LIVE FORM SIMULATOR (SIMULASI INTERAKTIF MAHASISWA WYSIWYG EXACT DRAFT) -->
   <!-- ========================================================================= -->
-  <div id="modalLiveFormSimulator" class="hidden fixed inset-0 z-50 bg-zinc-950/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4">
+  <div id="modalLiveFormSimulator" class="hidden fixed inset-0 z-50 bg-zinc-950/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4" onclick="if(event.target === this) closeLiveSimulatorModal()">
     <div class="bg-zinc-900 rounded-3xl max-w-5xl w-full h-[92vh] max-h-[92vh] flex flex-col shadow-2xl border border-zinc-700 overflow-hidden fade-enter">
       
       <!-- Simulator Top Control Bar -->
@@ -10650,7 +10650,7 @@ function getOrCreateFolder(folderName) {
   <!-- ========================================================================= -->
   <!-- MODAL: REVISION HISTORY (GOOGLE FORMS VERSION HISTORY) -->
   <!-- ========================================================================= -->
-  <div id="modalRevisionHistory" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+  <div id="modalRevisionHistory" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target === this) closeRevisionHistoryModal()">
     <div class="bg-white rounded-3xl max-w-xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-zinc-200 overflow-hidden fade-enter">
       
       <!-- Modal Header -->
@@ -10688,7 +10688,7 @@ function getOrCreateFolder(folderName) {
   <!-- ========================================================================= -->
   <!-- MODAL: UNIVERSAL IN-APP ACTION CONFIRMATION (ZERO NATIVE BROWSER POPUP) -->
   <!-- ========================================================================= -->
-  <div id="modalAppConfirm" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+  <div id="modalAppConfirm" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target === this) closeAppConfirm(false)">
     <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-4 transition-all">
       <div class="flex items-start gap-3.5">
         <div id="appConfirmIconBox" class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center shrink-0">

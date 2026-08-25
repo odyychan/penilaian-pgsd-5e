@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.98] - 2026-08-25
+
+### 🧹 Harmonisasi DOM, Eliminasi Duplikasi ID, & Standardisasi Interaksi Modal
+- **Pembersihan Elemen DOM Usang & Eliminasi Duplikat ID:**
+  - Membersihkan lebih dari 450 baris kode HTML statis usang (`legacyStaticStagesContainer`) di `index.html`, mengeliminasi 23 duplikasi ID elemen form (`selectPeranPenilai`, `inputNim`, `inputNama`, `inputEmail`, dll.) sehingga seluruh interaksi input dan validasi 100% presisi mengacu pada elemen dinamis aktif.
+- **Standardisasi Interaksi Modal & Dismissal Backdrop Konsisten:**
+  - Menerapkan penutupan modal otomatis pada seluruh modal sistem (`modalDeleteFormConfirm`, `modalCreateForm`, `modalShareForm`, `modalCoreFieldSettings`, `modalStageEditor`, `modalMoveFieldStage`, `modalCustomQuestion`, `modalEditGroup`, `modalEditMember`, `modalBatchGroup`, `modalResetConfirm`, `modalUniversalScript`, `modalGlobalSettings`, `modalLiveFormSimulator`, `modalRevisionHistory`, `modalAppConfirm`, `modalAttachQuestionMedia`, `modalSwitchForm`) melalui klik luar (*backdrop*) dan tombol `Escape`.
+- **Verifikasi Integritas Skema Basis Data & Views:**
+  - Memverifikasi kesehatan 6 tabel master dan 2 PostgreSQL views Supabase (`pgsd_forms`, `pgsd_form_configs`, `pgsd_groups`, `pgsd_students`, `pgsd_responses`, `pgsd_backups`, `pgsd_v_forms_summary`, `pgsd_v_rekap_nilai`) dengan status aktif dan sinkron.
+
+---
+
 ## [2.2.97] - 2026-08-25
 
 ### 🔗 Integrasi Tautan CDN Lampiran Mahasiswa pada Respon & Spreadsheet
