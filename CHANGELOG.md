@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.88] - 2026-08-25
+
+### 🧮 Penanganan Universal & Presisi Tinggi Simbol Matematika KaTeX & Smart Auto-Wrap
+- **Penyelarasan Rendering Matematika di Seluruh Tab & Komponen:**
+  - Mengintegrasikan pemanggilan otomatis `renderAllMathInElement()` pada setiap perpindahan tab admin (`switchAdminTab`), pemuatan awal DOM (`DOMContentLoaded`), modal instruksi, dan seluruh bagian dinamis aplikasi.
+- **Smart LaTeX Math Symbol Auto-Wrap (`smartMathFormat`):**
+  - Mesin cerdas kini mendeteksi dan secara otomatis membungkus simbol LaTeX/panah (`\rightarrow`, `\leftarrow`, `\pm`, `\approx`, `\le`, `\ge`, dll.) yang ditulis di teks instruksi atau soal tanpa harus selalu diapit `$`, sehingga selalu terender sebagai simbol matematika presisi tinggi.
+
+---
+
 ## [2.2.87] - 2026-08-25
 
 ### 🧹 Pembersihan Bersih Folder & Sheet Google Drive/Spreadsheet Saat Hapus Form (Zero-Orphan Architecture)

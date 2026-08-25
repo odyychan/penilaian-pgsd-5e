@@ -2619,9 +2619,7 @@ function getOrCreateFolder(folderName) {
     // =========================================================================
     function isFormatOrMathPresent(text) {
       if (!text || typeof text !== 'string') return false;
-      // Math is present ONLY if explicitly enclosed in delimiters ($...$, $$...$$, \(...\), \[...\])
-      const hasMath = /\$[^$]+\$|\$\$[\s\S]+\$\$|\\\([\s\S]+?\\\) |\\\[[\s\S]+?\\\]/.test(text) || (text.includes('$') && text.lastIndexOf('$') > text.indexOf('$'));
-      // Markdown formatting: **bold**, *italic*, [link](url)
+      const hasMath = /\$[^$]+\$|\$\$[\s\S]+\$\$|\\\([\s\S]+?\\\) |\\\[[\s\S]+?\\\]|\\(?:rightarrow|leftarrow|Rightarrow|Leftarrow|Leftrightarrow|pm|times|div|le|ge|neq|approx|sqrt|frac)/.test(text) || (text.includes('$') && text.lastIndexOf('$') > text.indexOf('$'));
       const hasMarkdown = /\*\*[^*]+\*\*|(?:\b|[^\*])\*[^*]+\*(?:\b|[^\*])|\[[^\]]+\]\(((?:https?:\/\/|\/)[^\s\)]+)\)/.test(text);
       return hasMath || hasMarkdown;
     }
@@ -2629,22 +2627,24 @@ function getOrCreateFolder(folderName) {
     function smartMathFormat(text) {
       if (!text || typeof text !== 'string') return "";
 
-      // Convert Markdown formatting (Bold, Italic, Link)
+      // 1. Convert Markdown formatting (Bold, Italic, Link)
       let res = text
         .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
         .replace(/(^|[^\*])\*([^*]+)\*([^\*]|$)/g, '$1<em>$2</em>$3')
         .replace(/\[([^\]]+)\]\(((?:https?:\/\/|\/)[^\s\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-800 underline font-semibold">$1</a>');
 
-      // Note: We do NOT auto-hijack plain text like x^2 without explicit $ delimiters.
-      // Math is parsed only when explicitly wrapped in $...$, $$...$$, \(...\), or \[...\]
+      // 2. Auto-wrap unwrapped LaTeX math symbols so they always render beautifully
+      res = res.replace(/(?<!\$|\\|\w)(\\(?:rightarrow|leftarrow|Rightarrow|Leftarrow|Leftrightarrow|pm|approx|neq|le|ge|times|div|cdot|infty|deg|alpha|beta|gamma|theta|pi|Sigma|mu|sigma)(?![a-zA-Z]))(?!\$)/g, '$$$1$$');
+
       return res;
     }
 
     function renderAllMathInElement(domElement) {
-      if (!domElement) return;
+      const target = domElement || document.body;
+      if (!target) return;
       if (typeof renderMathInElement === 'function') {
         try {
-          renderMathInElement(domElement, {
+          renderMathInElement(target, {
             delimiters: [
               { left: '$$', right: '$$', display: true },
               { left: '$', right: '$', display: false },
@@ -4450,6 +4450,7 @@ function getOrCreateFolder(folderName) {
       if (isAuth === "true") {
         showDashboard();
       }
+      setTimeout(() => renderAllMathInElement(document.body), 100);
     });
 
     function handleLogin(e) {
@@ -5042,7 +5043,10 @@ function getOrCreateFolder(folderName) {
         const btn = document.getElementById(`adminTabBtn_${t}`);
         
         if (t === tabKey) {
-          if (view) view.classList.remove("hidden");
+          if (view) {
+            view.classList.remove("hidden");
+            renderAllMathInElement(view);
+          }
           if (btn) {
             btn.className = "py-1.5 sm:py-2 px-2.5 sm:px-3 rounded-lg bg-zinc-100 text-zinc-950 shadow-xs transition flex items-center justify-center gap-1 cursor-pointer text-center whitespace-nowrap shrink-0 text-xs font-bold";
             const icon = btn.querySelector('svg');
