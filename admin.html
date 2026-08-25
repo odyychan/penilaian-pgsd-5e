@@ -4660,6 +4660,23 @@ function getOrCreateFolder(folderName) {
       if (e.key === "Escape") {
         document.querySelectorAll(".pgsd-dropdown-menu").forEach(m => m.classList.add("hidden"));
         document.querySelectorAll(".pgsd-dropdown-wrapper svg.rotate-180").forEach(s => s.classList.remove("rotate-180"));
+        
+        const attachModal = document.getElementById("modalAttachQuestionMedia");
+        if (attachModal && !attachModal.classList.contains("hidden")) {
+          closeAttachMediaModal(false);
+        }
+        const createModal = document.getElementById("modalCreateNewForm");
+        if (createModal && !createModal.classList.contains("hidden")) {
+          closeCreateFormModal();
+        }
+        const resetModal = document.getElementById("modalResetConfirm");
+        if (resetModal && !resetModal.classList.contains("hidden")) {
+          closeResetConfirmModal();
+        }
+        const settingsModal = document.getElementById("modalGlobalSettings");
+        if (settingsModal && !settingsModal.classList.contains("hidden")) {
+          closeGlobalSettingsModal();
+        }
       }
     });
 
@@ -9964,24 +9981,40 @@ function getOrCreateFolder(folderName) {
 
     async function executeResetResponses() {
       const targetForm = currentFormId || DEFAULT_PRIMARY_FORM_ID;
-      const apiUrl = getApiUrl();
       try {
-        const response = await fetch(apiUrl, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "adminResetResponses", formId: targetForm })
-        });
-        const res = await response.json();
-        if (res.success) {
-          closeResetConfirmModal();
-          showAdminToast("Semua data respons berhasil dikosongkan.", "success");
-          fetchAdminFullData();
-          fetchAdminResponsesList(true);
-        } else {
-          showAdminToast("Gagal reset: " + res.error, "error");
+        // 1. Kosongkan respons di basis data utama Supabase
+        const sb = await ensureSupabaseClient();
+        if (sb) {
+          await sb.from('pgsd_responses').delete().eq('form_id', targetForm);
         }
+
+        // 2. Bersihkan berkas lampiran mahasiswa di Supabase Storage
+        fetch(`https://eychjnqmqpxzxukiwbqf.supabase.co/storage/v1/object/pgsd-media`, {
+          method: "DELETE",
+          headers: {
+            apikey: "sb_publishable__vL9IPWnyC8uJRSQYLN_yg_qDHDflEp",
+            Authorization: "Bearer sb_publishable__vL9IPWnyC8uJRSQYLN_yg_qDHDflEp",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ prefixes: [`${targetForm}/lampiran_`] })
+        }).catch(e => console.warn("Notice cleaning storage attachments on reset:", e));
+
+        // 3. Reset baris lembar kerja di Google Spreadsheet
+        const apiUrl = getApiUrl();
+        if (apiUrl && !apiUrl.includes("localhost")) {
+          fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ action: "adminResetResponses", formId: targetForm })
+          }).catch(e => console.warn("Notice resetting sheet responses:", e));
+        }
+
+        closeResetConfirmModal();
+        showAdminToast("Semua data respons penilaian pada formulir ini berhasil dikosongkan.", "success");
+        await fetchAdminFullData();
+        await fetchAdminResponsesList(true);
       } catch (e) {
-        showAdminToast("Error koneksi.", "error");
+        showAdminToast("Gagal reset data respons: " + e.message, "error");
       }
     }
 
@@ -10691,8 +10724,8 @@ function getOrCreateFolder(folderName) {
   <!-- ========================================================================= -->
   <!-- MODAL: ATTACH MULTI-MEDIA TO QUESTION (IMAGE, VIDEO, AUDIO, EMBED) -->
   <!-- ========================================================================= -->
-  <div id="modalAttachQuestionMedia" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-5 fade-enter max-h-[90vh] overflow-y-auto">
+  <div id="modalAttachQuestionMedia" onclick="if(event.target === this) closeAttachMediaModal(false)" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-5 fade-enter max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
       
       <!-- Header -->
       <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
@@ -10707,7 +10740,7 @@ function getOrCreateFolder(folderName) {
             <p class="text-[11.5px] text-zinc-500">Tambahkan gambar, video, audio, atau link interaktif ke pertanyaan ini.</p>
           </div>
         </div>
-        <button type="button" onclick="closeAttachMediaModal()" class="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 cursor-pointer">
+        <button type="button" onclick="closeAttachMediaModal(false)" class="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 cursor-pointer">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>

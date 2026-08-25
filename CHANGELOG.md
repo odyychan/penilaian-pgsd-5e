@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.96] - 2026-08-25
+
+### 🛡️ Penanganan Kasus Khusus Komprehensif (*Backdrop Dismissal, Escape Key, & Full Reset Sync*)
+- **Penanganan Pembatalan Melalui Backdrop & Tombol Escape:**
+  - Menambahkan listener klik area luar modal (*backdrop dismissal*) dan penekanan tombol `Escape` pada seluruh modal (terutama Modal Sematkan Media) sehingga penutupan modal tak terduga tetap memicu pembersihan otomatis berkas sementara tanpa menyisakan berkas sampah.
+- **Pembersihan Bersih Saat Reset Respons Perkuliahan:**
+  - Memperbarui `executeResetResponses` agar menghapus seluruh rekaman di tabel Supabase `pgsd_responses`, membersihkan berkas lampiran mahasiswa di storage bucket `pgsd-media/{formId}/lampiran_*`, dan mengosongkan lembar kerja Google Spreadsheet secara sinkron.
+
+---
+
 ## [2.2.95] - 2026-08-25
 
 ### 🧹 Mesin Pembersihan Berkas Sampah Otomatis (*Zero-Orphan Lifecycle & Auto-Purge*)
