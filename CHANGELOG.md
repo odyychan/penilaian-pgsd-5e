@@ -4,6 +4,15 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.2] - 2026-08-25
+
+### 🔍 Peningkatan Ukuran & Ergonomi Tombol Undo / Redo (*Enhanced Touch Target & Visual Clarity*)
+- **Skalabilitas & Ergonomi Tombol Undo/Redo Header:**
+  - Memperbesar dimensi tombol Undo & Redo pada bilah navigasi atas (`admin.html`) dari ukuran mikro (26px) menjadi ukuran standar ergonomis (36px pada desktop/tablet dan 32px pada mobile) dengan ikon SVG tajam $20\times 20\text{ px}$.
+  - Menambahkan pembungkus *pill* modern dengan batas *border*, bayangan halus (*shadow-xs*), serta efek *hover* dan *active:scale-95* untuk umpan balik sentuhan yang nyaman.
+
+---
+
 ## [2.3.1] - 2026-08-25
 
 ### 🎨 Studio Multi-Media Pertanyaan & Galeri Berkas Fleksibel (*Batch Upload & Mixed Media Gallery*)
