@@ -4,6 +4,21 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.13] - 2026-08-25
+
+### 👥 Sistem Impor Kelompok Multi-Sumber & Generator Pembagian Otomatis (*Multi-Source Group Import Engine*)
+- **Salin Kelompok dari Form Lain (*Cross-Form Group Importer*):**
+  - Menyediakan opsi pemilihan form sumber dari daftar formulir terdaftar untuk menyalin susunan kelompok & mahasiswa secara instan.
+  - Dilengkapi checklist pemilihan kelompok interaktif (*Pilih Semua / Sebagian*) dan pratinjau jumlah mahasiswa.
+- **Generator Pembagian Otomatis dari Daftar Mahasiswa (*Custom Distribution Generator*):**
+  - Memungkinkan admin/dosen hanya menempel daftar nama & NIM mahasiswa (misal dari Siakad/daftar hadir).
+  - Tiga metode pembagian fleksibel: **Bagi rata ke $N$ Kelompok**, **Bagi per $X$ Mahasiswa per Kelompok**, atau **Masukkan ke 1 Kelompok Tertentu**.
+  - Dilengkapi fitur pengacakan urutan (*Random Shuffle*), penyesuaian awalan nama kelompok, dan pratinjau tabel interaktif sebelum data disimpan.
+- **Dukungan Tempel Teks Excel Lengkap:**
+  - Tetap mendukung format multi-kolom (*Kelompok / Sesi / NIM / Nama*) dengan pemisah tab atau garis miring.
+
+---
+
 ## [2.3.12] - 2026-08-25
 
 ### 🏷️ Eliminasi Simbol Plus Ganda pada Tombol Aksi (*Zero Redundancy Button Labels*)
