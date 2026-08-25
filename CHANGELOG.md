@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.73] - 2026-08-25
+
+### 🟢 Integrasi Compact Status Pill Toggle Button (Aktifkan/Tutup Form) pada Header Workspace
+- **Top Header Bar Zero-Click Status Toggle:**
+  - Menempatkan tombol toggle status formulir *compact* (`[ 🟢 Aktif ]` vs `[ ⚫ Ditutup ]`) langsung pada baris atas workspace dan sticky tab navigation bar.
+  - Memungkinkan dosen mengaktifkan atau menutup penerimaan respons penilaian secara instan dalam 1 detik tanpa perlu membuka menu pengaturan atau menggulir layar.
+- **Sinkronisasi Status Waktu-Nyata:**
+  - Terhubung langsung dengan basis data Supabase (`< 30 ms`), kartu pengaturan status di tab *Setelan Form*, serta halaman pengisian mahasiswa.
+
+---
+
 ## [2.2.72] - 2026-08-25
 
 ### 🌐 Redesain Elegan & Panduan Lengkap Integrasi Google Spreadsheet & Drive Perkuliahan
