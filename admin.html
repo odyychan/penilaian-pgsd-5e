@@ -402,27 +402,28 @@
 
           <!-- Top Action Controls Strip (Always Unified & Accessible) -->
           <div class="flex items-center justify-between sm:justify-end gap-1 sm:gap-2 pt-1 sm:pt-0 border-t sm:border-t-0 border-zinc-800/80 shrink-0">
-            <!-- Undo / Redo in Header -->
-            <div class="flex items-center rounded-xl bg-zinc-800/90 p-1 shrink-0 border border-zinc-700/80 shadow-xs gap-1">
+            <!-- Undo / Redo in Header (100% Consistent Height & Radius) -->
+            <div class="h-8 sm:h-9 p-0.5 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center shrink-0 shadow-2xs gap-0.5">
               <button 
                 type="button" 
                 id="btnHeaderBuilderUndo"
                 onclick="formBuilderUndo()" 
                 disabled
-                class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg text-zinc-300 hover:text-white hover:bg-zinc-700 active:scale-95 disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent flex items-center justify-center transition cursor-pointer"
+                class="h-full px-2 rounded-lg text-zinc-300 hover:text-white hover:bg-zinc-700 active:scale-95 disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent flex items-center justify-center transition cursor-pointer"
                 title="Urungkan (Undo - Ctrl + Z)"
               >
-                <svg class="w-4.5 h-4.5 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M3 10h10a5 5 0 015 5v2a5 5 0 01-5 5H6m-3-12l4-4m-4 4l4 4"></path></svg>
+                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M3 10h10a5 5 0 015 5v2a5 5 0 01-5 5H6m-3-12l4-4m-4 4l4 4"></path></svg>
               </button>
+              <div class="h-3.5 w-px bg-zinc-700/80"></div>
               <button 
                 type="button" 
                 id="btnHeaderBuilderRedo"
                 onclick="formBuilderRedo()" 
                 disabled
-                class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg text-zinc-300 hover:text-white hover:bg-zinc-700 active:scale-95 disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent flex items-center justify-center transition cursor-pointer"
+                class="h-full px-2 rounded-lg text-zinc-300 hover:text-white hover:bg-zinc-700 active:scale-95 disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent flex items-center justify-center transition cursor-pointer"
                 title="Ulangi (Redo - Ctrl + Y)"
               >
-                <svg class="w-4.5 h-4.5 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M21 10H11a5 5 0 00-5 5v2a5 5 0 005 5h7m3-12l-4-4m4 4l-4 4"></path></svg>
+                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M21 10H11a5 5 0 00-5 5v2a5 5 0 005 5h7m3-12l-4-4m4 4l-4 4"></path></svg>
               </button>
             </div>
 

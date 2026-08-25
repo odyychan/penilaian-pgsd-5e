@@ -4,6 +4,15 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.16] - 2026-08-25
+
+### 🎯 Presisi Dimensi & Penyelarasan Tombol Header Undo/Redo (*Pixel-Perfect Header Actions*)
+- **Penyelarasan Tinggi & Bounding Box Tombol Header:**
+  - Menyelaraskan kontainer tombol *Undo* dan *Redo* sehingga memiliki tinggi presisi `h-8 sm:h-9` (36px), identik 100% dengan tombol *Riwayat*, *Pratinjau*, dan *Publikasikan*.
+  - Mengatur ukuran ikon, radius sudut `rounded-xl`, dan garis pemisah vertikal yang proporsional sehingga seluruh bilah kontrol atas sejajar lurus tanpa distorsi visual.
+
+---
+
 ## [2.3.15] - 2026-08-25
 
 ### 🌳 Daftar Berhierarki Word/Docs & Penambahan Fitur Daftar Abjad (*Hierarchical Lists & Alphabet Feature*)
