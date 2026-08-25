@@ -7183,12 +7183,15 @@ function getOrCreateFolder(folderName) {
                 draggable="true"
                 ondragstart="handleQuestionCardDragStart(event, ${sIdx}, ${fIdx})"
                 ondragend="handleQuestionCardDragEnd(event)"
-                class="flex justify-center -mt-1 -mb-1 text-zinc-300 hover:text-indigo-600 cursor-grab active:cursor-grabbing select-none p-1 rounded hover:bg-zinc-100 transition"
-                title="Tarik handle 6-titik ini untuk menggeser posisi pertanyaan"
+                class="flex items-center justify-center -mt-1.5 -mb-1 text-zinc-300 hover:text-indigo-600 cursor-grab active:cursor-grabbing select-none py-1 px-3 rounded-lg hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-all duration-150 group/handle mx-auto"
+                title="Klik dan tarik handle 6-titik ini untuk memindahkan urutan pertanyaan"
               >
-                <svg class="w-6 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M9 5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 7a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 7a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm6-14a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 7a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 7a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path>
-                </svg>
+                <div class="flex items-center gap-1.5">
+                  <svg class="w-6 h-4 group-hover/handle:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 7a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 7a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm6-14a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 7a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 7a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path>
+                  </svg>
+                  <span class="text-[10px] font-mono font-bold uppercase tracking-wider hidden group-hover/handle:inline text-indigo-600 transition">Tarik Pertanyaan</span>
+                </div>
               </div>
 
               <!-- Top Row: Question Title & Dropdown Type Selector (Authentic Google Forms Layout) -->
@@ -7356,12 +7359,13 @@ function getOrCreateFolder(folderName) {
                   draggable="true"
                   ondragstart="handleStageCardDragStart(event, ${sIdx})"
                   ondragend="handleStageCardDragEnd(event)"
-                  class="flex items-center text-zinc-300 hover:text-indigo-600 cursor-grab active:cursor-grabbing p-1.5 rounded hover:bg-zinc-100 transition mr-0.5"
-                  title="Tarik handle 6-titik ini untuk menggeser posisi bagian"
+                  class="flex items-center text-zinc-400 hover:text-indigo-600 cursor-grab active:cursor-grabbing p-1.5 px-2 rounded-lg hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-all duration-150 mr-0.5 group/stageHandle"
+                  title="Klik dan tarik handle 6-titik ini untuk memindahkan seluruh Bagian"
                 >
-                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4 group-hover/stageHandle:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M9 5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 7a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 7a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm6-14a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 7a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 7a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path>
                   </svg>
+                  <span class="text-[10px] font-mono font-bold uppercase tracking-wider hidden group-hover/stageHandle:inline text-indigo-600 ml-1 transition">Tarik Bagian</span>
                 </div>
 
                 <button type="button" onclick="moveStage(${sIdx}, -1)" ${sIdx === 0 ? 'disabled' : ''} class="p-1.5 rounded-lg border border-zinc-200 hover:bg-indigo-50 hover:text-indigo-600 disabled:opacity-25 text-zinc-600 cursor-pointer transition shadow-2xs" title="Geser Bagian Naik (▲)">
@@ -7770,26 +7774,49 @@ function getOrCreateFolder(folderName) {
     let draggedQuestionData = null; // { sIdx, fIdx }
     let draggedStageIdx = null; // sIdx
 
+    function cleanupQuestionDragClasses() {
+      document.body.classList.remove("cursor-grabbing", "select-none");
+      document.querySelectorAll(".group\\/qcard").forEach(c => {
+        c.classList.remove(
+          "opacity-30", "border-dashed", "border-indigo-500", "bg-indigo-50/50", "scale-[0.98]", "shadow-inner",
+          "border-t-4", "border-b-4", "border-t-indigo-600", "border-b-indigo-600", "ring-2", "ring-indigo-400/50", "bg-indigo-50/20"
+        );
+      });
+      document.querySelectorAll('[id^="stageCard_"]').forEach(c => {
+        c.classList.remove(
+          "opacity-30", "border-dashed", "border-indigo-500", "bg-indigo-50/50", "scale-[0.98]", "shadow-inner",
+          "border-t-4", "border-b-4", "border-t-indigo-600", "border-b-indigo-600", "ring-2", "ring-indigo-400/50", "bg-indigo-50/20"
+        );
+      });
+    }
+
     function handleQuestionCardDragStart(e, sIdx, fIdx) {
       if (!adminFormSchema?.tahapan[sIdx]?.fields[fIdx]) return;
       draggedQuestionData = { sIdx, fIdx };
       draggedStageIdx = null;
+      document.body.classList.add("cursor-grabbing", "select-none");
+
+      const card = document.getElementById(`questionCard_${sIdx}_${fIdx}`);
       if (e && e.dataTransfer) {
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'QUESTION', sIdx, fIdx }));
+        if (card && e.dataTransfer.setDragImage) {
+          const rect = card.getBoundingClientRect();
+          const clickX = e.clientX - rect.left;
+          const clickY = e.clientY - rect.top;
+          e.dataTransfer.setDragImage(card, Math.max(15, Math.min(clickX, rect.width - 15)), Math.max(15, Math.min(clickY, 40)));
+        }
       }
-      const card = document.getElementById(`questionCard_${sIdx}_${fIdx}`);
+
       if (card) {
         setTimeout(() => {
-          card.classList.add("opacity-40", "border-dashed", "border-indigo-400", "scale-[0.99]");
+          card.classList.add("opacity-30", "border-dashed", "border-indigo-500", "bg-indigo-50/50", "scale-[0.98]", "shadow-inner");
         }, 0);
       }
     }
 
     function handleQuestionCardDragEnd(e) {
-      document.querySelectorAll(".group\\/qcard").forEach(c => {
-        c.classList.remove("opacity-40", "border-dashed", "border-indigo-400", "scale-[0.99]", "ring-2", "ring-indigo-500", "ring-offset-2", "bg-indigo-50/40");
-      });
+      cleanupQuestionDragClasses();
       draggedQuestionData = null;
     }
 
@@ -7797,21 +7824,42 @@ function getOrCreateFolder(folderName) {
       if (!draggedQuestionData) return;
       if (e && e.preventDefault) e.preventDefault();
       if (e && e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+
+      const card = document.getElementById(`questionCard_${sIdx}_${fIdx}`);
+      if (card) {
+        if (draggedQuestionData.sIdx === sIdx && draggedQuestionData.fIdx === fIdx) {
+          card.classList.remove("border-t-4", "border-b-4", "border-t-indigo-600", "border-b-indigo-600", "ring-2", "ring-indigo-400/50", "bg-indigo-50/20");
+          return;
+        }
+
+        const rect = card.getBoundingClientRect();
+        const isUpper = e.clientY < (rect.top + rect.height / 2);
+
+        document.querySelectorAll(".group\\/qcard").forEach(c => {
+          if (c !== card) {
+            c.classList.remove("border-t-4", "border-b-4", "border-t-indigo-600", "border-b-indigo-600", "ring-2", "ring-indigo-400/50", "bg-indigo-50/20");
+          }
+        });
+
+        if (isUpper) {
+          card.classList.remove("border-b-4", "border-b-indigo-600");
+          card.classList.add("border-t-4", "border-t-indigo-600", "ring-2", "ring-indigo-400/50", "bg-indigo-50/20");
+        } else {
+          card.classList.remove("border-t-4", "border-t-indigo-600");
+          card.classList.add("border-b-4", "border-b-indigo-600", "ring-2", "ring-indigo-400/50", "bg-indigo-50/20");
+        }
+      }
     }
 
     function handleQuestionCardDragEnter(e, sIdx, fIdx) {
       if (!draggedQuestionData) return;
       if (e && e.preventDefault) e.preventDefault();
-      const card = document.getElementById(`questionCard_${sIdx}_${fIdx}`);
-      if (card && (draggedQuestionData.sIdx !== sIdx || draggedQuestionData.fIdx !== fIdx)) {
-        card.classList.add("ring-2", "ring-indigo-500", "ring-offset-2", "bg-indigo-50/40");
-      }
     }
 
     function handleQuestionCardDragLeave(e) {
       const target = e?.currentTarget;
       if (target) {
-        target.classList.remove("ring-2", "ring-indigo-500", "ring-offset-2", "bg-indigo-50/40");
+        target.classList.remove("border-t-4", "border-b-4", "border-t-indigo-600", "border-b-indigo-600", "ring-2", "ring-indigo-400/50", "bg-indigo-50/20");
       }
     }
 
@@ -7823,14 +7871,32 @@ function getOrCreateFolder(folderName) {
       const srcStage = adminFormSchema?.tahapan[srcSIdx];
       const targetStage = adminFormSchema?.tahapan[targetSIdx];
       if (!srcStage?.fields || !targetStage?.fields) {
+        cleanupQuestionDragClasses();
         draggedQuestionData = null;
         return;
       }
       if (!srcStage.fields[srcFIdx]) {
+        cleanupQuestionDragClasses();
         draggedQuestionData = null;
         return;
       }
-      if (srcSIdx === targetSIdx && srcFIdx === targetFIdx) {
+
+      const targetCard = document.getElementById(`questionCard_${targetSIdx}_${targetFIdx}`);
+      let insertFIdx = targetFIdx;
+      if (targetCard) {
+        const rect = targetCard.getBoundingClientRect();
+        const isDropAfter = e.clientY >= (rect.top + rect.height / 2);
+        if (isDropAfter) {
+          insertFIdx = targetFIdx + 1;
+        }
+      }
+
+      if (srcSIdx === targetSIdx && srcFIdx < insertFIdx) {
+        insertFIdx--;
+      }
+
+      if (srcSIdx === targetSIdx && srcFIdx === insertFIdx) {
+        cleanupQuestionDragClasses();
         draggedQuestionData = null;
         return;
       }
@@ -7838,12 +7904,14 @@ function getOrCreateFolder(folderName) {
       pushUndoSnapshot('Pindah Urutan Pertanyaan');
 
       const [movedField] = srcStage.fields.splice(srcFIdx, 1);
-      targetStage.fields.splice(targetFIdx, 0, movedField);
+      targetStage.fields.splice(insertFIdx, 0, movedField);
+
+      cleanupQuestionDragClasses();
+      draggedQuestionData = null;
 
       renderDynamicStagesCanvas();
       triggerAutoSaveSchema();
-      showAdminToast(`Pertanyaan '${movedField.label || 'tanpa judul'}' berhasil dipindahkan ke Bagian ${targetSIdx + 1} (No. ${targetFIdx + 1})!`, "success");
-      draggedQuestionData = null;
+      showAdminToast(`Pertanyaan '${movedField.label || 'tanpa judul'}' berhasil dipindahkan ke Bagian ${targetSIdx + 1} (No. ${insertFIdx + 1})!`, "success");
     }
 
     // STAGE (BAGIAN) DRAG AND DROP
@@ -7851,22 +7919,29 @@ function getOrCreateFolder(folderName) {
       if (!adminFormSchema?.tahapan[sIdx]) return;
       draggedStageIdx = sIdx;
       draggedQuestionData = null;
+      document.body.classList.add("cursor-grabbing", "select-none");
+
+      const stageCard = document.getElementById(`stageCard_${sIdx}`);
       if (e && e.dataTransfer) {
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'STAGE', sIdx }));
+        if (stageCard && e.dataTransfer.setDragImage) {
+          const rect = stageCard.getBoundingClientRect();
+          const clickX = e.clientX - rect.left;
+          const clickY = e.clientY - rect.top;
+          e.dataTransfer.setDragImage(stageCard, Math.max(20, Math.min(clickX, rect.width - 20)), Math.max(20, Math.min(clickY, 50)));
+        }
       }
-      const stageCard = document.getElementById(`stageCard_${sIdx}`);
+
       if (stageCard) {
         setTimeout(() => {
-          stageCard.classList.add("opacity-40", "border-dashed", "border-indigo-400", "scale-[0.99]");
+          stageCard.classList.add("opacity-30", "border-dashed", "border-indigo-500", "bg-indigo-50/50", "scale-[0.98]", "shadow-inner");
         }, 0);
       }
     }
 
     function handleStageCardDragEnd(e) {
-      document.querySelectorAll('[id^="stageCard_"]').forEach(c => {
-        c.classList.remove("opacity-40", "border-dashed", "border-indigo-400", "scale-[0.99]", "ring-2", "ring-indigo-500", "ring-offset-2", "bg-indigo-50/30");
-      });
+      cleanupQuestionDragClasses();
       draggedStageIdx = null;
     }
 
@@ -7874,21 +7949,42 @@ function getOrCreateFolder(folderName) {
       if (draggedStageIdx === null) return;
       if (e && e.preventDefault) e.preventDefault();
       if (e && e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+
+      const stageCard = document.getElementById(`stageCard_${sIdx}`);
+      if (stageCard) {
+        if (draggedStageIdx === sIdx) {
+          stageCard.classList.remove("border-t-4", "border-b-4", "border-t-indigo-600", "border-b-indigo-600", "ring-2", "ring-indigo-400/50", "bg-indigo-50/20");
+          return;
+        }
+
+        const rect = stageCard.getBoundingClientRect();
+        const isUpper = e.clientY < (rect.top + rect.height / 2);
+
+        document.querySelectorAll('[id^="stageCard_"]').forEach(sc => {
+          if (sc !== stageCard) {
+            sc.classList.remove("border-t-4", "border-b-4", "border-t-indigo-600", "border-b-indigo-600", "ring-2", "ring-indigo-400/50", "bg-indigo-50/20");
+          }
+        });
+
+        if (isUpper) {
+          stageCard.classList.remove("border-b-4", "border-b-indigo-600");
+          stageCard.classList.add("border-t-4", "border-t-indigo-600", "ring-2", "ring-indigo-400/50", "bg-indigo-50/20");
+        } else {
+          stageCard.classList.remove("border-t-4", "border-t-indigo-600");
+          stageCard.classList.add("border-b-4", "border-b-indigo-600", "ring-2", "ring-indigo-400/50", "bg-indigo-50/20");
+        }
+      }
     }
 
     function handleStageCardDragEnter(e, sIdx) {
-      if (draggedStageIdx === null || draggedStageIdx === sIdx) return;
+      if (draggedStageIdx === null) return;
       if (e && e.preventDefault) e.preventDefault();
-      const stageCard = document.getElementById(`stageCard_${sIdx}`);
-      if (stageCard) {
-        stageCard.classList.add("ring-2", "ring-indigo-500", "ring-offset-2", "bg-indigo-50/30");
-      }
     }
 
     function handleStageCardDragLeave(e) {
       const target = e?.currentTarget;
       if (target) {
-        target.classList.remove("ring-2", "ring-indigo-500", "ring-offset-2", "bg-indigo-50/30");
+        target.classList.remove("border-t-4", "border-b-4", "border-t-indigo-600", "border-b-indigo-600", "ring-2", "ring-indigo-400/50", "bg-indigo-50/20");
       }
     }
 
@@ -7898,22 +7994,41 @@ function getOrCreateFolder(folderName) {
 
       const tahapan = adminFormSchema?.tahapan;
       if (!tahapan || !tahapan[draggedStageIdx] || !tahapan[targetSIdx]) {
+        cleanupQuestionDragClasses();
         draggedStageIdx = null;
         return;
       }
-      if (draggedStageIdx === targetSIdx) {
+
+      const targetCard = document.getElementById(`stageCard_${targetSIdx}`);
+      let insertSIdx = targetSIdx;
+      if (targetCard) {
+        const rect = targetCard.getBoundingClientRect();
+        const isDropAfter = e.clientY >= (rect.top + rect.height / 2);
+        if (isDropAfter) {
+          insertSIdx = targetSIdx + 1;
+        }
+      }
+
+      if (draggedStageIdx < insertSIdx) {
+        insertSIdx--;
+      }
+
+      if (draggedStageIdx === insertSIdx) {
+        cleanupQuestionDragClasses();
         draggedStageIdx = null;
         return;
       }
 
       pushUndoSnapshot('Pindah Urutan Bagian');
       const [movedStage] = tahapan.splice(draggedStageIdx, 1);
-      tahapan.splice(targetSIdx, 0, movedStage);
+      tahapan.splice(insertSIdx, 0, movedStage);
+
+      cleanupQuestionDragClasses();
+      draggedStageIdx = null;
 
       renderDynamicStagesCanvas();
       triggerAutoSaveSchema();
-      showAdminToast(`Bagian '${movedStage.title}' berhasil dipindahkan ke Urutan ${targetSIdx + 1}!`, "success");
-      draggedStageIdx = null;
+      showAdminToast(`Bagian '${movedStage.title}' berhasil dipindahkan ke Urutan ${insertSIdx + 1}!`, "success");
     }
 
     async function deleteField(sIdx, fIdx) {

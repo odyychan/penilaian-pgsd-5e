@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.74] - 2026-08-25
+
+### 🎛️ Peningkatan Visual & Interaktivitas Penuh Drag & Drop Reordering (Pertanyaan & Bagian)
+- **Visual Tarikan Kartu Utuh (`setDragImage`):**
+  - Mengimplementasikan `setDragImage` pada kartu pertanyaan dan bagian sehingga saat pegangan (*handle*) ditarik, seluruh kartu ikut melayang secara proporsional dan elegan di bawah kursor mouse/touch.
+- **Indikator Garis Penempatan Dinamis (*Dynamic Drop Placement Line*):**
+  - Menampilkan garis penempatan tegas (*border insertion line*) di atas atau di bawah kartu target sesuai posisi kursor serta efek *glowing ring* yang responsif.
+- **Visual Cue & Hover State Pegangan 6-Titik:**
+  - Menambahkan animasi pembesaran ikon, kursor *grabbing*, serta badge label *"Tarik Pertanyaan"* / *"Tarik Bagian"* saat kursor diarahkan ke pegangan drag.
+
+---
+
 ## [2.2.73] - 2026-08-25
 
 ### 🟢 Integrasi Compact Status Pill Toggle Button (Aktifkan/Tutup Form) pada Header Workspace
