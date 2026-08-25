@@ -4,6 +4,14 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.97] - 2026-08-25
+
+### 🔗 Integrasi Tautan CDN Lampiran Mahasiswa pada Respon & Spreadsheet
+- **Penyimpanan Metadata Berkas Lengkap:**
+  - Menyematkan atribut `fileUrl` (tautan Google Global CDN / Storage) pada objek `evaluasiDetail.uploadedFiles` saat pengiriman formulir penilaian mahasiswa (`handleFinalSubmit`), sehingga dosen dapat membuka dan meninjau berkas tugas mahasiswa langsung melalui spreadsheet maupun panel respons admin.
+
+---
+
 ## [2.2.96] - 2026-08-25
 
 ### 🛡️ Penanganan Kasus Khusus Komprehensif (*Backdrop Dismissal, Escape Key, & Full Reset Sync*)

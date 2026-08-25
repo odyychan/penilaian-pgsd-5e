@@ -4925,7 +4925,8 @@
                 payload.evaluasiDetail.uploadedFiles[fldId] = {
                   fileName: fileObj.name,
                   fileSize: fileObj.size || 0,
-                  mimeType: fileObj.type || 'application/octet-stream'
+                  mimeType: fileObj.type || 'application/octet-stream',
+                  fileUrl: fileObj.url || fileObj.dataUrl || ""
                 };
               }
             }
