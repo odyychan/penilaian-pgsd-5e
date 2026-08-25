@@ -1,15 +1,17 @@
 /**
  * ==============================================================================
  * BACKEND REST API - SISTEM MULTI-FORM & PENILAIAN PRESENTASI PGSD (ULTRA FAST)
- * Spreadsheet ID: 1D7nQcVEbmOKjgcJ6LzKeeDQPQxhAIiCELRC9eP9w7WU
+ * Spreadsheet ID: 1MAZqzRyau1mECqamnU9Bj3TALRJYDrA1WLQFesJ4wG4
+ * Google Drive Folder ID: 1ZYnP40AaCoaqu6-H2ZNfYuS-RshCWURK
  * Multi-Form Engine, Dynamic Form Builder, Google Drive Uploader & Isolated Sandboxes
  * ==============================================================================
  */
 
 // ==============================================================================
-// ⚙️ KONFIGURASI SPREADSHEET & REGISTRY DEFAULT
+// ⚙️ KONFIGURASI SPREADSHEET & GOOGLE DRIVE DEFAULT
 // ==============================================================================
-const SPREADSHEET_ID = "1D7nQcVEbmOKjgcJ6LzKeeDQPQxhAIiCELRC9eP9w7WU";
+const SPREADSHEET_ID = "1MAZqzRyau1mECqamnU9Bj3TALRJYDrA1WLQFesJ4wG4";
+const DEFAULT_DRIVE_FOLDER_ID = "1ZYnP40AaCoaqu6-H2ZNfYuS-RshCWURK";
 
 // Nama Sheet Registry Pusat
 const SHEET_REGISTRY = "Registry_Forms";
@@ -1284,10 +1286,45 @@ function deleteDriveFile(payload) {
   }
 }
 
-function getOrCreateDriveFolder(folderName) {
-  const folders = DriveApp.getFoldersByName(folderName);
+function getOrCreateDriveFolder(folderNameOrId) {
+  if (!folderNameOrId || folderNameOrId.trim() === "") {
+    folderNameOrId = DEFAULT_DRIVE_FOLDER_ID;
+  }
+  
+  const cleanTarget = folderNameOrId.trim();
+
+  // 1. Jika diberikan ID Folder (alfanumerik panjang) atau URL Drive
+  let targetId = cleanTarget;
+  if (cleanTarget.includes("folders/")) {
+    const match = cleanTarget.match(/folders\/([a-zA-Z0-9_-]+)/);
+    if (match) targetId = match[1];
+  } else if (cleanTarget.includes("id=")) {
+    const match = cleanTarget.match(/id=([a-zA-Z0-9_-]+)/);
+    if (match) targetId = match[1];
+  }
+
+  if (targetId && targetId.length >= 25 && !targetId.includes(" ")) {
+    try {
+      const folder = DriveApp.getFolderById(targetId);
+      if (folder) return folder;
+    } catch(e) {
+      Logger.log("Folder by ID not found, fallback to name search: " + e.toString());
+    }
+  }
+
+  // 2. Jika diberikan nama folder, cari folder berdasarkan nama
+  const folders = DriveApp.getFoldersByName(cleanTarget);
   if (folders.hasNext()) return folders.next();
-  return DriveApp.createFolder(folderName);
+
+  // 3. Fallback ke DEFAULT_DRIVE_FOLDER_ID
+  if (DEFAULT_DRIVE_FOLDER_ID) {
+    try {
+      const defFolder = DriveApp.getFolderById(DEFAULT_DRIVE_FOLDER_ID);
+      if (defFolder) return defFolder;
+    } catch(e) {}
+  }
+
+  return DriveApp.createFolder(cleanTarget);
 }
 
 function getOrCreateDriveSubfolder(parentFolder, subfolderName) {

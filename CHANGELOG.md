@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.80] - 2026-08-25
+
+### 🎯 Penyelarasan Default Folder Google Drive & Google Spreadsheet Utama
+- **Default Google Drive Folder Utama Terhubung:**
+  - Mengintegrasikan ID folder root Google Drive `1ZYnP40AaCoaqu6-H2ZNfYuS-RshCWURK` ke dalam `Code.gs` dan `admin.html`, sehingga seluruh media dan lampiran form otomatis bermuara ke dalam folder ini dengan subfolder terstruktur (`{PIN}/Media_Formulir/` dan `{PIN}/Lampiran_Mahasiswa/`).
+- **Default Google Spreadsheet Utama Terhubung:**
+  - Mengintegrasikan Spreadsheet ID `1MAZqzRyau1mECqamnU9Bj3TALRJYDrA1WLQFesJ4wG4` sebagai pusat sinkronisasi database lembar kerja seluruh formulir perkuliahan.
+
+---
+
 ## [2.2.79] - 2026-08-25
 
 ### 🔗 Integrasi Penuh Webhook Google Apps Script Web App Terotorisasi
