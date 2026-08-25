@@ -3601,8 +3601,8 @@ function getOrCreateFolder(folderName) {
         if (uploadBtn) uploadBtn.classList.remove("hidden");
       } else if (type === 'VIDEO') {
         if (label) label.textContent = "Tautan Video (YouTube, Vimeo, Drive, MP4):";
-        if (help) help.textContent = "Mendukung link YouTube biasa/shorts, Vimeo, Google Drive Video, atau direct link MP4.";
-        if (uploadBtn) uploadBtn.classList.add("hidden");
+        if (help) help.textContent = "Mendukung link YouTube biasa/shorts, Vimeo, Google Drive Video, direct link MP4/WebM, atau klik Unggah File.";
+        if (uploadBtn) uploadBtn.classList.remove("hidden");
       } else if (type === 'AUDIO') {
         if (label) label.textContent = "Tautan Berkas Audio (MP3, WAV, Drive Audio):";
         if (help) help.textContent = "Mendukung file audio MP3/WAV online, Google Drive audio, atau rekaman soal.";
@@ -3870,11 +3870,19 @@ function getOrCreateFolder(folderName) {
                           onerror="handleImageErrorFallback(this, '${url.replace(/'/g, "\\'")}')" 
                           class="max-h-48 w-auto rounded-xl border border-zinc-200 object-contain shadow-xs">`;
       } else if (type === 'VIDEO') {
-        mediaHtml = `
-          <div class="w-full max-w-md aspect-video rounded-xl overflow-hidden border border-zinc-200 shadow-xs bg-black">
-            <iframe src="${embedUrl}" class="w-full h-full" frameborder="0" allowfullscreen></iframe>
-          </div>
-        `;
+        if (embedUrl.includes('youtube.com/embed') || embedUrl.includes('vimeo.com') || embedUrl.includes('drive.google.com')) {
+          mediaHtml = `
+            <div class="w-full max-w-md aspect-video rounded-xl overflow-hidden border border-zinc-200 shadow-xs bg-black">
+              <iframe src="${embedUrl}" class="w-full h-full" frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+            </div>
+          `;
+        } else {
+          mediaHtml = `
+            <div class="w-full max-w-md aspect-video rounded-xl overflow-hidden border border-zinc-200 shadow-xs bg-black flex items-center justify-center">
+              <video src="${embedUrl}" controls class="w-full h-full object-contain bg-black" playsinline preload="metadata"></video>
+            </div>
+          `;
+        }
       } else if (type === 'AUDIO') {
         mediaHtml = `
           <div class="w-full max-w-sm p-3 rounded-xl bg-zinc-50 border border-zinc-200">
@@ -10787,7 +10795,7 @@ function getOrCreateFolder(folderName) {
             <input 
               type="file" 
               id="inputDirectMediaFile" 
-              accept="image/*,audio/*,video/*" 
+              accept="image/*,audio/*,video/*,.mp4,.webm,.ogg,.mov,.m4v,.mp3,.wav" 
               onchange="handleModalDirectFileUpload(this)" 
               onclick="this.value=null" 
               class="hidden"

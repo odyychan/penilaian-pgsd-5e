@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.0] - 2026-08-25
+
+### 🎬 Dukungan Unggah & Streaming Video Lengkap (*Native HTML5 Player & Multi-Source Embed*)
+- **Aktivasi Tombol Unggah Berkas pada Tab Video:**
+  - Mengaktifkan tombol *"Unggah File"* pada tab Video di modal media builder (`admin.html`) sehingga admin dapat mengunggah langsung berkas video mandiri (`.mp4`, `.webm`, `.ogg`, `.mov`, `.m4v`).
+- **Penyematan & Streaming Video Responsif (*Dual-Engine Video Renderer*):**
+  - Mengintegrasikan pemutar video cerdas: URL video berbasis berkas (MP4/WebM/Supabase Storage CDN) dirender menggunakan pemutar video HTML5 `<video controls playsinline>` dengan akselerasi hardware, sementara URL eksternal (YouTube, YouTube Shorts, Vimeo, Google Drive Video Preview) dirender via `<iframe>` dengan izin lengkap *fullscreen* dan *picture-in-picture*.
+
+---
+
 ## [2.2.99] - 2026-08-25
 
 ### ⚡ Restorasi & Akselerasi Penuh Tombol Unggah File (*Direct Button Trigger & Value Reset*)
