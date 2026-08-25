@@ -4,6 +4,15 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.12] - 2026-08-25
+
+### 🏷️ Eliminasi Simbol Plus Ganda pada Tombol Aksi (*Zero Redundancy Button Labels*)
+- **Pembersihan Redudansi Label Tombol:**
+  - Memperbaiki tombol aksi pada tab Kelompok sehingga tidak ada lagi tampilan ganda simbol plus (*"+ + Kelompok"*).
+  - Menyelaraskan teks menjadi **"Tambah Kelompok"**, **"Tambah Mahasiswa"**, dan **"Tambah Bagian Baru"** dengan ikon SVG yang proporsional dan bersih.
+
+---
+
 ## [2.3.11] - 2026-08-25
 
 ### 📋 Pemindahan Kartu Pengosongan Data Respons ke Tab Respons (*Contextual Action Placement*)
