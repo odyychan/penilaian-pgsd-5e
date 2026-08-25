@@ -2980,7 +2980,8 @@ function getOrCreateFolder(folderName) {
         const replacement = newLines.join('\n');
         input.value = val.substring(0, lineStart) + replacement + val.substring(lineEnd);
         input.focus();
-        input.setSelectionRange(lineStart, lineStart + replacement.length);
+        const newCursor = lineStart + replacement.length;
+        input.setSelectionRange(newCursor, newCursor);
         input.dispatchEvent(new Event('input', { bubbles: true }));
         if (typeof callback === 'function') callback(input.value);
         return;
@@ -2989,6 +2990,7 @@ function getOrCreateFolder(folderName) {
       // 2. Inline Text Formatting
       const selected = val.substring(start, end);
       let replacement = "";
+      let cursorOffset = 0;
 
       if (formatType === 'bold') {
         if (selected) {
@@ -2997,8 +2999,10 @@ function getOrCreateFolder(folderName) {
           } else {
             replacement = `**${selected}**`;
           }
+          cursorOffset = replacement.length;
         } else {
-          replacement = `**teks tebal**`;
+          replacement = `****`;
+          cursorOffset = 2; // Place cursor right between ** and **
         }
       } else if (formatType === 'italic') {
         if (selected) {
@@ -3007,8 +3011,10 @@ function getOrCreateFolder(folderName) {
           } else {
             replacement = `*${selected}*`;
           }
+          cursorOffset = replacement.length;
         } else {
-          replacement = `*teks miring*`;
+          replacement = `**`;
+          cursorOffset = 1; // Place cursor right between * and *
         }
       } else if (formatType === 'underline') {
         if (selected) {
@@ -3017,14 +3023,17 @@ function getOrCreateFolder(folderName) {
           } else {
             replacement = `<u>${selected}</u>`;
           }
+          cursorOffset = replacement.length;
         } else {
-          replacement = `<u>${selected || 'teks garis bawah'}</u>`;
+          replacement = `<u></u>`;
+          cursorOffset = 3; // Place cursor right between <u> and </u>
         }
       } else if (formatType === 'link') {
         if (selected) {
           const url = prompt("Masukkan URL Tautan (contoh: https://ulm.ac.id):", "https://");
           if (url && url.trim() && url.trim() !== "https://") {
             replacement = `[${selected}](${url.trim()})`;
+            cursorOffset = replacement.length;
           } else {
             return;
           }
@@ -3034,6 +3043,7 @@ function getOrCreateFolder(folderName) {
           const url = prompt("Masukkan URL Tautan (contoh: https://ulm.ac.id):", "https://");
           if (url && url.trim()) {
             replacement = `[${text}](${url.trim()})`;
+            cursorOffset = replacement.length;
           } else {
             return;
           }
@@ -3041,7 +3051,7 @@ function getOrCreateFolder(folderName) {
       } else if (formatType === 'remove_format') {
         const cleanText = (str) => {
           return str
-            .replace(/^(\s*)(?:•|\d+[\.\)]|[\-\x2A])\s+/gm, '$1')
+            .replace(/^(\s*)(?:[•◦▪▫\-\*]|(?:\d+|[A-Za-z]|[ivxlcdm]+)[\.\)])\s+/gm, '$1')
             .replace(/\*\*([^*]+)\*\*/g, '$1')
             .replace(/(^|[^\*])\*([^*]+)\*([^\*]|$)/g, '$1$2$3')
             .replace(/<u>([^<]+)<\/u>/gi, '$1')
@@ -3053,6 +3063,7 @@ function getOrCreateFolder(folderName) {
 
         if (selected) {
           replacement = cleanText(selected);
+          cursorOffset = replacement.length;
         } else {
           input.value = cleanText(val);
           input.dispatchEvent(new Event('input', { bubbles: true }));
@@ -3064,7 +3075,7 @@ function getOrCreateFolder(folderName) {
 
       input.value = val.substring(0, start) + replacement + val.substring(end);
       input.focus();
-      const newCursor = start + replacement.length;
+      const newCursor = start + cursorOffset;
       input.setSelectionRange(newCursor, newCursor);
       input.dispatchEvent(new Event('input', { bubbles: true }));
 

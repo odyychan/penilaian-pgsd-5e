@@ -4,6 +4,15 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.17] - 2026-08-25
+
+### ✍️ Eliminasi Pemblokan Otomatis & Penempatan Kursor Alami (*Natural Cursor Placement Engine*)
+- **Penempatan Kursor Cerdas Tanpa Pemblokan (*Zero Auto-Highlight*):**
+  - Menghapus pemblokan otomatis (`selection range`) pada seluruh baris saat pengguna menekan tombol alat pemformatan teks (*Nomor, Poin, Abjad, Tebal, Miring, Garis Bawah*).
+  - Kursor kini otomatis berkedip di akhir butir penomoran atau di tengah tanda format (`**|**`, `*|*`, `<u>|</u>`) sehingga pengguna dapat langsung melanjutkan pengetikan tanpa khawatir teks sebelumnya tertimpa atau terhapus.
+
+---
+
 ## [2.3.16] - 2026-08-25
 
 ### 🎯 Presisi Dimensi & Penyelarasan Tombol Header Undo/Redo (*Pixel-Perfect Header Actions*)
