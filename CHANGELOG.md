@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.68] - 2026-08-25
+
+### 🛡️ Eliminasi DOM ID Collision & Perbaikan Navigasi Tahapan Simulator
+- **Isolasi Penuh Kontainer Tahapan Statis vs Dinamis:**
+  - Memperbaiki konflik duplikasi ID (`stepSection_1..4`) antara blok HTML legacy dan kontainer tahapan dinamis (`dynamicClientStagesContainer`), mencegah *glitch layout* dan pembatalan navigasi kembali ke awal.
+- **Navigasi Tahapan & Validasi Presisi Tanpa Fallback Error:**
+  - Menyempurnakan logika `goToStep()` dan `updateStepUI()` dengan validasi kontekstual per tahapan aktif serta penanganan aman untuk mode simulasi pratinjau (`preview=draft`).
+
+---
+
 ## [2.2.67] - 2026-08-25
 
 ### 🖼️ Perbaikan Rendering Gambar & Blok Media Mandiri pada Pratinjau / Simulator Mahasiswa

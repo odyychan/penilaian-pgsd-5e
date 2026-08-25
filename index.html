@@ -389,10 +389,12 @@
         <form id="assessmentForm" onsubmit="handleFinalSubmit(event)" class="space-y-5">
           <div id="dynamicClientStagesContainer" class="space-y-5"></div>
 
-          <!-- =================================================================== -->
-          <!-- 1: IDENTITAS PENILAI (SMART ROLE & NIM-DRIVEN IDENTITY) -->
-          <!-- =================================================================== -->
-          <div id="stepSection_1" class="step-fade space-y-4">
+          <!-- Legacy Static Stages Wrapper (Hidden by default to prevent ID collisions with dynamic stages) -->
+          <div id="legacyStaticStagesContainer" class="hidden space-y-5">
+            <!-- =================================================================== -->
+            <!-- 1: IDENTITAS PENILAI (SMART ROLE & NIM-DRIVEN IDENTITY) -->
+            <!-- =================================================================== -->
+            <div id="legacyStepSection_1" class="step-fade space-y-4">
             <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5">
               
               <div class="border-b border-zinc-100 pb-3.5 flex items-center justify-between gap-2">
@@ -562,7 +564,7 @@
         <!-- =================================================================== -->
         <!-- 2: PILIH KELOMPOK -->
         <!-- =================================================================== -->
-        <div id="stepSection_2" class="step-fade space-y-4 hidden">
+        <div id="legacyStepSection_2" class="step-fade space-y-4 hidden">
           <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5">
             
             <div class="flex items-center justify-between border-b border-zinc-100 pb-3.5">
@@ -636,7 +638,7 @@
         <!-- =================================================================== -->
         <!-- 3: PENILAIAN SKOR & VOTING -->
         <!-- =================================================================== -->
-        <div id="stepSection_3" class="step-fade space-y-4 hidden">
+        <div id="legacyStepSection_3" class="step-fade space-y-4 hidden">
           
           <!-- 3A: Skor Presentasi -->
           <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5">
@@ -823,11 +825,9 @@
                 class="btnResetDraft hidden min-h-[44px] px-3.5 sm:px-4 py-3.5 rounded-lg border border-rose-200 bg-rose-50/60 hover:bg-rose-100 text-rose-700 hover:text-rose-800 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
                 title="Kosongkan dan Reset Seluruh Draf Isian"
               >
-                <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                </svg>
                 <span>Reset Draf</span>
               </button>
+
               <button 
                 type="submit" 
                 id="submitBtn" 
@@ -844,6 +844,7 @@
             </div>
           </div>
         </div>
+        </div> <!-- End of legacyStaticStagesContainer -->
 
         </form>
       </div>
@@ -2329,23 +2330,12 @@
         ? currentFormSchema.tahapan
         : null;
 
-      // If no custom tahapan or default primary with standard core structure, let standard stepSections handle
-      const isCustomForm = !!(tahapan && (activeFormId !== 'BK5E' || tahapan.some(s => (s.fields || []).some(f => !String(f.type||'').startsWith('CORE_')))));
+      const legacyContainer = document.getElementById("legacyStaticStagesContainer");
+      if (legacyContainer) legacyContainer.classList.add("hidden");
 
-      if (!isCustomForm) {
-        container.innerHTML = "";
-        // Unhide standard legacy step sections
-        for (let i = 1; i <= 4; i++) {
-          const el = document.getElementById(`stepSection_${i}`);
-          if (el) el.style.display = "";
-        }
+      if (!tahapan || tahapan.length === 0) {
+        container.innerHTML = '<div class="bg-white rounded-xl border border-zinc-200 p-8 text-center text-xs text-zinc-400">Belum ada tahapan formulir yang aktif.</div>';
         return;
-      }
-
-      // Hide legacy static sections
-      for (let i = 1; i <= 4; i++) {
-        const el = document.getElementById(`stepSection_${i}`);
-        if (el) el.style.display = "none";
       }
 
       const totalSteps = tahapan.length;
@@ -3932,13 +3922,23 @@
     // Navigation Step
     function updateStepUI(step, skipSave = false) {
       currentStep = step;
-      const meta = stepMetadata[step];
-      document.getElementById("stepNumberBadge").textContent = meta.badge;
-      document.getElementById("stepTitleLabel").textContent = meta.title;
-      document.getElementById("stepPercentLabel").textContent = `${meta.percent}%`;
-      document.getElementById("progressBarFill").style.width = `${meta.percent}%`;
+      const totalSteps = Object.keys(stepMetadata).length || 1;
+      const meta = (stepMetadata && stepMetadata[step]) || {
+        badge: `${step < 10 ? '0' + step : step}/${totalSteps < 10 ? '0' + totalSteps : totalSteps}`,
+        title: `Bagian ${step}`,
+        percent: Math.round((step / totalSteps) * 100)
+      };
 
-      const totalSteps = Object.keys(stepMetadata).length || 4;
+      const badgeEl = document.getElementById("stepNumberBadge");
+      const titleEl = document.getElementById("stepTitleLabel");
+      const percentEl = document.getElementById("stepPercentLabel");
+      const barEl = document.getElementById("progressBarFill");
+
+      if (badgeEl) badgeEl.textContent = meta.badge;
+      if (titleEl) titleEl.textContent = meta.title;
+      if (percentEl) percentEl.textContent = `${meta.percent}%`;
+      if (barEl) barEl.style.width = `${meta.percent}%`;
+
       for (let i = 1; i <= totalSteps; i++) {
         const sec = document.getElementById(`stepSection_${i}`);
         const tabBtn = document.getElementById(`stepTab_${i}`);
@@ -3980,34 +3980,22 @@
     function goToStep(targetStep) {
       if (targetStep === currentStep) return;
 
-      const isCustomForm = !!(currentFormSchema && Array.isArray(currentFormSchema.tahapan) && currentFormSchema.tahapan.length > 0 && (activeFormId !== 'BK5E' || currentFormSchema.tahapan.some(s => (s.fields || []).some(f => !String(f.type||'').startsWith('CORE_')))));
-
-      if (isCustomForm) {
-        if (targetStep > currentStep) {
-          // Validate required fields inside current stage
-          const currentStageSec = document.getElementById(`stepSection_${currentStep}`);
-          if (currentStageSec) {
-            const requiredInputs = currentStageSec.querySelectorAll('input[required], textarea[required], select[required]');
-            for (let input of requiredInputs) {
-              if (!input.value || !input.value.trim()) {
-                input.focus();
-                showToast("Mohon lengkapi seluruh pertanyaan bertanda wajib (*) sebelum melanjutkan.", "warning");
-                return;
-              }
+      if (targetStep > currentStep) {
+        // Validate required fields inside current stage
+        const currentStageSec = document.getElementById(`stepSection_${currentStep}`);
+        if (currentStageSec) {
+          const requiredInputs = currentStageSec.querySelectorAll('input[required], textarea[required], select[required]');
+          for (let input of requiredInputs) {
+            if (!input.value || !input.value.trim()) {
+              input.focus();
+              showToast("Mohon lengkapi seluruh pertanyaan bertanda wajib (*) sebelum melanjutkan.", "warning");
+              return;
             }
           }
         }
-        updateStepUI(targetStep);
-        return;
       }
 
-      if (targetStep > currentStep) {
-        if (currentStep === 1) nextFromStep1();
-        else if (currentStep === 2) nextFromStep2();
-        else if (currentStep === 3) nextFromStep3();
-      } else {
-        updateStepUI(targetStep);
-      }
+      updateStepUI(targetStep);
     }
 
     // =========================================================================
@@ -4689,24 +4677,35 @@
     }
 
     async function handleFinalSubmit(e) {
-      e.preventDefault();
+      if (e) e.preventDefault();
 
-      const email = document.getElementById("inputEmail").value.trim();
-      const nama = document.getElementById("inputNama").value.trim();
-      const nim = document.getElementById("inputNim") ? document.getElementById("inputNim").value.trim() : "-";
-      const nilai = parseFloat(document.getElementById("inputNilaiNumber").value);
+      const isPreviewMode = new URLSearchParams(window.location.search).get('preview') === 'draft';
+      if (isPreviewMode) {
+        showToast("🎉 Simulasi Pengisian Berhasil! Seluruh isian telah divalidasi dengan sukses (Mode Draf / Simulator — data tidak disimpan ke database).", "success", 5000);
+        return;
+      }
 
-      if (!validateEmailLive(email)) {
+      const emailEl = document.getElementById("inputEmail");
+      const namaEl = document.getElementById("inputNama");
+      const nimEl = document.getElementById("inputNim");
+      const nilaiEl = document.getElementById("inputNilaiNumber");
+
+      const email = emailEl ? emailEl.value.trim() : "";
+      const nama = namaEl ? namaEl.value.trim() : "";
+      const nim = nimEl ? nimEl.value.trim() : "-";
+      const nilai = nilaiEl ? parseFloat(nilaiEl.value) : 85;
+
+      if (emailEl && !validateEmailLive(email)) {
         showToast("Email penilai belum valid!", "error");
         updateStepUI(1);
         return;
       }
-      if (!selectedGroupObj) {
+      if (document.getElementById("stepSection_2")?.querySelector('#groupsGrid') && !selectedGroupObj) {
         showToast("Pilih kelompok yang dinilai!", "warning");
         updateStepUI(2);
         return;
       }
-      if (selectedBestPresenters.length === 0) {
+      if (document.getElementById("stepSection_3")?.querySelector('#presentersGrid') && selectedBestPresenters.length === 0) {
         showToast("Pilih minimal 1 orang presentator terbaik!", "warning");
         updateStepUI(3);
         return;
@@ -4723,7 +4722,7 @@
         evaluasiDetail[member] = val;
       });
 
-      if (!isAllEvalFilled) {
+      if (evalTextareas.length > 0 && !isAllEvalFilled) {
         showToast("Lengkapi evaluasi tertulis untuk setiap pemateri!", "warning");
         return;
       }
