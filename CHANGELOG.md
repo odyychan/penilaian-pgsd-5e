@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.91] - 2026-08-25
+
+### 🚀 Sinkronisasi Pembersihan Folder Google Drive Instan Saat Form Dihapus
+- **Penyelarasan Parameter & Penanganan Respon Asinkron:**
+  - Menyelaraskan pengiriman parameter `driveFolderId` dan `driveFolderName` pada payload `adminDeleteForm` serta menambahkan penanganan respon `Promise` untuk memastikan folder Google Drive `{PIN}/` langsung terhapus saat pengguna menekan tombol hapus di web.
+- **Pembersihan Bersih Folder `RF5P`:**
+  - Folder `RF5P` telah dibersihkan dan dilepaskan dari Google Drive secara tuntas.
+
+---
+
 ## [2.2.90] - 2026-08-25
 
 ### 🛡️ Perbaikan Definisi Konstanta Global & Integrasi Multi-Channel Form Deletion

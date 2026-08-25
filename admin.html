@@ -9163,7 +9163,8 @@ function getOrCreateFolder(folderName) {
           formId: formIdToDelete,
           deleteSheets: true,
           deleteDriveFolder: true,
-          driveFolderName: DEFAULT_DRIVE_FOLDER_ID
+          driveFolderName: DEFAULT_DRIVE_FOLDER_ID,
+          driveFolderId: DEFAULT_DRIVE_FOLDER_ID
         };
 
         // 1. Background forward ke Supabase Edge Function (Google Service Account)
@@ -9172,6 +9173,8 @@ function getOrCreateFolder(folderName) {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(deletePayload)
+          }).then(r => r.json()).then(res => {
+            console.log("Cloud Edge form delete success:", res);
           }).catch(e => console.warn("Cloud Edge Function delete notice:", e));
         }
 
