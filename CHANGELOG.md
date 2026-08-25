@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.65] - 2026-08-25
+
+### 🔄 Tombol Sinkronisasi Ulang & Reset Teks Alur Tahapan Pengisian
+- **Tombol Reset Per-Kartu Bagian (Individual Reset):**
+  - Menambahkan tombol aksi putar balik (`↺`) pada setiap kartu *Alur Tahapan Pengisian* untuk mengembalikan judul dan deskripsi alur agar kembali tersinkronisasi otomatis dengan teks *Judul Bagian* dan *Deskripsi Bagian* yang bersangkutan.
+- **Tombol Reset Massal ("Reset Sesuai Bagian"):**
+  - Menambahkan tombol *Reset Sesuai Bagian* pada header blok alur di samping badge *Sinkron Otomatis* untuk menyinkronkan seluruh kartu alur sekaligus dalam 1-klik dengan dukungan *undo snapshot*.
+
+---
+
 ## [2.2.64] - 2026-08-25
 
 ### 📐 Auto-Growing Textarea & Transisi Integrasi Spreadsheet Kolaborasi Bot
