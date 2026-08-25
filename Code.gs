@@ -435,6 +435,8 @@ function doPost(e) {
       result = adminCloneForm(payload);
     } else if (action === "adminDeleteForm") {
       result = adminDeleteForm(payload);
+    } else if (action === "adminSyncAllForms") {
+      result = adminSyncAllForms(payload);
     }
 
     // Form Sandbox Operations (Per-Form Scoped)
@@ -723,6 +725,18 @@ function adminCreateForm(payload) {
     ];
     regSheet.appendRow(newRow);
 
+    // 6. Inisialisasi Subfolder Google Drive Otomatis
+    let driveFolderUrl = "";
+    try {
+      const parentFolder = getOrCreateDriveFolder(DEFAULT_DRIVE_FOLDER_ID);
+      const formFolder = getOrCreateDriveSubfolder(parentFolder, formId);
+      getOrCreateDriveSubfolder(formFolder, "Media_Formulir");
+      getOrCreateDriveSubfolder(formFolder, "Lampiran_Mahasiswa");
+      driveFolderUrl = formFolder.getUrl();
+    } catch (dErr) {
+      Logger.log("Drive folder creation notice: " + dErr.toString());
+    }
+
     lock.releaseLock();
     clearApiCache();
 
@@ -730,10 +744,172 @@ function adminCreateForm(payload) {
       success: true,
       formId: formId,
       formSlug: formSlug,
+      driveFolderUrl: driveFolderUrl,
       message: `Formulir '${judulForm}' berhasil dibuat dengan Kode ID: ${formId}!`
     };
   } catch (err) {
     return { success: false, error: "Gagal membuat formulir baru: " + err.toString() };
+  }
+}
+
+/**
+ * Sinkronisasi Massal Seluruh Formulir ke Google Spreadsheet & Google Drive
+ */
+function adminSyncAllForms(payload) {
+  try {
+    const forms = Array.isArray(payload && payload.forms) ? payload.forms : [];
+    if (!forms || forms.length === 0) {
+      return { success: false, error: "Daftar formulir kosong." };
+    }
+
+    const ss = getSpreadsheet();
+    const regSheet = getRegistrySheet(ss);
+    const parentFolder = getOrCreateDriveFolder(DEFAULT_DRIVE_FOLDER_ID);
+
+    const syncedResults = [];
+
+    for (let i = 0; i < forms.length; i++) {
+      const f = forms[i];
+      const formId = String(f.form_id || f.id || "").trim().toUpperCase();
+      if (!formId) continue;
+
+      const judulForm = String(f.judul_form || f.judul || "Penilaian Perkuliahan").trim();
+      const mataKuliah = String(f.mata_kuliah || "").trim();
+      const dosen = String(f.dosen || "").trim();
+      const kelas = String(f.kelas || "").trim();
+      const jurusan = String(f.jurusan || "PGSD").trim();
+      const sesiAktif = String(f.sesi_aktif || "Minggu 1").trim();
+      const status = String(f.status || "AKTIF").trim().toUpperCase();
+      const formSlug = String(f.form_slug || formId.toLowerCase()).trim();
+
+      const masterSheetName = "Master_" + formId;
+      const configSheetName = "Config_" + formId;
+      const responsSheetName = "Respons_" + formId;
+      const rekapSheetName = "Rekap_" + formId;
+
+      // 1. Pastikan Sheets ada di Spreadsheet
+      if (!ss.getSheetByName(masterSheetName)) {
+        const sMaster = ss.insertSheet(masterSheetName);
+        sMaster.getRange(1, 1, 1, 5).setValues([["Kelompok", "Sesi_Minggu", "NIM", "Nama_Lengkap", "Status_Aktif"]]);
+        formatHeaderRange(sMaster.getRange(1, 1, 1, 5), "#047857", "#FFFFFF");
+        sMaster.autoResizeColumns(1, 5);
+      }
+      if (!ss.getSheetByName(configSheetName)) {
+        const sConfig = ss.insertSheet(configSheetName);
+        const configData = [
+          ["PARAMETER", "NILAI_PENGATURAN", "KETERANGAN"],
+          ["Judul_Form", judulForm, "Judul utama pada formulir"],
+          ["Mata_Kuliah", mataKuliah, "Nama mata kuliah"],
+          ["Dosen_Pengampu", dosen, "Nama dosen pengampu"],
+          ["Kelas", kelas, "Kelas mahasiswa"],
+          ["Jurusan", jurusan, "Jurusan / Program Studi"],
+          ["Sesi_Minggu_Aktif", sesiAktif, "Sesi pertemuan saat ini"],
+          ["Domain_Email_Wajib", "mhs.ulm.ac.id, ulm.ac.id", "Domain email yang diizinkan"],
+          ["Tampilkan_Ulasan_Publik", "AKTIF", "Pilihan: AKTIF atau NONAKTIF"],
+          ["Nilai_Kelompok_Min", "50", "Batas nilai minimum presentasi"],
+          ["Nilai_Kelompok_Max", "100", "Batas nilai maksimum presentasi"]
+        ];
+        sConfig.getRange(1, 1, configData.length, 3).setValues(configData);
+        formatHeaderRange(sConfig.getRange(1, 1, 1, 3), "#1E3A8A", "#FFFFFF");
+        sConfig.autoResizeColumns(1, 3);
+      }
+      if (!ss.getSheetByName(responsSheetName)) {
+        const sRespons = ss.insertSheet(responsSheetName);
+        const responsHeaders = [["ID_Respons", "Timestamp", "Sesi_Minggu", "Email_Penilai", "Nama_Penilai", "Kelompok_Dinilai", "Nilai_Kelompok", "Presentator_Terbaik_1", "Presentator_Terbaik_2", "Evaluasi_Detail_JSON", "Status", "Peran", "NIM_Penilai", "Custom_Answers_JSON"]];
+        sRespons.getRange(1, 1, 1, responsHeaders[0].length).setValues(responsHeaders);
+        formatHeaderRange(sRespons.getRange(1, 1, 1, responsHeaders[0].length), "#B91C1C", "#FFFFFF");
+        sRespons.autoResizeColumns(1, responsHeaders[0].length);
+      }
+      if (!ss.getSheetByName(rekapSheetName)) {
+        const sRekap = ss.insertSheet(rekapSheetName);
+        sRekap.getRange(1, 1, 1, 5).setValues([["Kelompok", "Sesi_Minggu", "Jumlah_Penilai", "Rata_Rata_Nilai", "Presentator_Terbaik_Terbanyak"]]);
+        formatHeaderRange(sRekap.getRange(1, 1, 1, 5), "#1E40AF", "#FFFFFF");
+        sRekap.autoResizeColumns(1, 5);
+      }
+
+      // 2. Pastikan Google Drive Subfolders ada
+      let driveUrl = "";
+      try {
+        const formFolder = getOrCreateDriveSubfolder(parentFolder, formId);
+        getOrCreateDriveSubfolder(formFolder, "Media_Formulir");
+        getOrCreateDriveSubfolder(formFolder, "Lampiran_Mahasiswa");
+        driveUrl = formFolder.getUrl();
+      } catch(dErr) {}
+
+      // 3. Upsert ke Sheet Registry_Forms
+      upsertRegistryFormRow(regSheet, {
+        formId: formId,
+        formSlug: formSlug,
+        judulForm: judulForm,
+        mataKuliah: mataKuliah,
+        dosen: dosen,
+        kelas: kelas,
+        jurusan: jurusan,
+        sesiAktif: sesiAktif,
+        status: status,
+        masterSheet: masterSheetName,
+        responsSheet: responsSheetName,
+        configSheet: configSheetName,
+        rekapSheet: rekapSheetName
+      });
+
+      syncedResults.push({
+        formId: formId,
+        judulForm: judulForm,
+        driveUrl: driveUrl
+      });
+    }
+
+    clearApiCache();
+
+    return {
+      success: true,
+      message: `Berhasil menyinkronkan ${syncedResults.length} formulir ke Google Spreadsheet & Google Drive!`,
+      syncedCount: syncedResults.length,
+      results: syncedResults
+    };
+  } catch (err) {
+    return { success: false, error: "Gagal sinkronisasi formulir: " + err.toString() };
+  }
+}
+
+/**
+ * Helper Upsert Row di Sheet Registry_Forms
+ */
+function upsertRegistryFormRow(regSheet, meta) {
+  const data = regSheet.getDataRange().getValues();
+  const nowStr = Utilities.formatDate(new Date(), "Asia/Makassar", "yyyy-MM-dd HH:mm:ss");
+  let foundRowIdx = -1;
+
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim().toUpperCase() === meta.formId) {
+      foundRowIdx = i + 1;
+      break;
+    }
+  }
+
+  const rowData = [
+    meta.formId,
+    meta.formSlug,
+    meta.judulForm,
+    meta.mataKuliah,
+    meta.dosen,
+    meta.kelas,
+    meta.jurusan,
+    meta.sesiAktif,
+    meta.status,
+    "[]",
+    meta.masterSheet,
+    meta.responsSheet,
+    meta.configSheet,
+    meta.rekapSheet,
+    nowStr
+  ];
+
+  if (foundRowIdx > 0) {
+    regSheet.getRange(foundRowIdx, 1, 1, rowData.length).setValues([rowData]);
+  } else {
+    regSheet.appendRow(rowData);
   }
 }
 

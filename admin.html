@@ -504,6 +504,17 @@
         <div class="flex items-center gap-2.5 flex-shrink-0 flex-wrap sm:flex-nowrap">
           <button 
             type="button" 
+            onclick="syncAllFormsToSpreadsheetAndDrive(null, true)" 
+            class="w-full sm:w-auto px-4 py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 active:scale-98 text-emerald-400 text-xs sm:text-sm font-semibold shadow-xs flex items-center justify-center gap-2 transition cursor-pointer"
+            title="Sinkronkan seluruh formulir ke Google Spreadsheet & Google Drive"
+          >
+            <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+            </svg>
+            <span>Sinkronkan Cloud</span>
+          </button>
+          <button 
+            type="button" 
             onclick="openGlobalSettingsModal()" 
             class="w-full sm:w-auto px-4 py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 active:scale-98 text-zinc-100 text-xs sm:text-sm font-semibold shadow-xs flex items-center justify-center gap-2 transition cursor-pointer"
           >
@@ -511,7 +522,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
             </svg>
-            <span>Setelan Sistem Global</span>
+            <span>Setelan Sistem</span>
           </button>
           <button 
             type="button" 
@@ -4426,6 +4437,54 @@ function getOrCreateFolder(folderName) {
     // MASTER FORM HUB CONTROLLERS
     // =========================================================================
 
+    async function syncAllFormsToSpreadsheetAndDrive(formsData, isManual = false) {
+      const apiUrl = getAdminApiUrl();
+      if (!apiUrl || apiUrl.includes("localhost") || !navigator.onLine) {
+        if (isManual) showAdminToast("Webhook Google Spreadsheet belum terkonfigurasi.", "warning");
+        return;
+      }
+
+      const listToSync = formsData || formsRegistryList;
+      if (!Array.isArray(listToSync) || listToSync.length === 0) return;
+
+      if (isManual) showAdminToast("Menyinkronkan formulir ke Google Spreadsheet & Google Drive...", "info");
+
+      try {
+        const payload = {
+          action: "adminSyncAllForms",
+          forms: listToSync.map(f => ({
+            form_id: f.form_id || f.formId,
+            form_slug: f.form_slug || f.formSlug,
+            judul_form: f.judul_form || f.judulForm,
+            mata_kuliah: f.mata_kuliah || f.mataKuliah,
+            dosen: f.dosen,
+            kelas: f.kelas,
+            jurusan: f.jurusan,
+            sesi_aktif: f.sesi_aktif || f.sesiAktif,
+            status: f.status
+          }))
+        };
+
+        const resp = await fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+
+        const rawText = await resp.text();
+        let resJson = null;
+        try { resJson = JSON.parse(rawText); } catch(e){}
+
+        if (resJson && resJson.success) {
+          if (isManual) {
+            showAdminToast(resJson.message || "Sinkronisasi ke Spreadsheet & Google Drive berhasil!", "success");
+          }
+        }
+      } catch(err) {
+        if (isManual) showAdminToast("Gagal sinkronisasi ke Spreadsheet: " + err.message, "error");
+      }
+    }
+
     async function handleRefreshHubRegistry(btn) {
       const refreshBtn = btn || document.getElementById("btnRefreshHubRegistry");
       const svg = refreshBtn ? refreshBtn.querySelector("svg") : null;
@@ -4434,7 +4493,7 @@ function getOrCreateFolder(folderName) {
 
       try {
         await fetchFormsRegistry(true);
-        showAdminToast("Daftar formulir berhasil diperbarui.", "success");
+        await syncAllFormsToSpreadsheetAndDrive(formsRegistryList, true);
       } catch (err) {
         showAdminToast("Gagal memperbarui daftar formulir: " + err, "error");
       } finally {
@@ -4657,6 +4716,9 @@ function getOrCreateFolder(folderName) {
               const containerEl = document.getElementById("hubFormsGrid");
               if (containerEl) renderAllMathInElement(containerEl);
             }, 60);
+
+            // Asynchronous background sync ke Google Spreadsheet & Drive
+            syncAllFormsToSpreadsheetAndDrive(formsData, false);
             return;
           }
         } catch (e) {

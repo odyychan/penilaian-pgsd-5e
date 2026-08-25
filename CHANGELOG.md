@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.83] - 2026-08-25
+
+### 🔄 Sinkronisasi 2-Arah Real-Time Multi-Form ke Google Spreadsheet & Google Drive
+- **Penyelarasan Otomatis Pembuatan & Duplikasi Form:**
+  - Setiap form baru yang dibuat atau diduplikasi di panel admin otomatis membuat lembar kerja mandiri (`Master_{PIN}`, `Config_{PIN}`, `Respons_{PIN}`, `Rekap_{PIN}`) dan mendaftarkannya di sheet `Registry_Forms` Spreadsheet Utama.
+  - Struktur folder di Google Drive `1ZYnP40AaCoaqu6-H2ZNfYuS-RshCWURK` otomatis dibuat untuk setiap form (`{PIN}/Media_Formulir/` dan `{PIN}/Lampiran_Mahasiswa/`).
+- **Tombol Sinkronkan Cloud & Background Auto-Sync:**
+  - Menambahkan tombol **Sinkronkan Cloud** di header Master Hub untuk menyinkronkan seluruh daftar form aktif secara massal ke Google Spreadsheet & Google Drive secara instan.
+
+---
+
 ## [2.2.82] - 2026-08-25
 
 ### ⚡ Peningkatan Ketahanan Mesin Unggah Media Admin & Fail-Safe Canvas Reader
