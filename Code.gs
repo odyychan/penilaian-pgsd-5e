@@ -1125,7 +1125,7 @@ let lastDriveError = "";
  */
 function setupAndAuthorizeDrive() {
   try {
-    const root = getOrCreateDriveFolder("Penilaian PGSD 5E - Dokumen");
+    const root = getOrCreateDriveFolder(DEFAULT_DRIVE_FOLDER_ID);
     const testSub = getOrCreateDriveSubfolder(root, "BK5E");
     Logger.log("Izin Google Drive & Sheets berhasil diotorisasi!");
     Logger.log("Root Folder ID: " + root.getId());
@@ -1155,7 +1155,7 @@ function saveUploadedFileToDrive(base64Data, fileName, mimeType, formId, categor
     const cleanFormId = String(formId || DEFAULT_FORM_ID).trim().toUpperCase();
     
     // Ambil nama folder kustom dari metadata form jika dikonfigurasi
-    let rootFolderName = "Penilaian PGSD 5E - Dokumen";
+    let rootFolderName = DEFAULT_DRIVE_FOLDER_ID;
     try {
       const meta = getFormMetadata(cleanFormId);
       if (meta && meta.driveFolder && meta.driveFolder.trim()) {

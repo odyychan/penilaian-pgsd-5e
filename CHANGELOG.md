@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.81] - 2026-08-25
+
+### 🧹 Audit Pembersihan Total Legacy Links & Pengujian End-to-End Google Drive
+- **Migrasi Menyeluruh Tautan Spreadsheet & Google Drive:**
+  - Membersihkan seluruh residu tautan folder dan ID spreadsheet lama di seluruh basis kode (`admin.html`, `index.html`, `Code.gs`, dan `docs/setup.sql`), beralih 100% ke Spreadsheet Utama `1MAZqzRyau1mECqamnU9Bj3TALRJYDrA1WLQFesJ4wG4` dan Folder Drive `1ZYnP40AaCoaqu6-H2ZNfYuS-RshCWURK`.
+- **Pengujian Langsung (*End-to-End Browser & Webhook Verification*):**
+  - Menguji alur unggah berkas dari browser (`handleModalDirectFileUpload`) $\rightarrow$ Berkas berhasil tersimpan di Google Drive dalam subfolder terstruktur (`{PIN}/Media_Formulir/`).
+  - Menguji pembersihan bersih (*zero-orphan delete*) $\rightarrow$ Berkas berhasil dihapus ke Sampah (*Trash*) seketika tanpa sisa file yatim.
+
+---
+
 ## [2.2.80] - 2026-08-25
 
 ### 🎯 Penyelarasan Default Folder Google Drive & Google Spreadsheet Utama

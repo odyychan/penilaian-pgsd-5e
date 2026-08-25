@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS pgsd_forms (
     sesi_aktif VARCHAR(50) DEFAULT 'Minggu 1',
     status VARCHAR(20) DEFAULT 'AKTIF', -- 'AKTIF', 'NONAKTIF', 'SELESAI'
     is_primary BOOLEAN DEFAULT FALSE,
-    google_drive_folder TEXT DEFAULT 'Arsip Penilaian FKIP ULM - Dokumen',
+    google_drive_folder TEXT DEFAULT 'https://drive.google.com/drive/folders/1ZYnP40AaCoaqu6-H2ZNfYuS-RshCWURK',
     spreadsheet_url TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -140,7 +140,7 @@ SELECT
     f.sesi_aktif,
     f.status,
     f.is_primary,
-    COALESCE(f.google_drive_folder, 'Arsip Penilaian FKIP ULM - Dokumen') AS google_drive_folder,
+    COALESCE(f.google_drive_folder, 'https://drive.google.com/drive/folders/1ZYnP40AaCoaqu6-H2ZNfYuS-RshCWURK') AS google_drive_folder,
     f.spreadsheet_url,
     COUNT(DISTINCT g.id) AS total_kelompok,
     COUNT(DISTINCT s.id) AS total_mahasiswa,

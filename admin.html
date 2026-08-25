@@ -2437,13 +2437,13 @@ function getOrCreateFolder(folderName) {
           </div>
 
           <div class="space-y-1">
-            <label class="block font-semibold text-zinc-700">Default Nama Folder Google Drive</label>
+            <label class="block font-semibold text-zinc-700">Default Folder Google Drive Utama</label>
             <input 
               type="text" 
               id="inputGlobalDriveFolder" 
-              placeholder="Arsip Penilaian FKIP ULM - Dokumen" 
-              value="Arsip Penilaian FKIP ULM - Dokumen"
-              class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs focus:border-zinc-900 outline-none transition"
+              placeholder="https://drive.google.com/drive/folders/1ZYnP40AaCoaqu6-H2ZNfYuS-RshCWURK" 
+              value="https://drive.google.com/drive/folders/1ZYnP40AaCoaqu6-H2ZNfYuS-RshCWURK"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 font-mono text-xs focus:border-zinc-900 outline-none transition"
             >
           </div>
         </div>
@@ -8846,7 +8846,7 @@ function getOrCreateFolder(folderName) {
           sesi_aktif: sesi,
           status: 'AKTIF',
           is_primary: false,
-          google_drive_folder: 'Arsip Penilaian FKIP ULM - Dokumen'
+          google_drive_folder: 'https://drive.google.com/drive/folders/1ZYnP40AaCoaqu6-H2ZNfYuS-RshCWURK'
         };
 
         const { error: insErr } = await sb.from('pgsd_forms').insert([newFormRow]);
@@ -9116,7 +9116,7 @@ function getOrCreateFolder(folderName) {
           sesi_aktif: srcForm?.sesi_aktif || "Minggu 1",
           status: 'AKTIF',
           is_primary: false,
-          google_drive_folder: srcForm?.google_drive_folder || 'Arsip Penilaian FKIP ULM - Dokumen'
+          google_drive_folder: srcForm?.google_drive_folder || 'https://drive.google.com/drive/folders/1ZYnP40AaCoaqu6-H2ZNfYuS-RshCWURK'
         }]);
 
         const initialBlankSchema = srcConfig?.schema_data || getBlankFormSchema();
@@ -9538,7 +9538,7 @@ function getOrCreateFolder(folderName) {
     function openGlobalSettingsModal() {
       const globalMasterSheet = localStorage.getItem("PGSD_GLOBAL_MASTER_SHEET_URL") || "https://docs.google.com/spreadsheets/d/1MAZqzRyau1mECqamnU9Bj3TALRJYDrA1WLQFesJ4wG4/edit";
       const globalUrl = localStorage.getItem("PGSD_GLOBAL_API_URL") || localStorage.getItem("PGSD_API_URL") || "";
-      const globalFolder = localStorage.getItem("PGSD_GLOBAL_DRIVE_FOLDER") || localStorage.getItem("PGSD_DRIVE_FOLDER_NAME") || "Arsip Penilaian FKIP ULM - Dokumen";
+      const globalFolder = localStorage.getItem("PGSD_GLOBAL_DRIVE_FOLDER") || localStorage.getItem("PGSD_DRIVE_FOLDER_NAME") || "https://drive.google.com/drive/folders/1ZYnP40AaCoaqu6-H2ZNfYuS-RshCWURK";
       
       const inputMasterSheet = document.getElementById("inputGlobalMasterSheetUrl");
       const inputUrl = document.getElementById("inputGlobalApiUrl");
@@ -9567,7 +9567,7 @@ function getOrCreateFolder(folderName) {
     function saveGlobalSystemSettings() {
       const masterSheet = document.getElementById("inputGlobalMasterSheetUrl")?.value.trim() || "https://docs.google.com/spreadsheets/d/1MAZqzRyau1mECqamnU9Bj3TALRJYDrA1WLQFesJ4wG4/edit";
       const globalUrl = document.getElementById("inputGlobalApiUrl")?.value.trim() || "";
-      const globalFolder = document.getElementById("inputGlobalDriveFolder")?.value.trim() || "Arsip Penilaian FKIP ULM - Dokumen";
+      const globalFolder = document.getElementById("inputGlobalDriveFolder")?.value.trim() || "https://drive.google.com/drive/folders/1ZYnP40AaCoaqu6-H2ZNfYuS-RshCWURK";
 
       if (masterSheet) {
         localStorage.setItem("PGSD_GLOBAL_MASTER_SHEET_URL", masterSheet);
