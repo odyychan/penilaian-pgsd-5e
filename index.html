@@ -4874,19 +4874,41 @@
         loadRekapData(true);
         showSuccessModal(payload.kelompok);
 
-        // 🔄 Background Pipeline: Sinkronkan ke Google Spreadsheet Dosen secara asinkron
-        fetch(apiUrl, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(payload)
-        }).then(r => r.json()).then(res => {
-          if (res && res.success && sb) {
-            sb.from('pgsd_responses').update({ 
-              synced_to_sheets: true, 
-              synced_at: new Date().toISOString() 
-            }).eq('id_respons', idRespons);
-          }
-        }).catch(e => console.warn("Background sheet sync notice:", e));
+        // 🔄 Background Pipeline: Sinkronkan ke Google Spreadsheet (Utama & Kustom) secara asinkron
+        const defaultSheetUrl = DEFAULT_API_URL;
+        const customSheetUrl = (appConfig && appConfig["Spreadsheet_Webhook_Url"]) || localStorage.getItem("PGSD_GLOBAL_API_URL");
+
+        // 1. Kirim ke Spreadsheet Utama
+        if (defaultSheetUrl) {
+          fetch(defaultSheetUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(payload)
+          }).then(r => r.json()).then(res => {
+            if (res && res.success && sb) {
+              sb.from('pgsd_responses').update({ 
+                synced_to_sheets: true, 
+                synced_at: new Date().toISOString() 
+              }).eq('id_respons', idRespons);
+            }
+          }).catch(e => console.warn("Primary sheet sync notice:", e));
+        }
+
+        // 2. Kirim juga ke Spreadsheet Kustom jika berbeda
+        if (customSheetUrl && customSheetUrl !== defaultSheetUrl) {
+          fetch(customSheetUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(payload)
+          }).then(r => r.json()).then(res => {
+            if (res && res.success && sb) {
+              sb.from('pgsd_responses').update({ 
+                synced_to_sheets: true, 
+                synced_at: new Date().toISOString() 
+              }).eq('id_respons', idRespons);
+            }
+          }).catch(e => console.warn("Custom sheet sync notice:", e));
+        }
         return;
       }
 

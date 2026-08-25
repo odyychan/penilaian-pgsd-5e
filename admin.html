@@ -4081,14 +4081,26 @@ function getOrCreateFolder(folderName) {
           }
         }
 
-        // 🔄 Asynchronous Background Forward to Google Sheets (Non-blocking)
-        const customUrl = (adminAppConfig && adminAppConfig["Spreadsheet_Webhook_Url"]) || localStorage.getItem("PGSD_GLOBAL_API_URL") || apiUrl;
-        if (customUrl) {
+        // 🔄 Asynchronous Background Forward to Google Sheets (Utama & Kustom - Non-blocking)
+        const defaultSheetUrl = DEFAULT_API_URL;
+        const customUrl = (adminAppConfig && adminAppConfig["Spreadsheet_Webhook_Url"]) || localStorage.getItem("PGSD_GLOBAL_API_URL");
+
+        // 1. Kirim ke Spreadsheet Utama
+        if (defaultSheetUrl) {
+          fetch(defaultSheetUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(bodyPayload)
+          }).catch(e => console.warn("Primary sheet sync queue notice:", e));
+        }
+
+        // 2. Kirim juga ke Spreadsheet Kustom Formulir jika dikonfigurasi berbeda
+        if (customUrl && customUrl !== defaultSheetUrl) {
           fetch(customUrl, {
             method: "POST",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify(bodyPayload)
-          }).catch(e => console.warn("Background sheet sync queue notice:", e));
+          }).catch(e => console.warn("Custom sheet sync queue notice:", e));
         }
 
         queue.shift();

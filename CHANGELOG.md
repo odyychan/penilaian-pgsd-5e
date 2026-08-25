@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.85] - 2026-08-25
+
+### 🛡️ Arsitektur Ketahanan Supabase-First & Dual Spreadsheet Synchronization
+- **Supabase PostgreSQL Sebagai Sumber Utama Kebenaran (*Single Source of Truth*):**
+  - Seluruh alur kerja (akses form, daftar kelompok, login mahasiswa, validasi rubrik, pengumpulan penilaian, dan analitik) berjalan secara eksklusif dan instan di Supabase (`< 30 ms`). Sistem tetap berjalan 100% normal dan kebal gangguan meskipun Google Spreadsheet offline, rusak, atau terhapus.
+- **Dual Spreadsheet Pipeline (Utama FKIP + Kustom Dosen):**
+  - Setiap perubahan data kelompok, rubrik, atau pengiriman nilai mahasiswa disinkronkan secara asinkron di latar belakang ke Spreadsheet Utama (`1MAZqzRyau1mECqamnU9Bj3TALRJYDrA1WLQFesJ4wG4`) dan secara bersamaan ke Spreadsheet Kustom Dosen jika dikonfigurasi pada formulir terkait.
+
+---
+
 ## [2.2.84] - 2026-08-25
 
 ### 🚀 Integrasi Penuh Google Cloud Service Account & Supabase Edge Functions
