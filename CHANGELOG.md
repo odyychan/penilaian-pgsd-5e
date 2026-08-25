@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.70] - 2026-08-25
+
+### 🏷️ Fitur Prefix Kustom Fleksibel (Maks. 50 Karakter) pada Kredit & Footer
+- **Pilihan Prefix Kustom Bebas:**
+  - Menambahkan opsi *"✨ Kustom / Tulis Sendiri (Maks. 50 Karakter)..."* pada dropdown Label / Prefix di pengaturan footer formulir.
+  - Menyediakan kolom input interaktif dengan pembatasan ketat maksimal **50 karakter**, penghitung karakter waktu-nyata (`0/50`), dan *badge live math preview*.
+  - Terintegrasi otomatis ke sinkronisasi draf, database Supabase, dan tampilan footer klien mahasiswa.
+
+---
+
 ## [2.2.69] - 2026-08-25
 
 ### 📝 Auto-Wrapping & Elastic Textarea Universal di Seluruh Input Field
