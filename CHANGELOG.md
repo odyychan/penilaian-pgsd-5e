@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.10] - 2026-08-25
+
+### 🩹 Perbaikan Sintaks Palet Simbol Matematika & Pembersihan Kebocoran String (*Math Palette Leak Hotfix*)
+- **Pembersihan Bocoran Kode String:**
+  - Memperbaiki tag penutup dan sintaks string tombol pada palet simbol matematika cepat (`universalFloatingMathPalette`) yang sebelumnya bocor ke bilah format teks.
+- **Verifikasi Integritas DOM:**
+  - Memastikan seluruh jendela modal dan palet melayang terisolasi sempurna dan bebas dari residu teks yang merusak tata letak.
+
+---
+
 ## [2.3.9] - 2026-08-25
 
 ### 📦 Penyatuan & Penyederhanaan Area Pengunggahan Media (*Unified Compact Media Bar*)
