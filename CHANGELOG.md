@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.14] - 2026-08-25
+
+### 📝 Format Indentasi Menggantung Word & Penyederhanaan Bilah Format (*Hanging Indent Typography Engine*)
+- **Pembersihan Tombol Indentasi Bilah Melayang (*Toolbar Decluttering*):**
+  - Menghapus tombol *Indent* dan *Outdent* dari bilah pemformatan teks mengambang agar lebih bersih, ramping, dan tidak membingungkan.
+- **Penerapan Format Indentasi Menggantung Standar Microsoft Word (*Word-Style Hanging Indent*):**
+  - Memperbarui mesin format `smartMathFormat` sehingga baris teks kedua dan seterusnya pada butir bernomor (`1.`, `2.`, dst.) dan butir poin (`•`) otomatis sejajar lurus ke dalam di bawah teks awal (*hanging indent*), bukan jatuh di bawah angka.
+  - Berlaku konsisten di seluruh judul pertanyaan, deskripsi formulir, kartu evaluasi, pratinjau kanvas admin, serta formulir pengisian mahasiswa (`index.html`).
+
+---
+
 ## [2.3.13] - 2026-08-25
 
 ### 👥 Sistem Impor Kelompok Multi-Sumber & Generator Pembagian Otomatis (*Multi-Source Group Import Engine*)

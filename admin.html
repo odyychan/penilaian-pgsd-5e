@@ -2776,52 +2776,56 @@ function getOrCreateFolder(folderName) {
     function smartMathFormat(text) {
       if (!text || typeof text !== 'string') return "";
 
-      // 1. Check if text has multiline bullet/number or indentation
-      const hasLines = text.includes('\n');
-      let res = text;
+      const rawLines = text.split('\n');
+      let processedLines = [];
 
-      if (hasLines) {
-        const rawLines = text.split('\n');
-        let processedLines = [];
+      for (let i = 0; i < rawLines.length; i++) {
+        const line = rawLines[i];
+        if (!line.trim()) {
+          processedLines.push('<div class="h-2"></div>');
+          continue;
+        }
 
-        for (let i = 0; i < rawLines.length; i++) {
-          const line = rawLines[i];
-          const bulletMatch = line.match(/^(\s*)(?:[•\-\x2A])\s+(.*)$/);
-          const numberMatch = line.match(/^(\s*)(\d+)[\.\)]\s+(.*)$/);
+        const bulletMatch = line.match(/^(\s*)(?:[•\-\x2A])\s+(.*)$/);
+        const numberMatch = line.match(/^(\s*)(\d+)[\.\)]\s+(.*)$/);
 
-          if (bulletMatch) {
-            const indentSpaces = bulletMatch[1].length;
+        if (bulletMatch) {
+          const indentSpaces = bulletMatch[1].length;
+          const indentLevel = Math.min(4, Math.floor(indentSpaces / 2));
+          const content = bulletMatch[2];
+          processedLines.push(`<div class="flex items-start gap-2.5 my-1 text-left leading-relaxed" style="padding-left: ${indentLevel * 1.25}rem;"><span class="text-indigo-600 font-bold select-none shrink-0 min-w-[0.75rem] text-center pt-0.5">•</span><span class="flex-1 min-w-0 break-words leading-relaxed">${content}</span></div>`);
+        } else if (numberMatch) {
+          const indentSpaces = numberMatch[1].length;
+          const indentLevel = Math.min(4, Math.floor(indentSpaces / 2));
+          const num = numberMatch[2];
+          const content = numberMatch[3];
+          processedLines.push(`<div class="flex items-start gap-2.5 my-1 text-left leading-relaxed" style="padding-left: ${indentLevel * 1.25}rem;"><span class="font-bold text-indigo-700 font-mono text-xs sm:text-sm select-none shrink-0 min-w-[1.25rem] text-right pt-0.5">${num}.</span><span class="flex-1 min-w-0 break-words leading-relaxed">${content}</span></div>`);
+        } else {
+          const indentMatch = line.match(/^(\s{2,})(.*)$/);
+          if (indentMatch && indentMatch[2].trim()) {
+            const indentSpaces = indentMatch[1].length;
             const indentLevel = Math.min(4, Math.floor(indentSpaces / 2));
-            const content = bulletMatch[2];
-            processedLines.push(`<div class="flex items-start gap-2 my-0.5 leading-relaxed" style="padding-left: ${indentLevel * 1.25}rem;"><span class="text-indigo-600 font-bold select-none shrink-0">•</span><span class="flex-1 min-w-0">${content}</span></div>`);
-          } else if (numberMatch) {
-            const indentSpaces = numberMatch[1].length;
-            const indentLevel = Math.min(4, Math.floor(indentSpaces / 2));
-            const num = numberMatch[2];
-            const content = numberMatch[3];
-            processedLines.push(`<div class="flex items-start gap-2 my-0.5 leading-relaxed" style="padding-left: ${indentLevel * 1.25}rem;"><span class="text-indigo-600 font-semibold font-mono text-xs select-none shrink-0 pt-0.5">${num}.</span><span class="flex-1 min-w-0">${content}</span></div>`);
+            processedLines.push(`<div class="my-1 leading-relaxed pl-5" style="padding-left: ${(indentLevel + 1) * 1.25}rem;">${indentMatch[2]}</div>`);
           } else {
-            const indentMatch = line.match(/^(\s{2,})(.*)$/);
-            if (indentMatch && indentMatch[2].trim()) {
-              const indentSpaces = indentMatch[1].length;
-              const indentLevel = Math.min(4, Math.floor(indentSpaces / 2));
-              processedLines.push(`<div class="my-0.5 leading-relaxed" style="padding-left: ${indentLevel * 1.25}rem;">${indentMatch[2]}</div>`);
+            if (rawLines.length > 1) {
+              processedLines.push(`<div class="my-0.5 leading-relaxed">${line}</div>`);
             } else {
               processedLines.push(line);
             }
           }
         }
-        res = processedLines.join('\n');
       }
 
-      // 2. Convert Markdown formatting (Bold, Italic, Underline, Link)
+      let res = processedLines.join('');
+
+      // Convert Markdown formatting (Bold, Italic, Underline, Link)
       res = res
-        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-        .replace(/(^|[^\*])\*([^*]+)\*([^\*]|$)/g, '$1<em>$2</em>$3')
+        .replace(/\*\*([^\*]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/(^|[^\*])\*([^\*]+)\*([^\*]|$)/g, '$1<em>$2</em>$3')
         .replace(/<u>([^<]+)<\/u>/gi, '<u>$1</u>')
         .replace(/\[([^\]]+)\]\(((?:https?:\/\/|\/)[^\s\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-800 underline font-semibold">$1</a>');
 
-      // 3. Auto-wrap unwrapped LaTeX math symbols so they always render beautifully
+      // Auto-wrap unwrapped LaTeX math symbols so they always render beautifully
       res = res.replace(/(?<!\$|\\|\w)(\\(?:rightarrow|leftarrow|Rightarrow|Leftarrow|Leftrightarrow|pm|approx|neq|le|ge|times|div|cdot|infty|deg|alpha|beta|gamma|theta|pi|Sigma|mu|sigma)(?![a-zA-Z]))(?!\$)/g, '$$1$');
 
       return res;
@@ -11728,32 +11732,6 @@ function getOrCreateFolder(folderName) {
     >
       <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M7 6h13M7 12h13M7 18h13M3 5v2m-1 0h2m-2 5h2v2H2m0 4h2v2H2"></path>
-      </svg>
-    </button>
-
-    <!-- Indent Left / Outdent (⇤) -->
-    <button 
-      type="button" 
-      onmousedown="event.preventDefault()"
-      onclick="applyActiveFieldFormat('outdent')" 
-      class="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-zinc-700 shrink-0" 
-      title="Kurangi Indentasi / Geser Kiri (Shift + Tab atau Ctrl + [)"
-    >
-      <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M11 19l-4-4 4-4m-4 4h14M3 6h18M3 18h18"></path>
-      </svg>
-    </button>
-
-    <!-- Indent Right (⇥) -->
-    <button 
-      type="button" 
-      onmousedown="event.preventDefault()"
-      onclick="applyActiveFieldFormat('indent')" 
-      class="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-zinc-700 shrink-0" 
-      title="Tambah Indentasi / Geser Kanan (Tab atau Ctrl + ])"
-    >
-      <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 5l4 4-4 4m4-4H3M3 6h18M3 18h18"></path>
       </svg>
     </button>
 
