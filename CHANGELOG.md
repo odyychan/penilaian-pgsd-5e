@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.93] - 2026-08-25
+
+### 📊 Indikator Progres Real-Time & Kartu Pelacak Unggah Media (*Live Upload Progress Bar*)
+- **Indikator Progres Animatif pada Modal Media Admin:**
+  - Menambahkan kartu pelacak progres unggah media (`mediaUploadProgressBarContainer`) yang menampilkan nama berkas, ukuran format (KB/MB), persentase numerik (`0%` $\rightarrow$ `100%`), dan teks tahapan dinamis (*Membaca berkas $\rightarrow$ Kompresi $\rightarrow$ Google Drive Upload $\rightarrow$ Google Global CDN Verification*).
+- **Status Responsif pada Unggah Berkas Mahasiswa:**
+  - Mengintegrasikan lintasan progres animasi (*pulse progress track*) pada kartu unggah tugas mahasiswa di `index.html` dengan badge hijau konfirmasi dan tombol batal/hapus berkas.
+
+---
+
 ## [2.2.92] - 2026-08-25
 
 ### ⚡ Sinkronisasi Penuh 2-Arah Real-Time Siklus Hidup Formulir (Create, Clone, Edit, Delete)
