@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.87] - 2026-08-25
+
+### 🧹 Pembersihan Bersih Folder & Sheet Google Drive/Spreadsheet Saat Hapus Form (Zero-Orphan Architecture)
+- **Pembersihan Otomatis Folder Google Drive Saat Hapus Form:**
+  - Menghubungkan alur `handleExecuteDeleteForm` dengan aksi penghapusan folder fisik Google Drive (`{formId}/`) dan pembersihan 4 lembar kerja terisolasi di Spreadsheet (`Master_{PIN}`, `Config_{PIN}`, `Respons_{PIN}`, `Rekap_{PIN}`).
+- **Mekanisme Auto-Cleanup Folder Yatim (*Orphaned Folders*):**
+  - Menyediakan fungsi pembersihan massal `adminCleanupOrphanedFolders` di Supabase Edge Functions dan Apps Script untuk mendeteksi dan memindahkan folder-folder lama yang sudah tidak aktif ke Sampah Google Drive secara bersih.
+
+---
+
 ## [2.2.86] - 2026-08-25
 
 ### 🖼️ Optimasi Mesin Pratinjau Gambar Media & Google Drive Global CDN

@@ -437,6 +437,8 @@ function doPost(e) {
       result = adminDeleteForm(payload);
     } else if (action === "adminSyncAllForms") {
       result = adminSyncAllForms(payload);
+    } else if (action === "adminCleanupOrphanedFolders") {
+      result = adminCleanupOrphanedFolders(payload);
     }
 
     // Form Sandbox Operations (Per-Form Scoped)
@@ -860,11 +862,52 @@ function adminSyncAllForms(payload) {
       });
     }
 
+    // 🧹 Auto-Cleanup Folder & Sheet Formulir yang Sudah Dihapus (Zero-Orphan Architecture)
+    const activeFormIds = forms.map(f => String(f.form_id || f.id || "").trim().toUpperCase()).filter(Boolean);
+    if (!activeFormIds.includes(DEFAULT_FORM_ID)) activeFormIds.push(DEFAULT_FORM_ID);
+
+    // 1. Bersihkan Folder Sampah di Google Drive
+    try {
+      if (parentFolder) {
+        const allDriveSubfolders = parentFolder.getFolders();
+        while (allDriveSubfolders.hasNext()) {
+          const subF = allDriveSubfolders.next();
+          const fName = subF.getName().trim().toUpperCase();
+          if (!activeFormIds.includes(fName) && fName !== "ARSIP" && fName !== "BACKUP" && fName !== "MEDIA") {
+            subF.setTrashed(true);
+            Logger.log("Trashed orphaned Drive folder: " + fName);
+          }
+        }
+      }
+    } catch(driveCleanErr) {
+      Logger.log("Notice cleaning orphaned drive folders: " + driveCleanErr.toString());
+    }
+
+    // 2. Bersihkan Sheet Sampah di Google Spreadsheet
+    try {
+      const allSheets = ss.getSheets();
+      allSheets.forEach(sh => {
+        const shName = sh.getName();
+        const prefixes = ["Master_", "Config_", "Respons_", "Rekap_"];
+        prefixes.forEach(pfx => {
+          if (shName.startsWith(pfx)) {
+            const potentialFormId = shName.replace(pfx, "").trim().toUpperCase();
+            if (potentialFormId && !activeFormIds.includes(potentialFormId) && potentialFormId !== "KELOMPOK" && potentialFormId !== "PENILAIAN" && potentialFormId !== "NILAI") {
+              ss.deleteSheet(sh);
+              Logger.log("Deleted orphaned sheet: " + shName);
+            }
+          }
+        });
+      });
+    } catch(sheetCleanErr) {
+      Logger.log("Notice cleaning orphaned sheets: " + sheetCleanErr.toString());
+    }
+
     clearApiCache();
 
     return {
       success: true,
-      message: `Berhasil menyinkronkan ${syncedResults.length} formulir ke Google Spreadsheet & Google Drive!`,
+      message: `Berhasil menyinkronkan ${syncedResults.length} formulir dan membersihkan folder/sheet sampah di Google Drive & Spreadsheet!`,
       syncedCount: syncedResults.length,
       results: syncedResults
     };
@@ -1043,23 +1086,41 @@ function adminDeleteForm(payload) {
       }
     }
 
-    if (targetRow === -1) {
-      lock.releaseLock();
-      return { success: false, error: "Formulir tidak ditemukan." };
+    if (targetRow !== -1) {
+      // Hapus baris dari registry
+      regSheet.deleteRow(targetRow);
     }
 
-    // Hapus baris dari registry
-    regSheet.deleteRow(targetRow);
+    // 1. Hapus seluruh sheet terisolasi formulir ini
+    const sheetsToDelete = [
+      `Master_${targetFormId}`,
+      `Config_${targetFormId}`,
+      `Respons_${targetFormId}`,
+      `Rekap_${targetFormId}`
+    ];
+    if (meta) {
+      sheetsToDelete.push(meta.masterSheetName, meta.responsSheetName, meta.configSheetName, meta.rekapSheetName);
+    }
+    sheetsToDelete.forEach(sName => {
+      try {
+        const s = ss.getSheetByName(sName);
+        if (s) ss.deleteSheet(s);
+      } catch (e) {}
+    });
 
-    // Hapus sheet terisolasi jika diminta
-    if (payload.deleteSheets && meta) {
-      const sheetsToDelete = [meta.masterSheetName, meta.responsSheetName, meta.configSheetName, meta.rekapSheetName];
-      sheetsToDelete.forEach(sName => {
-        try {
-          const s = ss.getSheetByName(sName);
-          if (s) ss.deleteSheet(s);
-        } catch (e) {}
-      });
+    // 2. Hapus / Pindahkan Folder Form di Google Drive ke Sampah
+    try {
+      const rootFolder = getOrCreateDriveFolder(payload.driveFolderName || DEFAULT_DRIVE_FOLDER_ID);
+      if (rootFolder) {
+        const subFolders = rootFolder.getFoldersByName(targetFormId);
+        while (subFolders.hasNext()) {
+          const subF = subFolders.next();
+          subF.setTrashed(true);
+          Logger.log("Trashed Drive folder for deleted form: " + targetFormId);
+        }
+      }
+    } catch(driveErr) {
+      Logger.log("Drive folder delete notice: " + driveErr.toString());
     }
 
     lock.releaseLock();
@@ -1067,10 +1128,45 @@ function adminDeleteForm(payload) {
 
     return {
       success: true,
-      message: `Formulir '${targetFormId}' berhasil dihapus dari registry.`
+      message: `Formulir '${targetFormId}' beserta sheet dan folder Google Drive berhasil dihapus secara bersih.`
     };
   } catch (err) {
     return { success: false, error: "Gagal menghapus formulir: " + err.toString() };
+  }
+}
+
+/**
+ * Pembersihan Massal Folder Yatim di Google Drive
+ */
+function adminCleanupOrphanedFolders(payload) {
+  try {
+    const activeForms = Array.isArray(payload && payload.activeFormIds) 
+      ? payload.activeFormIds.map(f => String(f).trim().toUpperCase()).filter(Boolean)
+      : [DEFAULT_FORM_ID];
+    if (!activeForms.includes(DEFAULT_FORM_ID)) activeForms.push(DEFAULT_FORM_ID);
+
+    const rootFolder = getOrCreateDriveFolder(payload && payload.driveFolderName || DEFAULT_DRIVE_FOLDER_ID);
+    const trashedFolders = [];
+
+    if (rootFolder) {
+      const subFolders = rootFolder.getFolders();
+      while (subFolders.hasNext()) {
+        const subF = subFolders.next();
+        const folderName = subF.getName().trim().toUpperCase();
+        if (!activeForms.includes(folderName) && folderName !== "ARSIP" && folderName !== "BACKUP" && folderName !== "MEDIA") {
+          subF.setTrashed(true);
+          trashedFolders.push(folderName);
+        }
+      }
+    }
+
+    return {
+      success: true,
+      message: `Berhasil memindahkan ${trashedFolders.length} folder sampah (${trashedFolders.join(', ') || 'tidak ada'}) ke Sampah Google Drive.`,
+      trashedFolders: trashedFolders
+    };
+  } catch (err) {
+    return { success: false, error: err.toString() };
   }
 }
 

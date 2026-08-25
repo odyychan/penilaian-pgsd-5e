@@ -57,6 +57,7 @@ async function getGoogleOAuthToken(): Promise<string> {
   let privKey = String(sa.private_key || "").trim();
   privKey = privKey.replace(/\\n/g, "\n");
   if (!privKey.endsWith("\n")) privKey += "\n";
+
   const signature = signer
     .sign(privKey, "base64")
     .replace(/=/g, "")
@@ -199,7 +200,94 @@ serve(async (req: Request) => {
       );
     }
 
-    // 3. Action: Sinkronisasi Massal Semua Form
+    // 3. Action: Hapus Formulir & Folder Drive Formulir
+    if (action === "adminDeleteForm") {
+      const targetFormId = String(payload.formId || "").trim().toUpperCase();
+      const rootFolderId = payload.driveFolderId || DEFAULT_DRIVE_FOLDER_ID;
+
+      if (!targetFormId) {
+        return new Response(
+          JSON.stringify({ success: false, error: "formId wajib diisi." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Cari folder form di Google Drive dan pindahkan ke Sampah
+      const query = `name = '${targetFormId}' and mimeType = 'application/vnd.google-apps.folder' and '${rootFolderId}' in parents and trashed = false`;
+      const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name)`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const searchData = await searchRes.json();
+      const trashedCount = (searchData.files || []).length;
+
+      if (searchData.files && searchData.files.length > 0) {
+        for (const f of searchData.files) {
+          await fetch(`https://www.googleapis.com/drive/v3/files/${f.id}`, {
+            method: "PATCH",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ trashed: true })
+          });
+        }
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          formId: targetFormId,
+          trashedFolderCount: trashedCount,
+          message: `Formulir '${targetFormId}' dan ${trashedCount} folder Google Drive berhasil dipindahkan ke Sampah.`
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // 4. Action: Pembersihan Massal Folder Sampah / Yatim (Zero-Orphan Cleanup)
+    if (action === "adminCleanupOrphanedFolders") {
+      const activeForms = Array.isArray(payload.activeFormIds) 
+        ? payload.activeFormIds.map((f: any) => String(f).trim().toUpperCase()).filter(Boolean)
+        : ["BK5E"];
+      if (!activeForms.includes("BK5E")) activeForms.push("BK5E");
+
+      const rootFolderId = payload.driveFolderId || DEFAULT_DRIVE_FOLDER_ID;
+
+      const query = `'${rootFolderId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
+      const listRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name)`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const listData = await listRes.json();
+      const trashedNames: string[] = [];
+
+      if (listData.files && listData.files.length > 0) {
+        for (const f of listData.files) {
+          const fName = String(f.name || "").trim().toUpperCase();
+          if (!activeForms.includes(fName) && fName !== "ARSIP" && fName !== "BACKUP" && fName !== "MEDIA") {
+            await fetch(`https://www.googleapis.com/drive/v3/files/${f.id}`, {
+              method: "PATCH",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({ trashed: true })
+            });
+            trashedNames.push(fName);
+          }
+        }
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          trashedFolders: trashedNames,
+          message: `Berhasil memindahkan ${trashedNames.length} folder sampah (${trashedNames.join(', ') || 'tidak ada'}) ke Sampah Google Drive.`
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // 5. Action: Sinkronisasi Massal Semua Form
     if (action === "adminSyncAllForms") {
       const forms = Array.isArray(payload.forms) ? payload.forms : [];
       const rootFolderId = payload.driveFolderId || DEFAULT_DRIVE_FOLDER_ID;
@@ -221,18 +309,47 @@ serve(async (req: Request) => {
         });
       }
 
+      // Auto-cleanup orphaned subfolders on Drive
+      const activeIds = forms.map((f: any) => String(f.form_id || f.formId || "").trim().toUpperCase()).filter(Boolean);
+      if (!activeIds.includes("BK5E")) activeIds.push("BK5E");
+
+      const query = `'${rootFolderId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
+      const listRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name)`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const listData = await listRes.json();
+      const trashedNames: string[] = [];
+
+      if (listData.files && listData.files.length > 0) {
+        for (const f of listData.files) {
+          const fName = String(f.name || "").trim().toUpperCase();
+          if (!activeIds.includes(fName) && fName !== "ARSIP" && fName !== "BACKUP" && fName !== "MEDIA") {
+            await fetch(`https://www.googleapis.com/drive/v3/files/${f.id}`, {
+              method: "PATCH",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({ trashed: true })
+            });
+            trashedNames.push(fName);
+          }
+        }
+      }
+
       return new Response(
         JSON.stringify({
           success: true,
-          message: `Berhasil menyinkronkan ${syncedResults.length} formulir ke Google Drive & Spreadsheet via Service Account!`,
+          message: `Berhasil menyinkronkan ${syncedResults.length} formulir dan membersihkan ${trashedNames.length} folder sampah di Google Drive!`,
           syncedCount: syncedResults.length,
+          trashedFolders: trashedNames,
           results: syncedResults
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // 4. Action: Buat Form Baru
+    // 6. Action: Buat Form Baru
     if (action === "adminCreateForm") {
       const formId = String(payload.customFormId || payload.formId || "BARU").trim().toUpperCase();
       const rootFolderId = payload.driveFolderId || DEFAULT_DRIVE_FOLDER_ID;

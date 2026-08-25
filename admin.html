@@ -9148,17 +9148,31 @@ function getOrCreateFolder(folderName) {
         closeDeleteFormModal();
         showAdminToast(`Formulir '${formIdToDelete}' berhasil dihapus dari Supabase.`, "success");
 
-        // Background forward ke Google Apps Script jika ada
-        const apiUrl = getApiUrl();
-        if (apiUrl) {
-          fetch(apiUrl, {
+        // Background forward ke Google Apps Script & Cloud Webhook untuk hapus sheet & folder Drive
+        const defaultSheetUrl = DEFAULT_API_URL;
+        const customSheetUrl = (adminAppConfig && adminAppConfig["Spreadsheet_Webhook_Url"]) || localStorage.getItem("PGSD_GLOBAL_API_URL");
+        const deletePayload = {
+          action: "adminDeleteForm",
+          formId: formIdToDelete,
+          deleteSheets: true,
+          deleteDriveFolder: true,
+          driveFolderName: DEFAULT_DRIVE_FOLDER_ID
+        };
+
+        if (defaultSheetUrl) {
+          fetch(defaultSheetUrl, {
             method: "POST",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({
-              action: "adminDeleteForm",
-              formId: formIdToDelete
-            })
-          }).catch(e => console.warn("Background sheet delete notice:", e));
+            body: JSON.stringify(deletePayload)
+          }).catch(e => console.warn("Primary sheet delete notice:", e));
+        }
+
+        if (customSheetUrl && customSheetUrl !== defaultSheetUrl) {
+          fetch(customSheetUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(deletePayload)
+          }).catch(e => console.warn("Custom sheet delete notice:", e));
         }
 
         if (currentFormId === formIdToDelete) {
