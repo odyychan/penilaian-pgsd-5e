@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.3] - 2026-08-25
+
+### 🎯 Eliminasi Redudansi & Penataan Presisi Tombol Status Formulir (*Unified Prominent Status Toggle*)
+- **Pembersihan Tombol Status Redundan:**
+  - Menghapus tombol status duplikat pada bilah navigasi tab (*tabs bar* `btnTabsBarFormStatusToggle`) yang sebelumnya berada bertumpuk di bawah bilah atas.
+- **Penyempurnaan Tombol Status Header (*Prominent Pill Badge*):**
+  - Mengintegrasikan satu tombol status utama pada bilah atas (`#btnHeaderFormStatusToggle`) dengan ukuran ergonomis ($103\times 36\text{ px}$), teks eksplisit (*"Form Aktif"* / *"Form Ditutup"*), lampu indikator animasi denyut (*pulsing dot*), dan kontras visual yang jelas di seluruh resolusi layar.
+
+---
+
 ## [2.3.2] - 2026-08-25
 
 ### 🔍 Peningkatan Ukuran & Ergonomi Tombol Undo / Redo (*Enhanced Touch Target & Visual Clarity*)
