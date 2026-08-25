@@ -3029,25 +3029,8 @@ function getOrCreateFolder(folderName) {
           cursorOffset = 3; // Place cursor right between <u> and </u>
         }
       } else if (formatType === 'link') {
-        if (selected) {
-          const url = prompt("Masukkan URL Tautan (contoh: https://ulm.ac.id):", "https://");
-          if (url && url.trim() && url.trim() !== "https://") {
-            replacement = `[${selected}](${url.trim()})`;
-            cursorOffset = replacement.length;
-          } else {
-            return;
-          }
-        } else {
-          const text = prompt("Masukkan teks tautan:", "Tautan Website");
-          if (!text) return;
-          const url = prompt("Masukkan URL Tautan (contoh: https://ulm.ac.id):", "https://");
-          if (url && url.trim()) {
-            replacement = `[${text}](${url.trim()})`;
-            cursorOffset = replacement.length;
-          } else {
-            return;
-          }
-        }
+        openInsertLinkModal(input, start, end, selected);
+        return;
       } else if (formatType === 'remove_format') {
         const cleanText = (str) => {
           return str
@@ -3082,6 +3065,83 @@ function getOrCreateFolder(folderName) {
       if (typeof callback === 'function') {
         callback(input.value);
       }
+    }
+
+        // =========================================================================
+    // IN-APP LINK INSERTION CONTROLLERS (ZERO NATIVE PROMPTS)
+    // =========================================================================
+    let pendingLinkContext = null;
+
+    function openInsertLinkModal(targetInput, start, end, selectedText) {
+      pendingLinkContext = {
+        input: targetInput,
+        start: typeof start === 'number' ? start : 0,
+        end: typeof end === 'number' ? end : 0,
+        selected: selectedText || ""
+      };
+
+      const displayInput = document.getElementById("inputLinkDisplayText");
+      const urlInput = document.getElementById("inputLinkUrl");
+
+      if (displayInput) displayInput.value = selectedText || "Tautan Website";
+      if (urlInput) urlInput.value = "https://";
+
+      document.getElementById("modalInsertLink")?.classList.remove("hidden");
+
+      setTimeout(() => {
+        if (!selectedText && displayInput) {
+          displayInput.focus();
+          displayInput.select();
+        } else if (urlInput) {
+          urlInput.focus();
+          urlInput.setSelectionRange(8, 8); // after https://
+        }
+      }, 60);
+    }
+
+    function closeInsertLinkModal() {
+      document.getElementById("modalInsertLink")?.classList.add("hidden");
+      if (pendingLinkContext?.input) {
+        pendingLinkContext.input.focus();
+      }
+      pendingLinkContext = null;
+    }
+
+    function applyInsertLinkFromModal() {
+      if (!pendingLinkContext || !pendingLinkContext.input) {
+        closeInsertLinkModal();
+        return;
+      }
+
+      const { input, start, end } = pendingLinkContext;
+      const displayInput = document.getElementById("inputLinkDisplayText");
+      const urlInput = document.getElementById("inputLinkUrl");
+
+      let text = (displayInput?.value || "").trim() || "Tautan";
+      let url = (urlInput?.value || "").trim();
+
+      if (!url || url === "https://" || url === "http://") {
+        showAdminToast("Masukkan alamat URL tautan yang valid.", "warning");
+        urlInput?.focus();
+        return;
+      }
+
+      if (!/^https?:\/\//i.test(url) && !url.startsWith('/') && !url.startsWith('#')) {
+        url = 'https://' + url;
+      }
+
+      const val = input.value || "";
+      const replacement = `[${text}](${url})`;
+
+      pushUndoSnapshot('Sisipkan Tautan');
+      input.value = val.substring(0, start) + replacement + val.substring(end);
+      input.focus();
+      const newCursor = start + replacement.length;
+      input.setSelectionRange(newCursor, newCursor);
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+
+      closeInsertLinkModal();
+      showAdminToast("Tautan berhasil disisipkan!", "success");
     }
 
     function handleUniversalMathButtonClick(targetInputId) {
@@ -11624,6 +11684,77 @@ function getOrCreateFolder(folderName) {
   </div>
 
   <!-- ========================================================================= -->
+    <!-- ========================================================================= -->
+  <!-- MODAL: SISIPKAN TAUTAN (IN-APP RICH LINK DIALOG - ZERO BROWSER PROMPT) -->
+  <!-- ========================================================================= -->
+  <div id="modalInsertLink" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target === this) closeInsertLinkModal()">
+    <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-4 fade-enter" onclick="event.stopPropagation()">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-200 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-bold text-sm sm:text-base text-zinc-900">Sisipkan Tautan</h3>
+            <p class="text-[11px] text-zinc-500">Tautkan teks ke situs web, Google Drive, atau dokumen daring.</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeInsertLinkModal()" class="w-7 h-7 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center cursor-pointer transition">
+          ✕
+        </button>
+      </div>
+
+      <!-- Inputs -->
+      <div class="space-y-3 text-xs">
+        <div class="space-y-1">
+          <label for="inputLinkDisplayText" class="block font-semibold text-zinc-700">Teks yang Ditampilkan:</label>
+          <input 
+            type="text" 
+            id="inputLinkDisplayText" 
+            placeholder="Teks tautan..." 
+            class="w-full px-3 py-2 rounded-xl border border-zinc-300 bg-white text-xs outline-none focus:border-indigo-600 transition shadow-2xs font-medium"
+            onkeydown="if(event.key==='Enter') document.getElementById('inputLinkUrl').focus()"
+          >
+        </div>
+
+        <div class="space-y-1">
+          <label for="inputLinkUrl" class="block font-semibold text-zinc-700">Alamat URL Tautan:</label>
+          <input 
+            type="url" 
+            id="inputLinkUrl" 
+            placeholder="https://..." 
+            class="w-full px-3 py-2 rounded-xl border border-zinc-300 bg-white text-xs outline-none focus:border-indigo-600 transition shadow-2xs font-mono text-zinc-800"
+            onkeydown="if(event.key==='Enter') applyInsertLinkFromModal()"
+          >
+          <p class="text-[10.5px] text-zinc-400">Contoh: <code>https://ulm.ac.id</code> atau <code>https://drive.google.com/...</code></p>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100 text-xs">
+        <button 
+          type="button" 
+          onclick="closeInsertLinkModal()" 
+          class="px-4 py-2 rounded-xl border border-zinc-200 hover:bg-zinc-50 text-zinc-700 font-semibold cursor-pointer transition"
+        >
+          Batal
+        </button>
+        <button 
+          type="button" 
+          onclick="applyInsertLinkFromModal()" 
+          class="px-4.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold cursor-pointer shadow-xs transition active:scale-98"
+        >
+          Terapkan Tautan
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- MODAL: ATTACH MULTI-MEDIA TO QUESTION (IMAGE, VIDEO, AUDIO, EMBED) -->
   <!-- ========================================================================= -->
   <div id="modalAttachQuestionMedia" onclick="if(event.target === this) closeAttachMediaModal(false)" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">

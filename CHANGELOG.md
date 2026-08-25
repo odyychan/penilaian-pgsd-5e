@@ -4,6 +4,15 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.18] - 2026-08-25
+
+### 🔗 Modal Penyisipan Tautan Dalam-Aplikasi (*In-App Link Insertion Dialog*)
+- **Penghapusan Dialog Prompt Bawaan Browser (*Zero Native Popups*):**
+  - Mengganti dialog bawaan browser (`window.prompt`) saat menyisipkan tautan dengan **Modal Sisipkan Tautan Dalam-Aplikasi (`modalInsertLink`)** yang modern, rapi, dan responsif.
+  - Menyediakan kolom *Teks yang Ditampilkan* dan *Alamat URL Tautan* dengan validasi protokol otomatis (`https://`) serta dukungan pintasan keyboard `Enter` untuk penyisipan instan.
+
+---
+
 ## [2.3.17] - 2026-08-25
 
 ### ✍️ Eliminasi Pemblokan Otomatis & Penempatan Kursor Alami (*Natural Cursor Placement Engine*)
