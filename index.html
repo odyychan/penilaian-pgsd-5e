@@ -4463,6 +4463,7 @@
           bestPresenters: selectedBestPresenters,
           evaluasi: evaluasi,
           customAnswers: clientCustomFormAnswers || {},
+          uploadedFiles: customUploadedFilesMap || {},
           step: currentStep,
           timestamp: Date.now()
         };
@@ -4481,6 +4482,7 @@
 
     function resetInMemoryClientFormState() {
       clientCustomFormAnswers = {};
+      customUploadedFilesMap = {};
       selectedGroupObj = null;
       selectedGroupIndex = -1;
       selectedBestPresenters = [];
@@ -4517,6 +4519,14 @@
         }
         const draft = JSON.parse(raw);
         if (!draft) {
+          updateDraftResetButtonVisibility();
+          return;
+        }
+
+        // Batas Waktu Draf (TTL: 7 Hari). Jika draf sudah usang, bersihkan otomatis
+        const DRAFT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+        if (draft.timestamp && (Date.now() - draft.timestamp > DRAFT_MAX_AGE_MS)) {
+          localStorage.removeItem(getFormDraftKey());
           updateDraftResetButtonVisibility();
           return;
         }
@@ -4621,11 +4631,15 @@
         const indicator = document.getElementById("autoSaveIndicator");
         if (indicator) indicator.classList.remove("hidden");
 
-        if (draft.email || draft.nama || draft.nim || draft.groupName) {
+        if (draft.uploadedFiles && typeof draft.uploadedFiles === 'object') {
+          customUploadedFilesMap = Object.assign({}, draft.uploadedFiles);
+        }
+
+        if (draft.email || draft.nama || draft.nim || draft.groupName || (customUploadedFilesMap && Object.keys(customUploadedFilesMap).length > 0)) {
           if (draft.customAnswers && typeof draft.customAnswers === 'object') {
             clientCustomFormAnswers = draft.customAnswers;
-            renderDynamicClientStages();
           }
+          renderDynamicClientStages();
 
           isDraftAlreadyRestored = true;
           startAssessmentForm();
@@ -4645,6 +4659,7 @@
       if (ok) {
         localStorage.removeItem(getFormDraftKey());
         clientCustomFormAnswers = {};
+        customUploadedFilesMap = {};
         window.location.reload();
       }
     }

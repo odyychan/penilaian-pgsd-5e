@@ -3666,6 +3666,31 @@ function getOrCreateFolder(folderName) {
       renderAllMathInElement(container);
     }
 
+    function cleanupDriveMediaFile(mediaObj) {
+      if (!mediaObj) return;
+      const fileId = mediaObj.fileId || "";
+      const fileUrl = mediaObj.url || "";
+      if (fileId || (fileUrl && fileUrl.includes("drive.google.com"))) {
+        const apiUrl = getAdminApiUrl();
+        if (apiUrl && !apiUrl.includes("localhost")) {
+          fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              action: "adminDeleteMedia",
+              formId: currentFormId || DEFAULT_PRIMARY_FORM_ID,
+              fileId: fileId,
+              fileUrl: fileUrl
+            })
+          }).then(res => res.json()).then(resJson => {
+            if (resJson && resJson.success) {
+              console.log("Drive media cleaned up successfully:", resJson);
+            }
+          }).catch(err => console.warn("Notice cleaning drive media:", err));
+        }
+      }
+    }
+
     function handleSaveModalMedia() {
       const { sIdx, fIdx } = currentMediaEditing;
       const field = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
@@ -3681,11 +3706,16 @@ function getOrCreateFolder(folderName) {
         return;
       }
 
+      // Jika mengganti media yang sudah ada, bersihkan file lama di Google Drive
+      if (field.media && field.media.url && field.media.url !== url) {
+        cleanupDriveMediaFile(field.media);
+      }
+
       pushUndoSnapshot('Lampirkan Media Pertanyaan');
       field.media = {
         type: currentMediaEditing.type,
         url: url,
-        fileId: currentMediaEditing.fileId || field.media?.fileId || "",
+        fileId: currentMediaEditing.fileId || (field.media?.url === url ? field.media?.fileId : "") || "",
         caption: caption,
         align: align,
         position: position
@@ -3694,7 +3724,8 @@ function getOrCreateFolder(folderName) {
       closeAttachMediaModal();
       renderDynamicStagesCanvas();
       markSchemaAsDirty();
-      showAdminToast("Media berhasil dilampirkan ke pertanyaan!", "success");
+      triggerAutoSaveSchema();
+      showAdminToast("Media berhasil dilampirkan dan tersimpan di draf!", "success");
     }
 
     function handleRemoveMedia(sIdx, fIdx) {
@@ -3706,26 +3737,11 @@ function getOrCreateFolder(folderName) {
       delete field.media;
       renderDynamicStagesCanvas();
       markSchemaAsDirty();
+      triggerAutoSaveSchema();
 
       // Bersihkan berkas fisik dari Google Drive secara instan
-      if (mediaToDelete && (mediaToDelete.fileId || (mediaToDelete.url && mediaToDelete.url.includes("drive.google.com")))) {
-        const apiUrl = getAdminApiUrl();
-        if (apiUrl && !apiUrl.includes("localhost")) {
-          fetch(apiUrl, {
-            method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({
-              action: "adminDeleteMedia",
-              formId: currentFormId || DEFAULT_PRIMARY_FORM_ID,
-              fileId: mediaToDelete.fileId || "",
-              fileUrl: mediaToDelete.url || ""
-            })
-          }).then(res => res.json()).then(resJson => {
-            if (resJson && resJson.success) {
-              console.log("Drive media cleaned up successfully:", resJson);
-            }
-          }).catch(err => console.warn("Notice cleaning drive media:", err));
-        }
+      if (mediaToDelete) {
+        cleanupDriveMediaFile(mediaToDelete);
         showAdminToast("Media pertanyaan dihapus dan berkas di Google Drive dibersihkan.", "info");
       } else {
         showAdminToast("Media pertanyaan dihapus.", "info");
@@ -7682,11 +7698,16 @@ function getOrCreateFolder(folderName) {
       });
       if (!ok) return;
 
+      // Bersihkan seluruh berkas media di dalam bagian ini dari Google Drive
+      (stage.fields || []).forEach(field => {
+        if (field.media) cleanupDriveMediaFile(field.media);
+      });
+
       pushUndoSnapshot('Hapus Bagian');
       adminFormSchema.tahapan.splice(sIdx, 1);
       renderDynamicStagesCanvas();
       triggerAutoSaveSchema();
-      showAdminToast("Bagian berhasil dihapus.", "info");
+      showAdminToast("Bagian berhasil dihapus dan berkas media dibersihkan.", "info");
     }
 
     // FIELD CRUD ACTIONS
@@ -8128,11 +8149,16 @@ function getOrCreateFolder(folderName) {
       });
       if (!ok) return;
 
+      // Bersihkan media berkas pertanyaan ini dari Google Drive
+      if (f.media) {
+        cleanupDriveMediaFile(f.media);
+      }
+
       pushUndoSnapshot('Hapus Pertanyaan');
       adminFormSchema.tahapan[sIdx].fields.splice(fIdx, 1);
       renderDynamicStagesCanvas();
       triggerAutoSaveSchema();
-      showAdminToast("Pertanyaan berhasil dihapus.", "info");
+      showAdminToast("Pertanyaan berhasil dihapus dan berkas media dibersihkan.", "info");
     }
 
     // MOVE FIELD ACROSS STAGES

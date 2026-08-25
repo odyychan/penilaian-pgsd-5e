@@ -4,6 +4,23 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.77] - 2026-08-25
+
+### 🛡️ Audit Ketat Zero-Orphan Media Google Drive & Peningkatan Mesin Draf Auto-Save (Admin & Klien)
+- **Zero-Orphan Files Cleanup di Google Drive:**
+  - Menjamin pembersihan berkas fisik di Google Drive pada seluruh skenario penghapusan admin:
+    - *Ganti Media Pertanyaan*: Otomatis memindahkan file gambar lama ke Trash saat diganti dengan yang baru.
+    - *Hapus Pertanyaan (`deleteField`)*: Otomatis membersihkan media lampiran pertanyaan terkait dari Drive.
+    - *Hapus Bagian (`deleteStage`)*: Otomatis membersihkan seluruh media lampiran pertanyaan di dalam bagian yang dihapus.
+- **Auto-Save Draf Media & Teks Form Builder Admin:**
+  - Setiap penambahan media, pengubahan teks, penyesuaian posisi, dan judul pertanyaan langsung tersimpan ke draf lokal dan Supabase (`triggerAutoSaveSchema()`) tanpa perlu klik manual.
+- **Penyimpanan Draf Responden dengan TTL (Time-To-Live):**
+  - Berkas lampiran mahasiswa dan seluruh isian jawaban tersimpan aman dalam draf lokal dan otomatis dipulihkan saat halaman dibuka kembali.
+  - Dilengkapi masa kedaluwarsa draf (7 hari) untuk mencegah akumulasi data usang pada memori perangkat mahasiswa.
+  - Tombol *Reset Draf* secara instan membersihkan seluruh draf isian dan berkas lampiran yang belum dikirim.
+
+---
+
 ## [2.2.76] - 2026-08-25
 
 ### 📁 Arsitektur Manajemen Media Google Drive Terstruktur & Zero Supabase Storage Footprint
