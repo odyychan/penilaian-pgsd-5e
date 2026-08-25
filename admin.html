@@ -3373,7 +3373,17 @@ function getOrCreateFolder(folderName) {
     // =========================================================================
     // RICH MULTI-MEDIA ENGINE (IMAGE, VIDEO, AUDIO, EMBED)
     // =========================================================================
-    let currentMediaEditing = { sIdx: -1, fIdx: -1, type: 'IMAGE' };
+    let currentMediaEditing = { sIdx: -1, fIdx: -1, type: 'IMAGE', localDataUrl: '' };
+
+    function extractDriveFileId(url) {
+      if (!url) return '';
+      url = String(url).trim();
+      let match = url.match(/(?:drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?export=view&id=|thumbnail\?id=)|lh3\.googleusercontent\.com\/d\/)([a-zA-Z0-9_-]+)/i);
+      if (match && match[1]) return match[1];
+      match = url.match(/[?&]id=([a-zA-Z0-9_-]+)/i);
+      if (match && match[1]) return match[1];
+      return '';
+    }
 
     function convertToEmbedUrl(url, type) {
       if (!url) return '';
@@ -3388,27 +3398,54 @@ function getOrCreateFolder(folderName) {
         if (vimeoMatch && vimeoMatch[1]) {
           return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
         }
-        const driveMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i);
-        if (driveMatch && driveMatch[1]) {
-          return `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
+        const fileId = extractDriveFileId(url);
+        if (fileId) {
+          return `https://drive.google.com/file/d/${fileId}/preview`;
         }
       }
 
       if (type === 'IMAGE') {
-        const driveImgMatch = url.match(/drive\.google\.com\/(?:file\/d\/|open\?id=)([a-zA-Z0-9_-]+)/i);
-        if (driveImgMatch && driveImgMatch[1]) {
-          return `https://drive.google.com/uc?export=view&id=${driveImgMatch[1]}`;
+        const fileId = extractDriveFileId(url);
+        if (fileId) {
+          // Google Drive Ultra-Fast CDN Endpoint (Bypass 403 cookie restriction)
+          return `https://lh3.googleusercontent.com/d/${fileId}`;
         }
       }
 
       if (type === 'AUDIO') {
-        const driveAudioMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i);
-        if (driveAudioMatch && driveAudioMatch[1]) {
-          return `https://drive.google.com/file/d/${driveAudioMatch[1]}/preview`;
+        const fileId = extractDriveFileId(url);
+        if (fileId) {
+          return `https://drive.google.com/file/d/${fileId}/preview`;
         }
       }
 
       return url;
+    }
+
+    function handleImageErrorFallback(imgEl, rawUrl) {
+      if (!imgEl) return;
+      const fileId = extractDriveFileId(rawUrl || imgEl.src);
+      const curSrc = imgEl.src || '';
+
+      if (fileId) {
+        if (!curSrc.includes('thumbnail')) {
+          imgEl.src = `https://drive.google.com/thumbnail?id=${fileId}&sz=w1200`;
+          return;
+        }
+        if (!curSrc.includes('uc?export=view')) {
+          imgEl.src = `https://drive.google.com/uc?export=view&id=${fileId}`;
+          return;
+        }
+        if (!curSrc.includes('drive.usercontent.google.com')) {
+          imgEl.src = `https://drive.usercontent.google.com/download?id=${fileId}&export=view`;
+          return;
+        }
+      }
+
+      if (currentMediaEditing && currentMediaEditing.localDataUrl && curSrc !== currentMediaEditing.localDataUrl) {
+        imgEl.src = currentMediaEditing.localDataUrl;
+        return;
+      }
     }
 
     function getBuilderMediaPreviewHtml(media, sIdx, fIdx) {
@@ -3420,7 +3457,12 @@ function getOrCreateFolder(folderName) {
       if (media.type === 'IMAGE') {
         mediaBody = `
           <div class="relative group inline-block max-w-full">
-            <img src="${embedUrl}" alt="${media.caption || 'Gambar Pertanyaan'}" class="max-h-72 w-auto rounded-xl border border-zinc-200 shadow-xs object-contain bg-zinc-900/5">
+            <img src="${embedUrl}" 
+                 referrerpolicy="no-referrer" 
+                 crossorigin="anonymous"
+                 onerror="handleImageErrorFallback(this, '${(media.url || '').replace(/'/g, "\\'")}')" 
+                 alt="${media.caption || 'Gambar Pertanyaan'}" 
+                 class="max-h-72 w-auto rounded-xl border border-zinc-200 shadow-xs object-contain bg-zinc-900/5">
           </div>
         `;
       } else if (media.type === 'VIDEO') {
@@ -3619,6 +3661,7 @@ function getOrCreateFolder(folderName) {
           return;
         }
 
+        currentMediaEditing.localDataUrl = dataUrl;
         document.getElementById("inputMediaUrl").value = dataUrl;
         updateMediaModalLivePreview();
         showAdminToast(`Berkas '${file.name}' siap dilampirkan.`, "info");
@@ -3688,7 +3731,11 @@ function getOrCreateFolder(folderName) {
 
       let mediaHtml = '';
       if (type === 'IMAGE') {
-        mediaHtml = `<img src="${embedUrl}" class="max-h-48 w-auto rounded-xl border border-zinc-200 object-contain shadow-xs">`;
+        mediaHtml = `<img src="${embedUrl}" 
+                          referrerpolicy="no-referrer" 
+                          crossorigin="anonymous"
+                          onerror="handleImageErrorFallback(this, '${url.replace(/'/g, "\\'")}')" 
+                          class="max-h-48 w-auto rounded-xl border border-zinc-200 object-contain shadow-xs">`;
       } else if (type === 'VIDEO') {
         mediaHtml = `
           <div class="w-full max-w-md aspect-video rounded-xl overflow-hidden border border-zinc-200 shadow-xs bg-black">

@@ -1370,7 +1370,7 @@ function saveUploadedFileToDrive(base64Data, fileName, mimeType, formId, categor
     const fileId = file.getId();
     const isImage = (mimeType && mimeType.startsWith("image/")) || /\.(jpe?g|png|gif|webp|bmp)$/i.test(safeName);
     const directUrl = isImage 
-      ? `https://drive.google.com/uc?export=view&id=${fileId}`
+      ? `https://lh3.googleusercontent.com/d/${fileId}`
       : file.getUrl();
 
     return {

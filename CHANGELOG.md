@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.86] - 2026-08-25
+
+### 🖼️ Optimasi Mesin Pratinjau Gambar Media & Google Drive Global CDN
+- **Pembaruan Endpoint Google Drive CDN:**
+  - Mengonversi format URL pratinjau media Google Drive secara otomatis ke Google High-Speed Global CDN (`https://lh3.googleusercontent.com/d/{fileId}`) yang kebal terhadap pembatasan cookie pihak ketiga dan *cross-origin hotlinking* Google Chrome.
+- **Fail-Safe Multi-Stage Image Fallback:**
+  - Menambahkan atribut `referrerpolicy="no-referrer"` dan mekanisme `onerror="handleImageErrorFallback()"` berlapis (CDN $\rightarrow$ Thumbnail $\rightarrow$ UC $\rightarrow$ Local Cache) untuk memastikan gambar selalu tampil jernih baik di modal admin, canvas builder, maupun tampilan formulir mahasiswa.
+
+---
+
 ## [2.2.85] - 2026-08-25
 
 ### 🛡️ Arsitektur Ketahanan Supabase-First & Dual Spreadsheet Synchronization
