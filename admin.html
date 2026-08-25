@@ -2588,7 +2588,18 @@ function getOrCreateFolder(folderName) {
     }
 
     function getApiUrl() {
-      return localStorage.getItem("PGSD_API_URL") || DEFAULT_API_URL;
+      return (typeof adminAppConfig !== 'undefined' && adminAppConfig && adminAppConfig["Spreadsheet_Webhook_Url"])
+        || localStorage.getItem("PGSD_GLOBAL_API_URL")
+        || localStorage.getItem("PGSD_API_URL")
+        || DEFAULT_API_URL;
+    }
+
+    function getEffectiveApiUrl() {
+      return getApiUrl();
+    }
+
+    function getAdminApiUrl() {
+      return getApiUrl();
     }
 
     
@@ -3602,6 +3613,9 @@ function getOrCreateFolder(folderName) {
               updateMediaModalLivePreview();
               showAdminToast("Media berhasil disimpan di Google Drive (Folder Media_Formulir)!", "success");
               return;
+            } else if (resJson && !resJson.success) {
+              console.warn("Drive upload notice:", resJson.error);
+              showAdminToast(resJson.error || "Gagal simpan ke Drive. Menggunakan draf lokal.", "warning");
             }
           } catch(netErr) {
             console.log("Drive upload fallback to local dataUrl:", netErr);

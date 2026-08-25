@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.78] - 2026-08-25
+
+### 🔧 Perbaikan Endpoint Pengunggahan Google Drive & Fungsi Otorisasi Apps Script
+- **Perbaikan Resolusi Endpoint API (`getAdminApiUrl` / `getEffectiveApiUrl`):**
+  - Memperbaiki pemanggilan fungsi URL webhook pada form builder admin sehingga proses unggah berkas langsung terhubung ke Google Drive dan tidak tertahan pada Base64 lokal.
+- **Fungsi Otorisasi Akses Drive (`setupAndAuthorizeDrive`):**
+  - Menambahkan fungsi helper otorisasi mandiri di `Code.gs` dan manifest `appsscript.json` dengan scope OAuth lengkap (`drive`, `spreadsheets`) untuk aktivasi izin Google Drive sekali klik.
+- **Transparansi Notifikasi Status Unggah:**
+  - Menampilkan lencana informasi dan toast spesifik jika izin Google Drive belum diaktifkan, serta memastikan data gambar tersimpan di draf formulir.
+
+---
+
 ## [2.2.77] - 2026-08-25
 
 ### 🛡️ Audit Ketat Zero-Orphan Media Google Drive & Peningkatan Mesin Draf Auto-Save (Admin & Klien)

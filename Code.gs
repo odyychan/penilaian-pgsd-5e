@@ -1116,16 +1116,39 @@ function isValidInstitutionalEmail(email, allowedDomainsStr) {
   return false;
 }
 
+let lastDriveError = "";
+
 /**
- * Upload File ke Google Drive secara Terstruktur
+ * Jalankan fungsi ini satu kali di Google Apps Script Editor untuk mengotorisasi Izin Akses Google Drive & Google Sheets
  */
+function setupAndAuthorizeDrive() {
+  try {
+    const root = getOrCreateDriveFolder("Penilaian PGSD 5E - Dokumen");
+    const testSub = getOrCreateDriveSubfolder(root, "BK5E");
+    Logger.log("Izin Google Drive & Sheets berhasil diotorisasi!");
+    Logger.log("Root Folder ID: " + root.getId());
+    return {
+      success: true,
+      folderId: root.getId(),
+      folderName: root.getName()
+    };
+  } catch (err) {
+    Logger.log("Otorisasi error: " + err.toString());
+    return { success: false, error: err.toString() };
+  }
+}
+
 /**
  * Upload File ke Google Drive secara Terstruktur dengan Manajemen Subfolder Otomatis
  * Struktur Folder: {Parent_Drive_Folder} / {PIN_FORMULIR} / (Media_Formulir | Lampiran_Mahasiswa)
  */
 function saveUploadedFileToDrive(base64Data, fileName, mimeType, formId, category) {
   try {
-    if (!base64Data || typeof base64Data !== 'string') return null;
+    lastDriveError = "";
+    if (!base64Data || typeof base64Data !== 'string') {
+      lastDriveError = "Data berkas base64 kosong.";
+      return null;
+    }
 
     const cleanFormId = String(formId || DEFAULT_FORM_ID).trim().toUpperCase();
     
@@ -1179,6 +1202,7 @@ function saveUploadedFileToDrive(base64Data, fileName, mimeType, formId, categor
       folderPath: `${rootFolderName} / ${cleanFormId} / ${categoryName}`
     };
   } catch (e) {
+    lastDriveError = e.toString();
     Logger.log("Error saveUploadedFileToDrive: " + e.toString());
     return null;
   }
@@ -1201,7 +1225,10 @@ function handleDirectFileUpload(payload) {
 
     const uploadRes = saveUploadedFileToDrive(base64Data, fileName, mimeType, formId, category);
     if (!uploadRes || !uploadRes.fileUrl) {
-      return { success: false, error: "Gagal menyimpan berkas ke Google Drive. Pastikan izin akses Drive bot aktif." };
+      return { 
+        success: false, 
+        error: "Gagal menyimpan berkas ke Google Drive: " + (lastDriveError || "Pastikan izin akses Drive aktif di Apps Script.") 
+      };
     }
 
     return {
