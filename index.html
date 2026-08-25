@@ -1240,7 +1240,21 @@
       }
     }
 
-    function renderClientMediaHtml(media) {
+function normalizeMediaList(fieldOrMedia) {
+      if (!fieldOrMedia) return [];
+      if (Array.isArray(fieldOrMedia.mediaList) && fieldOrMedia.mediaList.length > 0) {
+        return fieldOrMedia.mediaList;
+      }
+      if (fieldOrMedia.media && fieldOrMedia.media.url) {
+        return [fieldOrMedia.media];
+      }
+      if (fieldOrMedia.url) {
+        return [fieldOrMedia];
+      }
+      return [];
+    }
+
+    function renderSingleClientMediaBody(media) {
       if (!media || !media.url) return '';
       const alignClass = media.align === 'left' ? 'justify-start' : (media.align === 'right' ? 'justify-end' : 'justify-center');
       const embedUrl = convertToEmbedUrl(media.url, media.type);
@@ -1273,8 +1287,8 @@
           `;
         } else {
           mediaBody = `
-            <div class="w-full max-w-lg aspect-video rounded-2xl overflow-hidden border border-zinc-200 shadow-xs bg-black">
-              <video src="${embedUrl}" controls class="w-full h-full object-contain"></video>
+            <div class="w-full max-w-lg aspect-video rounded-2xl overflow-hidden border border-zinc-200 shadow-xs bg-black flex items-center justify-center">
+              <video src="${embedUrl}" controls class="w-full h-full object-contain bg-black" playsinline preload="metadata"></video>
             </div>
           `;
         }
@@ -1290,24 +1304,63 @@
         `;
       } else if (media.type === 'EMBED') {
         mediaBody = `
-          <div class="w-full max-w-xl aspect-[16/10] rounded-2xl overflow-hidden border border-zinc-200 shadow-xs bg-zinc-100">
+          <div class="w-full max-w-2xl aspect-[16/10] rounded-2xl overflow-hidden border border-zinc-200 shadow-xs bg-zinc-100">
             <iframe src="${embedUrl}" class="w-full h-full" frameborder="0"></iframe>
           </div>
         `;
       }
 
       return `
-        <div class="space-y-1.5 pt-1 pb-2">
+        <div class="space-y-2">
           <div class="flex ${alignClass}">
             ${mediaBody}
           </div>
-          ${media.caption ? `<p class="text-[11.5px] text-zinc-500 italic text-center math-renderable">${media.caption}</p>` : ''}
+          ${media.caption ? `<p class="text-xs text-zinc-600 text-center italic math-renderable">${media.caption}</p>` : ''}
+        </div>
+      `;
+    }
+
+    function renderClientMediaHtml(fieldOrMedia) {
+      const mediaList = normalizeMediaList(fieldOrMedia);
+      if (!mediaList || mediaList.length === 0) return '';
+
+      if (mediaList.length === 1) {
+        return renderSingleClientMediaBody(mediaList[0]);
+      }
+
+      const allImages = mediaList.every(m => m.type === 'IMAGE');
+      if (allImages) {
+        const gridCols = mediaList.length === 2 ? 'grid-cols-2' : (mediaList.length === 3 ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4');
+        return `
+          <div class="space-y-2 my-2.5">
+            <div class="grid ${gridCols} gap-2.5">
+              ${mediaList.map(m => `
+                <div class="relative group rounded-2xl overflow-hidden border border-zinc-200 shadow-2xs bg-zinc-900/5 aspect-square cursor-zoom-in"
+                     onclick="openClientImageZoom('${convertToEmbedUrl(m.url, 'IMAGE')}', '${(m.caption||'').replace(/'/g, "\\'")}')">
+                  <img src="${convertToEmbedUrl(m.url, 'IMAGE')}" 
+                       alt="${m.caption || ''}" 
+                       onerror="handleImageErrorFallback(this, '${(m.url||'').replace(/'/g, "\\'")}')"
+                       class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                  <div class="absolute bottom-1.5 right-1.5 px-2 py-1 rounded-lg bg-zinc-900/80 backdrop-blur-xs text-white text-[10px] font-semibold opacity-0 group-hover:opacity-100 transition pointer-events-none flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"></path></svg>
+                  </div>
+                  ${m.caption ? `<span class="absolute bottom-0 inset-x-0 bg-zinc-950/80 text-white text-[10.5px] p-1.5 truncate text-center italic math-renderable">${m.caption}</span>` : ''}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="space-y-3.5 my-2.5">
+          ${mediaList.map(m => renderSingleClientMediaBody(m)).join('')}
         </div>
       `;
     }
 
     // =========================================================================
-    // AUTO-GROWING TEXTAREA ENGINE (NO SCROLLBARS, ELASTIC EXPANSION)
+        // AUTO-GROWING TEXTAREA ENGINE (NO SCROLLBARS, ELASTIC EXPANSION)
     // =========================================================================
     function autoResizeTextarea(el) {
       if (!el || el.tagName !== 'TEXTAREA') return;
@@ -2092,8 +2145,8 @@
       const reqBadge = f.required ? '<span class="text-rose-500 font-bold ml-0.5">*</span>' : '';
       const savedVal = clientCustomFormAnswers[f.id] || '';
 
-      const mediaAbove = f.media && f.media.position === 'ABOVE_QUESTION' ? renderClientMediaHtml(f.media) : '';
-      const mediaBelow = f.media && f.media.position === 'BELOW_QUESTION' ? renderClientMediaHtml(f.media) : (f.media && !f.media.position ? renderClientMediaHtml(f.media) : '');
+      const hasMedia = (f.mediaList?.length > 0 || f.media?.url); const mediaPos = f.mediaPosition || f.media?.position || 'ABOVE_QUESTION'; const mediaAbove = (hasMedia && mediaPos === 'ABOVE_QUESTION') ? renderClientMediaHtml(f) : '';
+      const mediaBelow = (hasMedia && mediaPos === 'BELOW_QUESTION') ? renderClientMediaHtml(f) : '';
       const mediaHtml = renderClientMediaHtml(f.media);
 
       // 0. TITLE_DESC / BLOK JUDUL, DESKRIPSI & MEDIA / GAMBAR SAJA
@@ -2899,36 +2952,7 @@
       parentEl.appendChild(wrapper);
     }
 
-    function handleClientFileUpload(fieldId, fileInput) {
-      const file = fileInput.files && fileInput.files[0];
-      const statusEl = document.getElementById(`cust_file_status_${fieldId}`);
-      if (!file) {
-        delete customUploadedFilesMap[fieldId];
-        if (statusEl) statusEl.textContent = "Format didukung: PDF, PPTX, JPG, PNG (Maks 5 MB).";
-        return;
-      }
 
-      if (file.size > 5 * 1024 * 1024) {
-        showToast("Ukuran berkas melebihi batas maksimal 5 MB!", "error");
-        fileInput.value = "";
-        delete customUploadedFilesMap[fieldId];
-        return;
-      }
-
-      if (statusEl) statusEl.textContent = `Membaca ${file.name} (${Math.round(file.size/1024)} KB)...`;
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const base64Data = e.target.result;
-        customUploadedFilesMap[fieldId] = {
-          name: file.name,
-          type: file.type || "application/octet-stream",
-          base64: base64Data
-        };
-        if (statusEl) statusEl.textContent = `✓ Berkas '${file.name}' siap diunggah ke Google Drive.`;
-      };
-      reader.readAsDataURL(file);
-    }
 
     function collectCustomFieldsAnswers() {
       const answers = {};

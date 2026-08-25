@@ -3400,6 +3400,38 @@ function getOrCreateFolder(folderName) {
       return '';
     }
 
+// =========================================================================
+    // 🎨 MULTI-MEDIA STUDIO & GALLERY ENGINE FOR QUESTIONS
+    // =========================================================================
+    function normalizeMediaList(fieldOrMedia) {
+      if (!fieldOrMedia) return [];
+      if (Array.isArray(fieldOrMedia.mediaList) && fieldOrMedia.mediaList.length > 0) {
+        return fieldOrMedia.mediaList;
+      }
+      if (fieldOrMedia.media && fieldOrMedia.media.url) {
+        return [fieldOrMedia.media];
+      }
+      if (fieldOrMedia.url) {
+        return [fieldOrMedia];
+      }
+      return [];
+    }
+
+    function extractDriveFileId(url) {
+      if (!url) return '';
+      if (url.includes('lh3.googleusercontent.com/d/')) {
+        const m = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (m) return m[1];
+      }
+      if (url.includes('drive.google.com')) {
+        const m1 = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (m1) return m1[1];
+        const m2 = url.match(/id=([a-zA-Z0-9_-]+)/);
+        if (m2) return m2[1];
+      }
+      return '';
+    }
+
     function convertToEmbedUrl(url, type) {
       if (!url) return '';
       url = url.trim();
@@ -3422,7 +3454,6 @@ function getOrCreateFolder(folderName) {
       if (type === 'IMAGE') {
         const fileId = extractDriveFileId(url);
         if (fileId) {
-          // Google Drive Ultra-Fast CDN Endpoint (Bypass 403 cookie restriction)
           return `https://lh3.googleusercontent.com/d/${fileId}`;
         }
       }
@@ -3456,56 +3487,50 @@ function getOrCreateFolder(folderName) {
           return;
         }
       }
-
-      if (currentMediaEditing && currentMediaEditing.localDataUrl && curSrc !== currentMediaEditing.localDataUrl) {
-        imgEl.src = currentMediaEditing.localDataUrl;
-        return;
-      }
     }
 
-    function getBuilderMediaPreviewHtml(media, sIdx, fIdx) {
-      if (!media || !media.url) return '';
-      const alignClass = media.align === 'left' ? 'justify-start' : (media.align === 'right' ? 'justify-end' : 'justify-center');
-      const embedUrl = convertToEmbedUrl(media.url, media.type);
+    function renderSingleMediaItemPreview(m, isGallery = false) {
+      const embedUrl = convertToEmbedUrl(m.url, m.type);
+      const alignClass = m.align === 'left' ? 'justify-start' : (m.align === 'right' ? 'justify-end' : 'justify-center');
 
-      let mediaBody = '';
-      if (media.type === 'IMAGE') {
-        mediaBody = `
+      let body = '';
+      if (m.type === 'IMAGE') {
+        body = `
           <div class="relative group inline-block max-w-full">
             <img src="${embedUrl}" 
                  referrerpolicy="no-referrer" 
                  crossorigin="anonymous"
-                 onerror="handleImageErrorFallback(this, '${(media.url || '').replace(/'/g, "\\'")}')" 
-                 alt="${media.caption || 'Gambar Pertanyaan'}" 
-                 class="max-h-72 w-auto rounded-xl border border-zinc-200 shadow-xs object-contain bg-zinc-900/5">
+                 onerror="handleImageErrorFallback(this, '${(m.url || '').replace(/'/g, "\\'")}')" 
+                 alt="${m.caption || 'Gambar Pertanyaan'}" 
+                 class="${isGallery ? 'w-full h-48 sm:h-56 object-cover' : 'max-h-72 w-auto object-contain'} rounded-xl border border-zinc-200 shadow-xs bg-zinc-900/5">
           </div>
         `;
-      } else if (media.type === 'VIDEO') {
+      } else if (m.type === 'VIDEO') {
         if (embedUrl.includes('youtube.com/embed') || embedUrl.includes('vimeo.com') || embedUrl.includes('drive.google.com')) {
-          mediaBody = `
+          body = `
             <div class="w-full max-w-lg aspect-video rounded-xl overflow-hidden border border-zinc-200 shadow-xs bg-black">
               <iframe src="${embedUrl}" class="w-full h-full" frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
             </div>
           `;
         } else {
-          mediaBody = `
-            <div class="w-full max-w-lg aspect-video rounded-xl overflow-hidden border border-zinc-200 shadow-xs bg-black">
-              <video src="${embedUrl}" controls class="w-full h-full object-contain"></video>
+          body = `
+            <div class="w-full max-w-lg aspect-video rounded-xl overflow-hidden border border-zinc-200 shadow-xs bg-black flex items-center justify-center">
+              <video src="${embedUrl}" controls class="w-full h-full object-contain bg-black" playsinline preload="metadata"></video>
             </div>
           `;
         }
-      } else if (media.type === 'AUDIO') {
-        mediaBody = `
-          <div class="w-full max-w-md p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 shadow-2xs space-y-2">
-            <div class="flex items-center gap-2 text-xs font-semibold text-zinc-800">
-              <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg>
+      } else if (m.type === 'AUDIO') {
+        body = `
+          <div class="w-full max-w-md p-3 rounded-xl bg-zinc-50 border border-zinc-200 shadow-2xs space-y-1.5">
+            <div class="flex items-center gap-1.5 text-xs font-semibold text-zinc-800">
+              <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg>
               <span>Audio Pertanyaan</span>
             </div>
             <audio src="${embedUrl}" controls class="w-full h-8"></audio>
           </div>
         `;
-      } else if (media.type === 'EMBED') {
-        mediaBody = `
+      } else if (m.type === 'EMBED') {
+        body = `
           <div class="w-full max-w-xl aspect-[16/10] rounded-xl overflow-hidden border border-zinc-200 shadow-xs bg-zinc-100">
             <iframe src="${embedUrl}" class="w-full h-full" frameborder="0"></iframe>
           </div>
@@ -3513,27 +3538,68 @@ function getOrCreateFolder(folderName) {
       }
 
       return `
+        <div class="w-full space-y-1.5">
+          <div class="flex ${alignClass}">
+            ${body}
+          </div>
+          ${m.caption ? `<p class="text-xs text-zinc-600 italic text-center math-renderable">${m.caption}</p>` : ''}
+        </div>
+      `;
+    }
+
+    function getBuilderMediaPreviewHtml(fieldOrMedia, sIdx, fIdx) {
+      const mediaList = normalizeMediaList(fieldOrMedia);
+      if (!mediaList || mediaList.length === 0) return '';
+
+      const count = mediaList.length;
+      let contentHtml = '';
+
+      if (count === 1) {
+        contentHtml = renderSingleMediaItemPreview(mediaList[0], false);
+      } else {
+        const allImages = mediaList.every(m => m.type === 'IMAGE');
+        if (allImages) {
+          const gridCols = count === 2 ? 'grid-cols-2' : (count === 3 ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4');
+          contentHtml = `
+            <div class="grid ${gridCols} gap-2.5 my-1.5">
+              ${mediaList.map(m => `
+                <div class="relative group rounded-xl overflow-hidden border border-zinc-200 bg-zinc-100/60 shadow-2xs aspect-square flex flex-col justify-between">
+                  <img src="${convertToEmbedUrl(m.url, 'IMAGE')}" 
+                       alt="${m.caption || ''}" 
+                       onerror="handleImageErrorFallback(this, '${(m.url||'').replace(/'/g, "\\'")}')"
+                       class="w-full h-full object-cover">
+                  ${m.caption ? `<span class="absolute bottom-0 inset-x-0 bg-zinc-950/80 text-white text-[10px] p-1 truncate text-center">${m.caption}</span>` : ''}
+                </div>
+              `).join('')}
+            </div>
+          `;
+        } else {
+          contentHtml = `
+            <div class="space-y-3 my-1.5">
+              ${mediaList.map(m => renderSingleMediaItemPreview(m, false)).join('')}
+            </div>
+          `;
+        }
+      }
+
+      return `
         <div class="p-3 bg-zinc-50/80 rounded-2xl border border-zinc-200/90 space-y-2 my-2.5">
           <div class="flex items-center justify-between gap-2 border-b border-zinc-200/60 pb-2">
             <div class="flex items-center gap-2">
               <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">
-                MEDIA ${media.type}
+                ${count > 1 ? `GALERI MEDIA (${count} BERKAS)` : `MEDIA ${mediaList[0].type}`}
               </span>
-              <span class="text-[11px] text-zinc-600 font-medium truncate max-w-[200px]">${media.caption || 'Tanpa keterangan'}</span>
             </div>
             <div class="flex items-center gap-1.5">
               <button type="button" onclick="openAttachMediaModal(${sIdx}, ${fIdx})" class="px-2.5 py-1 rounded-lg bg-white border border-zinc-200 hover:bg-zinc-100 text-[11px] text-zinc-700 font-semibold cursor-pointer shadow-2xs">
-                Ubah
+                Kelola Media
               </button>
               <button type="button" onclick="handleRemoveMedia(${sIdx}, ${fIdx})" class="px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-200 hover:bg-rose-100 text-[11px] text-rose-600 font-semibold cursor-pointer shadow-2xs">
-                Hapus
+                Hapus Semua
               </button>
             </div>
           </div>
-          <div class="flex ${alignClass} py-1">
-            ${mediaBody}
-          </div>
-          ${media.caption ? `<p class="text-xs text-zinc-600 italic text-center border-t border-zinc-200/40 pt-1.5 math-renderable">${media.caption}</p>` : ''}
+          ${contentHtml}
         </div>
       `;
     }
@@ -3541,36 +3607,32 @@ function getOrCreateFolder(folderName) {
     function openAttachMediaModal(sIdx, fIdx) {
       currentMediaEditing.sIdx = sIdx;
       currentMediaEditing.fIdx = fIdx;
-      currentMediaEditing.pendingUpload = null;
+      currentMediaEditing.pendingUploads = [];
       const field = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
       if (!field) return;
 
-      const media = field.media || { type: 'IMAGE', url: '', caption: '', align: 'center', position: 'ABOVE_QUESTION' };
-      currentMediaEditing.type = media.type || 'IMAGE';
-      currentMediaEditing.originalUrl = media.url || '';
-      currentMediaEditing.originalFileId = media.fileId || '';
+      currentMediaEditing.mediaList = JSON.parse(JSON.stringify(normalizeMediaList(field)));
+      currentMediaEditing.position = field.mediaPosition || field.media?.position || 'ABOVE_QUESTION';
+      currentMediaEditing.type = 'IMAGE';
 
-      switchMediaModalType(currentMediaEditing.type);
-      document.getElementById("inputMediaUrl").value = media.url || '';
-      document.getElementById("inputMediaCaption").value = media.caption || '';
-      document.getElementById("selectMediaAlign").value = media.align || 'center';
-      document.getElementById("selectMediaPosition").value = media.position || 'ABOVE_QUESTION';
+      const posEl = document.getElementById("selectMediaPosition");
+      if (posEl) posEl.value = currentMediaEditing.position;
+      const urlEl = document.getElementById("inputMediaUrl");
+      if (urlEl) urlEl.value = "";
+      const capEl = document.getElementById("inputMediaCaption");
+      if (capEl) capEl.value = "";
+      const alignEl = document.getElementById("selectMediaAlign");
+      if (alignEl) alignEl.value = "center";
 
-      const btnDel = document.getElementById("btnDeleteModalMedia");
-      if (btnDel) {
-        if (field.media && field.media.url) btnDel.classList.remove("hidden");
-        else btnDel.classList.add("hidden");
-      }
-
-      updateMediaModalLivePreview();
+      switchMediaModalType('IMAGE');
+      renderMediaModalList();
       document.getElementById("modalAttachQuestionMedia").classList.remove("hidden");
     }
 
     function closeAttachMediaModal(isSaved = false) {
-      // Jika pengguna membatalkan (cancel) setelah mengunggah berkas baru, bersihkan berkas tersebut dari cloud secara instan
-      if (!isSaved && currentMediaEditing.pendingUpload) {
-        cleanupDriveMediaFile(currentMediaEditing.pendingUpload);
-        currentMediaEditing.pendingUpload = null;
+      if (!isSaved && currentMediaEditing.pendingUploads && currentMediaEditing.pendingUploads.length > 0) {
+        currentMediaEditing.pendingUploads.forEach(item => cleanupDriveMediaFile(item));
+        currentMediaEditing.pendingUploads = [];
       }
 
       document.getElementById("modalAttachQuestionMedia").classList.add("hidden");
@@ -3584,9 +3646,9 @@ function getOrCreateFolder(folderName) {
         const tab = document.getElementById(`mediaTab_${t}`);
         if (tab) {
           if (t === type) {
-            tab.className = "py-2 rounded-lg bg-white text-zinc-950 shadow-2xs text-center transition cursor-pointer font-bold";
+            tab.className = "py-1.5 rounded-lg bg-white text-zinc-950 shadow-2xs text-center transition cursor-pointer font-bold";
           } else {
-            tab.className = "py-2 rounded-lg text-zinc-500 hover:text-zinc-900 text-center transition cursor-pointer";
+            tab.className = "py-1.5 rounded-lg text-zinc-600 hover:text-zinc-900 text-center transition cursor-pointer";
           }
         }
       });
@@ -3597,11 +3659,11 @@ function getOrCreateFolder(folderName) {
 
       if (type === 'IMAGE') {
         if (label) label.textContent = "Tautan / URL Gambar:";
-        if (help) help.textContent = "Mendukung tautan langsung (JPG/PNG/GIF), Google Drive share link, atau klik Unggah File.";
+        if (help) help.textContent = "Mendukung tautan langsung (JPG/PNG/GIF), Google Drive share link, atau klik Unggah Berkas.";
         if (uploadBtn) uploadBtn.classList.remove("hidden");
       } else if (type === 'VIDEO') {
         if (label) label.textContent = "Tautan Video (YouTube, Vimeo, Drive, MP4):";
-        if (help) help.textContent = "Mendukung link YouTube biasa/shorts, Vimeo, Google Drive Video, direct link MP4/WebM, atau klik Unggah File.";
+        if (help) help.textContent = "Mendukung link YouTube biasa/shorts, Vimeo, Google Drive Video, direct link MP4/WebM, atau klik Unggah Berkas.";
         if (uploadBtn) uploadBtn.classList.remove("hidden");
       } else if (type === 'AUDIO') {
         if (label) label.textContent = "Tautan Berkas Audio (MP3, WAV, Drive Audio):";
@@ -3612,8 +3674,6 @@ function getOrCreateFolder(folderName) {
         if (help) help.textContent = "Mendukung link web interaktif, slide presentasi Google Slides, Figma, atau PDF online.";
         if (uploadBtn) uploadBtn.classList.add("hidden");
       }
-
-      updateMediaModalLivePreview();
     }
 
     function setMediaUploadProgress(percent, stageText, isSuccess = false, isError = false) {
@@ -3658,7 +3718,7 @@ function getOrCreateFolder(folderName) {
         bar.className = "h-full bg-indigo-600 rounded-full transition-all duration-300 ease-out shadow-xs";
         container.className = "p-3.5 rounded-2xl bg-indigo-50/80 border border-indigo-200/90 space-y-2.5 transition-all";
         if (percentEl) percentEl.className = "font-mono font-bold text-xs text-indigo-600 shrink-0";
-        if (stageEl) stageEl.className = "text-[11px] text-indigo-700 font-medium block";
+        if (stageEl) stageEl.className = "text-[11px] text-indigo-700 font-semibold block";
         if (iconEl) {
           iconEl.className = "w-7 h-7 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xs shrink-0 shadow-2xs";
           iconEl.innerHTML = `<svg class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>`;
@@ -3668,180 +3728,285 @@ function getOrCreateFolder(folderName) {
       }
     }
 
-    async function handleModalDirectFileUpload(fileInput) {
-      const file = fileInput.files ? fileInput.files[0] : null;
-      if (!file) return;
-      if (file.size > 25 * 1024 * 1024) {
-        showAdminToast("Ukuran berkas melebihi batas 25 MB!", "warning");
-        return;
-      }
+    function readSingleMediaFile(file) {
+      return new Promise((resolve) => {
+        const directReader = new FileReader();
+        directReader.onload = (e) => {
+          const rawDataUrl = e.target.result;
+          const rawBase64 = (rawDataUrl && rawDataUrl.includes(',')) ? rawDataUrl.split(',')[1] : '';
 
-      // Tampilkan info berkas pada Progress Bar
-      const fileNameEl = document.getElementById("mediaUploadFileName");
-      const fileSizeEl = document.getElementById("mediaUploadFileSize");
-      if (fileNameEl) fileNameEl.textContent = file.name;
-      if (fileSizeEl) {
-        fileSizeEl.textContent = file.size > 1024 * 1024 
-          ? `(${(file.size / (1024 * 1024)).toFixed(1)} MB)` 
-          : `(${(file.size / 1024).toFixed(0)} KB)`;
-      }
-
-      setMediaUploadProgress(15, "Membaca berkas & kompresi cerdas...");
-
-      let dataUrl = "";
-      let base64 = "";
-
-      try {
-        const readBase64Promise = (f) => new Promise((resolve) => {
-          const directReader = new FileReader();
-          directReader.onload = (e) => {
-            const rawDataUrl = e.target.result;
-            const rawBase64 = (rawDataUrl && rawDataUrl.includes(',')) ? rawDataUrl.split(',')[1] : '';
-
-            // Jika bukan image standard atau SVG, langsung resolve
-            if (!f.type.startsWith("image/") || f.type === "image/svg+xml") {
-              return resolve({ dataUrl: rawDataUrl, base64: rawBase64 });
-            }
-
-            // Kompresi cerdas canvas
-            const img = new Image();
-            img.onload = function() {
-              try {
-                let width = img.width || 800;
-                let height = img.height || 600;
-                const maxDim = 1600;
-                if (width > maxDim || height > maxDim) {
-                  if (width > height) {
-                    height = Math.round((height * maxDim) / width);
-                    width = maxDim;
-                  } else {
-                    width = Math.round((width * maxDim) / height);
-                    height = maxDim;
-                  }
-                }
-                const canvas = document.createElement("canvas");
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext("2d");
-                ctx.drawImage(img, 0, 0, width, height);
-                const compDataUrl = canvas.toDataURL(f.type === "image/png" ? "image/png" : "image/jpeg", 0.88);
-                const compBase64 = compDataUrl.split(',')[1] || rawBase64;
-                resolve({ dataUrl: compDataUrl, base64: compBase64 });
-              } catch(cvsErr) {
-                resolve({ dataUrl: rawDataUrl, base64: rawBase64 });
-              }
-            };
-            img.onerror = function() {
-              resolve({ dataUrl: rawDataUrl, base64: rawBase64 });
-            };
-            img.src = rawDataUrl;
-          };
-          directReader.onerror = () => resolve({ dataUrl: '', base64: '' });
-          directReader.readAsDataURL(f);
-        });
-
-        const res = await readBase64Promise(file);
-        dataUrl = res.dataUrl;
-        base64 = res.base64;
-
-        if (!dataUrl) {
-          setMediaUploadProgress(0, "Gagal membaca berkas lokal.", false, true);
-          showAdminToast("Tidak dapat membaca berkas yang dipilih.", "error");
-          return;
-        }
-
-        currentMediaEditing.localDataUrl = dataUrl;
-        document.getElementById("inputMediaUrl").value = dataUrl;
-        updateMediaModalLivePreview();
-        setMediaUploadProgress(40, "Menghubungkan ke Google Cloud & Supabase...");
-      } catch (err) {
-        console.error("Local file read error:", err);
-        setMediaUploadProgress(0, "Gagal memproses berkas lokal.", false, true);
-        showAdminToast("Gagal memproses berkas lokal.", "error");
-        return;
-      }
-
-      // =========================================================================
-      // 🚀 PIPELINE 1: ULTRA-FAST SUPABASE GLOBAL EDGE STORAGE CDN (< 200 ms)
-      // =========================================================================
-      const cleanFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-      const storagePath = `${currentFormId || 'BK5E'}/${Date.now()}_${cleanFileName}`;
-      const cdnPublicUrl = `https://eychjnqmqpxzxukiwbqf.supabase.co/storage/v1/object/public/pgsd-media/${storagePath}`;
-      let cdnUploadSuccess = false;
-
-      setMediaUploadProgress(50, "Mengunggah ke Super-Fast Global Edge CDN...");
-
-      try {
-        const uploadRes = await fetch(`https://eychjnqmqpxzxukiwbqf.supabase.co/storage/v1/object/pgsd-media/${storagePath}`, {
-          method: "POST",
-          headers: {
-            apikey: "sb_publishable__vL9IPWnyC8uJRSQYLN_yg_qDHDflEp",
-            Authorization: "Bearer sb_publishable__vL9IPWnyC8uJRSQYLN_yg_qDHDflEp",
-            "Content-Type": file.type || "application/octet-stream",
-            "x-upsert": "true"
-          },
-          body: file
-        });
-
-        if (uploadRes.ok) {
-          cdnUploadSuccess = true;
-          document.getElementById("inputMediaUrl").value = cdnPublicUrl;
-          currentMediaEditing.fileUrl = cdnPublicUrl;
-          currentMediaEditing.storagePath = storagePath;
-          currentMediaEditing.pendingUpload = {
-            url: cdnPublicUrl,
-            storagePath: storagePath
-          };
-          updateMediaModalLivePreview();
-          setMediaUploadProgress(100, "✅ Berkas Berhasil Tersimpan di Cloud CDN Global!", true);
-          showAdminToast("Media berhasil terunggah ke Cloud CDN Global!", "success");
-        }
-      } catch(cdnErr) {
-        console.warn("Direct CDN upload notice:", cdnErr);
-      }
-
-      // =========================================================================
-      // 🔄 PIPELINE 2: PARALLEL BACKGROUND GOOGLE DRIVE BACKUP SYNC
-      // =========================================================================
-      const apiUrl = getAdminApiUrl();
-      if (navigator.onLine && apiUrl && !apiUrl.includes("localhost") && base64) {
-        if (!cdnUploadSuccess) {
-          setMediaUploadProgress(75, "Menyimpan berkas ke Google Drive...");
-        }
-
-        fetch(apiUrl, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            action: "adminUploadMedia",
-            formId: currentFormId || DEFAULT_PRIMARY_FORM_ID,
-            category: "Media_Formulir",
-            name: file.name,
-            type: file.type,
-            base64: base64
-          })
-        }).then(r => r.text()).then(rawText => {
-          let resJson = null;
-          try { resJson = JSON.parse(rawText); } catch(pe) {}
-          if (resJson && resJson.success && resJson.fileUrl) {
-            currentMediaEditing.fileId = resJson.fileId || "";
-            currentMediaEditing.pendingUpload = {
-              fileId: resJson.fileId || "",
-              url: resJson.fileUrl || cdnPublicUrl,
-              storagePath: storagePath
-            };
-            // Jika CDN belum berhasil, gunakan URL Google Drive
-            if (!cdnUploadSuccess) {
-              document.getElementById("inputMediaUrl").value = resJson.fileUrl;
-              updateMediaModalLivePreview();
-              setMediaUploadProgress(100, "✅ Berkas Tersimpan di Google Drive!", true);
-            }
+          if (!file.type.startsWith("image/") || file.type === "image/svg+xml") {
+            return resolve({ dataUrl: rawDataUrl, base64: rawBase64 });
           }
-        }).catch(e => console.warn("Background Drive sync notice:", e));
+
+          const img = new Image();
+          img.onload = function() {
+            try {
+              let width = img.width || 800;
+              let height = img.height || 600;
+              const maxDim = 1600;
+              if (width > maxDim || height > maxDim) {
+                if (width > height) {
+                  height = Math.round((height * maxDim) / width);
+                  width = maxDim;
+                } else {
+                  width = Math.round((width * maxDim) / height);
+                  height = maxDim;
+                }
+              }
+              const canvas = document.createElement("canvas");
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(img, 0, 0, width, height);
+              const compDataUrl = canvas.toDataURL(file.type === "image/png" ? "image/png" : "image/jpeg", 0.88);
+              const compBase64 = compDataUrl.split(',')[1] || rawBase64;
+              resolve({ dataUrl: compDataUrl, base64: compBase64 });
+            } catch(cvsErr) {
+              resolve({ dataUrl: rawDataUrl, base64: rawBase64 });
+            }
+          };
+          img.onerror = () => resolve({ dataUrl: rawDataUrl, base64: rawBase64 });
+          img.src = rawDataUrl;
+        };
+        directReader.onerror = () => resolve({ dataUrl: '', base64: '' });
+        directReader.readAsDataURL(file);
+      });
+    }
+
+    async function handleModalDirectFileUpload(fileInput) {
+      const files = fileInput.files ? Array.from(fileInput.files) : [];
+      if (files.length === 0) return;
+
+      const totalFiles = files.length;
+      for (let i = 0; i < totalFiles; i++) {
+        const file = files[i];
+        if (file.size > 50 * 1024 * 1024) {
+          showAdminToast(`Berkas "${file.name}" melebihi batas 50 MB!`, "warning");
+          continue;
+        }
+
+        const fileNameEl = document.getElementById("mediaUploadFileName");
+        const fileSizeEl = document.getElementById("mediaUploadFileSize");
+        if (fileNameEl) fileNameEl.textContent = file.name;
+        if (fileSizeEl) {
+          fileSizeEl.textContent = file.size > 1024 * 1024 
+            ? `(${(file.size / (1024 * 1024)).toFixed(1)} MB)` 
+            : `(${(file.size / 1024).toFixed(0)} KB)`;
+        }
+
+        setMediaUploadProgress(
+          Math.round(((i) / totalFiles) * 100) + 10,
+          `Mengunggah berkas ${i + 1} dari ${totalFiles} (${file.name})...`
+        );
+
+        let mType = 'IMAGE';
+        if (file.type.startsWith('video/')) mType = 'VIDEO';
+        else if (file.type.startsWith('audio/')) mType = 'AUDIO';
+
+        let dataUrl = "";
+        let base64 = "";
+
+        try {
+          const res = await readSingleMediaFile(file);
+          dataUrl = res.dataUrl;
+          base64 = res.base64;
+        } catch (err) {
+          console.error("Local file read error:", err);
+          continue;
+        }
+
+        const cleanFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const storagePath = `${currentFormId || 'BK5E'}/${Date.now()}_${cleanFileName}`;
+        const cdnPublicUrl = `https://eychjnqmqpxzxukiwbqf.supabase.co/storage/v1/object/public/pgsd-media/${storagePath}`;
+        let cdnUploadSuccess = false;
+
+        try {
+          const uploadRes = await fetch(`https://eychjnqmqpxzxukiwbqf.supabase.co/storage/v1/object/pgsd-media/${storagePath}`, {
+            method: "POST",
+            headers: {
+              apikey: "sb_publishable__vL9IPWnyC8uJRSQYLN_yg_qDHDflEp",
+              Authorization: "Bearer sb_publishable__vL9IPWnyC8uJRSQYLN_yg_qDHDflEp",
+              "Content-Type": file.type || "application/octet-stream",
+              "x-upsert": "true"
+            },
+            body: file
+          });
+
+          if (uploadRes.ok) {
+            cdnUploadSuccess = true;
+          }
+        } catch(cdnErr) {
+          console.warn("Direct CDN upload notice:", cdnErr);
+        }
+
+        const newItem = {
+          id: "med_" + Date.now() + "_" + Math.random().toString(36).substring(2, 6),
+          type: mType,
+          url: cdnUploadSuccess ? cdnPublicUrl : dataUrl,
+          fileId: "",
+          storagePath: storagePath,
+          caption: "",
+          align: "center"
+        };
+
+        currentMediaEditing.mediaList.push(newItem);
+        currentMediaEditing.pendingUploads.push(newItem);
+
+        // Background Google Drive Sync
+        const apiUrl = getAdminApiUrl();
+        if (navigator.onLine && apiUrl && !apiUrl.includes("localhost") && base64) {
+          fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              action: "adminUploadMedia",
+              formId: currentFormId || DEFAULT_PRIMARY_FORM_ID,
+              category: "Media_Formulir",
+              name: file.name,
+              type: file.type,
+              base64: base64
+            })
+          }).then(r => r.text()).then(rawText => {
+            let resJson = null;
+            try { resJson = JSON.parse(rawText); } catch(pe) {}
+            if (resJson && resJson.success && resJson.fileUrl) {
+              newItem.fileId = resJson.fileId || "";
+              if (!cdnUploadSuccess) {
+                newItem.url = resJson.fileUrl;
+                renderMediaModalList();
+              }
+            }
+          }).catch(e => console.warn("Background Drive sync notice:", e));
+        }
       }
 
-      if (!cdnUploadSuccess && (!apiUrl || !navigator.onLine)) {
-        setMediaUploadProgress(100, "✅ Berkas lokal siap dilampirkan.", true);
+      setMediaUploadProgress(100, `✅ Berhasil mengunggah ${totalFiles} berkas!`, true);
+      renderMediaModalList();
+      showAdminToast(`${totalFiles} berkas media berhasil dilampirkan!`, "success");
+    }
+
+    function handleAddLinkMedia() {
+      const urlEl = document.getElementById("inputMediaUrl");
+      const url = (urlEl?.value || "").trim();
+      const capEl = document.getElementById("inputMediaCaption");
+      const caption = (capEl?.value || "").trim();
+      const alignEl = document.getElementById("selectMediaAlign");
+      const align = alignEl?.value || "center";
+
+      if (!url) {
+        showAdminToast("Mohon masukkan tautan / URL terlebih dahulu.", "warning");
+        return;
+      }
+
+      const newItem = {
+        id: "med_" + Date.now() + "_" + Math.random().toString(36).substring(2, 6),
+        type: currentMediaEditing.type,
+        url: url,
+        fileId: "",
+        storagePath: "",
+        caption: caption,
+        align: align
+      };
+
+      currentMediaEditing.mediaList.push(newItem);
+      if (urlEl) urlEl.value = "";
+      if (capEl) capEl.value = "";
+      renderMediaModalList();
+      showAdminToast("Media tautan berhasil ditambahkan ke daftar!", "success");
+    }
+
+    function renderMediaModalList() {
+      const listContainer = document.getElementById("mediaItemsListContainer");
+      const btnDel = document.getElementById("btnDeleteModalMedia");
+      if (!listContainer) return;
+
+      const mediaList = currentMediaEditing.mediaList || [];
+      if (btnDel) {
+        if (mediaList.length > 0) btnDel.classList.remove("hidden");
+        else btnDel.classList.add("hidden");
+      }
+
+      if (mediaList.length === 0) {
+        listContainer.innerHTML = `
+          <div class="p-6 rounded-2xl bg-zinc-50 border border-dashed border-zinc-300 text-center space-y-2">
+            <div class="w-10 h-10 rounded-full bg-zinc-100 text-zinc-400 flex items-center justify-center mx-auto">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            </div>
+            <p class="text-xs font-semibold text-zinc-700">Belum ada berkas media terlampir</p>
+            <p class="text-[11px] text-zinc-400">Pilih opsi di bawah untuk mengunggah banyak foto/video/audio sekaligus atau masukkan link URL.</p>
+          </div>
+        `;
+        updateMediaModalLivePreview();
+        return;
+      }
+
+      listContainer.innerHTML = mediaList.map((m, idx) => {
+        const embedUrl = convertToEmbedUrl(m.url, m.type);
+        let thumb = '';
+        if (m.type === 'IMAGE') {
+          thumb = `<img src="${embedUrl}" onerror="handleImageErrorFallback(this, '${(m.url||'').replace(/'/g, "\\'")}')" class="w-14 h-14 rounded-lg object-cover border border-zinc-200 bg-zinc-100 shrink-0">`;
+        } else if (m.type === 'VIDEO') {
+          thumb = `<div class="w-14 h-14 rounded-lg bg-zinc-900 text-white flex items-center justify-center shrink-0"><svg class="w-6 h-6 text-rose-500" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>`;
+        } else if (m.type === 'AUDIO') {
+          thumb = `<div class="w-14 h-14 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg></div>`;
+        } else {
+          thumb = `<div class="w-14 h-14 rounded-lg bg-zinc-100 text-zinc-600 flex items-center justify-center shrink-0"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg></div>`;
+        }
+
+        return `
+          <div class="p-3 bg-white rounded-xl border border-zinc-200 shadow-2xs flex items-start gap-3 transition">
+            ${thumb}
+            <div class="flex-1 min-w-0 space-y-1.5">
+              <div class="flex items-center justify-between gap-2">
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-zinc-100 text-zinc-800 border border-zinc-200">
+                  #${idx + 1} ${m.type}
+                </span>
+                <div class="flex items-center gap-1">
+                  <button type="button" onclick="moveMediaItem(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} class="p-1 rounded hover:bg-zinc-100 text-zinc-500 disabled:opacity-20 cursor-pointer" title="Geser Naik">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+                  </button>
+                  <button type="button" onclick="moveMediaItem(${idx}, 1)" ${idx === mediaList.length - 1 ? 'disabled' : ''} class="p-1 rounded hover:bg-zinc-100 text-zinc-500 disabled:opacity-20 cursor-pointer" title="Geser Turun">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                  </button>
+                  <button type="button" onclick="handleRemoveMediaItem(${idx})" class="p-1 rounded hover:bg-rose-50 text-rose-500 hover:text-rose-700 cursor-pointer" title="Hapus Berkas Ini">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                  </button>
+                </div>
+              </div>
+              <input type="text" value="${(m.caption || '').replace(/"/g, '&quot;')}" oninput="updateMediaItemCaption(${idx}, this.value)" placeholder="Keterangan teks di bawah media ini (opsional)..." class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-200 text-xs focus:border-indigo-600 outline-none bg-zinc-50/50">
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      updateMediaModalLivePreview();
+    }
+
+    function updateMediaItemCaption(idx, val) {
+      if (currentMediaEditing.mediaList && currentMediaEditing.mediaList[idx]) {
+        currentMediaEditing.mediaList[idx].caption = val;
+        updateMediaModalLivePreview();
+      }
+    }
+
+    function moveMediaItem(idx, dir) {
+      const list = currentMediaEditing.mediaList;
+      const target = idx + dir;
+      if (target < 0 || target >= list.length) return;
+      const temp = list[idx];
+      list[idx] = list[target];
+      list[target] = temp;
+      renderMediaModalList();
+    }
+
+    function handleRemoveMediaItem(idx) {
+      const item = currentMediaEditing.mediaList[idx];
+      if (item) {
+        cleanupDriveMediaFile(item);
+        currentMediaEditing.mediaList.splice(idx, 1);
+        renderMediaModalList();
+        showAdminToast("Berkas media dihapus dari daftar.", "info");
       }
     }
 
@@ -3849,62 +4014,13 @@ function getOrCreateFolder(folderName) {
       const container = document.getElementById("mediaModalPreviewContainer");
       if (!container) return;
 
-      const url = (document.getElementById("inputMediaUrl")?.value || "").trim();
-      const caption = (document.getElementById("inputMediaCaption")?.value || "").trim();
-      const align = document.getElementById("selectMediaAlign")?.value || "center";
-      const alignClass = align === 'left' ? 'justify-start' : (align === 'right' ? 'justify-end' : 'justify-center');
-
-      if (!url) {
-        container.innerHTML = '<span class="text-zinc-400 italic">Masukkan URL atau pilih berkas untuk melihat pratinjau media</span>';
+      const mediaList = currentMediaEditing.mediaList || [];
+      if (mediaList.length === 0) {
+        container.innerHTML = '<span class="text-zinc-400 italic">Belum ada media dalam pratinjau</span>';
         return;
       }
 
-      const type = currentMediaEditing.type;
-      const embedUrl = convertToEmbedUrl(url, type);
-
-      let mediaHtml = '';
-      if (type === 'IMAGE') {
-        mediaHtml = `<img src="${embedUrl}" 
-                          referrerpolicy="no-referrer" 
-                          crossorigin="anonymous"
-                          onerror="handleImageErrorFallback(this, '${url.replace(/'/g, "\\'")}')" 
-                          class="max-h-48 w-auto rounded-xl border border-zinc-200 object-contain shadow-xs">`;
-      } else if (type === 'VIDEO') {
-        if (embedUrl.includes('youtube.com/embed') || embedUrl.includes('vimeo.com') || embedUrl.includes('drive.google.com')) {
-          mediaHtml = `
-            <div class="w-full max-w-md aspect-video rounded-xl overflow-hidden border border-zinc-200 shadow-xs bg-black">
-              <iframe src="${embedUrl}" class="w-full h-full" frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
-            </div>
-          `;
-        } else {
-          mediaHtml = `
-            <div class="w-full max-w-md aspect-video rounded-xl overflow-hidden border border-zinc-200 shadow-xs bg-black flex items-center justify-center">
-              <video src="${embedUrl}" controls class="w-full h-full object-contain bg-black" playsinline preload="metadata"></video>
-            </div>
-          `;
-        }
-      } else if (type === 'AUDIO') {
-        mediaHtml = `
-          <div class="w-full max-w-sm p-3 rounded-xl bg-zinc-50 border border-zinc-200">
-            <audio src="${embedUrl}" controls class="w-full h-8"></audio>
-          </div>
-        `;
-      } else if (type === 'EMBED') {
-        mediaHtml = `
-          <div class="w-full max-w-md aspect-video rounded-xl overflow-hidden border border-zinc-200 shadow-xs bg-zinc-100">
-            <iframe src="${embedUrl}" class="w-full h-full" frameborder="0"></iframe>
-          </div>
-        `;
-      }
-
-      container.innerHTML = `
-        <div class="w-full space-y-2">
-          <div class="flex ${alignClass}">
-            ${mediaHtml}
-          </div>
-          ${caption ? `<p class="text-xs text-zinc-600 text-center italic math-renderable">${caption}</p>` : ''}
-        </div>
-      `;
+      container.innerHTML = mediaList.map(m => renderSingleMediaItemPreview(m, mediaList.length > 1)).join('');
       renderAllMathInElement(container);
     }
 
@@ -3913,18 +4029,11 @@ function getOrCreateFolder(folderName) {
       let fileId = mediaObj.fileId || "";
       let fileUrl = mediaObj.url || mediaObj.fileUrl || "";
 
-      // Extract Google Drive ID from any URL format
       if (!fileId && fileUrl) {
-        if (fileUrl.includes("lh3.googleusercontent.com/d/")) {
-          const m = fileUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-          if (m) fileId = m[1];
-        } else if (fileUrl.includes("drive.google.com")) {
-          const m = fileUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || fileUrl.match(/id=([a-zA-Z0-9_-]+)/);
-          if (m) fileId = m[1];
-        }
+        fileId = extractDriveFileId(fileUrl);
       }
 
-      // 1. Google Drive Deletion via Supabase Cloud Edge Function (Service Account)
+      // 1. Supabase Cloud Edge Function (Service Account)
       if (fileId && typeof GOOGLE_SYNC_EDGE_URL !== 'undefined' && GOOGLE_SYNC_EDGE_URL) {
         fetch(GOOGLE_SYNC_EDGE_URL, {
           method: "POST",
@@ -3939,7 +4048,7 @@ function getOrCreateFolder(folderName) {
         }).catch(e => console.warn("Cloud Edge media delete notice:", e));
       }
 
-      // 2. Google Drive Deletion via Apps Script Webhook
+      // 2. Apps Script Webhook
       const apiUrl = getAdminApiUrl();
       if (fileId && apiUrl && !apiUrl.includes("localhost")) {
         fetch(apiUrl, {
@@ -3954,7 +4063,7 @@ function getOrCreateFolder(folderName) {
         }).catch(err => console.warn("Notice cleaning drive media:", err));
       }
 
-      // 3. Supabase Storage Deletion (Zero-Waste Purge)
+      // 3. Supabase Storage Deletion
       let sbStoragePath = mediaObj.storagePath || "";
       if (!sbStoragePath && fileUrl && fileUrl.includes("/storage/v1/object/public/pgsd-media/")) {
         sbStoragePath = fileUrl.split("/storage/v1/object/public/pgsd-media/")[1];
@@ -3977,15 +4086,17 @@ function getOrCreateFolder(folderName) {
       if (!currentFormId) return;
       if (isManual) showAdminToast("Memindai dan membersihkan berkas media sampah...", "info");
 
-      // Kumpulkan seluruh URL media aktif di skema pertanyaan
       const activeUrls = [];
       const activeFileIds = [];
       (adminFormSchema.tahapan || []).forEach(stage => {
         (stage.fields || []).forEach(f => {
-          if (f.media && f.media.url) {
-            activeUrls.push(f.media.url);
-            if (f.media.fileId) activeFileIds.push(f.media.fileId);
-          }
+          const list = normalizeMediaList(f);
+          list.forEach(m => {
+            if (m && m.url) {
+              activeUrls.push(m.url);
+              if (m.fileId) activeFileIds.push(m.fileId);
+            }
+          });
         });
       });
 
@@ -4017,56 +4128,40 @@ function getOrCreateFolder(folderName) {
       const field = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
       if (!field) return;
 
-      const url = (document.getElementById("inputMediaUrl")?.value || "").trim();
-      const caption = (document.getElementById("inputMediaCaption")?.value || "").trim();
-      const align = document.getElementById("selectMediaAlign")?.value || "center";
+      const mediaList = currentMediaEditing.mediaList || [];
       const position = document.getElementById("selectMediaPosition")?.value || "ABOVE_QUESTION";
 
-      if (!url) {
-        showAdminToast("Mohon masukkan tautan / URL media terlebih dahulu.", "warning");
-        return;
-      }
+      pushUndoSnapshot('Kelola Media Pertanyaan');
 
-      // Jika mengganti media lama, bersihkan berkas lama di Google Drive & Supabase
-      if (field.media && field.media.url && field.media.url !== url) {
-        cleanupDriveMediaFile(field.media);
-      }
+      field.mediaList = mediaList;
+      field.mediaPosition = position;
+      field.media = mediaList.length > 0 ? Object.assign({}, mediaList[0], { position: position }) : null;
 
-      // Reset pending upload karena telah resmi disimpan
-      currentMediaEditing.pendingUpload = null;
-
-      pushUndoSnapshot('Lampirkan Media Pertanyaan');
-      field.media = {
-        type: currentMediaEditing.type,
-        url: url,
-        fileId: currentMediaEditing.fileId || (field.media?.url === url ? field.media?.fileId : "") || "",
-        caption: caption,
-        align: align,
-        position: position
-      };
+      currentMediaEditing.pendingUploads = [];
 
       closeAttachMediaModal(true);
       renderDynamicStagesCanvas();
       markSchemaAsDirty();
       triggerAutoSaveSchema();
-      showAdminToast("Media berhasil dilampirkan dan tersimpan di draf!", "success");
+      showAdminToast(`${mediaList.length} berkas media berhasil disimpan di draf!`, "success");
     }
 
     function handleRemoveMedia(sIdx, fIdx) {
       const field = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
       if (!field) return;
 
-      const mediaToDelete = field.media;
+      const mediaListToDelete = normalizeMediaList(field);
       pushUndoSnapshot('Hapus Media Pertanyaan');
       delete field.media;
+      delete field.mediaList;
+      delete field.mediaPosition;
       renderDynamicStagesCanvas();
       markSchemaAsDirty();
       triggerAutoSaveSchema();
 
-      // Bersihkan berkas fisik dari Google Drive & Supabase secara instan
-      if (mediaToDelete) {
-        cleanupDriveMediaFile(mediaToDelete);
-        showAdminToast("Media pertanyaan dihapus dan berkas di cloud dibersihkan.", "info");
+      if (mediaListToDelete.length > 0) {
+        mediaListToDelete.forEach(m => cleanupDriveMediaFile(m));
+        showAdminToast(`${mediaListToDelete.length} media dihapus dan dibersihkan dari cloud.`, "info");
       } else {
         showAdminToast("Media pertanyaan dihapus.", "info");
       }
@@ -4074,16 +4169,12 @@ function getOrCreateFolder(folderName) {
 
     function handleRemoveModalMedia() {
       const { sIdx, fIdx } = currentMediaEditing;
-      if (currentMediaEditing.pendingUpload) {
-        cleanupDriveMediaFile(currentMediaEditing.pendingUpload);
-        currentMediaEditing.pendingUpload = null;
-      }
       handleRemoveMedia(sIdx, fIdx);
       closeAttachMediaModal(true);
     }
 
     // =========================================================================
-    // UNIVERSAL PROGRESS BAR & SKELETON LOADERS ENGINE
+        // UNIVERSAL PROGRESS BAR & SKELETON LOADERS ENGINE
     // =========================================================================
     let activeGlobalLoadingCount = 0;
 
@@ -7718,10 +7809,10 @@ function getOrCreateFolder(folderName) {
                   <button 
                     type="button" 
                     onclick="openAttachMediaModal(${sIdx}, ${fIdx})" 
-                    class="p-2 rounded-xl border ${f.media ? 'border-indigo-300 bg-indigo-50 text-indigo-700 font-semibold' : 'border-zinc-200 hover:bg-zinc-100 text-zinc-500 hover:text-zinc-800'} transition cursor-pointer shadow-2xs shrink-0" 
-                    title="${f.media ? 'Media Terlampir (Klik untuk kelola)' : 'Sisipkan Media Gambar/Video untuk Pertanyaan ini'}"
+                    class="p-2 rounded-xl border ${(f.mediaList?.length > 0 || f.media?.url) ? 'border-indigo-300 bg-indigo-50 text-indigo-700 font-semibold' : 'border-zinc-200 hover:bg-zinc-100 text-zinc-500 hover:text-zinc-800'} transition cursor-pointer shadow-2xs shrink-0" 
+                    title="${(f.mediaList?.length > 0 || f.media?.url) ? 'Media Terlampir (' + normalizeMediaList(f).length + ' Berkas - Klik untuk kelola)' : 'Sisipkan Media Gambar/Video untuk Pertanyaan ini'}"
                   >
-                    <svg class="w-4 h-4 ${f.media ? 'text-indigo-600' : 'text-zinc-500'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 ${(f.mediaList?.length > 0 || f.media?.url) ? 'text-indigo-600' : 'text-zinc-500'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
                   </button>
@@ -7734,7 +7825,7 @@ function getOrCreateFolder(folderName) {
               </div>
 
               <!-- Media Preview (If attached ABOVE question) -->
-              ${f.media && (f.media.position === 'ABOVE_QUESTION' || !f.media.position) ? getBuilderMediaPreviewHtml(f.media, sIdx, fIdx) : ''}
+              ${(f.mediaList?.length > 0 || f.media?.url) && ((f.mediaPosition || f.media?.position || 'ABOVE_QUESTION') === 'ABOVE_QUESTION') ? getBuilderMediaPreviewHtml(f, sIdx, fIdx) : ''}
 
               <!-- Middle: Authentic Google Forms Question Body -->
               <div class="pt-1">
@@ -7742,7 +7833,7 @@ function getOrCreateFolder(folderName) {
               </div>
 
               <!-- Media Preview (If attached BELOW question) -->
-              ${f.media && f.media.position === 'BELOW_QUESTION' ? getBuilderMediaPreviewHtml(f.media, sIdx, fIdx) : ''}
+              ${(f.mediaList?.length > 0 || f.media?.url) && ((f.mediaPosition || f.media?.position) === 'BELOW_QUESTION') ? getBuilderMediaPreviewHtml(f, sIdx, fIdx) : ''}
 
               <!-- Bottom Row: Google Forms Action Toolbar -->
               <div class="flex items-center justify-between gap-3 pt-3.5 border-t border-zinc-200/80 text-xs">
@@ -10732,8 +10823,8 @@ function getOrCreateFolder(folderName) {
   <!-- ========================================================================= -->
   <!-- MODAL: ATTACH MULTI-MEDIA TO QUESTION (IMAGE, VIDEO, AUDIO, EMBED) -->
   <!-- ========================================================================= -->
-  <div id="modalAttachQuestionMedia" onclick="if(event.target === this) closeAttachMediaModal(false)" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-5 fade-enter max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+  <div id="modalAttachQuestionMedia" onclick="if(event.target === this) closeAttachMediaModal(false)" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-5 fade-enter max-h-[92vh] overflow-y-auto" onclick="event.stopPropagation()">
       
       <!-- Header -->
       <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
@@ -10744,8 +10835,8 @@ function getOrCreateFolder(folderName) {
             </svg>
           </div>
           <div>
-            <h3 class="font-bold text-sm sm:text-base text-zinc-900">Sematkan Media ke Pertanyaan</h3>
-            <p class="text-[11.5px] text-zinc-500">Tambahkan gambar, video, audio, atau link interaktif ke pertanyaan ini.</p>
+            <h3 class="font-bold text-sm sm:text-base text-zinc-900">Studio Multi-Media Pertanyaan</h3>
+            <p class="text-[11.5px] text-zinc-500">Lampirkan banyak foto, video, rekaman audio, atau link interaktif sekaligus.</p>
           </div>
         </div>
         <button type="button" onclick="closeAttachMediaModal(false)" class="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 cursor-pointer">
@@ -10753,55 +10844,80 @@ function getOrCreateFolder(folderName) {
         </button>
       </div>
 
-      <!-- Media Type Tabs -->
-      <div class="grid grid-cols-4 gap-1.5 p-1 bg-zinc-100 rounded-xl text-xs font-semibold">
-        <button type="button" id="mediaTab_IMAGE" onclick="switchMediaModalType('IMAGE')" class="py-2 rounded-lg bg-white text-zinc-950 shadow-2xs text-center transition cursor-pointer font-bold">
-          Gambar
-        </button>
-        <button type="button" id="mediaTab_VIDEO" onclick="switchMediaModalType('VIDEO')" class="py-2 rounded-lg text-zinc-500 hover:text-zinc-900 text-center transition cursor-pointer">
-          Video
-        </button>
-        <button type="button" id="mediaTab_AUDIO" onclick="switchMediaModalType('AUDIO')" class="py-2 rounded-lg text-zinc-500 hover:text-zinc-900 text-center transition cursor-pointer">
-          Audio
-        </button>
-        <button type="button" id="mediaTab_EMBED" onclick="switchMediaModalType('EMBED')" class="py-2 rounded-lg text-zinc-500 hover:text-zinc-900 text-center transition cursor-pointer">
-          Embed Link
-        </button>
+      <!-- DAFTAR MEDIA TERLAMPIR (MULTI-MEDIA LIST) -->
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-zinc-800 uppercase tracking-wider font-mono">Daftar Berkas Terlampir:</span>
+          <span class="text-[11px] text-zinc-400">Dapat diatur urutan &amp; keterangannya</span>
+        </div>
+        <div id="mediaItemsListContainer" class="space-y-2.5 max-h-56 overflow-y-auto p-1 border border-zinc-100 rounded-xl bg-zinc-50/50">
+          <!-- Dynamically generated via renderMediaModalList() -->
+        </div>
       </div>
 
-      <!-- Form Inputs -->
-      <div class="space-y-4 text-xs">
-        
-        <!-- URL Input & Direct Upload for Image -->
-        <div class="space-y-1.5">
-          <label class="block font-bold text-zinc-800" id="mediaUrlLabel">Tautan / URL Gambar:</label>
-          <div class="flex items-center gap-2">
-            <input 
-              type="text" 
-              id="inputMediaUrl" 
-              placeholder="https://... (contoh: https://images.unsplash.com/... atau link Drive)" 
-              oninput="updateMediaModalLivePreview()"
-              class="flex-1 px-3.5 py-2 rounded-xl border border-zinc-300 text-xs bg-white focus:border-indigo-600 outline-none transition"
-            >
-            <button 
-              type="button" 
-              id="btnMediaDirectUpload" 
-              onclick="document.getElementById('inputDirectMediaFile').click()" 
-              class="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 active:scale-95 text-white font-semibold cursor-pointer shrink-0 transition flex items-center gap-1.5 shadow-2xs"
-            >
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-              <span>Unggah File</span>
-            </button>
-            <input 
-              type="file" 
-              id="inputDirectMediaFile" 
-              accept="image/*,audio/*,video/*,.mp4,.webm,.ogg,.mov,.m4v,.mp3,.wav" 
-              onchange="handleModalDirectFileUpload(this)" 
-              onclick="this.value=null" 
-              class="hidden"
-            >
+      <!-- TAMBAH BERKAS BARU -->
+      <div class="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-3.5">
+        <span class="text-xs font-bold text-zinc-900 flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+          <span>Tambah Berkas Media Baru</span>
+        </span>
+
+        <!-- Media Type Tabs -->
+        <div class="grid grid-cols-4 gap-1 p-1 bg-zinc-200/70 rounded-xl text-xs font-semibold">
+          <button type="button" id="mediaTab_IMAGE" onclick="switchMediaModalType('IMAGE')" class="py-1.5 rounded-lg bg-white text-zinc-950 shadow-2xs text-center transition cursor-pointer font-bold">
+            Gambar
+          </button>
+          <button type="button" id="mediaTab_VIDEO" onclick="switchMediaModalType('VIDEO')" class="py-1.5 rounded-lg text-zinc-600 hover:text-zinc-900 text-center transition cursor-pointer">
+            Video
+          </button>
+          <button type="button" id="mediaTab_AUDIO" onclick="switchMediaModalType('AUDIO')" class="py-1.5 rounded-lg text-zinc-600 hover:text-zinc-900 text-center transition cursor-pointer">
+            Audio
+          </button>
+          <button type="button" id="mediaTab_EMBED" onclick="switchMediaModalType('EMBED')" class="py-1.5 rounded-lg text-zinc-600 hover:text-zinc-900 text-center transition cursor-pointer">
+            Embed
+          </button>
+        </div>
+
+        <!-- Inputs -->
+        <div class="space-y-2 text-xs">
+          <div class="space-y-1">
+            <label class="block font-bold text-zinc-700" id="mediaUrlLabel">Tautan / URL Media:</label>
+            <div class="flex items-center gap-2">
+              <input 
+                type="text" 
+                id="inputMediaUrl" 
+                placeholder="https://... (URL gambar, YouTube, Google Drive, MP4, MP3)" 
+                class="flex-1 px-3 py-2 rounded-xl border border-zinc-300 text-xs bg-white focus:border-indigo-600 outline-none transition"
+              >
+              <button 
+                type="button" 
+                onclick="handleAddLinkMedia()" 
+                class="px-3.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-semibold cursor-pointer shrink-0 transition flex items-center gap-1 shadow-2xs"
+              >
+                <span>+ Link</span>
+              </button>
+              <button 
+                type="button" 
+                id="btnMediaDirectUpload" 
+                onclick="document.getElementById('inputDirectMediaFile').click()" 
+                class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-semibold cursor-pointer shrink-0 transition flex items-center gap-1.5 shadow-xs"
+                title="Pilih satu atau banyak berkas sekaligus"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                <span>Unggah Berkas (Bisa Banyak)</span>
+              </button>
+              <input 
+                type="file" 
+                id="inputDirectMediaFile" 
+                multiple
+                accept="image/*,audio/*,video/*,.mp4,.webm,.ogg,.mov,.m4v,.mp3,.wav,.pdf" 
+                onchange="handleModalDirectFileUpload(this)" 
+                onclick="this.value=null" 
+                class="hidden"
+              >
+            </div>
+            <p class="text-[10.5px] text-zinc-400" id="mediaUrlHelp">Mendukung unggah banyak berkas sekaligus atau tautan langsung YouTube/Drive.</p>
           </div>
-          <p class="text-[11px] text-zinc-400" id="mediaUrlHelp">Mendukung tautan langsung gambar, Google Drive preview, dan YouTube.</p>
 
           <!-- Upload Progress Indicator Bar -->
           <div id="mediaUploadProgressBarContainer" class="hidden p-3.5 rounded-2xl bg-indigo-50/80 border border-indigo-200/90 space-y-2.5 transition-all">
@@ -10817,57 +10933,34 @@ function getOrCreateFolder(folderName) {
                     <span id="mediaUploadFileName" class="font-bold text-zinc-900 truncate max-w-[180px] sm:max-w-[280px] text-xs">nama_file.png</span>
                     <span id="mediaUploadFileSize" class="text-[10.5px] text-zinc-500 font-mono">(0 KB)</span>
                   </div>
-                  <span id="mediaUploadStageText" class="text-[11px] text-indigo-700 font-medium block">Membaca &amp; mengompresi berkas...</span>
+                  <span id="mediaUploadStageText" class="text-[11px] text-indigo-700 font-medium block">Mengunggah berkas...</span>
                 </div>
               </div>
               <span id="mediaUploadPercentage" class="font-mono font-bold text-xs text-indigo-600 shrink-0">0%</span>
             </div>
-            <!-- Animated Progress Bar Track -->
             <div class="w-full h-2 bg-indigo-200/60 rounded-full overflow-hidden p-0.5">
               <div id="mediaUploadProgressBar" class="h-full bg-indigo-600 rounded-full transition-all duration-300 ease-out shadow-xs" style="width: 0%;"></div>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Caption Input -->
-        <div class="space-y-1.5">
-          <label class="block font-bold text-zinc-800">Keterangan / Caption Media (Opsional):</label>
-          <input 
-            type="text" 
-            id="inputMediaCaption" 
-            placeholder="Teks keterangan di bawah media (mendukung math: $E=mc^2$)..." 
-            oninput="updateMediaModalLivePreview()"
-            class="w-full px-3.5 py-2 rounded-xl border border-zinc-300 text-xs bg-white focus:border-indigo-600 outline-none transition"
-          >
+      <!-- Posisi & Pratinjau -->
+      <div class="space-y-3 text-xs">
+        <div class="space-y-1">
+          <label class="block font-bold text-zinc-800">Posisi Media pada Pertanyaan:</label>
+          <select id="selectMediaPosition" class="w-full px-3 py-2 rounded-xl border border-zinc-300 bg-white font-semibold text-xs">
+            <option value="ABOVE_QUESTION">Di Atas Pertanyaan</option>
+            <option value="BELOW_QUESTION">Di Bawah Pertanyaan</option>
+          </select>
         </div>
 
-        <!-- Alignment & Position Controls -->
-        <div class="grid grid-cols-2 gap-3">
-          <div class="space-y-1.5">
-            <label class="block font-bold text-zinc-800">Perataan Media:</label>
-            <select id="selectMediaAlign" onchange="updateMediaModalLivePreview()" class="w-full px-3 py-2 rounded-xl border border-zinc-300 bg-white font-semibold text-xs">
-              <option value="center">Tengah (Center)</option>
-              <option value="left">Rata Kiri (Left)</option>
-              <option value="right">Rata Kanan (Right)</option>
-            </select>
-          </div>
-          <div class="space-y-1.5">
-            <label class="block font-bold text-zinc-800">Posisi Media:</label>
-            <select id="selectMediaPosition" class="w-full px-3 py-2 rounded-xl border border-zinc-300 bg-white font-semibold text-xs">
-              <option value="ABOVE_QUESTION">Di Atas Pertanyaan</option>
-              <option value="BELOW_QUESTION">Di Bawah Pertanyaan</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Live Preview Card inside Modal -->
         <div class="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-2">
-          <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider font-mono block">Pratinjau Langsung (Live Preview):</span>
-          <div id="mediaModalPreviewContainer" class="min-h-[100px] flex items-center justify-center p-3 bg-white rounded-xl border border-zinc-200/80 text-zinc-400 text-xs italic">
-            Masukkan URL atau pilih berkas untuk melihat pratinjau media
+          <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider font-mono block">Pratinjau Galeri Langsung:</span>
+          <div id="mediaModalPreviewContainer" class="min-h-[90px] flex items-center justify-center p-3 bg-white rounded-xl border border-zinc-200/80 text-zinc-400 text-xs italic">
+            Belum ada media dalam pratinjau
           </div>
         </div>
-
       </div>
 
       <!-- Action Buttons -->
@@ -10878,12 +10971,12 @@ function getOrCreateFolder(folderName) {
           onclick="handleRemoveModalMedia()" 
           class="px-4 py-2.5 rounded-xl border border-rose-200 hover:bg-rose-50 text-rose-600 text-xs font-semibold cursor-pointer transition hidden"
         >
-          Hapus Media
+          Hapus Semua Media
         </button>
         <div class="flex items-center gap-2 ml-auto">
           <button 
             type="button" 
-            onclick="closeAttachMediaModal()" 
+            onclick="closeAttachMediaModal(false)" 
             class="px-4 py-2.5 rounded-xl border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold cursor-pointer transition"
           >
             Batal
@@ -10893,14 +10986,13 @@ function getOrCreateFolder(folderName) {
             onclick="handleSaveModalMedia()" 
             class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md cursor-pointer transition"
           >
-            Simpan Media
+            Simpan Galeri Media
           </button>
         </div>
       </div>
 
     </div>
   </div>
-
 
   <!-- ========================================================================= -->
   <!-- SMART MATH RIGHT-CLICK CONTEXT MENU & FLOATING SELECTION BUBBLE -->

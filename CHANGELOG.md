@@ -4,6 +4,19 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.1] - 2026-08-25
+
+### 🎨 Studio Multi-Media Pertanyaan & Galeri Berkas Fleksibel (*Batch Upload & Mixed Media Gallery*)
+- **Dukungan Multi-Media & Batch File Upload pada Pertanyaan:**
+  - Mengizinkan admin melampirkan banyak berkas sekaligus (*multiple media*) dalam 1 pertanyaan tanpa batasan 1 berkas.
+  - Menambahkan atribut `multiple` pada dialog berkas sehingga admin dapat memilih dan mengunggah banyak foto, rekaman audio, atau video sekaligus dalam satu klik dengan pemantauan progres unggah paralel.
+- **Pengorganisasian Galeri Media Interaktif (*Studio Editor & Reordering*):**
+  - Menyediakan modal Studio Multi-Media dengan daftar berkas terlampir, kemampuan menggeser urutan (Naik/Turun), input *caption* per berkas, serta opsi hapus individual maupun hapus massal.
+- **Tampilan Galeri Responsif & Zoom Modal:**
+  - Pada formulir penilaian mahasiswa (`index.html`) dan kanvas admin (`admin.html`), beberapa berkas foto otomatis ditampilkan dalam tata letak kisi (*responsive gallery grid 2-col / 3-col*) dengan dukungan fitur perbesar (*click-to-zoom*), sedangkan video dan audio dirender dalam format pemutar responsif.
+
+---
+
 ## [2.3.0] - 2026-08-25
 
 ### 🎬 Dukungan Unggah & Streaming Video Lengkap (*Native HTML5 Player & Multi-Source Embed*)
