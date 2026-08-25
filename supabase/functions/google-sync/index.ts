@@ -125,16 +125,37 @@ async function getOrCreateDriveFolder(token: string, folderName: string, parentF
 }
 
 // Helper Drive: Unlink & Trash Folder/File secara tuntas
-async function unlinkAndTrashDriveItem(token: string, fileId: string, parentFolderId: string): Promise<void> {
+async function unlinkAndTrashDriveItem(token: string, fileId: string, parentFolderId?: string): Promise<void> {
+  if (parentFolderId) {
+    try {
+      await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?removeParents=${parentFolderId}&supportsAllDrives=true`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({})
+      });
+    } catch(e) {}
+  }
+
+  // Dapatkan seluruh parent file dan lepaskan
   try {
-    await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?removeParents=${parentFolderId}&supportsAllDrives=true`, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({})
+    const getRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?fields=parents&supportsAllDrives=true`, {
+      headers: { Authorization: `Bearer ${token}` }
     });
+    const getData = await getRes.json();
+    if (getData.parents && getData.parents.length > 0) {
+      const allParents = getData.parents.join(',');
+      await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?removeParents=${allParents}&supportsAllDrives=true`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({})
+      });
+    }
   } catch(e) {}
 
   try {
@@ -251,88 +272,7 @@ serve(async (req: Request) => {
       );
     }
 
-    // 2. Action: Direct High-Speed Multipart Upload ke Google Drive
-    if (action === "adminUploadMedia" || action === "uploadSingleFile") {
-      const formId = String(payload.formId || "BK5E").trim().toUpperCase();
-      const fileName = payload.name || `media_${Date.now()}.png`;
-      const mimeType = payload.type || "image/png";
-      const base64Data = payload.base64 || "";
-      const category = payload.category || "Media_Formulir";
-
-      if (!base64Data) {
-        return new Response(
-          JSON.stringify({ success: false, error: "Data base64 berkas kosong." }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-
-      // Dapatkan folder form & subfolder target di Google Drive
-      const formFolderId = await getOrCreateDriveFolder(token, formId, rootFolderId);
-      const targetFolderId = await getOrCreateDriveFolder(token, category, formFolderId);
-
-      // Upload via Google Drive Multipart API (High-Speed Edge Stream)
-      const boundary = "-------314159265358979323846";
-      const delimiter = "\r\n--" + boundary + "\r\n";
-      const closeDelim = "\r\n--" + boundary + "--";
-
-      const metadata = {
-        name: fileName,
-        mimeType: mimeType,
-        parents: [targetFolderId]
-      };
-
-      const metaPart = delimiter +
-        "Content-Type: application/json; charset=UTF-8\r\n\r\n" +
-        JSON.stringify(metadata) +
-        delimiter +
-        "Content-Type: " + mimeType + "\r\n" +
-        "Content-Transfer-Encoding: base64\r\n\r\n" +
-        base64Data +
-        closeDelim;
-
-      const uploadRes = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webContentLink,webViewLink", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": `multipart/related; boundary=${boundary}`
-        },
-        body: metaPart
-      });
-
-      const fileObj = await uploadRes.json();
-
-      if (!fileObj.id) {
-        throw new Error("Gagal mengunggah ke Google Drive: " + JSON.stringify(fileObj));
-      }
-
-      // Jadikan berkas public readable agar dapat diakses via Google Global CDN
-      try {
-        await fetch(`https://www.googleapis.com/drive/v3/files/${fileObj.id}/permissions`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ role: "reader", type: "anyone" })
-        });
-      } catch (permErr) {}
-
-      const cdnUrl = `https://lh3.googleusercontent.com/d/${fileObj.id}`;
-
-      return new Response(
-        JSON.stringify({
-          success: true,
-          fileId: fileObj.id,
-          fileName: fileObj.name,
-          fileUrl: cdnUrl,
-          driveUrl: fileObj.webViewLink || `https://drive.google.com/file/d/${fileObj.id}/view`,
-          message: "Berkas berhasil diunggah ke Google Drive via Direct High-Speed Pipeline!"
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // 3. Action: Hapus Berkas dari Google Drive
+    // 2. Action: Hapus Berkas dari Google Drive (Instan & Bersih)
     if (action === "adminDeleteMedia" || action === "deleteDriveFile") {
       let target = payload.fileId || payload.fileUrl || payload.url || "";
       let fileId = target;
@@ -358,6 +298,51 @@ serve(async (req: Request) => {
           success: true,
           message: "Berkas Google Drive berhasil dipindahkan ke Sampah secara bersih.",
           fileId: fileId
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // 3. Action: Bersihkan Seluruh Berkas Media Sampah / Yatim dalam Form
+    if (action === "adminCleanupOrphanedMedia") {
+      const formId = String(payload.formId || "BK5E").trim().toUpperCase();
+      const activeIds = Array.isArray(payload.activeFileIds) ? payload.activeFileIds : [];
+      const activeUrls = Array.isArray(payload.activeUrls) ? payload.activeUrls : [];
+
+      const allActiveFileIds: string[] = [...activeIds];
+      for (const u of activeUrls) {
+        if (typeof u === 'string') {
+          const m = u.match(/\/d\/([a-zA-Z0-9_-]+)/) || u.match(/id=([a-zA-Z0-9_-]+)/);
+          if (m) allActiveFileIds.push(m[1]);
+        }
+      }
+
+      const formFolderId = await getOrCreateDriveFolder(token, formId, rootFolderId);
+      const mediaFolderId = await getOrCreateDriveFolder(token, "Media_Formulir", formFolderId);
+
+      const q = `'${mediaFolderId}' in parents and trashed = false`;
+      const listRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const listData = await listRes.json();
+      const trashedNames: string[] = [];
+
+      if (listData.files && listData.files.length > 0) {
+        for (const f of listData.files) {
+          if (!allActiveFileIds.includes(f.id)) {
+            await unlinkAndTrashDriveItem(token, f.id, mediaFolderId);
+            trashedNames.push(f.name);
+          }
+        }
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          formId: formId,
+          trashedCount: trashedNames.length,
+          trashedFiles: trashedNames,
+          message: `Berhasil membersihkan ${trashedNames.length} berkas media yatim dari Google Drive.`
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );

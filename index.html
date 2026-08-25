@@ -2175,6 +2175,19 @@
       const statusEl = document.getElementById(`fileStatus_${fieldId}`) || document.getElementById(`fileCustomPreview_${fieldId}`);
       
       if (!file) {
+        const oldFile = customUploadedFilesMap[fieldId];
+        if (oldFile && oldFile.storagePath) {
+          fetch(`https://eychjnqmqpxzxukiwbqf.supabase.co/storage/v1/object/pgsd-media`, {
+            method: "DELETE",
+            headers: {
+              apikey: "sb_publishable__vL9IPWnyC8uJRSQYLN_yg_qDHDflEp",
+              Authorization: "Bearer sb_publishable__vL9IPWnyC8uJRSQYLN_yg_qDHDflEp",
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ prefixes: [oldFile.storagePath] })
+          }).catch(e => console.warn("Notice deleting old student attachment:", e));
+        }
+
         delete customUploadedFilesMap[fieldId];
         delete clientCustomFormAnswers[fieldId];
         if (statusEl) statusEl.innerHTML = `<span class="text-xs text-zinc-500 font-medium">Belum ada berkas dipilih</span>`;
@@ -2244,6 +2257,7 @@
           type: file.type,
           dataUrl: dataUrl,
           base64: base64,
+          storagePath: storagePath,
           url: cdnUrl || dataUrl
         };
 

@@ -1381,6 +1381,18 @@
 
             <button 
               type="button" 
+              onclick="cleanupAllOrphanMediaFiles(true)" 
+              class="px-4 py-2 rounded-xl border border-amber-200 bg-amber-50/70 hover:bg-amber-100 text-amber-800 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shadow-2xs"
+              title="Bersihkan seluruh berkas media yang tidak terhubung ke pertanyaan manapun di Google Drive & Storage"
+            >
+              <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+              </svg>
+              <span>Bersihkan Media Sampah</span>
+            </button>
+
+            <button 
+              type="button" 
               id="btnDeleteActiveWorkspaceForm"
               onclick="handleDeleteActiveWorkspaceForm()" 
               class="px-4 py-2 rounded-xl border border-rose-200 bg-rose-50/70 hover:bg-rose-100 text-rose-600 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shadow-2xs"
@@ -3529,11 +3541,14 @@ function getOrCreateFolder(folderName) {
     function openAttachMediaModal(sIdx, fIdx) {
       currentMediaEditing.sIdx = sIdx;
       currentMediaEditing.fIdx = fIdx;
+      currentMediaEditing.pendingUpload = null;
       const field = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
       if (!field) return;
 
       const media = field.media || { type: 'IMAGE', url: '', caption: '', align: 'center', position: 'ABOVE_QUESTION' };
       currentMediaEditing.type = media.type || 'IMAGE';
+      currentMediaEditing.originalUrl = media.url || '';
+      currentMediaEditing.originalFileId = media.fileId || '';
 
       switchMediaModalType(currentMediaEditing.type);
       document.getElementById("inputMediaUrl").value = media.url || '';
@@ -3551,7 +3566,13 @@ function getOrCreateFolder(folderName) {
       document.getElementById("modalAttachQuestionMedia").classList.remove("hidden");
     }
 
-    function closeAttachMediaModal() {
+    function closeAttachMediaModal(isSaved = false) {
+      // Jika pengguna membatalkan (cancel) setelah mengunggah berkas baru, bersihkan berkas tersebut dari cloud secara instan
+      if (!isSaved && currentMediaEditing.pendingUpload) {
+        cleanupDriveMediaFile(currentMediaEditing.pendingUpload);
+        currentMediaEditing.pendingUpload = null;
+      }
+
       document.getElementById("modalAttachQuestionMedia").classList.add("hidden");
       const prog = document.getElementById("mediaUploadProgressBarContainer");
       if (prog) prog.classList.add("hidden");
@@ -3766,6 +3787,11 @@ function getOrCreateFolder(folderName) {
           cdnUploadSuccess = true;
           document.getElementById("inputMediaUrl").value = cdnPublicUrl;
           currentMediaEditing.fileUrl = cdnPublicUrl;
+          currentMediaEditing.storagePath = storagePath;
+          currentMediaEditing.pendingUpload = {
+            url: cdnPublicUrl,
+            storagePath: storagePath
+          };
           updateMediaModalLivePreview();
           setMediaUploadProgress(100, "✅ Berkas Berhasil Tersimpan di Cloud CDN Global!", true);
           showAdminToast("Media berhasil terunggah ke Cloud CDN Global!", "success");
@@ -3799,6 +3825,11 @@ function getOrCreateFolder(folderName) {
           try { resJson = JSON.parse(rawText); } catch(pe) {}
           if (resJson && resJson.success && resJson.fileUrl) {
             currentMediaEditing.fileId = resJson.fileId || "";
+            currentMediaEditing.pendingUpload = {
+              fileId: resJson.fileId || "",
+              url: resJson.fileUrl || cdnPublicUrl,
+              storagePath: storagePath
+            };
             // Jika CDN belum berhasil, gunakan URL Google Drive
             if (!cdnUploadSuccess) {
               document.getElementById("inputMediaUrl").value = resJson.fileUrl;
@@ -3871,25 +3902,104 @@ function getOrCreateFolder(folderName) {
 
     function cleanupDriveMediaFile(mediaObj) {
       if (!mediaObj) return;
-      const fileId = mediaObj.fileId || "";
-      const fileUrl = mediaObj.url || "";
-      if (fileId || (fileUrl && fileUrl.includes("drive.google.com"))) {
-        const apiUrl = getAdminApiUrl();
-        if (apiUrl && !apiUrl.includes("localhost")) {
-          fetch(apiUrl, {
+      let fileId = mediaObj.fileId || "";
+      let fileUrl = mediaObj.url || mediaObj.fileUrl || "";
+
+      // Extract Google Drive ID from any URL format
+      if (!fileId && fileUrl) {
+        if (fileUrl.includes("lh3.googleusercontent.com/d/")) {
+          const m = fileUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+          if (m) fileId = m[1];
+        } else if (fileUrl.includes("drive.google.com")) {
+          const m = fileUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || fileUrl.match(/id=([a-zA-Z0-9_-]+)/);
+          if (m) fileId = m[1];
+        }
+      }
+
+      // 1. Google Drive Deletion via Supabase Cloud Edge Function (Service Account)
+      if (fileId && typeof GOOGLE_SYNC_EDGE_URL !== 'undefined' && GOOGLE_SYNC_EDGE_URL) {
+        fetch(GOOGLE_SYNC_EDGE_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "adminDeleteMedia",
+            formId: currentFormId || DEFAULT_PRIMARY_FORM_ID,
+            fileId: fileId,
+            fileUrl: fileUrl,
+            driveFolderId: DEFAULT_DRIVE_FOLDER_ID
+          })
+        }).catch(e => console.warn("Cloud Edge media delete notice:", e));
+      }
+
+      // 2. Google Drive Deletion via Apps Script Webhook
+      const apiUrl = getAdminApiUrl();
+      if (fileId && apiUrl && !apiUrl.includes("localhost")) {
+        fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "adminDeleteMedia",
+            formId: currentFormId || DEFAULT_PRIMARY_FORM_ID,
+            fileId: fileId,
+            fileUrl: fileUrl
+          })
+        }).catch(err => console.warn("Notice cleaning drive media:", err));
+      }
+
+      // 3. Supabase Storage Deletion (Zero-Waste Purge)
+      let sbStoragePath = mediaObj.storagePath || "";
+      if (!sbStoragePath && fileUrl && fileUrl.includes("/storage/v1/object/public/pgsd-media/")) {
+        sbStoragePath = fileUrl.split("/storage/v1/object/public/pgsd-media/")[1];
+      }
+
+      if (sbStoragePath) {
+        fetch(`https://eychjnqmqpxzxukiwbqf.supabase.co/storage/v1/object/pgsd-media`, {
+          method: "DELETE",
+          headers: {
+            apikey: "sb_publishable__vL9IPWnyC8uJRSQYLN_yg_qDHDflEp",
+            Authorization: "Bearer sb_publishable__vL9IPWnyC8uJRSQYLN_yg_qDHDflEp",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ prefixes: [sbStoragePath] })
+        }).catch(e => console.warn("Supabase storage delete notice:", e));
+      }
+    }
+
+    async function cleanupAllOrphanMediaFiles(isManual = false) {
+      if (!currentFormId) return;
+      if (isManual) showAdminToast("Memindai dan membersihkan berkas media sampah...", "info");
+
+      // Kumpulkan seluruh URL media aktif di skema pertanyaan
+      const activeUrls = [];
+      const activeFileIds = [];
+      (adminFormSchema.tahapan || []).forEach(stage => {
+        (stage.fields || []).forEach(f => {
+          if (f.media && f.media.url) {
+            activeUrls.push(f.media.url);
+            if (f.media.fileId) activeFileIds.push(f.media.fileId);
+          }
+        });
+      });
+
+      if (typeof GOOGLE_SYNC_EDGE_URL !== 'undefined' && GOOGLE_SYNC_EDGE_URL) {
+        try {
+          const res = await fetch(GOOGLE_SYNC_EDGE_URL, {
             method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              action: "adminDeleteMedia",
-              formId: currentFormId || DEFAULT_PRIMARY_FORM_ID,
-              fileId: fileId,
-              fileUrl: fileUrl
+              action: "adminCleanupOrphanedMedia",
+              formId: currentFormId,
+              activeUrls: activeUrls,
+              activeFileIds: activeFileIds,
+              driveFolderId: DEFAULT_DRIVE_FOLDER_ID
             })
-          }).then(res => res.json()).then(resJson => {
-            if (resJson && resJson.success) {
-              console.log("Drive media cleaned up successfully:", resJson);
-            }
-          }).catch(err => console.warn("Notice cleaning drive media:", err));
+          });
+          const data = await res.json();
+          if (isManual) {
+            showAdminToast(data.message || "Pembersihan berkas sampah di Google Drive berhasil!", "success");
+          }
+        } catch(e) {
+          if (isManual) showAdminToast("Gagal membersihkan media: " + e.message, "error");
         }
       }
     }
@@ -3909,10 +4019,13 @@ function getOrCreateFolder(folderName) {
         return;
       }
 
-      // Jika mengganti media yang sudah ada, bersihkan file lama di Google Drive
+      // Jika mengganti media lama, bersihkan berkas lama di Google Drive & Supabase
       if (field.media && field.media.url && field.media.url !== url) {
         cleanupDriveMediaFile(field.media);
       }
+
+      // Reset pending upload karena telah resmi disimpan
+      currentMediaEditing.pendingUpload = null;
 
       pushUndoSnapshot('Lampirkan Media Pertanyaan');
       field.media = {
@@ -3924,7 +4037,7 @@ function getOrCreateFolder(folderName) {
         position: position
       };
 
-      closeAttachMediaModal();
+      closeAttachMediaModal(true);
       renderDynamicStagesCanvas();
       markSchemaAsDirty();
       triggerAutoSaveSchema();
@@ -3942,10 +4055,10 @@ function getOrCreateFolder(folderName) {
       markSchemaAsDirty();
       triggerAutoSaveSchema();
 
-      // Bersihkan berkas fisik dari Google Drive secara instan
+      // Bersihkan berkas fisik dari Google Drive & Supabase secara instan
       if (mediaToDelete) {
         cleanupDriveMediaFile(mediaToDelete);
-        showAdminToast("Media pertanyaan dihapus dan berkas di Google Drive dibersihkan.", "info");
+        showAdminToast("Media pertanyaan dihapus dan berkas di cloud dibersihkan.", "info");
       } else {
         showAdminToast("Media pertanyaan dihapus.", "info");
       }
@@ -3953,8 +4066,12 @@ function getOrCreateFolder(folderName) {
 
     function handleRemoveModalMedia() {
       const { sIdx, fIdx } = currentMediaEditing;
+      if (currentMediaEditing.pendingUpload) {
+        cleanupDriveMediaFile(currentMediaEditing.pendingUpload);
+        currentMediaEditing.pendingUpload = null;
+      }
       handleRemoveMedia(sIdx, fIdx);
-      closeAttachMediaModal();
+      closeAttachMediaModal(true);
     }
 
     // =========================================================================

@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.95] - 2026-08-25
+
+### 🧹 Mesin Pembersihan Berkas Sampah Otomatis (*Zero-Orphan Lifecycle & Auto-Purge*)
+- **Pembersihan Otomatis Saat Pembatalan Modal (*Cancel-Safe Uploads*):**
+  - Mengintegrasikan pelacakan berkas sementara (`pendingUpload`). Jika pengguna mengunggah berkas lalu menekan tombol "Batal" atau menutup modal tanpa menyimpan, berkas sementara seketika dihapus dari Google Drive dan Supabase Storage tanpa meninggalkan sampah.
+- **Pembersihan Sinkron Saat Penggantian/Penghapusan Media Soal:**
+  - Ketika media diganti dengan berkas baru atau dihapus dari pertanyaan/bagian, berkas lama otomatis dimusnahkan dari Google Drive dan Supabase Storage.
+- **Pembersihan Lampiran Mahasiswa (`index.html`):**
+  - Ketika mahasiswa menghapus/mengganti berkas lampiran, berkas lama di storage langsung dihapus secara instan.
+- **Alat Pemindai & Pembersih Sampah Sekali Klik (*Admin Orphan Purge Tool*):**
+  - Menambahkan aksi `adminCleanupOrphanedMedia` di Google Cloud Edge Function dan tombol *"Bersihkan Media Sampah"* di tab setelan formulir untuk memindai dan membersihkan seluruh berkas yatim di Google Drive.
+
+---
+
 ## [2.2.94] - 2026-08-25
 
 ### 🚀 Arsitektur Unggah Paralel Super Cepat (*Dual-Pipeline Global Edge CDN & Cloud Backup*)
