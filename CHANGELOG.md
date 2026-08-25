@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.6] - 2026-08-25
+
+### 🧭 Restrukturisasi & Penamaan Presisi Tab Navigasi Workspace (*Zero Ambiguity Tabs*)
+- **Pembersihan Ambiguitas & Redudansi Tab "Setelan":**
+  - Mengubah label dan susunan tab navigasi workspace agar tidak ada lagi duplikasi penamaan antara *Setelan* dan *Setelan Form*.
+  - Menetapkan 5 tab navigasi dengan hierarki fungsi yang jelas dan tegas:
+    1. **Pertanyaan** (`config`): Kanvas editor pertanyaan, kartu info alur, dan struktur form.
+    2. **Respons** (`responses`): Rekapitulasi respon mahasiswa, grafik penilaian, dan ekspor data.
+    3. **Kelompok** (`data`): Manajemen kelompok penyaji, anggota, dan pembagian tugas.
+    4. **Setelan** (`settings`): Status penerimaan form, footer kredit, keamanan, dan kuota.
+    5. **Integrasi & Cloud** (`system`): Integrasi Google Sheets & Drive API dosen, Supabase database, backup & audit sistem.
+
+---
+
 ## [2.3.5] - 2026-08-25
 
 ### 📝 Peningkatan Suite Format Editor: Daftar Poin, Daftar Bernomor & Indentasi Presisi (*Rich List & Smart Indent Engine*)
