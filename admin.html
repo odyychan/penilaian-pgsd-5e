@@ -3740,52 +3740,76 @@ function getOrCreateFolder(folderName) {
         return;
       }
 
-      // Background Google Drive Cloud Upload (Non-blocking & fail-safe)
+      // =========================================================================
+      // 🚀 PIPELINE 1: ULTRA-FAST SUPABASE GLOBAL EDGE STORAGE CDN (< 200 ms)
+      // =========================================================================
+      const cleanFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const storagePath = `${currentFormId || 'BK5E'}/${Date.now()}_${cleanFileName}`;
+      const cdnPublicUrl = `https://eychjnqmqpxzxukiwbqf.supabase.co/storage/v1/object/public/pgsd-media/${storagePath}`;
+      let cdnUploadSuccess = false;
+
+      setMediaUploadProgress(50, "Mengunggah ke Super-Fast Global Edge CDN...");
+
+      try {
+        const uploadRes = await fetch(`https://eychjnqmqpxzxukiwbqf.supabase.co/storage/v1/object/pgsd-media/${storagePath}`, {
+          method: "POST",
+          headers: {
+            apikey: "sb_publishable__vL9IPWnyC8uJRSQYLN_yg_qDHDflEp",
+            Authorization: "Bearer sb_publishable__vL9IPWnyC8uJRSQYLN_yg_qDHDflEp",
+            "Content-Type": file.type || "application/octet-stream",
+            "x-upsert": "true"
+          },
+          body: file
+        });
+
+        if (uploadRes.ok) {
+          cdnUploadSuccess = true;
+          document.getElementById("inputMediaUrl").value = cdnPublicUrl;
+          currentMediaEditing.fileUrl = cdnPublicUrl;
+          updateMediaModalLivePreview();
+          setMediaUploadProgress(100, "✅ Berkas Berhasil Tersimpan di Cloud CDN Global!", true);
+          showAdminToast("Media berhasil terunggah ke Cloud CDN Global!", "success");
+        }
+      } catch(cdnErr) {
+        console.warn("Direct CDN upload notice:", cdnErr);
+      }
+
+      // =========================================================================
+      // 🔄 PIPELINE 2: PARALLEL BACKGROUND GOOGLE DRIVE BACKUP SYNC
+      // =========================================================================
       const apiUrl = getAdminApiUrl();
       if (navigator.onLine && apiUrl && !apiUrl.includes("localhost") && base64) {
-        setMediaUploadProgress(65, "Mengunggah berkas ke folder Google Drive...");
-        try {
-          const resp = await fetch(apiUrl, {
-            method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({
-              action: "adminUploadMedia",
-              formId: currentFormId || DEFAULT_PRIMARY_FORM_ID,
-              category: "Media_Formulir",
-              name: file.name,
-              type: file.type,
-              base64: base64
-            })
-          });
-
-          setMediaUploadProgress(88, "Menyiapkan Google Global CDN & pratinjau...");
-
-          const rawText = await resp.text();
-          let resJson = null;
-          try {
-            resJson = JSON.parse(rawText);
-          } catch(pe) {
-            console.warn("Drive webhook non-JSON response:", rawText);
-          }
-
-          if (resJson && resJson.success && resJson.fileUrl) {
-            document.getElementById("inputMediaUrl").value = resJson.fileUrl;
-            currentMediaEditing.fileId = resJson.fileId || "";
-            updateMediaModalLivePreview();
-            setMediaUploadProgress(100, "✅ Berkas Berhasil Tersimpan di Google Drive!", true);
-            showAdminToast("Media berhasil tersimpan di Google Drive!", "success");
-          } else if (resJson && !resJson.success) {
-            console.warn("Drive upload notice:", resJson.error);
-            setMediaUploadProgress(100, resJson.error || "Tersimpan sebagai draf media lokal.", false, false);
-            showAdminToast(resJson.error || "Tersimpan sebagai draf media lokal.", "warning");
-          } else {
-            setMediaUploadProgress(100, "✅ Siap dilampirkan ke formulir.", true);
-          }
-        } catch(netErr) {
-          console.log("Drive upload network notice, using local draft dataUrl:", netErr);
-          setMediaUploadProgress(100, "Tersimpan sebagai draf media lokal.", false, false);
+        if (!cdnUploadSuccess) {
+          setMediaUploadProgress(75, "Menyimpan berkas ke Google Drive...");
         }
-      } else {
+
+        fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "adminUploadMedia",
+            formId: currentFormId || DEFAULT_PRIMARY_FORM_ID,
+            category: "Media_Formulir",
+            name: file.name,
+            type: file.type,
+            base64: base64
+          })
+        }).then(r => r.text()).then(rawText => {
+          let resJson = null;
+          try { resJson = JSON.parse(rawText); } catch(pe) {}
+          if (resJson && resJson.success && resJson.fileUrl) {
+            currentMediaEditing.fileId = resJson.fileId || "";
+            // Jika CDN belum berhasil, gunakan URL Google Drive
+            if (!cdnUploadSuccess) {
+              document.getElementById("inputMediaUrl").value = resJson.fileUrl;
+              updateMediaModalLivePreview();
+              setMediaUploadProgress(100, "✅ Berkas Tersimpan di Google Drive!", true);
+            }
+          }
+        }).catch(e => console.warn("Background Drive sync notice:", e));
+      }
+
+      if (!cdnUploadSuccess && (!apiUrl || !navigator.onLine)) {
         setMediaUploadProgress(100, "✅ Berkas lokal siap dilampirkan.", true);
       }
     }

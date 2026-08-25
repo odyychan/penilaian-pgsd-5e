@@ -2214,12 +2214,37 @@
       try {
         const { dataUrl, base64 } = await compressImageFile(file);
 
+        // Upload ke Supabase Global Storage CDN
+        const cleanName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const formKey = clientFormMeta?.form_id || "BK5E";
+        const storagePath = `${formKey}/lampiran_${Date.now()}_${cleanName}`;
+        let cdnUrl = "";
+
+        try {
+          const uploadRes = await fetch(`https://eychjnqmqpxzxukiwbqf.supabase.co/storage/v1/object/pgsd-media/${storagePath}`, {
+            method: "POST",
+            headers: {
+              apikey: "sb_publishable__vL9IPWnyC8uJRSQYLN_yg_qDHDflEp",
+              Authorization: "Bearer sb_publishable__vL9IPWnyC8uJRSQYLN_yg_qDHDflEp",
+              "Content-Type": file.type || "application/octet-stream",
+              "x-upsert": "true"
+            },
+            body: file
+          });
+          if (uploadRes.ok) {
+            cdnUrl = `https://eychjnqmqpxzxukiwbqf.supabase.co/storage/v1/object/public/pgsd-media/${storagePath}`;
+          }
+        } catch(upErr) {
+          console.warn("Storage upload notice:", upErr);
+        }
+
         const fileObj = {
           name: file.name,
           size: file.size,
           type: file.type,
           dataUrl: dataUrl,
-          base64: base64
+          base64: base64,
+          url: cdnUrl || dataUrl
         };
 
         customUploadedFilesMap[fieldId] = fileObj;

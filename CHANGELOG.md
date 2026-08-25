@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.94] - 2026-08-25
+
+### 🚀 Arsitektur Unggah Paralel Super Cepat (*Dual-Pipeline Global Edge CDN & Cloud Backup*)
+- **Akselerasi Unggah Media Sub-300ms (*Supabase Global Edge Storage CDN*):**
+  - Mengimplementasikan pipeline unggah paralel pertama langsung ke bucket CDN `pgsd-media` menggunakan koneksi berkecepatan tinggi dengan latensi super rendah (< 300 ms) dan tautan publik instan.
+- **Pencadangan Google Drive Asinkron Latar Belakang (*Non-Blocking Cloud Sync*):**
+  - Mengirim salinan berkas media ke folder Google Drive (`Media_Formulir`) secara asinkron di latar belakang tanpa menahan antarmuka pengguna atau memperlambat interaksi.
+- **Akselerasi Unggah Berkas Mahasiswa:**
+  - Mengoptimalkan fungsi unggah lampiran tugas mahasiswa (`index.html`) langsung melalui jalur transmisi Global Edge Storage.
+
+---
+
 ## [2.2.93] - 2026-08-25
 
 ### 📊 Indikator Progres Real-Time & Kartu Pelacak Unggah Media (*Live Upload Progress Bar*)

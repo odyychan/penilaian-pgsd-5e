@@ -168,7 +168,6 @@ async function ensureSheetExists(token: string, spreadsheetId: string, sheetTitl
     const existing = await getSpreadsheetSheets(token, spreadsheetId);
     const found = existing.find((s: any) => s.properties?.title === sheetTitle);
     if (!found) {
-      // 1. Buat sheet baru
       await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
@@ -177,7 +176,6 @@ async function ensureSheetExists(token: string, spreadsheetId: string, sheetTitl
         })
       });
 
-      // 2. Isi header
       if (headerRow && headerRow.length > 0) {
         await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(sheetTitle)}!A1?valueInputOption=USER_ENTERED`, {
           method: "PUT",
@@ -253,7 +251,88 @@ serve(async (req: Request) => {
       );
     }
 
-    // 2. Action: Hapus Berkas dari Google Drive
+    // 2. Action: Direct High-Speed Multipart Upload ke Google Drive
+    if (action === "adminUploadMedia" || action === "uploadSingleFile") {
+      const formId = String(payload.formId || "BK5E").trim().toUpperCase();
+      const fileName = payload.name || `media_${Date.now()}.png`;
+      const mimeType = payload.type || "image/png";
+      const base64Data = payload.base64 || "";
+      const category = payload.category || "Media_Formulir";
+
+      if (!base64Data) {
+        return new Response(
+          JSON.stringify({ success: false, error: "Data base64 berkas kosong." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Dapatkan folder form & subfolder target di Google Drive
+      const formFolderId = await getOrCreateDriveFolder(token, formId, rootFolderId);
+      const targetFolderId = await getOrCreateDriveFolder(token, category, formFolderId);
+
+      // Upload via Google Drive Multipart API (High-Speed Edge Stream)
+      const boundary = "-------314159265358979323846";
+      const delimiter = "\r\n--" + boundary + "\r\n";
+      const closeDelim = "\r\n--" + boundary + "--";
+
+      const metadata = {
+        name: fileName,
+        mimeType: mimeType,
+        parents: [targetFolderId]
+      };
+
+      const metaPart = delimiter +
+        "Content-Type: application/json; charset=UTF-8\r\n\r\n" +
+        JSON.stringify(metadata) +
+        delimiter +
+        "Content-Type: " + mimeType + "\r\n" +
+        "Content-Transfer-Encoding: base64\r\n\r\n" +
+        base64Data +
+        closeDelim;
+
+      const uploadRes = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webContentLink,webViewLink", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": `multipart/related; boundary=${boundary}`
+        },
+        body: metaPart
+      });
+
+      const fileObj = await uploadRes.json();
+
+      if (!fileObj.id) {
+        throw new Error("Gagal mengunggah ke Google Drive: " + JSON.stringify(fileObj));
+      }
+
+      // Jadikan berkas public readable agar dapat diakses via Google Global CDN
+      try {
+        await fetch(`https://www.googleapis.com/drive/v3/files/${fileObj.id}/permissions`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ role: "reader", type: "anyone" })
+        });
+      } catch (permErr) {}
+
+      const cdnUrl = `https://lh3.googleusercontent.com/d/${fileObj.id}`;
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          fileId: fileObj.id,
+          fileName: fileObj.name,
+          fileUrl: cdnUrl,
+          driveUrl: fileObj.webViewLink || `https://drive.google.com/file/d/${fileObj.id}/view`,
+          message: "Berkas berhasil diunggah ke Google Drive via Direct High-Speed Pipeline!"
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // 3. Action: Hapus Berkas dari Google Drive
     if (action === "adminDeleteMedia" || action === "deleteDriveFile") {
       let target = payload.fileId || payload.fileUrl || payload.url || "";
       let fileId = target;
@@ -284,7 +363,7 @@ serve(async (req: Request) => {
       );
     }
 
-    // 3. Action: Hapus Formulir & Folder Drive & Sheet Terkait (Total Zero-Orphan Deletion)
+    // 4. Action: Hapus Formulir & Folder Drive & Sheet Terkait (Total Zero-Orphan Deletion)
     if (action === "adminDeleteForm") {
       const targetFormId = String(payload.formId || "").trim().toUpperCase();
 
@@ -295,7 +374,6 @@ serve(async (req: Request) => {
         );
       }
 
-      // A. Cari folder form di Google Drive dan unparent/trash
       const query = `name = '${targetFormId}' and mimeType = 'application/vnd.google-apps.folder' and '${rootFolderId}' in parents and trashed = false`;
       const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name)`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -309,7 +387,6 @@ serve(async (req: Request) => {
         }
       }
 
-      // B. Hapus sheet terisolasi di Google Spreadsheet
       const deletedSheetsCount = await deleteSheetsForForm(token, spreadsheetId, targetFormId);
 
       return new Response(
@@ -324,16 +401,14 @@ serve(async (req: Request) => {
       );
     }
 
-    // 4. Action: Buat / Kloning Form Baru (Create Drive Folder & Isolated Sheets)
+    // 5. Action: Buat / Kloning Form Baru (Create Drive Folder & Isolated Sheets)
     if (action === "adminCreateForm" || action === "adminCloneForm") {
       const formId = String(payload.customFormId || payload.formId || "BARU").trim().toUpperCase();
 
-      // A. Buat Struktur Folder di Google Drive
       const formFolderId = await getOrCreateDriveFolder(token, formId, rootFolderId);
       const mediaFolderId = await getOrCreateDriveFolder(token, "Media_Formulir", formFolderId);
       const lampiranFolderId = await getOrCreateDriveFolder(token, "Lampiran_Mahasiswa", formFolderId);
 
-      // B. Buat Sheet Terisolasi di Google Spreadsheet
       await ensureSheetExists(token, spreadsheetId, `Master_${formId}`, ["Kelompok", "Sesi_Minggu", "NIM", "Nama_Lengkap", "Status_Aktif"]);
       await ensureSheetExists(token, spreadsheetId, `Config_${formId}`, ["PARAMETER", "NILAI_PENGATURAN", "KETERANGAN"]);
       await ensureSheetExists(token, spreadsheetId, `Respons_${formId}`, ["Timestamp", "Form_ID", "ID_Kelompok", "Kelompok_Dinilai", "NIM_Penilai", "Nama_Penilai", "Total_Skor"]);
@@ -352,7 +427,7 @@ serve(async (req: Request) => {
       );
     }
 
-    // 5. Action: Pembersihan Massal Folder & Sheet Sampah / Yatim (Zero-Orphan Cleanup)
+    // 6. Action: Pembersihan Massal Folder & Sheet Sampah / Yatim (Zero-Orphan Cleanup)
     if (action === "adminCleanupOrphanedFolders") {
       const activeForms = Array.isArray(payload.activeFormIds) 
         ? payload.activeFormIds.map((f: any) => String(f).trim().toUpperCase()).filter(Boolean)
@@ -376,7 +451,6 @@ serve(async (req: Request) => {
         }
       }
 
-      // Cleanup Orphaned Sheets in Spreadsheet
       const existingSheets = await getSpreadsheetSheets(token, spreadsheetId);
       const defaultPreserved = ["SHEET1", "REGISTRY_FORMS", "KONFIGURASI", "MASTER_KELOMPOK", "DAFTAR_FORMULIR", "RESPONS_PENILAIAN", "REKAP_NILAI"];
       const sheetsToDelete: any[] = [];
@@ -418,7 +492,7 @@ serve(async (req: Request) => {
       );
     }
 
-    // 6. Action: Sinkronisasi Massal Semua Form
+    // 7. Action: Sinkronisasi Massal Semua Form
     if (action === "adminSyncAllForms") {
       const forms = Array.isArray(payload.forms) ? payload.forms : [];
       const syncedResults = [];
@@ -443,7 +517,6 @@ serve(async (req: Request) => {
         });
       }
 
-      // Auto-cleanup orphaned subfolders on Drive & Spreadsheet
       const activeIds = forms.map((f: any) => String(f.form_id || f.formId || "").trim().toUpperCase()).filter(Boolean);
       if (!activeIds.includes("BK5E")) activeIds.push("BK5E");
 
