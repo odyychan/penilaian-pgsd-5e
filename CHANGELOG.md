@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.4] - 2026-08-25
+
+### 🧹 Harmonisasi Header & Eliminasi Indikator Status Redundan (*Unified State Display*)
+- **Penghapusan Badge "Online" Redundan di Sisi Identitas:**
+  - Menghapus badge statis "Online" yang sebelumnya menumpuk di samping identitas ID formulir.
+  - Mengubah logika menjadi indikator bersyarat (`#headerOfflineBadge` bertuliskan *⚠️ Offline*) yang hanya muncul saat perangkat pengguna benar-benar kehilangan koneksi internet.
+- **Penyatuan Status Sinkronisasi Cloud & Konektivitas:**
+  - Memperbarui badge sinkronisasi database (`#cloudSyncBadge`) menjadi satu badge elegan *Tersinkron* yang berubah dinamis menjadi *Menyimpan...* saat pengiriman data dan *Mode Offline* saat terputus.
+  - Memastikan setiap indikator status pada bilah navigasi atas memiliki fungsi mandiri yang jelas tanpa tumpang tindih visual (*Zero State Redundancy*).
+
+---
+
 ## [2.3.3] - 2026-08-25
 
 ### 🎯 Eliminasi Redudansi & Penataan Presisi Tombol Status Formulir (*Unified Prominent Status Toggle*)

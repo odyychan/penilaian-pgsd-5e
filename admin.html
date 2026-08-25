@@ -277,10 +277,10 @@
           </button>
 
           <div class="min-w-0">
-            <div class="flex items-center gap-1 sm:gap-1.5">
-              <h1 id="headerMainTitle" class="font-bold text-[11px] sm:text-sm text-zinc-100 truncate hidden xs:inline">Admin</h1>
-              <span id="activeFormIdBadge" class="hidden px-1.5 py-0.2 rounded text-[9.5px] sm:text-[10px] font-mono font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 shrink-0">BK5E</span>
-              <span id="headerOnlineBadge" class="px-1 py-0.2 rounded text-[8.5px] sm:text-[9.5px] font-mono font-semibold bg-zinc-800 text-emerald-400 border border-zinc-700 shrink-0">Online</span>
+            <div class="flex items-center gap-1.5">
+              <h1 id="headerMainTitle" class="font-bold text-xs sm:text-sm text-zinc-100 truncate hidden xs:inline">Admin</h1>
+              <span id="activeFormIdBadge" class="hidden px-2 py-0.5 rounded-lg text-xs font-mono font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 shrink-0">BK5E</span>
+              <span id="headerOfflineBadge" class="hidden px-2 py-0.5 rounded-lg text-[11px] font-mono font-bold bg-rose-950/80 text-rose-300 border border-rose-800 shrink-0">⚠️ Offline</span>
             </div>
           </div>
         </div>
@@ -4291,21 +4291,15 @@ function getOrCreateFolder(folderName) {
       const dot = document.getElementById("cloudSyncDot");
       const text = document.getElementById("cloudSyncText");
       const banner = document.getElementById("offlineSyncBanner");
-      const headerOnlineBadge = document.getElementById("headerOnlineBadge");
+      const offlineBadge = document.getElementById("headerOfflineBadge");
 
       const isOnline = navigator.onLine;
 
-      // Harmonize Header Online/Offline Indicator
-      if (headerOnlineBadge) {
+      if (offlineBadge) {
         if (!isOnline || state === 'offline') {
-          headerOnlineBadge.className = "px-1.5 py-0.2 rounded text-[9px] sm:text-[10px] font-mono font-semibold bg-rose-950/80 text-rose-300 border border-rose-800 flex-shrink-0";
-          headerOnlineBadge.textContent = "Offline";
-        } else if (state === 'saving') {
-          headerOnlineBadge.className = "px-1.5 py-0.2 rounded text-[9px] sm:text-[10px] font-mono font-semibold bg-amber-950/80 text-amber-300 border border-amber-800 flex-shrink-0";
-          headerOnlineBadge.textContent = "Syncing";
+          offlineBadge.classList.remove("hidden");
         } else {
-          headerOnlineBadge.className = "px-1.5 py-0.2 rounded text-[9px] sm:text-[10px] font-mono font-semibold bg-zinc-800 text-emerald-400 border border-zinc-700 flex-shrink-0";
-          headerOnlineBadge.textContent = "Online";
+          offlineBadge.classList.add("hidden");
         }
       }
 
@@ -4313,18 +4307,18 @@ function getOrCreateFolder(folderName) {
       badge.classList.remove("hidden");
 
       if (state === 'saving') {
-        badge.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-950/60 text-amber-300 border border-amber-800/80 transition-all";
+        badge.className = "hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-950/60 text-amber-300 border border-amber-800/80 transition-all shadow-2xs";
         dot.className = "w-2 h-2 rounded-full bg-amber-400 animate-ping flex-shrink-0";
         text.textContent = customText || "Menyimpan...";
       } else if (state === 'synced') {
-        badge.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-950/60 text-emerald-400 border border-emerald-800/80 transition-all";
+        badge.className = "hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-zinc-800/80 text-zinc-300 border border-zinc-700/70 transition-all shadow-2xs";
         dot.className = "w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0";
-        text.textContent = customText || "Tersinkronisasi";
+        text.textContent = customText || "Tersinkron";
         if (banner) banner.classList.add("hidden");
       } else if (state === 'offline' || state === 'error') {
-        badge.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-rose-950/60 text-rose-300 border border-rose-800/80 transition-all";
+        badge.className = "hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-rose-950/70 text-rose-300 border border-rose-800/90 transition-all shadow-2xs";
         dot.className = "w-2 h-2 rounded-full bg-rose-500 flex-shrink-0";
-        text.textContent = customText || (state === 'offline' ? "Offline (Tersimpan Lokal)" : "Gagal Kirim");
+        text.textContent = customText || (state === 'offline' ? "Mode Offline" : "Gagal Kirim");
         if (banner) banner.classList.remove("hidden");
       }
     }
