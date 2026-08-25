@@ -4,6 +4,15 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.11] - 2026-08-25
+
+### 📋 Pemindahan Kartu Pengosongan Data Respons ke Tab Respons (*Contextual Action Placement*)
+- **Penempatan Ergonomis & Kontekstual Tindakan Data Respons:**
+  - Memindahkan kartu *Rekap Respons Penilaian* dan tombol *Kosongkan Seluruh Respons Form Ini* dari tab Integrasi & Cloud langsung ke **Tab Respons** (`adminView_responses`).
+  - Menyatukan informasi total data masuk dan tombol pembersihan respons pada satu halaman pemantauan hasil penilaian yang tepat dan intuitif.
+
+---
+
 ## [2.3.10] - 2026-08-25
 
 ### 🩹 Perbaikan Sintaks Palet Simbol Matematika & Pembersihan Kebocoran String (*Math Palette Leak Hotfix*)
