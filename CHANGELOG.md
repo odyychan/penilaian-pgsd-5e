@@ -4,6 +4,15 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.67] - 2026-08-25
+
+### 🖼️ Perbaikan Rendering Gambar & Blok Media Mandiri pada Pratinjau / Simulator Mahasiswa
+- **Dukungan Penuh Blok Media Gambar (Pure Image Block):**
+  - Memperbaiki fungsi perender klien (`renderSingleClientFieldHtml`) agar mendukung penuh tipe `TITLE_DESC` yang hanya berisi lampiran gambar/media tanpa teks label/deskripsi.
+  - Memastikan gambar yang dilampirkan langsung tampil bersih, presisi, responsif, dan dapat diperbesar (*modal zoom-in*) di seluruh pratinjau mahasiswa dan simulator draf formulir.
+
+---
+
 ## [2.2.66] - 2026-08-25
 
 ### 🎴 Kotak Informasi Tambahan Dinamis & Dukungan Math KaTeX Universal di Seluruh UI Preview

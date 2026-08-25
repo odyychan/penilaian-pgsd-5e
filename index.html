@@ -2423,21 +2423,41 @@
       const reqBadge = f.required ? '<span class="text-rose-500 font-bold ml-0.5">*</span>' : '';
       const savedVal = clientCustomFormAnswers[f.id] || '';
 
-      // 0. TITLE_DESC
+      const mediaAbove = f.media && f.media.position === 'ABOVE_QUESTION' ? renderClientMediaHtml(f.media) : '';
+      const mediaBelow = f.media && f.media.position === 'BELOW_QUESTION' ? renderClientMediaHtml(f.media) : (f.media && !f.media.position ? renderClientMediaHtml(f.media) : '');
+      const mediaHtml = renderClientMediaHtml(f.media);
+
+      // 0. TITLE_DESC / BLOK JUDUL, DESKRIPSI & MEDIA / GAMBAR SAJA
       if (f.type === 'TITLE_DESC') {
-        return `
-          <div class="bg-indigo-50/60 p-4 sm:p-5 rounded-2xl border border-indigo-100 space-y-1.5">
-            <div class="flex items-center gap-2 text-indigo-900 font-bold text-xs sm:text-sm math-renderable">
-              <svg class="w-4 h-4 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-              <span>${smartMathFormat(f.label || 'Informasi')}</span>
+        const rawLabel = (f.label || '').trim();
+        const rawDesc = (f.description || '').trim();
+        const hasCustomLabel = rawLabel !== '' && rawLabel !== 'Pertanyaan tanpa judul' && rawLabel !== 'Judul & Deskripsi Teks';
+        const hasCustomDesc = rawDesc !== '';
+
+        // If it only has an image/media and no custom text
+        if (!hasCustomLabel && !hasCustomDesc && mediaHtml) {
+          return `
+            <div class="p-3 sm:p-4 rounded-2xl border border-zinc-200/80 bg-zinc-50/50 space-y-2">
+              ${mediaHtml}
             </div>
-            ${f.description ? `<p class="text-xs text-indigo-950/80 leading-relaxed math-renderable">${smartMathFormat(f.description)}</p>` : ''}
+          `;
+        }
+
+        // If it has label or description or both with media
+        return `
+          <div class="bg-indigo-50/60 p-4 sm:p-5 rounded-2xl border border-indigo-100/90 space-y-2.5">
+            ${mediaAbove}
+            ${hasCustomLabel ? `
+              <div class="flex items-center gap-2 text-indigo-950 font-bold text-xs sm:text-sm math-renderable">
+                <svg class="w-4 h-4 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span>${smartMathFormat(f.label)}</span>
+              </div>
+            ` : ''}
+            ${hasCustomDesc ? `<p class="text-xs text-indigo-950/80 leading-relaxed math-renderable">${smartMathFormat(f.description)}</p>` : ''}
+            ${mediaBelow}
           </div>
         `;
       }
-
-      const mediaAbove = f.media && f.media.position === 'ABOVE_QUESTION' ? renderClientMediaHtml(f.media) : '';
-      const mediaBelow = f.media && f.media.position === 'BELOW_QUESTION' ? renderClientMediaHtml(f.media) : (f.media && !f.media.position ? renderClientMediaHtml(f.media) : '');
 
       // 1. SHORT_TEXT
       if (f.type === 'SHORT_TEXT') {
