@@ -1513,6 +1513,9 @@
   <!-- ========================================================================= -->
   <script>
     const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbxEa3t09i1hk-VBEHxz99zus8Q8D67G8LaoewN6o000nIQCC5yRPFji7WWHnqip2jlvoQ/exec";
+    const DEFAULT_DRIVE_FOLDER_ID = "1ZYnP40AaCoaqu6-H2ZNfYuS-RshCWURK";
+    const DEFAULT_SPREADSHEET_ID = "1MAZqzRyau1mECqamnU9Bj3TALRJYDrA1WLQFesJ4wG4";
+    const GOOGLE_SYNC_EDGE_URL = "https://eychjnqmqpxzxukiwbqf.supabase.co/functions/v1/google-sync";
     
     function getApiUrl() {
       return localStorage.getItem("PGSD_API_URL") || DEFAULT_API_URL;

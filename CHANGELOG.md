@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.90] - 2026-08-25
+
+### 🛡️ Perbaikan Definisi Konstanta Global & Integrasi Multi-Channel Form Deletion
+- **Penyelarasan Konstanta Global Lingkungan Admin & Klien:**
+  - Mendeklarasikan konstanta `DEFAULT_DRIVE_FOLDER_ID`, `DEFAULT_SPREADSHEET_ID`, dan `GOOGLE_SYNC_EDGE_URL` di cakupan global `admin.html` dan `index.html` guna mencegah `ReferenceError` saat penghapusan formulir.
+- **Penyelarasan Penghapusan Berkelanjutan Multi-Channel:**
+  - Fungsi `handleExecuteDeleteForm` kini meneruskan instruksi penghapusan secara serentak ke Supabase Edge Functions (`google-sync`) dan Google Apps Script Webhook.
+
+---
+
 ## [2.2.89] - 2026-08-25
 
 ### 🗑️ Peningkatan Penghapusan & Pelepasan Folder Google Drive (*Cross-Ownership Unlink & Trash*)

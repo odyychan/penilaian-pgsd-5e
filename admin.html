@@ -2547,6 +2547,9 @@ function getOrCreateFolder(folderName) {
   <!-- ========================================================================= -->
   <script>
     const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbxEa3t09i1hk-VBEHxz99zus8Q8D67G8LaoewN6o000nIQCC5yRPFji7WWHnqip2jlvoQ/exec";
+    const DEFAULT_DRIVE_FOLDER_ID = "1ZYnP40AaCoaqu6-H2ZNfYuS-RshCWURK";
+    const DEFAULT_SPREADSHEET_ID = "1MAZqzRyau1mECqamnU9Bj3TALRJYDrA1WLQFesJ4wG4";
+    const GOOGLE_SYNC_EDGE_URL = "https://eychjnqmqpxzxukiwbqf.supabase.co/functions/v1/google-sync";
     const DEFAULT_ADMIN_PASS = "admin5e";
     const DEFAULT_PRIMARY_FORM_ID = "BK5E";
 
@@ -9163,6 +9166,16 @@ function getOrCreateFolder(folderName) {
           driveFolderName: DEFAULT_DRIVE_FOLDER_ID
         };
 
+        // 1. Background forward ke Supabase Edge Function (Google Service Account)
+        if (typeof GOOGLE_SYNC_EDGE_URL !== 'undefined' && GOOGLE_SYNC_EDGE_URL) {
+          fetch(GOOGLE_SYNC_EDGE_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(deletePayload)
+          }).catch(e => console.warn("Cloud Edge Function delete notice:", e));
+        }
+
+        // 2. Background forward ke Google Apps Script Primary & Custom Webhook jika ada
         if (defaultSheetUrl) {
           fetch(defaultSheetUrl, {
             method: "POST",
