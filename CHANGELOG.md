@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.71] - 2026-08-25
+
+### 📄 Perbaikan Responsivitas Total Modal Cetak Dokumen Rekapitulasi (PDF/A4)
+- **Eliminasi Bug Squished / Collapsed Document Preview:**
+  - Memperbaiki layout flex kontainer modal cetak (`h-[92vh] max-h-[92vh]` dengan `flex-1 min-h-0`) sehingga area pratinjau lembar A4 tidak lagi menyusut menjadi garis tipis dan selalu tampil proporsional.
+- **Sistem Auto-Fit & Dynamic Scaling Cerdas:**
+  - Menerapkan mesin kalkulasi skala otomatis (*auto-fit scale*) yang menyesuaikan ukuran kertas A4 secara presisi terhadap lebar layar perangkat (Desktop, Tablet, hingga Smartphone).
+- **Toolbar Filter & Pengaturan Cetak Responsif:**
+  - Menata ulang filter cakupan kelompok, sesi, ulasan kualitatif, nama penilai, dan catatan kaki pengesahan dosen dengan layout grid responsif dan target sentuh ramah sentuhan (*touch-first*).
+
+---
+
 ## [2.2.70] - 2026-08-25
 
 ### 🏷️ Fitur Prefix Kustom Fleksibel (Maks. 50 Karakter) pada Kredit & Footer

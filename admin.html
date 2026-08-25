@@ -1970,28 +1970,33 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
   </div>
 
   <!-- MODAL CETAK LAPORAN REKAPITULASI RESMI (ADMIN PRINT PREVIEW) -->
-  <div id="printRekapModal" class="hidden fixed inset-0 z-50 bg-zinc-950/75 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 no-print">
-    <div class="bg-white rounded-2xl max-w-5xl w-full p-4 sm:p-5 shadow-2xl border border-zinc-200 flex flex-col max-h-[95vh] space-y-3">
+  <div id="printRekapModal" class="hidden fixed inset-0 z-50 bg-zinc-950/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 no-print">
+    <div class="bg-white rounded-2xl sm:rounded-3xl max-w-5xl w-full h-[92vh] max-h-[92vh] p-3 sm:p-5 shadow-2xl border border-zinc-200 flex flex-col space-y-3 overflow-hidden fade-enter">
+      
+      <!-- Modal Header -->
       <div class="flex items-center justify-between border-b border-zinc-100 pb-2.5 flex-shrink-0 gap-2">
         <div class="flex items-center gap-2 min-w-0">
-          <div class="p-1.5 rounded-lg bg-zinc-100 text-zinc-700 flex items-center justify-center shrink-0">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="p-2 rounded-xl bg-zinc-100 text-zinc-700 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4 text-zinc-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
             </svg>
           </div>
           <div class="truncate">
             <h3 class="text-xs sm:text-base font-bold text-zinc-900 leading-tight truncate">Cetak Dokumen Rekapitulasi</h3>
-            <p class="text-[10px] sm:text-[11px] text-zinc-500 truncate">Format Laporan Resmi A4 / PDF dengan Pengesahan.</p>
+            <p class="text-[10px] sm:text-[11px] text-zinc-500 truncate">Format Laporan Resmi A4 / PDF dengan Pengesahan Perkuliahan.</p>
           </div>
         </div>
-        <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
-          <div class="flex items-center gap-0.5 sm:gap-1 bg-zinc-100 p-0.5 sm:p-1 rounded-lg border border-zinc-200">
-            <button type="button" onclick="adjustAdminPrintZoom(-0.1)" class="w-7 h-7 sm:w-6 sm:h-6 rounded flex items-center justify-center text-xs font-bold text-zinc-700 hover:bg-white transition cursor-pointer">−</button>
-            <span id="adminPrintZoomBadge" class="text-[10px] sm:text-[11px] font-mono font-semibold text-zinc-800 px-1 min-w-[38px] text-center">Fit</span>
-            <button type="button" onclick="adjustAdminPrintZoom(0.1)" class="w-7 h-7 sm:w-6 sm:h-6 rounded flex items-center justify-center text-xs font-bold text-zinc-700 hover:bg-white transition cursor-pointer">+</button>
-            <button type="button" onclick="resetAdminPrintZoom()" class="text-[10px] font-semibold text-zinc-600 hover:text-zinc-900 px-1.5 py-0.5 rounded hover:bg-white transition cursor-pointer">Fit</button>
+
+        <div class="flex items-center gap-1 sm:gap-2 shrink-0">
+          <!-- Zoom Controls -->
+          <div class="flex items-center bg-zinc-100 p-0.5 sm:p-1 rounded-xl border border-zinc-200 shadow-2xs">
+            <button type="button" onclick="adjustAdminPrintZoom(-0.1)" class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-zinc-700 hover:bg-white hover:shadow-2xs transition cursor-pointer" title="Perkecil">−</button>
+            <span id="adminPrintZoomBadge" class="text-[10px] sm:text-[11px] font-mono font-bold text-zinc-800 px-1.5 min-w-[42px] text-center">Fit</span>
+            <button type="button" onclick="adjustAdminPrintZoom(0.1)" class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-zinc-700 hover:bg-white hover:shadow-2xs transition cursor-pointer" title="Perbesar">+</button>
+            <button type="button" onclick="resetAdminPrintZoom()" class="text-[10.5px] font-bold text-indigo-600 hover:text-indigo-800 px-2 py-1 rounded-lg hover:bg-white hover:shadow-2xs transition cursor-pointer ml-0.5">Fit</button>
           </div>
-          <button type="button" onclick="closeAdminPrintModal()" class="w-8 h-8 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center cursor-pointer">
+          
+          <button type="button" onclick="closeAdminPrintModal()" class="w-8 h-8 rounded-xl hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center cursor-pointer transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
@@ -1999,46 +2004,54 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
         </div>
       </div>
 
-      <div class="p-2 sm:p-3 bg-zinc-50 rounded-xl border border-zinc-200 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-3 text-xs flex-shrink-0 items-center">
-        <div>
-          <label class="block font-semibold text-zinc-700 mb-1 text-[11px]">Cakupan Kelompok:</label>
-          <select id="adminPrintScopeGroupSelect" onchange="renderAdminPrintPreviewContent()" class="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-xs font-medium focus:border-zinc-900 outline-none">
-            <option value="ALL">Semua Kelompok (Keseluruhan)</option>
-          </select>
+      <!-- Responsive Filter & Options Toolbar -->
+      <div class="p-2.5 sm:p-3.5 bg-zinc-50/90 rounded-2xl border border-zinc-200/90 space-y-2.5 flex-shrink-0">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+          <div>
+            <label class="block font-semibold text-zinc-700 mb-1 text-[11px]">Cakupan Kelompok:</label>
+            <select id="adminPrintScopeGroupSelect" onchange="renderAdminPrintPreviewContent()" class="w-full px-3 py-2 rounded-xl border border-zinc-300 bg-white text-xs font-medium focus:border-indigo-600 outline-none shadow-2xs">
+              <option value="ALL">Semua Kelompok (Keseluruhan)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-zinc-700 mb-1 text-[11px]">Cakupan Sesi:</label>
+            <select id="adminPrintScopeSesiSelect" onchange="renderAdminPrintPreviewContent()" class="w-full px-3 py-2 rounded-xl border border-zinc-300 bg-white text-xs font-medium focus:border-indigo-600 outline-none shadow-2xs">
+              <option value="ALL">Semua Sesi</option>
+            </select>
+          </div>
         </div>
-        <div>
-          <label class="block font-semibold text-zinc-700 mb-1 text-[11px]">Cakupan Sesi:</label>
-          <select id="adminPrintScopeSesiSelect" onchange="renderAdminPrintPreviewContent()" class="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-xs font-medium focus:border-zinc-900 outline-none">
-            <option value="ALL">Semua Sesi</option>
-          </select>
-        </div>
-        <div class="flex items-center gap-2 pt-1 sm:pt-4">
-          <input type="checkbox" id="adminPrintIncludeReviews" checked onchange="renderAdminPrintPreviewContent()" class="w-4 h-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900 cursor-pointer">
-          <label for="adminPrintIncludeReviews" class="text-xs text-zinc-700 cursor-pointer font-medium select-none">Sertakan Ulasan Evaluatif</label>
-        </div>
-        <div class="flex items-center gap-2 pt-1 sm:pt-4">
-          <input type="checkbox" id="adminPrintIncludeReviewerName" checked onchange="renderAdminPrintPreviewContent()" class="w-4 h-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900 cursor-pointer">
-          <label for="adminPrintIncludeReviewerName" class="text-xs text-zinc-700 cursor-pointer font-medium select-none">Sertakan Nama Pengirim</label>
-        </div>
-        <div class="flex items-center gap-2 pt-1 sm:pt-4">
-          <input type="checkbox" id="adminPrintIncludeFooter" checked onchange="renderAdminPrintPreviewContent()" class="w-4 h-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900 cursor-pointer">
-          <label for="adminPrintIncludeFooter" class="text-xs text-zinc-700 cursor-pointer font-medium select-none">Sertakan Catatan Kaki</label>
+
+        <div class="flex items-center flex-wrap gap-2 text-xs text-zinc-700">
+          <label class="inline-flex items-center gap-2 cursor-pointer select-none px-2.5 py-1.5 rounded-lg bg-white border border-zinc-200 hover:border-zinc-300 shadow-2xs transition">
+            <input type="checkbox" id="adminPrintIncludeReviews" checked onchange="renderAdminPrintPreviewContent()" class="w-4 h-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-600 cursor-pointer">
+            <span class="text-xs font-medium">Sertakan Ulasan Evaluatif</span>
+          </label>
+          <label class="inline-flex items-center gap-2 cursor-pointer select-none px-2.5 py-1.5 rounded-lg bg-white border border-zinc-200 hover:border-zinc-300 shadow-2xs transition">
+            <input type="checkbox" id="adminPrintIncludeReviewerName" checked onchange="renderAdminPrintPreviewContent()" class="w-4 h-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-600 cursor-pointer">
+            <span class="text-xs font-medium">Sertakan Nama Pengirim</span>
+          </label>
+          <label class="inline-flex items-center gap-2 cursor-pointer select-none px-2.5 py-1.5 rounded-lg bg-white border border-zinc-200 hover:border-zinc-300 shadow-2xs transition">
+            <input type="checkbox" id="adminPrintIncludeFooter" checked onchange="renderAdminPrintPreviewContent()" class="w-4 h-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-600 cursor-pointer">
+            <span class="text-xs font-medium">Sertakan Catatan Kaki</span>
+          </label>
         </div>
       </div>
 
-      <div id="adminPrintScrollContainer" class="flex-1 overflow-auto custom-scrollbar border border-zinc-300/80 rounded-xl p-2 sm:p-4 bg-zinc-600/15 shadow-inner">
+      <!-- Document Preview Scroll Area -->
+      <div id="adminPrintScrollContainer" class="flex-1 min-h-0 overflow-auto custom-scrollbar border border-zinc-200/90 rounded-2xl p-2 sm:p-5 bg-zinc-700/10 shadow-inner flex justify-center items-start">
         <div id="adminPrintableReportWrapper" style="margin: 0 auto; position: relative; transition: width 0.12s ease, height 0.12s ease;">
-          <div id="printableReportArea" class="bg-white rounded-sm border border-zinc-300 shadow-md text-zinc-900 text-xs w-[794px] min-w-[794px] max-w-[794px]" style="background: #ffffff; color: #000000; box-sizing: border-box; padding: 45px 53px 45px 53px; min-height: 1123px; transform-origin: top left; position: absolute; top: 0; left: 0;">
+          <div id="printableReportArea" class="bg-white rounded-lg border border-zinc-300/90 shadow-xl text-zinc-900 text-xs w-[794px] min-w-[794px] max-w-[794px]" style="background: #ffffff; color: #000000; box-sizing: border-box; padding: 45px 50px; min-height: 1123px; transform-origin: top left; position: absolute; top: 0; left: 0;">
             <!-- Dynamic Official Report Generated Here -->
           </div>
         </div>
       </div>
 
+      <!-- Modal Footer -->
       <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-2 sm:pt-3 border-t border-zinc-100 flex-shrink-0">
-        <span class="text-[10px] text-zinc-400">Gunakan opsi "Save as PDF". Kosongkan centang "Headers and footers" pada dialog cetak.</span>
+        <span class="text-[10.5px] text-zinc-500 font-medium">💡 Gunakan opsi "Save as PDF". Kosongkan centang "Headers and footers" pada dialog cetak.</span>
         <div class="flex items-center gap-2 justify-end">
-          <button type="button" onclick="closeAdminPrintModal()" class="px-4 py-2 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-medium cursor-pointer">Tutup</button>
-          <button type="button" onclick="executeAdminBrowserPrint()" class="px-4 sm:px-5 py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-xs transition active:scale-98 cursor-pointer">
+          <button type="button" onclick="closeAdminPrintModal()" class="px-4 py-2.5 rounded-xl border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold cursor-pointer transition active:scale-98">Tutup</button>
+          <button type="button" onclick="executeAdminBrowserPrint()" class="px-5 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition active:scale-98 cursor-pointer">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
             </svg>
@@ -2046,6 +2059,7 @@ Kelompok 2 / Minggu 1 / 2310125110003 / Budi Santoso
           </button>
         </div>
       </div>
+
     </div>
   </div>
 
@@ -9486,96 +9500,228 @@ function getOrCreateFolder(folderName) {
 
     // PRINT MODAL FUNCTIONS
     let adminPrintZoom = 1.0;
+
     function openAdminPrintModal() {
       populateAdminPrintScopeOptions();
-      document.getElementById("printRekapModal").classList.remove("hidden");
+      const modal = document.getElementById("printRekapModal");
+      if (modal) modal.classList.remove("hidden");
       renderAdminPrintPreviewContent();
+      setTimeout(() => {
+        resetAdminPrintZoom();
+      }, 50);
     }
+
     function closeAdminPrintModal() {
-      document.getElementById("printRekapModal").classList.add("hidden");
+      const modal = document.getElementById("printRekapModal");
+      if (modal) modal.classList.add("hidden");
     }
+
     function populateAdminPrintScopeOptions() {
       const gSel = document.getElementById("adminPrintScopeGroupSelect");
       const sSel = document.getElementById("adminPrintScopeSesiSelect");
       if (!gSel || !sSel) return;
       gSel.innerHTML = '<option value="ALL">Semua Kelompok (Keseluruhan)</option>';
       sSel.innerHTML = '<option value="ALL">Semua Sesi</option>';
-      const groups = Array.from(new Set(adminMasterGroups.map(g => g.name))).filter(Boolean);
-      groups.forEach(g => gSel.innerHTML += `<option value="${g}">${g}</option>`);
-      const sesis = Array.from(new Set(adminMasterGroups.map(g => g.sesi))).filter(Boolean);
-      sesis.forEach(s => sSel.innerHTML += `<option value="${s}">${s}</option>`);
+      const groups = Array.from(new Set((adminMasterGroups || []).map(g => g.name))).filter(Boolean);
+      groups.forEach(g => gSel.innerHTML += `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`);
+      const sesis = Array.from(new Set((adminMasterGroups || []).map(g => g.sesi))).filter(Boolean);
+      sesis.forEach(s => sSel.innerHTML += `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`);
     }
+
     function renderAdminPrintPreviewContent() {
       const container = document.getElementById("printableReportArea");
       if (!container) return;
+
       const title = currentFormMeta?.judulForm || adminAppConfig["Judul_Form"] || "PENILAIAN PRESENTASI";
       const matkul = currentFormMeta?.mataKuliah || adminAppConfig["Mata_Kuliah"] || "Bimbingan Konseling di SD";
       const dosen = currentFormMeta?.dosen || adminAppConfig["Dosen_Pengampu"] || "Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.";
+      const kelas = currentFormMeta?.kelas || adminAppConfig["Kelas"] || "5E";
+      const prodi = currentFormMeta?.jurusan || adminAppConfig["Jurusan"] || "PGSD";
+
+      const scopeGroup = document.getElementById("adminPrintScopeGroupSelect")?.value || "ALL";
+      const scopeSesi = document.getElementById("adminPrintScopeSesiSelect")?.value || "ALL";
+      const includeReviews = document.getElementById("adminPrintIncludeReviews")?.checked ?? true;
+      const includeReviewerName = document.getElementById("adminPrintIncludeReviewerName")?.checked ?? true;
+      const includeFooter = document.getElementById("adminPrintIncludeFooter")?.checked ?? true;
+
+      // Filter groups
+      let groupsToDisplay = Array.isArray(adminMasterGroups) ? [...adminMasterGroups] : [];
+      if (scopeGroup !== "ALL") {
+        groupsToDisplay = groupsToDisplay.filter(g => g.name === scopeGroup);
+      }
+      if (scopeSesi !== "ALL") {
+        groupsToDisplay = groupsToDisplay.filter(g => g.sesi === scopeSesi);
+      }
+
+      // Filter responses
+      const allResponses = Array.isArray(adminResponsesList) ? adminResponsesList : [];
+
+      let groupRowsHtml = '';
+      if (groupsToDisplay.length === 0) {
+        groupRowsHtml = `
+          <tr>
+            <td colspan="5" class="p-4 text-center text-zinc-400 italic">Belum ada data kelompok yang sesuai dengan filter.</td>
+          </tr>
+        `;
+      } else {
+        groupsToDisplay.forEach((g, idx) => {
+          const groupResponses = allResponses.filter(r => (r.kelompok === g.name) && (scopeSesi === 'ALL' || r.sesi === scopeSesi));
+          const countPenilai = groupResponses.length;
+          let avgScore = "-";
+          if (countPenilai > 0) {
+            const sum = groupResponses.reduce((acc, r) => acc + (parseFloat(r.nilaiKelompok) || 0), 0);
+            avgScore = (sum / countPenilai).toFixed(2);
+          }
+
+          groupRowsHtml += `
+            <tr class="border-b border-black">
+              <td class="p-2 border-r border-black text-center font-mono">${idx + 1}</td>
+              <td class="p-2 border-r border-black font-bold">${escapeHtml(g.name)}</td>
+              <td class="p-2 border-r border-black text-center font-mono">${escapeHtml(g.sesi || '-')}</td>
+              <td class="p-2 border-r border-black text-center font-mono">${countPenilai} Penilai</td>
+              <td class="p-2 text-center font-mono font-bold bg-zinc-50">${avgScore}</td>
+            </tr>
+          `;
+        });
+      }
+
+      // Reviews block if selected
+      let reviewsSectionHtml = '';
+      if (includeReviews && allResponses.length > 0) {
+        const filteredResponses = allResponses.filter(r => 
+          (scopeGroup === 'ALL' || r.kelompok === scopeGroup) &&
+          (scopeSesi === 'ALL' || r.sesi === scopeSesi)
+        );
+
+        if (filteredResponses.length > 0) {
+          const sampleReviews = filteredResponses.slice(0, 8);
+          reviewsSectionHtml = `
+            <div class="mt-6 pt-4 border-t border-black space-y-2">
+              <h4 class="font-bold text-xs uppercase tracking-wider">Catatan & Evaluasi Kualitatif Mahasiswa</h4>
+              <div class="space-y-2 text-[10.5px]">
+                ${sampleReviews.map(r => {
+                  let evalText = "";
+                  try {
+                    const parsed = typeof r.evaluasiDetail === 'object' ? r.evaluasiDetail : JSON.parse(r.evaluasiDetail || "{}");
+                    evalText = Object.entries(parsed).map(([k, v]) => `<strong>${escapeHtml(k)}:</strong> ${escapeHtml(v)}`).join(" | ");
+                  } catch(e) {
+                    evalText = escapeHtml(r.evaluasiDetail || "-");
+                  }
+                  if (!evalText) return '';
+                  return `
+                    <div class="p-2 rounded bg-zinc-50 border border-zinc-300">
+                      <div class="flex justify-between items-center text-[9.5px] text-zinc-500 mb-1">
+                        <span><strong>Kelompok Dinilai:</strong> ${escapeHtml(r.kelompok)}</span>
+                        ${includeReviewerName ? `<span><strong>Penilai:</strong> ${escapeHtml(r.namaPenilai)} (${escapeHtml(r.nim)})</span>` : ''}
+                      </div>
+                      <p class="leading-relaxed text-zinc-800">${evalText}</p>
+                    </div>
+                  `;
+                }).filter(Boolean).join("")}
+              </div>
+            </div>
+          `;
+        }
+      }
 
       container.innerHTML = `
-        <div class="print-page-wrapper">
-          <div>
-            <div class="border-b-2 border-black pb-3 mb-4 text-center space-y-1">
-              <h2 class="text-sm font-bold tracking-widest uppercase">UNIVERSITAS LAMBUNG MANGKURAT</h2>
-              <h3 class="text-xs font-semibold uppercase">FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN • PGSD</h3>
-              <h1 class="text-base font-extrabold uppercase mt-1">${title}</h1>
-              <p class="text-xs font-medium">${matkul} • Dosen: ${dosen}</p>
-            </div>
-            <p class="text-[11px] text-zinc-600 mb-3">Rekapitulasi resmi hasil peer-assessment perkuliahan.</p>
-            <div class="space-y-3">
-              <table class="w-full border border-black text-xs">
-                <thead>
-                  <tr class="bg-zinc-100 font-bold border-b border-black">
-                    <th class="p-2 border-r border-black text-left w-10">No</th>
-                    <th class="p-2 border-r border-black text-left">Kelompok Presentator</th>
-                    <th class="p-2 border-r border-black text-center w-24">Sesi</th>
-                    <th class="p-2 border-r border-black text-center w-20">Penilai</th>
-                    <th class="p-2 border-r border-black text-center w-24">Rata-Rata</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${adminMasterGroups.map((g, idx) => `
-                    <tr class="border-b border-zinc-300">
-                      <td class="p-2 border-r border-black text-center">${idx + 1}</td>
-                      <td class="p-2 border-r border-black font-semibold">${g.name}</td>
-                      <td class="p-2 border-r border-black text-center">${g.sesi}</td>
-                      <td class="p-2 border-r border-black text-center font-mono">-</td>
-                      <td class="p-2 border-r border-black text-center font-mono font-bold">-</td>
-                    </tr>
-                  `).join("")}
-                </tbody>
-              </table>
-            </div>
+        <div class="print-page-wrapper space-y-5">
+          <!-- Kop Laporan Resmi -->
+          <div class="border-b-2 border-black pb-3 text-center space-y-1">
+            <h2 class="text-xs sm:text-sm font-bold tracking-widest uppercase">UNIVERSITAS LAMBUNG MANGKURAT</h2>
+            <h3 class="text-[11px] sm:text-xs font-semibold uppercase">FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN • PROGRAM STUDI ${escapeHtml(prodi)}</h3>
+            <h1 class="text-sm sm:text-base font-extrabold uppercase mt-1 math-renderable">${smartMathFormat(title)}</h1>
+            <p class="text-xs font-medium math-renderable">Mata Kuliah: ${smartMathFormat(matkul)} • Kelas: ${escapeHtml(kelas)} • Dosen: ${smartMathFormat(dosen)}</p>
           </div>
-          <div class="pt-6 mt-6 border-t border-zinc-300 text-[10px] text-zinc-500 flex justify-between">
-            <span>Dicetak secara otomatis oleh Sistem Peer-Assessment PGSD ULM</span>
-            <span>${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+
+          <div class="flex justify-between items-center text-[10.5px] text-zinc-700">
+            <span><strong>Cakupan:</strong> ${scopeGroup === 'ALL' ? 'Semua Kelompok' : escapeHtml(scopeGroup)} (${scopeSesi === 'ALL' ? 'Semua Sesi' : escapeHtml(scopeSesi)})</span>
+            <span><strong>Tanggal Cetak:</strong> ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+          </div>
+
+          <!-- Table Data Rekapitulasi -->
+          <div>
+            <table class="w-full border border-black text-xs">
+              <thead>
+                <tr class="bg-zinc-100 font-bold border-b border-black text-[11px]">
+                  <th class="p-2 border-r border-black text-center w-10">No</th>
+                  <th class="p-2 border-r border-black text-left">Kelompok Presentator</th>
+                  <th class="p-2 border-r border-black text-center w-24">Sesi</th>
+                  <th class="p-2 border-r border-black text-center w-28">Jumlah Penilai</th>
+                  <th class="p-2 text-center w-28">Nilai Rata-Rata</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${groupRowsHtml}
+              </tbody>
+            </table>
+          </div>
+
+          ${reviewsSectionHtml}
+
+          <!-- Lembar Pengesahan & Tanda Tangan Dosen -->
+          ${includeFooter ? `
+            <div class="pt-8 mt-8 flex justify-end text-xs">
+              <div class="text-center w-64 space-y-12">
+                <div>
+                  <p class="text-[11px] text-zinc-600">Banjarmasin, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                  <p class="font-bold text-[11px]">Dosen Pengampu Mata Kuliah,</p>
+                </div>
+                <div>
+                  <p class="font-bold underline math-renderable">${smartMathFormat(dosen)}</p>
+                  <p class="text-[10px] text-zinc-500 font-mono">Dosen FKIP ULM</p>
+                </div>
+              </div>
+            </div>
+          ` : ''}
+
+          <!-- Footer Cetak Otomatis -->
+          <div class="pt-4 mt-6 border-t border-zinc-300 text-[9.5px] text-zinc-400 flex justify-between">
+            <span>Dicetak otomatis dari Sistem Evaluasi &amp; Peer-Assessment PGSD FKIP ULM</span>
+            <span>Halaman 1 dari 1</span>
           </div>
         </div>
       `;
+
+      requestAnimationFrame(() => {
+        renderAllMathInElement(container);
+        applyPrintZoom();
+      });
     }
+
     function adjustAdminPrintZoom(delta) {
-      adminPrintZoom = Math.max(0.5, Math.min(1.8, adminPrintZoom + delta));
-      const area = document.getElementById("printableReportArea");
-      const wrapper = document.getElementById("adminPrintableReportWrapper");
-      if (area && wrapper) {
-        area.style.transform = `scale(${adminPrintZoom})`;
-        wrapper.style.width = `${794 * adminPrintZoom}px`;
-        wrapper.style.height = `${1123 * adminPrintZoom}px`;
-      }
-      document.getElementById("adminPrintZoomBadge").textContent = `${Math.round(adminPrintZoom * 100)}%`;
+      adminPrintZoom = Math.max(0.3, Math.min(1.8, Math.round((adminPrintZoom + delta) * 10) / 10));
+      applyPrintZoom(false);
     }
+
     function resetAdminPrintZoom() {
-      adminPrintZoom = 1.0;
+      const scrollContainer = document.getElementById("adminPrintScrollContainer");
+      if (scrollContainer) {
+        const availableW = scrollContainer.clientWidth - 40;
+        const autoFitScale = Math.min(1.0, Math.max(0.35, availableW / 820));
+        adminPrintZoom = Math.round(autoFitScale * 100) / 100;
+      } else {
+        adminPrintZoom = 1.0;
+      }
+      applyPrintZoom(true);
+    }
+
+    function applyPrintZoom(isFit = false) {
       const area = document.getElementById("printableReportArea");
       const wrapper = document.getElementById("adminPrintableReportWrapper");
+      const badge = document.getElementById("adminPrintZoomBadge");
+
       if (area && wrapper) {
-        area.style.transform = `scale(1)`;
-        wrapper.style.width = `794px`;
-        wrapper.style.height = `1123px`;
+        const actualH = area.scrollHeight || 1123;
+        area.style.transform = `scale(${adminPrintZoom})`;
+        wrapper.style.width = `${Math.round(794 * adminPrintZoom)}px`;
+        wrapper.style.height = `${Math.round(actualH * adminPrintZoom)}px`;
       }
-      document.getElementById("adminPrintZoomBadge").textContent = `Fit`;
+      if (badge) {
+        badge.textContent = isFit ? `Fit (${Math.round(adminPrintZoom * 100)}%)` : `${Math.round(adminPrintZoom * 100)}%`;
+      }
     }
+
     function executeAdminBrowserPrint() {
       const area = document.getElementById("printableReportArea");
       const root = document.getElementById("printDocumentRoot");
