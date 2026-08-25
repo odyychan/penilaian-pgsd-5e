@@ -4,6 +4,15 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.69] - 2026-08-25
+
+### 📝 Auto-Wrapping & Elastic Textarea Universal di Seluruh Input Field
+- **Auto-Wrap & Auto-Grow Tanpa Scrollbar Horizontal/Vertikal:**
+  - Mengubah seluruh kolom input teks yang berpotensi panjang (Label Pertanyaan, Deskripsi Pertanyaan, Judul Bagian, Deskripsi Bagian, Judul Formulir, Opsi Pilihan, Kotak Info Tambahan, dan Input Klien) menjadi textarea elastis yang otomatis membungkus teks ke bawah (*text wrap*) dan menambah tinggi kotak sesuai jumlah baris.
+  - Mencegah teks terpotong ke ujung kanan tanpa bilah gulir (*zero scrollbars*).
+
+---
+
 ## [2.2.68] - 2026-08-25
 
 ### 🛡️ Eliminasi DOM ID Collision & Perbaikan Navigasi Tahapan Simulator

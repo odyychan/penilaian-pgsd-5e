@@ -728,14 +728,14 @@
               <label class="block text-[10px] sm:text-[11px] font-bold text-zinc-500 uppercase tracking-wider font-mono">Judul Formulir Penilaian</label>
             </div>
 
-            <input 
-              type="text" 
+            <textarea 
+              rows="1" 
               id="cfg_Judul_Form" 
               required 
-              oninput="handleConfigInputAutoSave()"
+              oninput="autoResizeTextarea(this); handleConfigInputAutoSave()"
               placeholder="Judul Formulir Penilaian" 
-              class="w-full text-lg sm:text-2xl font-extrabold text-zinc-900 bg-transparent border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 pb-1 sm:pb-1.5 outline-none transition placeholder:text-zinc-400"
-            >
+              class="w-full text-lg sm:text-2xl font-extrabold text-zinc-900 bg-transparent border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 pb-1 sm:pb-1.5 outline-none transition placeholder:text-zinc-400 resize-none overflow-hidden block whitespace-pre-wrap break-words leading-tight"
+            ></textarea>
             <div id="liveMathCfgJudul" class="math-live-preview-badge inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-50/90 border border-indigo-200/80 text-indigo-950 text-xs shadow-2xs mt-1 transition hidden">
               <span class="text-[9px] font-bold font-mono text-indigo-600 bg-indigo-100 px-1 py-0.5 rounded uppercase tracking-wider shrink-0">✨ Pratinjau:</span>
               <span class="math-renderable font-medium leading-relaxed"></span>
@@ -5028,14 +5028,13 @@ function getOrCreateFolder(folderName) {
         html += `
           <div class="group/hdrCard p-2.5 sm:p-3 rounded-xl bg-zinc-50/90 border border-zinc-200/80 hover:border-indigo-300 focus-within:border-indigo-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-indigo-100/50 transition shadow-2xs relative flex flex-col justify-between">
             <div class="flex items-center justify-between gap-1 mb-1">
-              <input 
-                type="text" 
-                value="${escapeHtml(card.label || '')}" 
+              <textarea 
+                rows="1" 
                 placeholder="Label (contoh: Dosen:)" 
                 title="Klik untuk mengubah label informasi ini"
-                oninput="handleHeaderCardLabelChange(${idx}, this.value)" 
-                class="text-zinc-500 font-bold text-[10.5px] sm:text-[11px] bg-transparent border-b border-dashed border-transparent hover:border-zinc-300 focus:border-indigo-600 focus:text-indigo-900 outline-none w-full px-0.5 py-0.5 rounded transition"
-              >
+                oninput="autoResizeTextarea(this); handleHeaderCardLabelChange(${idx}, this.value)" 
+                class="text-zinc-500 font-bold text-[10.5px] sm:text-[11px] bg-transparent border-b border-dashed border-transparent hover:border-zinc-300 focus:border-indigo-600 focus:text-indigo-900 outline-none w-full px-0.5 py-0.5 rounded transition resize-none overflow-hidden block whitespace-pre-wrap break-words leading-snug"
+              >${escapeHtml(card.label || '')}</textarea>
               <button 
                 type="button" 
                 onclick="deleteHeaderInfoCard(${idx})" 
@@ -5047,14 +5046,13 @@ function getOrCreateFolder(folderName) {
             </div>
 
             <div class="space-y-0.5">
-              <input 
-                type="text" 
+              <textarea 
+                rows="1" 
                 id="headerCardInput_${idx}"
-                value="${escapeHtml(card.value || '')}" 
                 placeholder="${escapeHtml(card.placeholder || 'Isi nilai...')}" 
-                oninput="handleHeaderCardValueChange(${idx}, this.value)" 
-                class="w-full font-semibold text-zinc-900 bg-transparent border-b border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 outline-none pb-0.5 transition"
-              >
+                oninput="autoResizeTextarea(this); handleHeaderCardValueChange(${idx}, this.value)" 
+                class="w-full font-semibold text-zinc-900 bg-transparent border-b border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 outline-none pb-0.5 transition resize-none overflow-hidden block whitespace-pre-wrap break-words leading-snug"
+              >${escapeHtml(card.value || '')}</textarea>
               ${getLiveMathBadgeHtml(card.value, `liveMathHeaderCard_${idx}`)}
             </div>
           </div>
@@ -6223,13 +6221,12 @@ function getOrCreateFolder(folderName) {
           <div class="space-y-1 group">
             <div class="flex items-center gap-2.5 text-xs">
               <span class="w-4 h-4 rounded-full border-2 border-zinc-400 shrink-0"></span>
-              <input 
-                type="text" 
-                value="${escapeHtml(o)}" 
+              <textarea 
+                rows="1" 
                 placeholder="Teks opsi..."
-                oninput="handleInlineOptionUpdate(${sIdx}, ${fIdx}, ${optIdx}, this.value)"
-                class="flex-1 px-2.5 py-1.5 rounded-md border-b border-transparent hover:border-zinc-300 focus:border-indigo-600 text-xs text-zinc-800 bg-transparent focus:bg-white outline-none transition"
-              >
+                oninput="autoResizeTextarea(this); handleInlineOptionUpdate(${sIdx}, ${fIdx}, ${optIdx}, this.value)"
+                class="flex-1 px-2.5 py-1.5 rounded-md border-b border-transparent hover:border-zinc-300 focus:border-indigo-600 text-xs text-zinc-800 bg-transparent focus:bg-white outline-none transition resize-none overflow-hidden block whitespace-pre-wrap break-words leading-snug"
+              >${escapeHtml(o)}</textarea>
               <button 
                 type="button" 
                 onclick="handleInlineDeleteOption(${sIdx}, ${fIdx}, ${optIdx})" 
@@ -6285,13 +6282,12 @@ function getOrCreateFolder(folderName) {
           <div class="space-y-1 group">
             <div class="flex items-center gap-2.5 text-xs">
               <span class="w-4 h-4 rounded border-2 border-zinc-400 shrink-0"></span>
-              <input 
-                type="text" 
-                value="${escapeHtml(o)}" 
+              <textarea 
+                rows="1" 
                 placeholder="Teks opsi..."
-                oninput="handleInlineOptionUpdate(${sIdx}, ${fIdx}, ${optIdx}, this.value)"
-                class="flex-1 px-2.5 py-1.5 rounded-md border-b border-transparent hover:border-zinc-300 focus:border-indigo-600 text-xs text-zinc-800 bg-transparent focus:bg-white outline-none transition"
-              >
+                oninput="autoResizeTextarea(this); handleInlineOptionUpdate(${sIdx}, ${fIdx}, ${optIdx}, this.value)"
+                class="flex-1 px-2.5 py-1.5 rounded-md border-b border-transparent hover:border-zinc-300 focus:border-indigo-600 text-xs text-zinc-800 bg-transparent focus:bg-white outline-none transition resize-none overflow-hidden block whitespace-pre-wrap break-words leading-snug"
+              >${escapeHtml(o)}</textarea>
               <button 
                 type="button" 
                 onclick="handleInlineDeleteOption(${sIdx}, ${fIdx}, ${optIdx})" 
@@ -6347,13 +6343,12 @@ function getOrCreateFolder(folderName) {
           <div class="space-y-1 group">
             <div class="flex items-center gap-2.5 text-xs">
               <span class="w-4 font-mono text-zinc-400 font-bold text-xs shrink-0 text-center">${optIdx + 1}.</span>
-              <input 
-                type="text" 
-                value="${escapeHtml(o)}" 
+              <textarea 
+                rows="1" 
                 placeholder="Teks opsi dropdown..."
-                oninput="handleInlineOptionUpdate(${sIdx}, ${fIdx}, ${optIdx}, this.value)"
-                class="flex-1 px-2.5 py-1.5 rounded-md border-b border-transparent hover:border-zinc-300 focus:border-indigo-600 text-xs text-zinc-800 bg-transparent focus:bg-white outline-none transition"
-              >
+                oninput="autoResizeTextarea(this); handleInlineOptionUpdate(${sIdx}, ${fIdx}, ${optIdx}, this.value)"
+                class="flex-1 px-2.5 py-1.5 rounded-md border-b border-transparent hover:border-zinc-300 focus:border-indigo-600 text-xs text-zinc-800 bg-transparent focus:bg-white outline-none transition resize-none overflow-hidden block whitespace-pre-wrap break-words leading-snug"
+              >${escapeHtml(o)}</textarea>
               <button 
                 type="button" 
                 onclick="handleInlineDeleteOption(${sIdx}, ${fIdx}, ${optIdx})" 
@@ -6830,15 +6825,14 @@ function getOrCreateFolder(folderName) {
                 <div class="flex items-center justify-end">
                   ${getRichTextToolbarHtml(`alurTitleInput_${idx}`, 'mb-1')}
                 </div>
-                <input 
-                  type="text" 
+                <textarea 
+                  rows="1" 
                   id="alurTitleInput_${idx}"
-                  value="${escapeHtml(currentAlurTitle)}" 
                   placeholder="Judul Alur Bagian ${num}..."
                   title="Klik untuk mengubah teks judul alur (hanya tampil di panduan)"
-                  oninput="handleInlineAlurUpdate(${idx}, 'alurTitle', this.value)"
-                  class="w-full font-bold text-zinc-900 text-xs bg-transparent hover:bg-zinc-50 focus:bg-white border-b border-dashed border-transparent hover:border-zinc-300 focus:border-indigo-600 px-1 py-0.5 rounded outline-none transition"
-                >
+                  oninput="autoResizeTextarea(this); handleInlineAlurUpdate(${idx}, 'alurTitle', this.value)"
+                  class="w-full font-bold text-zinc-900 text-xs bg-transparent hover:bg-zinc-50 focus:bg-white border-b border-dashed border-transparent hover:border-zinc-300 focus:border-indigo-600 px-1 py-0.5 rounded outline-none transition resize-none overflow-hidden block whitespace-pre-wrap break-words leading-snug"
+                >${escapeHtml(currentAlurTitle)}</textarea>
                 ${getLiveMathBadgeHtml(currentAlurTitle, `liveMathAlurTitle_${idx}`)}
               </div>
 
@@ -6847,15 +6841,14 @@ function getOrCreateFolder(folderName) {
                 <div class="flex items-center justify-end">
                   ${getRichTextToolbarHtml(`alurDescInput_${idx}`, 'mb-1')}
                 </div>
-                <input 
-                  type="text" 
+                <textarea 
+                  rows="1" 
                   id="alurDescInput_${idx}"
-                  value="${escapeHtml(currentAlurDesc)}" 
                   placeholder="Keterangan alur (opsional)..."
                   title="Klik untuk mengubah keterangan alur (hanya tampil di panduan)"
-                  oninput="handleInlineAlurUpdate(${idx}, 'alurDesc', this.value)"
-                  class="w-full text-[11px] text-zinc-500 bg-transparent hover:bg-zinc-50 focus:bg-white border-b border-dashed border-transparent hover:border-zinc-300 focus:border-indigo-600 px-1 py-0.5 rounded outline-none transition"
-                >
+                  oninput="autoResizeTextarea(this); handleInlineAlurUpdate(${idx}, 'alurDesc', this.value)"
+                  class="w-full text-[11px] text-zinc-500 bg-transparent hover:bg-zinc-50 focus:bg-white border-b border-dashed border-transparent hover:border-zinc-300 focus:border-indigo-600 px-1 py-0.5 rounded outline-none transition resize-none overflow-hidden block whitespace-pre-wrap break-words leading-relaxed"
+                >${escapeHtml(currentAlurDesc)}</textarea>
                 ${getLiveMathBadgeHtml(currentAlurDesc, `liveMathAlurDesc_${idx}`)}
               </div>
 
@@ -6980,15 +6973,14 @@ function getOrCreateFolder(folderName) {
                       ${getRichTextToolbarHtml(`fieldLabelInput_${sIdx}_${fIdx}`)}
                     </div>
                     <div class="relative">
-                      <input 
-                        type="text" 
+                      <textarea 
+                        rows="1" 
                         id="fieldLabelInput_${sIdx}_${fIdx}"
                         data-field-id="${f.id}"
-                        value="${escapeHtml(f.label)}" 
                         placeholder="Pertanyaan tanpa judul"
-                        oninput="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'label', this.value)"
-                        class="w-full text-sm sm:text-base font-semibold text-zinc-900 bg-zinc-100/90 hover:bg-zinc-100 focus:bg-zinc-100 border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 px-3 py-2.5 rounded-t-lg outline-none transition"
-                      >
+                        oninput="autoResizeTextarea(this); handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'label', this.value)"
+                        class="w-full text-sm sm:text-base font-semibold text-zinc-900 bg-zinc-100/90 hover:bg-zinc-100 focus:bg-zinc-100 border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 px-3 py-2.5 rounded-t-lg outline-none transition resize-none overflow-hidden block whitespace-pre-wrap break-words leading-relaxed"
+                      >${escapeHtml(f.label)}</textarea>
                     </div>
                     ${getLiveMathBadgeHtml(f.label, `liveMathQuestionLabel_${sIdx}_${fIdx}`)}
                   </div>
@@ -6999,14 +6991,13 @@ function getOrCreateFolder(folderName) {
                       <span class="text-[10.5px] font-medium text-zinc-400 font-mono">Deskripsi Pertanyaan (Opsional):</span>
                       ${getRichTextToolbarHtml(`fieldDescInput_${sIdx}_${fIdx}`)}
                     </div>
-                    <input 
-                      type="text" 
+                    <textarea 
+                      rows="1" 
                       id="fieldDescInput_${sIdx}_${fIdx}"
-                      value="${escapeHtml(f.description || '')}" 
                       placeholder="Teks deskripsi / panduan pengisian pertanyaan (opsional)..." 
-                      oninput="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'description', this.value)"
-                      class="w-full text-xs text-zinc-600 bg-transparent border-b border-dashed border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 px-1 py-1 outline-none transition"
-                    >
+                      oninput="autoResizeTextarea(this); handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'description', this.value)"
+                      class="w-full text-xs text-zinc-600 bg-transparent border-b border-dashed border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 px-1 py-1 outline-none transition resize-none overflow-hidden block whitespace-pre-wrap break-words leading-relaxed"
+                    >${escapeHtml(f.description || '')}</textarea>
                     ${getLiveMathBadgeHtml(f.description, `liveMathQuestionDesc_${sIdx}_${fIdx}`)}
                   </div>
                 </div>
@@ -7160,15 +7151,14 @@ function getOrCreateFolder(folderName) {
                   <label class="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider font-mono">Judul Bagian</label>
                   ${getRichTextToolbarHtml(`stageTitleInput_${sIdx}`)}
                 </div>
-                <input 
-                  type="text" 
+                <textarea 
+                  rows="1" 
                   id="stageTitleInput_${sIdx}"
                   data-stage-id="${stage.id || ('tahap_' + (sIdx+1))}"
-                  value="${escapeHtml(stage.title)}" 
                   placeholder="Judul Bagian (contoh: Evaluasi Presentasi, dll)..."
-                  oninput="handleInlineStageUpdate(${sIdx}, 'title', this.value)"
-                  class="w-full text-base sm:text-xl font-bold text-zinc-900 bg-transparent border-b-2 border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 px-1 py-1.5 outline-none transition"
-                >
+                  oninput="autoResizeTextarea(this); handleInlineStageUpdate(${sIdx}, 'title', this.value)"
+                  class="w-full text-base sm:text-xl font-bold text-zinc-900 bg-transparent border-b-2 border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 px-1 py-1.5 outline-none transition resize-none overflow-hidden block whitespace-pre-wrap break-words leading-snug"
+                >${escapeHtml(stage.title)}</textarea>
                 ${getLiveMathBadgeHtml(stage.title, `liveMathStageTitle_${sIdx}`)}
               </div>
 
@@ -7178,14 +7168,13 @@ function getOrCreateFolder(folderName) {
                   <label class="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider font-mono">Deskripsi Bagian (Opsional)</label>
                   ${getRichTextToolbarHtml(`stageDescInput_${sIdx}`)}
                 </div>
-                <input 
-                  type="text" 
+                <textarea 
+                  rows="1" 
                   id="stageDescInput_${sIdx}"
-                  value="${escapeHtml(stage.description || '')}" 
                   placeholder="Deskripsi Bagian (opsional, contoh: Berikan penilaian objektif)..."
-                  oninput="handleInlineStageUpdate(${sIdx}, 'description', this.value)"
-                  class="w-full text-xs sm:text-sm text-zinc-600 bg-transparent border-b border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 px-1 py-1 outline-none transition"
-                >
+                  oninput="autoResizeTextarea(this); handleInlineStageUpdate(${sIdx}, 'description', this.value)"
+                  class="w-full text-xs sm:text-sm text-zinc-600 bg-transparent border-b border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 px-1 py-1 outline-none transition resize-none overflow-hidden block whitespace-pre-wrap break-words leading-relaxed"
+                >${escapeHtml(stage.description || '')}</textarea>
                 ${getLiveMathBadgeHtml(stage.description, `liveMathStageDesc_${sIdx}`)}
               </div>
             </div>

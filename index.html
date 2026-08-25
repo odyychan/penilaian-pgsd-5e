@@ -1726,6 +1726,35 @@
     }
 
     // =========================================================================
+    // AUTO-GROWING TEXTAREA ENGINE (NO SCROLLBARS, ELASTIC EXPANSION)
+    // =========================================================================
+    function autoResizeTextarea(el) {
+      if (!el || el.tagName !== 'TEXTAREA') return;
+      el.style.height = 'auto';
+      el.style.height = (el.scrollHeight) + 'px';
+      el.style.overflowY = 'hidden';
+      el.style.overflowX = 'hidden';
+    }
+
+    function triggerGlobalAutoResize() {
+      requestAnimationFrame(() => {
+        document.querySelectorAll('textarea').forEach(autoResizeTextarea);
+      });
+    }
+
+    document.addEventListener('input', function(e) {
+      if (e.target && e.target.tagName === 'TEXTAREA') {
+        autoResizeTextarea(e.target);
+      }
+    });
+
+    document.addEventListener('focusin', function(e) {
+      if (e.target && e.target.tagName === 'TEXTAREA') {
+        autoResizeTextarea(e.target);
+      }
+    });
+
+    // =========================================================================
     // UNIVERSAL PROGRESS BAR & SKELETON LOADERS ENGINE
     // =========================================================================
     let activeGlobalLoadingCount = 0;
@@ -2459,14 +2488,13 @@
               ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
             </div>
             ${mediaBelow}
-            <input 
-              type="text" 
-              value="${savedVal}" 
+            <textarea 
+              rows="1" 
               placeholder="${f.placeholder || 'Jawaban Anda...'}" 
               ${f.required ? 'required' : ''} 
-              oninput="handleClientFieldInput('${f.id}', this.value)" 
-              class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm bg-white text-zinc-900 focus:border-zinc-900 outline-none transition shadow-2xs"
-            >
+              oninput="autoResizeTextarea(this); handleClientFieldInput('${f.id}', this.value)" 
+              class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm bg-white text-zinc-900 focus:border-zinc-900 outline-none transition shadow-2xs resize-none overflow-hidden block whitespace-pre-wrap break-words leading-relaxed"
+            >${escapeHtml(savedVal)}</textarea>
           </div>
         `;
       }
@@ -2482,12 +2510,12 @@
             </div>
             ${mediaBelow}
             <textarea 
-              rows="3" 
+              rows="2" 
               placeholder="${f.placeholder || 'Tuliskan ulasan atau jawaban lengkap Anda...'}" 
               ${f.required ? 'required' : ''} 
-              oninput="handleClientFieldInput('${f.id}', this.value)" 
-              class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm bg-white text-zinc-900 focus:border-zinc-900 outline-none transition shadow-2xs leading-relaxed"
-            >${savedVal}</textarea>
+              oninput="autoResizeTextarea(this); handleClientFieldInput('${f.id}', this.value)" 
+              class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm bg-white text-zinc-900 focus:border-zinc-900 outline-none transition shadow-2xs leading-relaxed resize-none overflow-hidden block whitespace-pre-wrap break-words"
+            >${escapeHtml(savedVal)}</textarea>
           </div>
         `;
       }
