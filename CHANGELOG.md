@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.82] - 2026-08-25
+
+### ⚡ Peningkatan Ketahanan Mesin Unggah Media Admin & Fail-Safe Canvas Reader
+- **Isolasi Alur Pembacaan Berkas Lokal (*Fail-Safe FileReader & Canvas Compression*):**
+  - Mengisolasi tahap kompresi gambar lokal dari proses unggah cloud di latar belakang, sehingga berkas gambar yang dipilih pengguna selalu 100% terbaca dan langsung tampil di pratinjau tanpa terhambat.
+- **Transparansi Respon Cloud Asinkron:**
+  - Proses unggah ke Google Drive berjalan secara aman di latar belakang dengan parsing JSON tahan-galat (*safe parser*), menggantikan Base64 lokal secara mulus dengan tautan resmi Google Drive saat respons diterima.
+
+---
+
 ## [2.2.81] - 2026-08-25
 
 ### 🧹 Audit Pembersihan Total Legacy Links & Pengujian End-to-End Google Drive

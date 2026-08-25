@@ -3540,92 +3540,121 @@ function getOrCreateFolder(folderName) {
     async function handleModalDirectFileUpload(fileInput) {
       const file = fileInput.files ? fileInput.files[0] : null;
       if (!file) return;
-      if (file.size > 10 * 1024 * 1024) {
-        showAdminToast("Ukuran berkas melebihi batas 10 MB!", "warning");
+      if (file.size > 15 * 1024 * 1024) {
+        showAdminToast("Ukuran berkas melebihi batas 15 MB!", "warning");
         return;
       }
 
       showAdminToast(`Memproses '${file.name}'...`, "info");
 
+      let dataUrl = "";
+      let base64 = "";
+
       try {
         const readBase64Promise = (f) => new Promise((resolve) => {
-          if (!f.type.startsWith("image/") || f.type === "image/svg+xml") {
-            const reader = new FileReader();
-            reader.onload = (e) => resolve({ dataUrl: e.target.result, base64: e.target.result.split(',')[1] || '' });
-            reader.readAsDataURL(f);
-            return;
-          }
-          const reader = new FileReader();
-          reader.onload = function(e) {
+          const directReader = new FileReader();
+          directReader.onload = (e) => {
+            const rawDataUrl = e.target.result;
+            const rawBase64 = (rawDataUrl && rawDataUrl.includes(',')) ? rawDataUrl.split(',')[1] : '';
+
+            // Jika bukan image standard atau SVG, langsung resolve
+            if (!f.type.startsWith("image/") || f.type === "image/svg+xml") {
+              return resolve({ dataUrl: rawDataUrl, base64: rawBase64 });
+            }
+
+            // Kompresi cerdas canvas
             const img = new Image();
             img.onload = function() {
-              let width = img.width;
-              let height = img.height;
-              const maxDim = 1600;
-              if (width > maxDim || height > maxDim) {
-                if (width > height) {
-                  height = Math.round((height * maxDim) / width);
-                  width = maxDim;
-                } else {
-                  width = Math.round((width * maxDim) / height);
-                  height = maxDim;
+              try {
+                let width = img.width || 800;
+                let height = img.height || 600;
+                const maxDim = 1600;
+                if (width > maxDim || height > maxDim) {
+                  if (width > height) {
+                    height = Math.round((height * maxDim) / width);
+                    width = maxDim;
+                  } else {
+                    width = Math.round((width * maxDim) / height);
+                    height = maxDim;
+                  }
                 }
+                const canvas = document.createElement("canvas");
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, width, height);
+                const compDataUrl = canvas.toDataURL(f.type === "image/png" ? "image/png" : "image/jpeg", 0.88);
+                const compBase64 = compDataUrl.split(',')[1] || rawBase64;
+                resolve({ dataUrl: compDataUrl, base64: compBase64 });
+              } catch(cvsErr) {
+                resolve({ dataUrl: rawDataUrl, base64: rawBase64 });
               }
-              const canvas = document.createElement("canvas");
-              canvas.width = width;
-              canvas.height = height;
-              const ctx = canvas.getContext("2d");
-              ctx.drawImage(img, 0, 0, width, height);
-              const dataUrl = canvas.toDataURL(f.type === "image/png" ? "image/png" : "image/jpeg", 0.88);
-              const base64 = dataUrl.split(',')[1] || '';
-              resolve({ dataUrl, base64 });
             };
-            img.src = e.target.result;
+            img.onerror = function() {
+              resolve({ dataUrl: rawDataUrl, base64: rawBase64 });
+            };
+            img.src = rawDataUrl;
           };
-          reader.readAsDataURL(f);
+          directReader.onerror = () => resolve({ dataUrl: '', base64: '' });
+          directReader.readAsDataURL(f);
         });
 
-        const { dataUrl, base64 } = await readBase64Promise(file);
-        document.getElementById("inputMediaUrl").value = dataUrl;
-        updateMediaModalLivePreview();
+        const res = await readBase64Promise(file);
+        dataUrl = res.dataUrl;
+        base64 = res.base64;
 
-        // Cloud Google Drive upload if backend is online
-        const apiUrl = getAdminApiUrl();
-        if (navigator.onLine && apiUrl && !apiUrl.includes("localhost")) {
-          showAdminToast("Mengunggah media ke Google Drive...", "info");
-          try {
-            const resp = await fetch(apiUrl, {
-              method: "POST",
-              headers: { "Content-Type": "text/plain;charset=utf-8" },
-              body: JSON.stringify({
-                action: "adminUploadMedia",
-                formId: currentFormId || DEFAULT_PRIMARY_FORM_ID,
-                category: "Media_Formulir",
-                name: file.name,
-                type: file.type,
-                base64: base64
-              })
-            });
-            const resJson = await resp.json();
-            if (resJson && resJson.success && resJson.fileUrl) {
-              document.getElementById("inputMediaUrl").value = resJson.fileUrl;
-              currentMediaEditing.fileId = resJson.fileId || "";
-              updateMediaModalLivePreview();
-              showAdminToast("Media berhasil disimpan di Google Drive (Folder Media_Formulir)!", "success");
-              return;
-            } else if (resJson && !resJson.success) {
-              console.warn("Drive upload notice:", resJson.error);
-              showAdminToast(resJson.error || "Gagal simpan ke Drive. Menggunakan draf lokal.", "warning");
-            }
-          } catch(netErr) {
-            console.log("Drive upload fallback to local dataUrl:", netErr);
-          }
+        if (!dataUrl) {
+          showAdminToast("Tidak dapat membaca berkas yang dipilih.", "error");
+          return;
         }
 
-        showAdminToast(`Berkas '${file.name}' siap dilampirkan.`, "success");
+        document.getElementById("inputMediaUrl").value = dataUrl;
+        updateMediaModalLivePreview();
+        showAdminToast(`Berkas '${file.name}' siap dilampirkan.`, "info");
       } catch (err) {
-        console.error("Direct upload error:", err);
-        showAdminToast("Gagal memproses berkas.", "error");
+        console.error("Local file read error:", err);
+        showAdminToast("Gagal memproses berkas lokal.", "error");
+        return;
+      }
+
+      // Background Google Drive Cloud Upload (Non-blocking & fail-safe)
+      const apiUrl = getAdminApiUrl();
+      if (navigator.onLine && apiUrl && !apiUrl.includes("localhost") && base64) {
+        showAdminToast("Menyimpan media ke Google Drive...", "info");
+        try {
+          const resp = await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              action: "adminUploadMedia",
+              formId: currentFormId || DEFAULT_PRIMARY_FORM_ID,
+              category: "Media_Formulir",
+              name: file.name,
+              type: file.type,
+              base64: base64
+            })
+          });
+
+          const rawText = await resp.text();
+          let resJson = null;
+          try {
+            resJson = JSON.parse(rawText);
+          } catch(pe) {
+            console.warn("Drive webhook non-JSON response:", rawText);
+          }
+
+          if (resJson && resJson.success && resJson.fileUrl) {
+            document.getElementById("inputMediaUrl").value = resJson.fileUrl;
+            currentMediaEditing.fileId = resJson.fileId || "";
+            updateMediaModalLivePreview();
+            showAdminToast("Media berhasil tersimpan di Google Drive!", "success");
+          } else if (resJson && !resJson.success) {
+            console.warn("Drive upload notice:", resJson.error);
+            showAdminToast(resJson.error || "Tersimpan sebagai draf media lokal.", "warning");
+          }
+        } catch(netErr) {
+          console.log("Drive upload network notice, using local draft dataUrl:", netErr);
+        }
       }
     }
 
