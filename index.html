@@ -4802,35 +4802,21 @@
       let sbSuccess = false;
       const idRespons = "RESP-" + activeFormId + "-" + Date.now() + "-" + Math.random().toString(36).substring(2, 6).toUpperCase();
 
-      // ⚡ FAST-PATH (< 50ms): Simpan langsung ke Supabase PostgreSQL & Storage Mandiri
+      // ⚡ FAST-PATH (< 50ms): Simpan langsung data transaksi penilaian ke Supabase PostgreSQL (0 bytes Supabase Storage)
       if (sb) {
         try {
-          // Upload berkas media/lampiran langsung ke Supabase Storage (pgsd-media)
+          // Berkas lampiran mahasiswa dikelola eksklusif di Google Drive (Folder: Lampiran_Mahasiswa)
           if (customUploadedFilesMap && Object.keys(customUploadedFilesMap).length > 0) {
             for (let fldId in customUploadedFilesMap) {
               const fileObj = customUploadedFilesMap[fldId];
-              if (fileObj && fileObj.dataUrl) {
-                try {
-                  const resBlob = await fetch(fileObj.dataUrl).then(r => r.blob());
-                  const cleanName = `${activeFormId}_${Date.now()}_${fileObj.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-                  const { data: upData, error: upErr } = await sb.storage
-                    .from('pgsd-media')
-                    .upload(`uploads/${cleanName}`, resBlob, { 
-                      contentType: fileObj.type || 'application/octet-stream', 
-                      upsert: true 
-                    });
-                  
-                  if (!upErr) {
-                    const { data: pubData } = sb.storage.from('pgsd-media').getPublicUrl(`uploads/${cleanName}`);
-                    if (pubData && pubData.publicUrl) {
-                      payload.customAnswers[fldId] = pubData.publicUrl;
-                      if (!payload.evaluasiDetail.uploadedFiles) payload.evaluasiDetail.uploadedFiles = {};
-                      payload.evaluasiDetail.uploadedFiles[fldId] = pubData.publicUrl;
-                    }
-                  }
-                } catch(e) {
-                  console.warn("Supabase storage upload notice:", e);
-                }
+              if (fileObj && fileObj.name) {
+                payload.customAnswers[fldId] = fileObj.name;
+                if (!payload.evaluasiDetail.uploadedFiles) payload.evaluasiDetail.uploadedFiles = {};
+                payload.evaluasiDetail.uploadedFiles[fldId] = {
+                  fileName: fileObj.name,
+                  fileSize: fileObj.size || 0,
+                  mimeType: fileObj.type || 'application/octet-stream'
+                };
               }
             }
           }

@@ -438,6 +438,8 @@ function doPost(e) {
     // Form Sandbox Operations (Per-Form Scoped)
     else if (action === "uploadSingleFile" || action === "adminUploadMedia") {
       result = handleDirectFileUpload(payload);
+    } else if (action === "deleteDriveFile" || action === "adminDeleteMedia") {
+      result = deleteDriveFile(payload);
     } else if (action === "submitAssessment") {
       result = submitAssessment(payload);
     } else if (action === "getInitialData") {
@@ -1117,13 +1119,34 @@ function isValidInstitutionalEmail(email, allowedDomainsStr) {
 /**
  * Upload File ke Google Drive secara Terstruktur
  */
-function saveUploadedFileToDrive(base64Data, fileName, mimeType, formId) {
+/**
+ * Upload File ke Google Drive secara Terstruktur dengan Manajemen Subfolder Otomatis
+ * Struktur Folder: {Parent_Drive_Folder} / {PIN_FORMULIR} / (Media_Formulir | Lampiran_Mahasiswa)
+ */
+function saveUploadedFileToDrive(base64Data, fileName, mimeType, formId, category) {
   try {
-    if (!base64Data || typeof base64Data !== 'string') return "";
+    if (!base64Data || typeof base64Data !== 'string') return null;
 
     const cleanFormId = String(formId || DEFAULT_FORM_ID).trim().toUpperCase();
-    const parentFolder = getOrCreateDriveFolder("Penilaian PGSD 5E - Dokumen");
+    
+    // Ambil nama folder kustom dari metadata form jika dikonfigurasi
+    let rootFolderName = "Penilaian PGSD 5E - Dokumen";
+    try {
+      const meta = getFormMetadata(cleanFormId);
+      if (meta && meta.driveFolder && meta.driveFolder.trim()) {
+        rootFolderName = meta.driveFolder.trim();
+      }
+    } catch(mErr) {}
+
+    const parentFolder = getOrCreateDriveFolder(rootFolderName);
     const formFolder = getOrCreateDriveSubfolder(parentFolder, cleanFormId);
+
+    // Kategori: "Media_Formulir" (admin) atau "Lampiran_Mahasiswa" (responden)
+    const categoryName = (category === "Media_Formulir" || category === "admin" || category === "form_media")
+      ? "Media_Formulir"
+      : "Lampiran_Mahasiswa";
+    
+    const targetFolder = getOrCreateDriveSubfolder(formFolder, categoryName);
 
     // Strip Data URL header if present (e.g. data:image/png;base64,...)
     let cleanBase64 = base64Data;
@@ -1135,7 +1158,7 @@ function saveUploadedFileToDrive(base64Data, fileName, mimeType, formId) {
     const decoded = Utilities.base64Decode(cleanBase64);
     const safeName = (fileName || ("berkas_" + Date.now())).replace(/[\\/:*?"<>|]/g, "_");
     const blob = Utilities.newBlob(decoded, mimeType || "application/octet-stream", safeName);
-    const file = formFolder.createFile(blob);
+    const file = targetFolder.createFile(blob);
 
     try {
       file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
@@ -1149,10 +1172,15 @@ function saveUploadedFileToDrive(base64Data, fileName, mimeType, formId) {
       ? `https://drive.google.com/uc?export=view&id=${fileId}`
       : file.getUrl();
 
-    return directUrl || file.getUrl();
+    return {
+      fileUrl: directUrl || file.getUrl(),
+      fileId: fileId,
+      fileName: safeName,
+      folderPath: `${rootFolderName} / ${cleanFormId} / ${categoryName}`
+    };
   } catch (e) {
     Logger.log("Error saveUploadedFileToDrive: " + e.toString());
-    return "";
+    return null;
   }
 }
 
@@ -1165,24 +1193,67 @@ function handleDirectFileUpload(payload) {
     const fileName = payload.name || payload.fileName || ("media_" + Date.now());
     const mimeType = payload.type || payload.mimeType || "application/octet-stream";
     const formId = payload.formId || DEFAULT_FORM_ID;
+    const category = payload.category || "Media_Formulir";
 
     if (!base64Data) {
       return { success: false, error: "Data berkas (base64) kosong." };
     }
 
-    const fileUrl = saveUploadedFileToDrive(base64Data, fileName, mimeType, formId);
-    if (!fileUrl) {
-      return { success: false, error: "Gagal menyimpan berkas ke Google Drive. Pastikan izin akses Drive aktif." };
+    const uploadRes = saveUploadedFileToDrive(base64Data, fileName, mimeType, formId, category);
+    if (!uploadRes || !uploadRes.fileUrl) {
+      return { success: false, error: "Gagal menyimpan berkas ke Google Drive. Pastikan izin akses Drive bot aktif." };
     }
 
     return {
       success: true,
-      fileUrl: fileUrl,
+      fileUrl: uploadRes.fileUrl,
+      fileId: uploadRes.fileId,
       fileName: fileName,
-      mimeType: mimeType
+      mimeType: mimeType,
+      folderPath: uploadRes.folderPath
     };
   } catch (e) {
     return { success: false, error: "Gagal memproses unggahan: " + e.toString() };
+  }
+}
+
+/**
+ * Hapus Berkas dari Google Drive secara Bersih Tanpa Jejak
+ */
+function deleteDriveFile(payload) {
+  try {
+    let target = payload?.fileId || payload?.fileUrl || payload?.url || (typeof payload === 'string' ? payload : '');
+    if (!target) {
+      return { success: false, error: "ID atau URL berkas kosong." };
+    }
+
+    let fileId = target;
+    if (target.includes("id=")) {
+      const match = target.match(/id=([a-zA-Z0-9_-]+)/);
+      if (match) fileId = match[1];
+    } else if (target.includes("/d/")) {
+      const match = target.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      if (match) fileId = match[1];
+    }
+
+    if (!fileId) {
+      return { success: false, error: "Tidak dapat menemukan ID berkas Google Drive." };
+    }
+
+    const file = DriveApp.getFileById(fileId);
+    if (file) {
+      file.setTrashed(true); // Pindahkan ke Trash agar bersih seketika
+      Logger.log("Drive file trashed successfully: " + fileId);
+      return {
+        success: true,
+        message: "Berkas Google Drive berhasil dihapus secara bersih.",
+        fileId: fileId
+      };
+    }
+    return { success: false, error: "Berkas tidak ditemukan di Google Drive." };
+  } catch (e) {
+    Logger.log("Error deleteDriveFile: " + e.toString());
+    return { success: false, error: "Gagal menghapus berkas Drive: " + e.toString() };
   }
 }
 

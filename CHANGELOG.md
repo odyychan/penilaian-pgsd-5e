@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.76] - 2026-08-25
+
+### 📁 Arsitektur Manajemen Media Google Drive Terstruktur & Zero Supabase Storage Footprint
+- **Manajemen Subfolder Otomatis & Terisolasi di Google Drive:**
+  - Menetapkan struktur folder Google Drive terorganisir per formulir dan per kategori:
+    - `{Parent_Folder} / {PIN_FORMULIR} / Media_Formulir /` $\rightarrow$ Khusus media gambar/video/audio formulir yang diunggah admin.
+    - `{Parent_Folder} / {PIN_FORMULIR} / Lampiran_Mahasiswa /` $\rightarrow$ Khusus berkas dokumen/PDF tugas yang diunggah responden/mahasiswa.
+- **Zero-Footprint Storage Supabase (Bebas Batas Kuota 1 GB):**
+  - Mengeliminasi penyimpanan binary blob di Supabase Storage sehingga kuota storage Supabase tetap 0 bytes dan tidak pernah penuh. Supabase PostgreSQL hanya menyimpan string URL & ID berkas Google Drive.
+- **Penghapusan Bersih Tanpa Jejak (*Zero-Trace Cleanup*):**
+  - Mengintegrasikan fungsi `adminDeleteMedia` dan `deleteDriveFile` sehingga saat media pertanyaan dihapus oleh admin, berkas fisik di Google Drive langsung dipindahkan ke Trash dan dibersihkan tanpa meninggalkan sampah file.
+
+---
+
 ## [2.2.75] - 2026-08-25
 
 ### 🚀 Implementasi Drag Auto-Scroll Engine (Auto-Scroll Halaman saat Menggeser Kartu)
