@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.15] - 2026-08-25
+
+### 🌳 Daftar Berhierarki Word/Docs & Penambahan Fitur Daftar Abjad (*Hierarchical Lists & Alphabet Feature*)
+- **Daftar Berhierarki Cerdas via Tab / Shift+Tab (*Smart Multilevel List Engine*):**
+  - Menekan tombol `Tab` pada baris nomor otomatis mengubah tingkat ke sub-abjad (`1.` $\rightarrow$ `   a.` $\rightarrow$ `      i.`).
+  - Menekan tombol `Tab` pada baris bullet otomatis mengubah bentuk bullet ke sub-tingkat (`•` $\rightarrow$ `   ◦` $\rightarrow$ `      ▪`).
+  - Menekan `Shift + Tab` otomatis menurunkan tingkat kembali ke susunan induk sebelumnya.
+  - Penekanan tombol `Enter` secara cerdas melanjutkan butir berikutnya sesuai abjad, angka, romawi, atau bullet, serta otomatis membersihkan baris kosong saat ditekan dua kali.
+- **Penambahan Tombol & Pintasan Daftar Abjad (*Alphabetical List Tool*):**
+  - Menghadirkan tombol **"A."** pada bilah format melayang dengan pintasan `Ctrl + Shift + 9`.
+  - Format butir abjad (`A.`, `B.`, `C.`, dst.) terintegrasi penuh ke dalam mesin *Word hanging indent* dan pratinjau langsung.
+
+---
+
 ## [2.3.14] - 2026-08-25
 
 ### 📝 Format Indentasi Menggantung Word & Penyederhanaan Bilah Format (*Hanging Indent Typography Engine*)

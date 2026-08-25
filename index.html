@@ -1132,26 +1132,45 @@
           continue;
         }
 
-        const bulletMatch = line.match(/^(\s*)(?:[•\-\x2A])\s+(.*)$/);
-        const numberMatch = line.match(/^(\s*)(\d+)[\.\)]\s+(.*)$/);
+        // 1. Bullets (•, ◦, ▪, ▫, -, *)
+        const bulletMatch = line.match(/^(\s*)([•◦▪▫\-\*])\s+(.*)$/);
+        // 2. Numbered (1., 2., 1.1., etc.)
+        const numberMatch = line.match(/^(\s*)(\d+(?:\.\d+)*)[\.\)]\s+(.*)$/);
+        // 3. Alphabetical (A., B., C., or a., b., c.)
+        const alphaMatch = line.match(/^(\s*)([A-Za-z])[\.\)]\s+(.*)$/);
+        // 4. Roman Numerals (i., ii., iii., IV., etc.)
+        const romanMatch = line.match(/^(\s*)([ivxlcdmIVXLCDM]+)[\.\)]\s+(.*)$/);
 
         if (bulletMatch) {
           const indentSpaces = bulletMatch[1].length;
-          const indentLevel = Math.min(4, Math.floor(indentSpaces / 2));
-          const content = bulletMatch[2];
-          processedLines.push(`<div class="flex items-start gap-2.5 my-1 text-left leading-relaxed" style="padding-left: ${indentLevel * 1.25}rem;"><span class="text-indigo-600 font-bold select-none shrink-0 min-w-[0.75rem] text-center pt-0.5">•</span><span class="flex-1 min-w-0 break-words leading-relaxed">${content}</span></div>`);
+          const indentLevel = Math.min(6, Math.floor(indentSpaces / 2));
+          const symbol = bulletMatch[2] === '-' || bulletMatch[2] === '*' ? '•' : bulletMatch[2];
+          const content = bulletMatch[3];
+          processedLines.push(`<div class="flex items-start gap-2.5 my-1 text-left leading-relaxed" style="padding-left: ${indentLevel * 1.5}rem;"><span class="text-indigo-600 font-bold select-none shrink-0 min-w-[0.85rem] text-center pt-0.5">${symbol}</span><span class="flex-1 min-w-0 break-words leading-relaxed">${content}</span></div>`);
         } else if (numberMatch) {
           const indentSpaces = numberMatch[1].length;
-          const indentLevel = Math.min(4, Math.floor(indentSpaces / 2));
+          const indentLevel = Math.min(6, Math.floor(indentSpaces / 2));
           const num = numberMatch[2];
           const content = numberMatch[3];
-          processedLines.push(`<div class="flex items-start gap-2.5 my-1 text-left leading-relaxed" style="padding-left: ${indentLevel * 1.25}rem;"><span class="font-bold text-indigo-700 font-mono text-xs sm:text-sm select-none shrink-0 min-w-[1.25rem] text-right pt-0.5">${num}.</span><span class="flex-1 min-w-0 break-words leading-relaxed">${content}</span></div>`);
+          processedLines.push(`<div class="flex items-start gap-2.5 my-1 text-left leading-relaxed" style="padding-left: ${indentLevel * 1.5}rem;"><span class="font-bold text-indigo-700 font-mono text-xs sm:text-sm select-none shrink-0 min-w-[1.4rem] text-right pt-0.5">${num}.</span><span class="flex-1 min-w-0 break-words leading-relaxed">${content}</span></div>`);
+        } else if (alphaMatch) {
+          const indentSpaces = alphaMatch[1].length;
+          const indentLevel = Math.min(6, Math.floor(indentSpaces / 2));
+          const letter = alphaMatch[2];
+          const content = alphaMatch[3];
+          processedLines.push(`<div class="flex items-start gap-2.5 my-1 text-left leading-relaxed" style="padding-left: ${indentLevel * 1.5}rem;"><span class="font-bold text-indigo-700 font-mono text-xs sm:text-sm select-none shrink-0 min-w-[1.4rem] text-right pt-0.5">${letter}.</span><span class="flex-1 min-w-0 break-words leading-relaxed">${content}</span></div>`);
+        } else if (romanMatch) {
+          const indentSpaces = romanMatch[1].length;
+          const indentLevel = Math.min(6, Math.floor(indentSpaces / 2));
+          const roman = romanMatch[2];
+          const content = romanMatch[3];
+          processedLines.push(`<div class="flex items-start gap-2.5 my-1 text-left leading-relaxed" style="padding-left: ${indentLevel * 1.5}rem;"><span class="font-bold text-indigo-700 font-mono text-xs sm:text-sm select-none shrink-0 min-w-[1.4rem] text-right pt-0.5">${roman}.</span><span class="flex-1 min-w-0 break-words leading-relaxed">${content}</span></div>`);
         } else {
           const indentMatch = line.match(/^(\s{2,})(.*)$/);
           if (indentMatch && indentMatch[2].trim()) {
             const indentSpaces = indentMatch[1].length;
-            const indentLevel = Math.min(4, Math.floor(indentSpaces / 2));
-            processedLines.push(`<div class="my-1 leading-relaxed pl-5" style="padding-left: ${(indentLevel + 1) * 1.25}rem;">${indentMatch[2]}</div>`);
+            const indentLevel = Math.min(6, Math.floor(indentSpaces / 2));
+            processedLines.push(`<div class="my-1 leading-relaxed pl-5" style="padding-left: ${(indentLevel + 1) * 1.5}rem;">${indentMatch[2]}</div>`);
           } else {
             if (rawLines.length > 1) {
               processedLines.push(`<div class="my-0.5 leading-relaxed">${line}</div>`);

@@ -2786,26 +2786,45 @@ function getOrCreateFolder(folderName) {
           continue;
         }
 
-        const bulletMatch = line.match(/^(\s*)(?:[•\-\x2A])\s+(.*)$/);
-        const numberMatch = line.match(/^(\s*)(\d+)[\.\)]\s+(.*)$/);
+        // 1. Bullets (•, ◦, ▪, ▫, -, *)
+        const bulletMatch = line.match(/^(\s*)([•◦▪▫\-\*])\s+(.*)$/);
+        // 2. Numbered (1., 2., 1.1., etc.)
+        const numberMatch = line.match(/^(\s*)(\d+(?:\.\d+)*)[\.\)]\s+(.*)$/);
+        // 3. Alphabetical (A., B., C., or a., b., c.)
+        const alphaMatch = line.match(/^(\s*)([A-Za-z])[\.\)]\s+(.*)$/);
+        // 4. Roman Numerals (i., ii., iii., IV., etc.)
+        const romanMatch = line.match(/^(\s*)([ivxlcdmIVXLCDM]+)[\.\)]\s+(.*)$/);
 
         if (bulletMatch) {
           const indentSpaces = bulletMatch[1].length;
-          const indentLevel = Math.min(4, Math.floor(indentSpaces / 2));
-          const content = bulletMatch[2];
-          processedLines.push(`<div class="flex items-start gap-2.5 my-1 text-left leading-relaxed" style="padding-left: ${indentLevel * 1.25}rem;"><span class="text-indigo-600 font-bold select-none shrink-0 min-w-[0.75rem] text-center pt-0.5">•</span><span class="flex-1 min-w-0 break-words leading-relaxed">${content}</span></div>`);
+          const indentLevel = Math.min(6, Math.floor(indentSpaces / 2));
+          const symbol = bulletMatch[2] === '-' || bulletMatch[2] === '*' ? '•' : bulletMatch[2];
+          const content = bulletMatch[3];
+          processedLines.push(`<div class="flex items-start gap-2.5 my-1 text-left leading-relaxed" style="padding-left: ${indentLevel * 1.5}rem;"><span class="text-indigo-600 font-bold select-none shrink-0 min-w-[0.85rem] text-center pt-0.5">${symbol}</span><span class="flex-1 min-w-0 break-words leading-relaxed">${content}</span></div>`);
         } else if (numberMatch) {
           const indentSpaces = numberMatch[1].length;
-          const indentLevel = Math.min(4, Math.floor(indentSpaces / 2));
+          const indentLevel = Math.min(6, Math.floor(indentSpaces / 2));
           const num = numberMatch[2];
           const content = numberMatch[3];
-          processedLines.push(`<div class="flex items-start gap-2.5 my-1 text-left leading-relaxed" style="padding-left: ${indentLevel * 1.25}rem;"><span class="font-bold text-indigo-700 font-mono text-xs sm:text-sm select-none shrink-0 min-w-[1.25rem] text-right pt-0.5">${num}.</span><span class="flex-1 min-w-0 break-words leading-relaxed">${content}</span></div>`);
+          processedLines.push(`<div class="flex items-start gap-2.5 my-1 text-left leading-relaxed" style="padding-left: ${indentLevel * 1.5}rem;"><span class="font-bold text-indigo-700 font-mono text-xs sm:text-sm select-none shrink-0 min-w-[1.4rem] text-right pt-0.5">${num}.</span><span class="flex-1 min-w-0 break-words leading-relaxed">${content}</span></div>`);
+        } else if (alphaMatch) {
+          const indentSpaces = alphaMatch[1].length;
+          const indentLevel = Math.min(6, Math.floor(indentSpaces / 2));
+          const letter = alphaMatch[2];
+          const content = alphaMatch[3];
+          processedLines.push(`<div class="flex items-start gap-2.5 my-1 text-left leading-relaxed" style="padding-left: ${indentLevel * 1.5}rem;"><span class="font-bold text-indigo-700 font-mono text-xs sm:text-sm select-none shrink-0 min-w-[1.4rem] text-right pt-0.5">${letter}.</span><span class="flex-1 min-w-0 break-words leading-relaxed">${content}</span></div>`);
+        } else if (romanMatch) {
+          const indentSpaces = romanMatch[1].length;
+          const indentLevel = Math.min(6, Math.floor(indentSpaces / 2));
+          const roman = romanMatch[2];
+          const content = romanMatch[3];
+          processedLines.push(`<div class="flex items-start gap-2.5 my-1 text-left leading-relaxed" style="padding-left: ${indentLevel * 1.5}rem;"><span class="font-bold text-indigo-700 font-mono text-xs sm:text-sm select-none shrink-0 min-w-[1.4rem] text-right pt-0.5">${roman}.</span><span class="flex-1 min-w-0 break-words leading-relaxed">${content}</span></div>`);
         } else {
           const indentMatch = line.match(/^(\s{2,})(.*)$/);
           if (indentMatch && indentMatch[2].trim()) {
             const indentSpaces = indentMatch[1].length;
-            const indentLevel = Math.min(4, Math.floor(indentSpaces / 2));
-            processedLines.push(`<div class="my-1 leading-relaxed pl-5" style="padding-left: ${(indentLevel + 1) * 1.25}rem;">${indentMatch[2]}</div>`);
+            const indentLevel = Math.min(6, Math.floor(indentSpaces / 2));
+            processedLines.push(`<div class="my-1 leading-relaxed pl-5" style="padding-left: ${(indentLevel + 1) * 1.5}rem;">${indentMatch[2]}</div>`);
           } else {
             if (rawLines.length > 1) {
               processedLines.push(`<div class="my-0.5 leading-relaxed">${line}</div>`);
@@ -2886,7 +2905,7 @@ function getOrCreateFolder(folderName) {
     // =========================================================================
     // UNIVERSAL GOOGLE FORMS RICH TEXT FORMATTER (B, I, U, Link, Remove Format, Math)
     // =========================================================================
-    function applyUniversalTextFormat(inputSelector, formatType, callback) {
+        function applyUniversalTextFormat(inputSelector, formatType, callback) {
       const input = typeof inputSelector === 'string' ? document.querySelector(inputSelector) : inputSelector;
       if (!input) return;
 
@@ -2896,8 +2915,8 @@ function getOrCreateFolder(folderName) {
 
       pushUndoSnapshot(`Format Teks (${formatType})`);
 
-      // 1. Line-based Transformations: Bullet, Number, Indent, Outdent
-      if (['bullet', 'number', 'indent', 'outdent'].includes(formatType)) {
+      // 1. Line-based Transformations: Bullet, Number, Alphabet, Indent, Outdent
+      if (['bullet', 'number', 'alpha', 'indent', 'outdent'].includes(formatType)) {
         const lineStart = val.lastIndexOf('\n', start - 1) + 1;
         let lineEnd = val.indexOf('\n', end);
         if (lineEnd === -1) lineEnd = val.length;
@@ -2907,15 +2926,16 @@ function getOrCreateFolder(folderName) {
         let newLines = [];
 
         if (formatType === 'bullet') {
-          const allBulleted = lines.every(l => /^\s*•\s+/.test(l));
+          const allBulleted = lines.every(l => /^\s*[•◦▪▫\-\*]\s+/.test(l));
           if (allBulleted) {
-            newLines = lines.map(l => l.replace(/^(\s*)•\s+/, '$1'));
+            newLines = lines.map(l => l.replace(/^(\s*)[•◦▪▫\-\*]\s+/, '$1'));
           } else {
             newLines = lines.map(l => {
-              const cleaned = l.replace(/^(\s*)(?:•|\d+[\.\)]|[\-\x2A])\s+/, '$1');
+              const cleaned = l.replace(/^(\s*)(?:[•◦▪▫\-\*]|(?:\d+|[A-Za-z]|[ivxlcdm]+)[\.\)])\s+/, '$1');
               const leadingSpaces = cleaned.match(/^\s*/)[0];
               const textContent = cleaned.substring(leadingSpaces.length);
-              return `${leadingSpaces}• ${textContent}`;
+              const symbol = leadingSpaces.length >= 4 ? '▪' : (leadingSpaces.length >= 2 ? '◦' : '•');
+              return `${leadingSpaces}${symbol} ${textContent}`;
             });
           }
         } else if (formatType === 'number') {
@@ -2925,10 +2945,24 @@ function getOrCreateFolder(folderName) {
           } else {
             let num = 1;
             newLines = lines.map(l => {
-              const cleaned = l.replace(/^(\s*)(?:•|\d+[\.\)]|[\-\x2A])\s+/, '$1');
+              const cleaned = l.replace(/^(\s*)(?:[•◦▪▫\-\*]|(?:\d+|[A-Za-z]|[ivxlcdm]+)[\.\)])\s+/, '$1');
               const leadingSpaces = cleaned.match(/^\s*/)[0];
               const textContent = cleaned.substring(leadingSpaces.length);
               return `${leadingSpaces}${num++}. ${textContent}`;
+            });
+          }
+        } else if (formatType === 'alpha') {
+          const allAlpha = lines.every(l => /^\s*[A-Za-z]\.\s+/.test(l));
+          if (allAlpha) {
+            newLines = lines.map(l => l.replace(/^(\s*)[A-Za-z]\.\s+/, '$1'));
+          } else {
+            let charCode = 65; // 'A'
+            newLines = lines.map(l => {
+              const cleaned = l.replace(/^(\s*)(?:[•◦▪▫\-\*]|(?:\d+|[A-Za-z]|[ivxlcdm]+)[\.\)])\s+/, '$1');
+              const leadingSpaces = cleaned.match(/^\s*/)[0];
+              const textContent = cleaned.substring(leadingSpaces.length);
+              const letter = String.fromCharCode(charCode++);
+              return `${leadingSpaces}${letter}. ${textContent}`;
             });
           }
         } else if (formatType === 'indent') {
@@ -3349,44 +3383,163 @@ function getOrCreateFolder(folderName) {
         const end = target.selectionEnd || 0;
         const val = target.value || '';
 
-        // Tab / Shift+Tab for Indent / Outdent
+                // 1. Hierarchical Tab / Shift+Tab List Indentation (Word & Google Docs Engine)
         if (e.key === 'Tab') {
           e.preventDefault();
-          if (e.shiftKey) {
-            applyUniversalTextFormat(target, 'outdent');
-          } else {
-            if (end > start && val.substring(start, end).includes('\n')) {
-              applyUniversalTextFormat(target, 'indent');
+          const lineStart = val.lastIndexOf('\n', start - 1) + 1;
+          let lineEnd = val.indexOf('\n', end);
+          if (lineEnd === -1) lineEnd = val.length;
+
+          const targetBlock = val.substring(lineStart, lineEnd);
+          const lines = targetBlock.split('\n');
+
+          const transformedLines = lines.map(line => {
+            if (e.shiftKey) {
+              // SHIFT + TAB: DECREASE INDENTATION (OUTDENT LEVEL)
+              // Level 3 roman i. -> Level 2 letter a.
+              const romanMatch = line.match(/^(\s{4,})([ivxlcdm]+)\.\s+(.*)$/i);
+              if (romanMatch) {
+                return `  a. ${romanMatch[3]}`;
+              }
+              // Level 2 letter a. -> Level 1 number 1.
+              const alphaMatch = line.match(/^(\s{2,})([a-z])\.\s+(.*)$/);
+              if (alphaMatch) {
+                return `1. ${alphaMatch[3]}`;
+              }
+              // Level 2 number 1. (under Alpha A.) -> Level 1 Alpha A.
+              const numSubMatch = line.match(/^(\s{2,})(\d+)\.\s+(.*)$/);
+              if (numSubMatch) {
+                return `A. ${numSubMatch[3]}`;
+              }
+              // Level 3 bullet ▪ -> Level 2 bullet ◦
+              const squareBulletMatch = line.match(/^(\s{4,})[▪▫]\s+(.*)$/);
+              if (squareBulletMatch) {
+                return `  ◦ ${squareBulletMatch[2]}`;
+              }
+              // Level 2 bullet ◦ -> Level 1 bullet •
+              const openBulletMatch = line.match(/^(\s{2,})[◦\-]\s+(.*)$/);
+              if (openBulletMatch) {
+                return `• ${openBulletMatch[2]}`;
+              }
+              // Generic whitespace outdent
+              if (line.startsWith('  ')) return line.substring(2);
+              if (line.startsWith(' ')) return line.substring(1);
+              if (line.startsWith('\t')) return line.substring(1);
+              return line;
             } else {
-              target.value = val.substring(0, start) + '  ' + val.substring(end);
-              target.setSelectionRange(start + 2, start + 2);
-              target.dispatchEvent(new Event('input', { bubbles: true }));
+              // TAB: INCREASE INDENTATION (HIERARCHICAL INDENT LEVEL)
+              // Level 1 Root Number (1.) -> Level 2 Letter (  a.)
+              const rootNumMatch = line.match(/^(\s*)(\d+)\.\s+(.*)$/);
+              if (rootNumMatch && rootNumMatch[1].length < 2) {
+                return `  a. ${rootNumMatch[3]}`;
+              }
+              // Level 2 Letter (  a.) -> Level 3 Roman (    i.)
+              const alphaMatch = line.match(/^(\s{2,3})([a-z])\.\s+(.*)$/);
+              if (alphaMatch) {
+                return `    i. ${alphaMatch[3]}`;
+              }
+              // Level 1 Root Alpha (A.) -> Level 2 Sub-Number (  1.)
+              const rootAlphaMatch = line.match(/^(\s*)([A-Z])\.\s+(.*)$/);
+              if (rootAlphaMatch && rootAlphaMatch[1].length < 2) {
+                return `  1. ${rootAlphaMatch[3]}`;
+              }
+              // Level 2 Sub-Number (  1.) -> Level 3 Sub-Letter (    a.)
+              if (rootNumMatch && rootNumMatch[1].length >= 2) {
+                return `    a. ${rootNumMatch[3]}`;
+              }
+              // Level 1 Root Bullet (•) -> Level 2 Sub-Bullet (  ◦)
+              const rootBulletMatch = line.match(/^(\s*)•\s+(.*)$/);
+              if (rootBulletMatch && rootBulletMatch[1].length < 2) {
+                return `  ◦ ${rootBulletMatch[2]}`;
+              }
+              // Level 2 Sub-Bullet (  ◦) -> Level 3 Sub-Bullet (    ▪)
+              const subBulletMatch = line.match(/^(\s{2,3})[◦\-]\s+(.*)$/);
+              if (subBulletMatch) {
+                return `    ▪ ${subBulletMatch[2]}`;
+              }
+              // Non-list line: simple 2-space indent
+              return `  ${line}`;
             }
-          }
+          });
+
+          const replacement = transformedLines.join('\n');
+          target.value = val.substring(0, lineStart) + replacement + val.substring(lineEnd);
+          target.setSelectionRange(lineStart + replacement.length, lineStart + replacement.length);
+          target.dispatchEvent(new Event('input', { bubbles: true }));
           return;
         }
 
-        // Enter key smart continuation for Bullet and Numbered lists (Google Docs behavior)
+        // 2. Smart Enter Key List Continuation (Numbers, Letters, Romans, Bullets)
         if (e.key === 'Enter' && target.tagName === 'TEXTAREA' && !e.shiftKey && !isCtrlOrCmd) {
           const lineStart = val.lastIndexOf('\n', start - 1) + 1;
           const currentLine = val.substring(lineStart, start);
-          const bulletMatch = currentLine.match(/^(\s*)•\s*(.*)$/);
-          const numberMatch = currentLine.match(/^(\s*)(\d+)\.\s*(.*)$/);
 
-          if (bulletMatch) {
+          const bulletMatch = currentLine.match(/^(\s*)([•◦▪▫\-\*])\s*(.*)$/);
+          const numberMatch = currentLine.match(/^(\s*)(\d+)\.\s*(.*)$/);
+          const alphaUpperMatch = currentLine.match(/^(\s*)([A-Z])\.\s*(.*)$/);
+          const alphaLowerMatch = currentLine.match(/^(\s*)([a-z])\.\s*(.*)$/);
+          const romanMatch = currentLine.match(/^(\s*)(i|ii|iii|iv|v|vi|vii|viii|ix|x)\.\s*(.*)$/i);
+
+          if (romanMatch) {
             e.preventDefault();
-            const indent = bulletMatch[1];
-            const content = bulletMatch[2];
+            const indent = romanMatch[1];
+            const currentRoman = romanMatch[2].toLowerCase();
+            const content = romanMatch[3];
             if (content.trim() === '') {
-              // Empty bullet item on Enter: remove bullet and insert plain newline
+              // Outdent on empty Enter
+              if (indent.length >= 4) {
+                target.value = val.substring(0, lineStart) + '  a. ' + val.substring(start);
+                target.setSelectionRange(lineStart + 5, lineStart + 5);
+              } else {
+                target.value = val.substring(0, lineStart) + val.substring(start);
+                target.setSelectionRange(lineStart, lineStart);
+              }
+            } else {
+              const romanOrder = ['i','ii','iii','iv','v','vi','vii','viii','ix','x','xi','xii'];
+              const rIdx = romanOrder.indexOf(currentRoman);
+              const nextRoman = rIdx !== -1 && rIdx < romanOrder.length - 1 ? romanOrder[rIdx + 1] : 'i';
+              const nextStr = `\n${indent}${nextRoman}. `;
+              target.value = val.substring(0, start) + nextStr + val.substring(end);
+              target.setSelectionRange(start + nextStr.length, start + nextStr.length);
+            }
+            target.dispatchEvent(new Event('input', { bubbles: true }));
+            autoResizeTextarea(target);
+            return;
+          } else if (alphaLowerMatch) {
+            e.preventDefault();
+            const indent = alphaLowerMatch[1];
+            const charCode = alphaLowerMatch[2].charCodeAt(0);
+            const content = alphaLowerMatch[3];
+            if (content.trim() === '') {
+              if (indent.length >= 2) {
+                target.value = val.substring(0, lineStart) + '1. ' + val.substring(start);
+                target.setSelectionRange(lineStart + 3, lineStart + 3);
+              } else {
+                target.value = val.substring(0, lineStart) + val.substring(start);
+                target.setSelectionRange(lineStart, lineStart);
+              }
+            } else {
+              const nextChar = charCode < 122 ? String.fromCharCode(charCode + 1) : 'a';
+              const nextStr = `\n${indent}${nextChar}. `;
+              target.value = val.substring(0, start) + nextStr + val.substring(end);
+              target.setSelectionRange(start + nextStr.length, start + nextStr.length);
+            }
+            target.dispatchEvent(new Event('input', { bubbles: true }));
+            autoResizeTextarea(target);
+            return;
+          } else if (alphaUpperMatch) {
+            e.preventDefault();
+            const indent = alphaUpperMatch[1];
+            const charCode = alphaUpperMatch[2].charCodeAt(0);
+            const content = alphaUpperMatch[3];
+            if (content.trim() === '') {
               target.value = val.substring(0, lineStart) + val.substring(start);
               target.setSelectionRange(lineStart, lineStart);
             } else {
-              // Insert next bullet
-              const nextBullet = `\n${indent}• `;
-              target.value = val.substring(0, start) + nextBullet + val.substring(end);
-              const nextCursor = start + nextBullet.length;
-              target.setSelectionRange(nextCursor, nextCursor);
+              const nextChar = charCode < 90 ? String.fromCharCode(charCode + 1) : 'A';
+              const nextStr = `\n${indent}${nextChar}. `;
+              target.value = val.substring(0, start) + nextStr + val.substring(end);
+              target.setSelectionRange(start + nextStr.length, start + nextStr.length);
             }
             target.dispatchEvent(new Event('input', { bubbles: true }));
             autoResizeTextarea(target);
@@ -3397,20 +3550,54 @@ function getOrCreateFolder(folderName) {
             const currentNum = parseInt(numberMatch[2], 10);
             const content = numberMatch[3];
             if (content.trim() === '') {
-              // Empty numbered item on Enter: remove number and insert plain newline
-              target.value = val.substring(0, lineStart) + val.substring(start);
-              target.setSelectionRange(lineStart, lineStart);
+              if (indent.length >= 2) {
+                target.value = val.substring(0, lineStart) + 'A. ' + val.substring(start);
+                target.setSelectionRange(lineStart + 3, lineStart + 3);
+              } else {
+                target.value = val.substring(0, lineStart) + val.substring(start);
+                target.setSelectionRange(lineStart, lineStart);
+              }
             } else {
-              // Insert next number
               const nextNumber = `\n${indent}${currentNum + 1}. `;
               target.value = val.substring(0, start) + nextNumber + val.substring(end);
-              const nextCursor = start + nextNumber.length;
-              target.setSelectionRange(nextCursor, nextCursor);
+              target.setSelectionRange(start + nextNumber.length, start + nextNumber.length);
+            }
+            target.dispatchEvent(new Event('input', { bubbles: true }));
+            autoResizeTextarea(target);
+            return;
+          } else if (bulletMatch) {
+            e.preventDefault();
+            const indent = bulletMatch[1];
+            const bulletSymbol = bulletMatch[2];
+            const content = bulletMatch[3];
+            if (content.trim() === '') {
+              if (indent.length >= 4) {
+                target.value = val.substring(0, lineStart) + '  ◦ ' + val.substring(start);
+                target.setSelectionRange(lineStart + 4, lineStart + 4);
+              } else if (indent.length >= 2) {
+                target.value = val.substring(0, lineStart) + '• ' + val.substring(start);
+                target.setSelectionRange(lineStart + 2, lineStart + 2);
+              } else {
+                target.value = val.substring(0, lineStart) + val.substring(start);
+                target.setSelectionRange(lineStart, lineStart);
+              }
+            } else {
+              const nextBullet = `\n${indent}${bulletSymbol} `;
+              target.value = val.substring(0, start) + nextBullet + val.substring(end);
+              target.setSelectionRange(start + nextBullet.length, start + nextBullet.length);
             }
             target.dispatchEvent(new Event('input', { bubbles: true }));
             autoResizeTextarea(target);
             return;
           }
+        }
+
+                // 8. Ctrl + Shift + 9 -> Alphabet List (A.)
+        if (isCtrlOrCmd && e.shiftKey && (e.key === '9' || e.code === 'Digit9')) {
+          e.preventDefault();
+          e.stopPropagation();
+          applyUniversalTextFormat(target, 'alpha');
+          return;
         }
 
         // 1. Ctrl + B -> Bold
@@ -11733,6 +11920,17 @@ function getOrCreateFolder(folderName) {
       <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M7 6h13M7 12h13M7 18h13M3 5v2m-1 0h2m-2 5h2v2H2m0 4h2v2H2"></path>
       </svg>
+    </button>
+
+    <!-- Alphabet List (A.) -->
+    <button 
+      type="button" 
+      onmousedown="event.preventDefault()"
+      onclick="applyActiveFieldFormat('alpha')" 
+      class="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-zinc-700 font-mono font-bold text-xs sm:text-[13px] shrink-0" 
+      title="Daftar Abjad / Alphabet List (Ctrl + Shift + 9)"
+    >
+      A.
     </button>
 
     <div class="h-4 w-px bg-zinc-200 mx-0.5 shrink-0"></div>
