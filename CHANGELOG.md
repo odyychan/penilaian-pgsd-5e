@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.8] - 2026-08-25
+
+### 🖼️ Optimasi Skala & Dimensi Galeri Foto (*Zero-Cropping Responsive Gallery*)
+- **Peniadaan Pemotongan Gambar (*Object Contain vs Object Cover*):**
+  - Mengubah perenderan gambar dari `aspect-square object-cover` (yang sebelumnya memotong dan men-zoom foto/screenshot) menjadi `object-contain` dengan proporsi alami penuh 100% tanpa ada bagian yang terpotong.
+- **Pengaturan Dimensi & Grid Ergonomis:**
+  - Mengatur batas tinggi maksimal yang proporsional (`h-36 sm:h-44` untuk 2 gambar, `h-32 sm:h-36` untuk 3 gambar, `h-24 sm:h-28` untuk 4+ gambar) dengan pembungkus terpusat (`max-w-xl` hingga `max-w-3xl`).
+  - Menyelaraskan tampilan galeri pada formulir mahasiswa (`index.html`) dan pratinjau kanvas admin (`admin.html`).
+
+---
+
 ## [2.3.7] - 2026-08-25
 
 ### 💬 Penyederhanaan Total Redaksi Teks & Deskripsi Panel Admin (*Human-First Copywriting*)
