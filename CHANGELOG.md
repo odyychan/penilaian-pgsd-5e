@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.2.79] - 2026-08-25
+
+### 🔗 Integrasi Penuh Webhook Google Apps Script Web App Terotorisasi
+- **Penyelarasan URL Webhook Produksi:**
+  - Memperbarui `DEFAULT_API_URL` di `admin.html` dan `index.html` dengan deployment Apps Script resmi yang telah diotorisasi Google Drive (`...j2jlvoQ/exec`).
+- **Verifikasi Pengujian Berhasil:**
+  - Pengujian live endpoint berhasil mengunggah berkas gambar ke subfolder Google Drive `Penilaian PGSD 5E - Dokumen / {PIN} / Media_Formulir/` dan mengembalikan URL pratinjau publik yang valid.
+
+---
+
 ## [2.2.78] - 2026-08-25
 
 ### 🔧 Perbaikan Endpoint Pengunggahan Google Drive & Fungsi Otorisasi Apps Script
