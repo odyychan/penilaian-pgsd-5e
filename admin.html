@@ -2630,14 +2630,53 @@ function getOrCreateFolder(folderName) {
     function smartMathFormat(text) {
       if (!text || typeof text !== 'string') return "";
 
-      // 1. Convert Markdown formatting (Bold, Italic, Link)
-      let res = text
+      // 1. Check if text has multiline bullet/number or indentation
+      const hasLines = text.includes('\n');
+      let res = text;
+
+      if (hasLines) {
+        const rawLines = text.split('\n');
+        let processedLines = [];
+
+        for (let i = 0; i < rawLines.length; i++) {
+          const line = rawLines[i];
+          const bulletMatch = line.match(/^(\s*)(?:[•\-\x2A])\s+(.*)$/);
+          const numberMatch = line.match(/^(\s*)(\d+)[\.\)]\s+(.*)$/);
+
+          if (bulletMatch) {
+            const indentSpaces = bulletMatch[1].length;
+            const indentLevel = Math.min(4, Math.floor(indentSpaces / 2));
+            const content = bulletMatch[2];
+            processedLines.push(`<div class="flex items-start gap-2 my-0.5 leading-relaxed" style="padding-left: ${indentLevel * 1.25}rem;"><span class="text-indigo-600 font-bold select-none shrink-0">•</span><span class="flex-1 min-w-0">${content}</span></div>`);
+          } else if (numberMatch) {
+            const indentSpaces = numberMatch[1].length;
+            const indentLevel = Math.min(4, Math.floor(indentSpaces / 2));
+            const num = numberMatch[2];
+            const content = numberMatch[3];
+            processedLines.push(`<div class="flex items-start gap-2 my-0.5 leading-relaxed" style="padding-left: ${indentLevel * 1.25}rem;"><span class="text-indigo-600 font-semibold font-mono text-xs select-none shrink-0 pt-0.5">${num}.</span><span class="flex-1 min-w-0">${content}</span></div>`);
+          } else {
+            const indentMatch = line.match(/^(\s{2,})(.*)$/);
+            if (indentMatch && indentMatch[2].trim()) {
+              const indentSpaces = indentMatch[1].length;
+              const indentLevel = Math.min(4, Math.floor(indentSpaces / 2));
+              processedLines.push(`<div class="my-0.5 leading-relaxed" style="padding-left: ${indentLevel * 1.25}rem;">${indentMatch[2]}</div>`);
+            } else {
+              processedLines.push(line);
+            }
+          }
+        }
+        res = processedLines.join('\n');
+      }
+
+      // 2. Convert Markdown formatting (Bold, Italic, Underline, Link)
+      res = res
         .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
         .replace(/(^|[^\*])\*([^*]+)\*([^\*]|$)/g, '$1<em>$2</em>$3')
+        .replace(/<u>([^<]+)<\/u>/gi, '<u>$1</u>')
         .replace(/\[([^\]]+)\]\(((?:https?:\/\/|\/)[^\s\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-800 underline font-semibold">$1</a>');
 
-      // 2. Auto-wrap unwrapped LaTeX math symbols so they always render beautifully
-      res = res.replace(/(?<!\$|\\|\w)(\\(?:rightarrow|leftarrow|Rightarrow|Leftarrow|Leftrightarrow|pm|approx|neq|le|ge|times|div|cdot|infty|deg|alpha|beta|gamma|theta|pi|Sigma|mu|sigma)(?![a-zA-Z]))(?!\$)/g, '$$$1$$');
+      // 3. Auto-wrap unwrapped LaTeX math symbols so they always render beautifully
+      res = res.replace(/(?<!\$|\\|\w)(\\(?:rightarrow|leftarrow|Rightarrow|Leftarrow|Leftrightarrow|pm|approx|neq|le|ge|times|div|cdot|infty|deg|alpha|beta|gamma|theta|pi|Sigma|mu|sigma)(?![a-zA-Z]))(?!\$)/g, '$$1$');
 
       return res;
     }
@@ -2704,10 +2743,66 @@ function getOrCreateFolder(folderName) {
       const start = typeof input.selectionStart === 'number' ? input.selectionStart : 0;
       const end = typeof input.selectionEnd === 'number' ? input.selectionEnd : 0;
       const val = input.value || "";
-      const selected = val.substring(start, end);
 
       pushUndoSnapshot(`Format Teks (${formatType})`);
 
+      // 1. Line-based Transformations: Bullet, Number, Indent, Outdent
+      if (['bullet', 'number', 'indent', 'outdent'].includes(formatType)) {
+        const lineStart = val.lastIndexOf('\n', start - 1) + 1;
+        let lineEnd = val.indexOf('\n', end);
+        if (lineEnd === -1) lineEnd = val.length;
+
+        const targetBlock = val.substring(lineStart, lineEnd);
+        const lines = targetBlock.split('\n');
+        let newLines = [];
+
+        if (formatType === 'bullet') {
+          const allBulleted = lines.every(l => /^\s*•\s+/.test(l));
+          if (allBulleted) {
+            newLines = lines.map(l => l.replace(/^(\s*)•\s+/, '$1'));
+          } else {
+            newLines = lines.map(l => {
+              const cleaned = l.replace(/^(\s*)(?:•|\d+[\.\)]|[\-\x2A])\s+/, '$1');
+              const leadingSpaces = cleaned.match(/^\s*/)[0];
+              const textContent = cleaned.substring(leadingSpaces.length);
+              return `${leadingSpaces}• ${textContent}`;
+            });
+          }
+        } else if (formatType === 'number') {
+          const allNumbered = lines.every(l => /^\s*\d+\.\s+/.test(l));
+          if (allNumbered) {
+            newLines = lines.map(l => l.replace(/^(\s*)\d+\.\s+/, '$1'));
+          } else {
+            let num = 1;
+            newLines = lines.map(l => {
+              const cleaned = l.replace(/^(\s*)(?:•|\d+[\.\)]|[\-\x2A])\s+/, '$1');
+              const leadingSpaces = cleaned.match(/^\s*/)[0];
+              const textContent = cleaned.substring(leadingSpaces.length);
+              return `${leadingSpaces}${num++}. ${textContent}`;
+            });
+          }
+        } else if (formatType === 'indent') {
+          newLines = lines.map(l => `  ${l}`);
+        } else if (formatType === 'outdent') {
+          newLines = lines.map(l => {
+            if (l.startsWith('  ')) return l.substring(2);
+            if (l.startsWith(' ')) return l.substring(1);
+            if (l.startsWith('\t')) return l.substring(1);
+            return l;
+          });
+        }
+
+        const replacement = newLines.join('\n');
+        input.value = val.substring(0, lineStart) + replacement + val.substring(lineEnd);
+        input.focus();
+        input.setSelectionRange(lineStart, lineStart + replacement.length);
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        if (typeof callback === 'function') callback(input.value);
+        return;
+      }
+
+      // 2. Inline Text Formatting
+      const selected = val.substring(start, end);
       let replacement = "";
 
       if (formatType === 'bold') {
@@ -2761,6 +2856,7 @@ function getOrCreateFolder(folderName) {
       } else if (formatType === 'remove_format') {
         const cleanText = (str) => {
           return str
+            .replace(/^(\s*)(?:•|\d+[\.\)]|[\-\x2A])\s+/gm, '$1')
             .replace(/\*\*([^*]+)\*\*/g, '$1')
             .replace(/(^|[^\*])\*([^*]+)\*([^\*]|$)/g, '$1$2$3')
             .replace(/<u>([^<]+)<\/u>/gi, '$1')
@@ -2776,7 +2872,7 @@ function getOrCreateFolder(folderName) {
           input.value = cleanText(val);
           input.dispatchEvent(new Event('input', { bubbles: true }));
           if (typeof callback === 'function') callback(input.value);
-          showAdminToast("Format teks dibersihkan.", "info");
+          showAdminToast("Format teks dan poin dibersihkan.", "info");
           return;
         }
       }
@@ -3089,6 +3185,9 @@ function getOrCreateFolder(folderName) {
     // =========================================================================
     // UNIVERSAL KEYBOARD SHORTCUTS ENGINE (Ctrl+B, Ctrl+I, Ctrl+U, Ctrl+K, Ctrl+\, Ctrl+M)
     // =========================================================================
+    // =========================================================================
+    // UNIVERSAL KEYBOARD SHORTCUTS & SMART TAB/ENTER LIST ENGINE
+    // =========================================================================
     document.addEventListener('keydown', function(e) {
       const isCtrlOrCmd = e.ctrlKey || e.metaKey;
       const target = document.activeElement;
@@ -3096,7 +3195,74 @@ function getOrCreateFolder(folderName) {
 
       if (isTextInput) {
         const key = (e.key || '').toLowerCase();
-        
+        const start = target.selectionStart || 0;
+        const end = target.selectionEnd || 0;
+        const val = target.value || '';
+
+        // Tab / Shift+Tab for Indent / Outdent
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          if (e.shiftKey) {
+            applyUniversalTextFormat(target, 'outdent');
+          } else {
+            if (end > start && val.substring(start, end).includes('\n')) {
+              applyUniversalTextFormat(target, 'indent');
+            } else {
+              target.value = val.substring(0, start) + '  ' + val.substring(end);
+              target.setSelectionRange(start + 2, start + 2);
+              target.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+          }
+          return;
+        }
+
+        // Enter key smart continuation for Bullet and Numbered lists (Google Docs behavior)
+        if (e.key === 'Enter' && target.tagName === 'TEXTAREA' && !e.shiftKey && !isCtrlOrCmd) {
+          const lineStart = val.lastIndexOf('\n', start - 1) + 1;
+          const currentLine = val.substring(lineStart, start);
+          const bulletMatch = currentLine.match(/^(\s*)•\s*(.*)$/);
+          const numberMatch = currentLine.match(/^(\s*)(\d+)\.\s*(.*)$/);
+
+          if (bulletMatch) {
+            e.preventDefault();
+            const indent = bulletMatch[1];
+            const content = bulletMatch[2];
+            if (content.trim() === '') {
+              // Empty bullet item on Enter: remove bullet and insert plain newline
+              target.value = val.substring(0, lineStart) + val.substring(start);
+              target.setSelectionRange(lineStart, lineStart);
+            } else {
+              // Insert next bullet
+              const nextBullet = `\n${indent}• `;
+              target.value = val.substring(0, start) + nextBullet + val.substring(end);
+              const nextCursor = start + nextBullet.length;
+              target.setSelectionRange(nextCursor, nextCursor);
+            }
+            target.dispatchEvent(new Event('input', { bubbles: true }));
+            autoResizeTextarea(target);
+            return;
+          } else if (numberMatch) {
+            e.preventDefault();
+            const indent = numberMatch[1];
+            const currentNum = parseInt(numberMatch[2], 10);
+            const content = numberMatch[3];
+            if (content.trim() === '') {
+              // Empty numbered item on Enter: remove number and insert plain newline
+              target.value = val.substring(0, lineStart) + val.substring(start);
+              target.setSelectionRange(lineStart, lineStart);
+            } else {
+              // Insert next number
+              const nextNumber = `\n${indent}${currentNum + 1}. `;
+              target.value = val.substring(0, start) + nextNumber + val.substring(end);
+              const nextCursor = start + nextNumber.length;
+              target.setSelectionRange(nextCursor, nextCursor);
+            }
+            target.dispatchEvent(new Event('input', { bubbles: true }));
+            autoResizeTextarea(target);
+            return;
+          }
+        }
+
         // 1. Ctrl + B -> Bold
         if (isCtrlOrCmd && key === 'b' && !e.shiftKey && !e.altKey) {
           e.preventDefault();
@@ -3121,7 +3287,37 @@ function getOrCreateFolder(folderName) {
           return;
         }
 
-        // 4. Ctrl + K -> Link
+        // 4. Ctrl + Shift + 8 (or Ctrl + Shift + U) -> Bullet List
+        if (isCtrlOrCmd && ((key === '8' && e.shiftKey) || (key === 'u' && e.shiftKey))) {
+          e.preventDefault();
+          e.stopPropagation();
+          applyUniversalTextFormat(target, 'bullet');
+          return;
+        }
+
+        // 5. Ctrl + Shift + 7 (or Ctrl + Shift + O) -> Numbered List
+        if (isCtrlOrCmd && ((key === '7' && e.shiftKey) || (key === 'o' && e.shiftKey))) {
+          e.preventDefault();
+          e.stopPropagation();
+          applyUniversalTextFormat(target, 'number');
+          return;
+        }
+
+        // 6. Ctrl + ] -> Indent, Ctrl + [ -> Outdent
+        if (isCtrlOrCmd && key === ']') {
+          e.preventDefault();
+          e.stopPropagation();
+          applyUniversalTextFormat(target, 'indent');
+          return;
+        }
+        if (isCtrlOrCmd && key === '[') {
+          e.preventDefault();
+          e.stopPropagation();
+          applyUniversalTextFormat(target, 'outdent');
+          return;
+        }
+
+        // 7. Ctrl + K -> Link
         if (isCtrlOrCmd && key === 'k' && !e.shiftKey && !e.altKey) {
           e.preventDefault();
           e.stopPropagation();
@@ -3129,7 +3325,7 @@ function getOrCreateFolder(folderName) {
           return;
         }
 
-        // 5. Ctrl + \ or Ctrl + Shift + X -> Remove Formatting
+        // 8. Ctrl + \ or Ctrl + Shift + X -> Remove Formatting
         if ((isCtrlOrCmd && (e.key === '\\' || (key === 'x' && e.shiftKey))) && !e.altKey) {
           e.preventDefault();
           e.stopPropagation();
@@ -3137,7 +3333,7 @@ function getOrCreateFolder(folderName) {
           return;
         }
 
-        // 6. Ctrl + M or Alt + M -> Formula / Math
+        // 9. Ctrl + M or Alt + M -> Formula / Math
         if ((isCtrlOrCmd && key === 'm') || (e.altKey && key === 'm')) {
           e.preventDefault();
           e.stopPropagation();
@@ -11031,10 +11227,10 @@ function getOrCreateFolder(folderName) {
     </button>
   </div>
 
-  <!-- UNIVERSAL FLOATING BOTTOM FORMATTING TOOLBAR (Pill-shaped Bottom-Center Overlay, Persistent on Scroll) -->
+  <!-- UNIVERSAL FLOATING BOTTOM FORMATTING TOOLBAR (Pill-shaped Bottom-Center Overlay, Complete Rich Tools) -->
   <div 
     id="universalFloatingFormattingBar" 
-    class="hidden fixed bottom-3.5 sm:bottom-8 left-1/2 -translate-x-1/2 z-[100] items-center gap-0.5 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-white/95 backdrop-blur-md rounded-2xl border border-zinc-200 shadow-2xl text-zinc-700 select-none transition-all duration-200 animate-in fade-in slide-in-from-bottom-4 ring-1 ring-black/5"
+    class="hidden fixed bottom-3.5 sm:bottom-8 left-1/2 -translate-x-1/2 z-[100] items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 bg-white/95 backdrop-blur-md rounded-2xl border border-zinc-200 shadow-2xl text-zinc-700 select-none transition-all duration-200 animate-in fade-in slide-in-from-bottom-4 ring-1 ring-black/5 max-w-[96vw] overflow-x-auto scrollbar-none"
     style="box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.2), 0 6px 16px -4px rgba(0, 0, 0, 0.1);"
   >
     <!-- Bold (B) -->
@@ -11042,7 +11238,7 @@ function getOrCreateFolder(folderName) {
       type="button" 
       onmousedown="event.preventDefault()"
       onclick="applyActiveFieldFormat('bold')" 
-      class="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center font-serif font-black hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-xs sm:text-sm" 
+      class="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center font-serif font-black hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-xs sm:text-sm shrink-0" 
       title="Tebal (Ctrl + B)"
     >
       B
@@ -11053,7 +11249,7 @@ function getOrCreateFolder(folderName) {
       type="button" 
       onmousedown="event.preventDefault()"
       onclick="applyActiveFieldFormat('italic')" 
-      class="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center font-serif italic font-bold hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-xs sm:text-sm" 
+      class="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center font-serif italic font-bold hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-xs sm:text-sm shrink-0" 
       title="Miring (Ctrl + I)"
     >
       I
@@ -11064,18 +11260,74 @@ function getOrCreateFolder(folderName) {
       type="button" 
       onmousedown="event.preventDefault()"
       onclick="applyActiveFieldFormat('underline')" 
-      class="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center font-serif underline font-bold hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-xs sm:text-sm" 
+      class="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center font-serif underline font-bold hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-xs sm:text-sm shrink-0" 
       title="Garis Bawah (Ctrl + U)"
     >
       U
     </button>
+
+    <div class="h-4 w-px bg-zinc-200 mx-0.5 shrink-0"></div>
+
+    <!-- Bullet List (•) -->
+    <button 
+      type="button" 
+      onmousedown="event.preventDefault()"
+      onclick="applyActiveFieldFormat('bullet')" 
+      class="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-zinc-700 shrink-0" 
+      title="Daftar Poin / Bullet List (Ctrl + Shift + 8)"
+    >
+      <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 6h16M4 12h16M4 18h16M2 6h.01M2 12h.01M2 18h.01"></path>
+      </svg>
+    </button>
+
+    <!-- Numbered List (1.) -->
+    <button 
+      type="button" 
+      onmousedown="event.preventDefault()"
+      onclick="applyActiveFieldFormat('number')" 
+      class="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-zinc-700 shrink-0" 
+      title="Daftar Bernomor / Numbered List (Ctrl + Shift + 7)"
+    >
+      <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M7 6h13M7 12h13M7 18h13M3 5v2m-1 0h2m-2 5h2v2H2m0 4h2v2H2"></path>
+      </svg>
+    </button>
+
+    <!-- Indent Left / Outdent (⇤) -->
+    <button 
+      type="button" 
+      onmousedown="event.preventDefault()"
+      onclick="applyActiveFieldFormat('outdent')" 
+      class="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-zinc-700 shrink-0" 
+      title="Kurangi Indentasi / Geser Kiri (Shift + Tab atau Ctrl + [)"
+    >
+      <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M11 19l-4-4 4-4m-4 4h14M3 6h18M3 18h18"></path>
+      </svg>
+    </button>
+
+    <!-- Indent Right (⇥) -->
+    <button 
+      type="button" 
+      onmousedown="event.preventDefault()"
+      onclick="applyActiveFieldFormat('indent')" 
+      class="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-zinc-700 shrink-0" 
+      title="Tambah Indentasi / Geser Kanan (Tab atau Ctrl + ])"
+    >
+      <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 5l4 4-4 4m4-4H3M3 6h18M3 18h18"></path>
+      </svg>
+    </button>
+
+    <div class="h-4 w-px bg-zinc-200 mx-0.5 shrink-0"></div>
 
     <!-- Link (🔗) -->
     <button 
       type="button" 
       onmousedown="event.preventDefault()"
       onclick="applyActiveFieldFormat('link')" 
-      class="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-zinc-700" 
+      class="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-zinc-700 shrink-0" 
       title="Sisipkan Tautan (Ctrl + K)"
     >
       <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -11088,18 +11340,18 @@ function getOrCreateFolder(folderName) {
       type="button" 
       onmousedown="event.preventDefault()"
       onclick="applyActiveFieldFormat('remove_format')" 
-      class="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-zinc-700" 
-      title="Hapus Format (Ctrl + \ atau Ctrl + Shift + X)"
+      class="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center hover:bg-zinc-100 active:bg-zinc-200 transition cursor-pointer text-zinc-700 shrink-0" 
+      title="Hapus Format & Poin (Ctrl + \ atau Ctrl + Shift + X)"
     >
       <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="currentColor">
         <path d="M6 4v3h4.5v13h3V7H18V4H6zm14.7 15.3l-1.4 1.4L4.3 5.7 5.7 4.3l15 15z"></path>
       </svg>
     </button>
 
-    <div class="h-4 w-px bg-zinc-200 mx-0.5 sm:mx-1"></div>
+    <div class="h-4 w-px bg-zinc-200 mx-0.5 shrink-0"></div>
 
     <!-- Formula Button with Upward Floating Palette -->
-    <div class="relative">
+    <div class="relative shrink-0">
       <button 
         type="button" 
         onmousedown="event.preventDefault()"
@@ -11126,23 +11378,96 @@ function getOrCreateFolder(folderName) {
         </div>
 
         <div class="grid grid-cols-4 gap-1 text-xs">
-          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('$x^2$'); toggleUniversalFloatingMathPalette();" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Pangkat Dua">x²</button>
-          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('$\\sqrt{x}$'); toggleUniversalFloatingMathPalette();" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Akar Kuadrat">√x</button>
-          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('$\\frac{a}{b}$'); toggleUniversalFloatingMathPalette();" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Pecahan">a/b</button>
-          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('$\\pm$'); toggleUniversalFloatingMathPalette();" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Plus Minus">±</button>
-          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('$\\le$'); toggleUniversalFloatingMathPalette();" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Kurang Dari Sama Dengan">≤</button>
-          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('$\\ge$'); toggleUniversalFloatingMathPalette();" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Lebih Dari Sama Dengan">≥</button>
-          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('$\\neq$'); toggleUniversalFloatingMathPalette();" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Tidak Sama Dengan">≠</button>
-          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('$\\pi$'); toggleUniversalFloatingMathPalette();" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Pi">π</button>
-        </div>
+          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('$x^2
 
-        <div class="pt-1">
-          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('$...$'); toggleUniversalFloatingMathPalette();" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-mono font-bold text-xs transition cursor-pointer shadow-xs text-center">
-            $ Sisipkan Rumus KaTeX $
-          </button>
+  </div>
+
+</body>
+</html>
+); toggleUniversalFloatingMathPalette();" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Pangkat Dua">x²</button>
+          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('$\\sqrt{x}
+
+  </div>
+
+</body>
+</html>
+); toggleUniversalFloatingMathPalette();" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Akar Kuadrat">√x</button>
+          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('$\\frac{a}{b}
+
+  </div>
+
+</body>
+</html>
+); toggleUniversalFloatingMathPalette();" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Pecahan a/b">a/b</button>
+          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('$\\pm
+
+  </div>
+
+</body>
+</html>
+); toggleUniversalFloatingMathPalette();" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Plus Minus">±</button>
+          
+          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('$\\le
+
+  </div>
+
+</body>
+</html>
+); toggleUniversalFloatingMathPalette();" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Kurang Dari Sama Dengan">≤</button>
+          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('$\\ge
+
+  </div>
+
+</body>
+</html>
+); toggleUniversalFloatingMathPalette();" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Lebih Dari Sama Dengan">≥</button>
+          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('$\\neq
+
+  </div>
+
+</body>
+</html>
+); toggleUniversalFloatingMathPalette();" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Tidak Sama Dengan">≠</button>
+          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('$\\times
+
+  </div>
+
+</body>
+</html>
+); toggleUniversalFloatingMathPalette();" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Kali">×</button>
+
+          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('$\\div
+
+  </div>
+
+</body>
+</html>
+); toggleUniversalFloatingMathPalette();" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Bagi">÷</button>
+          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('$\\rightarrow
+
+  </div>
+
+</body>
+</html>
+); toggleUniversalFloatingMathPalette();" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Panah Kanan">→</button>
+          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('$\\pi
+
+  </div>
+
+</body>
+</html>
+); toggleUniversalFloatingMathPalette();" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Pi">π</button>
+          <button type="button" onmousedown="event.preventDefault()" onclick="insertActiveFieldMathSymbol('$\\Sigma
+
+  </div>
+
+</body>
+</html>
+); toggleUniversalFloatingMathPalette();" class="px-2 py-1.5 bg-zinc-50 hover:bg-indigo-50 text-zinc-800 rounded-lg border border-zinc-200 font-mono font-bold transition cursor-pointer text-center text-xs shadow-2xs" title="Sigma / Penjumlahan">∑</button>
         </div>
       </div>
     </div>
+  </div>
 
   </div>
 

@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.5] - 2026-08-25
+
+### 📝 Peningkatan Suite Format Editor: Daftar Poin, Daftar Bernomor & Indentasi Presisi (*Rich List & Smart Indent Engine*)
+- **Penambahan Alat Format Poin & Penomoran (*Bullet & Numbered Lists*):**
+  - Menambahkan tombol **Daftar Poin (•)** (`Ctrl + Shift + 8`) dan **Daftar Bernomor (1.)** (`Ctrl + Shift + 7`) pada bilah alat format melayang (`universalFloatingFormattingBar`).
+  - Mendukung konversi multi-baris dinamis dan *toggle on/off* list yang intuitif.
+- **Dukungan Indentasi Cerdas & Multi-Level Lists (*Smart Indent / Outdent*):**
+  - Menambahkan tombol **Tambah Indentasi (⇥)** dan **Kurangi Indentasi (⇤)** dengan integrasi tombol `Tab` dan `Shift + Tab` langsung pada seluruh kolom teks formulir.
+  - Menghadirkan perilaku cerdas tombol `Enter` ala Google Docs: otomatis melanjutkan poin/nomor berikutnya dan otomatis menghapus penanda jika menekan enter pada baris kosong.
+- **Penyempurnaan Perenderan Teks & Rumus (*Consistent Hanging Indent Renderer*):**
+  - Memperbarui mesin `smartMathFormat` di `admin.html` dan `index.html` untuk merender daftar poin, nomor, dan sub-indentasi secara presisi dengan tata letak flex bertingkat dan perataan gantung (*hanging indent*) yang rapi di seluruh kartu pertanyaan, deskripsi, dan info alur.
+
+---
+
 ## [2.3.4] - 2026-08-25
 
 ### 🧹 Harmonisasi Header & Eliminasi Indikator Status Redundan (*Unified State Display*)
