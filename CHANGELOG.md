@@ -4,6 +4,15 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.19] - 2026-08-25
+
+### 📱 Optimasi Responsivitas Tablet & Resolusi Non-Reguler (*Cross-Device Viewport Audit*)
+- **Audit & Penyelarasan Tata Letak Responsif:**
+  - Memperbaiki breakpoint kontainer bilah tab navigasi form workspace (`headerTabsStandardView`) sehingga tampil rapi tanpa *horizontal overflow* pada tablet (768px - 1024px) maupun rasio layar panjang non-reguler (1080×2460, 720×1600, 360×800).
+  - Memastikan seluruh dialog modal memiliki padding aman (*safe-area container*), tinggi adaptif `max-h-[92vh]`, dan scroll internal lancar pada perangkat mobile portrait & landscape.
+
+---
+
 ## [2.3.18] - 2026-08-25
 
 ### 🔗 Modal Penyisipan Tautan Dalam-Aplikasi (*In-App Link Insertion Dialog*)

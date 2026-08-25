@@ -333,11 +333,11 @@
       <!-- Main Navigation Google Forms Sticky Bar (Visible ONLY inside Single Form Workspace) -->
       <div id="headerWorkspaceTabs" class="w-full px-2 sm:px-6 lg:px-8 pb-2 pt-0.5 hidden">
         
-        <!-- AUTHENTIC GOOGLE FORMS STICKY TOP APP BAR -->
-        <div id="headerTabsStandardView" class="w-full bg-zinc-900 rounded-xl border border-zinc-800 p-1 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-semibold shadow-xs">
+        <!-- AUTHENTIC GOOGLE FORMS STICKY TOP APP BAR (Responsive for Mobile, Tablet & Desktop) -->
+        <div id="headerTabsStandardView" class="w-full bg-zinc-900 rounded-xl border border-zinc-800 p-1 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-1.5 lg:gap-2 text-[11px] sm:text-xs font-semibold shadow-xs">
           
-          <!-- Primary Workspace Navigation Tabs (Horizontal scroll on mobile) -->
-          <div class="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5 shrink-0" style="scrollbar-width: none; -webkit-overflow-scrolling: touch;">
+          <!-- Primary Workspace Navigation Tabs (Horizontal scroll on mobile & tablet) -->
+          <div class="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5 shrink-0 max-w-full" style="scrollbar-width: none; -webkit-overflow-scrolling: touch;">
             <!-- 1. Pertanyaan (Google Forms Canvas) -->
             <button 
               id="adminTabBtn_config" 
@@ -401,7 +401,7 @@
           </div>
 
           <!-- Top Action Controls Strip (Always Unified & Accessible) -->
-          <div class="flex items-center justify-between sm:justify-end gap-1 sm:gap-2 pt-1 sm:pt-0 border-t sm:border-t-0 border-zinc-800/80 shrink-0">
+          <div class="flex items-center justify-between lg:justify-end gap-1 sm:gap-2 pt-1 lg:pt-0 border-t lg:border-t-0 border-zinc-800/80 shrink-0 overflow-x-auto no-scrollbar">
             <!-- Undo / Redo in Header (100% Consistent Height & Radius) -->
             <div class="h-8 sm:h-9 p-0.5 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center shrink-0 shadow-2xs gap-0.5">
               <button 
