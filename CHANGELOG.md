@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.12] - 2026-08-26
+
+### 🎨 Restrukturisasi & Penyempurnaan Tata Letak Modal Media Pertanyaan (*Zero Overflow*)
+- **🧩 Perbaikan Tag Nesting & Struktur DOM Modal:**
+  - Mengoreksi penutupan tag pembungkus dialog modal yang menyebabkan elemen pratinjau media dan tombol aksi terdorong keluar dari kartu dialog utama.
+- **✨ Tata Letak Rapi, Minimalis, dan Responsif Mobile-First:**
+  - Mengintegrasikan seluruh bagian modal (Daftar Media Terlampir, Pengunggah Berkas Terpadu, Tempel Tautan Online, Status Progress Bar, Pilihan Posisi Tampilan, dan Live Preview) ke dalam satu dialog card yang rapi dan elegan.
+  - Memastikan *scrollbar* internal halus (`custom-scrollbar`), tombol aksi adaptif di mode mobile dan desktop, serta pratinjau gambar/video proporsional tanpa *layout shift*.
+
+---
+
 ## [2.4.11] - 2026-08-26
 
 ### 🔑 Kustomisasi Bebas ID PIN Formulir & Perbaikan Tautan Responden / QR Code
