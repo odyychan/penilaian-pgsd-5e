@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.9] - 2026-08-26
+
+### 💎 Desain Header Terintegrasi & Layout Minimalis Pusat Pengelolaan
+- **🏛️ Relokasi Identitas Hub ke Samping Logo Institusi ULM:**
+  - Memindahkan teks utama *"Pusat Pengelolaan Seluruh Formulir Penilaian"* beserta sub-identitas institusi (*FKIP Universitas Lambung Mangkurat*) langsung ke sebelah Logo ULM pada Header Navigasi.
+- **✨ Eliminasi Hero Banner & Transisi ke Toolbar Minimalis Modern:**
+  - Menggantikan hero banner gelap yang besar dengan sub-header ramping yang bersih, memuat ringkasan jumlah formulir serta tombol aksi utama (*Setelan Sistem* & *+ Buat Formulir Baru*) secara elegan dan responsif.
+  - Memberikan pengalaman navigasi yang lapang, cepat, dan terfokus pada daftar kartu formulir penilaian.
+
+---
+
 ## [2.4.8] - 2026-08-26
 
 ### 🧹 Pembersihan & Penataan Elemen Antarmuka Pusat Pengelolaan (*Master Hub Streamlining*)
