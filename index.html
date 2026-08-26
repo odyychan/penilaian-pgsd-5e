@@ -1132,8 +1132,9 @@
     function isFormatOrMathPresent(text) {
       if (!text || typeof text !== 'string') return false;
       const hasMath = /\$[^$]+\$|\$\$[\s\S]+\$\$|\\\([\s\S]+?\\\) |\\\[[\s\S]+?\\\]|\\(?:rightarrow|leftarrow|Rightarrow|Leftarrow|Leftrightarrow|pm|times|div|le|ge|neq|approx|sqrt|frac)/.test(text) || (text.includes('$') && text.lastIndexOf('$') > text.indexOf('$'));
-      const hasMarkdown = /\*\*[^*]+\*\*|(?:\b|[^\*])\*[^*]+\*(?:\b|[^\*])|\[[^\]]+\]\(((?:https?:\/\/|\/)[^\s\)]+)\)/.test(text);
-      return hasMath || hasMarkdown;
+      const hasMarkdown = /\*\*[^*]+\*\*|(?:\b|[^\*])\*[^*]+\*(?:\b|[^\*])|<u>[\s\S]+?<\/u>|\[[^\]]+\]\(((?:https?:\/\/|\/)[^\s\)]+)\)/.test(text);
+      const hasList = /(?:^|\n)\s*(?:[•◦▪▫\-\*]|(?:\d+|[A-Za-z]|[ivxlcdmIVXLCDM]+)[\.\)])\s+/.test(text);
+      return hasMath || hasMarkdown || hasList;
     }
 
     function smartMathFormat(text) {

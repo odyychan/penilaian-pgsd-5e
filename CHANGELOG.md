@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.22] - 2026-08-26
+
+### 👁️ Mode Pengeditan & Pratinjau Terpadu (*Integrated Edit & Real-Time Rich Render Preview*)
+- **Pengalih Mode Edit & Pratinjau Langsung (*Edit ↔ Preview Mode Switcher*):**
+  - Menambahkan tombol beralih cepat `✏️ Edit` dan `👁️ Pratinjau` pada kolom Petunjuk & Deskripsi Formulir sehingga dosen dapat langsung melihat hasil render visual yang identik dengan tampilan mahasiswa (tautan aktif, nomor/abjad hierarki, bullet berlekuk rapi, dan rumus KaTeX).
+- **Peningkatan Deteksi Format Teks Pintar (*Universal Rich Format Detector*):**
+  - Memperluas fungsi `isFormatOrMathPresent` pada admin dan formulir klien untuk mendeteksi secara otomatis format daftar abjad (`A.`), angka (`1.`), bullet (`•`), garis bawah (`<u>`), tautan Markdown (`[Teks](url)`), serta sintaks KaTeX.
+- **Pembaruan Kartu Pratinjau Langsung (*Full-Width Live Render Preview Cards*):**
+  - Mengubah tampilan pratinjau mini pada seluruh kartu pertanyaan, judul, dan opsi menjadi kartu pratinjau visual penuh (*Full-Width Preview Card*) yang estetis, rapi, dan responsif di semua perangkat.
+
+---
+
 ## [2.3.21] - 2026-08-26
 
 ### 🛡️ Optimasi Dinamis Aturan Integritas & Audit Edge Function (*Dynamic Integrity Toggles & Edge Audit*)

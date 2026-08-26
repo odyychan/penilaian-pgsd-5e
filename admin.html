@@ -829,9 +829,11 @@
               placeholder="Judul Formulir Penilaian" 
               class="w-full text-lg sm:text-2xl font-extrabold text-zinc-900 bg-transparent border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 pb-1 sm:pb-1.5 outline-none transition placeholder:text-zinc-400 resize-none overflow-hidden block whitespace-pre-wrap break-words leading-tight"
             ></textarea>
-            <div id="liveMathCfgJudul" class="math-live-preview-badge inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-50/90 border border-indigo-200/80 text-indigo-950 text-xs shadow-2xs mt-1 transition hidden">
-              <span class="text-[9px] font-bold font-mono text-indigo-600 bg-indigo-100 px-1 py-0.5 rounded uppercase tracking-wider shrink-0">✨ Pratinjau:</span>
-              <span class="math-renderable font-medium leading-relaxed"></span>
+            <div id="liveMathCfgJudul" class="math-live-preview-badge w-full mt-1.5 p-2.5 rounded-xl bg-indigo-50/70 border border-indigo-200/70 text-zinc-800 text-base sm:text-xl font-extrabold shadow-2xs transition-all hidden">
+              <div class="flex items-center gap-1.5 mb-1 pb-1 border-b border-indigo-100 text-[10px] font-bold font-mono text-indigo-700 select-none">
+                <span class="px-1.5 py-0.5 rounded bg-indigo-100/90 uppercase tracking-wider">✨ Pratinjau Judul</span>
+              </div>
+              <div class="math-renderable font-extrabold leading-tight w-full break-words text-zinc-900"></div>
             </div>
           </div>
 
@@ -839,18 +841,37 @@
           <div class="group/fieldBlock space-y-1 sm:space-y-1.5">
             <div class="flex items-center justify-between">
               <label class="block text-[10px] sm:text-[11px] font-bold text-zinc-500 uppercase tracking-wider font-mono">Petunjuk &amp; Deskripsi Formulir</label>
+              <!-- Toggle Switch Edit ↔ Pratinjau -->
+              <div class="flex items-center gap-1.5">
+                <button type="button" id="btnDescEditMode" onclick="setDescMode('edit')"
+                  class="px-2 py-0.5 rounded-md text-[10px] font-bold text-white bg-zinc-900 shadow-xs transition cursor-pointer">
+                  ✏️ Edit
+                </button>
+                <button type="button" id="btnDescPreviewMode" onclick="setDescMode('preview')"
+                  class="px-2 py-0.5 rounded-md text-[10px] font-semibold text-zinc-500 bg-zinc-100 hover:bg-zinc-200 transition cursor-pointer">
+                  👁️ Pratinjau
+                </button>
+              </div>
             </div>
 
-            <textarea 
-              id="cfg_Deskripsi_Form"
-              rows="2"
-              oninput="handleConfigInputAutoSave()"
-              placeholder="Tuliskan petunjuk umum pengisian formulir di sini (contoh: Berikan penilaian secara jujur dan objektif)..."
-              class="w-full text-xs sm:text-sm text-zinc-700 bg-zinc-50/80 hover:bg-zinc-100/90 focus:bg-white border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-t-lg outline-none transition"
-            ></textarea>
-            <div id="liveMathCfgDesc" class="math-live-preview-badge inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-50/90 border border-indigo-200/80 text-indigo-950 text-xs shadow-2xs mt-1 transition hidden">
-              <span class="text-[9px] font-bold font-mono text-indigo-600 bg-indigo-100 px-1 py-0.5 rounded uppercase tracking-wider shrink-0">✨ Pratinjau:</span>
-              <span class="math-renderable font-medium leading-relaxed"></span>
+            <!-- EDIT MODE: textarea -->
+            <div id="descEditPanel">
+              <textarea 
+                id="cfg_Deskripsi_Form"
+                rows="4"
+                oninput="handleConfigInputAutoSave(); syncDescPreview();"
+                placeholder="Tuliskan petunjuk umum pengisian formulir di sini. Markdown didukung: **tebal**, *miring*, [Teks Link](https://url.com), A. Daftar Abjad, 1. Daftar Nomor, • Bullet..."
+                class="w-full text-xs sm:text-sm text-zinc-700 bg-zinc-50/80 hover:bg-zinc-100/90 focus:bg-white border border-zinc-200 focus:border-indigo-500 px-3 py-2.5 rounded-xl outline-none transition resize-y min-h-[80px] font-mono leading-relaxed"
+              ></textarea>
+              <p class="text-[10px] text-zinc-400 mt-1 pl-0.5">Tip: Gunakan toolbar format di atas, atau ketik Markdown langsung. Klik <strong>Pratinjau</strong> untuk melihat hasil akhir.</p>
+            </div>
+
+            <!-- PREVIEW MODE: rendered output (selalu tampil identik dengan index.html) -->
+            <div id="descPreviewPanel" class="hidden">
+              <div id="descLiveRender"
+                class="w-full text-xs sm:text-sm text-zinc-700 bg-zinc-50/50 border border-zinc-200 px-3.5 py-3 rounded-xl min-h-[80px] leading-relaxed math-renderable">
+              </div>
+              <p class="text-[10px] text-zinc-400 mt-1 pl-0.5">Mode Pratinjau — tampilan ini identik dengan yang dilihat mahasiswa.</p>
             </div>
           </div>
 
@@ -2979,8 +3000,9 @@ function getOrCreateFolder(folderName) {
     function isFormatOrMathPresent(text) {
       if (!text || typeof text !== 'string') return false;
       const hasMath = /\$[^$]+\$|\$\$[\s\S]+\$\$|\\\([\s\S]+?\\\) |\\\[[\s\S]+?\\\]|\\(?:rightarrow|leftarrow|Rightarrow|Leftarrow|Leftrightarrow|pm|times|div|le|ge|neq|approx|sqrt|frac)/.test(text) || (text.includes('$') && text.lastIndexOf('$') > text.indexOf('$'));
-      const hasMarkdown = /\*\*[^*]+\*\*|(?:\b|[^\*])\*[^*]+\*(?:\b|[^\*])|\[[^\]]+\]\(((?:https?:\/\/|\/)[^\s\)]+)\)/.test(text);
-      return hasMath || hasMarkdown;
+      const hasMarkdown = /\*\*[^*]+\*\*|(?:\b|[^\*])\*[^*]+\*(?:\b|[^\*])|<u>[\s\S]+?<\/u>|\[[^\]]+\]\(((?:https?:\/\/|\/)[^\s\)]+)\)/.test(text);
+      const hasList = /(?:^|\n)\s*(?:[•◦▪▫\-\*]|(?:\d+|[A-Za-z]|[ivxlcdmIVXLCDM]+)[\.\)])\s+/.test(text);
+      return hasMath || hasMarkdown || hasList;
     }
 
     function smartMathFormat(text) {
@@ -3090,8 +3112,10 @@ function getOrCreateFolder(folderName) {
       
       if (!isFormatPresent) {
         badge.classList.add("hidden");
+        badge.classList.remove("block");
       } else {
         badge.classList.remove("hidden");
+        badge.classList.add("block");
         const span = badge.querySelector('.math-renderable');
         if (span) {
           span.innerHTML = formatted;
@@ -3105,9 +3129,11 @@ function getOrCreateFolder(folderName) {
       const isFormatPresent = isFormatOrMathPresent(rawText || "");
 
       return `
-        <div id="${containerId}" class="math-live-preview-badge inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50/90 border border-indigo-200/80 text-indigo-950 text-xs shadow-2xs mt-1 transition ${isFormatPresent ? '' : 'hidden'}">
-          <span class="text-[9.5px] font-bold font-mono text-indigo-600 bg-indigo-100 px-1 py-0.5 rounded uppercase tracking-wider shrink-0">✨ Pratinjau:</span>
-          <span class="math-renderable font-medium leading-relaxed">${formatted}</span>
+        <div id="${containerId}" class="math-live-preview-badge w-full mt-1.5 p-2.5 rounded-xl bg-indigo-50/70 border border-indigo-200/70 text-zinc-800 text-xs sm:text-sm shadow-2xs transition-all ${isFormatPresent ? 'block' : 'hidden'}">
+          <div class="flex items-center gap-1.5 mb-1.5 pb-1 border-b border-indigo-100 text-[10px] font-bold font-mono text-indigo-700 select-none">
+            <span class="px-1.5 py-0.5 rounded bg-indigo-100/90 uppercase tracking-wider">✨ Pratinjau Tampilan</span>
+          </div>
+          <div class="math-renderable font-normal leading-relaxed w-full break-words text-zinc-800">${formatted}</div>
         </div>
       `;
     }
@@ -6653,6 +6679,54 @@ function getOrCreateFolder(folderName) {
     // =========================================================================
     // TAB 2: CONFIG & FORM BUILDER
     // =========================================================================
+    // =========================================================================
+    // DESKRIPSI FORM: EDIT ↔ PREVIEW MODE TOGGLE & LIVE SYNC
+    // =========================================================================
+    function syncDescPreview() {
+      const textarea = document.getElementById('cfg_Deskripsi_Form');
+      const renderEl = document.getElementById('descLiveRender');
+      if (!textarea || !renderEl) return;
+
+      const val = textarea.value || '';
+      const formatted = smartMathFormat(val);
+      if (val.trim()) {
+        renderEl.innerHTML = formatted || '<span class="text-zinc-400 italic">Tidak ada konten untuk ditampilkan.</span>';
+      } else {
+        renderEl.innerHTML = '<span class="text-zinc-400 italic">Kosong – tulis sesuatu di mode Edit.</span>';
+      }
+      renderAllMathInElement(renderEl);
+    }
+
+    function setDescMode(mode) {
+      const editPanel = document.getElementById('descEditPanel');
+      const previewPanel = document.getElementById('descPreviewPanel');
+      const btnEdit = document.getElementById('btnDescEditMode');
+      const btnPreview = document.getElementById('btnDescPreviewMode');
+      if (!editPanel || !previewPanel) return;
+
+      if (mode === 'preview') {
+        syncDescPreview();
+        editPanel.classList.add('hidden');
+        previewPanel.classList.remove('hidden');
+        if (btnEdit) {
+          btnEdit.className = 'px-2 py-0.5 rounded-md text-[10px] font-semibold text-zinc-500 bg-zinc-100 hover:bg-zinc-200 transition cursor-pointer';
+        }
+        if (btnPreview) {
+          btnPreview.className = 'px-2 py-0.5 rounded-md text-[10px] font-bold text-white bg-zinc-900 shadow-xs transition cursor-pointer';
+        }
+      } else {
+        editPanel.classList.remove('hidden');
+        previewPanel.classList.add('hidden');
+        if (btnEdit) {
+          btnEdit.className = 'px-2 py-0.5 rounded-md text-[10px] font-bold text-white bg-zinc-900 shadow-xs transition cursor-pointer';
+        }
+        if (btnPreview) {
+          btnPreview.className = 'px-2 py-0.5 rounded-md text-[10px] font-semibold text-zinc-500 bg-zinc-100 hover:bg-zinc-200 transition cursor-pointer';
+        }
+        document.getElementById('cfg_Deskripsi_Form')?.focus();
+      }
+    }
+
     function populateConfigFormValues() {
       // Synchronize config fallback with currentFormMeta
       if (currentFormMeta) {
@@ -6690,7 +6764,7 @@ function getOrCreateFolder(folderName) {
         updateLiveMathBadge(adminAppConfig["Judul_Form"] || "", 'liveMathCfgJudul');
       }
       if (document.getElementById('cfg_Deskripsi_Form')) {
-        updateLiveMathBadge(adminAppConfig["Deskripsi_Form"] || "", 'liveMathCfgDesc');
+        syncDescPreview();
       }
       if (document.getElementById('cfg_Mata_Kuliah')) {
         updateLiveMathBadge(adminAppConfig["Mata_Kuliah"] || "", 'liveMathCfgMataKuliah');
@@ -6762,7 +6836,7 @@ function getOrCreateFolder(folderName) {
         updateLiveMathBadge(document.getElementById('cfg_Judul_Form').value, 'liveMathCfgJudul');
       }
       if (document.getElementById('cfg_Deskripsi_Form')) {
-        updateLiveMathBadge(document.getElementById('cfg_Deskripsi_Form').value, 'liveMathCfgDesc');
+        syncDescPreview();
       }
       if (document.getElementById('cfg_Mata_Kuliah')) {
         updateLiveMathBadge(document.getElementById('cfg_Mata_Kuliah').value, 'liveMathCfgMataKuliah');
