@@ -3585,6 +3585,7 @@ function normalizeMediaList(fieldOrMedia) {
             updateStepUI(currentStep || 1);
             updateAccountHeaderUI();
             checkAndApplyAuthGate();
+            loadRekapData(true);
             return;
           }
         } catch(sbErr) {
@@ -4023,8 +4024,26 @@ function normalizeMediaList(fieldOrMedia) {
       const fragment = document.createDocumentFragment();
 
       // Dapatkan data penilai aktif (NIM, Nama, Peran, dan Kelompok Mahasiswa)
-      const currentNim = (document.getElementById("inputNim")?.value || "").replace(/\s+/g, "").trim().toLowerCase();
-      const currentName = (document.getElementById("inputNama")?.value || "").trim().toLowerCase();
+      const currentNim = (
+        document.getElementById("inputNim")?.value || 
+        clientCustomFormAnswers["fld_core_identity_nim"] || 
+        activeUserAccountNim || 
+        ""
+      ).replace(/\s+/g, "").trim().toLowerCase();
+
+      const currentName = (
+        document.getElementById("inputNama")?.value || 
+        clientCustomFormAnswers["fld_core_identity_nama"] || 
+        activeUserAccountName || 
+        ""
+      ).trim().toLowerCase();
+
+      const currentEmail = (
+        document.getElementById("inputEmail")?.value || 
+        clientCustomFormAnswers["fld_core_identity_email"] || 
+        activeUserAccountEmail || 
+        ""
+      ).trim().toLowerCase();
       
       let evaluatorStudentGroup = "";
       if (currentEvaluatorRole === 'Mahasiswa' && currentNim) {
@@ -4042,6 +4061,11 @@ function normalizeMediaList(fieldOrMedia) {
         }
         if (currentName && currentRekapData.nameToKelompokMap && currentRekapData.nameToKelompokMap[currentName]) {
           currentRekapData.nameToKelompokMap[currentName].forEach(g => {
+            if (!filledGroups.some(fg => fg.toLowerCase() === g.toLowerCase())) filledGroups.push(g);
+          });
+        }
+        if (currentEmail && currentRekapData.emailToKelompokMap && currentRekapData.emailToKelompokMap[currentEmail]) {
+          currentRekapData.emailToKelompokMap[currentEmail].forEach(g => {
             if (!filledGroups.some(fg => fg.toLowerCase() === g.toLowerCase())) filledGroups.push(g);
           });
         }
@@ -4325,6 +4349,54 @@ function normalizeMediaList(fieldOrMedia) {
             }
           }
         }
+
+        // Additional integrity validation when moving from Step 2 to Step 3
+        if (currentStep === 2 && targetStep > 2) {
+          if (!selectedGroupObj) {
+            showToast("Pilih salah satu kelompok presentator sebelum melanjutkan!", "warning");
+            return;
+          }
+
+          const currentNim = (
+            document.getElementById("inputNim")?.value || 
+            clientCustomFormAnswers["fld_core_identity_nim"] || 
+            activeUserAccountNim || 
+            ""
+          ).replace(/\s+/g, "").trim().toLowerCase();
+
+          const currentEmail = (
+            document.getElementById("inputEmail")?.value || 
+            clientCustomFormAnswers["fld_core_identity_email"] || 
+            activeUserAccountEmail || 
+            ""
+          ).trim().toLowerCase();
+
+          const singleSubmissionLock = appConfig && appConfig["Kunci_Respons_Ganda"] !== false && appConfig["Kunci_Respons_Ganda"] !== "false";
+          let isDuplicate = false;
+          if (singleSubmissionLock && currentRekapData) {
+            if (currentNim && currentRekapData.nimToKelompokMap && currentRekapData.nimToKelompokMap[currentNim]) {
+              if (currentRekapData.nimToKelompokMap[currentNim].some(g => g.toLowerCase() === selectedGroupObj.name.toLowerCase())) {
+                isDuplicate = true;
+              }
+            }
+            if (currentEmail && currentRekapData.emailToKelompokMap && currentRekapData.emailToKelompokMap[currentEmail]) {
+              if (currentRekapData.emailToKelompokMap[currentEmail].some(g => g.toLowerCase() === selectedGroupObj.name.toLowerCase())) {
+                isDuplicate = true;
+              }
+            }
+          }
+
+          if (isDuplicate) {
+            showToast(`Anda sudah pernah mengirimkan penilaian untuk ${selectedGroupObj.name}. Pilihan dibekukan.`, "error");
+            selectedGroupObj = null;
+            renderGroupOptions();
+            return;
+          }
+        }
+      }
+
+      if (targetStep === 2) {
+        renderGroupOptions();
       }
 
       updateStepUI(targetStep);
@@ -4498,6 +4570,8 @@ function normalizeMediaList(fieldOrMedia) {
           btnFillNimEmail.classList.remove("hidden");
         }
 
+        activeUserAccountNim = cleanNim;
+        renderGroupOptions();
         return true;
       } else {
         if (iconEl) iconEl.classList.add("hidden");
@@ -4522,6 +4596,8 @@ function normalizeMediaList(fieldOrMedia) {
           if (nimInput) nimInput.className = "w-full pl-3.5 pr-16 py-2.5 rounded-lg border border-zinc-300 text-xs sm:text-sm font-mono focus:border-zinc-900 outline-none transition bg-white placeholder-zinc-400";
           if (feedbackBox) feedbackBox.classList.add("hidden");
         }
+        activeUserAccountNim = cleanNim;
+        renderGroupOptions();
         return false;
       }
     }
@@ -6818,6 +6894,39 @@ function normalizeMediaList(fieldOrMedia) {
               });
             };
 
+            // Build nimToKelompokMap, nameToKelompokMap, emailToKelompokMap
+            const nimToKelompokMap = {};
+            const nameToKelompokMap = {};
+            const emailToKelompokMap = {};
+
+            respList.forEach(r => {
+              const nim = String(r.nim_penilai || '').replace(/\s+/g, '').trim().toLowerCase();
+              const name = String(r.nama_penilai || '').trim().toLowerCase();
+              const email = String(r.email || '').trim().toLowerCase();
+              const grp = String(r.kelompok_dinilai || '').trim();
+
+              if (grp) {
+                if (nim && nim !== '-') {
+                  if (!nimToKelompokMap[nim]) nimToKelompokMap[nim] = [];
+                  if (!nimToKelompokMap[nim].some(g => g.toLowerCase() === grp.toLowerCase())) {
+                    nimToKelompokMap[nim].push(grp);
+                  }
+                }
+                if (name && name !== '-') {
+                  if (!nameToKelompokMap[name]) nameToKelompokMap[name] = [];
+                  if (!nameToKelompokMap[name].some(g => g.toLowerCase() === grp.toLowerCase())) {
+                    nameToKelompokMap[name].push(grp);
+                  }
+                }
+                if (email && email !== '-') {
+                  if (!emailToKelompokMap[email]) emailToKelompokMap[email] = [];
+                  if (!emailToKelompokMap[email].some(g => g.toLowerCase() === grp.toLowerCase())) {
+                    emailToKelompokMap[email].push(grp);
+                  }
+                }
+              }
+            });
+
             const summaryArray = calcSummaryForResponses(respList);
             const summaryMhs = calcSummaryForResponses(respList.filter(r => (r.peran_penilai || 'Mahasiswa') === 'Mahasiswa'));
 
@@ -6825,6 +6934,9 @@ function normalizeMediaList(fieldOrMedia) {
               success: true,
               summary: summaryArray,
               summaryMhs: summaryMhs,
+              nimToKelompokMap: nimToKelompokMap,
+              nameToKelompokMap: nameToKelompokMap,
+              emailToKelompokMap: emailToKelompokMap,
               isPublicReviewVisible: true,
               responses: respList.map(r => ({
                 idRespons: r.id_respons,
@@ -6857,6 +6969,7 @@ function normalizeMediaList(fieldOrMedia) {
               populatePresensiFilters();
               renderBothRekapViews();
             }
+            renderGroupOptions();
             if (!isSilent) {
               setBtnSuccess();
               showToast("Data rekapitulasi diperbarui dari Supabase (< 30ms).", "success");

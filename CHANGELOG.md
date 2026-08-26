@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.61] - 2026-08-26
+
+### 🛡️ Perbaikan Deteksi & Penguncian Respons Ganda (Multi-Source Duplicate Lock)
+- **⚡ Sinkronisasi Peta Riwayat Penilaian Supabase:**
+  - Memperbaiki pengisian struktur peta riwayat (`nimToKelompokMap`, `nameToKelompokMap`, `emailToKelompokMap`) pada jalur *fast-path* Supabase dalam fungsi `loadRekapData()`.
+  - Memastikan kelompok yang telah dinilai oleh mahasiswa/NIM tertentu otomatis berstatus `Sudah Dinilai • Terkunci` dengan kartu berwarna hijau dan tombol dinonaktifkan.
+- **🔒 Validasi Real-Time Input NIM & Navigasi Tahap 2 ke 3:**
+  - Menghubungkan validasi live NIM (`validateNimLive`) langsung ke pembaruan status kartu kelompok (`renderGroupOptions`).
+  - Menambahkan proteksi berlapis pada `goToStep` agar mahasiswa yang mencoba melanjutkan ke tahap rubrik skor pada kelompok yang telah dinilai langsung diblokir dengan notifikasi integritas.
+
+---
+
 ## [2.3.60] - 2026-08-26
 
 ### 🛠️ Perbaikan Render Gambar Canvas Struk & Pratinjau Cetak Struk Penilaian
