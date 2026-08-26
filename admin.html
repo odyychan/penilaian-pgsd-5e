@@ -3081,21 +3081,24 @@ function getOrCreateFolder(folderName) {
       if (!displayEl && targetId) {
         displayEl = document.createElement('div');
         displayEl.setAttribute('data-for', targetId);
-        displayEl.className = 'in-place-rich-display cursor-text select-text leading-relaxed transition-all hidden';
+        displayEl.setAttribute('title', 'Klik untuk mengedit');
+        displayEl.className = 'in-place-rich-display cursor-pointer hover:cursor-text select-text leading-relaxed transition-all duration-150 group/richDisplay relative hidden';
 
-        // Match typography and styling based on target input
+        // Match typography and input border affordance based on target input
         if (targetId === 'cfg_Judul_Form') {
-          displayEl.className += ' text-lg sm:text-2xl font-extrabold text-zinc-900 border-b-2 border-transparent pb-1 sm:pb-1.5 leading-tight';
+          displayEl.className += ' text-lg sm:text-2xl font-extrabold text-zinc-900 border-b-2 border-dashed border-zinc-300 hover:border-indigo-600 pb-1 sm:pb-1.5 leading-tight';
+        } else if (targetId === 'cfg_Deskripsi_Form') {
+          displayEl.className += ' text-xs sm:text-sm text-zinc-700 bg-zinc-50/50 hover:bg-zinc-100/80 border-b-2 border-dashed border-zinc-300 hover:border-indigo-600 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-t-lg';
         } else if (targetId.startsWith('alurTitleInput_') || targetId.startsWith('stageTitleInput_')) {
-          displayEl.className += ' font-bold text-zinc-900 text-xs sm:text-sm px-1 py-0.5';
+          displayEl.className += ' font-bold text-zinc-900 text-xs sm:text-sm border-b border-dashed border-zinc-300 hover:border-indigo-600 px-1 py-0.5 rounded hover:bg-zinc-50/70';
         } else if (targetId.startsWith('alurDescInput_') || targetId.startsWith('stageDescInput_')) {
-          displayEl.className += ' text-[11px] text-zinc-600 px-1 py-0.5';
+          displayEl.className += ' text-[11px] text-zinc-600 border-b border-dashed border-zinc-200 hover:border-indigo-400 px-1 py-0.5 rounded hover:bg-zinc-50/70';
         } else if (targetId.startsWith('fieldLabelInput_')) {
-          displayEl.className += ' text-xs sm:text-sm font-semibold text-zinc-900 px-1 py-0.5';
+          displayEl.className += ' text-xs sm:text-sm font-semibold text-zinc-900 border-b-2 border-dashed border-zinc-300 hover:border-indigo-600 px-2 py-1.5 bg-zinc-50/40 hover:bg-zinc-100/70 rounded-t-lg';
         } else if (targetId.startsWith('fieldDescInput_')) {
-          displayEl.className += ' text-xs text-zinc-500 px-1 py-0.5';
+          displayEl.className += ' text-xs text-zinc-500 border-b border-dashed border-zinc-200 hover:border-indigo-400 px-2 py-1 rounded hover:bg-zinc-50/70';
         } else {
-          displayEl.className += ' text-xs sm:text-sm text-zinc-700 px-1 py-0.5';
+          displayEl.className += ' text-xs sm:text-sm text-zinc-700 border-b border-dashed border-zinc-300 hover:border-indigo-500 px-1 py-0.5 rounded hover:bg-zinc-50/70';
         }
 
         displayEl.addEventListener('click', () => {
@@ -3112,7 +3115,8 @@ function getOrCreateFolder(folderName) {
 
       if (displayEl) {
         if (hasRichFormat && !isFocused && val !== '') {
-          displayEl.innerHTML = smartMathFormat(val);
+          const editBadgeHtml = '<span class="opacity-0 group-hover/richDisplay:opacity-100 transition-opacity absolute top-1 right-1 px-1.5 py-0.5 rounded-md bg-zinc-900/90 text-white text-[9.5px] font-mono font-bold flex items-center gap-1 shadow-xs pointer-events-none select-none z-10">✏️ Klik untuk edit</span>';
+          displayEl.innerHTML = smartMathFormat(val) + editBadgeHtml;
           renderAllMathInElement(displayEl);
           displayEl.classList.remove('hidden');
           inputEl.classList.add('hidden');

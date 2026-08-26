@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.25] - 2026-08-26
+
+### 💡 Indikator Visual Interaktif & Sorot Kolom Isian (*Intuitive In-Place Edit Affordances*)
+- **Efek Sorot & Garis Bawah Putus-Putus (*Hover State & Dashed Baseline*):**
+  - Menambahkan garis bawah putus-putus (*dashed border*) dan aksen warna indigo saat kursor diarahkan ke teks terformat, memberikan isyarat visual yang jelas bahwa area tersebut merupakan kolom isian aktif yang dapat diedit.
+- **Lencana Bantuan Mengambang (*Hover Edit Badge Affordance*):**
+  - Menghadirkan lencana animasi halus berlabel **"✏️ Klik untuk edit"** yang muncul di sudut kanan atas setiap teks terformat saat pengguna mengarahkan kursor.
+- **Kursor Teks & Tooltip Intuitif (*Text Cursor & Interaction Feedback*):**
+  - Mengatur kursor mouse secara otomatis menjadi *I-beam / Text Selection* saat berada di atas kolom teks sehingga mempermudah pengguna di perangkat desktop maupun perangkat sentuh (*touchscreen*).
+
+---
+
 ## [2.3.24] - 2026-08-26
 
 ### 🧹 Penyelarasan & Penyederhanaan Kolom Deskripsi Formulir (*Seamless In-Place Description Field*)
