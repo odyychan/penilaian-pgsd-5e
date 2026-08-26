@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.49] - 2026-08-26
+
+### 🛡️ Eliminasi Race-Condition SignOut Otomatis & Ketahanan Sesi Multi-Form
+- **🔒 Proteksi Sesi Login Terverifikasi:**
+  - Menghapus pembersihan sesi otomatis dari listener `onAuthStateChange('SIGNED_OUT')` yang sempat mereset token saat Supabase Client baru diinisialisasi. Logout kini hanya dieksekusi saat tombol *Keluar* ditekan secara sadar.
+- **✨ Fallback Toleran Pengambilan Sesi:**
+  - Memperkuat `getCurrentAuthSession()` agar membaca sesi formulir aktif maupun fallback primer `BK5E` secara konsisten tanpa terputus siklus muat halaman.
+
+---
+
 ## [2.3.48] - 2026-08-26
 
 ### 🚀 Penyempurnaan Gerbang Auth & Sinkronisasi Konfigurasi Domain

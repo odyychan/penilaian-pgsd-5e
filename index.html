@@ -5058,8 +5058,9 @@ function normalizeMediaList(fieldOrMedia) {
     // =========================================================================
     function getCurrentAuthSession() {
       try {
-        const key = "PGSD_AUTH_SESSION_" + (activeFormId || 'BK5E').toUpperCase();
-        const raw = localStorage.getItem(key) || sessionStorage.getItem(key);
+        const formKey = (activeFormId || 'BK5E').toUpperCase();
+        const key = "PGSD_AUTH_SESSION_" + formKey;
+        const raw = localStorage.getItem(key) || sessionStorage.getItem(key) || localStorage.getItem("PGSD_AUTH_SESSION_BK5E");
         if (raw) return JSON.parse(raw);
       } catch (e) {}
       return null;
@@ -5114,7 +5115,7 @@ function normalizeMediaList(fieldOrMedia) {
 
       if (!authGate || !overview) return;
 
-      const emailMode = appConfig["Mode_Pengumpulan_Email"] || "ULM_ONLY";
+      const emailMode = appConfig["Mode_Pengumpulan_Email"] || "ALL_EMAIL";
 
       // Render header info in Auth Gate Banner
       const judulEl = document.getElementById("authGateJudulForm");
@@ -5585,11 +5586,8 @@ function normalizeMediaList(fieldOrMedia) {
 
         // 2. Listen to auth state changes
         sb.auth.onAuthStateChange(async (event, session) => {
-          if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'USER_UPDATED') && session && session.user) {
+          if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'USER_UPDATED' || event === 'TOKEN_REFRESHED') && session && session.user) {
             applySupabaseGoogleUser(session.user);
-          } else if (event === 'SIGNED_OUT') {
-            clearAuthSession();
-            checkAndApplyAuthGate();
           }
         });
       } catch (e) {
