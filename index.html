@@ -2062,9 +2062,15 @@ function normalizeMediaList(fieldOrMedia) {
       initAllModernDropdowns();
       loadLocalCache();
       
-      // Pulihkan Active Tab (Formulir vs Rekapitulasi)
+      // Inisialisasi Listener Google OAuth Supabase & Tangkap Token URL Hash Seketika
+      if (typeof initSupabaseAuthListener === 'function') {
+        initSupabaseAuthListener();
+      }
+
+      // Pulihkan Active Tab (Formulir vs Rekapitulasi) tanpa merusak token hash
       const hash = (window.location.hash || "").replace("#", "").toLowerCase();
-      const savedTab = (hash === "rekap" || hash === "form") ? hash : (localStorage.getItem("PGSD_ACTIVE_MAIN_TAB") || "form");
+      const isAuthHash = hash.includes("access_token") || hash.includes("error_description");
+      const savedTab = (!isAuthHash && (hash === "rekap" || hash === "form")) ? hash : (localStorage.getItem("PGSD_ACTIVE_MAIN_TAB") || "form");
       
       switchTab(savedTab, false);
       updateStepUI(1);
@@ -2074,11 +2080,6 @@ function normalizeMediaList(fieldOrMedia) {
 
       restoreFormDraft();
       fetchInitialFormData(false);
-      
-      // Inisialisasi Listener Google OAuth Supabase
-      if (typeof initSupabaseAuthListener === 'function') {
-        initSupabaseAuthListener();
-      }
 
       // Pre-fetch rekap data secara diam-diam di background agar instan saat dibuka
       setTimeout(() => loadRekapData(true), 400);
@@ -5518,10 +5519,52 @@ function normalizeMediaList(fieldOrMedia) {
     }
 
     async function initSupabaseAuthListener() {
+      // 0. Direct Instant Extraction from URL Hash Fragment (#access_token=...)
+      try {
+        const rawHash = window.location.hash || '';
+        if (rawHash.includes('access_token=')) {
+          const hashClean = rawHash.replace(/^#/, '');
+          const hashParams = new URLSearchParams(hashClean);
+          const accessToken = hashParams.get('access_token');
+          const refreshToken = hashParams.get('refresh_token');
+
+          if (accessToken) {
+            try {
+              const base64Url = accessToken.split('.')[1];
+              const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+              const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+              const payload = JSON.parse(jsonPayload);
+
+              if (payload && (payload.email || payload.user_metadata?.email)) {
+                const email = (payload.email || payload.user_metadata?.email).toLowerCase().trim();
+                const userObj = {
+                  email: email,
+                  user_metadata: payload.user_metadata || {}
+                };
+                applySupabaseGoogleUser(userObj);
+              }
+            } catch (jwtErr) {
+              console.warn("Direct JWT token parse notice:", jwtErr);
+            }
+
+            if (supabaseClient && supabaseClient.auth && refreshToken) {
+              try {
+                await supabaseClient.auth.setSession({
+                  access_token: accessToken,
+                  refresh_token: refreshToken
+                });
+              } catch (setErr) {}
+            }
+          }
+        }
+      } catch (hashErr) {
+        console.warn("OAuth Hash extraction notice:", hashErr);
+      }
+
       if (!supabaseClient || !supabaseClient.auth) return;
 
       try {
-        // 1. Check initial session from hash / URL redirect
+        // 1. Check initial session from Supabase Client
         const { data: sessionData } = await supabaseClient.auth.getSession();
         if (sessionData && sessionData.session && sessionData.session.user) {
           applySupabaseGoogleUser(sessionData.session.user);
@@ -5529,7 +5572,7 @@ function normalizeMediaList(fieldOrMedia) {
 
         // 2. Listen to auth state changes
         supabaseClient.auth.onAuthStateChange(async (event, session) => {
-          if (event === 'SIGNED_IN' && session && session.user) {
+          if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'USER_UPDATED') && session && session.user) {
             applySupabaseGoogleUser(session.user);
           } else if (event === 'SIGNED_OUT') {
             clearAuthSession();
@@ -5615,8 +5658,17 @@ function normalizeMediaList(fieldOrMedia) {
       updateAccountHeaderUI();
       checkAndApplyAuthGate();
 
+      // Bersihkan hash fragment OAuth dari URL browser
+      try {
+        if (window.location.hash.includes('access_token')) {
+          history.replaceState(null, null, window.location.pathname + window.location.search);
+        }
+      } catch (e) {}
+
       isDraftAlreadyRestored = false;
       restoreFormDraft();
+      startAssessmentForm();
+      showToast(`Selamat datang, ${authUser.nama || authUser.email}! Berhasil masuk dengan Akun Google.`, "success", 4000);
     }
 
     function resetInMemoryClientFormState() {

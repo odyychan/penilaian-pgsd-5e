@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.46] - 2026-08-26
+
+### 🚀 Ekstraksi Token Otomatis & Transisi Mulus Pasca-Login Google OAuth
+- **⚡ Ekstraksi Instan Hash Fragment (`#access_token`):**
+  - Menangkap token autentikasi Google OAuth seketika saat browser kembali dari Google, mendekode payload profil pengguna, dan memvalidasi sesi Supabase Auth tanpa terganggu inisialisasi tab hash.
+- **🔄 Transisi Otomatis ke Formulir Penilaian:**
+  - Seketika setelah Google OAuth berhasil, sistem otomatis mengalihkan pengguna ke formulir penilaian (`startAssessmentForm`), membersihkan URL hash (`#access_token`), dan menampilkan sambutan nama penilai.
+
+---
+
 ## [2.3.45] - 2026-08-26
 
 ### 🔒 Penetapan Default Tampilan Gerbang Login Google & Penyelarasan Render Overview
