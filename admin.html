@@ -279,7 +279,16 @@
           <div class="min-w-0">
             <div class="flex items-center gap-1.5">
               <h1 id="headerMainTitle" class="font-bold text-xs sm:text-sm text-zinc-100 truncate">Pusat Pengelolaan Seluruh Formulir Penilaian</h1>
-              <span id="activeFormIdBadge" class="hidden px-2 py-0.5 rounded-lg text-xs font-mono font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 shrink-0">BK5E</span>
+              <button
+                type="button"
+                id="activeFormIdBadge"
+                onclick="promptChangeFormId(currentFormId)"
+                title="Klik untuk mengubah / kustomisasi ID PIN Formulir"
+                class="hidden px-2.5 py-0.5 rounded-lg text-xs font-mono font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 hover:bg-indigo-500/30 hover:border-indigo-400 cursor-pointer transition-all items-center gap-1 active:scale-95 shrink-0"
+              >
+                <span id="activeFormIdBadgeText">ID: BK5E</span>
+                <svg class="w-3 h-3 text-indigo-300/70 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+              </button>
               <span id="headerOfflineBadge" class="hidden px-2 py-0.5 rounded-lg text-[11px] font-mono font-bold bg-rose-950/80 text-rose-300 border border-rose-800 shrink-0">⚠️ Offline</span>
             </div>
             <p id="headerSubTitle" class="text-[10px] sm:text-[11px] text-zinc-400 truncate hidden xs:block">FKIP Universitas Lambung Mangkurat</p>
@@ -1012,6 +1021,44 @@
               <input type="checkbox" id="toggleWorkspaceFormStatus_config" onchange="handleWorkspaceStatusToggle(this.checked)" class="sr-only peer" checked>
               <div class="w-12 h-6.5 bg-zinc-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5.5 after:w-5.5 after:transition-all peer-checked:bg-emerald-600"></div>
             </label>
+          </div>
+        </div>
+
+        <!-- Identitas ID / Kode PIN & Tautan Akses Responden Card -->
+        <div class="bg-white rounded-xl sm:rounded-2xl border border-zinc-200/90 p-3.5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 transition-all duration-200">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center font-bold text-sm bg-indigo-50 text-indigo-600 border border-indigo-200 shrink-0">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+            </div>
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <h4 class="font-bold text-xs sm:text-base text-zinc-900">Kode PIN / Akses Formulir:</h4>
+                <span id="settingsFormIdBadge" class="px-2.5 py-0.5 rounded-lg text-xs font-mono font-extrabold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                  BK5E
+                </span>
+              </div>
+              <p class="text-[10.5px] sm:text-xs text-zinc-500 mt-0.5">
+                Kode akses unik yang dibagikan kepada mahasiswa untuk membuka formulir penilaian ini.
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 self-end sm:self-auto shrink-0">
+            <button 
+              type="button" 
+              onclick="promptChangeFormId(currentFormId)" 
+              class="px-3.5 py-2 rounded-xl bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-700 text-xs font-semibold shadow-2xs flex items-center gap-1.5 transition cursor-pointer active:scale-95"
+            >
+              <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+              <span>Ubah ID PIN</span>
+            </button>
+            <button 
+              type="button" 
+              onclick="openShareModal(currentFormId)" 
+              class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs flex items-center gap-1.5 transition cursor-pointer active:scale-95"
+            >
+              <svg class="w-3.5 h-3.5 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+              <span>Bagikan QR</span>
+            </button>
           </div>
         </div>
 
@@ -1842,22 +1889,38 @@
         <img id="shareQrCodeImg" src="" alt="QR Code Formulir" class="w-48 h-48 sm:w-56 sm:h-56 mx-auto object-contain rounded-lg bg-white p-2 border border-zinc-200" />
       </div>
 
-      <!-- 4-5 Characters PIN Box -->
-      <div class="p-3 bg-indigo-50 border border-indigo-200 rounded-xl space-y-1">
-        <span class="text-[10px] uppercase font-bold text-indigo-700 tracking-wider">Kode PIN Masuk Mahasiswa:</span>
-        <div class="flex items-center justify-center gap-2">
-          <span id="sharePinText" class="text-2xl sm:text-3xl font-mono font-extrabold text-indigo-900 tracking-widest">BK5E</span>
-          <button 
-            type="button" 
-            onclick="copySharePin()" 
-            title="Salin Kode PIN" 
-            class="px-2.5 py-1 rounded bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold cursor-pointer transition active:scale-95 flex items-center gap-1"
-          >
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-            </svg>
-            <span>Salin</span>
-          </button>
+      <!-- 4-5 Characters PIN Box with Copy & Edit Buttons -->
+      <div class="p-3.5 bg-indigo-50 border border-indigo-200 rounded-2xl space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-[10.5px] uppercase font-bold text-indigo-700 tracking-wider">Kode PIN Masuk Mahasiswa:</span>
+          <span class="text-[10px] font-mono font-semibold text-indigo-500">ID Akses</span>
+        </div>
+        <div class="flex items-center justify-between gap-2 bg-white p-2 sm:p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
+          <span id="sharePinText" class="text-2xl sm:text-3xl font-mono font-extrabold text-indigo-950 tracking-widest pl-2">BK5E</span>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button 
+              type="button" 
+              onclick="promptChangeFormId(currentFormId || document.getElementById('sharePinText').textContent)" 
+              title="Ubah / Kustomisasi Kode PIN ID Formulir" 
+              class="px-2.5 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-xs font-semibold cursor-pointer transition active:scale-95 flex items-center gap-1 border border-zinc-200"
+            >
+              <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+              </svg>
+              <span>Ubah</span>
+            </button>
+            <button 
+              type="button" 
+              onclick="copySharePin()" 
+              title="Salin Kode PIN" 
+              class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold cursor-pointer transition active:scale-95 flex items-center gap-1 shadow-xs"
+            >
+              <svg class="w-3.5 h-3.5 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+              </svg>
+              <span>Salin</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1894,6 +1957,57 @@
         </button>
       </div>
 
+    </div>
+  </div>
+
+  <!-- MODAL EDIT FORM ID / CUSTOM PIN -->
+  <div id="modalChangeFormId" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target === this) closeChangeFormIdModal()">
+    <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-4 fade-enter" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-200 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+          </div>
+          <div>
+            <h3 class="font-bold text-sm sm:text-base text-zinc-900">Ubah ID / Kode PIN Formulir</h3>
+            <p class="text-[11px] text-zinc-500">Sesuaikan kode akses unik formulir ini.</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeChangeFormIdModal()" class="w-8 h-8 rounded-xl hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center cursor-pointer transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div class="space-y-1">
+          <label class="block font-semibold text-zinc-700">Kode PIN / Form ID Saat Ini:</label>
+          <input type="text" id="inputCurrentFormIdDisplay" readonly class="w-full px-3.5 py-2 rounded-xl border border-zinc-200 font-mono font-bold text-zinc-500 bg-zinc-100 outline-none select-all">
+        </div>
+
+        <div class="space-y-1">
+          <label class="block font-semibold text-zinc-800">Kode PIN / Form ID Baru:</label>
+          <input 
+            type="text" 
+            id="inputNewFormIdValue" 
+            maxlength="12" 
+            placeholder="Contoh: BK5E, IPA1, KELAS5" 
+            class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 font-mono font-extrabold text-sm text-indigo-900 bg-white outline-none focus:border-indigo-600 uppercase tracking-widest transition"
+            oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9_-]/g, '')"
+          >
+          <p class="text-[10.5px] text-zinc-400">Gunakan 3–10 karakter huruf, angka, atau tanda hubung (-). Tautan responden dan QR code akan otomatis diperbarui.</p>
+        </div>
+
+        <div id="changeFormIdError" class="hidden p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium"></div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100">
+        <button type="button" onclick="closeChangeFormIdModal()" class="px-4 py-2 rounded-xl border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-medium cursor-pointer transition">
+          Batal
+        </button>
+        <button type="button" id="btnSaveNewFormId" onclick="submitChangeFormId()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition active:scale-95 cursor-pointer">
+          <span>Simpan Perubahan ID</span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -6083,7 +6197,7 @@ function getOrCreateFolder(folderName) {
       if (document.getElementById("headerSubTitle")) document.getElementById("headerSubTitle").textContent = "FKIP Universitas Lambung Mangkurat";
       
       const btnBukaForm = document.getElementById("btnBukaFormActive");
-      if (btnBukaForm) { const u = new URL(window.location.href); u.pathname = u.pathname.replace(/admin\.html$/i, "index.html"); if (!u.pathname.endsWith("index.html")) u.pathname = u.pathname.replace(/\/?$/, "/index.html"); u.search = ""; btnBukaForm.href = u.toString(); }
+      if (btnBukaForm) btnBukaForm.href = getRespondentFormUrl();
 
       // 🚀 Instant SWR Hydration: Tampilkan cache/fallback seketika (0 ms)
       fallbackRegistryList();
@@ -6369,11 +6483,15 @@ function getOrCreateFolder(folderName) {
       if (document.getElementById("headerMainTitle")) document.getElementById("headerMainTitle").textContent = "Panel Admin Form";
       if (document.getElementById("headerSubTitle")) document.getElementById("headerSubTitle").textContent = `Mengelola Form PIN: ${currentFormId}`;
       if (document.getElementById("activeFormIdBadge")) {
-        document.getElementById("activeFormIdBadge").textContent = `ID: ${currentFormId}`;
+        document.getElementById("activeFormIdBadge").classList.remove("hidden");
+        document.getElementById("activeFormIdBadge").classList.add("flex");
+        const spanEl = document.getElementById("activeFormIdBadgeText");
+        if (spanEl) spanEl.textContent = `ID: ${currentFormId}`;
+        else document.getElementById("activeFormIdBadge").textContent = `ID: ${currentFormId}`;
       }
 
       const btnBukaForm = document.getElementById("btnBukaFormActive");
-      if (btnBukaForm) { const u = new URL(window.location.href); u.pathname = u.pathname.replace(/admin\.html$/i, "index.html"); if (!u.pathname.endsWith("index.html")) u.pathname = u.pathname.replace(/\/?$/, "/index.html"); u.search = `?id=${encodeURIComponent(currentFormId)}`; btnBukaForm.href = u.toString(); }
+      if (btnBukaForm) btnBukaForm.href = getRespondentFormUrl(currentFormId);
 
       const savedTab = localStorage.getItem("PGSD_ADMIN_ACTIVE_TAB") || "config";
       switchAdminTab(savedTab, false);
@@ -6937,6 +7055,9 @@ function getOrCreateFolder(folderName) {
       updateEmailModeCardsUI(currentEmailMode);
 
       handleScheduleToggle(document.getElementById('cfg_Jadwal_Aktif')?.checked || false);
+
+      const settingsBadge = document.getElementById("settingsFormIdBadge");
+      if (settingsBadge) settingsBadge.textContent = currentFormId || DEFAULT_PRIMARY_FORM_ID;
 
       if (document.getElementById('cfg_Judul_Form')) {
         updateLiveMathBadge(adminAppConfig["Judul_Form"] || "", 'liveMathCfgJudul');
@@ -10878,19 +10999,30 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       }
     }
 
+    // RESPONDENT URL RESOLVER (CLEAN & BULLETPROOF FOR PROD / DEV)
+    function getRespondentFormUrl(formId) {
+      const fId = formId || currentFormId || DEFAULT_PRIMARY_FORM_ID;
+      if (window.location.protocol === 'file:') {
+        const path = window.location.pathname.replace(/admin\.html$/i, "index.html");
+        return `file://${path}?id=${encodeURIComponent(fId)}`;
+      }
+      
+      const origin = window.location.origin;
+      // Strip /admin, /admin.html, or /index.html from pathname to point to root form
+      let pathname = window.location.pathname.replace(/\/(admin(\.html)?|index\.html)?$/i, '');
+      if (!pathname.endsWith('/')) pathname += '/';
+      return `${origin}${pathname}?id=${encodeURIComponent(fId)}`;
+    }
+
     // SHARE MODAL & QR CODE
     function openShareModal(formId) {
       const fId = formId || currentFormId || DEFAULT_PRIMARY_FORM_ID;
-      const u = new URL(window.location.href);
-      u.pathname = u.pathname.replace(/admin\.html$/i, "index.html");
-      if (!u.pathname.endsWith("index.html")) u.pathname = u.pathname.replace(/\/?$/, "/index.html");
-      u.search = `?id=${encodeURIComponent(fId)}`;
-      const fullUrl = u.toString();
+      const fullUrl = getRespondentFormUrl(fId);
 
       document.getElementById("sharePinText").textContent = fId;
       document.getElementById("shareDirectLinkInput").value = fullUrl;
 
-      // QR Code Generator URL
+      // QR Code Generator URL pointing to respondents form
       const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(fullUrl)}`;
       document.getElementById("shareQrCodeImg").src = qrUrl;
 
@@ -10910,7 +11042,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
     function copyShareDirectLink() {
       const link = document.getElementById("shareDirectLinkInput").value;
       navigator.clipboard.writeText(link);
-      showAdminToast("Tautan formulir berhasil disalin!", "success");
+      showAdminToast("Tautan responden formulir berhasil disalin!", "success");
     }
 
     function downloadQrCodePng() {
@@ -10921,6 +11053,175 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       a.download = `QR-Form-${pin}.png`;
       a.target = "_blank";
       a.click();
+    }
+
+    // CUSTOM / EDIT FORM PIN ID HANDLERS
+    let targetChangingFormId = null;
+
+    function promptChangeFormId(targetFormId) {
+      const fId = targetFormId || currentFormId || DEFAULT_PRIMARY_FORM_ID;
+      targetChangingFormId = fId;
+      
+      const currentInput = document.getElementById("inputCurrentFormIdDisplay");
+      const newInput = document.getElementById("inputNewFormIdValue");
+      const errEl = document.getElementById("changeFormIdError");
+      
+      if (currentInput) currentInput.value = fId;
+      if (newInput) {
+        newInput.value = fId;
+        setTimeout(() => {
+          newInput.focus();
+          newInput.select();
+        }, 150);
+      }
+      if (errEl) {
+        errEl.classList.add("hidden");
+        errEl.textContent = "";
+      }
+
+      document.getElementById("modalChangeFormId")?.classList.remove("hidden");
+    }
+
+    function closeChangeFormIdModal() {
+      document.getElementById("modalChangeFormId")?.classList.add("hidden");
+      targetChangingFormId = null;
+    }
+
+    async function submitChangeFormId() {
+      const oldId = targetChangingFormId || currentFormId;
+      const newId = (document.getElementById("inputNewFormIdValue")?.value || "").trim().toUpperCase();
+      const errEl = document.getElementById("changeFormIdError");
+      const btn = document.getElementById("btnSaveNewFormId");
+
+      if (!newId || newId.length < 2) {
+        if (errEl) {
+          errEl.textContent = "Kode PIN ID minimal 2 karakter!";
+          errEl.classList.remove("hidden");
+        }
+        return;
+      }
+
+      if (newId === oldId) {
+        closeChangeFormIdModal();
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="flex items-center gap-1"><svg class="w-3.5 h-3.5 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Menyimpan...</span>';
+      }
+
+      try {
+        const sb = await ensureSupabaseClient();
+        if (sb) {
+          // Check if newId already exists in database
+          const { data: existing, error: checkErr } = await sb
+            .from('pgsd_forms')
+            .select('form_id')
+            .eq('form_id', newId)
+            .maybeSingle();
+
+          if (existing && existing.form_id) {
+            if (errEl) {
+              errEl.textContent = `Kode PIN '${newId}' sudah digunakan oleh formulir lain. Gunakan kode unik lain.`;
+              errEl.classList.remove("hidden");
+            }
+            if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = '<span>Simpan Perubahan ID</span>';
+            }
+            return;
+          }
+
+          // Update primary key on pgsd_forms (Cascades to child tables via ON UPDATE CASCADE)
+          const { error: updateErr } = await sb
+            .from('pgsd_forms')
+            .update({ form_id: newId, updated_at: new Date().toISOString() })
+            .eq('form_id', oldId);
+
+          if (updateErr) {
+            console.error("Supabase form_id update error:", updateErr);
+            throw new Error(updateErr.message || "Gagal memperbarui ID di database Supabase.");
+          }
+        }
+
+        // Migrate local storage cache keys
+        const keysToMigrate = [
+          `PGSD_CACHE_META_`,
+          `PGSD_CACHE_CONFIG_`,
+          `PGSD_CACHE_GROUPS_`,
+          `PGSD_DRAFT_SCHEMA_`
+        ];
+        keysToMigrate.forEach(prefix => {
+          const oldVal = localStorage.getItem(`${prefix}${oldId}`);
+          if (oldVal) {
+            localStorage.setItem(`${prefix}${newId}`, oldVal);
+            localStorage.removeItem(`${prefix}${oldId}`);
+          }
+        });
+
+        // Update registry list in memory
+        const regIdx = formsRegistryList.findIndex(f => (f.formId || f.form_id) === oldId);
+        if (regIdx !== -1) {
+          formsRegistryList[regIdx].formId = newId;
+          formsRegistryList[regIdx].form_id = newId;
+        }
+
+        // If currently in workspace for this form, update currentFormId and UI
+        if (currentFormId === oldId) {
+          currentFormId = newId;
+          if (currentFormMeta) {
+            currentFormMeta.formId = newId;
+            currentFormMeta.form_id = newId;
+          }
+
+          // Update URL
+          const url = new URL(window.location);
+          url.searchParams.set('id', newId);
+          window.history.replaceState({}, '', url);
+
+          // Update Header Badges
+          const badge = document.getElementById("activeFormIdBadge");
+          if (badge) {
+            const spanText = badge.querySelector('span');
+            if (spanText) spanText.textContent = `ID: ${newId}`;
+            else badge.textContent = `ID: ${newId}`;
+          }
+          if (document.getElementById("headerSubTitle")) {
+            document.getElementById("headerSubTitle").textContent = `Mengelola Form PIN: ${newId}`;
+          }
+
+          // Update Share Modal if open
+          const sharePin = document.getElementById("sharePinText");
+          if (sharePin) sharePin.textContent = newId;
+          const shareLink = document.getElementById("shareDirectLinkInput");
+          if (shareLink) {
+            const fullUrl = getRespondentFormUrl(newId);
+            shareLink.value = fullUrl;
+            const qrImg = document.getElementById("shareQrCodeImg");
+            if (qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(fullUrl)}`;
+          }
+
+          const btnBuka = document.getElementById("btnBukaFormActive");
+          if (btnBuka) btnBuka.href = getRespondentFormUrl(newId);
+        }
+
+        renderHubFormsGrid();
+        closeChangeFormIdModal();
+        showAdminToast(`Kode PIN formulir berhasil diubah menjadi '${newId}'!`, "success");
+
+      } catch (err) {
+        console.error("Change form id error:", err);
+        if (errEl) {
+          errEl.textContent = err.message || "Gagal mengubah ID formulir.";
+          errEl.classList.remove("hidden");
+        }
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>Simpan Perubahan ID</span>';
+        }
+      }
     }
 
     async function cloneFormAction(sourceFormId) {

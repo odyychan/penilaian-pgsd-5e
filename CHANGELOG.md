@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.11] - 2026-08-26
+
+### 🔑 Kustomisasi Bebas ID PIN Formulir & Perbaikan Tautan Responden / QR Code
+- **🎯 Perbaikan Tautan Langsung & QR Code Responden:**
+  - Mengoreksi penentuan URL formulir responden agar tepat mengarah ke akar formulir responden (`https://bksd-ulm.vercel.app/?id=PIN`), bukan jalur admin (`/admin/index.html`).
+  - Memastikan gambar QR Code yang dihasilkan langsung dapat dipindai oleh kamera mahasiswa untuk membuka formulir yang sesuai.
+- **✨ Kustomisasi ID / Kode PIN Formulir Secara Dinamis:**
+  - **Badge Header Interaktif:** Badge `ID: [PIN]` di bilah atas kini dapat diklik langsung untuk mengubah dan mengkustomisasi kode PIN formulir kapan saja.
+  - **Aksi Cepat di Modal Bagikan QR:** Menyediakan tombol **✏️ Ubah** tepat di sebelah tombol Salin PIN pada kotak modal Bagikan Formulir.
+  - **Kartu Identitas di Tab Setelan Form:** Menambahkan kartu status ID PIN dan tombol kustomisasi pada tab Setelan Formulir.
+  - **Sinkronisasi Database Berjenjang (*Cascade Sync*):** Mengupdate `form_id` di Supabase secara aman dengan *ON UPDATE CASCADE*, serta memperbarui cache browser, parameter URL, dan QR Code seketika.
+
+---
+
 ## [2.4.10] - 2026-08-26
 
 ### 🔔 Reposisi Notifikasi Toast Mengikuti Standar Ergonomi UI (Mobile Top-Center & Desktop Bottom-Right)
