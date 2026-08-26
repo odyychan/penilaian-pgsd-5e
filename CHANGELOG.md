@@ -4,6 +4,21 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.62] - 2026-08-26
+
+### 🚀 Peluncuran Portal Akses Formulir (PIN Gate & History Hub)
+- **🔑 Halaman Portal Akses Masuk Awal (`#viewPortal`):**
+  - Mengubah alur pendaratan awal situs (*landing page*) tanpa parameter URL eksplisit agar tidak langsung membuka formulir `BK5E`.
+  - Menyediakan gerbang portal aman di mana pengguna memasukkan **PIN / Kode Akses Formulir** (misal: `BK5E`, dsb.) yang terverifikasi secara instan dengan basis data Supabase.
+- **🕒 Manajemen Riwayat Formulir Perangkat (*Visited Forms History*):**
+  - Merekam seluruh formulir yang pernah dibuka di perangkat ke dalam penyimpanan lokal lengkap dengan judul, mata kuliah, dosen, dan waktu kunjungan relatif.
+  - Menampilkan kartu riwayat formulir yang dapat diklik langsung (*1-click resume*) atau dihapus secara individual/keseluruhan.
+- **🔗 Integrasi Direct Link & Tombol Ganti PIN:**
+  - Tautan langsung yang dibagikan dosen (misal: `?id=BK5E`) tetap membuka formulir secara otomatis dan mencatatnya ke riwayat perangkat.
+  - Menambahkan tombol *"Ganti PIN / Cari Form"* pada *Overview* dan *Header Navbar* untuk memudahkan pengguna berpindah instrumen penilaian kapan saja.
+
+---
+
 ## [2.3.61] - 2026-08-26
 
 ### 🛡️ Perbaikan Deteksi & Penguncian Respons Ganda (Multi-Source Duplicate Lock)
