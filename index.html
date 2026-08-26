@@ -2852,8 +2852,8 @@ function normalizeMediaList(fieldOrMedia) {
         `;
       }
 
-      // 10. CORE_IDENTITAS (Peran, NIM, Nama, Email)
-      if (f.type === 'CORE_IDENTITAS') {
+      // 10. CORE_IDENTITY / CORE_IDENTITAS (Peran, NIM, Nama, Email)
+      if (f.type === 'CORE_IDENTITY' || f.type === 'CORE_IDENTITAS') {
         const peranMhsLabel = appConfig["Peran_Mahasiswa_Label"] || "Mahasiswa (Anggota Kelas)";
         const peranDosenLabel = appConfig["Peran_Dosen_Label"] || "Dosen (Pengampu / Penguji)";
         const peranTamuLabel = appConfig["Peran_Lainnya_Label"] || "Lainnya / Penilai Tamu";
@@ -6814,58 +6814,101 @@ function normalizeMediaList(fieldOrMedia) {
             .order('created_at', { ascending: false });
 
           if (!sbErr && Array.isArray(respList)) {
-            // Kalkulasi summary per kelompok secara instan di memori browser
-            const groupMap = {};
-            respList.forEach(r => {
-              const grp = r.kelompok_dinilai || "Kelompok";
-              if (!groupMap[grp]) {
-                groupMap[grp] = {
-                  kelompok: grp,
-                  sesi: r.sesi || "Minggu 1",
-                  totalNilai: 0,
-                  totalPenilai: 0,
-                  totalKomentar: 0,
-                  presentatorMap: {}
-                };
-              }
-              groupMap[grp].totalNilai += (parseFloat(r.nilai_kelompok) || 0);
-              groupMap[grp].totalPenilai += 1;
-              if (r.evaluasi_detail && Object.keys(r.evaluasi_detail).length > 0) {
-                groupMap[grp].totalKomentar += Object.keys(r.evaluasi_detail).length;
-              }
-              if (r.best_presenter_1 && r.best_presenter_1 !== "-") {
-                groupMap[grp].presentatorMap[r.best_presenter_1] = (groupMap[grp].presentatorMap[r.best_presenter_1] || 0) + 1;
-              }
-              if (r.best_presenter_2 && r.best_presenter_2 !== "-") {
-                groupMap[grp].presentatorMap[r.best_presenter_2] = (groupMap[grp].presentatorMap[r.best_presenter_2] || 0) + 1;
-              }
-            });
-
-            const summaryArray = Object.values(groupMap).map(g => {
-              let best1 = "-", best2 = "-", max1 = 0, max2 = 0;
-              for (let p in g.presentatorMap) {
-                const count = g.presentatorMap[p];
-                if (count > max1) {
-                  max2 = max1; best2 = best1;
-                  max1 = count; best1 = p;
-                } else if (count > max2) {
-                  max2 = count; best2 = p;
+            // Kalkulasi summary per kelompok secara komprehensif & real-time
+            const calcSummaryForResponses = (list) => {
+              const groupMap = {};
+              list.forEach(r => {
+                const grp = r.kelompok_dinilai || "Kelompok";
+                if (!groupMap[grp]) {
+                  groupMap[grp] = {
+                    kelompok: grp,
+                    sesi: r.sesi || "Minggu 1",
+                    totalNilai: 0,
+                    totalPenilai: 0,
+                    totalKomentar: 0,
+                    presentatorMap: {},
+                    evaluators: [],
+                    evaluasiList: {},
+                    votePresentator: {}
+                  };
+                  // Pre-seed all members from groupsData if available
+                  const foundGroupObj = (groupsData || []).find(g => g.name === grp);
+                  if (foundGroupObj && Array.isArray(foundGroupObj.members)) {
+                    foundGroupObj.members.forEach(m => {
+                      groupMap[grp].evaluasiList[m.name] = [];
+                      groupMap[grp].votePresentator[m.name] = 0;
+                    });
+                  }
                 }
-              }
-              return {
-                kelompok: g.kelompok,
-                sesi: g.sesi,
-                rataRataNilai: g.totalPenilai > 0 ? parseFloat((g.totalNilai / g.totalPenilai).toFixed(2)) : 0,
-                totalPenilai: g.totalPenilai,
-                totalKomentar: g.totalKomentar,
-                presentatorTerbaik1: best1 !== "-" ? `${best1} (${max1} Suara)` : "-",
-                presentatorTerbaik2: best2 !== "-" ? `${best2} (${max2} Suara)` : "-"
-              };
-            });
+                groupMap[grp].totalNilai += (parseFloat(r.nilai_kelompok) || 0);
+                groupMap[grp].totalPenilai += 1;
+                groupMap[grp].evaluators.push({
+                  nim: r.nim_penilai,
+                  nama: r.nama_penilai,
+                  email: r.email,
+                  peran: r.peran_penilai || 'Mahasiswa',
+                  nilai: r.nilai_kelompok
+                });
+                if (r.evaluasi_detail && typeof r.evaluasi_detail === 'object') {
+                  const evKeys = Object.keys(r.evaluasi_detail);
+                  groupMap[grp].totalKomentar += evKeys.length;
+                  evKeys.forEach(sName => {
+                    const text = r.evaluasi_detail[sName];
+                    if (text && String(text).trim()) {
+                      if (!groupMap[grp].evaluasiList[sName]) groupMap[grp].evaluasiList[sName] = [];
+                      groupMap[grp].evaluasiList[sName].push({
+                        penilai: r.nama_penilai || 'Anonim',
+                        peran: r.peran_penilai || 'Mahasiswa',
+                        nim: r.nim_penilai || '-',
+                        ulasan: String(text).trim(),
+                        timestamp: r.created_at
+                      });
+                    }
+                  });
+                }
+                if (r.best_presenter_1 && r.best_presenter_1 !== "-") {
+                  groupMap[grp].presentatorMap[r.best_presenter_1] = (groupMap[grp].presentatorMap[r.best_presenter_1] || 0) + 1;
+                  groupMap[grp].votePresentator[r.best_presenter_1] = (groupMap[grp].votePresentator[r.best_presenter_1] || 0) + 1;
+                }
+                if (r.best_presenter_2 && r.best_presenter_2 !== "-") {
+                  groupMap[grp].presentatorMap[r.best_presenter_2] = (groupMap[grp].presentatorMap[r.best_presenter_2] || 0) + 1;
+                  groupMap[grp].votePresentator[r.best_presenter_2] = (groupMap[grp].votePresentator[r.best_presenter_2] || 0) + 1;
+                }
+              });
+
+              return Object.values(groupMap).map(g => {
+                const ranked = Object.entries(g.presentatorMap)
+                  .map(([name, votes]) => ({ name, votes }))
+                  .sort((a, b) => b.votes - a.votes);
+                const best1 = ranked[0] ? `${ranked[0].name} (${ranked[0].votes} Suara)` : "-";
+                const best2 = ranked[1] ? `${ranked[1].name} (${ranked[1].votes} Suara)` : "-";
+                const avg = g.totalPenilai > 0 ? parseFloat((g.totalNilai / g.totalPenilai).toFixed(2)) : 0;
+                return {
+                  kelompok: g.kelompok,
+                  sesi: g.sesi,
+                  rataRataSkor: avg,
+                  rataRataNilai: avg,
+                  rataRata: avg,
+                  totalPenilai: g.totalPenilai,
+                  totalKomentar: g.totalKomentar,
+                  presentatorTerbaik1: best1,
+                  presentatorTerbaik2: best2,
+                  rankedPresenters: ranked,
+                  evaluators: g.evaluators,
+                  evaluasiList: g.evaluasiList,
+                  votePresentator: g.votePresentator
+                };
+              });
+            };
+
+            const summaryArray = calcSummaryForResponses(respList);
+            const summaryMhs = calcSummaryForResponses(respList.filter(r => (r.peran_penilai || 'Mahasiswa') === 'Mahasiswa'));
 
             const res = {
               success: true,
               summary: summaryArray,
+              summaryMhs: summaryMhs,
+              isPublicReviewVisible: true,
               responses: respList.map(r => ({
                 idRespons: r.id_respons,
                 timestamp: new Date(r.created_at).toLocaleString('id-ID'),

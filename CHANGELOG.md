@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.50] - 2026-08-26
+
+### 🛡️ Penyelarasan Komponen Inti CORE_IDENTITY & Optimalisasi Agregasi Real-Time Rekapitulasi
+- **👤 Penyelarasan Tipe Field Identitas (`CORE_IDENTITY`):**
+  - Menambahkan dukungan ganda untuk tipe komponen `CORE_IDENTITY` dan `CORE_IDENTITAS` pada mesin perenderan formulir dinamis (`renderSingleClientFieldHtml`), memastikan data identitas penilai dan profil akun Google terisi otomatis dengan presisi di Tahap 1.
+- **📊 Agregasi Lengkap Rekapitulasi Real-Time Supabase:**
+  - Memperkuat kalkulasi `loadRekapData()` untuk menyusun ringkasan kelompok (`rataRataSkor`), suara pemateri terbaik (`rankedPresenters`), ulasan kualitatif per pemateri (`evaluasiList`), serta daftar penilai (`evaluators`) secara instan dari tabel transaksi Supabase PostgreSQL.
+- **🧪 Verifikasi Penuh End-to-End Google Auth & Pengiriman Penilaian:**
+  - Berhasil menguji alur otentikasi akun Google terverifikasi, transisi formulir 4 tahap, hingga pengiriman 1 respons penilaian lengkap dengan pembuatan tanda terima digital resmi ber-QR Code di server Supabase.
+
+---
+
 ## [2.3.49] - 2026-08-26
 
 ### 🛡️ Eliminasi Race-Condition SignOut Otomatis & Ketahanan Sesi Multi-Form
