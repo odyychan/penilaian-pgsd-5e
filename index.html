@@ -333,32 +333,34 @@
             <p id="lockBannerDesc" class="text-xs text-amber-900 leading-relaxed pl-10.5"></p>
           </div>
 
-          <!-- TOGGLE BUTTON SPOILER DETAIL (TAMPIL SAAT FORM TERKUNCI / BELUM DIBUKA) -->
-          <div id="overviewSpoilerToggleWrapper" class="hidden text-center py-1">
-            <button 
-              type="button" 
-              id="overviewSpoilerToggleBtn"
-              onclick="toggleOverviewDetailsSpoiler()"
-              class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-100/90 hover:bg-zinc-200 text-zinc-700 text-xs font-bold border border-zinc-200 transition cursor-pointer shadow-2xs active:scale-98"
+          <!-- SPOILER BLUR CONTAINER (DETAIL INFORMASI & ALUR PERKULIAHAN) -->
+          <div id="overviewSpoilerWrapper" class="relative rounded-2xl transition-all duration-300 overflow-hidden">
+            <!-- SPOILER OVERLAY (TAMPIL HANYA JIKA FORM TERKUNCI / BELUM DIBUKA) -->
+            <div 
+              id="overviewSpoilerOverlay" 
+              onclick="revealSpoilerBlur()"
+              class="hidden absolute inset-0 z-20 flex-col items-center justify-center p-4 bg-zinc-900/10 backdrop-blur-[6px] hover:backdrop-blur-[4px] rounded-2xl cursor-pointer group/spoiler transition-all duration-300"
             >
-              <span id="overviewSpoilerIcon">📋</span>
-              <span id="overviewSpoilerText">Lihat Detail Informasi &amp; Alur Form</span>
-              <span id="overviewSpoilerChevron" class="text-xs transition-transform duration-200">▾</span>
-            </button>
-          </div>
-
-          <!-- CONTAINER DETAIL & ALUR FORMULIR (COLLAPSIBLE / SPOILER KETIKA FORM DITUTUP) -->
-          <div id="overviewDetailsContainer" class="space-y-4 sm:space-y-5 transition-all">
-            <!-- Rincian Identitas / Informasi Tambahan (Dinamis dari Config) -->
-            <div id="overviewHeaderInfoGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 text-xs">
-              <!-- Rendered dynamically via renderOverviewHeaderInfoGrid() -->
+              <div class="px-4 py-2.5 rounded-xl bg-zinc-900/90 group-hover/spoiler:bg-zinc-900 text-white text-xs font-bold shadow-xl border border-zinc-700/60 flex items-center gap-2 transform group-hover/spoiler:scale-105 active:scale-95 transition-all duration-200">
+                <span class="text-sm">👁️</span>
+                <span>Buka Sensor Rincian (Spoiler)</span>
+                <span class="text-[10px] text-zinc-400 font-mono bg-zinc-800 px-1.5 py-0.5 rounded">Detail Form</span>
+              </div>
             </div>
 
-            <!-- Alur Tahapan Pengisian (Dinamis dari Schema) -->
-            <div class="bg-zinc-50 rounded-xl p-3 sm:p-4 border border-zinc-200/70 space-y-2.5 sm:space-y-3">
-              <h4 class="text-[11px] sm:text-xs font-bold text-zinc-800 uppercase tracking-wider font-mono">Alur Tahapan Pengisian:</h4>
-              <div id="overviewAlurTahapanGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5 text-xs">
-                <!-- Rendered dynamically via renderOverviewAlurTahapan() -->
+            <!-- KONTEN RINCIAN (AKAN TER-BLUR SECARA HALUS SAAT FORM TERKUNCI) -->
+            <div id="overviewSpoilerContent" class="space-y-4 sm:space-y-5 transition-all duration-300">
+              <!-- Rincian Identitas / Informasi Tambahan (Dinamis dari Config) -->
+              <div id="overviewHeaderInfoGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 text-xs">
+                <!-- Rendered dynamically via renderOverviewHeaderInfoGrid() -->
+              </div>
+
+              <!-- Alur Tahapan Pengisian (Dinamis dari Schema) -->
+              <div class="bg-zinc-50 rounded-xl p-3 sm:p-4 border border-zinc-200/70 space-y-2.5 sm:space-y-3">
+                <h4 class="text-[11px] sm:text-xs font-bold text-zinc-800 uppercase tracking-wider font-mono">Alur Tahapan Pengisian:</h4>
+                <div id="overviewAlurTahapanGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5 text-xs">
+                  <!-- Rendered dynamically via renderOverviewAlurTahapan() -->
+                </div>
               </div>
             </div>
           </div>
@@ -3488,6 +3490,9 @@ function normalizeMediaList(fieldOrMedia) {
       const detailsContainer = document.getElementById("overviewDetailsContainer");
       const spoilerWrapper = document.getElementById("overviewSpoilerToggleWrapper");
 
+      const spoilerContent = document.getElementById("overviewSpoilerContent");
+      const spoilerOverlay = document.getElementById("overviewSpoilerOverlay");
+
       if (isBlocked) {
         if (warningBadge) {
           warningBadge.classList.add("hidden");
@@ -3503,12 +3508,10 @@ function normalizeMediaList(fieldOrMedia) {
           startBtn.classList.add("opacity-50", "cursor-not-allowed");
           startBtn.innerHTML = `<span>🔒 Formulir Ditutup</span>`;
         }
-        // Collapse details into spoiler by default when form is closed or not yet open
-        if (detailsContainer && spoilerWrapper) {
-          if (!detailsContainer.hasAttribute('data-user-opened')) {
-            detailsContainer.classList.add("hidden");
-            spoilerWrapper.classList.remove("hidden");
-            updateSpoilerButtonState(false);
+        // Apply frosted glass spoiler blur when form is closed or not yet open
+        if (spoilerContent && spoilerOverlay) {
+          if (!spoilerContent.hasAttribute('data-revealed')) {
+            applySpoilerBlur(true);
           }
         }
       } else {
@@ -3517,8 +3520,7 @@ function normalizeMediaList(fieldOrMedia) {
           warningBadge.classList.add("hidden");
           warningBadge.classList.remove("inline-flex");
         }
-        if (detailsContainer) detailsContainer.classList.remove("hidden");
-        if (spoilerWrapper) spoilerWrapper.classList.add("hidden");
+        applySpoilerBlur(false);
         if (startBtn) {
           startBtn.disabled = false;
           startBtn.classList.remove("opacity-50", "cursor-not-allowed");
@@ -3530,37 +3532,28 @@ function normalizeMediaList(fieldOrMedia) {
       }
     }
 
-    function toggleOverviewDetailsSpoiler() {
-      const detailsContainer = document.getElementById("overviewDetailsContainer");
-      if (!detailsContainer) return;
-      const isHidden = detailsContainer.classList.contains("hidden");
+    function applySpoilerBlur(isBlurred) {
+      const spoilerOverlay = document.getElementById("overviewSpoilerOverlay");
+      const spoilerContent = document.getElementById("overviewSpoilerContent");
+      if (!spoilerContent || !spoilerOverlay) return;
 
-      if (isHidden) {
-        detailsContainer.classList.remove("hidden");
-        detailsContainer.setAttribute('data-user-opened', 'true');
-        updateSpoilerButtonState(true);
-        renderAllMathInElement(detailsContainer);
+      if (isBlurred) {
+        spoilerContent.classList.add("filter", "blur-[6px]", "select-none", "pointer-events-none", "opacity-50");
+        spoilerOverlay.classList.remove("hidden");
+        spoilerOverlay.classList.add("flex");
       } else {
-        detailsContainer.classList.add("hidden");
-        detailsContainer.removeAttribute('data-user-opened');
-        updateSpoilerButtonState(false);
+        spoilerContent.classList.remove("filter", "blur-[6px]", "select-none", "pointer-events-none", "opacity-50");
+        spoilerOverlay.classList.add("hidden");
+        spoilerOverlay.classList.remove("flex");
       }
     }
 
-    function updateSpoilerButtonState(isOpen) {
-      const icon = document.getElementById("overviewSpoilerIcon");
-      const text = document.getElementById("overviewSpoilerText");
-      const chevron = document.getElementById("overviewSpoilerChevron");
-
-      if (isOpen) {
-        if (icon) icon.textContent = "✕";
-        if (text) text.textContent = "Sembunyikan Rincian & Alur Form";
-        if (chevron) chevron.textContent = "▴";
-      } else {
-        if (icon) icon.textContent = "📋";
-        if (text) text.textContent = "Lihat Detail Informasi & Alur Form";
-        if (chevron) chevron.textContent = "▾";
+    function revealSpoilerBlur() {
+      const spoilerContent = document.getElementById("overviewSpoilerContent");
+      if (spoilerContent) {
+        spoilerContent.setAttribute('data-revealed', 'true');
       }
+      applySpoilerBlur(false);
     }
 
     function renderConfigHeader() {

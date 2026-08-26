@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.27] - 2026-08-26
+
+### 🌫️ Efek Sensor Kabur Spoiler Kaca Es (*Frosted Glass Spoiler Blur Effect*)
+- **Efek Sensor Kabur Interaktif (*Authentic Spoiler Blur Overlay*):**
+  - Menggantikan accordion dengan efek *Frosted Glass Spoiler Blur* (`backdrop-blur-[6px]` & `filter: blur`) pada kartu informasi perkuliahan dan alur pengisian saat formulir dalam kondisi belum dibuka atau ditutup.
+- **Interaksi Ketuk untuk Membuka Sensor (*Tap-to-Reveal Interaction*):**
+  - Menyediakan overlay tombol interaktif berlabel **"👁️ Buka Sensor Rincian (Spoiler)"** yang saat diklik/diketuk akan menghilangkan efek blur secara halus dan menampilkan seluruh rincian informasi.
+- **Nonaktif Otomatis Saat Formulir Dibuka (*Auto Disable on Form Open*):**
+  - Ketika jadwal penilaian telah dimulai atau formulir dibuka aktif, seluruh konten ditampilkan jernih dan tajam secara otomatis.
+
+---
+
 ## [2.3.26] - 2026-08-26
 
 ### 📦 Penyembunyian Rincian Otomatis Saat Formulir Terkunci (*Smart Collapsible Spoiler for Locked Forms*)
