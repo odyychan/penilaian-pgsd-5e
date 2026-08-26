@@ -2884,12 +2884,16 @@ function getOrCreateFolder(folderName) {
   <!-- ========================================================================= -->
   <!-- ============ Modular JS: Load order matters (shared first) ============ -->
   <script src="src/shared/config.js"></script>
-  <script src="src/shared/utils.js"></script>
+  <script src="src/shared/math.js"></script>
+  <script src="src/shared/rich-text.js"></script>
+  <script src="src/shared/keyboard.js"></script>
   <script src="src/admin/auth.js"></script>
   <script src="src/admin/ui.js"></script>
   <script src="src/admin/forms.js"></script>
-  <script src="src/admin/groups.js"></script>
-  <script src="src/admin/questions.js"></script>
+  <script src="src/admin/groups-core.js"></script>
+  <script src="src/admin/groups-import.js"></script>
+  <script src="src/admin/questions-core.js"></script>
+  <script src="src/admin/questions-media.js"></script>
   <script src="src/admin/responses.js"></script>
 
   <!-- ========================================================================= -->

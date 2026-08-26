@@ -502,4 +502,29 @@ function normalizeMediaList(fieldOrMedia) {
             </div>
           </div>
         `;
-      }
+      }
+
+// ============================================================
+// SERVICE WORKER REGISTRATION (PWA Support)
+// ============================================================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' })
+      .then(reg => {
+        console.log('[SW] Registered, scope:', reg.scope);
+        // Listen for updates
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // New version available - notify user via toast
+              if (typeof showToast === 'function') {
+                showToast('Pembaruan tersedia! Muat ulang halaman untuk mendapatkan versi terbaru.', 'info', 8000);
+              }
+            }
+          });
+        });
+      })
+      .catch(err => console.warn('[SW] Registration failed:', err));
+  });
+}

@@ -4,6 +4,47 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.20] - 2026-08-27
+
+### ♻️ Modularisasi Lanjutan, Optimasi Caching & PWA Service Worker
+- **📦 Pemecahan Modul Mendalam (Deep Splitting):**
+  - Memecah modul berukuran besar menjadi sub-modul yang lebih granular dan fokus per domain:
+    - `src/shared/`: `config.js` (konfigurasi), `math.js` (KaTeX & render formula), `rich-text.js` (editor & pemformatan teks), `keyboard.js` (shortcut & navigasi), dan `styles.css`.
+    - `src/admin/`: `auth.js`, `ui.js`, `forms.js`, `groups-core.js`, `groups-import.js`, `questions-core.js`, `questions-media.js`, `responses.js`, dan `admin.css`.
+    - `src/student/`: `auth.js`, `form.js`, `submission.js`, `recap.js`, `print.js`, `app.js`, dan `index.css`.
+- **⚡ Kebijakan Caching Vercel (Immutable Modules):**
+  - Mengonfigurasi `vercel.json` dengan header `Cache-Control: public, max-age=31536000, immutable` untuk seluruh aset skrip dan gaya di `/src/` sehingga beban muat peramban berkurang drastis pada kunjungan berulang.
+- **🛡️ Penguatan Header Keamanan HTTP:**
+  - Menerapkan `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `X-XSS-Protection: 1; mode=block`, dan `Referrer-Policy: strict-origin-when-cross-origin`.
+- **📱 PWA Offline & Precache Service Worker (`sw.js`):**
+  - Mengimplementasikan Service Worker dengan strategi terpadu: *Cache-First* untuk modul JS/CSS, *Network-First* untuk dokumen HTML, dan *Stale-While-Revalidate* untuk aset gambar/ikon.
+  - Menambahkan registrasi Service Worker dan pendeteksi versi baru otomatis di `src/student/app.js`.
+
+---
+
+## [2.4.19] - 2026-08-27
+
+### 🏗️ Transformasi Monorepo Terstruktur & Dekomposisi File Monolit
+- **🗂️ Pemisahan Concerns (Separation of Concerns):**
+  - Mengekstrak puluhan ribu baris JavaScript dan CSS inline dari `admin.html` dan `index.html` menjadi arsitektur direktori modular `src/`.
+  - Mengurangi ukuran file shell:
+    - `admin.html`: 13.391 baris → 3.505 baris (−74%).
+    - `index.html`: 9.351 baris → 1.334 baris (−86%).
+- **🚀 Peningkatan Kemudahan Pemeliharaan (Maintainability):**
+  - Setiap modul kode memiliki tanggung jawab tunggal (Single Responsibility) dan dapat ditinjau atau diedit secara terisolasi tanpa risiko konflik pada bagian aplikasi lainnya.
+
+---
+
+## [2.4.18] - 2026-08-27
+
+### 🎨 Penyederhanaan Antarmuka Modal & Redesain Setelan Sistem
+- **✨ Redesain Modal Setelan Sistem & Database Global:**
+  - Mengadopsi tata letak modern minimalis dengan *bottom-sheet style* pada perangkat mobile (`rounded-t-3xl`), header ringkas, kartu status database yang jelas, dan tombol aksi terstruktur.
+- **🎯 Penyederhanaan Modal "Buat Formulir Baru":**
+  - Menghilangkan opsi radio redundan dan memfokuskan alur langsung pada pembuatan formulir baru berbasis kode akses PIN. Alur kloning data tetap difokuskan pada fitur Kloning di Master Hub.
+
+---
+
 ## [2.4.17] - 2026-08-26
 
 ### 🛡️ Mesin Autentikasi Admin Multi-Tier & Pemulihan Akses Portal

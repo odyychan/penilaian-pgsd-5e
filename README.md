@@ -7,13 +7,50 @@ Sistem ini adalah aplikasi **Web Multi-Form Peer-Assessment & Executive Leaderbo
 
 ---
 
-## 📁 Struktur File Proyek
+## 📁 Struktur Monorepo Proyek
 
-1. **[`Index.html`](file:///d:/Project%20Dede/Index.html)**: Frontend web mahasiswa (Multi-step assessment form, auto-save draft, interactive score slider, and modern minimalist leaderboard).
-2. **[`admin.html`](file:///d:/Project%20Dede/admin.html)**: Portal Admin lengkap (Master data kelompok & anggota, konfigurasi parameter, monitoring respons & reset jawaban, auto-sync realtime dengan offline queue).
-3. **[`vercel.json`](file:///d:/Project%20Dede/vercel.json)**: Konfigurasi routing & rewrites untuk deployment instan di Vercel.
-4. **[`_redirects`](file:///d:/Project%20Dede/_redirects)**: Konfigurasi rewrites untuk Netlify.
-5. **[`Code.gs`](file:///d:/Project%20Dede/Code.gs)**: Backend REST API di Google Apps Script.
+```text
+├── index.html                    # Shell frontend mahasiswa (Multi-step assessment, auto-save, PWA)
+├── admin.html                    # Shell portal admin (Master hub, form builder, groups, responses)
+├── sw.js                         # PWA Service Worker (Cache-first modules, offline support)
+├── vercel.json                   # Konfigurasi routing, immutable caching & security headers
+├── _redirects                    # Konfigurasi fallback Netlify
+│
+├── src/                          # Modular Architecture
+│   ├── shared/                   # Modul yang digunakan bersama (Admin & Mahasiswa)
+│   │   ├── config.js             # Konstanta global, endpoints & SUPABASE_CONFIG
+│   │   ├── math.js               # Universal KaTeX & formula rendering engine
+│   │   ├── rich-text.js          # WYSIWYG rich text formatting & in-place editor
+│   │   ├── keyboard.js           # Shortcut keyboard, textarea elastic & navigation
+│   │   └── styles.css            # Base CSS utility
+│   │
+│   ├── admin/                    # Modul Portal Admin
+│   │   ├── admin.css             # Gaya spesifik admin
+│   │   ├── auth.js               # Multi-tier login verification & session management
+│   │   ├── ui.js                 # Master hub, tab navigation, modal & popover controllers
+│   │   ├── forms.js              # CRUD formulir, isolasi workspace & sinkronisasi
+│   │   ├── groups-core.js        # Manajemen kelompok & mahasiswa
+│   │   ├── groups-import.js      # Multi-source smart student importer
+│   │   ├── questions-core.js     # Form builder, question cards & schema normalization
+│   │   ├── questions-media.js    # Media studio gallery, upload & preview
+│   │   └── responses.js          # Viewer respons, pelacak partisipasi & scoped export
+│   │
+│   └── student/                  # Modul Portal Mahasiswa
+│       ├── index.css             # Gaya spesifik halaman penilaian
+│       ├── auth.js               # Google OAuth via Supabase Auth & session
+│       ├── form.js               # Dynamic stage wizard, question renderer & identity step
+│       ├── submission.js         # Submission engine, single submission lock & receipt
+│       ├── recap.js              # Leaderboard chart, rekapitulasi nilai & presensi
+│       ├── print.js              # Official printable report & PDF generator
+│       └── app.js                # Inisialisasi aplikasi & registrasi PWA Service Worker
+│
+├── assets/                       # Ikon PWA, logo & favicons
+├── supabase/                     # Edge Functions & konfigurasi Supabase
+│   └── functions/
+│       ├── admin-auth/           # Edge Function autentikasi admin
+│       └── google-sync/          # Edge Function pipeline sinkronisasi Google Sheets
+└── docs/                         # Skema database setup.sql & dokumentasi teknis
+```
 
 ---
 
