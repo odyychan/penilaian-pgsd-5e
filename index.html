@@ -341,9 +341,24 @@
               onclick="revealSpoilerBlur()"
               class="hidden absolute inset-0 z-20 flex-col items-center justify-start pt-14 sm:pt-16 p-4 bg-zinc-900/5 backdrop-blur-[2px] hover:backdrop-blur-[1px] rounded-2xl cursor-pointer group/spoiler transition-all duration-300"
             >
-              <div class="px-4 py-2.5 rounded-xl bg-zinc-900/90 group-hover/spoiler:bg-zinc-900 text-white text-xs font-bold shadow-xl border border-zinc-700/60 flex items-center gap-2 transform group-hover/spoiler:scale-105 active:scale-95 transition-all duration-200">
-                <span class="text-sm">👁️</span>
-                <span>Lihat Rincian (Spoiler)</span>
+              <div class="px-4 py-2.5 rounded-xl bg-zinc-900/95 group-hover/spoiler:bg-zinc-900 text-white text-xs font-bold shadow-xl border border-zinc-700/70 flex items-center gap-2.5 transform group-hover/spoiler:scale-105 active:scale-95 transition-all duration-200 select-none">
+                <!-- Interactive Mouse-Tracking Eyeball SVG -->
+                <div id="spoilerEyeContainer" class="w-5 h-5 flex items-center justify-center shrink-0">
+                  <svg id="spoilerEyeSvg" class="w-5 h-5 text-white overflow-visible" viewBox="0 0 24 24" fill="none">
+                    <!-- Sclera / Outer Eyeball -->
+                    <path d="M2.5 12C4.5 7.5 8 4.5 12 4.5C16 4.5 19.5 7.5 21.5 12C19.5 16.5 16 19.5 12 19.5C8 19.5 4.5 16.5 2.5 12Z" fill="#ffffff" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                    <!-- Moving Pupil & Iris Group -->
+                    <g id="spoilerPupilGroup" class="transition-transform duration-75 ease-out" style="transform: translate(0px, 0px);">
+                      <!-- Iris -->
+                      <circle cx="12" cy="12" r="4.2" fill="#4f46e5"/>
+                      <!-- Pupil Center -->
+                      <circle cx="12" cy="12" r="2.4" fill="#0f172a"/>
+                      <!-- Light Reflection Highlight -->
+                      <circle cx="10.8" cy="10.8" r="1.1" fill="#ffffff"/>
+                    </g>
+                  </svg>
+                </div>
+                <span class="tracking-tight">Lihat Rincian (Spoiler)</span>
               </div>
             </div>
 
@@ -3531,6 +3546,40 @@ function normalizeMediaList(fieldOrMedia) {
       }
     }
 
+    let eyeTrackRafId = null;
+    function initSpoilerEyeTracking() {
+      if (window._spoilerEyeTrackingInitialized) return;
+      window._spoilerEyeTrackingInitialized = true;
+
+      window.addEventListener('mousemove', (e) => {
+        const pupilGroup = document.getElementById("spoilerPupilGroup");
+        const overlay = document.getElementById("overviewSpoilerOverlay");
+        if (!pupilGroup || !overlay || overlay.classList.contains("hidden")) return;
+
+        if (eyeTrackRafId) cancelAnimationFrame(eyeTrackRafId);
+        eyeTrackRafId = requestAnimationFrame(() => {
+          const rect = pupilGroup.getBoundingClientRect();
+          const eyeCenterX = rect.left + rect.width / 2;
+          const eyeCenterY = rect.top + rect.height / 2;
+
+          const deltaX = e.clientX - eyeCenterX;
+          const deltaY = e.clientY - eyeCenterY;
+          const angle = Math.atan2(deltaY, deltaX);
+
+          // Calculate natural clamped movement within eye socket
+          const distance = Math.hypot(deltaX, deltaY);
+          const maxDistanceX = 3.2;
+          const maxDistanceY = 2.0;
+          const clampedRatio = Math.min(1, distance / 120);
+
+          const moveX = Math.cos(angle) * (maxDistanceX * clampedRatio);
+          const moveY = Math.sin(angle) * (maxDistanceY * clampedRatio);
+
+          pupilGroup.style.transform = `translate(${moveX.toFixed(2)}px, ${moveY.toFixed(2)}px)`;
+        });
+      }, { passive: true });
+    }
+
     function applySpoilerBlur(isBlurred) {
       const spoilerOverlay = document.getElementById("overviewSpoilerOverlay");
       const spoilerContent = document.getElementById("overviewSpoilerContent");
@@ -3540,6 +3589,7 @@ function normalizeMediaList(fieldOrMedia) {
         spoilerContent.classList.add("filter", "blur-[3.5px]", "select-none", "pointer-events-none", "opacity-75");
         spoilerOverlay.classList.remove("hidden");
         spoilerOverlay.classList.add("flex");
+        initSpoilerEyeTracking();
       } else {
         spoilerContent.classList.remove("filter", "blur-[3.5px]", "select-none", "pointer-events-none", "opacity-75");
         spoilerOverlay.classList.add("hidden");

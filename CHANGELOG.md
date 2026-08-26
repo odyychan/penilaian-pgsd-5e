@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.31] - 2026-08-26
+
+### 👁️ Animasi Interaktif Bola Mata Mengikuti Kursor Mouse (*Interactive Eye Cursor Tracking Animation*)
+- **Animasi Pelacak Arah Kursor (*Dynamic 60FPS Eye Physics*):**
+  - Mengganti ikon statis pada tombol spoiler dengan elemen SVG bola mata interaktif yang iris dan pupilnya bergerak secara halus dan dinamis mengikuti posisi kursor mouse pengguna secara *real-time*.
+- **Optimalisasi Performa & Batasan Fisik Alami (*Clamped Boundary Physics & Zero-Lag*):**
+  - Menggunakan kalkulasi sudut trigonometri dan batasan radius alami (*clamped eye socket physics*) yang dijalankan via `requestAnimationFrame` untuk menjamin animasi 60 FPS yang mulus tanpa membebani performa CPU/memori.
+
+---
+
 ## [2.3.30] - 2026-08-26
 
 ### 🏷️ Penyelarasan Label Tombol Spoiler (*Updated Spoiler Trigger Label*)
