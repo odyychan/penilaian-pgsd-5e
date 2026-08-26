@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.35] - 2026-08-26
+
+### 🛠️ Perbaikan Sinkronisasi ID Container & Pemulihan Textarea Evaluasi Masukan Pemateri (*Fix Member Feedback Textarea Container & Rehydration*)
+- **Penyelarasan ID Container Evaluasi (`#evaluationInputsContainer`):**
+  - Memperbaiki ketidakcocokan ID elemen container ulasan pemateri pada *dynamic renderer* (`renderSingleClientFieldHtml`) dari `memberFeedbackContainer` menjadi `evaluationInputsContainer` agar sinkron dengan fungsi pembuat textarea `onSelectGroup`, auto-save draf, pemulihan draf, dan submit form.
+- **Rehidrasi Otomatis Komponen Dinamis (*Dynamic Stages Rehydration*):**
+  - Memperbaiki pemanggilan fungsi `renderDynamicClientStages()` agar otomatis merender ulang daftar kelompok (`renderGroupOptions`) dan membuat textarea evaluasi perorangan anggota kelompok yang terpilih saat draf dipulihkan (*auto-restore*).
+- **Panduan Status Kosong (*Empty State Notice*):**
+  - Menambahkan pemberitahuan informatif jika mahasiswa langsung membuka Bagian 4 sebelum memilih kelompok di Bagian 2.
+
+---
+
 ## [2.3.34] - 2026-08-26
 
 ### 🚀 3 Fitur Esensial Mahasiswa: Pratinjau Sebelum Kirim, Pemulihan Draf Otomatis & Struk Bukti Digital ber-QR Code

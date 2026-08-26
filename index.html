@@ -2394,12 +2394,14 @@ function normalizeMediaList(fieldOrMedia) {
       initAllModernDropdowns();
 
       // Populate core components if data exists
-      if (typeof renderGroupCards === 'function' && cachedDataKelompok && cachedDataKelompok.length > 0) {
-        renderGroupCards();
+      if (groupsData && groupsData.length > 0) {
+        renderGroupOptions();
       }
-      if (typeof renderPresenterCards === 'function' && selectedKelompokIndex !== null) {
-        renderPresenterCards();
-        if (typeof renderFeedbackTextareas === 'function') renderFeedbackTextareas();
+      if (selectedGroupObj && groupsData && groupsData.length > 0) {
+        const grpIdx = groupsData.findIndex(g => g.name === selectedGroupObj.name);
+        if (grpIdx !== -1) {
+          onSelectGroup(selectedGroupObj.name, grpIdx);
+        }
       }
 
       setTimeout(() => {
@@ -2951,7 +2953,11 @@ function normalizeMediaList(fieldOrMedia) {
               <h3 class="text-sm sm:text-base font-bold text-zinc-900 math-renderable">${smartMathFormat(f.label || 'Evaluasi Masukan Tiap Pemateri')}${reqBadge}</h3>
               <p class="text-xs text-zinc-500 mt-0.5 math-renderable">${smartMathFormat(f.description || 'Berikan masukan apresiasi konstruktif untuk setiap anggota pemateri.')}</p>
             </div>
-            <div id="memberFeedbackContainer" class="space-y-4"></div>
+            <div id="evaluationInputsContainer" class="space-y-4">
+              <div id="evaluationEmptyNotice" class="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs text-center">
+                Silakan pilih kelompok yang dinilai terlebih dahulu pada bagian sebelumnya untuk menampilkan formulir ulasan pemateri.
+              </div>
+            </div>
           </div>
         `;
       }
@@ -4721,7 +4727,18 @@ function normalizeMediaList(fieldOrMedia) {
           return;
         }
 
-        // 1. Pulihkan Step 1 (Identitas & Peran)
+        // 1. Pulihkan Jawaban Kustom & Berkas Terlebih Dahulu
+        if (draft.customAnswers && typeof draft.customAnswers === 'object') {
+          clientCustomFormAnswers = Object.assign({}, draft.customAnswers);
+        }
+        if (draft.uploadedFiles && typeof draft.uploadedFiles === 'object') {
+          customUploadedFilesMap = Object.assign({}, draft.uploadedFiles);
+        }
+
+        // Render struktur tahapan dinamis ke DOM
+        renderDynamicClientStages();
+
+        // 2. Pulihkan Step 1 (Identitas & Peran)
         if (draft.peran) {
           onRoleChange(draft.peran);
         }
@@ -4744,7 +4761,7 @@ function normalizeMediaList(fieldOrMedia) {
           }
         }
 
-        // 2. Pulihkan Pemilihan Kelompok & Sub-komponennya
+        // 3. Pulihkan Pemilihan Kelompok & Sub-komponennya
         if (draft.groupName && groupsData && groupsData.length > 0) {
           const grpIdx = groupsData.findIndex(g => g.name === draft.groupName);
           if (grpIdx !== -1) {
@@ -4753,7 +4770,7 @@ function normalizeMediaList(fieldOrMedia) {
             
             onSelectGroup(draft.groupName, grpIdx);
 
-            // 3. Pulihkan Skor
+            // 4. Pulihkan Skor
             if (draft.nilai) {
               const numEl = document.getElementById("inputNilaiNumber");
               const sliEl = document.getElementById("inputNilaiSlider");
@@ -4762,7 +4779,7 @@ function normalizeMediaList(fieldOrMedia) {
               updateScoreBadge(draft.nilai);
             }
 
-            // 4. Pulihkan Presentator Terbaik
+            // 5. Pulihkan Presentator Terbaik
             if (draft.bestPresenters && Array.isArray(draft.bestPresenters)) {
               selectedBestPresenters = [...draft.bestPresenters];
               updateBestPresenterBadge();
@@ -4776,8 +4793,8 @@ function normalizeMediaList(fieldOrMedia) {
               });
             }
 
-            // 5. Pulihkan Evaluasi Kualitatif per Mahasiswa
-            if (draft.evaluasi) {
+            // 6. Pulihkan Evaluasi Kualitatif per Mahasiswa
+            if (draft.evaluasi && typeof draft.evaluasi === 'object') {
               const maxChars = parseInt(appConfig["Maksimal_Karakter_Evaluasi"] || 500);
               document.querySelectorAll("#evaluationInputsContainer textarea").forEach((ta, eIdx) => {
                 const member = ta.getAttribute("data-member");
@@ -4790,54 +4807,29 @@ function normalizeMediaList(fieldOrMedia) {
                 }
               });
             }
-
-            // 6. Pulihkan Posisi Step Halaman
-            if (draft.step && draft.step > 1 && draft.step <= 4) {
-              if (draft.step >= 2 && draft.email && draft.nama) {
-                if (draft.step >= 3 && draft.groupName) {
-                  if (draft.step === 4 && draft.bestPresenters && draft.bestPresenters.length > 0) {
-                    document.getElementById("summaryPenilai").textContent = draft.nama + ` (${draft.peran || 'Mahasiswa'})`;
-                    document.getElementById("summaryKelompok").textContent = draft.groupName;
-                    document.getElementById("summarySkor").textContent = draft.nilai || 85;
-                    document.getElementById("summaryPresentator").textContent = draft.bestPresenters.join(", ");
-                    startAssessmentForm();
-                    updateStepUI(4, true);
-                  } else {
-                    startAssessmentForm();
-                    updateStepUI(3, true);
-                  }
-                } else {
-                  startAssessmentForm();
-                  updateStepUI(2, true);
-                }
-              }
-            } else if (draft.email || draft.nama || draft.nim) {
-              startAssessmentForm();
-              updateStepUI(1, true);
-            }
           }
         }
 
-        const indicator = document.getElementById("autoSaveIndicator");
-        if (indicator) indicator.classList.remove("hidden");
-
-        if (draft.uploadedFiles && typeof draft.uploadedFiles === 'object') {
-          customUploadedFilesMap = Object.assign({}, draft.uploadedFiles);
-        }
-
-        if (draft.email || draft.nama || draft.nim || draft.groupName || (customUploadedFilesMap && Object.keys(customUploadedFilesMap).length > 0)) {
-          if (draft.customAnswers && typeof draft.customAnswers === 'object') {
-            clientCustomFormAnswers = draft.customAnswers;
-          }
-          renderDynamicClientStages();
-
+        // 7. Tentukan Navigasi & Posisi Langkah
+        if (draft.email || draft.nama || draft.nim || draft.groupName) {
           isDraftAlreadyRestored = true;
           startAssessmentForm();
+
+          const targetStep = (draft.step && draft.step >= 1 && draft.step <= (Object.keys(stepMetadata).length || 4))
+            ? draft.step
+            : 1;
+          updateStepUI(targetStep, true);
+
           const banner = document.getElementById("studentDraftRestoreBanner");
           if (banner) banner.classList.remove("hidden");
+          const indicator = document.getElementById("autoSaveIndicator");
+          if (indicator) indicator.classList.remove("hidden");
+
           showToast("Draf isian sebelumnya berhasil dipulihkan.", "info");
         }
-      } catch (e) {}
+      } catch (e) {
+        console.warn("Restore draft error notice:", e);
+      }
       updateDraftResetButtonVisibility();
     }
 
