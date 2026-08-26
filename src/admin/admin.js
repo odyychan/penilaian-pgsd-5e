@@ -3262,20 +3262,53 @@
       } catch(e){}
     }
 
+    // ============================================================
+    // MODE PENGEMBANG & SANDBOX DEBUGGING ISOLATED ENGINE
+    // ============================================================
+    function isDebugModeEnabled() {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("debug") === "true" || urlParams.get("debug") === "1") return true;
+      return localStorage.getItem("PGSD_DEBUG_MODE") === "true";
+    }
+
+    function toggleDebugMode() {
+      const current = isDebugModeEnabled();
+      const next = !current;
+      localStorage.setItem("PGSD_DEBUG_MODE", next ? "true" : "false");
+      if (typeof showToast === "function") {
+        showToast(next ? "🛠️ Mode Debug Aktif: Form Sandbox DEBUG ditampilkan." : "Mode Debug Dinonaktifkan.", "info");
+      }
+      renderHubFormsGrid();
+      updateDebugModeUI();
+    }
+
+    function updateDebugModeUI() {
+      const isDebug = isDebugModeEnabled();
+      const toggleInput = document.getElementById("toggleDebugModeInput");
+      if (toggleInput) toggleInput.checked = isDebug;
+    }
+
     function renderHubFormsGrid() {
       const container = document.getElementById("hubFormsGrid");
       const emptyEl = document.getElementById("emptyHubForms");
       const countEl = document.getElementById("hubTotalFormsCount");
       container.innerHTML = "";
 
+      const isDebug = isDebugModeEnabled();
+      updateDebugModeUI();
+
       const query = (document.getElementById("searchHubFormsInput")?.value || "").trim().toLowerCase();
       const statusFilter = document.getElementById("filterHubStatusSelect")?.value || "ALL";
 
       let visibleCount = 0;
-      if (countEl) countEl.textContent = `${formsRegistryList.length} Formulir Terdaftar`;
 
       formsRegistryList.forEach(form => {
         const fId = form.formId || DEFAULT_PRIMARY_FORM_ID;
+        const isDebugForm = (fId === "DEBUG" || (fId && fId.toUpperCase().startsWith("DBG_")));
+
+        // Sembunyikan form DEBUG jika Mode Debug TIDAK aktif
+        if (isDebugForm && !isDebug) return;
+
         const fTitle = form.judulForm || "Formulir Penilaian";
         const fMatkul = form.mataKuliah || "Mata Kuliah";
         const fDosen = form.dosen || "-";
@@ -3318,16 +3351,17 @@
         `;
 
         const card = document.createElement("div");
-        card.className = "bg-white rounded-2xl border border-zinc-200/90 p-5 shadow-xs flex flex-col justify-between space-y-4 hover:shadow-md hover:border-zinc-300 transition-all duration-200 group";
+        card.className = `bg-white rounded-2xl border ${isDebugForm ? 'border-amber-400/90 ring-2 ring-amber-400/20 bg-amber-500/[0.02]' : 'border-zinc-200/90'} p-5 shadow-xs flex flex-col justify-between space-y-4 hover:shadow-md hover:border-zinc-300 transition-all duration-200 group`;
 
         card.innerHTML = `
           <div class="space-y-3">
             <div class="flex items-center justify-between gap-2">
               <div class="flex items-center gap-1.5">
-                <span class="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200/80 font-mono font-bold text-xs tracking-wider">
+                <span class="px-2.5 py-1 rounded-lg ${isDebugForm ? 'bg-amber-100 text-amber-900 border border-amber-300 font-mono font-extrabold text-xs tracking-wider' : 'bg-indigo-50 text-indigo-700 border border-indigo-200/80 font-mono font-bold text-xs tracking-wider'}">
                   PIN: ${fId}
                 </span>
                 ${isPrimary ? '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-zinc-100 text-zinc-700 border border-zinc-200">Utama</span>' : ''}
+                ${isDebugForm ? '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">🛠️ Sandbox QA</span>' : ''}
               </div>
               <div class="flex items-center gap-1.5">
                 ${statusBadge}
@@ -9149,6 +9183,8 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       const statGroups = document.getElementById("statGlobalGroups");
       const statStudents = document.getElementById("statGlobalStudents");
       if (statForms) statForms.textContent = formsRegistryList.length || "2";
+
+      updateDebugModeUI();
 
       const modal = document.getElementById("modalGlobalSettings");
       if (modal) modal.classList.remove("hidden");

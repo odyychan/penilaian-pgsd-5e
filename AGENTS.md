@@ -58,3 +58,25 @@ Dokumen ini berfungsi sebagai instruksi inti, standar teknis, dan pedoman operas
    - Hindari mengekspos detail sensitif backend/token di dalam Changelog publik.
 2. **Auto-Commit & Auto-Push**:
    - Setelah setiap pembaruan kode selesai dan diverifikasi, Agent wajib melakukan `git add .`, `git commit -m "<pesan rilis>"`, dan `git push origin main` secara otomatis tanpa menunggu perintah tambahan.
+
+---
+
+## 🛠️ 5. Standar Pengujian & Form Debugging Terisolasi (Non-Negotiable)
+
+1. **Formulir Khusus Sandbox Debugging (`form_id: 'DEBUG'`)**:
+   - Seluruh pengujian otomatis (*automated testing*), pengujian jarak jauh (*remote testing* via Playwright/Browser), simulasi pengiriman respon, injeksi data dummy, pengetesan upload berkas, perbaikan celah keamanan, dan verifikasi fitur baru **WAJIB HANYA DILAKUKAN PADA FORMULIR SANDBOX DEDIKASI**:
+     - `Form PIN ID`: `DEBUG`
+     - `Form Title`: `🛠️ [DEBUG] Sandbox Form Pengujian & Diagnostik Sistem`
+     - `Form Slug`: `debug-sandbox`
+   - **DILARANG KERAS** melakukan testing, submit respon uji coba, mengubah rubrik, atau menghapus data pada formulir perkuliahan aktif nyata (seperti `BK5E` atau formulir mahasiswa/dosen lainnya).
+
+2. **Visibilitas Terisolasi (Mode Pengembang / Debug Mode)**:
+   - Formulir `DEBUG` **TIDAK BOLEH TAMPIL** di daftar utama Master Hub Admin untuk pengguna biasa agar tidak membingungkan dosen dan mahasiswa.
+   - Formulir `DEBUG` **HANYA TAMPIL** apabila Mode Debugging diaktifkan melalui:
+     - URL parameter: `?debug=true` atau `?debug=1`
+     - Sakelar Mode Pengembang di *Modal Setelan Sistem*: `localStorage.PGSD_DEBUG_MODE = 'true'`
+   - Ketika Mode Debugging aktif, form `DEBUG` ditandai dengan badge khusus `[🛠️ Sandbox QA]`.
+
+3. **Integritas Data Produksi**:
+   - Setiap kali Agent diperintahkan untuk melakukan uji coba atau diagnosa, Agent wajib membuka `https://bksd-ulm.vercel.app/?id=DEBUG` atau `https://bksd-ulm.vercel.app/admin?id=DEBUG` (atau mengaktifkan `?debug=true`) sehingga integritas data nyata tetap terjaga 100%.
+

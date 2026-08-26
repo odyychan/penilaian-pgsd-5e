@@ -4,6 +4,21 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.22] - 2026-08-27
+
+### 🛠️ Lingkungan Sandbox Debugging Terisolasi & Standar Pengujian Mandiri
+- **🧪 Formulir Sandbox Khusus Pengujian (`form_id: 'DEBUG'`):**
+  - Membuat formulir sandbox dedikasi dengan PIN `DEBUG` untuk seluruh pengujian fitur, remote testing, simulasi respons, dan diagnosa celah sistem.
+  - Menjamin formulir perkuliahan aktif (seperti `BK5E` dan lainnya) tidak akan terganggu, terubah, atau terpolusi oleh data dummy pengujian.
+- **👁️ Visibilitas Terisolasi (Mode Pengembang / Debug Mode):**
+  - Formulir `DEBUG` secara default disembunyikan dari daftar Master Hub Admin.
+  - Formulir hanya muncul jika Mode Debug diaktifkan melalui URL parameter (`?debug=true`) atau sakelar "Mode Pengembang & Sandbox Form" di Modal Setelan Sistem.
+  - Formulir sandbox ditandai dengan badge jelas `[🛠️ Sandbox QA]`.
+- **📜 Standarisasi Aturan Agen (`AGENTS.md`):**
+  - Menetapkan Bagian 5 pada pedoman `AGENTS.md` sebagai standar non-negotiable bagi seluruh agen AI untuk selalu menggunakan form sandbox `DEBUG` saat pengujian.
+
+---
+
 ## [2.4.21] - 2026-08-27
 
 ### 🚀 Konsolidasi & Verifikasi Arsitektur Modular Mandiri

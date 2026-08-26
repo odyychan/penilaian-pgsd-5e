@@ -2862,6 +2862,25 @@ function getOrCreateFolder(folderName) {
           </div>
         </div>
 
+        <div class="border-t border-zinc-100"></div>
+
+        <!-- 5. Mode Pengembang & Form Debugging Sandbox -->
+        <div class="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 flex items-center justify-center font-bold text-sm shrink-0">
+              🛠️
+            </div>
+            <div>
+              <p class="font-bold text-xs text-zinc-900">Mode Pengembang &amp; Sandbox Form (DEBUG)</p>
+              <p class="text-[11px] text-zinc-500 mt-0.5 leading-tight">Tampilkan formulir sandbox (DEBUG) untuk uji coba fitur &amp; remote testing tanpa mengganggu form aktif.</p>
+            </div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer shrink-0">
+            <input type="checkbox" id="toggleDebugModeInput" onchange="toggleDebugMode()" class="sr-only peer">
+            <div class="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+          </label>
+        </div>
+
       </div>
 
       <!-- Modal Footer -->
