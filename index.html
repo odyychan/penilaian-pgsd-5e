@@ -1343,6 +1343,7 @@
     const isPreviewMode = urlParams.get('preview') === 'draft' || urlParams.get('preview') === 'true';
     let activeFormId = (urlParams.get('id') || urlParams.get('form') || localStorage.getItem('PGSD_ACTIVE_CLIENT_FORM_ID') || 'BK5E').toUpperCase();
     let currentFormMeta = null;
+    let currentFormSchema = null;
     let customFieldsData = [];
     let customUploadedFilesMap = {};
 

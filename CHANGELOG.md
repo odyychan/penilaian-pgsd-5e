@@ -4,6 +4,15 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.58] - 2026-08-26
+
+### 🐛 Perbaikan Scope Global `currentFormSchema`
+- **🔒 Deklarasi Eksplisit Scope Global:**
+  - Menambahkan deklarasi eksplisit `let currentFormSchema = null;` pada scope variabel global teratas di `index.html`.
+  - Mengeliminasi `ReferenceError: currentFormSchema is not defined` yang sempat menghentikan eksekusi render tahapan formulir saat form wizard dibuka.
+
+---
+
 ## [2.3.57] - 2026-08-26
 
 ### 🛠️ Perbaikan Render Tahapan Formulir Dinamis (Dynamic Client Stages Engine)
