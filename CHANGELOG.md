@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.14] - 2026-08-26
+
+### 🛡️ Proteksi Tautan Langsung Responden & Eliminasi Total Kebocoran Rute Admin
+- **🔗 Integrasi Dynamic Real-time Respondent URL Engine:**
+  - Tombol **"Buka Formulir"** pada bilah navigasi atas kini menggunakan aksi eksekusi `window.open(getRespondentFormUrl(currentFormId), '_blank')` secara real-time, **menjamin 100% selalu membuka halaman formulir responden mahasiswa (`https://bksd-ulm.vercel.app/?id=PIN`)**, bukan halaman admin (`/admin` atau `/admin/index.html`).
+  - Menambahkan tombol aksi cepat **"Buka Form"** pada setiap kartu formulir di Pusat Pengelolaan (*Master Hub*).
+  - Mengoreksi sumber iframe pada *Live Form Simulator* dan pratinjau tab baru agar selalu menggunakan URL responden resmi.
+
+---
+
 ## [2.4.13] - 2026-08-26
 
 ### 🚀 Bilah Aksi Melayang Kontekstual Adaptif (*Google Forms-Style Active Tracking Toolbar*)
