@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.3] - 2026-08-26
+
+### 📱 Optimasi Presisi Responsivitas Multi-Ukuran (Mobile-S / Mobile-M / Mobile-L)
+- **📐 Pengujian & Penguatan Breakpoint Mobile:**
+  - **Mobile-S (320px):** Mengoptimalkan padding kontainer, penataan tab tahapan wizard 4 kolom (`grid-cols-4`), pemendekan label teks otomatis (*auto-ellipsis*), dan pencegahan *overflow horizontal*.
+  - **Mobile-M (375px) & Mobile-L (425px):** Menstabilkan proporsi kartu kelompok, baris info akademik, tombol aksi touch-target $\ge 48\text{ px}$, dan dialog tanda terima digital.
+  - Memastikan seluruh elemen antarmuka stabil dan rapi di seluruh rasio layar tanpa distorsi (*zero clipping*).
+
+---
+
 ## [2.4.2] - 2026-08-26
 
 ### 🎨 Penyelarasan Desain Token & Presisi Dimensi Portal Akses

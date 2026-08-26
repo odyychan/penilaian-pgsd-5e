@@ -2602,19 +2602,18 @@ function normalizeMediaList(fieldOrMedia) {
       if (!container) return;
       
       const total = Object.keys(stepMetadata).length || 4;
-      const cols = Math.min(total, 4);
-      container.className = `grid grid-cols-${cols} sm:grid-cols-${total} gap-1.5 pt-1 text-center`;
+      container.className = "grid grid-cols-4 gap-1 sm:gap-1.5 pt-1 text-center";
       
       let html = '';
       for (let i = 1; i <= total; i++) {
         const meta = stepMetadata[i] || { title: `Tahap ${i}` };
-        const shortTitle = meta.title.length > 18 ? meta.title.substring(0, 16) + '…' : meta.title;
+        const shortTitle = meta.title.length > 14 ? meta.title.substring(0, 12) + '…' : meta.title;
         html += `
           <button 
             type="button" 
             id="stepTab_${i}" 
             onclick="goToStep(${i})" 
-            class="py-1.5 px-1 rounded text-[10px] sm:text-[11px] font-medium transition text-zinc-400 bg-zinc-50 border border-transparent truncate"
+            class="py-1.5 px-0.5 sm:px-1 rounded text-[9.5px] sm:text-[11px] font-bold transition text-zinc-400 bg-zinc-50 border border-transparent truncate"
             title="${meta.title}"
           >
             ${i}. ${shortTitle}
