@@ -791,7 +791,7 @@
       <div id="adminView_config" class="flex flex-col gap-3 sm:gap-6 relative pb-20 sm:pb-12">
 
         <!-- KARTU UTAMA IDENTITAS PERKULIAHAN (GOOGLE FORMS HEADER CARD) -->
-        <div class="bg-white rounded-xl sm:rounded-2xl border-2 border-zinc-200 border-t-8 border-t-indigo-600 shadow-sm p-3.5 sm:p-7 space-y-4 sm:space-y-5 transition hover:shadow-md relative">
+        <div id="headerFormCard" onclick="setActiveFormCard('header', 0, null, this)" onfocusin="setActiveFormCard('header', 0, null, this)" class="bg-white rounded-xl sm:rounded-2xl border-2 border-zinc-200 border-t-8 border-t-indigo-600 shadow-sm p-3.5 sm:p-7 space-y-4 sm:space-y-5 transition hover:shadow-md relative">
           
           <!-- Top Badge Bar (Identik dengan Tampilan Panduan Mahasiswa) -->
           <div class="flex flex-col xs:flex-row xs:items-center justify-between gap-1.5 border-b border-zinc-100 pb-2.5">
@@ -944,10 +944,10 @@
           class="fixed z-40 transition-all duration-200 bottom-3.5 left-1/2 -translate-x-1/2 sm:translate-x-0 sm:left-auto sm:bottom-auto sm:right-6 sm:top-40 w-fit sm:w-12 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-zinc-200 p-1 sm:p-1.5 flex sm:flex-col items-center justify-center gap-1 sm:gap-1.5 ring-1 ring-black/5"
           style="box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.15), 0 4px 12px -2px rgba(0, 0, 0, 0.08);"
         >
-          <!-- + Tambah Pertanyaan -->
+          <!-- + Tambah Pertanyaan Langsung di Bawah Elemen Aktif -->
           <button 
             type="button" 
-            onclick="addNewQuestionDirect(adminFormSchema ? adminFormSchema.tahapan.length - 1 : 0)" 
+            onclick="handleFloatingDockAddQuestion()" 
             class="w-8 h-8 sm:w-9.5 sm:h-9.5 rounded-xl hover:bg-indigo-50 text-indigo-600 hover:text-indigo-800 flex items-center justify-center transition cursor-pointer active:scale-95 shadow-2xs" 
             title="Tambah Pertanyaan Baru (+)"
           >
@@ -956,20 +956,20 @@
             </svg>
           </button>
 
-          <!-- TT Fokus Judul / Deskripsi -->
+          <!-- TT Tambah Blok Teks / Judul -->
           <button 
             type="button" 
-            onclick="document.getElementById('cfg_Judul_Form')?.focus()" 
+            onclick="handleFloatingDockAddText()" 
             class="w-8 h-8 sm:w-9.5 sm:h-9.5 rounded-xl hover:bg-zinc-100 text-zinc-600 hover:text-zinc-900 flex items-center justify-center font-serif font-bold text-xs sm:text-sm transition cursor-pointer active:scale-95 shadow-2xs" 
-            title="Fokus ke Judul &amp; Deskripsi Formulir (TT)"
+            title="Tambah Judul &amp; Deskripsi / Teks (TT)"
           >
             TT
           </button>
 
-          <!-- 🖼️ Tambah Media -->
+          <!-- 🖼️ Tambah Media Gambar / Video -->
           <button 
             type="button" 
-            onclick="openAttachMediaModal(0, 0)" 
+            onclick="handleFloatingDockAddMedia()" 
             class="w-8 h-8 sm:w-9.5 sm:h-9.5 rounded-xl hover:bg-zinc-100 text-zinc-600 hover:text-zinc-900 flex items-center justify-center transition cursor-pointer active:scale-95 shadow-2xs" 
             title="Sisipkan Media Gambar / Video"
           >
@@ -981,7 +981,7 @@
           <!-- ⎘ Tambah Bagian Baru -->
           <button 
             type="button" 
-            onclick="addNewStageDirect()" 
+            onclick="handleFloatingDockAddStage()" 
             class="w-8 h-8 sm:w-9.5 sm:h-9.5 rounded-xl hover:bg-zinc-100 text-zinc-600 hover:text-zinc-900 flex items-center justify-center transition cursor-pointer active:scale-95 shadow-2xs" 
             title="Tambahkan Bagian Baru (⎘)"
           >
@@ -6549,9 +6549,9 @@ function getOrCreateFolder(folderName) {
 
       // Floating action dock only visible on Question Canvas
       const dock = document.getElementById("googleFormsFloatingDock");
-      if (dock) {
         if (tabKey === 'config') {
           dock.classList.remove("hidden");
+          setTimeout(updateFloatingDockPosition, 60);
         } else {
           dock.classList.add("hidden");
         }
@@ -7636,56 +7636,191 @@ function getOrCreateFolder(folderName) {
       showAdminToast(`Formulir berhasil dipulihkan ke versi (${targetRev.dateStr})!`, "success");
     }
 
-    function addNewQuestionDirect(sIdx = 0) {
+    // =========================================================================
+    // GOOGLE FORMS CONTEXT-AWARE FLOATING DOCK ENGINE
+    // =========================================================================
+    let activeFocusedContext = {
+      type: 'header', // 'question' | 'stage' | 'header'
+      sIdx: 0,
+      fIdx: null,
+      el: null
+    };
+
+    function setActiveFormCard(type, sIdx = 0, fIdx = null, element = null) {
+      activeFocusedContext = {
+        type: type || 'question',
+        sIdx: (sIdx !== null && sIdx !== undefined) ? parseInt(sIdx, 10) : 0,
+        fIdx: (fIdx !== null && fIdx !== undefined) ? parseInt(fIdx, 10) : null,
+        el: element || (fIdx !== null ? document.getElementById(`questionCard_${sIdx}_${fIdx}`) : document.getElementById(`stageCard_${sIdx}`))
+      };
+
+      // Visual highlighting: Remove active class from previous, add to current
+      document.querySelectorAll('.active-google-card').forEach(el => {
+        el.classList.remove('active-google-card', 'ring-2', 'ring-indigo-500/25', 'shadow-md');
+      });
+
+      if (activeFocusedContext.el) {
+        activeFocusedContext.el.classList.add('active-google-card', 'ring-2', 'ring-indigo-500/25', 'shadow-md');
+      }
+
+      updateFloatingDockPosition();
+    }
+
+    function updateFloatingDockPosition() {
+      const dock = document.getElementById("googleFormsFloatingDock");
+      if (!dock) return;
+
+      // Only show when inside questions builder tab
+      const qTab = document.getElementById("adminView_questions");
+      if (!qTab || qTab.classList.contains("hidden")) {
+        dock.style.display = "none";
+        return;
+      }
+      dock.style.display = "flex";
+
+      // Mobile Mode (< 640px): Stay docked at bottom center
+      if (window.innerWidth < 640) {
+        dock.style.position = "fixed";
+        dock.style.left = "50%";
+        dock.style.top = "auto";
+        dock.style.bottom = "14px";
+        dock.style.transform = "translateX(-50%)";
+        dock.style.zIndex = "45";
+        return;
+      }
+
+      // Desktop Mode: Follow currently active card or default container
+      let targetEl = activeFocusedContext.el;
+      if (!targetEl || !document.body.contains(targetEl)) {
+        targetEl = document.querySelector('[id^="questionCard_"]') || document.getElementById('headerFormCard') || document.querySelector('[id^="stageCard_"]');
+        if (targetEl) activeFocusedContext.el = targetEl;
+      }
+
+      if (!targetEl) return;
+
+      const rect = targetEl.getBoundingClientRect();
+      const dockWidth = dock.offsetWidth || 48;
+      const dockHeight = dock.offsetHeight || 180;
+
+      // Position to the right side of the active card
+      const targetRight = rect.right + 14;
+      const maxLeft = window.innerWidth - dockWidth - 16;
+      const finalLeft = Math.min(targetRight, maxLeft);
+
+      // Top aligned with active card, clamped to visible viewport
+      const minTop = 80;
+      const maxTop = window.innerHeight - dockHeight - 20;
+      const idealTop = rect.top + 6;
+      const clampedTop = Math.max(minTop, Math.min(idealTop, maxTop));
+
+      dock.style.position = "fixed";
+      dock.style.left = `${finalLeft}px`;
+      dock.style.top = `${clampedTop}px`;
+      dock.style.bottom = "auto";
+      dock.style.transform = "none";
+      dock.style.zIndex = "45";
+    }
+
+    // Scroll & Resize Listeners for Smooth Glide Tracking
+    window.addEventListener('scroll', () => {
+      if (window.innerWidth >= 640) updateFloatingDockPosition();
+    }, { passive: true });
+
+    window.addEventListener('resize', () => {
+      updateFloatingDockPosition();
+    });
+
+    // FLOATING DOCK CONTEXTUAL ACTIONS
+    function handleFloatingDockAddQuestion() {
+      if (activeFocusedContext.type === 'question' && activeFocusedContext.fIdx !== null) {
+        insertQuestionDirectBelow(activeFocusedContext.sIdx, activeFocusedContext.fIdx);
+      } else if (activeFocusedContext.type === 'stage' && activeFocusedContext.sIdx !== null) {
+        addNewQuestionDirect(activeFocusedContext.sIdx);
+      } else {
+        const lastStageIdx = adminFormSchema && adminFormSchema.tahapan ? adminFormSchema.tahapan.length - 1 : 0;
+        addNewQuestionDirect(lastStageIdx >= 0 ? lastStageIdx : 0);
+      }
+    }
+
+    function handleFloatingDockAddText() {
+      if (activeFocusedContext.type === 'question' && activeFocusedContext.fIdx !== null) {
+        insertQuestionDirectBelow(activeFocusedContext.sIdx, activeFocusedContext.fIdx, 'DESCRIPTION', 'Judul & Deskripsi Tambahan');
+      } else {
+        const titleEl = document.getElementById('cfg_Judul_Form');
+        if (titleEl) {
+          titleEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          titleEl.focus();
+        }
+      }
+    }
+
+    function handleFloatingDockAddMedia() {
+      if (activeFocusedContext.type === 'question' && activeFocusedContext.fIdx !== null) {
+        openAttachMediaModal(activeFocusedContext.sIdx, activeFocusedContext.fIdx);
+      } else {
+        openAttachMediaModal(activeFocusedContext.sIdx || 0, 0);
+      }
+    }
+
+    function handleFloatingDockAddStage() {
+      if (activeFocusedContext.sIdx !== null && activeFocusedContext.sIdx !== undefined) {
+        insertStageDirectAfter(activeFocusedContext.sIdx);
+      } else {
+        addNewStageDirect();
+      }
+    }
+
+    function insertQuestionDirectBelow(sIdx, fIdx, type = "RADIO", label = "Pertanyaan tanpa judul") {
       pushUndoSnapshot('Tambah Pertanyaan');
       initOrNormalizeFormSchema();
       if (sIdx === undefined || sIdx === null || sIdx < 0) sIdx = 0;
-      if (!adminFormSchema.tahapan[sIdx]) {
-        sIdx = adminFormSchema.tahapan.length - 1;
-      }
-      if (sIdx < 0) sIdx = 0;
+      if (!adminFormSchema.tahapan[sIdx]) sIdx = 0;
+      if (!adminFormSchema.tahapan[sIdx].fields) adminFormSchema.tahapan[sIdx].fields = [];
 
-      const newFieldId = "fld_" + Date.now().toString(36);
+      const newFieldId = "fld_" + Date.now().toString(36) + Math.random().toString(36).substring(2, 5);
       const newField = {
         id: newFieldId,
-        type: "RADIO",
-        label: "Pertanyaan tanpa judul",
+        type: type,
+        label: label,
         description: "",
         required: false,
         scope: "GLOBAL",
-        options: ["Opsi 1"]
+        options: type === 'DESCRIPTION' ? [] : ["Opsi 1"]
       };
 
-      if (!adminFormSchema.tahapan[sIdx].fields) {
-        adminFormSchema.tahapan[sIdx].fields = [];
-      }
-      adminFormSchema.tahapan[sIdx].fields.push(newField);
+      const targetIdx = (fIdx !== null && fIdx !== undefined && fIdx >= 0) ? fIdx + 1 : adminFormSchema.tahapan[sIdx].fields.length;
+      adminFormSchema.tahapan[sIdx].fields.splice(targetIdx, 0, newField);
+      
       renderDynamicStagesCanvas();
       markSchemaAsDirty();
 
       setTimeout(() => {
-        const inputEl = document.querySelector(`input[data-field-id="${newFieldId}"]`);
-        if (inputEl) {
-          inputEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          inputEl.focus();
-          inputEl.select();
+        const inputEl = document.querySelector(`textarea[data-field-id="${newFieldId}"]`) || document.querySelector(`input[data-field-id="${newFieldId}"]`);
+        const cardEl = document.getElementById(`questionCard_${sIdx}_${targetIdx}`);
+        if (cardEl) {
+          setActiveFormCard('question', sIdx, targetIdx, cardEl);
+          cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-      }, 100);
+        if (inputEl) {
+          inputEl.focus();
+          if (typeof inputEl.select === 'function') inputEl.select();
+        }
+      }, 120);
 
-      showAdminToast("Pertanyaan baru dibuat! Ketik judul dan atur opsi langsung di kartu.", "success");
+      showAdminToast("Pertanyaan baru disisipkan tepat di bawah elemen aktif!", "success");
     }
 
-    function addNewStageDirect() {
-      pushUndoSnapshot('Tambah Bagian');
+    function insertStageDirectAfter(sIdx) {
+      pushUndoSnapshot('Tambah Bagian Baru');
       initOrNormalizeFormSchema();
-      const newStageIdx = adminFormSchema.tahapan.length;
-      const newStageId = "tahap_" + (newStageIdx + 1) + "_" + Date.now().toString(36);
+      const insertAt = (sIdx !== null && sIdx !== undefined && sIdx >= 0) ? sIdx + 1 : adminFormSchema.tahapan.length;
+      const newStageId = "tahap_" + (insertAt + 1) + "_" + Date.now().toString(36);
       const newFieldId = "fld_" + Date.now().toString(36);
 
       const newStage = {
         id: newStageId,
-        title: `Bagian ${newStageIdx + 1} Tanpa Judul`,
-        description: "",
+        nama: `Bagian ${insertAt + 1} Tanpa Judul`,
+        petunjuk: "Ketik petunjuk khusus untuk bagian evaluasi ini...",
         fields: [
           {
             id: newFieldId,
@@ -7699,20 +7834,28 @@ function getOrCreateFolder(folderName) {
         ]
       };
 
-      adminFormSchema.tahapan.push(newStage);
+      adminFormSchema.tahapan.splice(insertAt, 0, newStage);
       renderDynamicStagesCanvas();
       markSchemaAsDirty();
 
       setTimeout(() => {
-        const stageInput = document.querySelector(`input[data-stage-id="${newStageId}"]`);
-        if (stageInput) {
-          stageInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          stageInput.focus();
-          stageInput.select();
+        const stageEl = document.getElementById(`stageCard_${insertAt}`);
+        if (stageEl) {
+          setActiveFormCard('stage', insertAt, null, stageEl);
+          stageEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-      }, 100);
+      }, 120);
 
-      showAdminToast(`Bagian ${newStageIdx + 1} berhasil ditambahkan!`, "success");
+      showAdminToast(`Bagian baru (Bagian ${insertAt + 1}) berhasil ditambahkan!`, "success");
+    }
+
+    function addNewQuestionDirect(sIdx = 0) {
+      insertQuestionDirectBelow(sIdx, null);
+    }
+
+    function addNewStageDirect() {
+      const lastIdx = adminFormSchema && adminFormSchema.tahapan ? adminFormSchema.tahapan.length - 1 : 0;
+      insertStageDirectAfter(lastIdx);
     }
 
     let inlineSaveTimeout = null;
@@ -8920,11 +9063,13 @@ function getOrCreateFolder(folderName) {
               id="questionCard_${sIdx}_${fIdx}"
               data-stage-idx="${sIdx}"
               data-field-idx="${fIdx}"
+              onclick="setActiveFormCard('question', ${sIdx}, ${fIdx}, this)"
+              onfocusin="setActiveFormCard('question', ${sIdx}, ${fIdx}, this)"
               ondragover="handleQuestionCardDragOver(event, ${sIdx}, ${fIdx})"
               ondragenter="handleQuestionCardDragEnter(event, ${sIdx}, ${fIdx})"
               ondragleave="handleQuestionCardDragLeave(event)"
               ondrop="handleQuestionCardDrop(event, ${sIdx}, ${fIdx})"
-              class="group/qcard bg-white rounded-xl border border-zinc-200 border-l-4 border-l-indigo-600 shadow-sm p-4 sm:p-6 space-y-3.5 transition hover:shadow-md relative"
+              class="group/qcard bg-white rounded-xl border border-zinc-200 border-l-4 border-l-indigo-600 shadow-sm p-4 sm:p-6 space-y-3.5 transition hover:shadow-md relative cursor-pointer"
             >
               
               <!-- 6-Dots Drag Handle Centered (Google Forms Style Drag & Drop) -->
@@ -9199,7 +9344,8 @@ function getOrCreateFolder(folderName) {
       setTimeout(() => {
         renderAllMathInElement(container);
         initAllInPlaceRichFields(container);
-      }, 40);
+        updateFloatingDockPosition();
+      }, 50);
     }
 
     // LIVE FORM SIMULATOR ENGINE (EXACT AUTHENTIC DRAFT PREVIEW & RESPONSIVE DEVICE MODES)

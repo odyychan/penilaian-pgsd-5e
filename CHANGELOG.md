@@ -4,6 +4,21 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.13] - 2026-08-26
+
+### 🚀 Bilah Aksi Melayang Kontekstual Adaptif (*Google Forms-Style Active Tracking Toolbar*)
+- **🎯 Pelacakan Posisi Mengikuti Elemen Aktif (*Contextual Position Tracking*):**
+  - Bilah tombol melayang (*floating dock*) kini secara cerdas meluncur dan menempel tepat di sisi kanan wadah pertanyaan, bagian (*stage*), atau kartu identitas yang sedang aktif/diklik oleh pengguna.
+  - Mempertahankan posisi yang nyaman dan terlihat di layar (*viewport bounds auto-clamping*) saat pengguna menggulir halaman (*smooth scroll gliding*).
+  - Pada layar *mobile*, bilah aksi beradaptasi secara otomatis berada di posisi tengah bawah layar sehingga nyaman dijangkau ibu jari (*thumb-friendly*).
+- **⚡ Aksi Cerdas Sesuai Konteks (*Context-Aware Actions*):**
+  - **Tombol `+` (Tambah Pertanyaan):** Langsung menyisipkan pertanyaan baru tepat di bawah pertanyaan yang sedang dipilih/aktif.
+  - **Tombol `TT` (Tambah Teks/Judul):** Menyisipkan blok keterangan/judul tambahan langsung di bawah kartu aktif.
+  - **Tombol `🖼️` (Sisipkan Media):** Membuka modal lampiran media langsung terarah ke pertanyaan aktif tersebut.
+  - **Tombol `⎘` (Tambah Bagian):** Menyisipkan bagian evaluasi baru tepat setelah bagian yang sedang dikelola.
+
+---
+
 ## [2.4.12] - 2026-08-26
 
 ### 🎨 Restrukturisasi & Penyempurnaan Tata Letak Modal Media Pertanyaan (*Zero Overflow*)
