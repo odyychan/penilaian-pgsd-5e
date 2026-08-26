@@ -300,6 +300,165 @@
     <div id="viewForm" class="space-y-4 sm:space-y-5">
 
       <!-- =================================================================== -->
+      <!-- AUTH GATE SCREEN: GERBANG MASUK OTENTIKASI PENILAI (GOOGLE FORMS AUTH) -->
+      <!-- =================================================================== -->
+      <div id="formAuthGateSection" class="hidden step-fade space-y-4 sm:space-y-5">
+        <div class="bg-white rounded-2xl border border-zinc-200 p-4 sm:p-7 shadow-xs space-y-5">
+          <!-- Header Banner -->
+          <div class="space-y-3 border-b border-zinc-100 pb-4 sm:pb-5">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center font-bold text-base shrink-0 shadow-2xs">
+                  🔐
+                </div>
+                <div>
+                  <span class="px-2 py-0.5 rounded text-[9.5px] font-mono font-bold bg-indigo-900 text-indigo-100" id="authGateModeBadge">OTENTIKASI PENILAI</span>
+                  <p class="text-[10px] text-zinc-400 font-mono mt-0.5">FKIP Universitas Lambung Mangkurat</p>
+                </div>
+              </div>
+              <span class="text-[10px] font-bold text-zinc-500 font-mono bg-zinc-100 px-2.5 py-1 rounded-lg border border-zinc-200" id="authGateFormPinBadge">PIN: BK5E</span>
+            </div>
+
+            <div class="space-y-1">
+              <h2 id="authGateJudulForm" class="text-base sm:text-xl font-bold text-zinc-900 leading-snug math-renderable">
+                Penilaian Presentasi Mahasiswa
+              </h2>
+              <p id="authGateSubJudul" class="text-xs sm:text-sm text-zinc-600 leading-relaxed math-renderable">
+                Silakan masuk dengan akun resmi Anda terlebih dahulu untuk membuka dan mengisi formulir evaluasi ini.
+              </p>
+            </div>
+          </div>
+
+          <!-- Quick One-Click Login with Saved Accounts -->
+          <div id="authQuickSavedSection" class="hidden space-y-2.5 bg-indigo-50/50 p-3.5 sm:p-4 rounded-xl border border-indigo-200/80">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-indigo-900 flex items-center gap-1.5 font-mono uppercase tracking-wider">
+                <span>⚡</span>
+                <span>Masuk Cepat (Akun Tersimpan di Perangkat Ini):</span>
+              </span>
+            </div>
+            <div id="authQuickSavedList" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+          </div>
+
+          <!-- Main Login / Sign-In Form -->
+          <form id="authGateLoginForm" onsubmit="handleAuthLoginSubmit(event)" class="space-y-4 pt-1">
+            <div class="space-y-1">
+              <label class="block text-xs font-bold text-zinc-800">
+                Pilih Peran Anda <span class="text-rose-500">*</span>
+              </label>
+              <div class="grid grid-cols-3 gap-2 text-xs">
+                <label class="flex items-center justify-center p-2.5 rounded-xl border border-zinc-300 bg-white hover:bg-zinc-50 cursor-pointer transition font-semibold text-zinc-700 has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-50/60 has-[:checked]:text-indigo-900 shadow-2xs">
+                  <input type="radio" name="authRole" value="Mahasiswa" onchange="handleAuthRoleChange(this.value)" class="sr-only" checked>
+                  <span>🎓 Mahasiswa</span>
+                </label>
+                <label class="flex items-center justify-center p-2.5 rounded-xl border border-zinc-300 bg-white hover:bg-zinc-50 cursor-pointer transition font-semibold text-zinc-700 has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-50/60 has-[:checked]:text-indigo-900 shadow-2xs">
+                  <input type="radio" name="authRole" value="Dosen" onchange="handleAuthRoleChange(this.value)" class="sr-only">
+                  <span>👨‍🏫 Dosen</span>
+                </label>
+                <label class="flex items-center justify-center p-2.5 rounded-xl border border-zinc-300 bg-white hover:bg-zinc-50 cursor-pointer transition font-semibold text-zinc-700 has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-50/60 has-[:checked]:text-indigo-900 shadow-2xs">
+                  <input type="radio" name="authRole" value="Tamu" onchange="handleAuthRoleChange(this.value)" class="sr-only">
+                  <span>🌐 Tamu</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- NIM Input (Mahasiswa) -->
+            <div id="authNimContainer" class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <label class="block text-xs font-semibold text-zinc-700">
+                  Nomor Induk Mahasiswa (NIM) <span class="text-rose-500">*</span>
+                </label>
+                <span id="authNimAutoNotice" class="text-[10px] text-emerald-700 font-medium hidden">Nama terverifikasi</span>
+              </div>
+              <div class="relative">
+                <input 
+                  type="text" 
+                  id="authInputNim" 
+                  inputmode="numeric"
+                  placeholder="Masukkan NIM Anda (contoh: 2310125210099)..." 
+                  class="w-full pl-3.5 pr-20 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm font-mono focus:border-indigo-600 outline-none transition bg-white placeholder-zinc-400"
+                  oninput="validateAuthNimLive(this.value)"
+                >
+                <div id="authNimStatusIcon" class="absolute right-3 top-2.5 hidden">
+                  <span class="inline-flex items-center gap-1 text-emerald-600 font-semibold text-xs">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                    <span>Valid</span>
+                  </span>
+                </div>
+              </div>
+              <div id="authNimFeedbackBox" class="text-xs rounded-lg p-2 hidden space-y-1"></div>
+            </div>
+
+            <!-- Nama & Email Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div class="space-y-1.5">
+                <label class="block text-xs font-semibold text-zinc-700">
+                  Nama Lengkap Penilai <span class="text-rose-500">*</span>
+                </label>
+                <input 
+                  type="text" 
+                  id="authInputNama" 
+                  required 
+                  placeholder="Nama lengkap Anda..." 
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm focus:border-indigo-600 outline-none transition bg-white placeholder-zinc-400"
+                >
+              </div>
+
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between">
+                  <label class="block text-xs font-semibold text-zinc-700">
+                    Alamat Email Resmi <span class="text-rose-500">*</span>
+                  </label>
+                  <button 
+                    type="button" 
+                    id="btnAuthFillNimEmail" 
+                    onclick="fillAuthNimEmailFormat()" 
+                    class="hidden text-[10px] font-mono font-semibold text-zinc-700 hover:text-zinc-950 bg-zinc-100 hover:bg-zinc-200 px-2 py-0.5 rounded border border-zinc-300 transition cursor-pointer"
+                  >
+                    Isi Otomatis
+                  </button>
+                </div>
+                <input 
+                  type="email" 
+                  id="authInputEmail" 
+                  required 
+                  inputmode="email"
+                  placeholder="nama.nim@mhs.ulm.ac.id" 
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm focus:border-indigo-600 outline-none transition bg-white placeholder-zinc-400"
+                  oninput="validateAuthEmailLive(this.value)"
+                >
+                <div class="flex flex-wrap items-center gap-1 pt-0.5">
+                  <span class="text-[9.5px] text-zinc-400 font-mono">Domain:</span>
+                  <button type="button" onclick="appendAuthDomain('@mhs.ulm.ac.id')" class="px-1.5 py-0.5 rounded bg-zinc-100 hover:bg-indigo-50 hover:text-indigo-700 text-[10px] font-mono text-zinc-600 border border-zinc-200 transition cursor-pointer">+ @mhs.ulm.ac.id</button>
+                  <button type="button" onclick="appendAuthDomain('@ulm.ac.id')" class="px-1.5 py-0.5 rounded bg-zinc-100 hover:bg-indigo-50 hover:text-indigo-700 text-[10px] font-mono text-zinc-600 border border-zinc-200 transition cursor-pointer">+ @ulm.ac.id</button>
+                  <button type="button" onclick="appendAuthDomain('@gmail.com')" class="px-1.5 py-0.5 rounded bg-zinc-100 hover:bg-indigo-50 hover:text-indigo-700 text-[10px] font-mono text-zinc-600 border border-zinc-200 transition cursor-pointer">+ @gmail.com</button>
+                </div>
+                <p id="authEmailValidationMsg" class="text-[11px] font-medium hidden"></p>
+              </div>
+            </div>
+
+            <!-- Remember me checkbox -->
+            <label class="flex items-center gap-2 cursor-pointer select-none pt-1">
+              <input type="checkbox" id="authRememberMe" class="w-4 h-4 text-indigo-600 rounded border-zinc-300 focus:ring-indigo-500 cursor-pointer" checked>
+              <span class="text-xs text-zinc-600">Ingat akun saya di perangkat ini untuk pengisian berikutnya</span>
+            </label>
+
+            <!-- Submit Button -->
+            <div class="pt-2">
+              <button 
+                type="submit" 
+                id="btnAuthSubmitLogin"
+                class="w-full py-3 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-98 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>🚀 Masuk &amp; Lanjutkan ke Formulir</span>
+                <span class="text-base">→</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- =================================================================== -->
       <!-- 0: INFORMASI FORMULIR & IDENTITAS AKADEMIK (HALAMAN AWAL) -->
       <!-- =================================================================== -->
       <div id="formOverviewSection" class="step-fade space-y-4 sm:space-y-5">
@@ -449,14 +608,24 @@
               <p id="accountNoticeText" class="text-[11px] text-zinc-500 leading-tight">Draf dan respons penilaian direkam otomatis pada akun ini.</p>
             </div>
           </div>
-          <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
+          <div class="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
             <button 
               type="button" 
               onclick="openSwitchAccountModal()"
               class="px-2.5 py-1.5 rounded-lg bg-white hover:bg-zinc-100 text-zinc-700 border border-zinc-200 font-semibold text-[11px] transition cursor-pointer shadow-2xs flex items-center gap-1.5"
+              title="Pindah atau ganti akun penilai"
             >
               <span>🔄</span>
               <span>Ganti Akun</span>
+            </button>
+            <button 
+              type="button" 
+              onclick="handleAuthLogout()"
+              class="px-2.5 py-1.5 rounded-lg bg-white hover:bg-rose-50 text-rose-600 hover:text-rose-700 border border-zinc-200 hover:border-rose-300 font-semibold text-[11px] transition cursor-pointer shadow-2xs flex items-center gap-1.5"
+              title="Keluar dari akun penilai ini"
+            >
+              <span>🚪</span>
+              <span>Keluar</span>
             </button>
           </div>
         </div>
@@ -3692,6 +3861,7 @@ function normalizeMediaList(fieldOrMedia) {
           renderGroupOptions();
           restoreFormDraft();
           updateAccountHeaderUI();
+          checkAndApplyAuthGate();
 
           // Jika pengguna sudah mengetikkan NIM, re-evaluasi secara instan dengan data terbaru
           const currentNimInput = document.getElementById("inputNim")?.value || "";
@@ -3704,6 +3874,7 @@ function normalizeMediaList(fieldOrMedia) {
         renderGroupOptions();
         restoreFormDraft();
         updateAccountHeaderUI();
+        checkAndApplyAuthGate();
       } finally {
         if (loading) loading.classList.add("hidden");
       }
@@ -5055,6 +5226,370 @@ function normalizeMediaList(fieldOrMedia) {
       isDraftAlreadyRestored = false;
       restoreFormDraft();
       showToast(`Berhasil beralih ke akun ${newEmail}. Draf untuk akun ini telah dimuat.`, "success");
+    }
+
+    // =========================================================================
+    // DEDICATED AUTHENTICATION GATE & SESSION CONTROLLER (GOOGLE FORMS STYLE)
+    // =========================================================================
+    function getCurrentAuthSession() {
+      try {
+        const key = "PGSD_AUTH_SESSION_" + (activeFormId || 'BK5E').toUpperCase();
+        const raw = localStorage.getItem(key) || sessionStorage.getItem(key);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+      return null;
+    }
+
+    function setAuthSession(user, remember = true) {
+      if (!user || !user.email) return;
+      const key = "PGSD_AUTH_SESSION_" + (activeFormId || 'BK5E').toUpperCase();
+      const payload = {
+        email: user.email.trim(),
+        nama: user.nama || user.name || "",
+        nim: user.nim || "",
+        peran: user.peran || "Mahasiswa",
+        loginAt: Date.now()
+      };
+      if (remember) {
+        localStorage.setItem(key, JSON.stringify(payload));
+      } else {
+        sessionStorage.setItem(key, JSON.stringify(payload));
+      }
+      activeUserAccountEmail = payload.email;
+      activeUserAccountName = payload.nama;
+      activeUserAccountNim = payload.nim;
+      if (payload.peran) currentEvaluatorRole = payload.peran;
+      saveAccountProfile(payload.email, payload.nama, payload.nim, payload.peran);
+    }
+
+    function clearAuthSession() {
+      const key = "PGSD_AUTH_SESSION_" + (activeFormId || 'BK5E').toUpperCase();
+      localStorage.removeItem(key);
+      sessionStorage.removeItem(key);
+      activeUserAccountEmail = "";
+      activeUserAccountName = "";
+      activeUserAccountNim = "";
+    }
+
+    function checkAndApplyAuthGate() {
+      const authGate = document.getElementById("formAuthGateSection");
+      const overview = document.getElementById("formOverviewSection");
+      const wizard = document.getElementById("formWizardContainer");
+
+      if (!authGate || !overview) return;
+
+      const emailMode = appConfig["Mode_Pengumpulan_Email"] || "ULM_ONLY";
+
+      // Render header info in Auth Gate Banner
+      const judulEl = document.getElementById("authGateJudulForm");
+      if (judulEl && appConfig["Judul_Form"]) {
+        judulEl.innerHTML = smartMathFormat(appConfig["Judul_Form"]);
+        renderAllMathInElement(judulEl);
+      }
+      const subJudulEl = document.getElementById("authGateSubJudul");
+      if (subJudulEl && (appConfig["Mata_Kuliah"] || appConfig["Dosen_Pengampu"])) {
+        subJudulEl.innerHTML = smartMathFormat(`Mata Kuliah: **${appConfig["Mata_Kuliah"] || '-'}** • Dosen: **${appConfig["Dosen_Pengampu"] || '-'}** (${appConfig["Kelas"] || 'Kelas 5E'})`);
+        renderAllMathInElement(subJudulEl);
+      }
+      const pinEl = document.getElementById("authGateFormPinBadge");
+      if (pinEl) pinEl.textContent = `PIN: ${activeFormId || 'BK5E'}`;
+
+      const badgeEl = document.getElementById("authGateModeBadge");
+      if (badgeEl) {
+        if (emailMode === 'ULM_ONLY') badgeEl.textContent = "LOGIN AKUN KAMPUS ULM";
+        else if (emailMode === 'ALL_EMAIL') badgeEl.textContent = "LOGIN EMAIL BEBAS";
+        else badgeEl.textContent = "OTENTIKASI PENILAI";
+      }
+
+      // Mode 3: NO_EMAIL -> Bypass Auth Gate completely
+      if (emailMode === "NO_EMAIL") {
+        authGate.classList.add("hidden");
+        if (!wizard || wizard.classList.contains("hidden")) {
+          overview.classList.remove("hidden");
+        }
+        updateAccountHeaderUI();
+        return;
+      }
+
+      // Check active session
+      const session = getCurrentAuthSession();
+      if (session && session.email) {
+        // Authenticated!
+        activeUserAccountEmail = session.email;
+        activeUserAccountName = session.nama || "";
+        activeUserAccountNim = session.nim || "";
+        if (session.peran) currentEvaluatorRole = session.peran;
+
+        authGate.classList.add("hidden");
+        if (!wizard || wizard.classList.contains("hidden")) {
+          overview.classList.remove("hidden");
+        }
+
+        // Populate Step 1 fields
+        const inputEmail = document.getElementById("inputEmail");
+        const inputNama = document.getElementById("inputNama");
+        const inputNim = document.getElementById("inputNim");
+        if (inputEmail && session.email) inputEmail.value = session.email;
+        if (inputNama && session.nama) inputNama.value = session.nama;
+        if (inputNim && session.nim) {
+          inputNim.value = session.nim;
+          validateNimLive(session.nim);
+        }
+        if (session.peran) onRoleChange(session.peran);
+
+        updateAccountHeaderUI();
+        return;
+      }
+
+      // Not authenticated: Show Auth Gate
+      overview.classList.add("hidden");
+      if (wizard) wizard.classList.add("hidden");
+      authGate.classList.remove("hidden");
+
+      renderAuthGateSavedAccounts();
+    }
+
+    function renderAuthGateSavedAccounts() {
+      const section = document.getElementById("authQuickSavedSection");
+      const list = document.getElementById("authQuickSavedList");
+      if (!section || !list) return;
+
+      const profiles = getSavedAccountProfiles();
+      if (!profiles || profiles.length === 0) {
+        section.classList.add("hidden");
+        return;
+      }
+
+      section.classList.remove("hidden");
+      let html = '';
+      profiles.forEach(p => {
+        const initial = (p.name ? p.name.charAt(0) : p.email.charAt(0)).toUpperCase();
+        html += `
+          <div onclick="handleAuthQuickLogin('${escapeHtml(p.email)}', '${escapeHtml(p.name || '')}', '${escapeHtml(p.nim || '')}', '${escapeHtml(p.role || 'Mahasiswa')}')" class="p-2.5 rounded-xl bg-white hover:bg-indigo-50 border border-indigo-200 hover:border-indigo-400 cursor-pointer transition shadow-2xs flex items-center justify-between gap-2 group">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <div class="w-7 h-7 rounded-full bg-indigo-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                ${initial}
+              </div>
+              <div class="min-w-0">
+                <p class="font-bold text-zinc-900 text-xs truncate">${escapeHtml(p.email)}</p>
+                <p class="text-[10px] text-zinc-500 truncate">${escapeHtml(p.name || p.nim || p.role)}</p>
+              </div>
+            </div>
+            <span class="text-[10.5px] font-bold text-indigo-600 group-hover:translate-x-0.5 transition shrink-0">Masuk →</span>
+          </div>
+        `;
+      });
+      list.innerHTML = html;
+    }
+
+    function handleAuthRoleChange(role) {
+      const nimContainer = document.getElementById("authNimContainer");
+      const btnFillEmail = document.getElementById("btnAuthFillNimEmail");
+      if (role === 'Mahasiswa') {
+        if (nimContainer) nimContainer.classList.remove("hidden");
+        if (btnFillEmail) btnFillEmail.classList.remove("hidden");
+      } else {
+        if (nimContainer) nimContainer.classList.add("hidden");
+        if (btnFillEmail) btnFillEmail.classList.add("hidden");
+      }
+    }
+
+    function validateAuthNimLive(nimVal) {
+      const cleanNim = (nimVal || "").trim();
+      const statusIcon = document.getElementById("authNimStatusIcon");
+      const autoNotice = document.getElementById("authNimAutoNotice");
+      const feedbackBox = document.getElementById("authNimFeedbackBox");
+      const namaInput = document.getElementById("authInputNama");
+      const btnFillEmail = document.getElementById("btnAuthFillNimEmail");
+
+      if (!cleanNim) {
+        if (statusIcon) statusIcon.classList.add("hidden");
+        if (autoNotice) autoNotice.classList.add("hidden");
+        if (feedbackBox) feedbackBox.classList.add("hidden");
+        if (btnFillEmail) btnFillEmail.classList.add("hidden");
+        return;
+      }
+
+      if (btnFillEmail) btnFillEmail.classList.remove("hidden");
+
+      if (allStudentsData && allStudentsData.length > 0) {
+        const found = allStudentsData.find(s => String(s.nim).trim() === cleanNim);
+        if (found) {
+          if (statusIcon) statusIcon.classList.remove("hidden");
+          if (autoNotice) autoNotice.classList.remove("hidden");
+          if (namaInput && (!namaInput.value || namaInput.value === '')) {
+            namaInput.value = found.name;
+          }
+          if (feedbackBox) {
+            feedbackBox.className = "text-xs rounded-lg p-2 bg-emerald-50 text-emerald-800 border border-emerald-200";
+            feedbackBox.innerHTML = `<span>Terdaftar sebagai: <strong>${escapeHtml(found.name)}</strong> (${escapeHtml(found.kelompok || 'Mahasiswa')})</span>`;
+            feedbackBox.classList.remove("hidden");
+          }
+          return;
+        }
+      }
+
+      if (statusIcon) statusIcon.classList.add("hidden");
+      if (autoNotice) autoNotice.classList.add("hidden");
+      if (feedbackBox) {
+        if (cleanNim.length >= 6) {
+          feedbackBox.className = "text-xs rounded-lg p-2 bg-zinc-50 text-zinc-600 border border-zinc-200";
+          feedbackBox.innerHTML = `<span>NIM format mandiri. Silakan pastikan nama lengkap sudah benar.</span>`;
+          feedbackBox.classList.remove("hidden");
+        } else {
+          feedbackBox.classList.add("hidden");
+        }
+      }
+    }
+
+    function fillAuthNimEmailFormat() {
+      const nim = document.getElementById("authInputNim")?.value.trim();
+      const emailInput = document.getElementById("authInputEmail");
+      if (!nim || !emailInput) return;
+      emailInput.value = `${nim}@mhs.ulm.ac.id`;
+      validateAuthEmailLive(emailInput.value);
+    }
+
+    function appendAuthDomain(domain) {
+      const emailInput = document.getElementById("authInputEmail");
+      if (!emailInput) return;
+      let val = emailInput.value.trim();
+      if (!val) {
+        const nim = document.getElementById("authInputNim")?.value.trim();
+        val = nim || "user";
+      }
+      if (val.includes("@")) {
+        val = val.split("@")[0] + domain;
+      } else {
+        val = val + domain;
+      }
+      emailInput.value = val;
+      validateAuthEmailLive(val);
+    }
+
+    function validateAuthEmailLive(emailVal) {
+      const msgEl = document.getElementById("authEmailValidationMsg");
+      const emailInput = document.getElementById("authInputEmail");
+      const cleanEmail = (emailVal || "").trim().toLowerCase();
+      const emailMode = appConfig["Mode_Pengumpulan_Email"] || "ULM_ONLY";
+      const selRole = document.querySelector('input[name="authRole"]:checked')?.value || "Mahasiswa";
+
+      if (!cleanEmail) {
+        if (msgEl) msgEl.classList.add("hidden");
+        if (emailInput) emailInput.className = "w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm focus:border-indigo-600 outline-none transition bg-white placeholder-zinc-400";
+        return false;
+      }
+
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailRegex.test(cleanEmail)) {
+        if (msgEl) {
+          msgEl.textContent = "Format email belum lengkap";
+          msgEl.className = "text-[11px] text-amber-600 font-medium";
+          msgEl.classList.remove("hidden");
+        }
+        return false;
+      }
+
+      if (emailMode === 'ULM_ONLY' && selRole === 'Mahasiswa') {
+        const allowedStr = appConfig["Domain_Email_Wajib"] || "mhs.ulm.ac.id, ulm.ac.id";
+        const allowedDomains = allowedStr.split(",").map(d => d.trim().toLowerCase()).filter(Boolean);
+
+        let isDomainMatch = false;
+        for (let d of allowedDomains) {
+          if (cleanEmail.endsWith("@" + d) || cleanEmail.endsWith("." + d)) {
+            isDomainMatch = true;
+            break;
+          }
+        }
+
+        if (!isDomainMatch) {
+          if (msgEl) {
+            msgEl.textContent = "Mode ULM: Email mahasiswa harus domain (" + allowedStr + ").";
+            msgEl.className = "text-[11px] text-rose-600 font-medium";
+            msgEl.classList.remove("hidden");
+          }
+          if (emailInput) emailInput.className = "w-full px-3.5 py-2.5 rounded-xl border border-rose-400 text-xs sm:text-sm focus:border-rose-600 outline-none transition bg-white";
+          return false;
+        }
+      }
+
+      if (msgEl) msgEl.classList.add("hidden");
+      if (emailInput) emailInput.className = "w-full px-3.5 py-2.5 rounded-xl border border-emerald-400 text-xs sm:text-sm focus:border-emerald-600 outline-none transition bg-white";
+      return true;
+    }
+
+    function handleAuthLoginSubmit(e) {
+      if (e) e.preventDefault();
+
+      const selRole = document.querySelector('input[name="authRole"]:checked')?.value || "Mahasiswa";
+      const nimVal = document.getElementById("authInputNim")?.value.trim() || "";
+      const namaVal = document.getElementById("authInputNama")?.value.trim() || "";
+      const emailVal = document.getElementById("authInputEmail")?.value.trim() || "";
+      const remember = document.getElementById("authRememberMe")?.checked ?? true;
+
+      if (!emailVal) {
+        showToast("Alamat email wajib diisi untuk masuk!", "warning");
+        return;
+      }
+      if (!namaVal) {
+        showToast("Nama lengkap wajib diisi!", "warning");
+        return;
+      }
+      if (selRole === 'Mahasiswa' && !nimVal) {
+        showToast("Nomor Induk Mahasiswa (NIM) wajib diisi!", "warning");
+        return;
+      }
+
+      if (!validateAuthEmailLive(emailVal)) {
+        showToast("Format alamat email belum valid!", "warning");
+        return;
+      }
+
+      const user = {
+        email: emailVal,
+        nama: namaVal,
+        nim: nimVal,
+        peran: selRole
+      };
+
+      setAuthSession(user, remember);
+
+      showToast(`Selamat datang, ${namaVal}! Anda berhasil masuk.`, "success");
+
+      checkAndApplyAuthGate();
+
+      // Trigger draft restore for this user
+      isDraftAlreadyRestored = false;
+      restoreFormDraft();
+    }
+
+    function handleAuthQuickLogin(email, name, nim, role) {
+      const user = {
+        email: email,
+        nama: name,
+        nim: nim,
+        peran: role || "Mahasiswa"
+      };
+      setAuthSession(user, true);
+      showToast(`Berhasil masuk sebagai ${email}.`, "success");
+      checkAndApplyAuthGate();
+      isDraftAlreadyRestored = false;
+      restoreFormDraft();
+    }
+
+    async function handleAuthLogout() {
+      const ok = await showConfirmModal({
+        title: "Keluar dari Akun?",
+        message: "Apakah Anda yakin ingin keluar dari akun penilai ini? Draf isian Anda tetap tersimpan aman di akun ini.",
+        confirmText: "Ya, Keluar Akun",
+        cancelText: "Batal",
+        type: "warning"
+      });
+      if (ok) {
+        clearAuthSession();
+        showToast("Anda telah keluar dari akun.", "info");
+        checkAndApplyAuthGate();
+      }
     }
 
     function resetInMemoryClientFormState() {

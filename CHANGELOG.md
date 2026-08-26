@@ -4,6 +4,23 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.37] - 2026-08-26
+
+### 🔐 Halaman Gerbang Login Otentikasi Resmi (*Dedicated Sign-In Auth Gate Screen*)
+- **📱 Layar Gerbang Masuk Otentikasi (`#formAuthGateSection`):**
+  - Menghadirkan halaman login otentikasi resmi sebelum responden dapat mengakses dan mengisi formulir penilaian.
+  - Menampilkan identitas resmi FKIP ULM, Judul Formulir, Mata Kuliah, Dosen Pengampu, Kelas, serta lencana mode otentikasi aktif.
+- **⚡ Masuk Cepat (*One-Click Quick Login* dengan Profil Tersimpan):**
+  - Menampilkan kartu akun tersimpan di browser perangkat (`#authQuickSavedSection`) dengan avatar inisial nama, memungkinkan mahasiswa/dosen masuk kembali dalam 1 sentuhan tanpa mengetik ulang.
+- **🔍 Verifikasi Master Data & Auto-Lookup Kampus Terpadu:**
+  - Input NIM otomatis mendeteksi nama dari basis data master mahasiswa (`pgsd_students`), mengunci domain resmi `@mhs.ulm.ac.id`, dan memvalidasi format email secara langsung.
+- **🚪 Manajemen Sesi & Tombol Keluar (*Logout*):**
+  - Menyediakan tombol *[🚪 Keluar]* pada bar akun formulir yang secara aman mengakhiri sesi dan mengembalikan pengguna ke halaman login otentikasi dengan draf yang tetap tersimpan terisolasi.
+- **🚫 Dukungan Mode Bypass Otomatis:**
+  - Jika mode di Admin diatur ke *Tanpa Email / Anonim (`NO_EMAIL`)*, layar login otomatis dilewati sehingga formulir terbuka langsung secara publik.
+
+---
+
 ## [2.3.36] - 2026-08-26
 
 ### ✉️ Sistem Otentikasi Email Cerdas, Mode Fleksibel Pengumpulan Email & Pengikatan Draf Berbasis Akun (*Smart Email Collection & Account-Bound Draft Engine*)
