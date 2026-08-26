@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.39] - 2026-08-26
+
+### 🛡️ Optimasi Alur Inisialisasi & Penguncian Gerbang Login Otentikasi Sejak Awal Muat
+- **⚡ Inisialisasi Instan di `DOMContentLoaded`:**
+  - Memanggil evaluasi `checkAndApplyAuthGate()` segera saat halaman dimuat sehingga layar login otentikasi (`#formAuthGateSection`) langsung tampil mengunci form sebelum draf lama dijalankan.
+- **🔒 Pengamanan Restorasi Draf (`restoreFormDraft` Guard):**
+  - Mencegah peralihan otomatis ke wizard formulir (`startAssessmentForm()`) saat draf lokal terdeteksi jika pengguna belum terotentikasi.
+- **🚀 Sinkronisasi Fast-Path Supabase:**
+  - Menyambungkan callback `fetchInitialFormData` dengan `checkAndApplyAuthGate()` dan `updateAccountHeaderUI()` untuk menjamin sinkronisasi status sesi real-time dari database.
+
+---
+
 ## [2.3.38] - 2026-08-26
 
 ### 🌐 Integrasi Resmi Otentikasi Google OAuth via Supabase Auth (*Sign in with Google*)

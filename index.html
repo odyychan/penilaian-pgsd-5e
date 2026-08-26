@@ -2257,6 +2257,10 @@ function normalizeMediaList(fieldOrMedia) {
       
       switchTab(savedTab, false);
       updateStepUI(1);
+      
+      // Evaluasi Gerbang Login Otentikasi sejak awal muat halaman
+      checkAndApplyAuthGate();
+
       restoreFormDraft();
       fetchInitialFormData(false);
       
@@ -3812,6 +3816,9 @@ function normalizeMediaList(fieldOrMedia) {
 
             renderConfigHeader();
             renderGroupOptions();
+            restoreFormDraft();
+            updateAccountHeaderUI();
+            checkAndApplyAuthGate();
             return;
           }
         } catch(sbErr) {
@@ -5918,22 +5925,29 @@ function normalizeMediaList(fieldOrMedia) {
           }
         }
 
-        // 7. Tentukan Navigasi & Posisi Langkah
+        // 7. Tentukan Navigasi & Posisi Langkah (Hanya buka wizard jika sudah login atau mode NO_EMAIL)
+        const emailMode = appConfig["Mode_Pengumpulan_Email"] || "ULM_ONLY";
+        const currentSession = getCurrentAuthSession();
+        const isAuthenticated = (emailMode === 'NO_EMAIL') || (currentSession && currentSession.email);
+
         if (draft.email || draft.nama || draft.nim || draft.groupName) {
           isDraftAlreadyRestored = true;
-          startAssessmentForm();
 
-          const targetStep = (draft.step && draft.step >= 1 && draft.step <= (Object.keys(stepMetadata).length || 4))
-            ? draft.step
-            : 1;
-          updateStepUI(targetStep, true);
+          if (isAuthenticated) {
+            startAssessmentForm();
 
-          const banner = document.getElementById("studentDraftRestoreBanner");
-          if (banner) banner.classList.remove("hidden");
-          const indicator = document.getElementById("autoSaveIndicator");
-          if (indicator) indicator.classList.remove("hidden");
+            const targetStep = (draft.step && draft.step >= 1 && draft.step <= (Object.keys(stepMetadata).length || 4))
+              ? draft.step
+              : 1;
+            updateStepUI(targetStep, true);
 
-          showToast("Draf isian sebelumnya berhasil dipulihkan.", "info");
+            const banner = document.getElementById("studentDraftRestoreBanner");
+            if (banner) banner.classList.remove("hidden");
+            const indicator = document.getElementById("autoSaveIndicator");
+            if (indicator) indicator.classList.remove("hidden");
+
+            showToast("Draf isian sebelumnya berhasil dipulihkan.", "info");
+          }
         }
       } catch (e) {
         console.warn("Restore draft error notice:", e);
