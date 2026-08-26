@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.41] - 2026-08-26
+
+### 🛡️ Penguncian Menyeluruh Seluruh Titik Masuk Formulir (*Strict Pre-Fill Auth Enforcement*)
+- **🔒 Proteksi `startAssessmentForm()`:**
+  - Menolak pembukaan wizard pengisian jika formulir memerlukan pengumpulan email dan pengguna belum menyelesaikan otentikasi Google.
+- **🔄 Sinkronisasi Tab Navigasi `switchTab('form')`:**
+  - Menjalankan pemeriksaan `checkAndApplyAuthGate()` setiap kali tab formulir diakses, memastikan gerbang login tidak dapat dilewati melalui navigasi bilah atas.
+- **🚫 Zero-Bypass Architecture:**
+  - Menjamin responden wajib menekan tombol Google Sign-In dan berhasil lolos otentikasi sebelum diizinkan melihat atau mengisi pertanyaan penilaian.
+
+---
+
 ## [2.3.40] - 2026-08-26
 
 ### 🔒 Penegakan Eksklusif Otentikasi Akun Google Resmi (*Strict Single Sign-On*)

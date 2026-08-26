@@ -4353,6 +4353,12 @@ function normalizeMediaList(fieldOrMedia) {
 
     // Flow Navigation: Info Form vs Wizard Form
     function startAssessmentForm() {
+      const emailMode = appConfig["Mode_Pengumpulan_Email"] || "ULM_ONLY";
+      const session = getCurrentAuthSession();
+      if (emailMode !== 'NO_EMAIL' && (!session || !session.email)) {
+        checkAndApplyAuthGate();
+        return;
+      }
       const overview = document.getElementById("formOverviewSection");
       const wizard = document.getElementById("formWizardContainer");
       if (overview) overview.classList.add("hidden");
@@ -6695,6 +6701,7 @@ function normalizeMediaList(fieldOrMedia) {
         viewRekap.classList.add("hidden");
         tabFormBtn.className = "py-1.5 px-3 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer";
         tabRekapBtn.className = "py-1.5 px-3 rounded-md text-zinc-400 hover:text-zinc-100 transition-all flex items-center justify-center gap-1.5 cursor-pointer";
+        checkAndApplyAuthGate();
       } else {
         viewForm.classList.add("hidden");
         viewRekap.classList.remove("hidden");
