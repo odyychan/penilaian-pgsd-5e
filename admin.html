@@ -292,8 +292,8 @@
             <span id="cloudSyncText">Tersinkronisasi</span>
           </div>
 
-          <!-- Top Action Buttons (Compact & Accessible) -->
-          <div id="headerWorkspaceActions" class="flex items-center gap-1.5">
+          <!-- Top Action Buttons (Compact & Accessible, Shown ONLY when inside a specific Form Workspace) -->
+          <div id="headerWorkspaceActions" class="hidden flex items-center gap-1.5">
             <!-- Prominent Status Pill Toggle Button -->
             <button 
               type="button" 
@@ -493,19 +493,8 @@
         <div class="flex items-center gap-2.5 flex-shrink-0 flex-wrap sm:flex-nowrap">
           <button 
             type="button" 
-            onclick="syncAllFormsToSpreadsheetAndDrive(null, true)" 
-            class="w-full sm:w-auto px-4 py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 active:scale-98 text-emerald-400 text-xs sm:text-sm font-semibold shadow-xs flex items-center justify-center gap-2 transition cursor-pointer"
-            title="Sinkronkan seluruh formulir ke Google Spreadsheet & Google Drive"
-          >
-            <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
-            </svg>
-            <span>Sinkronkan Cloud</span>
-          </button>
-          <button 
-            type="button" 
             onclick="openGlobalSettingsModal()" 
-            class="w-full sm:w-auto px-4 py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 active:scale-98 text-zinc-100 text-xs sm:text-sm font-semibold shadow-xs flex items-center justify-center gap-2 transition cursor-pointer"
+            class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 active:scale-98 text-zinc-200 text-xs sm:text-sm font-semibold shadow-xs flex items-center justify-center gap-2 transition cursor-pointer"
           >
             <svg class="w-4 h-4 text-zinc-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
@@ -516,7 +505,7 @@
           <button 
             type="button" 
             onclick="openCreateFormModal()" 
-            class="w-full sm:w-auto px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-98 text-white text-xs sm:text-sm font-bold shadow-md flex items-center justify-center gap-2 transition cursor-pointer"
+            class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-98 text-white text-xs sm:text-sm font-bold shadow-md flex items-center justify-center gap-2 transition cursor-pointer"
           >
             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
@@ -533,7 +522,7 @@
             type="text" 
             id="searchHubFormsInput" 
             oninput="renderHubFormsGrid()" 
-            placeholder="Cari judul formulir, mata kuliah, dosen, kelas, atau kode PIN (contoh: BK5E, IPA1, MAT3)..." 
+            placeholder="Cari judul formulir, mata kuliah, dosen, kelas, atau kode PIN..." 
             class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-zinc-200 text-xs focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900/10 outline-none transition bg-zinc-50/70 focus:bg-white text-zinc-900 placeholder:text-zinc-400"
           >
           <svg class="w-4 h-4 text-zinc-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -6091,6 +6080,8 @@ function getOrCreateFolder(folderName) {
       document.getElementById("adminHubContainer").classList.remove("hidden");
       document.getElementById("adminSingleWorkspaceContainer").classList.add("hidden");
       document.getElementById("headerWorkspaceTabs").classList.add("hidden");
+      document.getElementById("headerWorkspaceActions")?.classList.add("hidden");
+      document.getElementById("cloudSyncBadge")?.classList.add("hidden");
       
       document.getElementById("headerBtnReturnToHub")?.classList.add("hidden");
       document.getElementById("headerBtnReturnToHub")?.classList.remove("flex");
@@ -6375,6 +6366,8 @@ function getOrCreateFolder(folderName) {
       document.getElementById("adminHubContainer").classList.add("hidden");
       document.getElementById("adminSingleWorkspaceContainer").classList.remove("hidden");
       document.getElementById("headerWorkspaceTabs").classList.remove("hidden");
+      document.getElementById("headerWorkspaceActions")?.classList.remove("hidden");
+      document.getElementById("cloudSyncBadge")?.classList.remove("hidden");
 
       document.getElementById("headerBtnReturnToHub")?.classList.remove("hidden");
       document.getElementById("headerBtnReturnToHub")?.classList.add("flex");

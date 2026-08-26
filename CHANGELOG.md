@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.8] - 2026-08-26
+
+### 🧹 Pembersihan & Penataan Elemen Antarmuka Pusat Pengelolaan (*Master Hub Streamlining*)
+- **✨ Eliminasi Tombol Redundan di Hero Banner:**
+  - Menghapus tombol *Sinkronkan Cloud* manual pada banner utama karena sinkronisasi database & spreadsheet telah berjalan otomatis di latar belakang (*seamless background queue*).
+  - Menyederhanakan aksi utama menjadi 2 tombol fokus: **Setelan Sistem (⚙️)** dan **Buat Formulir Baru (+)**.
+- **🧭 Kontekstualisasi Top Navigation Bar:**
+  - Menyembunyikan tombol-tombol spesifik formulir (*Form Aktif*, *Bagikan QR*, *Buka Formulir*) saat berada di halaman **Pusat Pengelolaan (Hub)** untuk menghindari ambiguitas dan menjaga kerapian antarmuka.
+  - Tombol-tombol tersebut secara otomatis hanya muncul ketika admin sedang mengelola formulir spesifik tertentu (*Form Workspace*).
+- **🔍 Pembersihan Placeholder Pencarian:**
+  - Membersihkan teks bantuan pada kolom pencarian menjadi format netral yang ringkas dan profesional.
+
+---
+
 ## [2.4.7] - 2026-08-26
 
 ### 🚀 Optimasi Responsivitas Modal & Pencegahan Dropdown Terpotong (*Zero Clipping*)
