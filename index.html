@@ -4294,14 +4294,16 @@ function normalizeMediaList(fieldOrMedia) {
 
     // Flow Navigation: Info Form vs Wizard Form
     function startAssessmentForm() {
-      const emailMode = appConfig["Mode_Pengumpulan_Email"] || "ULM_ONLY";
+      const emailMode = appConfig["Mode_Pengumpulan_Email"] || "ALL_EMAIL";
       const session = getCurrentAuthSession();
       if (emailMode !== 'NO_EMAIL' && (!session || !session.email)) {
         checkAndApplyAuthGate();
         return;
       }
+      const authGate = document.getElementById("formAuthGateSection");
       const overview = document.getElementById("formOverviewSection");
       const wizard = document.getElementById("formWizardContainer");
+      if (authGate) authGate.classList.add("hidden");
       if (overview) overview.classList.add("hidden");
       if (wizard) wizard.classList.remove("hidden");
       updateStepUI(currentStep || 1);
@@ -4309,8 +4311,10 @@ function normalizeMediaList(fieldOrMedia) {
     }
 
     function goToInfoOverview() {
+      const authGate = document.getElementById("formAuthGateSection");
       const overview = document.getElementById("formOverviewSection");
       const wizard = document.getElementById("formWizardContainer");
+      if (authGate) authGate.classList.add("hidden");
       if (overview) overview.classList.remove("hidden");
       if (wizard) wizard.classList.add("hidden");
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -5593,13 +5597,33 @@ function normalizeMediaList(fieldOrMedia) {
       }
     }
 
-    function applySupabaseGoogleUser(user) {
+    async function applySupabaseGoogleUser(user) {
       if (!user || !user.email) return;
 
       const email = user.email.toLowerCase().trim();
-      const emailMode = appConfig["Mode_Pengumpulan_Email"] || "ULM_ONLY";
 
-      // Domain enforcement if ULM_ONLY mode is active
+      // Ensure appConfig is populated from cache or Supabase if currently empty
+      if (!appConfig || Object.keys(appConfig).length === 0) {
+        const cachedConfig = localStorage.getItem("PGSD_CACHE_CONFIG_" + activeFormId);
+        if (cachedConfig) {
+          try { appConfig = JSON.parse(cachedConfig); } catch(e) {}
+        }
+      }
+      if (!appConfig || Object.keys(appConfig).length === 0) {
+        const sb = getSupabaseClient();
+        if (sb) {
+          try {
+            const { data: configRow } = await sb.from('pgsd_form_configs').select('*').eq('form_id', activeFormId).single();
+            if (configRow && configRow.config_data) {
+              appConfig = configRow.config_data;
+            }
+          } catch(e) {}
+        }
+      }
+
+      const emailMode = appConfig["Mode_Pengumpulan_Email"] || "ALL_EMAIL";
+
+      // Domain enforcement only if explicitly ULM_ONLY
       if (emailMode === 'ULM_ONLY') {
         const allowedStr = appConfig["Domain_Email_Wajib"] || "mhs.ulm.ac.id, ulm.ac.id";
         const allowedDomains = allowedStr.split(",").map(d => d.trim().toLowerCase()).filter(Boolean);
@@ -5664,13 +5688,30 @@ function normalizeMediaList(fieldOrMedia) {
 
       setAuthSession(authUser, true);
       activeUserAccountAvatarUrl = avatarUrl;
+      activeUserAccountEmail = email;
+      activeUserAccountName = matchedName || email.split("@")[0];
+      activeUserAccountNim = extractedNim;
+      if (detectedRole) currentEvaluatorRole = detectedRole;
+
+      // Populate Step 1 fields in DOM
+      const inputEmail = document.getElementById("inputEmail");
+      const inputNama = document.getElementById("inputNama");
+      const inputNim = document.getElementById("inputNim");
+      if (inputEmail) inputEmail.value = email;
+      if (inputNama && matchedName) inputNama.value = matchedName;
+      if (inputNim && extractedNim) {
+        inputNim.value = extractedNim;
+        validateNimLive(extractedNim);
+      }
+      if (detectedRole) onRoleChange(detectedRole);
+
       updateAccountHeaderUI();
       checkAndApplyAuthGate();
 
       // Bersihkan hash fragment OAuth dari URL browser
       try {
-        if (window.location.hash.includes('access_token')) {
-          history.replaceState(null, null, window.location.pathname + window.location.search);
+        if (window.location.hash.includes('access_token') || window.location.hash === '#') {
+          history.replaceState(null, null, window.location.pathname + (window.location.search || `?id=${activeFormId}`));
         }
       } catch (e) {}
 

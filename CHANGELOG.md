@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.48] - 2026-08-26
+
+### 🚀 Penyempurnaan Gerbang Auth & Sinkronisasi Konfigurasi Domain
+- **🛡️ Penanganan Fleksibel Domain Akun Bebas (`ALL_EMAIL`):**
+  - Mengambil data konfigurasi formulir (`appConfig`) secara asinkron sebelum validasi domain dilakukan, sehingga akun Gmail umum (seperti `thuandmuda2@gmail.com`) pada formulir berstatus `ALL_EMAIL` tidak lagi tertolak.
+- **✨ Transisi Langsung ke Formulir (`startAssessmentForm`):**
+  - Memastikan `#formAuthGateSection` disembunyikan seketika dan container wizard `#formWizardContainer` dibuka mulus setelah proses otentikasi Google berhasil.
+
+---
+
 ## [2.3.47] - 2026-08-26
 
 ### 🛡️ Inisialisasi Kredensial Supabase Auth Eager & Multi-CDN Fallback
