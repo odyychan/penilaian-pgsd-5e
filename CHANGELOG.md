@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.43] - 2026-08-26
+
+### ✨ Sinkronisasi Otomatis & Penguncian Identitas Step 1 Berbasis Google Auth
+- **🔒 Penguncian Otomatis Input Email:**
+  - Kolom email pada Bagian 1 kini otomatis terkunci (*readonly*) dengan lencana `✓ Terverifikasi Google`, mencegah perubahan manual yang tidak valid.
+- **⚡ Auto-Fill Nama & NIM:**
+  - Nama lengkap dan NIM penilai otomatis terisi dari akun Google dan data master mahasiswa FKIP ULM.
+- **🧹 Pembersihan Chip Domain:**
+  - Tombol chip domain manual (`+ @mhs.ulm.ac.id`, dll) disembunyikan otomatis saat pengguna telah terotentikasi via Google OAuth.
+
+---
+
 ## [2.3.42] - 2026-08-26
 
 ### 🗑️ Penghapusan Total Modal Ganti Akun Manual & Integrasi Penuh Google Account Switcher
