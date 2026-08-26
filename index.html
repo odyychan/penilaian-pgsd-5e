@@ -2382,17 +2382,20 @@ function normalizeMediaList(fieldOrMedia) {
       const container = document.getElementById("dynamicClientStagesContainer");
       if (!container) return;
 
+      updateStepMetadataFromSchema();
+      renderDynamicStepTabs();
+
       const tahapan = (currentFormSchema && Array.isArray(currentFormSchema.tahapan) && currentFormSchema.tahapan.length > 0)
         ? currentFormSchema.tahapan
-        : null;
+        : [
+            { id: "t1", title: "Identitas & Akses Penilai", description: "Isi identitas diri Anda sebelum menilai.", fields: [{ id: "fld_core_identity", type: "CORE_IDENTITY", label: "Identitas Penilai", required: true }] },
+            { id: "t2", title: "Pemilihan Kelompok Presentator", description: "Pilih kelompok yang sedang presentasi.", fields: [{ id: "fld_core_group", type: "CORE_GROUP_SELECT", label: "Kelompok yang Dinilai", required: true }] },
+            { id: "t3", title: "Skor Rubrik & Voting Presentator", description: "Berikan nilai presentasi dan pilih pemateri terbaik.", fields: [{ id: "fld_core_score", type: "CORE_SCORE_RUBRIC", label: "Nilai Presentasi", required: true }, { id: "fld_core_voting", type: "CORE_BEST_PRESENTER", label: "Presentator Terbaik", required: true }] },
+            { id: "t4", title: "Evaluasi Masukan Kualitatif", description: "Tuliskan masukan apresiasi dan catatan untuk pemateri.", fields: [{ id: "fld_core_feedback", type: "CORE_MEMBER_FEEDBACK", label: "Evaluasi Masukan Kualitatif Tiap Pemateri", required: true }] }
+          ];
 
       const legacyContainer = document.getElementById("legacyStaticStagesContainer");
       if (legacyContainer) legacyContainer.classList.add("hidden");
-
-      if (!tahapan || tahapan.length === 0) {
-        container.innerHTML = '<div class="bg-white rounded-xl border border-zinc-200 p-8 text-center text-xs text-zinc-400">Belum ada tahapan formulir yang aktif.</div>';
-        return;
-      }
 
       const totalSteps = tahapan.length;
       let stagesHtml = '';
@@ -3487,6 +3490,7 @@ function normalizeMediaList(fieldOrMedia) {
         renderConfigHeader();
         renderGroupOptions();
         renderDynamicCustomFields();
+        renderDynamicClientStages();
 
         const cachedRekap = localStorage.getItem("PGSD_CACHE_REKAP_" + activeFormId) || (isDefault ? localStorage.getItem("PGSD_CACHE_REKAP") : null);
         if (cachedRekap) {
@@ -3570,7 +3574,9 @@ function normalizeMediaList(fieldOrMedia) {
 
             renderConfigHeader();
             renderGroupOptions();
+            renderDynamicClientStages();
             restoreFormDraft();
+            updateStepUI(currentStep || 1);
             updateAccountHeaderUI();
             checkAndApplyAuthGate();
             return;
@@ -3649,7 +3655,9 @@ function normalizeMediaList(fieldOrMedia) {
 
           renderConfigHeader();
           renderGroupOptions();
+          renderDynamicClientStages();
           restoreFormDraft();
+          updateStepUI(currentStep || 1);
           updateAccountHeaderUI();
           checkAndApplyAuthGate();
 
@@ -3662,7 +3670,9 @@ function normalizeMediaList(fieldOrMedia) {
       } catch (err) {
         renderConfigHeader();
         renderGroupOptions();
+        renderDynamicClientStages();
         restoreFormDraft();
+        updateStepUI(currentStep || 1);
         updateAccountHeaderUI();
         checkAndApplyAuthGate();
       } finally {
@@ -4215,6 +4225,9 @@ function normalizeMediaList(fieldOrMedia) {
       if (authGate) authGate.classList.add("hidden");
       if (overview) overview.classList.add("hidden");
       if (wizard) wizard.classList.remove("hidden");
+      if (!document.getElementById("stepSection_1")) {
+        renderDynamicClientStages();
+      }
       updateStepUI(currentStep || 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -4231,6 +4244,9 @@ function normalizeMediaList(fieldOrMedia) {
 
     // Navigation Step
     function updateStepUI(step, skipSave = false) {
+      if (!document.getElementById("stepSection_1")) {
+        renderDynamicClientStages();
+      }
       currentStep = step;
       const totalSteps = Object.keys(stepMetadata).length || 1;
       const meta = (stepMetadata && stepMetadata[step]) || {

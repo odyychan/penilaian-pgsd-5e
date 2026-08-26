@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.57] - 2026-08-26
+
+### 🛠️ Perbaikan Render Tahapan Formulir Dinamis (Dynamic Client Stages Engine)
+- **⚡ Inisialisasi Otomatis `renderDynamicClientStages`:**
+  - Memperbaiki alur render sehingga `renderDynamicClientStages()` dipanggil secara konsisten pada `fetchInitialFormData()`, `loadLocalCache()`, `startAssessmentForm()`, dan `updateStepUI()`.
+  - Mengeliminasi kondisi tampilan formulir kosong/putih di bawah progress bar dengan menyertakan fallback tahapan standar dan render instan ke dalam `#dynamicClientStagesContainer`.
+- **🎯 Penyelarasan Step Tabs & Metadata:**
+  - Menghubungkan pembaharuan tab tahapan (`updateStepMetadataFromSchema` & `renderDynamicStepTabs`) secara otomatis ke setiap inisialisasi form schema.
+
+---
+
 ## [2.3.56] - 2026-08-26
 
 ### 🚀 Penyederhanaan Alur Pengisian Bebas Hambatan (Direct Identity Input)
