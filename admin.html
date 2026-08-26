@@ -2868,203 +2868,167 @@ function getOrCreateFolder(folderName) {
   <!-- ========================================================================= -->
   <!-- MODAL: SETELAN SISTEM & DATABASE GLOBAL (MASTER LEVEL) -->
   <!-- ========================================================================= -->
-  <div id="modalGlobalSettings" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target === this) closeGlobalSettingsModal()">
-    <div class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-4.5 fade-enter max-h-[90vh] overflow-y-auto custom-scrollbar">
-      
+  <div id="modalGlobalSettings" class="hidden fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4" onclick="if(event.target === this) closeGlobalSettingsModal()">
+    <div class="bg-white rounded-t-3xl sm:rounded-2xl max-w-2xl w-full shadow-2xl border border-zinc-200/80 max-h-[92vh] sm:max-h-[88vh] overflow-hidden flex flex-col fade-enter">
+
       <!-- Modal Header -->
-      <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-zinc-900 text-white flex items-center justify-center shadow-xs">
-            <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="flex items-center justify-between px-5 sm:px-6 pt-5 pb-4 border-b border-zinc-100 shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-xl bg-zinc-900 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
             </svg>
           </div>
           <div>
-            <h3 class="font-bold text-sm sm:text-base text-zinc-900">Setelan Sistem &amp; Database Global</h3>
-            <p class="text-[11px] text-zinc-500">Konfigurasi menyeluruh untuk seluruh sistem penilaian &amp; integrasi multi-formulir.</p>
+            <h3 class="font-bold text-sm text-zinc-900">Setelan Sistem</h3>
+            <p class="text-[11px] text-zinc-400 mt-0.5">Konfigurasi global & integrasi data</p>
           </div>
         </div>
-        <button type="button" onclick="closeGlobalSettingsModal()" class="w-8 h-8 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center cursor-pointer transition">
-          ✕
+        <button type="button" onclick="closeGlobalSettingsModal()" class="w-8 h-8 rounded-xl hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center cursor-pointer transition shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
 
-      <!-- 1. Database Status Card -->
-      <div class="bg-zinc-900 rounded-xl p-3.5 text-white space-y-2 border border-zinc-800 shadow-xs">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span class="font-bold text-xs">Basis Data Utama: Supabase Dedicated (PostgreSQL)</span>
-          </div>
-          <span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-mono text-[10.5px] border border-emerald-500/30 font-bold">
-            &lt; 30 ms (Aktif)
-          </span>
-        </div>
-        <div class="grid grid-cols-3 gap-2 pt-1 text-center font-mono">
-          <div class="bg-zinc-800/80 p-2 rounded-lg border border-zinc-700/60">
-            <div class="text-[10px] text-zinc-400 uppercase">Formulir</div>
-            <div id="statGlobalForms" class="text-sm font-bold text-emerald-400">2</div>
-          </div>
-          <div class="bg-zinc-800/80 p-2 rounded-lg border border-zinc-700/60">
-            <div class="text-[10px] text-zinc-400 uppercase">Kelompok</div>
-            <div id="statGlobalGroups" class="text-sm font-bold text-indigo-300">3</div>
-          </div>
-          <div class="bg-zinc-800/80 p-2 rounded-lg border border-zinc-700/60">
-            <div class="text-[10px] text-zinc-400 uppercase">Mahasiswa</div>
-            <div id="statGlobalStudents" class="text-sm font-bold text-amber-300">11</div>
-          </div>
-        </div>
-      </div>
+      <!-- Scrollable Body -->
+      <div class="overflow-y-auto flex-1 custom-scrollbar px-5 sm:px-6 py-4 space-y-4">
 
-      <!-- 2. Global Spreadsheet & Drive Fallback Settings -->
-      <div class="bg-white rounded-xl border border-zinc-200 p-3.5 sm:p-4 space-y-3 shadow-2xs">
-        <div class="flex items-center justify-between border-b border-zinc-100 pb-2">
-          <div>
-            <h4 class="text-xs sm:text-sm font-bold text-zinc-900">Default Global Spreadsheet &amp; Google Drive</h4>
-            <p class="text-[10.5px] text-zinc-500">Berlaku otomatis untuk semua formulir yang tidak mengisi link khusus.</p>
+        <!-- 1. Database Status -->
+        <div class="bg-zinc-950 rounded-2xl p-4 text-white">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+              <span class="text-xs font-semibold text-zinc-200">Supabase PostgreSQL · Dedicated</span>
+            </div>
+            <span class="px-2 py-0.5 rounded-lg bg-emerald-500/15 text-emerald-400 font-mono text-[10px] border border-emerald-500/25 font-semibold">&lt; 30 ms · Aktif</span>
           </div>
-          <button 
-            type="button" 
-            onclick="openUniversalScriptModal()" 
-            class="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[11px] font-bold border border-indigo-200 transition cursor-pointer"
-          >
-            Lihat Skrip 30-Baris
-          </button>
+          <div class="grid grid-cols-3 gap-2">
+            <div class="bg-white/5 rounded-xl p-2.5 text-center">
+              <div class="text-[10px] text-zinc-500 uppercase tracking-wide mb-0.5">Formulir</div>
+              <div id="statGlobalForms" class="text-lg font-bold text-emerald-400 leading-none">2</div>
+            </div>
+            <div class="bg-white/5 rounded-xl p-2.5 text-center">
+              <div class="text-[10px] text-zinc-500 uppercase tracking-wide mb-0.5">Kelompok</div>
+              <div id="statGlobalGroups" class="text-lg font-bold text-indigo-300 leading-none">3</div>
+            </div>
+            <div class="bg-white/5 rounded-xl p-2.5 text-center">
+              <div class="text-[10px] text-zinc-500 uppercase tracking-wide mb-0.5">Mahasiswa</div>
+              <div id="statGlobalStudents" class="text-lg font-bold text-amber-300 leading-none">11</div>
+            </div>
+          </div>
         </div>
 
-        <div class="space-y-2 text-xs">
+        <!-- 2. Google Integration -->
+        <div class="space-y-1">
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-xs font-bold text-zinc-800">Integrasi Google</p>
+            <button type="button" onclick="openUniversalScriptModal()" class="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 transition cursor-pointer">Lihat Skrip Apps Script</button>
+          </div>
+
+          <!-- Master Spreadsheet -->
           <div class="space-y-1">
             <div class="flex items-center justify-between">
-              <label class="block font-semibold text-zinc-700">Master Google Spreadsheet (Arsip Utama)</label>
-              <a 
-                id="linkOpenMasterSheet" 
-                href="https://docs.google.com/spreadsheets/d/1MAZqzRyau1mECqamnU9Bj3TALRJYDrA1WLQFesJ4wG4/edit" 
-                target="_blank" 
-                class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 transition flex items-center gap-1"
-              >
-                <span>Buka Master Sheet</span>
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+              <label class="text-[11px] font-semibold text-zinc-600">Master Spreadsheet</label>
+              <a id="linkOpenMasterSheet" href="https://docs.google.com/spreadsheets/d/1MAZqzRyau1mECqamnU9Bj3TALRJYDrA1WLQFesJ4wG4/edit" target="_blank" class="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 transition flex items-center gap-1">
+                Buka <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
               </a>
             </div>
-            <input 
-              type="text" 
-              id="inputGlobalMasterSheetUrl" 
-              placeholder="https://docs.google.com/spreadsheets/d/.../edit" 
-              value="https://docs.google.com/spreadsheets/d/1MAZqzRyau1mECqamnU9Bj3TALRJYDrA1WLQFesJ4wG4/edit"
-              class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 font-mono text-xs focus:border-zinc-900 outline-none transition"
-            >
-            <p class="text-[10.5px] text-zinc-400">Arsip default terpusat untuk formulir yang tidak menggunakan spreadsheet khusus.</p>
+            <input type="text" id="inputGlobalMasterSheetUrl" placeholder="https://docs.google.com/spreadsheets/d/.../edit" value="https://docs.google.com/spreadsheets/d/1MAZqzRyau1mECqamnU9Bj3TALRJYDrA1WLQFesJ4wG4/edit" class="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-zinc-50 font-mono text-[11px] text-zinc-600 focus:border-zinc-900 focus:bg-white outline-none transition">
           </div>
 
-          <div class="space-y-1">
-            <label class="block font-semibold text-zinc-700">Default URL Webhook Spreadsheet (Apps Script)</label>
-            <input 
-              type="text" 
-              id="inputGlobalApiUrl" 
-              placeholder="https://script.google.com/macros/s/.../exec" 
-              class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 font-mono text-xs focus:border-zinc-900 outline-none transition"
-            >
+          <!-- Webhook URL -->
+          <div class="space-y-1 pt-1">
+            <label class="text-[11px] font-semibold text-zinc-600">Webhook Apps Script</label>
+            <input type="text" id="inputGlobalApiUrl" placeholder="https://script.google.com/macros/s/.../exec" class="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-zinc-50 font-mono text-[11px] text-zinc-600 focus:border-zinc-900 focus:bg-white outline-none transition">
           </div>
 
-          <div class="space-y-1">
-            <label class="block font-semibold text-zinc-700">Default Folder Google Drive Utama</label>
-            <input 
-              type="text" 
-              id="inputGlobalDriveFolder" 
-              placeholder="https://drive.google.com/drive/folders/1ZYnP40AaCoaqu6-H2ZNfYuS-RshCWURK" 
-              value="https://drive.google.com/drive/folders/1ZYnP40AaCoaqu6-H2ZNfYuS-RshCWURK"
-              class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 font-mono text-xs focus:border-zinc-900 outline-none transition"
-            >
+          <!-- Drive Folder -->
+          <div class="space-y-1 pt-1">
+            <label class="text-[11px] font-semibold text-zinc-600">Google Drive Folder</label>
+            <input type="text" id="inputGlobalDriveFolder" placeholder="https://drive.google.com/drive/folders/..." value="https://drive.google.com/drive/folders/1ZYnP40AaCoaqu6-H2ZNfYuS-RshCWURK" class="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-zinc-50 font-mono text-[11px] text-zinc-600 focus:border-zinc-900 focus:bg-white outline-none transition">
+          </div>
+
+          <!-- Test Connection -->
+          <div class="pt-1.5 flex items-center gap-2">
+            <button type="button" onclick="testGlobalApiConnection()" class="flex items-center gap-1.5 text-[11px] font-semibold text-zinc-600 hover:text-zinc-900 px-3 py-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-100 transition cursor-pointer">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              Tes Sambungan
+            </button>
+            <div id="globalConnectionStatusResult" class="text-[11px] font-mono text-zinc-500 hidden"></div>
           </div>
         </div>
 
-        <div class="flex items-center justify-between gap-2 pt-2 border-t border-zinc-100">
-          <button 
-            type="button" 
-            onclick="testGlobalApiConnection()" 
-            class="px-3 py-1.5 rounded-lg border border-zinc-300 hover:bg-zinc-100 text-zinc-700 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
-          >
-            <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-            </svg>
-            <span>Tes Sambungan Global</span>
-          </button>
-          <div id="globalConnectionStatusResult" class="text-xs font-mono hidden"></div>
+        <div class="border-t border-zinc-100"></div>
+
+        <!-- 3. Backup & Restore -->
+        <div class="space-y-2">
+          <div>
+            <p class="text-xs font-bold text-zinc-800">Cadangan & Pemulihan Data</p>
+            <p class="text-[11px] text-zinc-400 mt-0.5">Ekspor atau pulihkan seluruh data Supabase dalam format JSON.</p>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" onclick="downloadGlobalDatabaseBackup()" class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition cursor-pointer">
+              <svg class="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              Unduh Cadangan
+            </button>
+            <label class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition cursor-pointer">
+              <svg class="w-3.5 h-3.5 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+              Pulihkan Data
+              <input type="file" accept=".json" onchange="handleRestoreDatabaseFileInput(this)" class="sr-only">
+            </label>
+          </div>
         </div>
-      </div>
 
-      <!-- 3. Full Database Backup & Restore Card -->
-      <div class="bg-white rounded-xl border border-zinc-200 p-3.5 sm:p-4 space-y-3 shadow-2xs">
-        <div class="border-b border-zinc-100 pb-2">
-          <h4 class="text-xs sm:text-sm font-bold text-zinc-900">Cadangkan &amp; Pulihkan Basis Data (Backup &amp; Restore)</h4>
-          <p class="text-[10.5px] text-zinc-500">Ekspor seluruh schema dan data Supabase menjadi berkas JSON atau pulihkan data secara utuh dari file cadangan.</p>
-        </div>
+        <div class="border-t border-zinc-100"></div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 text-xs">
-          <button 
-            type="button" 
-            onclick="downloadGlobalDatabaseBackup()" 
-            class="px-3.5 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-semibold flex items-center justify-center gap-2 transition cursor-pointer shadow-xs"
-          >
-            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-            </svg>
-            <span>Unduh Cadangan Database (.json)</span>
-          </button>
-
-          <label class="px-3.5 py-2.5 rounded-xl border border-zinc-300 hover:bg-zinc-50 text-zinc-700 font-semibold flex items-center justify-center gap-2 transition cursor-pointer shadow-2xs">
-            <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
-            </svg>
-            <span>Pulihkan Dari File Cadangan</span>
-            <input type="file" accept=".json" onchange="handleRestoreDatabaseFileInput(this)" class="sr-only">
-          </label>
-        </div>
-      </div>
-
-      <!-- 4. Security & Maintenance Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-        <div class="bg-white rounded-xl border border-zinc-200 p-3.5 space-y-2 shadow-2xs">
-          <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider font-mono">Keamanan Portal Supabase</span>
-          <h4 class="font-bold text-zinc-900">Ubah Kata Sandi Admin</h4>
-          <p class="text-[11px] text-zinc-500">Tersinkronisasi langsung dengan Supabase Secrets (<code class="font-mono text-zinc-700">ADMIN_PASSWORD</code>).</p>
-          <div class="space-y-1.5 pt-0.5">
-            <input type="password" id="inputGlobalCurrentAdminPassword" placeholder="Kata sandi saat ini..." class="w-full px-3 py-1.5 rounded-lg border border-zinc-300 text-xs outline-none focus:border-zinc-900">
-            <div class="flex items-center gap-1.5">
-              <input type="password" id="inputGlobalNewAdminPassword" placeholder="Kata sandi baru..." class="flex-1 px-3 py-1.5 rounded-lg border border-zinc-300 text-xs outline-none focus:border-zinc-900">
-              <button type="button" id="btnUpdateAdminPass" onclick="updateGlobalAdminPassword()" class="px-3.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white font-semibold text-xs cursor-pointer active:scale-95 shadow-xs">
-                Simpan
-              </button>
+        <!-- 4. Security & Cache — Side by Side -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Change Password -->
+          <div class="space-y-2">
+            <div>
+              <p class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Keamanan</p>
+              <p class="text-xs font-bold text-zinc-800 mt-0.5">Kata Sandi Admin</p>
+            </div>
+            <div class="space-y-1.5">
+              <input type="password" id="inputGlobalCurrentAdminPassword" placeholder="Kata sandi saat ini" class="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-zinc-50 text-xs outline-none focus:border-zinc-900 focus:bg-white transition">
+              <div class="flex gap-1.5">
+                <input type="password" id="inputGlobalNewAdminPassword" placeholder="Kata sandi baru" class="flex-1 px-3 py-2 rounded-xl border border-zinc-200 bg-zinc-50 text-xs outline-none focus:border-zinc-900 focus:bg-white transition">
+                <button type="button" id="btnUpdateAdminPass" onclick="updateGlobalAdminPassword()" class="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold cursor-pointer transition shrink-0">
+                  Simpan
+                </button>
+              </div>
             </div>
           </div>
+
+          <!-- Cache -->
+          <div class="space-y-2">
+            <div>
+              <p class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Pemeliharaan</p>
+              <p class="text-xs font-bold text-zinc-800 mt-0.5">Cache Browser</p>
+            </div>
+            <button type="button" onclick="clearLocalAppCache()" class="w-full px-3 py-2.5 rounded-xl border border-zinc-200 hover:bg-zinc-100 text-zinc-600 text-xs font-semibold transition cursor-pointer text-left flex items-center gap-2">
+              <svg class="w-3.5 h-3.5 text-zinc-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              Bersihkan & Sinkronkan Ulang
+            </button>
+          </div>
         </div>
 
-        <div class="bg-white rounded-xl border border-zinc-200 p-3.5 space-y-2 shadow-2xs">
-          <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider font-mono">Pemeliharaan Cache</span>
-          <h4 class="font-bold text-zinc-900">Segarkan Cache Browser</h4>
-          <button type="button" onclick="clearLocalAppCache()" class="w-full px-3 py-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-100 text-zinc-700 font-medium transition cursor-pointer">
-            Bersihkan Cache &amp; Sinkronkan Ulang
-          </button>
-        </div>
       </div>
 
       <!-- Modal Footer -->
-      <div class="flex items-center justify-between gap-3 pt-3 border-t border-zinc-100">
-        <button type="button" onclick="closeGlobalSettingsModal()" class="px-4 py-2.5 rounded-xl border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold cursor-pointer transition">
+      <div class="flex items-center justify-between gap-3 px-5 sm:px-6 py-4 border-t border-zinc-100 bg-zinc-50/50 shrink-0">
+        <button type="button" onclick="closeGlobalSettingsModal()" class="px-4 py-2 rounded-xl border border-zinc-200 hover:bg-zinc-100 text-zinc-600 text-xs font-semibold cursor-pointer transition">
           Tutup
         </button>
-        <button 
-          type="button" 
-          onclick="saveGlobalSystemSettings()" 
-          class="px-5 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 active:scale-98 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer transition"
-        >
-          <span>Simpan Seluruh Setelan Global</span>
+        <button type="button" onclick="saveGlobalSystemSettings()" class="px-5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 active:scale-98 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer transition">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          Simpan Setelan
         </button>
       </div>
 
     </div>
   </div>
+      
 
   <!-- ========================================================================= -->
   <!-- JAVASCRIPT APP LOGIC: MULTI-FORM & ISOLATED SANDBOX ENGINE -->
