@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.21] - 2026-08-26
+
+### 🛡️ Optimasi Dinamis Aturan Integritas & Audit Edge Function (*Dynamic Integrity Toggles & Edge Audit*)
+- **Fleksibilitas Aturan Integritas Penilaian (Aktif / Nonaktif):**
+  - Mengintegrasikan evaluasi aturan **Cegah Penilaian Diri Sendiri** dan **Kunci Respons Ganda** secara dinamis dan *real-time* di seluruh kartu kelompok dan proses pengiriman, sehingga dosen leluasa mengaktifkan atau menonaktifkan aturan sesuai skenario ujian/presentasi.
+- **Penyelarasan Zona Waktu Lokal & Hitung Mundur Tenggat:**
+  - Menyesuaikan parser waktu jadwal pembukaan dan penutupan dengan zona waktu lokal (WITA / UTC+8) sehingga lencana peringatan batas waktu (*"⏱️ Batas Pengisian: X jam Y menit lagi"*) aktif secara presisi.
+- **Audit & Verifikasi Supabase Edge Functions:**
+  - Memverifikasi endpoint Supabase Edge Function `google-sync` (CORS 200 OK, latency < 30ms pada cluster `ap-southeast-1`).
+
+---
+
 ## [2.3.20] - 2026-08-26
 
 ### ⏱️ Manajemen Jadwal Akses & Pelacak Partisipasi Mahasiswa (*Access Window & Attendance Tracker Engine*)

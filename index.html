@@ -317,6 +317,22 @@
             </p>
           </div>
 
+          <!-- DEADLINE APPROACHING WARNING BADGE -->
+          <div id="deadlineWarningBadge" class="hidden inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 text-xs font-semibold shadow-xs mb-2"></div>
+
+          <!-- SCHEDULE LOCK / STATUS NOTIFICATION BANNER -->
+          <div id="formScheduleLockBanner" class="hidden p-4 sm:p-5 rounded-2xl bg-amber-50/90 border border-amber-300 text-amber-950 space-y-2 shadow-xs fade-enter">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-amber-100 border border-amber-300 text-amber-800 flex items-center justify-center font-bold text-base shrink-0">
+                ⏱️
+              </div>
+              <div>
+                <h4 id="lockBannerTitle" class="font-bold text-sm sm:text-base text-amber-950">Formulir Belum Dibuka</h4>
+              </div>
+            </div>
+            <p id="lockBannerDesc" class="text-xs text-amber-900 leading-relaxed pl-10.5"></p>
+          </div>
+
           <!-- Rincian Identitas / Informasi Tambahan (Dinamis dari Config) -->
           <div id="overviewHeaderInfoGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 text-xs">
             <!-- Rendered dynamically via renderOverviewHeaderInfoGrid() -->
@@ -335,6 +351,7 @@
             <span class="text-[11px] sm:text-xs text-zinc-500 hidden sm:inline">Pastikan data pengisian objektif &amp; konstruktif.</span>
             <button 
               type="button" 
+              id="startAssessmentBtn"
               onclick="startAssessmentForm()" 
               class="w-full sm:w-auto px-5 sm:px-7 py-2.5 sm:py-3.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-semibold text-xs sm:text-sm shadow-md active:scale-98 transition flex items-center justify-center gap-2 cursor-pointer"
             >
@@ -3386,7 +3403,7 @@ function normalizeMediaList(fieldOrMedia) {
 
     function evaluateFormScheduleStatus() {
       const lockBanner = document.getElementById("formScheduleLockBanner");
-      const startBtn = document.getElementById("startFormBtn");
+      const startBtn = document.getElementById("startAssessmentBtn");
       const warningBadge = document.getElementById("deadlineWarningBadge");
 
       const isManualClosed = currentFormMeta && (currentFormMeta.status === 'NONAKTIF' || currentFormMeta.status === 'SELESAI');
@@ -3436,17 +3453,25 @@ function normalizeMediaList(fieldOrMedia) {
               const diffMinutes = Math.floor((diffMs % (3600 * 1000)) / (60 * 1000));
               if (warningBadge) {
                 warningBadge.classList.remove("hidden");
+                warningBadge.classList.add("inline-flex");
                 warningBadge.innerHTML = `
                   <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
                   <span>⏱️ Batas Pengisian: <strong>${diffHours} jam ${diffMinutes} menit lagi</strong></span>
                 `;
               }
+            } else if (warningBadge) {
+              warningBadge.classList.add("hidden");
+              warningBadge.classList.remove("inline-flex");
             }
           }
         }
       }
 
       if (isBlocked) {
+        if (warningBadge) {
+          warningBadge.classList.add("hidden");
+          warningBadge.classList.remove("inline-flex");
+        }
         if (lockBanner) {
           lockBanner.classList.remove("hidden");
           document.getElementById("lockBannerTitle").textContent = blockTitle;
@@ -3459,9 +3484,17 @@ function normalizeMediaList(fieldOrMedia) {
         }
       } else {
         if (lockBanner) lockBanner.classList.add("hidden");
+        if (!scheduleActive && warningBadge) {
+          warningBadge.classList.add("hidden");
+          warningBadge.classList.remove("inline-flex");
+        }
         if (startBtn) {
           startBtn.disabled = false;
           startBtn.classList.remove("opacity-50", "cursor-not-allowed");
+          startBtn.innerHTML = `
+            <span>Mulai Pengisian Penilaian</span>
+            <span class="text-base">→</span>
+          `;
         }
       }
     }
@@ -3589,9 +3622,12 @@ function normalizeMediaList(fieldOrMedia) {
         }
       }
 
+      const isAntiSelfEvalActive = appConfig ? (appConfig["Cegah_Penilaian_Diri"] === true || appConfig["Cegah_Penilaian_Diri"] === "true" || appConfig["Cegah_Penilaian_Diri"] === undefined) : true;
+      const isSingleLockActive = appConfig ? (appConfig["Kunci_Respons_Ganda"] === true || appConfig["Kunci_Respons_Ganda"] === "true" || appConfig["Kunci_Respons_Ganda"] === undefined) : true;
+
       groupsData.forEach((grp, idx) => {
-        const isSelfGroup = currentEvaluatorRole === 'Mahasiswa' && evaluatorStudentGroup && evaluatorStudentGroup.toLowerCase() === grp.name.toLowerCase();
-        const isAlreadyFilled = filledGroups.some(fg => fg.toLowerCase() === grp.name.toLowerCase());
+        const isSelfGroup = isAntiSelfEvalActive && currentEvaluatorRole === 'Mahasiswa' && evaluatorStudentGroup && evaluatorStudentGroup.toLowerCase() === grp.name.toLowerCase();
+        const isAlreadyFilled = isSingleLockActive && filledGroups.some(fg => fg.toLowerCase() === grp.name.toLowerCase());
         const isCurrentlySelected = selectedGroupObj && selectedGroupObj.name === grp.name;
         
         let cardState = "available"; // "available" | "self" | "already_filled"
