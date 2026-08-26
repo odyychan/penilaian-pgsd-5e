@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.10] - 2026-08-26
+
+### 🔔 Reposisi Notifikasi Toast Mengikuti Standar Ergonomi UI (Mobile Top-Center & Desktop Bottom-Right)
+- **📱 Posisi Notifikasi di Perangkat Mobile:**
+  - Menempatkan notifikasi melayang (*floating toast alert*) di bagian **Tengah Atas (*Top-Center*)** dengan lebar responsif yang nyaman dipandang tanpa menutupi input formulir utama.
+- **🖥️ Posisi Notifikasi di Desktop & Tablet:**
+  - Memindahkan notifikasi dari pojok kanan atas ke **Pojok Kanan Bawah (*Bottom-Right*)** sehingga tidak menghalangi bilah menu, tombol navigasi, maupun header aplikasi.
+  - Menyelaraskan efek animasi transisi halus (`backdrop-blur`, rounded corners modern, bayangan ambient lembut).
+
+---
+
 ## [2.4.9] - 2026-08-26
 
 ### 💎 Desain Header Terintegrasi & Layout Minimalis Pusat Pengelolaan
