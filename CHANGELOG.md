@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.26] - 2026-08-26
+
+### 📦 Penyembunyian Rincian Otomatis Saat Formulir Terkunci (*Smart Collapsible Spoiler for Locked Forms*)
+- **Tampilan Bersih & Fokus Jadwal (*Focused Lock Screen Experience*):**
+  - Saat formulir belum dibuka (*scheduled in future*) atau telah ditutup (*closed/finished*), kartu rincian informasi perkuliahan dan alur tahapan secara otomatis disembunyikan dalam mode lipat (*collapsible spoiler*) agar mahasiswa fokus pada spanduk pengumuman jadwal dan waktu buka.
+- **Tombol Spoiler Interaktif (*Interactive Spoiler Toggle*):**
+  - Menghadirkan tombol lipat `[ 📋 Lihat Detail Informasi & Alur Form ▾ ]` yang elegan di bawah spanduk jadwal, memungkinkan pengguna membuka atau menutup rincian mata kuliah dan alur pengisian kapan saja.
+- **Ekspansi Otomatis Saat Dibuka (*Automatic Expansion on Form Open*):**
+  - Ketika formulir aktif atau waktu mulai telah tiba, seluruh rincian secara otomatis tampil penuh tanpa terlipat.
+
+---
+
 ## [2.3.25] - 2026-08-26
 
 ### 💡 Indikator Visual Interaktif & Sorot Kolom Isian (*Intuitive In-Place Edit Affordances*)
