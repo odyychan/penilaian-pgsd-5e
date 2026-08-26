@@ -4,6 +4,21 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.20] - 2026-08-26
+
+### ⏱️ Manajemen Jadwal Akses & Pelacak Partisipasi Mahasiswa (*Access Window & Attendance Tracker Engine*)
+- **Manajemen Tenggat Waktu & Jadwal Akses Otomatis (*Schedule & Access Window*):**
+  - Menghadirkan pengaturan jadwal buka & tutup formulir otomatis pada Tab Setelan Form dengan pemilih tanggal/jam, batas kuota respons, dan kustomisasi pesan ramah saat formulir belum dibuka atau sudah ditutup.
+  - Menambahkan lencana peringatan batas waktu (*live deadline countdown badge*) pada sisi mahasiswa jika waktu pengisian tersisa kurang dari 24 jam.
+- **Integritas Penilaian & Anti-Kecurangan (*Assessment Integrity Guard*):**
+  - Menambahkan aturan pencegahan penilaian diri sendiri (*Self-Assessment Guard*) sehingga mahasiswa tidak dapat menilai kelompok asalnya sendiri.
+  - Menambahkan kunci respons ganda (*Single Submission Lock*) untuk menjamin 1 NIM hanya dapat menilai 1 kali per kelompok target pada sesi aktif.
+- **Pelacak Partisipasi & Blast Pengingat WhatsApp (*Attendance Tracker*):**
+  - Menampilkan ringkasan partisipasi kelas secara real-time ($X / Y$ mahasiswa - $Z\%$) dan daftar status mahasiswa (`Sudah Menilai` vs `Belum Menilai`) pada Tab Respons.
+  - Tombol instan **"📋 Salin Pengingat WhatsApp"** untuk menyalin draf pesan pengingat siap kirim ke grup kelas lengkap dengan daftar nama mahasiswa yang belum mengisi.
+
+---
+
 ## [2.3.19] - 2026-08-25
 
 ### 📱 Optimasi Responsivitas Tablet & Resolusi Non-Reguler (*Cross-Device Viewport Audit*)

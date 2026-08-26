@@ -3379,6 +3379,93 @@ function normalizeMediaList(fieldOrMedia) {
       }
     }
 
+        // =========================================================================
+    // JADWAL AKSES FORMULIR & KONTROL TENGGAT WAKTU (SCHEDULE & DEADLINE ENGINE)
+    // =========================================================================
+    let scheduleIntervalTimer = null;
+
+    function evaluateFormScheduleStatus() {
+      const lockBanner = document.getElementById("formScheduleLockBanner");
+      const startBtn = document.getElementById("startFormBtn");
+      const warningBadge = document.getElementById("deadlineWarningBadge");
+
+      const isManualClosed = currentFormMeta && (currentFormMeta.status === 'NONAKTIF' || currentFormMeta.status === 'SELESAI');
+      const scheduleActive = appConfig && (appConfig["Jadwal_Aktif"] === true || appConfig["Jadwal_Aktif"] === "true");
+
+      const now = new Date();
+      let isBlocked = false;
+      let blockReason = "";
+      let blockTitle = "";
+      let blockDesc = "";
+      let targetTime = null;
+
+      if (isManualClosed) {
+        isBlocked = true;
+        blockTitle = "Formulir Sedang Dinonaktifkan";
+        blockDesc = "Pengisian formulir ini saat ini sedang ditutup oleh dosen pengampu.";
+      } else if (scheduleActive) {
+        const startTimeStr = appConfig["Jadwal_Mulai"];
+        const endTimeStr = appConfig["Jadwal_Selesai"];
+        const maxResponses = parseInt(appConfig["Batas_Maksimal_Respons"]) || 0;
+
+        if (startTimeStr) {
+          const startTime = new Date(startTimeStr);
+          if (now < startTime) {
+            isBlocked = true;
+            blockReason = "BEFORE_START";
+            blockTitle = "Formulir Belum Dibuka";
+            targetTime = startTime;
+            const timeFormatted = startTime.toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' });
+            blockDesc = (appConfig["Pesan_Form_Belum_Buka"] || "Formulir penilaian belum dibuka. Perkuliahan akan dimulai sesuai jadwal.") + `<br><span class="inline-block mt-2 font-mono font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200">Dibuka pada: ${timeFormatted} WITA</span>`;
+          }
+        }
+
+        if (!isBlocked && endTimeStr) {
+          const endTime = new Date(endTimeStr);
+          if (now > endTime) {
+            isBlocked = true;
+            blockReason = "AFTER_END";
+            blockTitle = "Batas Waktu Pengisian Telah Berakhir";
+            const timeFormatted = endTime.toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' });
+            blockDesc = (appConfig["Pesan_Form_Ditutup"] || "Sesi penilaian telah berakhir dan batas waktu telah ditutup. Terima kasih atas partisipasi Anda.") + `<br><span class="inline-block mt-2 font-mono font-bold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200">Ditutup sejak: ${timeFormatted} WITA</span>`;
+          } else {
+            // Check if deadline is approaching (< 24 hours)
+            const diffMs = endTime - now;
+            if (diffMs > 0 && diffMs < 24 * 3600 * 1000) {
+              const diffHours = Math.floor(diffMs / (3600 * 1000));
+              const diffMinutes = Math.floor((diffMs % (3600 * 1000)) / (60 * 1000));
+              if (warningBadge) {
+                warningBadge.classList.remove("hidden");
+                warningBadge.innerHTML = `
+                  <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+                  <span>⏱️ Batas Pengisian: <strong>${diffHours} jam ${diffMinutes} menit lagi</strong></span>
+                `;
+              }
+            }
+          }
+        }
+      }
+
+      if (isBlocked) {
+        if (lockBanner) {
+          lockBanner.classList.remove("hidden");
+          document.getElementById("lockBannerTitle").textContent = blockTitle;
+          document.getElementById("lockBannerDesc").innerHTML = blockDesc;
+        }
+        if (startBtn) {
+          startBtn.disabled = true;
+          startBtn.classList.add("opacity-50", "cursor-not-allowed");
+          startBtn.innerHTML = `<span>🔒 Formulir Ditutup</span>`;
+        }
+      } else {
+        if (lockBanner) lockBanner.classList.add("hidden");
+        if (startBtn) {
+          startBtn.disabled = false;
+          startBtn.classList.remove("opacity-50", "cursor-not-allowed");
+        }
+      }
+    }
+
     function renderConfigHeader() {
       const title = appConfig["Judul_Form"] || (currentFormMeta && currentFormMeta.judulForm) || `Penilaian Presentasi ${activeFormId}`;
       const matkul = appConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || "Mata Kuliah";
@@ -3427,6 +3514,7 @@ function normalizeMediaList(fieldOrMedia) {
       document.getElementById("inputNilaiNumber").min = minVal;
       document.getElementById("inputNilaiNumber").max = maxVal;
       updateScoreBadge(document.getElementById("inputNilaiNumber").value || 85);
+      evaluateFormScheduleStatus();
 
       // Dynamic Role & Group Labels (Inline Editable Sync)
       const optMhs = document.querySelector('#selectPeranPenilai option[value="Mahasiswa"]');
@@ -4488,6 +4576,46 @@ function normalizeMediaList(fieldOrMedia) {
         showToast("Pilih kelompok yang dinilai!", "warning");
         updateStepUI(2);
         return;
+      }
+
+      // 🛡️ INTEGRITY GUARD 1: Cegah Penilaian Kelompok Sendiri (Self-Evaluation Guard)
+      const antiSelfEval = appConfig && appConfig["Cegah_Penilaian_Diri"] !== false && appConfig["Cegah_Penilaian_Diri"] !== "false";
+      if (antiSelfEval && currentEvaluatorRole === 'Mahasiswa') {
+        const studentNimClean = (nim || "").replace(/\s+/g, "").trim().toLowerCase();
+        const studentNamaClean = (nama || "").trim().toLowerCase();
+        const ownStudent = (allStudentsData || []).find(s => 
+          (s.nim && String(s.nim).replace(/\s+/g, "").trim().toLowerCase() === studentNimClean) || 
+          (s.name && String(s.name).trim().toLowerCase() === studentNamaClean)
+        );
+
+        if (ownStudent && ownStudent.kelompok && selectedGroupObj && selectedGroupObj.name.toLowerCase() === ownStudent.kelompok.toLowerCase()) {
+          showToast(`Sesuai aturan integritas, Anda tidak dapat menilai kelompok Anda sendiri (${ownStudent.kelompok}).`, "error");
+          updateStepUI(2);
+          return;
+        }
+      }
+
+      // 🛡️ INTEGRITY GUARD 2: Kunci Respons Ganda (Single Submission Lock)
+      const singleSubmissionLock = appConfig && appConfig["Kunci_Respons_Ganda"] !== false && appConfig["Kunci_Respons_Ganda"] !== "false";
+      if (singleSubmissionLock && currentEvaluatorRole === 'Mahasiswa' && selectedGroupObj) {
+        const sb = getSupabaseClient();
+        if (sb && nim && nim !== "-") {
+          try {
+            const { data: existingResp, error: checkErr } = await sb.from('pgsd_responses')
+              .select('id_respons')
+              .eq('form_id', activeFormId)
+              .eq('nim_penilai', nim)
+              .eq('kelompok_dinilai', selectedGroupObj.name)
+              .limit(1);
+
+            if (!checkErr && existingResp && existingResp.length > 0) {
+              showToast(`Anda sudah pernah mengirimkan penilaian untuk ${selectedGroupObj.name}. Respons ganda tidak diizinkan.`, "error");
+              return;
+            }
+          } catch(dupErr) {
+            console.warn("Duplicate check fallback notice:", dupErr);
+          }
+        }
       }
       if (document.getElementById("stepSection_3")?.querySelector('#presentersGrid') && selectedBestPresenters.length === 0) {
         showToast("Pilih minimal 1 orang presentator terbaik!", "warning");

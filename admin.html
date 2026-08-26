@@ -642,6 +642,75 @@
             </button>
           </div>
         </div>
+                <!-- 📊 PELACAK PARTISIPASI & MAHASISWA BELUM MENILAI (ATTENDANCE TRACKER) -->
+        <div class="bg-white rounded-xl sm:rounded-2xl border border-zinc-200 p-3.5 sm:p-5 shadow-xs space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 pb-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center font-bold text-base shrink-0 shadow-2xs">
+                📊
+              </div>
+              <div>
+                <h3 class="text-xs sm:text-base font-bold text-zinc-900">Pelacak Partisipasi &amp; Pengisian Mahasiswa</h3>
+                <p class="text-[10.5px] sm:text-xs text-zinc-500 mt-0.5">Pantau mahasiswa yang sudah vs belum mengisi form penilaian peer-assessment.</p>
+              </div>
+            </div>
+
+            <!-- Blast WA Reminder Button -->
+            <button 
+              type="button" 
+              onclick="copyWhatsAppAttendanceReminder()" 
+              class="px-3 sm:px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition cursor-pointer shrink-0 active:scale-98"
+              title="Salin draf teks pengingat WhatsApp lengkap dengan daftar nama mahasiswa yang belum mengisi"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+              <span>📋 Salin Pengingat WhatsApp</span>
+            </button>
+          </div>
+
+          <!-- Progress Bar & Quick Stats -->
+          <div class="bg-zinc-50 rounded-xl border border-zinc-200/80 p-3 sm:p-4 space-y-2.5">
+            <div class="flex items-center justify-between text-xs font-semibold">
+              <span class="text-zinc-700 flex items-center gap-1.5">
+                <span>Tingkat Partisipasi Kelas:</span>
+                <span id="trackerParticipationPercent" class="font-mono font-bold text-emerald-700">0%</span>
+              </span>
+              <div class="flex items-center gap-2 text-[11px] font-mono">
+                <span class="text-emerald-700 font-bold bg-emerald-100/70 px-2 py-0.5 rounded-md" id="trackerCountSubmitted">🟢 Sudah: 0</span>
+                <span class="text-rose-700 font-bold bg-rose-100/70 px-2 py-0.5 rounded-md" id="trackerCountMissing">🔴 Belum: 0</span>
+              </div>
+            </div>
+
+            <!-- Visual Progress Bar -->
+            <div class="w-full bg-zinc-200 h-2.5 rounded-full overflow-hidden shadow-inner flex">
+              <div id="trackerProgressBar" class="bg-emerald-500 h-full transition-all duration-500 rounded-full" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <!-- Student Roster Attendance Filter & Table -->
+          <div class="space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
+              <div class="flex items-center gap-1 bg-zinc-100 p-1 rounded-xl w-fit">
+                <button type="button" onclick="setAttendanceTrackerFilter('ALL')" id="btnTrackerFilter_ALL" class="px-2.5 py-1 rounded-lg font-bold bg-white text-zinc-900 shadow-2xs cursor-pointer text-xs transition">Semua (<span id="countPill_ALL">0</span>)</button>
+                <button type="button" onclick="setAttendanceTrackerFilter('MISSING')" id="btnTrackerFilter_MISSING" class="px-2.5 py-1 rounded-lg font-medium text-rose-700 hover:bg-white/60 cursor-pointer text-xs transition">Belum Menilai (<span id="countPill_MISSING">0</span>)</button>
+                <button type="button" onclick="setAttendanceTrackerFilter('SUBMITTED')" id="btnTrackerFilter_SUBMITTED" class="px-2.5 py-1 rounded-lg font-medium text-emerald-700 hover:bg-white/60 cursor-pointer text-xs transition">Sudah Menilai (<span id="countPill_SUBMITTED">0</span>)</button>
+              </div>
+
+              <input 
+                type="text" 
+                id="trackerSearchInput" 
+                oninput="renderAdminAttendanceTracker()" 
+                placeholder="Cari nama atau NIM mahasiswa..." 
+                class="px-3 py-1.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none bg-zinc-50 focus:bg-white transition max-w-xs w-full"
+              >
+            </div>
+
+            <!-- Attendance List Container -->
+            <div id="attendanceTrackerListContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-72 overflow-y-auto p-1 border border-zinc-100 rounded-xl bg-zinc-50/50">
+              <!-- Dynamically populated via renderAdminAttendanceTracker() -->
+            </div>
+          </div>
+        </div>
+
         <div class="bg-white rounded-xl border border-zinc-200 p-3.5 sm:p-5 shadow-xs space-y-3 sm:space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-zinc-100 pb-3">
             <div>
@@ -970,6 +1039,146 @@
               <input type="checkbox" id="toggleWorkspaceFormStatus_config" onchange="handleWorkspaceStatusToggle(this.checked)" class="sr-only peer" checked>
               <div class="w-12 h-6.5 bg-zinc-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5.5 after:w-5.5 after:transition-all peer-checked:bg-emerald-600"></div>
             </label>
+          </div>
+        </div>
+
+                <!-- JADWAL & BATAS WAKTU AKSES FORMULIR (SCHEDULE & DEADLINE) -->
+        <div class="bg-white rounded-xl sm:rounded-2xl border border-zinc-200/90 p-3.5 sm:p-6 shadow-xs space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 pb-3.5">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center font-bold text-base shrink-0 shadow-2xs">
+                ⏱️
+              </div>
+              <div>
+                <h3 class="text-xs sm:text-base font-bold text-zinc-900">Jadwal &amp; Batas Waktu Akses</h3>
+                <p class="text-[10.5px] sm:text-xs text-zinc-500 mt-0.5">Atur jadwal pembukaan otomatis, batas akhir pengisian, dan kuota respons.</p>
+              </div>
+            </div>
+
+            <!-- Toggle Switch Jadwal Aktif -->
+            <div class="flex items-center gap-2 self-end sm:self-auto shrink-0">
+              <span class="text-[11px] font-semibold text-zinc-600">Jadwal Otomatis:</span>
+              <label class="relative inline-flex items-center cursor-pointer select-none">
+                <input type="checkbox" id="cfg_Jadwal_Aktif" onchange="handleScheduleToggle(this.checked); handleConfigInputAutoSave();" class="sr-only peer">
+                <div class="w-11 h-6 bg-zinc-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Schedule Fields Container (Visible when toggle active) -->
+          <div id="scheduleFieldsContainer" class="space-y-3.5 text-xs pt-1 transition-all duration-200">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+              <div class="space-y-1">
+                <label for="cfg_Jadwal_Mulai" class="block font-semibold text-zinc-700">Waktu Mulai Dibuka:</label>
+                <input 
+                  type="datetime-local" 
+                  id="cfg_Jadwal_Mulai" 
+                  onchange="handleConfigInputAutoSave()"
+                  class="w-full px-3 py-2 rounded-xl border border-zinc-300 bg-white text-xs outline-none focus:border-amber-500 transition shadow-2xs font-mono"
+                >
+                <p class="text-[10px] text-zinc-400">Kosongkan jika langsung dibuka sekarang.</p>
+              </div>
+
+              <div class="space-y-1">
+                <label for="cfg_Jadwal_Selesai" class="block font-semibold text-zinc-700">Waktu Batas Tutup (Tenggat):</label>
+                <input 
+                  type="datetime-local" 
+                  id="cfg_Jadwal_Selesai" 
+                  onchange="handleConfigInputAutoSave()"
+                  class="w-full px-3 py-2 rounded-xl border border-zinc-300 bg-white text-xs outline-none focus:border-amber-500 transition shadow-2xs font-mono"
+                >
+                <p class="text-[10px] text-zinc-400">Formulir otomatis tertutup setelah jam ini.</p>
+              </div>
+
+              <div class="space-y-1">
+                <label for="cfg_Batas_Maksimal_Respons" class="block font-semibold text-zinc-700">Batas Kuota Respons (Opsional):</label>
+                <input 
+                  type="number" 
+                  id="cfg_Batas_Maksimal_Respons" 
+                  min="0"
+                  step="1"
+                  placeholder="0 (Tanpa Batas)" 
+                  oninput="handleConfigInputAutoSave()"
+                  class="w-full px-3 py-2 rounded-xl border border-zinc-300 bg-white text-xs outline-none focus:border-amber-500 transition shadow-2xs font-mono"
+                >
+                <p class="text-[10px] text-zinc-400">Tutup otomatis jika mencapai jumlah ini.</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-1">
+              <div class="space-y-1">
+                <label for="cfg_Pesan_Form_Belum_Buka" class="block font-semibold text-zinc-700">Pesan Saat Form Belum Dibuka:</label>
+                <textarea 
+                  id="cfg_Pesan_Form_Belum_Buka" 
+                  rows="2"
+                  oninput="handleConfigInputAutoSave()"
+                  placeholder="Formulir penilaian belum dibuka. Perkuliahan akan dimulai sesuai jadwal." 
+                  class="w-full px-3 py-2 rounded-xl border border-zinc-300 bg-white text-xs outline-none focus:border-amber-500 transition shadow-2xs resize-none"
+                ></textarea>
+              </div>
+
+              <div class="space-y-1">
+                <label for="cfg_Pesan_Form_Ditutup" class="block font-semibold text-zinc-700">Pesan Saat Form Sudah Ditutup:</label>
+                <textarea 
+                  id="cfg_Pesan_Form_Ditutup" 
+                  rows="2"
+                  oninput="handleConfigInputAutoSave()"
+                  placeholder="Sesi penilaian telah berakhir dan batas waktu telah ditutup. Terima kasih atas partisipasi Anda." 
+                  class="w-full px-3 py-2 rounded-xl border border-zinc-300 bg-white text-xs outline-none focus:border-amber-500 transition shadow-2xs resize-none"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- INTEGRITAS & ATURAN PENILAIAN (ANTI-FRAUD & INTEGRITY RULES) -->
+        <div class="bg-white rounded-xl sm:rounded-2xl border border-zinc-200/90 p-3.5 sm:p-6 shadow-xs space-y-4">
+          <div class="border-b border-zinc-100 pb-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-200 flex items-center justify-center font-bold text-base shrink-0 shadow-2xs">
+                🛡️
+              </div>
+              <div>
+                <h3 class="text-xs sm:text-base font-bold text-zinc-900">Integritas &amp; Aturan Penilaian</h3>
+                <p class="text-[10.5px] sm:text-xs text-zinc-500 mt-0.5">Cegah bias penilaian dan amankan integritas peer-assessment antar kelompok.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs">
+            <!-- Rule 1: Anti-Self Evaluation -->
+            <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 flex items-start justify-between gap-3">
+              <div class="space-y-1">
+                <h4 class="font-bold text-zinc-900 text-xs flex items-center gap-1.5">
+                  <span>🚫</span>
+                  <span>Cegah Penilaian Diri Sendiri</span>
+                </h4>
+                <p class="text-[11px] text-zinc-500 leading-relaxed">
+                  Mahasiswa otomatis tidak dapat memilih atau menilai kelompoknya sendiri saat mengisi evaluasi.
+                </p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer select-none shrink-0 mt-0.5">
+                <input type="checkbox" id="cfg_Cegah_Penilaian_Diri" onchange="handleConfigInputAutoSave()" class="sr-only peer" checked>
+                <div class="w-10 h-5.5 bg-zinc-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4.5 after:w-4.5 after:transition-all peer-checked:bg-indigo-600"></div>
+              </label>
+            </div>
+
+            <!-- Rule 2: Single Submission Lock -->
+            <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 flex items-start justify-between gap-3">
+              <div class="space-y-1">
+                <h4 class="font-bold text-zinc-900 text-xs flex items-center gap-1.5">
+                  <span>🔒</span>
+                  <span>Kunci Respons Ganda</span>
+                </h4>
+                <p class="text-[11px] text-zinc-500 leading-relaxed">
+                  Satu NIM hanya diperbolehkan mengirimkan tepat 1 kali penilaian untuk kelompok target yang sama.
+                </p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer select-none shrink-0 mt-0.5">
+                <input type="checkbox" id="cfg_Kunci_Respons_Ganda" onchange="handleConfigInputAutoSave()" class="sr-only peer" checked>
+                <div class="w-10 h-5.5 bg-zinc-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4.5 after:w-4.5 after:transition-all peer-checked:bg-indigo-600"></div>
+              </label>
+            </div>
           </div>
         </div>
 
@@ -6459,15 +6668,23 @@ function getOrCreateFolder(folderName) {
         "Pembuat_Web_Prefix", "Pembuat_Web_Nama", "Pembuat_Web_Nim",
         "Nilai_Kelompok_Min", "Nilai_Kelompok_Max",
         "Maksimal_Pilihan_Presentator_Terbaik", "Maksimal_Karakter_Evaluasi",
-        "Tampilkan_Ulasan_Publik", "Kewajiban_Menilai_Penyaji"
+        "Tampilkan_Ulasan_Publik", "Kewajiban_Menilai_Penyaji",
+        "Jadwal_Aktif", "Jadwal_Mulai", "Jadwal_Selesai", "Batas_Maksimal_Respons",
+        "Pesan_Form_Belum_Buka", "Pesan_Form_Ditutup",
+        "Cegah_Penilaian_Diri", "Kunci_Respons_Ganda"
       ];
 
       keys.forEach(k => {
         const el = document.getElementById(`cfg_${k}`);
         if (el && adminAppConfig[k] !== undefined) {
-          el.value = adminAppConfig[k];
+          if (el.type === 'checkbox') {
+            el.checked = adminAppConfig[k] === true || adminAppConfig[k] === 'true';
+          } else {
+            el.value = adminAppConfig[k];
+          }
         }
       });
+      handleScheduleToggle(document.getElementById('cfg_Jadwal_Aktif')?.checked || false);
 
       if (document.getElementById('cfg_Judul_Form')) {
         updateLiveMathBadge(adminAppConfig["Judul_Form"] || "", 'liveMathCfgJudul');
@@ -6524,13 +6741,20 @@ function getOrCreateFolder(folderName) {
         "Pembuat_Web_Prefix", "Pembuat_Web_Nama", "Pembuat_Web_Nim",
         "Nilai_Kelompok_Min", "Nilai_Kelompok_Max",
         "Maksimal_Pilihan_Presentator_Terbaik", "Maksimal_Karakter_Evaluasi",
-        "Tampilkan_Ulasan_Publik", "Kewajiban_Menilai_Penyaji"
+        "Tampilkan_Ulasan_Publik", "Kewajiban_Menilai_Penyaji",
+        "Jadwal_Aktif", "Jadwal_Mulai", "Jadwal_Selesai", "Batas_Maksimal_Respons",
+        "Pesan_Form_Belum_Buka", "Pesan_Form_Ditutup",
+        "Cegah_Penilaian_Diri", "Kunci_Respons_Ganda"
       ];
 
       keys.forEach(k => {
         const el = document.getElementById(`cfg_${k}`);
         if (el) {
-          adminAppConfig[k] = el.value;
+          if (el.type === 'checkbox') {
+            adminAppConfig[k] = el.checked;
+          } else {
+            adminAppConfig[k] = el.value;
+          }
         }
       });
 
@@ -9672,6 +9896,237 @@ function getOrCreateFolder(folderName) {
       }
     }
 
+        // =========================================================================
+    // JADWAL AKSES & PELACAK PARTISIPASI MAHASISWA (ATTENDANCE TRACKER)
+    // =========================================================================
+    let currentAttendanceFilter = 'ALL';
+
+    function handleScheduleToggle(enabled) {
+      const container = document.getElementById('scheduleFieldsContainer');
+      if (!container) return;
+      if (enabled) {
+        container.classList.remove('opacity-40', 'pointer-events-none');
+      } else {
+        container.classList.add('opacity-40', 'pointer-events-none');
+      }
+    }
+
+    function setAttendanceTrackerFilter(filter) {
+      currentAttendanceFilter = filter;
+      ['ALL', 'MISSING', 'SUBMITTED'].forEach(f => {
+        const btn = document.getElementById(`btnTrackerFilter_${f}`);
+        if (btn) {
+          if (f === filter) {
+            btn.className = "px-2.5 py-1 rounded-lg font-bold bg-white text-zinc-900 shadow-2xs cursor-pointer text-xs transition";
+          } else {
+            btn.className = "px-2.5 py-1 rounded-lg font-medium text-zinc-500 hover:bg-white/60 cursor-pointer text-xs transition";
+          }
+        }
+      });
+      renderAdminAttendanceTracker();
+    }
+
+    function getAllRosterStudents() {
+      const students = [];
+      (adminMasterGroups || []).forEach(g => {
+        (g.members || []).forEach(m => {
+          students.push({
+            nim: (m.nim || "").trim(),
+            nama: (m.name || m.nama || "").trim(),
+            kelompok: g.name || "Kelompok",
+            role: m.status || m.role || 'Anggota'
+          });
+        });
+      });
+      return students;
+    }
+
+    function renderAdminAttendanceTracker() {
+      const listContainer = document.getElementById("attendanceTrackerListContainer");
+      if (!listContainer) return;
+      listContainer.innerHTML = "";
+
+      const allStudents = getAllRosterStudents();
+      const searchQuery = (document.getElementById("trackerSearchInput")?.value || "").trim().toLowerCase();
+
+      let submittedCount = 0;
+      let missingCount = 0;
+
+      const studentStatuses = allStudents.map(student => {
+        const studentNimClean = student.nim.toLowerCase();
+        const studentNamaClean = student.nama.toLowerCase();
+
+        // Find responses sent by this student
+        const matchedResponses = (adminResponsesList || []).filter(r => {
+          const rNim = (r.nim || "").trim().toLowerCase();
+          const rNama = (r.namaPenilai || "").trim().toLowerCase();
+          return (rNim && studentNimClean && rNim === studentNimClean) || (rNama && studentNamaClean && rNama === studentNamaClean);
+        });
+
+        const isSubmitted = matchedResponses.length > 0;
+        if (isSubmitted) submittedCount++;
+        else missingCount++;
+
+        return {
+          ...student,
+          isSubmitted,
+          submittedCount: matchedResponses.length,
+          ratedGroups: matchedResponses.map(r => r.kelompok)
+        };
+      });
+
+      // Update counters & progress bar
+      const totalStudents = allStudents.length;
+      const percent = totalStudents > 0 ? Math.round((submittedCount / totalStudents) * 100) : 0;
+
+      const elPercent = document.getElementById("trackerParticipationPercent");
+      const elCountSub = document.getElementById("trackerCountSubmitted");
+      const elCountMis = document.getElementById("trackerCountMissing");
+      const elBar = document.getElementById("trackerProgressBar");
+
+      const pillAll = document.getElementById("countPill_ALL");
+      const pillMis = document.getElementById("countPill_MISSING");
+      const pillSub = document.getElementById("countPill_SUBMITTED");
+
+      if (elPercent) elPercent.textContent = `${percent}%`;
+      if (elCountSub) elCountSub.textContent = `🟢 Sudah: ${submittedCount}`;
+      if (elCountMis) elCountMis.textContent = `🔴 Belum: ${missingCount}`;
+      if (elBar) elBar.style.width = `${percent}%`;
+
+      if (pillAll) pillAll.textContent = totalStudents;
+      if (pillMis) pillMis.textContent = missingCount;
+      if (pillSub) pillSub.textContent = submittedCount;
+
+      // Filter and render cards
+      let visibleStudents = studentStatuses.filter(s => {
+        if (currentAttendanceFilter === 'MISSING' && s.isSubmitted) return false;
+        if (currentAttendanceFilter === 'SUBMITTED' && !s.isSubmitted) return false;
+        if (searchQuery) {
+          const text = `${s.nama} ${s.nim} ${s.kelompok}`.toLowerCase();
+          if (!text.includes(searchQuery)) return false;
+        }
+        return true;
+      });
+
+      if (visibleStudents.length === 0) {
+        listContainer.innerHTML = `
+          <div class="col-span-full p-4 text-center text-xs text-zinc-400">
+            Tidak ada mahasiswa yang sesuai dengan filter saat ini.
+          </div>
+        `;
+        return;
+      }
+
+      visibleStudents.forEach((st, idx) => {
+        const card = document.createElement("div");
+        card.className = `p-3 rounded-xl border flex items-center justify-between gap-2.5 transition ${st.isSubmitted ? 'bg-emerald-50/50 border-emerald-200' : 'bg-white border-zinc-200 shadow-2xs'}`;
+
+        card.innerHTML = `
+          <div class="min-w-0 flex items-center gap-2.5">
+            <span class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold font-mono shrink-0 ${st.isSubmitted ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+              ${st.isSubmitted ? '✓' : '✕'}
+            </span>
+            <div class="min-w-0">
+              <h5 class="font-bold text-xs text-zinc-900 truncate">${st.nama}</h5>
+              <div class="flex items-center gap-1.5 text-[10px] text-zinc-500 font-mono">
+                <span>${st.nim || '-'}</span>
+                <span>•</span>
+                <span class="font-sans font-semibold text-zinc-600">${st.kelompok}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="shrink-0 text-right">
+            ${st.isSubmitted 
+              ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-emerald-100 text-emerald-800 border border-emerald-200/80 block">
+                  ${st.submittedCount} Nilai
+                 </span>`
+              : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-rose-100 text-rose-800 border border-rose-200/80 block">
+                  Belum
+                 </span>`
+            }
+          </div>
+        `;
+
+        listContainer.appendChild(card);
+      });
+    }
+
+    function copyWhatsAppAttendanceReminder() {
+      const allStudents = getAllRosterStudents();
+      const missingStudents = allStudents.filter(student => {
+        const studentNimClean = student.nim.toLowerCase();
+        const studentNamaClean = student.nama.toLowerCase();
+        const hasSubmitted = (adminResponsesList || []).some(r => {
+          const rNim = (r.nim || "").trim().toLowerCase();
+          const rNama = (r.namaPenilai || "").trim().toLowerCase();
+          return (rNim && studentNimClean && rNim === studentNimClean) || (rNama && studentNamaClean && rNama === studentNamaClean);
+        });
+        return !hasSubmitted;
+      });
+
+      const judulForm = adminAppConfig["Judul_Form"] || currentFormMeta?.judulForm || "Penilaian Peer-Assessment";
+      const mataKuliah = adminAppConfig["Mata_Kuliah"] || currentFormMeta?.mataKuliah || "Mata Kuliah";
+      const kelas = adminAppConfig["Kelas"] || currentFormMeta?.kelas || "5E";
+      const dosen = adminAppConfig["Dosen_Pengampu"] || currentFormMeta?.dosen || "Dosen Pengampu";
+
+      const deadline = adminAppConfig["Jadwal_Aktif"] && adminAppConfig["Jadwal_Selesai"]
+        ? new Date(adminAppConfig["Jadwal_Selesai"]).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' }) + ' WITA'
+        : "Segera sebelum perkuliahan berakhir";
+
+      const formUrl = new URL(window.location.href);
+      formUrl.pathname = formUrl.pathname.replace(/admin\.html$/i, "index.html");
+      if (!formUrl.pathname.endsWith("index.html")) formUrl.pathname = formUrl.pathname.replace(/\/?$/, "/index.html");
+      formUrl.search = `?id=${encodeURIComponent(currentFormId || DEFAULT_PRIMARY_FORM_ID)}`;
+
+      let message = `📢 *PENGINGAT PENGISIAN PENILAIAN PEER-ASSESSMENT*
+`;
+      message += `----------------------------------------
+`;
+      message += `📖 *Mata Kuliah:* ${mataKuliah}
+`;
+      message += `🏫 *Kelas:* ${kelas} | *Dosen:* ${dosen}
+`;
+      message += `📝 *Formulir:* ${judulForm}
+`;
+      message += `⏱️ *Batas Waktu:* ${deadline}
+`;
+      message += `----------------------------------------
+
+`;
+
+      if (missingStudents.length === 0) {
+        message += `🎉 *Luar biasa!* Seluruh mahasiswa (${allStudents.length} orang) telah menyelesaikan pengisian penilaian peer-assessment. Terima kasih!`;
+      } else {
+        message += `Berikut daftar *${missingStudents.length} mahasiswa* yang *belum mengisi* formulir penilaian:
+
+`;
+        missingStudents.forEach((st, idx) => {
+          message += `${idx + 1}. ${st.nama} (${st.nim}) - ${st.kelompok}
+`;
+        });
+        message += `
+Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi berikut:
+`;
+        message += `🔗 *${formUrl.toString()}*
+
+`;
+        message += `Terima kasih atas kerja sama dan kedisiplinan rekan-rekan semua. 🙏`;
+      }
+
+      navigator.clipboard.writeText(message).then(() => {
+        showAdminToast(`Draf pesan WhatsApp (${missingStudents.length} mahasiswa belum mengisi) berhasil disalin!`, "success");
+      }).catch(err => {
+        const textarea = document.createElement("textarea");
+        textarea.value = message;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+        showAdminToast(`Draf pesan WhatsApp (${missingStudents.length} mahasiswa) berhasil disalin!`, "success");
+      });
+    }
+
     function renderAdminResponsesList() {
       const container = document.getElementById("adminResponsesCardsContainer");
       const emptyEl = document.getElementById("emptyAdminResponses");
@@ -9736,6 +10191,7 @@ function getOrCreateFolder(folderName) {
 
       if (visibleCount === 0) emptyEl.classList.remove("hidden");
       else emptyEl.classList.add("hidden");
+      renderAdminAttendanceTracker();
     }
 
     async function deleteSingleResponse(idRespons, rowIndex) {
