@@ -4,6 +4,19 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.21] - 2026-08-27
+
+### 🚀 Konsolidasi & Verifikasi Arsitektur Modular Mandiri
+- **✨ Arsitektur Modular Terverifikasi:**
+  - Mengonsolidasikan direktori `src/` menjadi modul terisolasi per aplikasi: `src/admin/admin.js`, `src/admin/admin.css`, `src/student/student.js`, dan `src/student/student.css`.
+  - Memastikan seluruh modul JavaScript 100% valid secara sintaksis tanpa broken closures, unclosed braces, atau runtime scope issues.
+- **⚡ Precache Service Worker Sinkron:**
+  - Menyelaraskan daftar precache `sw.js` dengan berkas aset aktif di `/src/` dan root HTML.
+- **🛡️ Pengujian Otomatis Zero-Error:**
+  - Memvalidasi pemuatan halaman live di peramban tanpa adanya error konsol sintaksis.
+
+---
+
 ## [2.4.20] - 2026-08-27
 
 ### ♻️ Modularisasi Lanjutan, Optimasi Caching & PWA Service Worker

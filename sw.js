@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
  * sw.js — Service Worker | Platform Penilaian FKIP ULM
  * Strategy:
  *   - HTML: Network-first (always fresh)
@@ -6,7 +6,7 @@
  *   - Assets: Stale-while-revalidate
  * ============================================================ */
 
-const CACHE_VERSION = 'v2.4.19';
+const CACHE_VERSION = 'v2.4.21';
 const STATIC_CACHE  = `pgsd-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `pgsd-runtime-${CACHE_VERSION}`;
 
@@ -14,32 +14,13 @@ const RUNTIME_CACHE = `pgsd-runtime-${CACHE_VERSION}`;
 const PRECACHE_MODULES = [
   '/',
   '/index.html',
+  '/admin',
+  '/admin.html',
   '/manifest.json',
-  // Shared modules
-  '/src/shared/config.js',
-  '/src/shared/math.js',
-  '/src/shared/rich-text.js',
-  '/src/shared/keyboard.js',
-  '/src/shared/styles.css',
-  // Admin modules
   '/src/admin/admin.css',
-  '/src/admin/auth.js',
-  '/src/admin/ui.js',
-  '/src/admin/forms.js',
-  '/src/admin/groups-core.js',
-  '/src/admin/groups-import.js',
-  '/src/admin/questions-core.js',
-  '/src/admin/questions-media.js',
-  '/src/admin/responses.js',
-  // Student modules
+  '/src/admin/admin.js',
   '/src/student/index.css',
-  '/src/student/auth.js',
-  '/src/student/form.js',
-  '/src/student/submission.js',
-  '/src/student/recap.js',
-  '/src/student/print.js',
-  '/src/student/app.js',
-  // Assets
+  '/src/student/student.js',
   '/assets/logo-ulm.png',
   '/assets/icon-192.png',
   '/assets/icon-512.png',
