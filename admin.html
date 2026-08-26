@@ -1770,30 +1770,30 @@
   <!-- ========================================================================= -->
   <!-- MODAL: BUAT FORMULIR BARU (CREATION CONFIRMATION / WIZARD) -->
   <!-- ========================================================================= -->
-  <div id="modalCreateForm" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target === this) closeCreateFormModal()">
-    <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 space-y-4 fade-enter max-h-[90vh] overflow-y-auto custom-scrollbar">
-      
-      <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
+  <div id="modalCreateForm" class="hidden fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4" onclick="if(event.target === this) closeCreateFormModal()">
+    <div class="bg-white rounded-t-3xl sm:rounded-2xl max-w-sm w-full shadow-2xl border border-zinc-200/80 fade-enter overflow-hidden">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between px-5 pt-5 pb-4 border-b border-zinc-100">
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          <div class="w-8 h-8 rounded-xl bg-zinc-900 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
             </svg>
           </div>
           <div>
-            <h3 class="font-bold text-sm sm:text-base text-zinc-900">Buat Formulir Baru</h3>
-            <p class="text-[11px] text-zinc-500">Pilih opsi awal formulir penilaian baru.</p>
+            <h3 class="font-bold text-sm text-zinc-900">Formulir Baru</h3>
+            <p class="text-[11px] text-zinc-400 mt-0.5">Buat formulir penilaian baru</p>
           </div>
         </div>
-        <button type="button" onclick="closeCreateFormModal()" class="w-8 h-8 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center cursor-pointer">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
+        <button type="button" onclick="closeCreateFormModal()" class="w-8 h-8 rounded-xl hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center cursor-pointer transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
 
-      <form id="formWizardCreate" onsubmit="handleCreateFormSubmit(event)" class="space-y-3.5 text-xs">
-        <!-- Hidden inputs for fallback compatibility -->
+      <!-- Body -->
+      <form id="formWizardCreate" onsubmit="handleCreateFormSubmit(event)" class="px-5 py-5 space-y-4">
+        <!-- Hidden inputs -->
         <input type="hidden" id="wiz_Judul_Form" value="Formulir Penilaian Baru">
         <input type="hidden" id="wiz_Mata_Kuliah" value="-">
         <input type="hidden" id="wiz_Dosen" value="-">
@@ -1801,65 +1801,45 @@
         <input type="hidden" id="wiz_Jurusan" value="PGSD">
         <input type="hidden" id="wiz_Sesi" value="Minggu 1">
         <input type="hidden" id="wiz_Form_Slug" value="">
+        <input type="hidden" name="wizRosterOption" value="empty">
 
-        <!-- Custom Short ID (4-5 Karakter) & PIN Preview -->
-        <div class="p-3.5 bg-zinc-50 rounded-xl border border-zinc-200 space-y-2">
+        <!-- PIN Field -->
+        <div class="space-y-2">
           <div class="flex items-center justify-between">
-            <span class="font-semibold text-zinc-700">Kode Akses PIN Formulir:</span>
-            <button type="button" onclick="generateRandomWizPin()" class="text-[11px] text-indigo-600 hover:text-indigo-800 font-semibold cursor-pointer">
-              Acak Kode Baru
+            <label class="text-xs font-bold text-zinc-700">Kode PIN Akses</label>
+            <button type="button" onclick="generateRandomWizPin()" class="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 cursor-pointer transition">
+              Acak
             </button>
           </div>
-          <div>
-            <input 
-              type="text" 
-              id="wiz_Form_Id" 
-              maxlength="5" 
-              required 
-              oninput="handleWizTitleInput()"
-              class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 font-mono font-bold text-sm uppercase focus:border-zinc-900 outline-none bg-white tracking-widest text-indigo-700 text-center"
-            >
-          </div>
-          <p class="text-[10.5px] text-zinc-500 text-center">Mahasiswa dan penilai cukup memasukkan kode PIN ini atau membuka link: <code id="wizUrlPreview" class="text-indigo-600 font-semibold">/?id=...</code></p>
+          <input
+            type="text"
+            id="wiz_Form_Id"
+            maxlength="5"
+            required
+            oninput="handleWizTitleInput()"
+            placeholder="Contoh: BK5E"
+            class="w-full px-4 py-3 rounded-xl border border-zinc-200 font-mono font-bold text-lg uppercase text-center text-indigo-700 tracking-widest focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition bg-zinc-50 focus:bg-white"
+          >
+          <p class="text-[11px] text-zinc-400 text-center">
+            Mahasiswa akses via PIN atau link: <code id="wizUrlPreview" class="text-indigo-600 font-semibold">/?id=...</code>
+          </p>
         </div>
 
-        <!-- Opsi Template Roster -->
-        <div class="space-y-1.5 pt-1">
-          <label class="block font-semibold text-zinc-700">Pilihan Data Mahasiswa &amp; Kelompok:</label>
-          <div class="space-y-2">
-            <label class="flex items-start gap-2.5 p-3 rounded-xl border border-zinc-200 hover:bg-zinc-50 cursor-pointer transition">
-              <input type="radio" name="wizRosterOption" value="empty" checked class="mt-0.5 text-indigo-600">
-              <div>
-                <p class="font-semibold text-zinc-900 text-xs sm:text-sm">Mulai dari Formulir Kosong</p>
-                <p class="text-[11px] text-zinc-500 mt-0.5">Anda dapat mengisi nama kelompok dan mahasiswa secara manual nanti.</p>
-              </div>
-            </label>
-            <label class="flex items-start gap-2.5 p-3 rounded-xl border border-zinc-200 hover:bg-zinc-50 cursor-pointer transition">
-              <input type="radio" name="wizRosterOption" value="clone_default" class="mt-0.5 text-indigo-600">
-              <div>
-                <p class="font-semibold text-zinc-900 text-xs sm:text-sm">Gunakan Data Mahasiswa yang Ada (Salin dari Formulir Utama)</p>
-                <p class="text-[11px] text-zinc-500 mt-0.5">Menyalin otomatis daftar nama mahasiswa dan kelompok agar tidak perlu mengetik ulang.</p>
-              </div>
-            </label>
-          </div>
-        </div>
-
-        <div class="flex items-center justify-between gap-3 pt-3 border-t border-zinc-100">
-          <button type="button" onclick="closeCreateFormModal()" class="px-4 py-2.5 rounded-xl border border-zinc-200 hover:bg-zinc-50 text-zinc-700 font-medium cursor-pointer min-h-[44px]">
+        <!-- Actions -->
+        <div class="flex items-center gap-2.5 pt-1">
+          <button type="button" onclick="closeCreateFormModal()" class="flex-1 py-2.5 rounded-xl border border-zinc-200 hover:bg-zinc-50 text-zinc-600 text-xs font-semibold cursor-pointer transition">
             Batal
           </button>
-          <button 
-            type="submit" 
-            id="btnSubmitCreateForm" 
-            class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-xs flex items-center gap-1.5 transition active:scale-98 cursor-pointer min-h-[44px]"
-          >
-            <span>Buat Formulir Sekarang</span>
+          <button type="submit" id="btnSubmitCreateForm" class="flex-2 flex-grow-[2] py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold shadow-xs flex items-center justify-center gap-1.5 transition active:scale-98 cursor-pointer">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+            Buat Formulir
           </button>
         </div>
       </form>
 
     </div>
   </div>
+
 
   <!-- ========================================================================= -->
   <!-- MODAL: BAGIKAN FORMULIR (QR CODE, PIN 4-5 KARAKTER & TAUTAN) -->
