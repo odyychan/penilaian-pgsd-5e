@@ -4,6 +4,23 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.34] - 2026-08-26
+
+### 🚀 3 Fitur Esensial Mahasiswa: Pratinjau Sebelum Kirim, Pemulihan Draf Otomatis & Struk Bukti Digital ber-QR Code
+- **🔍 Pratinjau Ringkasan Sebelum Kirim (*Pre-Submit Review Modal*):**
+  - Menghadirkan modal konfirmasi sebelum data dikirim permanen (`#modalPreSubmitReview`) yang menyajikan ringkasan identitas penilai (Nama, NIM, Email), kelompok yang dinilai, skor angka, presentator terbaik, serta ulasan kualitatif.
+  - Dilengkapi tombol *[✏️ Edit Kembali]* untuk mengoreksi isian dan *[🚀 Ya, Kirim Penilaian Sekarang]* untuk konfirmasi akhir.
+- **💾 Pemulihan Draf Otomatis (*Smart Form Auto-Save & Restore Engine*):**
+  - Sistem otomatis menyimpan setiap ketikan dan pilihan formulir secara lokal (`saveStudentFormDraft`).
+  - Saat membuka kembali formulir atau terjadi *refresh* halaman/koneksi terputus, isian dipulihkan otomatis (`restoreStudentFormDraft`) dan memunculkan banner pemberitahuan `#studentDraftRestoreBanner` lengkap dengan tombol *[🗑️ Hapus Draf]*.
+  - Draf lokal otomatis dibersihkan saat penilaian berhasil terkirim.
+- **📥 Struk Bukti Penilaian Digital Resmi (*Digital Assessment Receipt with QR Code*):**
+  - Mengubah modal sukses (`#successModal`) menjadi **Kartu Tanda Terima Penilaian Resmi FKIP ULM** ber-ID Tiket unik (`PGSD-REC-...`), lencana "TERVERIFIKASI SISTEM", serta kode QR dinamis untuk validasi keabsahan data.
+  - **Unduh Struk PNG Beresolusi Tinggi:** Mengintegrasikan generator canvas offline (`downloadDigitalReceiptImage`) yang merender kartu bukti digital lengkap dan mengunduhnya ke galeri/unduhan perangkat mahasiswa.
+  - **Cetak Struk Resmi:** Menyediakan tombol cetak (`printDigitalReceipt`) yang dioptimalkan untuk lembar cetak fisik maupun simpan sebagai PDF.
+
+---
+
 ## [2.3.33] - 2026-08-26
 
 ### 🛡️ Sakelar Interaktif Integritas & Aturan Penilaian (*Integrity Rules Interactive Toggles*)

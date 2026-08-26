@@ -435,6 +435,21 @@
           </div>
         </div>
 
+        <!-- RESTORE DRAFT NOTIFICATION BANNER -->
+        <div id="studentDraftRestoreBanner" class="hidden p-3 rounded-xl bg-indigo-50/90 border border-indigo-200 text-xs text-indigo-900 flex items-center justify-between gap-2 transition-all duration-300 shadow-2xs">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="text-base shrink-0">💾</span>
+            <span class="truncate">Draf isian Anda sebelumnya telah dipulihkan otomatis.</span>
+          </div>
+          <button 
+            type="button" 
+            onclick="clearStudentFormDraft(true)"
+            class="px-2.5 py-1 rounded-lg bg-white hover:bg-rose-50 text-rose-600 hover:text-rose-700 border border-indigo-200 hover:border-rose-300 font-semibold text-[11px] shrink-0 transition cursor-pointer shadow-2xs"
+          >
+            🗑️ Hapus Draf
+          </button>
+        </div>
+
         <!-- FORM CONTAINER -->
         <form id="assessmentForm" onsubmit="handleFinalSubmit(event)" class="space-y-5">
           <div id="dynamicClientStagesContainer" class="space-y-5"></div>
@@ -972,33 +987,170 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- SUCCESS MODAL -->
+  <!-- MODAL: PRATINJAU & KONFIRMASI PENILAIAN SEBELUM KIRIM (PRE-SUBMIT REVIEW) -->
   <!-- ========================================================================= -->
-  <div id="successModal" class="hidden fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl max-w-sm w-full p-6 text-center space-y-4 shadow-xl border border-zinc-200">
-      <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto border border-emerald-200">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
-        </svg>
+  <div id="modalPreSubmitReview" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-4 sm:p-6 shadow-2xl border border-zinc-200 space-y-4 my-auto max-h-[92vh] flex flex-col">
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-zinc-100 pb-3 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-200 flex items-center justify-center font-bold text-base shrink-0 shadow-2xs">
+            🔍
+          </div>
+          <div>
+            <h3 class="text-sm sm:text-base font-bold text-zinc-900 leading-tight">Konfirmasi &amp; Pratinjau Isian</h3>
+            <p class="text-[11px] text-zinc-500">Periksa kembali rincian penilaian Anda sebelum dikirim permanen.</p>
+          </div>
+        </div>
+        <button type="button" onclick="closePreSubmitReviewModal()" class="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition cursor-pointer">✕</button>
       </div>
-      <div>
-        <h3 class="text-base font-bold text-zinc-900">Penilaian Berhasil Dikirim</h3>
-        <p class="text-xs text-zinc-500 leading-relaxed mt-1" id="successModalMsg">
-          Data penilaian Anda telah tersimpan secara aman di Google Sheets.
-        </p>
+
+      <!-- Scrollable Review Content -->
+      <div id="preSubmitReviewContent" class="space-y-3.5 overflow-y-auto pr-1 text-xs text-zinc-700 flex-1">
+        <!-- Dynamic Review Cards generated via renderPreSubmitReviewContent() -->
       </div>
-      <div class="pt-2 flex flex-col gap-2">
+
+      <!-- Action Buttons Footer -->
+      <div class="pt-3 border-t border-zinc-100 flex flex-col sm:flex-row items-center justify-between gap-2.5 shrink-0">
         <button 
-          onclick="resetFormAndCloseModal()" 
-          class="w-full py-2.5 px-4 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 cursor-pointer"
+          type="button" 
+          onclick="closePreSubmitReviewModal()"
+          class="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition cursor-pointer flex items-center justify-center gap-1.5"
         >
-          Nilai Kelompok Lainnya
+          <span>✏️</span>
+          <span>Edit Kembali</span>
         </button>
         <button 
-          onclick="closeModalAndGoToRekap()" 
-          class="w-full py-2 px-4 rounded-lg border border-zinc-200 text-zinc-700 hover:bg-zinc-50 text-xs font-medium transition cursor-pointer"
+          type="button" 
+          id="btnConfirmFinalSubmit"
+          onclick="executeConfirmedFinalSubmit()"
+          class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white text-xs font-bold transition cursor-pointer shadow-md flex items-center justify-center gap-2"
         >
-          Lihat Rekapitulasi
+          <svg id="confirmFinalSubmitSpinner" class="w-4 h-4 animate-spin hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span>🚀 Ya, Kirim Penilaian Sekarang</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- DIGITAL ASSESSMENT RECEIPT MODAL (STRUK BUKTI PENILAIAN DIGITAL MAHASISWA) -->
+  <!-- ========================================================================= -->
+  <div id="successModal" class="hidden fixed inset-0 z-50 bg-zinc-950/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-4 sm:p-6 shadow-2xl border border-zinc-200 space-y-4 my-auto max-h-[95vh] flex flex-col">
+      
+      <!-- RECEIPT CONTAINER (TARGET CANVAS / UNDUH & CETAK) -->
+      <div id="digitalReceiptPrintArea" class="bg-linear-to-b from-zinc-50 to-white rounded-2xl border border-zinc-200 p-4 sm:p-5 space-y-3.5 shadow-2xs relative overflow-hidden text-left">
+        <!-- Watermark / Security Badge -->
+        <div class="flex items-center justify-between border-b border-zinc-200/80 pb-3">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-xs">
+              ✓
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="text-xs font-bold text-zinc-900">TANDA TERIMA PENILAIAN</span>
+                <span class="px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800 text-[9px] font-mono font-bold">TERVERIFIKASI</span>
+              </div>
+              <p class="text-[10px] text-zinc-500 font-mono mt-0.5" id="receiptIdText">PGSD-REC-BK5E-XXXX</p>
+            </div>
+          </div>
+          <div class="text-right hidden sm:block">
+            <span class="text-[10.5px] font-bold text-zinc-700 block">FKIP ULM</span>
+            <span class="text-[9px] text-zinc-400 font-mono">Peer-Assessment</span>
+          </div>
+        </div>
+
+        <!-- Receipt Main Details Grid -->
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div class="p-2.5 rounded-xl bg-white border border-zinc-200/70 space-y-0.5">
+            <span class="text-[10px] text-zinc-400 font-medium block">NIM Penilai:</span>
+            <p id="receiptNimPenilai" class="font-mono font-bold text-zinc-900 truncate">-</p>
+          </div>
+          <div class="p-2.5 rounded-xl bg-white border border-zinc-200/70 space-y-0.5">
+            <span class="text-[10px] text-zinc-400 font-medium block">Nama Penilai:</span>
+            <p id="receiptNamaPenilai" class="font-bold text-zinc-900 truncate">-</p>
+          </div>
+          <div class="p-2.5 rounded-xl bg-white border border-zinc-200/70 space-y-0.5">
+            <span class="text-[10px] text-zinc-400 font-medium block">Kelompok Dinilai:</span>
+            <p id="receiptKelompokDinilai" class="font-bold text-indigo-700 truncate">-</p>
+          </div>
+          <div class="p-2.5 rounded-xl bg-white border border-zinc-200/70 space-y-0.5">
+            <span class="text-[10px] text-zinc-400 font-medium block">Nilai yang Diberikan:</span>
+            <p id="receiptNilaiKelompok" class="font-mono font-bold text-emerald-700 truncate">-</p>
+          </div>
+        </div>
+
+        <!-- Timestamp & Subject Details -->
+        <div class="p-2.5 rounded-xl bg-zinc-100/80 border border-zinc-200/70 text-[11px] space-y-1">
+          <div class="flex items-center justify-between text-zinc-600">
+            <span>Mata Kuliah:</span>
+            <span id="receiptMataKuliah" class="font-semibold text-zinc-900 text-right truncate ml-2">-</span>
+          </div>
+          <div class="flex items-center justify-between text-zinc-600">
+            <span>Dosen Pengampu:</span>
+            <span id="receiptDosenPengampu" class="font-semibold text-zinc-900 text-right truncate ml-2">-</span>
+          </div>
+          <div class="flex items-center justify-between text-zinc-600 border-t border-zinc-200 pt-1 mt-1">
+            <span>Waktu Pengiriman:</span>
+            <span id="receiptTimestampWita" class="font-mono font-bold text-zinc-900 text-right">-</span>
+          </div>
+        </div>
+
+        <!-- QR Code Verification Section -->
+        <div class="flex items-center justify-between p-2.5 rounded-xl bg-white border border-zinc-200/80 gap-3">
+          <div class="space-y-0.5 min-w-0">
+            <span class="text-[10.5px] font-bold text-zinc-800 block">QR Verifikasi Keaslian</span>
+            <p class="text-[9.5px] text-zinc-500 leading-tight">Pindai kode QR untuk memverifikasi keabsahan tanda terima penilaian ini.</p>
+          </div>
+          <div id="receiptQrCodeBox" class="w-16 h-16 shrink-0 bg-white p-1 rounded-lg border border-zinc-300 flex items-center justify-center shadow-2xs">
+            <!-- Rendered dynamically via QR code SVG/canvas -->
+          </div>
+        </div>
+
+        <!-- Notice Message -->
+        <p class="text-[10px] text-center text-zinc-500 italic" id="successModalMsg">
+          Penilaian Anda telah tersimpan secara resmi di server database Supabase.
+        </p>
+      </div>
+
+      <!-- Action Buttons Footer -->
+      <div class="pt-1 flex flex-col sm:flex-row gap-2 shrink-0">
+        <button 
+          type="button"
+          onclick="downloadDigitalReceiptImage()" 
+          class="flex-1 py-2.5 px-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition active:scale-98 cursor-pointer shadow-xs flex items-center justify-center gap-1.5"
+        >
+          <span>📥</span>
+          <span>Unduh Struk (Gambar)</span>
+        </button>
+        <button 
+          type="button"
+          onclick="printDigitalReceipt()" 
+          class="py-2.5 px-3.5 rounded-xl border border-zinc-300 hover:bg-zinc-100 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5"
+        >
+          <span>🖨️</span>
+          <span>Cetak Struk</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 shrink-0">
+        <button 
+          type="button"
+          onclick="resetFormAndCloseModal()" 
+          class="py-2 px-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 cursor-pointer"
+        >
+          🔄 Nilai Kelompok Lain
+        </button>
+        <button 
+          type="button"
+          onclick="closeModalAndGoToRekap()" 
+          class="py-2 px-3 rounded-xl border border-zinc-200 text-zinc-700 hover:bg-zinc-50 text-xs font-medium transition cursor-pointer"
+        >
+          📊 Lihat Rekapitulasi
         </button>
       </div>
     </div>
@@ -3916,49 +4068,53 @@ function normalizeMediaList(fieldOrMedia) {
 
       // Checkbox Presenter
       const bestList = document.getElementById("bestPresenterList");
-      bestList.innerHTML = "";
-      selectedGroupObj.members.forEach((member, mIdx) => {
-        const item = document.createElement("label");
-        item.id = `bestPresCard_${mIdx}`;
-        item.className = "flex items-center p-3 rounded-lg border border-zinc-200 hover:border-zinc-400 bg-white cursor-pointer transition text-xs";
-        item.innerHTML = `
-          <input type="checkbox" value="${member.name}" class="accent-zinc-900 h-4 w-4 rounded flex-shrink-0" onchange="handleBestPresenterChange(this, ${mIdx})">
-          <div class="ml-2.5 min-w-0 flex-1 flex items-center justify-between gap-2">
-            <span class="font-medium text-zinc-900 truncate">${member.name}</span>
-            <span class="text-[10px] text-zinc-400 font-mono">${member.nim || 'NIM -'}</span>
-          </div>
-        `;
-        bestList.appendChild(item);
-      });
+      if (bestList) {
+        bestList.innerHTML = "";
+        selectedGroupObj.members.forEach((member, mIdx) => {
+          const item = document.createElement("label");
+          item.id = `bestPresCard_${mIdx}`;
+          item.className = "flex items-center p-3 rounded-lg border border-zinc-200 hover:border-zinc-400 bg-white cursor-pointer transition text-xs";
+          item.innerHTML = `
+            <input type="checkbox" value="${member.name}" class="accent-zinc-900 h-4 w-4 rounded flex-shrink-0" onchange="handleBestPresenterChange(this, ${mIdx})">
+            <div class="ml-2.5 min-w-0 flex-1 flex items-center justify-between gap-2">
+              <span class="font-medium text-zinc-900 truncate">${member.name}</span>
+              <span class="text-[10px] text-zinc-400 font-mono">${member.nim || 'NIM -'}</span>
+            </div>
+          `;
+          bestList.appendChild(item);
+        });
+      }
 
       // Textarea Evaluasi
       const evalContainer = document.getElementById("evaluationInputsContainer");
-      evalContainer.innerHTML = "";
-      const maxChars = parseInt(appConfig["Maksimal_Karakter_Evaluasi"] || 500);
+      if (evalContainer) {
+        evalContainer.innerHTML = "";
+        const maxChars = parseInt(appConfig["Maksimal_Karakter_Evaluasi"] || 500);
 
-      selectedGroupObj.members.forEach((member, eIdx) => {
-        const box = document.createElement("div");
-        box.className = "p-3.5 sm:p-4 rounded-lg bg-zinc-50 border border-zinc-200 space-y-2";
-        box.innerHTML = `
-          <div class="flex items-center justify-between gap-2">
-            <span class="font-semibold text-zinc-800 text-xs sm:text-sm truncate">
-              ${eIdx + 1}. ${member.name} <span class="text-[10px] font-normal text-zinc-500 font-mono">(${member.nim || 'NIM -'})</span>
-            </span>
-            <span id="charCount_${eIdx}" class="text-[10px] text-zinc-400 font-mono">0/${maxChars}</span>
-          </div>
-          <textarea 
-            id="evalText_${eIdx}" 
-            data-member="${member.name}" 
-            required 
-            rows="2" 
-            maxlength="${maxChars}" 
-            placeholder="Tuliskan masukan evaluasi untuk ${member.name}..." 
-            class="w-full p-2.5 rounded-lg border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 outline-none bg-white transition leading-relaxed placeholder-zinc-400"
-            oninput="updateCharCounter(this, 'charCount_${eIdx}', ${maxChars}); saveFormDraft();"
-          ></textarea>
-        `;
-        evalContainer.appendChild(box);
-      });
+        selectedGroupObj.members.forEach((member, eIdx) => {
+          const box = document.createElement("div");
+          box.className = "p-3.5 sm:p-4 rounded-lg bg-zinc-50 border border-zinc-200 space-y-2";
+          box.innerHTML = `
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-semibold text-zinc-800 text-xs sm:text-sm truncate">
+                ${eIdx + 1}. ${member.name} <span class="text-[10px] font-normal text-zinc-500 font-mono">(${member.nim || 'NIM -'})</span>
+              </span>
+              <span id="charCount_${eIdx}" class="text-[10px] text-zinc-400 font-mono">0/${maxChars}</span>
+            </div>
+            <textarea 
+              id="evalText_${eIdx}" 
+              data-member="${member.name}" 
+              required 
+              rows="2" 
+              maxlength="${maxChars}" 
+              placeholder="Tuliskan masukan evaluasi untuk ${member.name}..." 
+              class="w-full p-2.5 rounded-lg border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 outline-none bg-white transition leading-relaxed placeholder-zinc-400"
+              oninput="updateCharCounter(this, 'charCount_${eIdx}', ${maxChars}); saveFormDraft();"
+            ></textarea>
+          `;
+          evalContainer.appendChild(box);
+        });
+      }
 
       saveFormDraft();
     }
@@ -4677,6 +4833,8 @@ function normalizeMediaList(fieldOrMedia) {
 
           isDraftAlreadyRestored = true;
           startAssessmentForm();
+          const banner = document.getElementById("studentDraftRestoreBanner");
+          if (banner) banner.classList.remove("hidden");
           showToast("Draf isian sebelumnya berhasil dipulihkan.", "info");
         }
       } catch (e) {}
@@ -4746,11 +4904,143 @@ function normalizeMediaList(fieldOrMedia) {
         }
       }
 
-      msgEl.classList.add("hidden");
-      iconEl.classList.remove("hidden");
-      emailInput.className = "w-full px-3.5 py-2.5 rounded-lg border border-emerald-400 text-xs sm:text-sm focus:border-emerald-600 outline-none transition bg-white";
+      if (msgEl) msgEl.classList.add("hidden");
+      if (iconEl) iconEl.classList.remove("hidden");
+      if (emailInput) emailInput.className = "w-full px-3.5 py-2.5 rounded-lg border border-emerald-400 text-xs sm:text-sm focus:border-emerald-600 outline-none transition bg-white";
       isEmailValidState = true;
       return true;
+    }
+
+    let currentPendingSubmissionPayload = null;
+    let currentReceiptData = null;
+
+    function openPreSubmitReviewModal(payload) {
+      currentPendingSubmissionPayload = payload;
+      renderPreSubmitReviewContent(payload);
+      const modal = document.getElementById("modalPreSubmitReview");
+      if (modal) {
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+    }
+
+    function closePreSubmitReviewModal() {
+      const modal = document.getElementById("modalPreSubmitReview");
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+    }
+
+    function renderPreSubmitReviewContent(payload) {
+      const container = document.getElementById("preSubmitReviewContent");
+      if (!container || !payload) return;
+
+      const matkul = appConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || "-";
+      const dosen = appConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || "-";
+
+      let bestPresText = "-";
+      if (Array.isArray(payload.presentatorTerbaik) && payload.presentatorTerbaik.length > 0) {
+        bestPresText = payload.presentatorTerbaik.join(", ");
+      }
+
+      let evalListHtml = "";
+      if (payload.evaluasiDetail && typeof payload.evaluasiDetail === 'object') {
+        for (let member in payload.evaluasiDetail) {
+          if (member === 'uploadedFiles') continue;
+          const textVal = payload.evaluasiDetail[member];
+          if (textVal) {
+            evalListHtml += `
+              <div class="p-2.5 rounded-lg bg-zinc-50 border border-zinc-200/70 text-xs">
+                <span class="font-bold text-zinc-900 block mb-0.5">👤 ${member}:</span>
+                <p class="text-zinc-600 text-[11px] leading-relaxed italic whitespace-pre-wrap">"${textVal}"</p>
+              </div>
+            `;
+          }
+        }
+      }
+
+      let customAnswersHtml = "";
+      if (payload.customAnswers && Object.keys(payload.customAnswers).length > 0) {
+        for (let fldId in payload.customAnswers) {
+          const ans = payload.customAnswers[fldId];
+          if (ans) {
+            let fldLabel = fldId;
+            if (currentFormSchema && Array.isArray(currentFormSchema.tahapan)) {
+              for (let stg of currentFormSchema.tahapan) {
+                const foundFld = (stg.fields || []).find(f => f.id === fldId);
+                if (foundFld) { fldLabel = foundFld.label; break; }
+              }
+            }
+            customAnswersHtml += `
+              <div class="flex items-start justify-between py-1 border-b border-zinc-100 last:border-0 gap-2">
+                <span class="text-zinc-500 font-medium">${fldLabel}:</span>
+                <span class="font-bold text-zinc-900 text-right">${Array.isArray(ans) ? ans.join(', ') : ans}</span>
+              </div>
+            `;
+          }
+        }
+      }
+
+      container.innerHTML = `
+        <!-- Card 1: Identitas Penilai -->
+        <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-2">
+          <h4 class="text-[11px] font-bold text-zinc-500 uppercase tracking-wider font-mono">1. Identitas Penilai</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div class="p-2 rounded-lg bg-white border border-zinc-200/60">
+              <span class="text-[10px] text-zinc-400 block">Nama &amp; Peran:</span>
+              <p class="font-bold text-zinc-900 truncate">${payload.namaPenilai} <span class="font-normal text-zinc-500 text-[10.5px]">(${payload.peranPenilai})</span></p>
+            </div>
+            <div class="p-2 rounded-lg bg-white border border-zinc-200/60">
+              <span class="text-[10px] text-zinc-400 block">NIM:</span>
+              <p class="font-mono font-bold text-zinc-900 truncate">${payload.nimPenilai || '-'}</p>
+            </div>
+          </div>
+          <div class="p-2 rounded-lg bg-white border border-zinc-200/60">
+            <span class="text-[10px] text-zinc-400 block">Email:</span>
+            <p class="font-mono text-zinc-700 text-[11px] truncate">${payload.email}</p>
+          </div>
+        </div>
+
+        <!-- Card 2: Target & Skor -->
+        <div class="p-3.5 rounded-xl bg-indigo-50/70 border border-indigo-100 space-y-2">
+          <h4 class="text-[11px] font-bold text-indigo-800 uppercase tracking-wider font-mono">2. Target Penilaian &amp; Skor</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div class="p-2 rounded-lg bg-white border border-indigo-100">
+              <span class="text-[10px] text-zinc-400 block">Kelompok Dinilai:</span>
+              <p class="font-bold text-indigo-700 truncate">${payload.kelompok}</p>
+            </div>
+            <div class="p-2 rounded-lg bg-white border border-indigo-100">
+              <span class="text-[10px] text-zinc-400 block">Nilai yang Diberikan:</span>
+              <p class="font-mono font-bold text-emerald-700 text-sm">${payload.nilaiKelompok} <span class="text-[10px] font-normal text-zinc-400">/ 100</span></p>
+            </div>
+          </div>
+          <div class="p-2 rounded-lg bg-white border border-indigo-100">
+            <span class="text-[10px] text-zinc-400 block">Presentator Terbaik:</span>
+            <p class="font-semibold text-zinc-900">${bestPresText}</p>
+          </div>
+        </div>
+
+        ${evalListHtml ? `
+          <!-- Card 3: Evaluasi Kualitatif -->
+          <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-2">
+            <h4 class="text-[11px] font-bold text-zinc-500 uppercase tracking-wider font-mono">3. Evaluasi Kualitatif Pemateri</h4>
+            <div class="space-y-2">
+              ${evalListHtml}
+            </div>
+          </div>
+        ` : ''}
+
+        ${customAnswersHtml ? `
+          <!-- Card 4: Jawaban Tambahan -->
+          <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-2">
+            <h4 class="text-[11px] font-bold text-zinc-500 uppercase tracking-wider font-mono">4. Jawaban Rubrik Tambahan</h4>
+            <div class="space-y-1 bg-white p-2.5 rounded-lg border border-zinc-200/60">
+              ${customAnswersHtml}
+            </div>
+          </div>
+        ` : ''}
+      `;
     }
 
     async function handleFinalSubmit(e) {
@@ -4846,7 +5136,7 @@ function normalizeMediaList(fieldOrMedia) {
 
       const customAnswers = collectCustomFieldsAnswers();
 
-      // Gather all uploaded files from both customAnswers and customUploadedFilesMap
+      // Gather all uploaded files
       const mergedUploadedFiles = Object.assign({}, customUploadedFilesMap);
       if (clientCustomFormAnswers && typeof clientCustomFormAnswers === 'object') {
         for (let k in clientCustomFormAnswers) {
@@ -4870,7 +5160,7 @@ function normalizeMediaList(fieldOrMedia) {
         nimPenilai: currentEvaluatorRole === 'Mahasiswa' ? nim : "-",
         email: email,
         namaPenilai: nama,
-        kelompok: selectedGroupObj.name,
+        kelompok: selectedGroupObj ? selectedGroupObj.name : "Kelompok",
         sesi: appConfig["Sesi_Minggu_Aktif"] || "Minggu 1",
         nilaiKelompok: nilai,
         presentatorTerbaik: selectedBestPresenters,
@@ -4880,21 +5170,33 @@ function normalizeMediaList(fieldOrMedia) {
         driveFolderName: (appConfig && appConfig["Google_Drive_Folder_Name"]) || localStorage.getItem("PGSD_GLOBAL_DRIVE_FOLDER") || localStorage.getItem("PGSD_DRIVE_FOLDER_NAME") || "https://drive.google.com/drive/folders/1ZYnP40AaCoaqu6-H2ZNfYuS-RshCWURK"
       };
 
-      const effectiveSpreadsheetUrl = (appConfig && appConfig["Spreadsheet_Webhook_Url"]) || localStorage.getItem("PGSD_GLOBAL_API_URL") || getApiUrl();
+      // 🔍 BUKA MODAL PRATINJAU RINGKASAN SEBELUM KIRIM
+      openPreSubmitReviewModal(payload);
+    }
+
+    async function executeConfirmedFinalSubmit() {
+      if (!currentPendingSubmissionPayload) return;
+      const payload = currentPendingSubmissionPayload;
+
+      const confirmBtn = document.getElementById("btnConfirmFinalSubmit");
+      const confirmSpinner = document.getElementById("confirmFinalSubmitSpinner");
       const submitBtn = document.getElementById("submitBtn");
       const spinner = document.getElementById("submitSpinner");
-      submitBtn.disabled = true;
-      spinner.classList.remove("hidden");
 
+      if (confirmBtn) confirmBtn.disabled = true;
+      if (confirmSpinner) confirmSpinner.classList.remove("hidden");
+      if (submitBtn) submitBtn.disabled = true;
+      if (spinner) spinner.classList.remove("hidden");
+
+      const effectiveSpreadsheetUrl = (appConfig && appConfig["Spreadsheet_Webhook_Url"]) || localStorage.getItem("PGSD_GLOBAL_API_URL") || getApiUrl();
       const apiUrl = effectiveSpreadsheetUrl;
       const sb = getSupabaseClient();
       let sbSuccess = false;
-      const idRespons = "RESP-" + activeFormId + "-" + Date.now() + "-" + Math.random().toString(36).substring(2, 6).toUpperCase();
+      const idRespons = "PGSD-REC-" + activeFormId + "-" + Date.now().toString(36).toUpperCase();
 
-      // ⚡ FAST-PATH (< 50ms): Simpan langsung data transaksi penilaian ke Supabase PostgreSQL (0 bytes Supabase Storage)
+      // ⚡ FAST-PATH (< 50ms): Simpan langsung data transaksi penilaian ke Supabase PostgreSQL
       if (sb) {
         try {
-          // Berkas lampiran mahasiswa dikelola eksklusif di Google Drive (Folder: Lampiran_Mahasiswa)
           if (customUploadedFilesMap && Object.keys(customUploadedFilesMap).length > 0) {
             for (let fldId in customUploadedFilesMap) {
               const fileObj = customUploadedFilesMap[fldId];
@@ -4921,8 +5223,8 @@ function normalizeMediaList(fieldOrMedia) {
             peran_penilai: payload.peranPenilai || "Mahasiswa",
             kelompok_dinilai: payload.kelompok,
             nilai_kelompok: parseFloat(payload.nilaiKelompok) || 0,
-            best_presenter_1: (selectedBestPresenters && selectedBestPresenters[0]) || "-",
-            best_presenter_2: (selectedBestPresenters && selectedBestPresenters[1]) || "-",
+            best_presenter_1: (payload.presentatorTerbaik && payload.presentatorTerbaik[0]) || "-",
+            best_presenter_2: (payload.presentatorTerbaik && payload.presentatorTerbaik[1]) || "-",
             evaluasi_detail: payload.evaluasiDetail || {},
             custom_answers: payload.customAnswers || {},
             synced_to_sheets: false
@@ -4937,23 +5239,25 @@ function normalizeMediaList(fieldOrMedia) {
       }
 
       if (sbSuccess) {
-        // ✨ Respons instan: Mahasiswa langsung sukses tanpa menunggu Google Sheets
-        submitBtn.disabled = false;
-        spinner.classList.add("hidden");
+        if (confirmBtn) confirmBtn.disabled = false;
+        if (confirmSpinner) confirmSpinner.classList.add("hidden");
+        if (submitBtn) submitBtn.disabled = false;
+        if (spinner) spinner.classList.add("hidden");
 
-        localStorage.removeItem(getFormDraftKey());
+        closePreSubmitReviewModal();
+        clearStudentFormDraft(false);
+
         clientCustomFormAnswers = {};
         localStorage.removeItem("PGSD_CACHE_REKAP_" + activeFormId);
         localStorage.setItem("PGSD_LAST_SUBMISSION_EVENT", Date.now().toString());
 
         loadRekapData(true);
-        showSuccessModal(payload.kelompok);
+        showSuccessModal(payload.kelompok, false, payload, idRespons);
 
-        // 🔄 Background Pipeline: Sinkronkan ke Google Spreadsheet (Utama & Kustom) secara asinkron
+        // 🔄 Background Pipeline: Sinkronkan ke Google Spreadsheet secara asinkron
         const defaultSheetUrl = DEFAULT_API_URL;
         const customSheetUrl = (appConfig && appConfig["Spreadsheet_Webhook_Url"]) || localStorage.getItem("PGSD_GLOBAL_API_URL");
 
-        // 1. Kirim ke Spreadsheet Utama
         if (defaultSheetUrl) {
           fetch(defaultSheetUrl, {
             method: "POST",
@@ -4969,7 +5273,6 @@ function normalizeMediaList(fieldOrMedia) {
           }).catch(e => console.warn("Primary sheet sync notice:", e));
         }
 
-        // 2. Kirim juga ke Spreadsheet Kustom jika berbeda
         if (customSheetUrl && customSheetUrl !== defaultSheetUrl) {
           fetch(customSheetUrl, {
             method: "POST",
@@ -4987,7 +5290,7 @@ function normalizeMediaList(fieldOrMedia) {
         return;
       }
 
-      // 🛡️ Fallback Standar: Jika Supabase belum aktif, simpan via Apps Script
+      // 🛡️ Fallback Standar: Kirim via Apps Script
       const fetchWithTimeout = (url, opts, ms = 12000) => {
         return Promise.race([
           fetch(url, opts),
@@ -5003,28 +5306,34 @@ function normalizeMediaList(fieldOrMedia) {
         }, 12000);
 
         const res = await response.json();
-        submitBtn.disabled = false;
-        spinner.classList.add("hidden");
+        if (confirmBtn) confirmBtn.disabled = false;
+        if (confirmSpinner) confirmSpinner.classList.add("hidden");
+        if (submitBtn) submitBtn.disabled = false;
+        if (spinner) spinner.classList.add("hidden");
 
         if (res && res.success) {
-          localStorage.removeItem(getFormDraftKey());
+          closePreSubmitReviewModal();
+          clearStudentFormDraft(false);
+
           clientCustomFormAnswers = {};
           localStorage.removeItem("PGSD_CACHE_REKAP_" + activeFormId);
           localStorage.setItem("PGSD_LAST_SUBMISSION_EVENT", Date.now().toString());
           
           loadRekapData(true);
-          showSuccessModal(payload.kelompok);
+          showSuccessModal(payload.kelompok, false, payload, idRespons);
         } else {
           showToast(res?.error || "Gagal mengirim penilaian.", "error");
         }
       } catch (err) {
-        submitBtn.disabled = false;
-        spinner.classList.add("hidden");
+        if (confirmBtn) confirmBtn.disabled = false;
+        if (confirmSpinner) confirmSpinner.classList.add("hidden");
+        if (submitBtn) submitBtn.disabled = false;
+        if (spinner) spinner.classList.add("hidden");
         
-        // Simpan ke antrean pengiriman lokal agar data mahasiswa tidak hilang
+        closePreSubmitReviewModal();
         savePendingSubmission(payload);
-        localStorage.removeItem("PGSD_FORM_DRAFT");
-        showSuccessModal(payload.kelompok, true);
+        clearStudentFormDraft(false);
+        showSuccessModal(payload.kelompok, true, payload, idRespons);
       }
     }
 
@@ -5038,7 +5347,6 @@ function normalizeMediaList(fieldOrMedia) {
 
     function savePendingSubmission(payload) {
       let pending = getPendingSubmissions();
-      // Hindari duplikasi payload kelompok yang sama
       pending = pending.filter(p => !(p.payload.email === payload.email && p.payload.kelompok === payload.kelompok && p.payload.sesi === payload.sesi));
       pending.push({ payload, timestamp: Date.now() });
       localStorage.setItem("PGSD_PENDING_SUBMISSIONS", JSON.stringify(pending));
@@ -5082,23 +5390,209 @@ function normalizeMediaList(fieldOrMedia) {
       loadRekapData(true);
     });
 
-    function showSuccessModal(kelompokName, isOfflineQueued = false) {
-      const msgEl = document.getElementById("successModalMsg");
-      if (isOfflineQueued) {
-        msgEl.innerHTML = `
-          <span class="text-amber-700 font-bold block mb-1">Tersimpan di Browser (Mode Offline)</span>
-          Koneksi internet Anda sedang lambat atau terputus. Penilaian untuk <strong>${kelompokName}</strong> telah tersimpan secara aman di browser dan akan otomatis dikirim ke Google Sheets begitu koneksi terhubung kembali.
-        `;
-      } else {
-        msgEl.textContent = `Penilaian Anda untuk ${kelompokName} telah berhasil disimpan ke Google Sheets.`;
-      }
-      document.getElementById("successModal").classList.remove("hidden");
+    function generateReceiptQRCode(receiptId, payload) {
+      const qrBox = document.getElementById("receiptQrCodeBox");
+      if (!qrBox) return;
+
+      const verifyData = `PGSD-ULM|ID:${receiptId}|NIM:${payload.nimPenilai || '-'}|MHS:${payload.namaPenilai || '-'}|GRP:${payload.kelompok || '-'}|SKOR:${payload.nilaiKelompok || '-'}|T:${Date.now()}`;
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=2&data=${encodeURIComponent(verifyData)}`;
+
+      qrBox.innerHTML = `
+        <img 
+          src="${qrUrl}" 
+          alt="QR Verifikasi" 
+          class="w-full h-full object-contain rounded"
+          onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'text-[9px] font-mono text-zinc-400 text-center leading-none p-1\\'>✓<br>VERIFIED<br>OFFLINE</div>';"
+        >
+      `;
     }
 
-    function resetFormAndCloseModal() {
-      document.getElementById("successModal").classList.add("hidden");
+    function showSuccessModal(kelompokName, isOfflineQueued = false, payload = null, idRespons = "") {
+      const modal = document.getElementById("successModal");
+      if (!modal) return;
+
+      const finalId = idRespons || ("PGSD-REC-" + activeFormId + "-" + Date.now().toString(36).toUpperCase());
+      const now = new Date();
+      currentReceiptData = {
+        payload: payload || {
+          nimPenilai: "-",
+          namaPenilai: "-",
+          kelompok: kelompokName,
+          nilaiKelompok: "-"
+        },
+        idRespons: finalId,
+        timestamp: now
+      };
+
+      const receiptIdEl = document.getElementById("receiptIdText");
+      if (receiptIdEl) receiptIdEl.textContent = finalId;
+
+      if (payload) {
+        const nimEl = document.getElementById("receiptNimPenilai");
+        if (nimEl) nimEl.textContent = payload.nimPenilai || "-";
+
+        const namaEl = document.getElementById("receiptNamaPenilai");
+        if (namaEl) namaEl.textContent = payload.namaPenilai || "-";
+
+        const grpEl = document.getElementById("receiptKelompokDinilai");
+        if (grpEl) grpEl.textContent = payload.kelompok || kelompokName;
+
+        const nilaiEl = document.getElementById("receiptNilaiKelompok");
+        if (nilaiEl) nilaiEl.textContent = payload.nilaiKelompok !== undefined ? payload.nilaiKelompok : "-";
+
+        const matkulEl = document.getElementById("receiptMataKuliah");
+        if (matkulEl) matkulEl.textContent = appConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || "-";
+
+        const dosenEl = document.getElementById("receiptDosenPengampu");
+        if (dosenEl) dosenEl.textContent = appConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || "-";
+
+        const timeEl = document.getElementById("receiptTimestampWita");
+        if (timeEl) timeEl.innerHTML = formatSmartScheduleTime(now);
+
+        generateReceiptQRCode(finalId, payload);
+      }
+
+      const msgEl = document.getElementById("successModalMsg");
+      if (msgEl) {
+        if (isOfflineQueued) {
+          msgEl.innerHTML = `
+            <span class="text-amber-700 font-bold block mb-1">Tersimpan di Browser (Mode Offline)</span>
+            Penilaian untuk <strong>${kelompokName}</strong> telah tersimpan aman di browser dan akan otomatis terkirim saat online.
+          `;
+        } else {
+          msgEl.textContent = `Penilaian Anda telah tersimpan secara resmi di server database Supabase.`;
+        }
+      }
+
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function downloadDigitalReceiptImage() {
+      if (!currentReceiptData || !currentReceiptData.payload) {
+        showToast("Data tanda terima tidak ditemukan.", "error");
+        return;
+      }
+      const data = currentReceiptData;
+      const payload = data.payload;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = 1000;
+      canvas.height = 1300;
+      const ctx = canvas.getContext("2d");
+
+      // 1. Background Card
+      ctx.fillStyle = "#f8fafc";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.roundRect ? ctx.roundRect(40, 40, 920, 1220, 24) : ctx.fillRect(40, 40, 920, 1220);
+      ctx.fill();
+      ctx.strokeStyle = "#e2e8f0";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // 2. Top Header Banner
+      ctx.fillStyle = "#059669";
+      ctx.roundRect ? ctx.roundRect(40, 40, 920, 120, [24, 24, 0, 0]) : ctx.fillRect(40, 40, 920, 120);
+      ctx.fill();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 28px sans-serif";
+      ctx.fillText("UNIVERSITAS LAMBUNG MANGKURAT", 70, 90);
+      ctx.font = "normal 18px sans-serif";
+      ctx.fillStyle = "#d1fae5";
+      ctx.fillText("FKIP • Program Studi Pendidikan Guru Sekolah Dasar (PGSD)", 70, 125);
+
+      // 3. Receipt Title & Verified Badge
+      ctx.fillStyle = "#0f172a";
+      ctx.font = "bold 32px sans-serif";
+      ctx.fillText("TANDA TERIMA PENILAIAN PEER-ASSESSMENT", 70, 215);
+
+      ctx.fillStyle = "#10b981";
+      ctx.roundRect ? ctx.roundRect(70, 240, 240, 36, 18) : ctx.fillRect(70, 240, 240, 36);
+      ctx.fill();
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 15px sans-serif";
+      ctx.fillText("✓ TERVERIFIKASI SISTEM", 92, 264);
+
+      ctx.fillStyle = "#64748b";
+      ctx.font = "bold 16px monospace";
+      ctx.fillText(`ID TIKET: ${data.idRespons}`, 330, 264);
+
+      // 4. Details Table Box
+      const startY = 310;
+      const rowHeight = 70;
+      const details = [
+        ["NIM Penilai", payload.nimPenilai || "-"],
+        ["Nama Penilai", payload.namaPenilai || "-"],
+        ["Peran Penilai", payload.peranPenilai || "Mahasiswa"],
+        ["Kelompok yang Dinilai", payload.kelompok || "-"],
+        ["Nilai / Skor Kelompok", `${payload.nilaiKelompok || 0} / 100`],
+        ["Presentator Terbaik", Array.isArray(payload.presentatorTerbaik) ? payload.presentatorTerbaik.join(", ") : (payload.presentatorTerbaik || "-")],
+        ["Mata Kuliah", appConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || "-"],
+        ["Dosen Pengampu", appConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || "-"],
+        ["Waktu Pengiriman", new Date().toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'medium' }) + " WITA"]
+      ];
+
+      details.forEach((row, i) => {
+        const curY = startY + (i * rowHeight);
+        ctx.fillStyle = (i % 2 === 0) ? "#f8fafc" : "#ffffff";
+        ctx.roundRect ? ctx.roundRect(70, curY, 860, rowHeight - 6, 12) : ctx.fillRect(70, curY, 860, rowHeight - 6);
+        ctx.fill();
+        ctx.strokeStyle = "#edf2f7";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        ctx.fillStyle = "#64748b";
+        ctx.font = "500 18px sans-serif";
+        ctx.fillText(row[0] + ":", 95, curY + 38);
+
+        ctx.fillStyle = (row[0].includes("Nilai") || row[0].includes("Kelompok yang")) ? "#4f46e5" : "#0f172a";
+        ctx.font = "bold 19px sans-serif";
+        const valText = String(row[1]).length > 45 ? String(row[1]).substring(0, 45) + "..." : String(row[1]);
+        ctx.fillText(valText, 360, curY + 38);
+      });
+
+      // 5. Footer Notice
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "italic 15px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Bukti tanda terima ini sah dan tercatat permanen di basis data server Supabase FKIP ULM.", canvas.width / 2, 1080);
+      ctx.fillText("Simpan bukti ini sebagai konfirmasi resmi keikutsertaan penilaian perkuliahan.", canvas.width / 2, 1110);
+      ctx.textAlign = "left";
+
+      // Download
+      const dataUrl = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.download = `bukti-penilaian-${(payload.nimPenilai || 'mhs').replace(/\s+/g, '')}-${(payload.kelompok || 'kelompok').replace(/\s+/g, '_')}.png`;
+      link.href = dataUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      showToast("Bukti tanda terima digital berhasil diunduh!", "success");
+    }
+
+    function printDigitalReceipt() {
+      window.print();
+    }
+
+    function clearStudentFormDraft(isManual = false) {
+      localStorage.removeItem(getFormDraftKey());
       localStorage.removeItem("PGSD_FORM_DRAFT");
-      
+      clientCustomFormAnswers = {};
+      customUploadedFilesMap = {};
+      const banner = document.getElementById("studentDraftRestoreBanner");
+      if (banner) banner.classList.add("hidden");
+
+      if (isManual) {
+        resetStudentForm();
+        showToast("Draf isian berhasil dihapus.", "info");
+      }
+    }
+
+    function resetStudentForm() {
       const radioChecked = document.querySelector("input[name='selectedGroup']:checked");
       if (radioChecked) radioChecked.checked = false;
       document.querySelectorAll(".group-card").forEach(c => {
@@ -5108,6 +5602,13 @@ function normalizeMediaList(fieldOrMedia) {
       selectedBestPresenters = [];
       goToInfoOverview();
       updateStepUI(1);
+    }
+
+    function resetFormAndCloseModal() {
+      document.getElementById("successModal").classList.add("hidden");
+      document.getElementById("successModal").classList.remove("flex");
+      clearStudentFormDraft(false);
+      resetStudentForm();
     }
 
     function closeModalAndGoToRekap() {
