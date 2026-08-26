@@ -211,6 +211,7 @@
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
   <!-- Supabase High-Performance Database Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>if (!window.supabase) document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>');</script>
 </head>
 <body class="min-h-screen flex flex-col bg-zinc-50 font-sans antialiased text-zinc-900">
 
@@ -1399,6 +1400,11 @@
       }
       return supabaseClient;
     }
+
+    // Eagerly initialize supabase client
+    try {
+      getSupabaseClient();
+    } catch(e) {}
 
     // Multi-Form & Dynamic Questions State
     const urlParams = new URLSearchParams(window.location.search);
@@ -5475,12 +5481,13 @@ function normalizeMediaList(fieldOrMedia) {
         }
 
         const redirectUrl = window.location.origin + window.location.pathname + (activeFormId ? `?id=${activeFormId}` : '');
+        const sb = getSupabaseClient() || (window.supabase && typeof window.supabase.createClient === "function" ? (supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey)) : null);
 
-        if (!supabaseClient || !supabaseClient.auth) {
-          throw new Error("Supabase Auth Client belum siap.");
+        if (!sb || !sb.auth) {
+          throw new Error("Supabase Auth Client belum siap. Silakan coba kembali dalam beberapa detik.");
         }
 
-        const { data, error } = await supabaseClient.auth.signInWithOAuth({
+        const { data, error } = await sb.auth.signInWithOAuth({
           provider: 'google',
           options: {
             redirectTo: redirectUrl,
@@ -5547,9 +5554,10 @@ function normalizeMediaList(fieldOrMedia) {
               console.warn("Direct JWT token parse notice:", jwtErr);
             }
 
-            if (supabaseClient && supabaseClient.auth && refreshToken) {
+            const sbInst = getSupabaseClient();
+            if (sbInst && sbInst.auth && refreshToken) {
               try {
-                await supabaseClient.auth.setSession({
+                await sbInst.auth.setSession({
                   access_token: accessToken,
                   refresh_token: refreshToken
                 });
@@ -5561,17 +5569,18 @@ function normalizeMediaList(fieldOrMedia) {
         console.warn("OAuth Hash extraction notice:", hashErr);
       }
 
-      if (!supabaseClient || !supabaseClient.auth) return;
+      const sb = getSupabaseClient() || (window.supabase && typeof window.supabase.createClient === "function" ? (supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey)) : null);
+      if (!sb || !sb.auth) return;
 
       try {
         // 1. Check initial session from Supabase Client
-        const { data: sessionData } = await supabaseClient.auth.getSession();
+        const { data: sessionData } = await sb.auth.getSession();
         if (sessionData && sessionData.session && sessionData.session.user) {
           applySupabaseGoogleUser(sessionData.session.user);
         }
 
         // 2. Listen to auth state changes
-        supabaseClient.auth.onAuthStateChange(async (event, session) => {
+        sb.auth.onAuthStateChange(async (event, session) => {
           if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'USER_UPDATED') && session && session.user) {
             applySupabaseGoogleUser(session.user);
           } else if (event === 'SIGNED_OUT') {

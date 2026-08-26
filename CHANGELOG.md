@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.47] - 2026-08-26
+
+### 🛡️ Inisialisasi Kredensial Supabase Auth Eager & Multi-CDN Fallback
+- **⚡ Inisialisasi Eager Supabase Client:**
+  - Memastikan instans `supabaseClient` selalu siap sebelum fungsi `handleGoogleSignIn` atau `initSupabaseAuthListener` dipanggil, mengeliminasi error *"Supabase Auth Client belum siap"*.
+- **🌐 CDN Fallback Ganda (`jsDelivr + unpkg`):**
+  - Menambahkan *script fallback* untuk menjamin pustaka `@supabase/supabase-js` termuat 100% tanpa risiko kegagalan CDN pihak ketiga.
+
+---
+
 ## [2.3.46] - 2026-08-26
 
 ### 🚀 Ekstraksi Token Otomatis & Transisi Mulus Pasca-Login Google OAuth
