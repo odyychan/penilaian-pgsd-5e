@@ -14,6 +14,13 @@ Thumbs.db
 *.sln
 *.sw?
 
+# Dependencies & Build Output
+node_modules/
+scripts/
+*.pyc
+__pycache__/
+test_*.py
+
 # Local Netlify & Vercel folders
 .netlify
 .vercel
