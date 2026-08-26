@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.54] - 2026-08-26
+
+### 🛡️ Sinkronisasi Async Callback OAuth & Penanganan Eksplisit Error Code Exchange
+- **⚡ Penantian Asinkron `await applySupabaseGoogleUser`:**
+  - Mengintegrasikan `await` pada seluruh pemanggilan fungsi asinkron `applySupabaseGoogleUser` di dalam `initSupabaseAuthListener`, mengeliminasi *race-condition* saat membaca konfigurasi form dan menyimpan sesi aplikasi.
+- **🛡️ Penanganan Eksplisit Error `exchangeCodeForSession`:**
+  - Menambahkan logging dan notifikasi toast ketika pertukaran kode otentikasi Google menemui kendala, mencegah kegagalan otentikasi terjadi secara diam-diam.
+- **🚀 Orkestrasi `DOMContentLoaded` Asinkron:**
+  - Menjadikan handler `DOMContentLoaded` asinkron dan menunggu `await initSupabaseAuthListener()` tuntas sebelum mengevaluasi status gerbang login.
+
+---
+
 ## [2.3.53] - 2026-08-26
 
 ### 🛡️ Optimasi Persistensi Client Supabase & Header Cache Edge Vercel

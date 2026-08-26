@@ -2071,29 +2071,34 @@ function normalizeMediaList(fieldOrMedia) {
       }
     });
 
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", async function() {
       initAllModernDropdowns();
       loadLocalCache();
       
-      // Inisialisasi Listener Google OAuth Supabase & Tangkap Token URL Hash Seketika
+      // Deteksi apakah URL sedang memproses Callback OAuth (PKCE atau Hash)
+      const hasAuthCode = (window.location.search || "").includes("code=");
+      const hasAuthHash = (window.location.hash || "").includes("access_token");
+      const isAuthProcessing = hasAuthCode || hasAuthHash;
+
+      // Inisialisasi Listener Google OAuth Supabase & Tangkap Token Seketika
       if (typeof initSupabaseAuthListener === 'function') {
-        initSupabaseAuthListener();
+        if (isAuthProcessing) {
+          await initSupabaseAuthListener();
+        } else {
+          initSupabaseAuthListener();
+        }
       }
 
       // Pulihkan Active Tab (Formulir vs Rekapitulasi) tanpa merusak token hash
       const hash = (window.location.hash || "").replace("#", "").toLowerCase();
-      const isAuthHash = hash.includes("access_token") || hash.includes("error_description");
-      const hasAuthCode = (window.location.search || "").includes("code=");
-      const isAuthProcessing = isAuthHash || hasAuthCode;
-      const savedTab = (!isAuthHash && (hash === "rekap" || hash === "form")) ? hash : (localStorage.getItem("PGSD_ACTIVE_MAIN_TAB") || "form");
+      const isAuthHashOnly = hash.includes("access_token") || hash.includes("error_description");
+      const savedTab = (!isAuthHashOnly && (hash === "rekap" || hash === "form")) ? hash : (localStorage.getItem("PGSD_ACTIVE_MAIN_TAB") || "form");
       
       switchTab(savedTab, false);
       updateStepUI(1);
       
-      // Evaluasi Gerbang Login Otentikasi sejak awal muat halaman (hindari flash jika sedang memproses callback)
-      if (!isAuthProcessing) {
-        checkAndApplyAuthGate();
-      }
+      // Evaluasi Gerbang Login Otentikasi
+      checkAndApplyAuthGate();
 
       restoreFormDraft();
       fetchInitialFormData(false);
@@ -5560,8 +5565,12 @@ function normalizeMediaList(fieldOrMedia) {
             `;
           }
           const { data: codeData, error: codeErr } = await sb.auth.exchangeCodeForSession(authCode);
-          if (!codeErr && codeData && codeData.session && codeData.session.user) {
-            applySupabaseGoogleUser(codeData.session.user);
+          if (codeErr) {
+            console.error("Supabase exchangeCodeForSession error:", codeErr);
+            showToast("Gagal memproses sesi login Google: " + (codeErr.message || codeErr), "error", 6000);
+            renderGoogleSignInButtonDefault();
+          } else if (codeData && codeData.session && codeData.session.user) {
+            await applySupabaseGoogleUser(codeData.session.user);
             try {
               const cleanUrl = new URL(window.location.href);
               cleanUrl.searchParams.delete('code');
@@ -5596,7 +5605,7 @@ function normalizeMediaList(fieldOrMedia) {
                   email: email,
                   user_metadata: payload.user_metadata || {}
                 };
-                applySupabaseGoogleUser(userObj);
+                await applySupabaseGoogleUser(userObj);
               }
             } catch (jwtErr) {
               console.warn("Direct JWT token parse notice:", jwtErr);
@@ -5622,13 +5631,13 @@ function normalizeMediaList(fieldOrMedia) {
         // 2. Check initial session from Supabase Client
         const { data: sessionData } = await sb.auth.getSession();
         if (sessionData && sessionData.session && sessionData.session.user) {
-          applySupabaseGoogleUser(sessionData.session.user);
+          await applySupabaseGoogleUser(sessionData.session.user);
         }
 
         // 3. Listen to auth state changes
         sb.auth.onAuthStateChange(async (event, session) => {
           if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'USER_UPDATED' || event === 'TOKEN_REFRESHED') && session && session.user) {
-            applySupabaseGoogleUser(session.user);
+            await applySupabaseGoogleUser(session.user);
           }
         });
       } catch (e) {
