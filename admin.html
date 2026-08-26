@@ -6593,6 +6593,7 @@ function getOrCreateFolder(folderName) {
 
       // Floating action dock only visible on Question Canvas
       const dock = document.getElementById("googleFormsFloatingDock");
+      if (dock) {
         if (tabKey === 'config') {
           dock.classList.remove("hidden");
           setTimeout(updateFloatingDockPosition, 60);
