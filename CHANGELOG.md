@@ -4,6 +4,14 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.30] - 2026-08-26
+
+### 🏷️ Penyelarasan Label Tombol Spoiler (*Updated Spoiler Trigger Label*)
+- **Label Tombol Ringkas & Jelas (*Intuitive Button Wording*):**
+  - Mengubah teks pada tombol pembuka sensor kabur menjadi **`[ 👁️ Lihat Rincian (Spoiler) ]`** untuk memberikan instruksi yang lebih ringkas dan mudah dipahami oleh mahasiswa saat formulir sedang dalam status belum dibuka / ditutup.
+
+---
+
 ## [2.3.29] - 2026-08-26
 
 ### 🌫️ Desain Spoiler Blur Minimalis & Penyesuaian Intensitas Teks Samar (*Subtle Visible Spoiler Blur*)
