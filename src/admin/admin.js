@@ -2822,9 +2822,11 @@
     });
 
     async function handleLogin(e) {
-      e.preventDefault();
+      if (e && typeof e.preventDefault === "function") e.preventDefault();
       const enteredPass = document.getElementById("inputPassword")?.value.trim();
-      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const submitBtn = (e && e.target && typeof e.target.querySelector === "function") 
+        ? e.target.querySelector('button[type="submit"]') 
+        : document.querySelector('#loginScreen button[type="submit"]');
       const errMsg = document.getElementById("loginErrorMsg");
       const card = document.getElementById("loginCard");
       
