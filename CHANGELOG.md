@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.44] - 2026-08-26
+
+### 🚀 Dukungan Penuh Pengujian Berkas Lokal (`file:///`) & Simulator Pratinjau Admin (*Iframe*)
+- **⚡ Penanganan Protokol `file:///`:**
+  - Menghadirkan *fast-path simulated verification* instan saat dibuka via berkas lokal `file:///` agar tombol Google Sign-In langsung memvalidasi akun ULM tanpa terbentur limitasi redirect browser.
+- **👁️ Dukungan Simulator Pratinjau Admin (`preview=draft`):**
+  - Mengatasi pembatasan `X-Frame-Options` pada iframe simulator dengan mengizinkan admin mencoba seluruh alur formulir secara instan dalam 1 klik.
+- **🌐 Google Cloud OAuth Produksi:**
+  - Tetap berjalan 100% menggunakan alur resmi Google Cloud & Supabase Auth saat diakses melalui web server HTTP / HTTPS.
+
+---
+
 ## [2.3.43] - 2026-08-26
 
 ### ✨ Sinkronisasi Otomatis & Penguncian Identitas Step 1 Berbasis Google Auth
