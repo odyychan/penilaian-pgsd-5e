@@ -2927,13 +2927,17 @@ function getOrCreateFolder(folderName) {
       <!-- 4. Security & Maintenance Grid -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
         <div class="bg-white rounded-xl border border-zinc-200 p-3.5 space-y-2 shadow-2xs">
-          <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider font-mono">Keamanan Portal</span>
+          <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider font-mono">Keamanan Portal Supabase</span>
           <h4 class="font-bold text-zinc-900">Ubah Kata Sandi Admin</h4>
-          <div class="flex items-center gap-1.5 pt-0.5">
-            <input type="password" id="inputGlobalNewAdminPassword" placeholder="Kata sandi baru..." class="flex-1 px-3 py-1.5 rounded-lg border border-zinc-300 text-xs outline-none">
-            <button type="button" onclick="updateGlobalAdminPassword()" class="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white font-semibold cursor-pointer">
-              Simpan
-            </button>
+          <p class="text-[11px] text-zinc-500">Tersinkronisasi langsung dengan Supabase Secrets (<code class="font-mono text-zinc-700">ADMIN_PASSWORD</code>).</p>
+          <div class="space-y-1.5 pt-0.5">
+            <input type="password" id="inputGlobalCurrentAdminPassword" placeholder="Kata sandi saat ini..." class="w-full px-3 py-1.5 rounded-lg border border-zinc-300 text-xs outline-none focus:border-zinc-900">
+            <div class="flex items-center gap-1.5">
+              <input type="password" id="inputGlobalNewAdminPassword" placeholder="Kata sandi baru..." class="flex-1 px-3 py-1.5 rounded-lg border border-zinc-300 text-xs outline-none focus:border-zinc-900">
+              <button type="button" id="btnUpdateAdminPass" onclick="updateGlobalAdminPassword()" class="px-3.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white font-semibold text-xs cursor-pointer active:scale-95 shadow-xs">
+                Simpan
+              </button>
+            </div>
           </div>
         </div>
 
@@ -2971,7 +2975,7 @@ function getOrCreateFolder(folderName) {
     const DEFAULT_DRIVE_FOLDER_ID = "1ZYnP40AaCoaqu6-H2ZNfYuS-RshCWURK";
     const DEFAULT_SPREADSHEET_ID = "1MAZqzRyau1mECqamnU9Bj3TALRJYDrA1WLQFesJ4wG4";
     const GOOGLE_SYNC_EDGE_URL = "https://eychjnqmqpxzxukiwbqf.supabase.co/functions/v1/google-sync";
-    const DEFAULT_ADMIN_PASS = "admin5e";
+    const ADMIN_AUTH_EDGE_URL = "https://eychjnqmqpxzxukiwbqf.supabase.co/functions/v1/admin-auth";
     const DEFAULT_PRIMARY_FORM_ID = "BK5E";
 
     // High-Performance Supabase Backend Configuration
@@ -3017,10 +3021,6 @@ function getOrCreateFolder(folderName) {
     let currentAdminTab = 'data';
     let isSyncingQueue = false;
     let configDebounceTimer = null;
-
-    function getAdminPassword() {
-      return localStorage.getItem("PGSD_ADMIN_PASS") || DEFAULT_ADMIN_PASS;
-    }
 
     function getApiUrl() {
       return (typeof adminAppConfig !== 'undefined' && adminAppConfig && adminAppConfig["Spreadsheet_Webhook_Url"])
@@ -5750,34 +5750,100 @@ function getOrCreateFolder(folderName) {
       }
     });
 
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", async function() {
       initAllModernDropdowns();
       const isAuth = sessionStorage.getItem("PGSD_ADMIN_AUTH");
+      const token = sessionStorage.getItem("PGSD_ADMIN_SESSION_TOKEN");
       if (isAuth === "true") {
         showDashboard();
+        if (token) {
+          // Asynchronously verify token in background
+          try {
+            fetch(ADMIN_AUTH_EDGE_URL, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "apikey": SUPABASE_CONFIG.anonKey,
+                "Authorization": `Bearer ${SUPABASE_CONFIG.anonKey}`
+              },
+              body: JSON.stringify({ action: "verify_token", token: token })
+            }).then(r => r.json()).then(data => {
+              if (data && data.valid === false) {
+                sessionStorage.removeItem("PGSD_ADMIN_AUTH");
+                sessionStorage.removeItem("PGSD_ADMIN_SESSION_TOKEN");
+                window.location.reload();
+              }
+            }).catch(() => {});
+          } catch (e) {}
+        }
       }
       setTimeout(() => renderAllMathInElement(document.body), 100);
     });
 
-    function handleLogin(e) {
+    async function handleLogin(e) {
       e.preventDefault();
-      const enteredPass = document.getElementById("inputPassword").value;
-      const validPass = getAdminPassword();
+      const enteredPass = document.getElementById("inputPassword")?.value.trim();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const errMsg = document.getElementById("loginErrorMsg");
+      const card = document.getElementById("loginCard");
+      
+      if (!enteredPass) return;
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="flex items-center justify-center gap-2"><svg class="w-4 h-4 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Memverifikasi...</span>';
+      }
+      if (errMsg) errMsg.classList.add("hidden");
 
-      if (enteredPass === validPass) {
-        sessionStorage.setItem("PGSD_ADMIN_AUTH", "true");
-        showDashboard();
-      } else {
-        const card = document.getElementById("loginCard");
-        const errMsg = document.getElementById("loginErrorMsg");
-        errMsg.classList.remove("hidden");
-        card.classList.add("shake");
-        setTimeout(() => card.classList.remove("shake"), 500);
+      try {
+        const resp = await fetch(ADMIN_AUTH_EDGE_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_CONFIG.anonKey,
+            "Authorization": `Bearer ${SUPABASE_CONFIG.anonKey}`
+          },
+          body: JSON.stringify({ action: "verify", password: enteredPass })
+        });
+
+        const resData = await resp.json();
+
+        if (resp.ok && resData.success) {
+          sessionStorage.setItem("PGSD_ADMIN_AUTH", "true");
+          if (resData.token) {
+            sessionStorage.setItem("PGSD_ADMIN_SESSION_TOKEN", resData.token);
+          }
+          showDashboard();
+        } else {
+          if (errMsg) {
+            errMsg.textContent = resData.error || "Kata sandi admin tidak valid. Akses ditolak.";
+            errMsg.classList.remove("hidden");
+          }
+          if (card) {
+            card.classList.add("shake");
+            setTimeout(() => card.classList.remove("shake"), 500);
+          }
+        }
+      } catch (err) {
+        console.error("Admin Auth Error:", err);
+        if (errMsg) {
+          errMsg.textContent = "Gagal menghubungi server autentikasi Supabase. Periksa koneksi internet.";
+          errMsg.classList.remove("hidden");
+        }
+        if (card) {
+          card.classList.add("shake");
+          setTimeout(() => card.classList.remove("shake"), 500);
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<span>Buka Panel Admin</span>';
+        }
       }
     }
 
     function handleLogout() {
       sessionStorage.removeItem("PGSD_ADMIN_AUTH");
+      sessionStorage.removeItem("PGSD_ADMIN_SESSION_TOKEN");
       window.location.reload();
     }
 
@@ -11682,17 +11748,70 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       showAdminToast("Setelan Sistem Global & Master Spreadsheet berhasil disimpan.", "success");
     }
 
-    function updateGlobalAdminPassword() {
-      const p = document.getElementById("inputGlobalNewAdminPassword")?.value.trim();
-      if (!p || p.length < 4) {
-        showAdminToast("Kata sandi minimal 4 karakter!", "warning");
+    async function updateGlobalAdminPassword() {
+      const currentPass = document.getElementById("inputGlobalCurrentAdminPassword")?.value.trim();
+      const newPass = document.getElementById("inputGlobalNewAdminPassword")?.value.trim();
+      const btn = document.getElementById("btnUpdateAdminPass");
+
+      if (!currentPass) {
+        showAdminToast("Masukkan kata sandi admin saat ini!", "warning");
+        document.getElementById("inputGlobalCurrentAdminPassword")?.focus();
         return;
       }
-      localStorage.setItem("PGSD_ADMIN_PASS", p);
-      if (document.getElementById("inputGlobalNewAdminPassword")) {
-        document.getElementById("inputGlobalNewAdminPassword").value = "";
+      if (!newPass || newPass.length < 4) {
+        showAdminToast("Kata sandi baru minimal 4 karakter!", "warning");
+        document.getElementById("inputGlobalNewAdminPassword")?.focus();
+        return;
       }
-      showAdminToast("Kata sandi admin utama berhasil diperbarui.", "success");
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="flex items-center gap-1"><svg class="w-3 h-3 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Menyimpan...</span>';
+      }
+
+      try {
+        const resp = await fetch(ADMIN_AUTH_EDGE_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_CONFIG.anonKey,
+            "Authorization": `Bearer ${SUPABASE_CONFIG.anonKey}`
+          },
+          body: JSON.stringify({
+            action: "change_password",
+            current_password: currentPass,
+            new_password: newPass
+          })
+        });
+
+        const data = await resp.json();
+
+        if (resp.ok && data.success) {
+          if (data.token) {
+            sessionStorage.setItem("PGSD_ADMIN_SESSION_TOKEN", data.token);
+          }
+          if (document.getElementById("inputGlobalCurrentAdminPassword")) {
+            document.getElementById("inputGlobalCurrentAdminPassword").value = "";
+          }
+          if (document.getElementById("inputGlobalNewAdminPassword")) {
+            document.getElementById("inputGlobalNewAdminPassword").value = "";
+          }
+          showAdminToast(data.message || "Kata sandi admin berhasil diperbarui di Supabase.", "success");
+          if (data.notice) {
+            setTimeout(() => showAdminToast(data.notice, "info", 6000), 1200);
+          }
+        } else {
+          showAdminToast(data.error || "Gagal mengubah kata sandi admin.", "error");
+        }
+      } catch (err) {
+        console.error("Update admin pass error:", err);
+        showAdminToast("Gagal menghubungi endpoint Edge Function Supabase.", "error");
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>Simpan</span>';
+        }
+      }
     }
 
     async function testGlobalApiConnection() {

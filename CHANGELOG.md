@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.6] - 2026-08-26
+
+### 🛡️ Migrasi Autentikasi Admin ke Supabase Secrets & Server-Side Edge Functions
+- **🔒 Eliminasi Hardcoded Password di Sisi Klien:**
+  - Menghapus total konstanta `DEFAULT_ADMIN_PASS` dan logika plaintext password dari berkas HTML/JS sisi klien.
+  - Memindahkan otorisasi ke Supabase Edge Function (`/functions/v1/admin-auth`) yang membaca secret `ADMIN_PASSWORD` via `Deno.env.get()`.
+- **🔑 Customable Admin Password Manager:**
+  - Mendukung pergantian kata sandi admin secara dinamis melalui modal Setelan Sistem di Panel Admin atau langsung memperbarui secret `ADMIN_PASSWORD` di Dashboard Supabase.
+  - Mengimplementasikan validasi sesi aman berbasis *HMAC-SHA256 Signed Session Token*.
+
+---
+
 ## [2.4.5] - 2026-08-26
 
 ### 🧹 Eliminasi Ikon Ganda & Penyelarasan Tombol Aksi Panel Admin

@@ -39,3 +39,24 @@ Dokumentasi arsitektur database, eksekusi migrasi, keamanan Row Level Security (
    - Di Google Spreadsheet Dosen, baris data ditulis dengan format kolom standar Google Forms:
      - `Timestamp` | `Sesi` | `Email` | `Nama Penilai` | `NIM` | `Peran` | `Kelompok Dinilai` | `Nilai Akhir` | `Best Presenter 1` | `Best Presenter 2` | `Detail Evaluasi`
    - Kolom `synced_to_sheets` di Supabase diperbarui menjadi `true`.
+
+---
+
+## 🔐 4. Autentikasi Admin & Konfigurasi Supabase Secrets (`ADMIN_PASSWORD`)
+
+Untuk menjamin keamanan tingkat tinggi tanpa mengekspos kata sandi di berkas HTML/JS sisi klien:
+
+1. **Supabase Secrets (`ADMIN_PASSWORD`)**:
+   - Buka **Project Settings** → **Configuration** → **Secrets** di Supabase Dashboard:
+     `https://supabase.com/dashboard/project/eychjnqmqpxzxukiwbqf/settings/secrets`
+   - Tambahkan Secret baru:
+     - **Name**: `ADMIN_PASSWORD`
+     - **Value**: *(Kata sandi admin kustom Anda)*
+2. **Supabase Edge Function (`admin-auth`)**:
+   - Berada di: `supabase/functions/admin-auth/index.ts`
+   - Bertindak sebagai gerbang verifikasi kata sandi di sisi server (*server-side verification*) yang membaca langsung `Deno.env.get("ADMIN_PASSWORD")`.
+   - Mengeluarkan *HMAC-SHA256 signed session token* untuk memvalidasi sesi admin tanpa menyimpan plaintext password di `localStorage`.
+3. **Mengubah Kata Sandi via UI Admin atau Dashboard**:
+   - **Opsi A (Via UI Admin)**: Masuk ke `/admin` → Buka **Setelan Sistem** (ikon roda gigi) → Masukkan kata sandi saat ini & kata sandi baru → Klik **Simpan**.
+   - **Opsi B (Via Supabase Secrets)**: Perbarui nilai secret `ADMIN_PASSWORD` di Dashboard Supabase kapan saja. Edge function akan langsung membaca nilai terbaru secara instan.
+
