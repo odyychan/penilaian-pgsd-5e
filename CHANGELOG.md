@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.16] - 2026-08-26
+
+### 🔄 Penyesuaian Tata Letak Tab Kelompok: Daftar Kelompok Didahulukan
+- **📋 Reorder Kartu Manajemen Mahasiswa & Partisipasi:**
+  - Mengubah urutan kartu pada tab **Kelompok** (`adminView_data`):
+    1. **Kartu Utama 1:** **Daftar Kelompok & Mahasiswa** (Daftar kelompok presentasi, impor banyak, tambah kelompok, pencarian, dan kartu anggota mahasiswa).
+    2. **Kartu Utama 2:** **Pelacak Partisipasi & Pengisian Mahasiswa** (Progress bar partisipasi, filter belum/sudah mengisi, dan salin pengingat WhatsApp).
+  - Memudahkan admin/dosen mengelola pembagian kelompok terlebih dahulu sebelum meninjau status pelacakan absensi.
+
+---
+
 ## [2.4.15] - 2026-08-26
 
 ### 🎨 Perbaikan Presisi Padding & Border Tombol Bilah Tab Header (*Zero Edge Clipping*)

@@ -638,76 +638,8 @@
             </button>
           </div>
         </div>
-                <!-- 📊 PELACAK PARTISIPASI & MAHASISWA BELUM MENILAI (ATTENDANCE TRACKER) -->
-        <div class="bg-white rounded-xl sm:rounded-2xl border border-zinc-200 p-3.5 sm:p-5 shadow-xs space-y-4">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 pb-3">
-            <div class="flex items-center gap-2.5">
-              <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center font-bold text-base shrink-0 shadow-2xs">
-                📊
-              </div>
-              <div>
-                <h3 class="text-xs sm:text-base font-bold text-zinc-900">Pelacak Partisipasi &amp; Pengisian Mahasiswa</h3>
-                <p class="text-[10.5px] sm:text-xs text-zinc-500 mt-0.5">Pantau mahasiswa yang sudah vs belum mengisi form penilaian peer-assessment.</p>
-              </div>
-            </div>
-
-            <!-- Blast WA Reminder Button -->
-            <button 
-              type="button" 
-              onclick="copyWhatsAppAttendanceReminder()" 
-              class="px-3 sm:px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition cursor-pointer shrink-0 active:scale-98"
-              title="Salin draf teks pengingat WhatsApp lengkap dengan daftar nama mahasiswa yang belum mengisi"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-              <span>📋 Salin Pengingat WhatsApp</span>
-            </button>
-          </div>
-
-          <!-- Progress Bar & Quick Stats -->
-          <div class="bg-zinc-50 rounded-xl border border-zinc-200/80 p-3 sm:p-4 space-y-2.5">
-            <div class="flex items-center justify-between text-xs font-semibold">
-              <span class="text-zinc-700 flex items-center gap-1.5">
-                <span>Tingkat Partisipasi Kelas:</span>
-                <span id="trackerParticipationPercent" class="font-mono font-bold text-emerald-700">0%</span>
-              </span>
-              <div class="flex items-center gap-2 text-[11px] font-mono">
-                <span class="text-emerald-700 font-bold bg-emerald-100/70 px-2 py-0.5 rounded-md" id="trackerCountSubmitted">🟢 Sudah: 0</span>
-                <span class="text-rose-700 font-bold bg-rose-100/70 px-2 py-0.5 rounded-md" id="trackerCountMissing">🔴 Belum: 0</span>
-              </div>
-            </div>
-
-            <!-- Visual Progress Bar -->
-            <div class="w-full bg-zinc-200 h-2.5 rounded-full overflow-hidden shadow-inner flex">
-              <div id="trackerProgressBar" class="bg-emerald-500 h-full transition-all duration-500 rounded-full" style="width: 0%;"></div>
-            </div>
-          </div>
-
-          <!-- Student Roster Attendance Filter & Table -->
-          <div class="space-y-3">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
-              <div class="flex items-center gap-1 bg-zinc-100 p-1 rounded-xl w-fit">
-                <button type="button" onclick="setAttendanceTrackerFilter('ALL')" id="btnTrackerFilter_ALL" class="px-2.5 py-1 rounded-lg font-bold bg-white text-zinc-900 shadow-2xs cursor-pointer text-xs transition">Semua (<span id="countPill_ALL">0</span>)</button>
-                <button type="button" onclick="setAttendanceTrackerFilter('MISSING')" id="btnTrackerFilter_MISSING" class="px-2.5 py-1 rounded-lg font-medium text-rose-700 hover:bg-white/60 cursor-pointer text-xs transition">Belum Menilai (<span id="countPill_MISSING">0</span>)</button>
-                <button type="button" onclick="setAttendanceTrackerFilter('SUBMITTED')" id="btnTrackerFilter_SUBMITTED" class="px-2.5 py-1 rounded-lg font-medium text-emerald-700 hover:bg-white/60 cursor-pointer text-xs transition">Sudah Menilai (<span id="countPill_SUBMITTED">0</span>)</button>
-              </div>
-
-              <input 
-                type="text" 
-                id="trackerSearchInput" 
-                oninput="renderAdminAttendanceTracker()" 
-                placeholder="Cari nama atau NIM mahasiswa..." 
-                class="px-3 py-1.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none bg-zinc-50 focus:bg-white transition max-w-xs w-full"
-              >
-            </div>
-
-            <!-- Attendance List Container -->
-            <div id="attendanceTrackerListContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-72 overflow-y-auto p-1 border border-zinc-100 rounded-xl bg-zinc-50/50">
-              <!-- Dynamically populated via renderAdminAttendanceTracker() -->
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-xl border border-zinc-200 p-3.5 sm:p-5 shadow-xs space-y-3 sm:space-y-4">
+                <!-- DAFTAR KELOMPOK & MAHASISWA -->
+        <div class="bg-white rounded-xl sm:rounded-2xl border border-zinc-200 p-3.5 sm:p-5 shadow-xs space-y-3 sm:space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-zinc-100 pb-3">
             <div>
               <h2 class="text-sm sm:text-base font-bold text-zinc-900">Daftar Kelompok &amp; Mahasiswa</h2>
@@ -787,6 +719,75 @@
           <div id="emptyMasterGroups" class="hidden p-6 sm:p-8 text-center bg-zinc-50 rounded-xl border border-dashed border-zinc-300 space-y-2">
             <p class="text-xs font-semibold text-zinc-600">Belum ada data kelompok.</p>
             <p class="text-[10.5px] sm:text-[11px] text-zinc-400">Klik "Tambah Kelompok" atau "Impor Banyak" untuk menambahkan daftar mahasiswa.</p>
+          </div>
+        </div>
+
+        <!-- 📊 PELACAK PARTISIPASI & MAHASISWA BELUM MENILAI (ATTENDANCE TRACKER) -->
+        <div class="bg-white rounded-xl sm:rounded-2xl border border-zinc-200 p-3.5 sm:p-5 shadow-xs space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 pb-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center font-bold text-base shrink-0 shadow-2xs">
+                📊
+              </div>
+              <div>
+                <h3 class="text-xs sm:text-base font-bold text-zinc-900">Pelacak Partisipasi &amp; Pengisian Mahasiswa</h3>
+                <p class="text-[10.5px] sm:text-xs text-zinc-500 mt-0.5">Pantau mahasiswa yang sudah vs belum mengisi form penilaian peer-assessment.</p>
+              </div>
+            </div>
+
+            <!-- Blast WA Reminder Button -->
+            <button 
+              type="button" 
+              onclick="copyWhatsAppAttendanceReminder()" 
+              class="px-3 sm:px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition cursor-pointer shrink-0 active:scale-98"
+              title="Salin draf teks pengingat WhatsApp lengkap dengan daftar nama mahasiswa yang belum mengisi"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+              <span>📋 Salin Pengingat WhatsApp</span>
+            </button>
+          </div>
+
+          <!-- Progress Bar & Quick Stats -->
+          <div class="bg-zinc-50 rounded-xl border border-zinc-200/80 p-3 sm:p-4 space-y-2.5">
+            <div class="flex items-center justify-between text-xs font-semibold">
+              <span class="text-zinc-700 flex items-center gap-1.5">
+                <span>Tingkat Partisipasi Kelas:</span>
+                <span id="trackerParticipationPercent" class="font-mono font-bold text-emerald-700">0%</span>
+              </span>
+              <div class="flex items-center gap-2 text-[11px] font-mono">
+                <span class="text-emerald-700 font-bold bg-emerald-100/70 px-2 py-0.5 rounded-md" id="trackerCountSubmitted">🟢 Sudah: 0</span>
+                <span class="text-rose-700 font-bold bg-rose-100/70 px-2 py-0.5 rounded-md" id="trackerCountMissing">🔴 Belum: 0</span>
+              </div>
+            </div>
+
+            <!-- Visual Progress Bar -->
+            <div class="w-full bg-zinc-200 h-2.5 rounded-full overflow-hidden shadow-inner flex">
+              <div id="trackerProgressBar" class="bg-emerald-500 h-full transition-all duration-500 rounded-full" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <!-- Student Roster Attendance Filter & Table -->
+          <div class="space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
+              <div class="flex items-center gap-1 bg-zinc-100 p-1 rounded-xl w-fit">
+                <button type="button" onclick="setAttendanceTrackerFilter('ALL')" id="btnTrackerFilter_ALL" class="px-2.5 py-1 rounded-lg font-bold bg-white text-zinc-900 shadow-2xs cursor-pointer text-xs transition">Semua (<span id="countPill_ALL">0</span>)</button>
+                <button type="button" onclick="setAttendanceTrackerFilter('MISSING')" id="btnTrackerFilter_MISSING" class="px-2.5 py-1 rounded-lg font-medium text-rose-700 hover:bg-white/60 cursor-pointer text-xs transition">Belum Menilai (<span id="countPill_MISSING">0</span>)</button>
+                <button type="button" onclick="setAttendanceTrackerFilter('SUBMITTED')" id="btnTrackerFilter_SUBMITTED" class="px-2.5 py-1 rounded-lg font-medium text-emerald-700 hover:bg-white/60 cursor-pointer text-xs transition">Sudah Menilai (<span id="countPill_SUBMITTED">0</span>)</button>
+              </div>
+
+              <input 
+                type="text" 
+                id="trackerSearchInput" 
+                oninput="renderAdminAttendanceTracker()" 
+                placeholder="Cari nama atau NIM mahasiswa..." 
+                class="px-3 py-1.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none bg-zinc-50 focus:bg-white transition max-w-xs w-full"
+              >
+            </div>
+
+            <!-- Attendance List Container -->
+            <div id="attendanceTrackerListContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-72 overflow-y-auto p-1 border border-zinc-100 rounded-xl bg-zinc-50/50">
+              <!-- Dynamically populated via renderAdminAttendanceTracker() -->
+            </div>
           </div>
         </div>
       </div>
