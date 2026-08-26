@@ -4,6 +4,15 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.2] - 2026-08-26
+
+### 🎨 Penyelarasan Desain Token & Presisi Dimensi Portal Akses
+- **📐 Keselarasan Penuh Desain Asli (`#viewPortal`):**
+  - Mengadopsi padding, margin, radius sudut (`rounded-xl sm:rounded-2xl`), dan lebar kontainer yang 100% identik dengan kartu panduan dan formulir utama (`formOverviewSection`).
+  - Menyelaraskan ukuran tipografi judul (`text-base sm:text-xl font-bold`), subjudul, badge pill institusi, kolom input PIN, dan kartu riwayat formulir perangkat.
+
+---
+
 ## [2.3.64] - 2026-08-26
 
 ### 🛡️ Stabilisasi Total Antarmuka Asli & Presisi Tata Letak Responsif
