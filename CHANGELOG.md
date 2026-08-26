@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.52] - 2026-08-26
+
+### 🛡️ Penguatan Arsitektur Callback OAuth (PKCE & Implicit) & Anti-Flicker Sesi
+- **⚡ Dukungan Penuh Alur PKCE (`?code=...`):**
+  - Mengintegrasikan penukaran kode otentikasi otomatis via `supabaseClient.auth.exchangeCodeForSession(code)` ketika Supabase Auth mengembalikan query parameter `code`, menjamin kompatibilitas mutlak pada alur PKCE modern dan SPA browser.
+- **🔒 Eliminasi Race-Condition & Layar Berkedip Saat Callback:**
+  - Menangguhkan evaluasi gerbang masuk awal (`checkAndApplyAuthGate`) saat halaman mendeteksi callback OAuth sedang aktif (`code=` atau `#access_token=`), memastikan transisi sesi berjalan mulus tanpa kedip ataupun redirect loop.
+- **✨ Pembersihan URL Riwayat Bersih:**
+  - Membersihkan parameter `code` maupun hash token dari address bar browser setelah sesi tervalidasi penuh demi estetika dan keamanan pengguna.
+
+---
+
 ## [2.3.51] - 2026-08-26
 
 ### 🔄 Penyempurnaan Dialog Konfirmasi Keluar & Pergantian Akun Google

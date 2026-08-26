@@ -2076,13 +2076,17 @@ function normalizeMediaList(fieldOrMedia) {
       // Pulihkan Active Tab (Formulir vs Rekapitulasi) tanpa merusak token hash
       const hash = (window.location.hash || "").replace("#", "").toLowerCase();
       const isAuthHash = hash.includes("access_token") || hash.includes("error_description");
+      const hasAuthCode = (window.location.search || "").includes("code=");
+      const isAuthProcessing = isAuthHash || hasAuthCode;
       const savedTab = (!isAuthHash && (hash === "rekap" || hash === "form")) ? hash : (localStorage.getItem("PGSD_ACTIVE_MAIN_TAB") || "form");
       
       switchTab(savedTab, false);
       updateStepUI(1);
       
-      // Evaluasi Gerbang Login Otentikasi sejak awal muat halaman
-      checkAndApplyAuthGate();
+      // Evaluasi Gerbang Login Otentikasi sejak awal muat halaman (hindari flash jika sedang memproses callback)
+      if (!isAuthProcessing) {
+        checkAndApplyAuthGate();
+      }
 
       restoreFormDraft();
       fetchInitialFormData(false);
@@ -5531,7 +5535,39 @@ function normalizeMediaList(fieldOrMedia) {
     }
 
     async function initSupabaseAuthListener() {
-      // 0. Direct Instant Extraction from URL Hash Fragment (#access_token=...)
+      const sb = getSupabaseClient() || (window.supabase && typeof window.supabase.createClient === "function" ? (supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey)) : null);
+
+      // 0. PKCE OAuth Flow Check (?code=...)
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const authCode = urlParams.get('code');
+        if (authCode && sb && sb.auth && typeof sb.auth.exchangeCodeForSession === 'function') {
+          const btn = document.getElementById("btnGoogleSignIn");
+          if (btn) {
+            btn.innerHTML = `
+              <svg class="w-4 h-4 animate-spin text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span class="text-white font-bold">Menyelesaikan Otentikasi Google...</span>
+            `;
+          }
+          const { data: codeData, error: codeErr } = await sb.auth.exchangeCodeForSession(authCode);
+          if (!codeErr && codeData && codeData.session && codeData.session.user) {
+            applySupabaseGoogleUser(codeData.session.user);
+            try {
+              const cleanUrl = new URL(window.location.href);
+              cleanUrl.searchParams.delete('code');
+              history.replaceState(null, null, cleanUrl.toString());
+            } catch (e) {}
+            return;
+          }
+        }
+      } catch (pkceErr) {
+        console.warn("PKCE code exchange notice:", pkceErr);
+      }
+
+      // 1. Direct Instant Extraction from URL Hash Fragment (#access_token=...)
       try {
         const rawHash = window.location.hash || '';
         if (rawHash.includes('access_token=')) {
@@ -5559,10 +5595,9 @@ function normalizeMediaList(fieldOrMedia) {
               console.warn("Direct JWT token parse notice:", jwtErr);
             }
 
-            const sbInst = getSupabaseClient();
-            if (sbInst && sbInst.auth && refreshToken) {
+            if (sb && sb.auth && refreshToken) {
               try {
-                await sbInst.auth.setSession({
+                await sb.auth.setSession({
                   access_token: accessToken,
                   refresh_token: refreshToken
                 });
@@ -5574,17 +5609,16 @@ function normalizeMediaList(fieldOrMedia) {
         console.warn("OAuth Hash extraction notice:", hashErr);
       }
 
-      const sb = getSupabaseClient() || (window.supabase && typeof window.supabase.createClient === "function" ? (supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey)) : null);
       if (!sb || !sb.auth) return;
 
       try {
-        // 1. Check initial session from Supabase Client
+        // 2. Check initial session from Supabase Client
         const { data: sessionData } = await sb.auth.getSession();
         if (sessionData && sessionData.session && sessionData.session.user) {
           applySupabaseGoogleUser(sessionData.session.user);
         }
 
-        // 2. Listen to auth state changes
+        // 3. Listen to auth state changes
         sb.auth.onAuthStateChange(async (event, session) => {
           if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'USER_UPDATED' || event === 'TOKEN_REFRESHED') && session && session.user) {
             applySupabaseGoogleUser(session.user);
