@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.4] - 2026-08-26
+
+### 💎 Desain Terpusat Ultra-Clean & Estetika Modern Minimalis Portal PIN
+- **✨ Redesain Portal Masuk Terfokus (*Focused Centered Gate*):**
+  - Mengubah layout portal dari lebar penuh menjadi kartu terpusat elegan (`max-w-md`) dengan radius halus `rounded-3xl` dan bayangan ambient lembut.
+  - Memusatkan elemen identitas institusi, logo ULM, judul, dan kolom input PIN monospace terpusat dengan placeholder bersih.
+  - Mengompakkan kartu riwayat formulir di perangkat dan menghilangkan kotak petunjuk berlebih demi tampilan yang tenang, rapi, dan estetis.
+
+---
+
 ## [2.4.3] - 2026-08-26
 
 ### 📱 Optimasi Presisi Responsivitas Multi-Ukuran (Mobile-S / Mobile-M / Mobile-L)
