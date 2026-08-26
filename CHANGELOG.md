@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.32] - 2026-08-26
+
+### 🌐 Konversi Pintar Zona Waktu Lintas Wilayah (*Smart Cross-Timezone Conversion*)
+- **Penyesuaian Jam Otomatis Sesuai Wilayah Mahasiswa (*Smart Timezone Localization*):**
+  - Mengintegrasikan fungsi `formatSmartScheduleTime` yang otomatis mendeteksi zona waktu perangkat mahasiswa: jika dosen menyetel jadwal pukul `20.00 WITA`, mahasiswa di zona WIB (Jakarta/Jawa) akan otomatis melihat tampilan `19.00 WIB (20.00 WITA - Waktu Kampus)` dan mahasiswa di zona WIT akan melihat `21.00 WIT`.
+- **Standarisasi Waktu Kampus Terpadu (*Campus Time Normalization*):**
+  - Seluruh input jadwal di panel Admin distandarisasi ke zona waktu kampus FKIP ULM (**WITA / UTC+8**), dilengkapi lencana indikator zona waktu yang jelas pada kolom input admin.
+
+---
+
 ## [2.3.31] - 2026-08-26
 
 ### 👁️ Animasi Interaktif Bola Mata Mengikuti Kursor Mouse (*Interactive Eye Cursor Tracking Animation*)

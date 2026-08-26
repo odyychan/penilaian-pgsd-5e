@@ -3430,10 +3430,73 @@ function normalizeMediaList(fieldOrMedia) {
       }
     }
 
-        // =========================================================================
+    // =========================================================================
     // JADWAL AKSES FORMULIR & KONTROL TENGGAT WAKTU (SCHEDULE & DEADLINE ENGINE)
     // =========================================================================
     let scheduleIntervalTimer = null;
+
+    function parseCampusDate(str) {
+      if (!str) return null;
+      if (str instanceof Date) return isNaN(str.getTime()) ? null : str;
+      const s = String(str).trim();
+      // If no timezone offset is provided, assume WITA (UTC+8 / +08:00)
+      const hasOffset = s.includes('Z') || /[+-]\d{2}(:\d{2})?$/.test(s);
+      const normalized = hasOffset ? s : s + '+08:00';
+      const d = new Date(normalized);
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    function formatSmartScheduleTime(dateInput) {
+      const dateObj = parseCampusDate(dateInput);
+      if (!dateObj) return '-';
+
+      // Format Campus Time (WITA - Asia/Makassar)
+      const witaDateStr = dateObj.toLocaleDateString('id-ID', {
+        timeZone: 'Asia/Makassar',
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+      const witaTimeStr = dateObj.toLocaleTimeString('id-ID', {
+        timeZone: 'Asia/Makassar',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      }).replace(':', '.');
+
+      // Detect User's Local Timezone Offset
+      const localOffsetMin = -new Date().getTimezoneOffset(); // in minutes (+420 = WIB, +480 = WITA, +540 = WIT)
+      const isWita = (localOffsetMin === 480);
+
+      if (isWita) {
+        return `${witaDateStr} pukul ${witaTimeStr} WITA`;
+      }
+
+      // Format User's Local Time
+      let zoneLabel = 'WIB';
+      if (localOffsetMin === 420) zoneLabel = 'WIB';
+      else if (localOffsetMin === 540) zoneLabel = 'WIT';
+      else {
+        const sign = localOffsetMin >= 0 ? '+' : '-';
+        const hrs = Math.floor(Math.abs(localOffsetMin) / 60);
+        zoneLabel = `UTC${sign}${hrs}`;
+      }
+
+      const localDateStr = dateObj.toLocaleDateString('id-ID', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+      const localTimeStr = dateObj.toLocaleTimeString('id-ID', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      }).replace(':', '.');
+
+      return `${localDateStr} pukul ${localTimeStr} ${zoneLabel} <span class="font-normal text-amber-800/80">(${witaTimeStr} WITA - Waktu Kampus)</span>`;
+    }
 
     function evaluateFormScheduleStatus() {
       const lockBanner = document.getElementById("formScheduleLockBanner");
@@ -3460,26 +3523,26 @@ function normalizeMediaList(fieldOrMedia) {
         const maxResponses = parseInt(appConfig["Batas_Maksimal_Respons"]) || 0;
 
         if (startTimeStr) {
-          const startTime = new Date(startTimeStr);
-          if (now < startTime) {
+          const startTime = parseCampusDate(startTimeStr);
+          if (startTime && now < startTime) {
             isBlocked = true;
             blockReason = "BEFORE_START";
             blockTitle = "Formulir Belum Dibuka";
             targetTime = startTime;
-            const timeFormatted = startTime.toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' });
-            blockDesc = (appConfig["Pesan_Form_Belum_Buka"] || "Formulir penilaian belum dibuka. Perkuliahan akan dimulai sesuai jadwal.") + `<br><span class="inline-block mt-2 font-mono font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200">Dibuka pada: ${timeFormatted} WITA</span>`;
+            const timeFormatted = formatSmartScheduleTime(startTime);
+            blockDesc = (appConfig["Pesan_Form_Belum_Buka"] || "Formulir penilaian belum dibuka. Perkuliahan akan dimulai sesuai jadwal.") + `<br><span class="inline-block mt-2 font-mono font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200">Dibuka pada: ${timeFormatted}</span>`;
           }
         }
 
         if (!isBlocked && endTimeStr) {
-          const endTime = new Date(endTimeStr);
-          if (now > endTime) {
+          const endTime = parseCampusDate(endTimeStr);
+          if (endTime && now > endTime) {
             isBlocked = true;
             blockReason = "AFTER_END";
             blockTitle = "Batas Waktu Pengisian Telah Berakhir";
-            const timeFormatted = endTime.toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' });
-            blockDesc = (appConfig["Pesan_Form_Ditutup"] || "Sesi penilaian telah berakhir dan batas waktu telah ditutup. Terima kasih atas partisipasi Anda.") + `<br><span class="inline-block mt-2 font-mono font-bold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200">Ditutup sejak: ${timeFormatted} WITA</span>`;
-          } else {
+            const timeFormatted = formatSmartScheduleTime(endTime);
+            blockDesc = (appConfig["Pesan_Form_Ditutup"] || "Sesi penilaian telah berakhir dan batas waktu telah ditutup. Terima kasih atas partisipasi Anda.") + `<br><span class="inline-block mt-2 font-mono font-bold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200">Ditutup sejak: ${timeFormatted}</span>`;
+          } else if (endTime) {
             // Check if deadline is approaching (< 24 hours)
             const diffMs = endTime - now;
             if (diffMs > 0 && diffMs < 24 * 3600 * 1000) {
