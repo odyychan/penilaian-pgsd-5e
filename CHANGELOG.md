@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.40] - 2026-08-26
+
+### 🔒 Penegakan Eksklusif Otentikasi Akun Google Resmi (*Strict Single Sign-On*)
+- **🚫 Penghapusan Formulir Login Mandiri:**
+  - Menghapus opsi pengisian login manual pada gerbang otentikasi; seluruh akses wajib melalui verifikasi resmi **Google OAuth** (`Sign in with Google`).
+- **🛡️ Penegakan Domain Kampus ULM (*Strict Domain Enforcement*):**
+  - Pada mode `ULM_ONLY`, akun Google di luar domain resmi (`@mhs.ulm.ac.id` / `@ulm.ac.id`) otomatis ditolak oleh sistem dan dikembalikan ke layar login dengan pesan penolakan resmi.
+- **✨ Antarmuka Gerbang Masuk Bersih & Terfokus:**
+  - Tampilan `#formAuthGateSection` kini fokus 100% pada tombol **Masuk dengan Akun Google Kampus ULM** dan akun Google terverifikasi yang tersimpan di perangkat.
+
+---
+
 ## [2.3.39] - 2026-08-26
 
 ### 🛡️ Optimasi Alur Inisialisasi & Penguncian Gerbang Login Otentikasi Sejak Awal Muat
