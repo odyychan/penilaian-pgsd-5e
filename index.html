@@ -4312,7 +4312,8 @@ function normalizeMediaList(fieldOrMedia) {
     function startAssessmentForm() {
       const emailMode = appConfig["Mode_Pengumpulan_Email"] || "ALL_EMAIL";
       const session = getCurrentAuthSession();
-      if (emailMode !== 'NO_EMAIL' && (!session || !session.email)) {
+      const hasEmail = activeUserAccountEmail || (session && session.email);
+      if (emailMode !== 'NO_EMAIL' && !hasEmail) {
         checkAndApplyAuthGate();
         return;
       }
@@ -5076,7 +5077,11 @@ function normalizeMediaList(fieldOrMedia) {
       try {
         const formKey = (activeFormId || 'BK5E').toUpperCase();
         const key = "PGSD_AUTH_SESSION_" + formKey;
-        const raw = localStorage.getItem(key) || sessionStorage.getItem(key) || localStorage.getItem("PGSD_AUTH_SESSION_BK5E");
+        const raw = localStorage.getItem(key) || 
+                    sessionStorage.getItem(key) || 
+                    localStorage.getItem("PGSD_AUTH_SESSION_BK5E") || 
+                    sessionStorage.getItem("PGSD_AUTH_SESSION_BK5E") || 
+                    localStorage.getItem("PGSD_AUTH_SESSION_PRIMARY");
         if (raw) return JSON.parse(raw);
       } catch (e) {}
       return null;
@@ -5098,8 +5103,12 @@ function normalizeMediaList(fieldOrMedia) {
       };
       if (remember) {
         localStorage.setItem(key, JSON.stringify(payload));
+        localStorage.setItem("PGSD_AUTH_SESSION_PRIMARY", JSON.stringify(payload));
+        localStorage.setItem("PGSD_AUTH_SESSION_BK5E", JSON.stringify(payload));
       } else {
         sessionStorage.setItem(key, JSON.stringify(payload));
+        sessionStorage.setItem("PGSD_AUTH_SESSION_PRIMARY", JSON.stringify(payload));
+        sessionStorage.setItem("PGSD_AUTH_SESSION_BK5E", JSON.stringify(payload));
       }
       activeUserAccountEmail = payload.email;
       activeUserAccountName = payload.nama;
@@ -5113,6 +5122,10 @@ function normalizeMediaList(fieldOrMedia) {
       const key = "PGSD_AUTH_SESSION_" + (activeFormId || 'BK5E').toUpperCase();
       localStorage.removeItem(key);
       sessionStorage.removeItem(key);
+      localStorage.removeItem("PGSD_AUTH_SESSION_PRIMARY");
+      sessionStorage.removeItem("PGSD_AUTH_SESSION_PRIMARY");
+      localStorage.removeItem("PGSD_AUTH_SESSION_BK5E");
+      sessionStorage.removeItem("PGSD_AUTH_SESSION_BK5E");
       activeUserAccountEmail = "";
       activeUserAccountName = "";
       activeUserAccountNim = "";

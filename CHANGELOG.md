@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.55] - 2026-08-26
+
+### 🛡️ Penguatan Persistensi Multi-Key Sesi & Penyelarasan Aturan Domain ULM / Bebas
+- **🔒 Multi-Key Storage Persistensi Sesi:**
+  - Menyimpan sesi login ke beberapa kunci fallback (`PGSD_AUTH_SESSION_[FORM]`, `PGSD_AUTH_SESSION_PRIMARY`, `PGSD_AUTH_SESSION_BK5E`) di `localStorage` dan `sessionStorage`, menjamin sesi login tidak hilang saat pergantian rute ataupun reload.
+- **✨ Transisi Mulus Buka Form (`startAssessmentForm`):**
+  - Menyederhanakan pengecekan sesi pada `startAssessmentForm` agar langsung membuka wadah wizard formulir tanpa tertahan di layar overview ataupun gerbang login.
+- **📋 Penyelarasan Aturan Akun ULM vs Akun Bebas:**
+  - Memverifikasi mode pengumpulan email (`ALL_EMAIL` vs `ULM_ONLY`) agar akun Google Gmail umum diterima pada mode bebas tanpa penolakan domain, dan hanya membatasi `@mhs.ulm.ac.id` / `@ulm.ac.id` jika mode diatur ke `ULM_ONLY`.
+
+---
+
 ## [2.3.54] - 2026-08-26
 
 ### 🛡️ Sinkronisasi Async Callback OAuth & Penanganan Eksplisit Error Code Exchange
