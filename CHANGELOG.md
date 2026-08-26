@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.63] - 2026-08-26
+
+### 🎨 Redesain Modern-Minimalist Portal Akses & Netralisasi Teks Contoh PIN
+- **✨ Desain Terpadu Modern-Minimalist (`#viewPortal`):**
+  - Menggabungkan elemen portal ke dalam kartu tunggal elegan (*unified modern card*) dengan border halus `border-zinc-200/90`, bayangan lembut, tipografi bersih, dan logo institusi FKIP ULM resolusi tinggi.
+  - Menghapus kotak gelap terpisah (*dark hero banner*) agar selaras dengan estetika modern-minimalis sistem.
+- **🔒 Netralisasi Teks & Pencegahan Kebocoran Kode Formulir:**
+  - Menghapus seluruh teks petunjuk, placeholder, dan contoh yang menyebutkan kode `BK5E`.
+  - Mengubah placeholder menjadi teks netral yang elegan: `KODE PIN FORMULIR` dengan ikon gembok/kunci dan tombol hapus input yang presisi.
+
+---
+
 ## [2.3.62] - 2026-08-26
 
 ### 🚀 Peluncuran Portal Akses Formulir (PIN Gate & History Hub)

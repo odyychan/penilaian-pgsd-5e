@@ -296,116 +296,114 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- PORTAL MASUK AWAL: INPUT PIN & HISTORI FORMULIR (LANDING GATE) -->
+    <!-- PORTAL MASUK AWAL: INPUT PIN & HISTORI FORMULIR (MODERN MINIMALIST HUB) -->
     <!-- ========================================================================= -->
-    <div id="viewPortal" class="hidden max-w-2xl w-full mx-auto space-y-4 sm:space-y-6 pt-1 sm:pt-3 step-fade">
+    <div id="viewPortal" class="hidden max-w-xl w-full mx-auto space-y-4 sm:space-y-5 pt-2 sm:pt-6 pb-6 step-fade">
       
-      <!-- Hero Card -->
-      <div class="bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 rounded-2xl p-5 sm:p-7 text-white shadow-xl border border-zinc-800 relative overflow-hidden text-center sm:text-left">
-        <div class="absolute -right-12 -bottom-12 w-48 h-48 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
-        <div class="absolute -left-12 -top-12 w-48 h-48 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
-
-        <div class="relative z-10 flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5">
-          <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/10 p-2 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0 shadow-lg">
-            <img src="assets/logo-ulm.png" alt="Logo ULM" onerror="this.src='logo-ulm.png'" class="w-full h-full object-contain filter drop-shadow">
+      <!-- Main Portal Card (Unified Clean Card) -->
+      <div class="bg-white rounded-2xl sm:rounded-3xl border border-zinc-200/90 shadow-lg shadow-zinc-900/5 p-6 sm:p-8 space-y-6">
+        
+        <!-- Header & Identity -->
+        <div class="text-center space-y-3">
+          <div class="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-zinc-50 border border-zinc-200/80 p-2.5 mx-auto shadow-2xs">
+            <img src="assets/logo-ulm.png" alt="Logo ULM" onerror="this.src='logo-ulm.png'" class="w-full h-full object-contain filter drop-shadow-2xs">
           </div>
-          <div class="space-y-1.5 flex-1">
-            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[10px] sm:text-xs font-mono font-bold">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          
+          <div class="space-y-1.5">
+            <div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-[10px] sm:text-[11px] font-mono font-bold">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
               PORTAL PENILAIAN AKADEMIK FKIP ULM
             </div>
-            <h1 class="text-base sm:text-xl font-extrabold text-white tracking-tight">
-              Sistem Penilaian Peer-Assessment
+            <h1 class="text-xl sm:text-2xl font-extrabold text-zinc-900 tracking-tight">
+              Akses Formulir Penilaian
             </h1>
-            <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed max-w-lg">
-              Masukkan <strong>PIN / Kode Akses Formulir</strong> yang dibagikan oleh Dosen Pengampu untuk membuka instrumen penilaian kelas.
+            <p class="text-xs sm:text-sm text-zinc-500 max-w-sm mx-auto leading-relaxed">
+              Masukkan kode PIN yang diberikan oleh dosen pengampu atau koordinator kelas untuk membuka instrumen penilaian.
             </p>
           </div>
         </div>
-      </div>
 
-      <!-- PIN Input Card -->
-      <div class="bg-white rounded-2xl border border-zinc-200 p-5 sm:p-6 shadow-xs space-y-4">
-        <div class="border-b border-zinc-100 pb-3">
-          <h2 class="text-sm sm:text-base font-bold text-zinc-900 flex items-center gap-2">
-            <span>🔑</span>
-            <span>Akses Formulir dengan PIN</span>
-          </h2>
-          <p class="text-xs text-zinc-500 mt-0.5">
-            Ketik kode PIN formulir perkuliahan Anda (contoh: <code class="bg-zinc-100 px-1 py-0.5 rounded font-mono font-bold text-zinc-800">BK5E</code>).
-          </p>
-        </div>
-
-        <form id="portalPinForm" onsubmit="event.preventDefault(); submitPortalPin();" class="space-y-3.5">
-          <div>
-            <label for="inputPortalPin" class="block text-xs font-bold text-zinc-700 mb-1.5">
-              KODE PIN FORMULIR <span class="text-rose-500">*</span>
+        <!-- Form Input PIN -->
+        <form id="portalPinForm" onsubmit="event.preventDefault(); submitPortalPin();" class="space-y-3.5 pt-1">
+          <div class="space-y-1.5">
+            <label for="inputPortalPin" class="block text-[11px] sm:text-xs font-bold text-zinc-700 uppercase tracking-wider text-center sm:text-left">
+              Kode Akses / PIN Formulir <span class="text-rose-500">*</span>
             </label>
             <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-zinc-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                </svg>
+              </div>
               <input 
                 type="text" 
                 id="inputPortalPin" 
-                placeholder="MASUKKAN PIN (CONTOH: BK5E)" 
+                placeholder="KODE PIN FORMULIR" 
                 autocomplete="off" 
                 autocapitalize="characters" 
                 maxlength="16" 
-                class="w-full px-4 py-3 sm:py-3.5 text-base sm:text-lg font-mono font-extrabold text-zinc-900 tracking-wider uppercase rounded-xl border border-zinc-300 focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10 outline-none transition bg-zinc-50 focus:bg-white placeholder-zinc-400 select-all"
+                class="w-full pl-11 pr-11 py-3.5 sm:py-4 text-center sm:text-left text-base sm:text-lg font-mono font-extrabold text-zinc-900 tracking-widest uppercase rounded-xl border border-zinc-300 focus:border-zinc-900 focus:ring-4 focus:ring-zinc-900/5 outline-none transition bg-zinc-50/50 focus:bg-white placeholder-zinc-400 select-all"
                 oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9_-]/g, '')"
               >
+              <button 
+                type="button" 
+                onclick="document.getElementById('inputPortalPin').value=''; document.getElementById('inputPortalPin').focus();"
+                class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-zinc-300 hover:text-zinc-600 transition cursor-pointer text-sm"
+                title="Hapus input"
+              >
+                ✕
+              </button>
             </div>
           </div>
 
           <button 
             type="submit" 
             id="btnSubmitPortalPin"
-            class="w-full min-h-[48px] px-6 py-3.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs sm:text-sm font-bold transition active:scale-98 flex items-center justify-center gap-2 cursor-pointer shadow-md"
+            class="w-full min-h-[48px] px-6 py-3.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs sm:text-sm font-bold transition-all active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer shadow-md hover:shadow-lg"
           >
             <svg id="portalPinSpinner" class="hidden w-4 h-4 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
             </svg>
             <span>Buka Formulir Penilaian</span>
-            <span>→</span>
+            <span class="text-base font-bold">→</span>
           </button>
         </form>
-      </div>
 
-      <!-- History Card (Riwayat Formulir Terakhir) -->
-      <div id="portalHistoryContainer" class="bg-white rounded-2xl border border-zinc-200 p-5 sm:p-6 shadow-xs space-y-3.5">
-        <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
-          <div>
-            <h2 class="text-sm sm:text-base font-bold text-zinc-900 flex items-center gap-2">
+        <!-- Divider with label -->
+        <div class="relative py-1">
+          <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-zinc-200/80"></div></div>
+          <div class="relative flex justify-center text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-zinc-400"><span class="bg-white px-3">Riwayat Perangkat</span></div>
+        </div>
+
+        <!-- History Container -->
+        <div id="portalHistoryContainer" class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xs sm:text-sm font-bold text-zinc-800 flex items-center gap-1.5">
               <span>🕒</span>
-              <span>Riwayat Formulir Terakhir</span>
+              <span>Formulir Terakhir Dibuka</span>
             </h2>
-            <p class="text-[11px] sm:text-xs text-zinc-500 mt-0.5">
-              Formulir yang tersimpan dan pernah dibuka di perangkat ini.
-            </p>
+            <button 
+              type="button" 
+              id="btnClearPortalHistory" 
+              onclick="clearAllVisitedFormsHistory()" 
+              class="hidden text-[11px] text-zinc-400 hover:text-rose-600 font-semibold transition cursor-pointer"
+            >
+              Hapus Semua
+            </button>
           </div>
-          <button 
-            type="button" 
-            id="btnClearPortalHistory" 
-            onclick="clearAllVisitedFormsHistory()" 
-            class="hidden text-[11px] text-zinc-400 hover:text-rose-600 font-semibold transition cursor-pointer"
-          >
-            Hapus Riwayat
-          </button>
+
+          <!-- History Cards List -->
+          <div id="portalHistoryList" class="space-y-2">
+            <!-- Populated dynamically via renderPortalHistoryCards() -->
+          </div>
         </div>
 
-        <!-- History List Items Container -->
-        <div id="portalHistoryList" class="space-y-2.5">
-          <!-- Populated dynamically via renderPortalHistoryCards() -->
+        <!-- Helpful Bottom Notice -->
+        <div class="pt-2 border-t border-zinc-100 flex items-start gap-2 text-[11px] text-zinc-500 leading-relaxed">
+          <span class="text-zinc-400 shrink-0">💡</span>
+          <span>Tautan langsung yang dibagikan oleh dosen pengampu akan membuka formulir secara otomatis tanpa perlu memasukkan PIN kembali.</span>
         </div>
-      </div>
 
-      <!-- Quick Info Box -->
-      <div class="p-4 rounded-xl bg-zinc-100/90 border border-zinc-200 text-xs text-zinc-600 space-y-1 text-center sm:text-left">
-        <p class="font-bold text-zinc-800 flex items-center justify-center sm:justify-start gap-1.5">
-          <span>💡</span>
-          <span>Petunjuk Akses</span>
-        </p>
-        <p class="text-[11px] text-zinc-500 leading-relaxed">
-          Jika Anda membuka tautan langsung yang dibagikan dosen (misal: <code>?id=BK5E</code>), formulir akan terbuka otomatis tanpa perlu memasukkan PIN kembali.
-        </p>
       </div>
 
     </div>
@@ -9271,7 +9269,7 @@ function normalizeMediaList(fieldOrMedia) {
       </div>
       <div>
         <h3 class="font-bold text-base text-zinc-900">Buka Formulir Penilaian Lain</h3>
-        <p class="text-xs text-zinc-500 mt-1">Masukkan kode PIN (4–5 karakter) atau slug tautan yang diberikan dosen/admin.</p>
+        <p class="text-xs text-zinc-500 mt-1">Masukkan kode PIN atau slug tautan yang diberikan oleh dosen pengampu.</p>
       </div>
       <form onsubmit="handleSwitchFormSubmit(event)" class="space-y-3">
         <input 
@@ -9279,12 +9277,12 @@ function normalizeMediaList(fieldOrMedia) {
           id="inputSwitchFormPin" 
           maxlength="20" 
           required 
-          placeholder="contoh: BK5E / IPA1" 
-          class="w-full text-center px-4 py-2.5 rounded-xl border border-zinc-300 font-mono font-extrabold text-base tracking-widest uppercase focus:border-indigo-600 outline-none select-all"
+          placeholder="KODE PIN FORMULIR" 
+          class="w-full text-center px-4 py-2.5 rounded-xl border border-zinc-300 font-mono font-extrabold text-base tracking-widest uppercase focus:border-zinc-900 outline-none select-all"
         >
         <div class="flex items-center justify-center gap-2 pt-1">
           <button type="button" onclick="closeSwitchFormModal()" class="px-4 py-2 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-medium cursor-pointer">Batal</button>
-          <button type="submit" class="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs cursor-pointer">Buka Formulir</button>
+          <button type="submit" class="px-5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold shadow-xs cursor-pointer">Buka Formulir</button>
         </div>
       </form>
     </div>
