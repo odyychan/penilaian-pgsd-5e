@@ -4,6 +4,14 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.5] - 2026-08-26
+
+### 🧹 Eliminasi Ikon Ganda & Penyelarasan Tombol Aksi Panel Admin
+- **✨ Perbaikan Ikon Redundan Tombol Reset:**
+  - Menghapus karakter simbol ganda (`↺`) pada tombol *Reset ke Bawaan* di Panel Admin, menyisakan SVG icon vektor tunggal yang bersih dan presisi.
+
+---
+
 ## [2.4.4] - 2026-08-26
 
 ### 💎 Desain Terpusat Ultra-Clean & Estetika Modern Minimalis Portal PIN
