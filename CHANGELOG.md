@@ -4,6 +4,19 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.23] - 2026-08-26
+
+### 🎨 Tampilan Terformat Langsung Pada Kolom Isian (*True In-Place WYSIWYG Morphing Fields*)
+- **Penghapusan Kotak Pratinjau Duplikat (*Zero Clutter & Compact Layout*):**
+  - Menghapus seluruh kotak terpisah lencana "PRATINJAU TAMPILAN" di bawah setiap input alur, pertanyaan, dan konfigurasi agar antarmuka kartu builder tetap ringkas, bersih, dan tidak memakan ruang.
+- **Tampilan Terformat Langsung di Tempat (*In-Place Visual Rendering*):**
+  - Kolom isian alur tahapan, judul bagian, pertanyaan, dan deskripsi kini langsung berwujud terformat rapi (nomor/abjad `A.`/`1.` berwarna indigo dan berlekuk sejajar, tautan link biru, rumus matematika KaTeX, teks tebal/miring) persis seperti tampilan pratinjau mahasiswa.
+- **Interaksi Klik-Untuk-Edit Mulus (*Seamless Click-to-Edit & Auto-Morph*):**
+  - Klik langsung pada teks terformat untuk mengedit dan mengetik secara instan.
+  - Saat selesai mengedit atau berpindah fokus (blur), elemen otomatis bertransformasi kembali menjadi tampilan terformat yang rapi dan estetis.
+
+---
+
 ## [2.3.22] - 2026-08-26
 
 ### 👁️ Mode Pengeditan & Pratinjau Terpadu (*Integrated Edit & Real-Time Rich Render Preview*)
