@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.42] - 2026-08-26
+
+### 🗑️ Penghapusan Total Modal Ganti Akun Manual & Integrasi Penuh Google Account Switcher
+- **🚫 Penghapusan Modal Manual (`#modalSwitchAccount`):**
+  - Menghapus jendela pop-up input email/NIM/nama manual untuk mengganti akun.
+- **🔄 Google Native Account Switcher:**
+  - Tombol *[🔄 Ganti Akun Google]* pada bar akun aktif kini langsung memicu dialog resmi pemilihan Akun Google (*"Choose an account"* via `supabaseClient.auth.signInWithOAuth`), memberikan pengalaman perpindahan akun yang mulus, aman, dan berstandar Google Workspace.
+
+---
+
 ## [2.3.41] - 2026-08-26
 
 ### 🛡️ Penguncian Menyeluruh Seluruh Titik Masuk Formulir (*Strict Pre-Fill Auth Enforcement*)
