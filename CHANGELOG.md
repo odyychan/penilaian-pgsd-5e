@@ -4,6 +4,25 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.36] - 2026-08-26
+
+### ✉️ Sistem Otentikasi Email Cerdas, Mode Fleksibel Pengumpulan Email & Pengikatan Draf Berbasis Akun (*Smart Email Collection & Account-Bound Draft Engine*)
+- **⚙️ 3 Mode Pengumpulan Email di Setelan Admin (`admin.html`):**
+  - **Khusus Akun Resmi ULM (`ULM_ONLY`):** Mengunci validasi email khusus ke domain kampus `@mhs.ulm.ac.id` dan `@ulm.ac.id` dengan pencocokan otomatis data master mahasiswa.
+  - **Email Umum Bebas (`ALL_EMAIL`):** Fleksibilitas penuh menerima semua alamat email umum (Gmail, Yahoo, institusi lain) untuk dosen tamu, praktisi luar, atau seminar terbuka.
+  - **Tanpa Email / Anonim (`NO_EMAIL`):** Mode penilaian cepat tanpa meminta alamat email penilai.
+- **📇 Bar Identitas Akun Aktif (*Google Forms Style Account Card*):**
+  - Menghadirkan bar identitas akun di bagian atas formulir penilaian (`#formAccountHeaderCard`) dengan avatar inisial, email aktif, lencana status akun, dan tombol *[🔄 Ganti Akun]*.
+- **💾 Pengikatan Draf Berbasis Akun Email (*Account-Bound Draft Isolation Engine*):**
+  - Seluruh rekaman draf disimpan secara terisolasi per akun (`PGSD_DRAFT_{formId}_{userEmail}`).
+  - Jika beberapa pengguna bergantian memakai perangkat yang sama, draf isian tidak akan tertukar; saat beralih akun, draf akun terkait otomatis dimuat kembali.
+- **🔄 Modal Ganti Akun & Riwayat Profil Lokal (`#modalSwitchAccount`):**
+  - Memungkinkan penilai beralih akun email atau memilih dari daftar akun tersimpan di browser secara instan.
+- **⚡ Domain Auto-Suggestion Chips:**
+  - Menambahkan tombol pintas penambah domain instan (`+ @mhs.ulm.ac.id`, `+ @ulm.ac.id`, `+ @gmail.com`) pada kolom input email.
+
+---
+
 ## [2.3.35] - 2026-08-26
 
 ### 🛠️ Perbaikan Sinkronisasi ID Container & Pemulihan Textarea Evaluasi Masukan Pemateri (*Fix Member Feedback Textarea Container & Rehydration*)

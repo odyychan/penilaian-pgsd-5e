@@ -435,6 +435,32 @@
           </div>
         </div>
 
+        <!-- GOOGLE FORMS STYLE ACTIVE ACCOUNT BAR -->
+        <div id="formAccountHeaderCard" class="hidden p-3.5 sm:p-4 rounded-xl bg-zinc-50 border border-zinc-200/90 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs transition-all">
+          <div class="flex items-center gap-3 min-w-0">
+            <div id="accountAvatarBox" class="w-9 h-9 rounded-full bg-indigo-600 text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-2xs">
+              ?
+            </div>
+            <div class="min-w-0 space-y-0.5">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span id="accountActiveEmail" class="font-bold text-zinc-900 truncate">-</span>
+                <span id="accountModeBadge" class="px-1.5 py-0.2 rounded-full bg-indigo-100 text-indigo-800 text-[9px] font-mono font-bold">Akun Aktif</span>
+              </div>
+              <p id="accountNoticeText" class="text-[11px] text-zinc-500 leading-tight">Draf dan respons penilaian direkam otomatis pada akun ini.</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
+            <button 
+              type="button" 
+              onclick="openSwitchAccountModal()"
+              class="px-2.5 py-1.5 rounded-lg bg-white hover:bg-zinc-100 text-zinc-700 border border-zinc-200 font-semibold text-[11px] transition cursor-pointer shadow-2xs flex items-center gap-1.5"
+            >
+              <span>🔄</span>
+              <span>Ganti Akun</span>
+            </button>
+          </div>
+        </div>
+
         <!-- RESTORE DRAFT NOTIFICATION BANNER -->
         <div id="studentDraftRestoreBanner" class="hidden p-3 rounded-xl bg-indigo-50/90 border border-indigo-200 text-xs text-indigo-900 flex items-center justify-between gap-2 transition-all duration-300 shadow-2xs">
           <div class="flex items-center gap-2 min-w-0">
@@ -983,6 +1009,93 @@
         </button>
       </div>
 
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: GANTI AKUN PENILAI (SWITCH ACCOUNT - GOOGLE FORMS STYLE) -->
+  <!-- ========================================================================= -->
+  <div id="modalSwitchAccount" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-md w-full p-4 sm:p-6 shadow-2xl border border-zinc-200 space-y-4 my-auto flex flex-col">
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-zinc-100 pb-3 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-200 flex items-center justify-center font-bold text-base shrink-0 shadow-2xs">
+            🔄
+          </div>
+          <div>
+            <h3 class="text-sm sm:text-base font-bold text-zinc-900 leading-tight">Ganti Akun Penilai</h3>
+            <p class="text-[11px] text-zinc-500">Pindah akun atau gunakan email penilai yang berbeda.</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeSwitchAccountModal()" class="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition cursor-pointer">✕</button>
+      </div>
+
+      <!-- Quick Saved Profiles List -->
+      <div id="savedAccountsSection" class="space-y-2">
+        <label class="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider font-mono">Akun Tersimpan di Perangkat Ini:</label>
+        <div id="savedAccountsList" class="space-y-1.5 max-h-36 overflow-y-auto pr-1"></div>
+      </div>
+
+      <!-- Input New Account -->
+      <div class="space-y-3 pt-2 border-t border-zinc-100">
+        <label class="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider font-mono">Atau Masukkan Akun / Email Baru:</label>
+        
+        <div class="space-y-1">
+          <label class="block text-xs font-semibold text-zinc-700">Email Penilai <span class="text-rose-500">*</span></label>
+          <input 
+            type="email" 
+            id="switchModalInputEmail" 
+            placeholder="nama.nim@mhs.ulm.ac.id" 
+            class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 outline-none transition bg-white"
+          >
+          <div class="flex flex-wrap items-center gap-1.5 pt-1">
+            <button type="button" onclick="appendSwitchModalDomain('@mhs.ulm.ac.id')" class="px-2 py-0.5 rounded-lg bg-zinc-100 hover:bg-indigo-50 text-[10.5px] font-mono text-zinc-600 border border-zinc-200 transition cursor-pointer">+ @mhs.ulm.ac.id</button>
+            <button type="button" onclick="appendSwitchModalDomain('@ulm.ac.id')" class="px-2 py-0.5 rounded-lg bg-zinc-100 hover:bg-indigo-50 text-[10.5px] font-mono text-zinc-600 border border-zinc-200 transition cursor-pointer">+ @ulm.ac.id</button>
+            <button type="button" onclick="appendSwitchModalDomain('@gmail.com')" class="px-2 py-0.5 rounded-lg bg-zinc-100 hover:bg-indigo-50 text-[10.5px] font-mono text-zinc-600 border border-zinc-200 transition cursor-pointer">+ @gmail.com</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div class="space-y-1">
+            <label class="block text-xs font-semibold text-zinc-700">NIM (Opsional)</label>
+            <input 
+              type="text" 
+              id="switchModalInputNim" 
+              placeholder="Contoh: 211012345" 
+              class="w-full px-3 py-2 rounded-xl border border-zinc-300 text-xs font-mono focus:border-zinc-900 outline-none transition bg-white"
+            >
+          </div>
+          <div class="space-y-1">
+            <label class="block text-xs font-semibold text-zinc-700">Nama Lengkap</label>
+            <input 
+              type="text" 
+              id="switchModalInputNama" 
+              placeholder="Nama penilai..." 
+              class="w-full px-3 py-2 rounded-xl border border-zinc-300 text-xs focus:border-zinc-900 outline-none transition bg-white"
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons Footer -->
+      <div class="pt-3 border-t border-zinc-100 flex items-center justify-end gap-2 shrink-0">
+        <button 
+          type="button" 
+          onclick="closeSwitchAccountModal()"
+          class="px-4 py-2.5 rounded-xl border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition cursor-pointer"
+        >
+          Batal
+        </button>
+        <button 
+          type="button" 
+          onclick="handleApplySwitchAccount()"
+          class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition active:scale-98 cursor-pointer shadow-md flex items-center gap-1.5"
+        >
+          <span>✓</span>
+          <span>Ganti &amp; Muat Draf</span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -2797,10 +2910,10 @@ function normalizeMediaList(fieldOrMedia) {
                 >
               </div>
 
-              <div class="space-y-1.5">
+              <div class="space-y-1.5" id="emailFieldContainer">
                 <div class="flex items-center justify-between">
-                  <label class="block text-xs font-semibold text-zinc-700">
-                    Email Penilai <span class="text-rose-500">*</span>
+                  <label id="labelEmailPenilai" class="block text-xs font-semibold text-zinc-700">
+                    Email Penilai <span id="emailRequiredStar" class="text-rose-500">*</span>
                   </label>
                   <button 
                     type="button" 
@@ -2819,8 +2932,14 @@ function normalizeMediaList(fieldOrMedia) {
                   inputmode="email"
                   placeholder="nama.nim@email.ac.id" 
                   class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 outline-none transition bg-white placeholder-zinc-400"
-                  oninput="validateEmailLive(this.value); saveFormDraft();"
+                  oninput="validateEmailLive(this.value); updateAccountActiveEmail(this.value); saveFormDraft();"
                 >
+                <div id="emailQuickChips" class="flex flex-wrap items-center gap-1 pt-0.5">
+                  <span class="text-[9.5px] text-zinc-400 font-mono">Domain:</span>
+                  <button type="button" onclick="appendEmailDomain('@mhs.ulm.ac.id')" class="px-1.5 py-0.5 rounded bg-zinc-100 hover:bg-indigo-50 hover:text-indigo-700 text-[10px] font-mono text-zinc-600 border border-zinc-200 transition cursor-pointer">+ @mhs.ulm.ac.id</button>
+                  <button type="button" onclick="appendEmailDomain('@ulm.ac.id')" class="px-1.5 py-0.5 rounded bg-zinc-100 hover:bg-indigo-50 hover:text-indigo-700 text-[10px] font-mono text-zinc-600 border border-zinc-200 transition cursor-pointer">+ @ulm.ac.id</button>
+                  <button type="button" onclick="appendEmailDomain('@gmail.com')" class="px-1.5 py-0.5 rounded bg-zinc-100 hover:bg-indigo-50 hover:text-indigo-700 text-[10px] font-mono text-zinc-600 border border-zinc-200 transition cursor-pointer">+ @gmail.com</button>
+                </div>
                 <p id="emailValidationMsg" class="text-[11px] font-medium hidden"></p>
               </div>
             </div>
@@ -3572,6 +3691,7 @@ function normalizeMediaList(fieldOrMedia) {
           renderConfigHeader();
           renderGroupOptions();
           restoreFormDraft();
+          updateAccountHeaderUI();
 
           // Jika pengguna sudah mengetikkan NIM, re-evaluasi secara instan dengan data terbaru
           const currentNimInput = document.getElementById("inputNim")?.value || "";
@@ -3583,6 +3703,7 @@ function normalizeMediaList(fieldOrMedia) {
         renderConfigHeader();
         renderGroupOptions();
         restoreFormDraft();
+        updateAccountHeaderUI();
       } finally {
         if (loading) loading.classList.add("hidden");
       }
@@ -4664,7 +4785,15 @@ function normalizeMediaList(fieldOrMedia) {
           timestamp: Date.now()
         };
 
-        localStorage.setItem(getFormDraftKey(), JSON.stringify(draft));
+        const draftKey = getFormDraftKey(email);
+        localStorage.setItem(draftKey, JSON.stringify(draft));
+
+        if (email) {
+          saveAccountProfile(email, nama, nim, peran);
+          activeUserAccountEmail = email;
+          activeUserAccountName = nama;
+          updateAccountHeaderUI();
+        }
 
         const indicator = document.getElementById("autoSaveIndicator");
         if (indicator) indicator.classList.remove("hidden");
@@ -4672,8 +4801,260 @@ function normalizeMediaList(fieldOrMedia) {
       updateDraftResetButtonVisibility();
     }
 
-    function getFormDraftKey() {
-      return "PGSD_FORM_DRAFT_" + (activeFormId || 'BK5E').toUpperCase();
+    function getFormDraftKey(specificEmail = null) {
+      const emailInput = document.getElementById("inputEmail");
+      const currentEmail = specificEmail || (emailInput && emailInput.value.trim()) || activeUserAccountEmail || "";
+      const cleanEmail = currentEmail.toLowerCase().replace(/[^a-z0-9]/g, '_');
+      if (cleanEmail) {
+        return "PGSD_DRAFT_" + (activeFormId || 'BK5E').toUpperCase() + "_" + cleanEmail;
+      }
+      return "PGSD_DRAFT_" + (activeFormId || 'BK5E').toUpperCase() + "_DEFAULT";
+    }
+
+    // =========================================================================
+    // GOOGLE FORMS STYLE: ACCOUNT SESSION & PROFILE MEMORY
+    // =========================================================================
+    let activeUserAccountEmail = "";
+    let activeUserAccountName = "";
+
+    function appendEmailDomain(domain) {
+      const emailInput = document.getElementById("inputEmail");
+      if (!emailInput) return;
+      let val = emailInput.value.trim();
+      if (!val) {
+        const nim = document.getElementById("inputNim")?.value.trim();
+        val = nim || "user";
+      }
+      if (val.includes("@")) {
+        val = val.split("@")[0] + domain;
+      } else {
+        val = val + domain;
+      }
+      emailInput.value = val;
+      validateEmailLive(val);
+      updateAccountActiveEmail(val);
+      saveFormDraft();
+    }
+
+    function appendSwitchModalDomain(domain) {
+      const input = document.getElementById("switchModalInputEmail");
+      if (!input) return;
+      let val = input.value.trim();
+      if (!val) {
+        const nim = document.getElementById("switchModalInputNim")?.value.trim();
+        val = nim || "user";
+      }
+      if (val.includes("@")) {
+        val = val.split("@")[0] + domain;
+      } else {
+        val = val + domain;
+      }
+      input.value = val;
+    }
+
+    function updateAccountActiveEmail(emailVal) {
+      activeUserAccountEmail = (emailVal || "").trim();
+      const namaVal = document.getElementById("inputNama")?.value.trim() || "";
+      if (namaVal) activeUserAccountName = namaVal;
+      updateAccountHeaderUI();
+    }
+
+    function updateAccountHeaderUI() {
+      const card = document.getElementById("formAccountHeaderCard");
+      if (!card) return;
+
+      const mode = appConfig["Mode_Pengumpulan_Email"] || "ULM_ONLY";
+      if (mode === "NO_EMAIL") {
+        card.classList.remove("hidden");
+        const avatarBox = document.getElementById("accountAvatarBox");
+        if (avatarBox) {
+          avatarBox.innerHTML = "👤";
+          avatarBox.className = "w-9 h-9 rounded-full bg-zinc-700 text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-2xs";
+        }
+        const emailEl = document.getElementById("accountActiveEmail");
+        if (emailEl) emailEl.textContent = "Mode Pengisian Anonim (Tanpa Email)";
+        const badgeEl = document.getElementById("accountModeBadge");
+        if (badgeEl) {
+          badgeEl.textContent = "Anonim";
+          badgeEl.className = "px-1.5 py-0.2 rounded-full bg-zinc-200 text-zinc-800 text-[9px] font-mono font-bold";
+        }
+        const noticeEl = document.getElementById("accountNoticeText");
+        if (noticeEl) noticeEl.textContent = "Penilaian ini bersifat terbuka dan tidak merekam alamat email Anda.";
+        return;
+      }
+
+      const email = activeUserAccountEmail || (document.getElementById("inputEmail")?.value.trim()) || "";
+      const name = activeUserAccountName || (document.getElementById("inputNama")?.value.trim()) || "";
+
+      if (!email && !name) {
+        card.classList.add("hidden");
+        return;
+      }
+
+      card.classList.remove("hidden");
+      const initial = (name ? name.charAt(0) : (email ? email.charAt(0) : "?")).toUpperCase();
+      const avatarBox = document.getElementById("accountAvatarBox");
+      if (avatarBox) {
+        avatarBox.textContent = initial;
+        avatarBox.className = "w-9 h-9 rounded-full bg-indigo-600 text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-2xs";
+      }
+
+      const emailEl = document.getElementById("accountActiveEmail");
+      if (emailEl) {
+        emailEl.textContent = email || (name ? `${name} (Belum ada email)` : "Akun Aktif");
+      }
+
+      const badgeEl = document.getElementById("accountModeBadge");
+      if (badgeEl) {
+        if (email.endsWith("@mhs.ulm.ac.id") || email.endsWith("@ulm.ac.id")) {
+          badgeEl.textContent = "Akun Kampus ULM";
+          badgeEl.className = "px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800 text-[9px] font-mono font-bold";
+        } else if (mode === "ALL_EMAIL") {
+          badgeEl.textContent = "Akun Umum";
+          badgeEl.className = "px-1.5 py-0.2 rounded-full bg-indigo-100 text-indigo-800 text-[9px] font-mono font-bold";
+        } else {
+          badgeEl.textContent = "Akun Terverifikasi";
+          badgeEl.className = "px-1.5 py-0.2 rounded-full bg-zinc-100 text-zinc-800 text-[9px] font-mono font-bold";
+        }
+      }
+
+      const noticeEl = document.getElementById("accountNoticeText");
+      if (noticeEl) {
+        noticeEl.textContent = `Draf isian dan tanggapan penilaian Anda direkam otomatis pada akun ini.`;
+      }
+    }
+
+    function getSavedAccountProfiles() {
+      try {
+        return JSON.parse(localStorage.getItem("PGSD_SAVED_PROFILES") || "[]");
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveAccountProfile(email, name, nim, role) {
+      if (!email || !email.includes("@")) return;
+      let profiles = getSavedAccountProfiles();
+      profiles = profiles.filter(p => p.email.toLowerCase() !== email.toLowerCase());
+      profiles.unshift({
+        email: email.trim(),
+        name: name || "",
+        nim: nim || "",
+        role: role || "Mahasiswa",
+        lastUsed: Date.now()
+      });
+      if (profiles.length > 5) profiles = profiles.slice(0, 5);
+      try {
+        localStorage.setItem("PGSD_SAVED_PROFILES", JSON.stringify(profiles));
+      } catch (e) {}
+    }
+
+    function openSwitchAccountModal() {
+      const modal = document.getElementById("modalSwitchAccount");
+      if (!modal) return;
+
+      const savedList = document.getElementById("savedAccountsList");
+      const profiles = getSavedAccountProfiles();
+
+      if (savedList) {
+        if (profiles.length === 0) {
+          savedList.innerHTML = `<p class="text-[11px] text-zinc-400 italic">Belum ada akun lain yang tersimpan di perangkat ini.</p>`;
+        } else {
+          let html = '';
+          profiles.forEach((p) => {
+            const initial = (p.name ? p.name.charAt(0) : p.email.charAt(0)).toUpperCase();
+            html += `
+              <div onclick="selectSavedProfileToSwitch('${escapeHtml(p.email)}', '${escapeHtml(p.name || '')}', '${escapeHtml(p.nim || '')}', '${escapeHtml(p.role || 'Mahasiswa')}')" class="flex items-center justify-between p-2 rounded-xl bg-zinc-50 hover:bg-indigo-50 border border-zinc-200 hover:border-indigo-200 cursor-pointer transition">
+                <div class="flex items-center gap-2 min-w-0">
+                  <div class="w-6 h-6 rounded-full bg-indigo-600 text-white font-bold text-[10px] flex items-center justify-center shrink-0">
+                    ${initial}
+                  </div>
+                  <div class="min-w-0">
+                    <p class="font-bold text-zinc-900 text-xs truncate">${escapeHtml(p.email)}</p>
+                    <p class="text-[10px] text-zinc-500 truncate">${escapeHtml(p.name || p.nim || p.role)}</p>
+                  </div>
+                </div>
+                <span class="text-[10px] font-semibold text-indigo-600 shrink-0">Pilih →</span>
+              </div>
+            `;
+          });
+          savedList.innerHTML = html;
+        }
+      }
+
+      const emailInput = document.getElementById("switchModalInputEmail");
+      const nimInput = document.getElementById("switchModalInputNim");
+      const namaInput = document.getElementById("switchModalInputNama");
+      if (emailInput) emailInput.value = "";
+      if (nimInput) nimInput.value = "";
+      if (namaInput) namaInput.value = "";
+
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeSwitchAccountModal() {
+      const modal = document.getElementById("modalSwitchAccount");
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+    }
+
+    function selectSavedProfileToSwitch(email, name, nim, role) {
+      const emailInput = document.getElementById("switchModalInputEmail");
+      const nimInput = document.getElementById("switchModalInputNim");
+      const namaInput = document.getElementById("switchModalInputNama");
+      if (emailInput) emailInput.value = email;
+      if (nimInput) nimInput.value = nim;
+      if (namaInput) namaInput.value = name;
+      handleApplySwitchAccount();
+    }
+
+    function handleApplySwitchAccount() {
+      const emailInput = document.getElementById("switchModalInputEmail");
+      const nimInput = document.getElementById("switchModalInputNim");
+      const namaInput = document.getElementById("switchModalInputNama");
+
+      const newEmail = emailInput ? emailInput.value.trim() : "";
+      const newNim = nimInput ? nimInput.value.trim() : "";
+      const newNama = namaInput ? namaInput.value.trim() : "";
+
+      if (!newEmail) {
+        showToast("Masukkan alamat email akun baru!", "warning");
+        return;
+      }
+
+      // Save old account profile
+      const oldEmail = document.getElementById("inputEmail")?.value.trim();
+      const oldNama = document.getElementById("inputNama")?.value.trim();
+      const oldNim = document.getElementById("inputNim")?.value.trim();
+      if (oldEmail) saveAccountProfile(oldEmail, oldNama, oldNim, currentEvaluatorRole);
+
+      // Switch to new account
+      activeUserAccountEmail = newEmail;
+      if (newNama) activeUserAccountName = newNama;
+      saveAccountProfile(newEmail, newNama, newNim, currentEvaluatorRole);
+
+      const mainEmailEl = document.getElementById("inputEmail");
+      const mainNamaEl = document.getElementById("inputNama");
+      const mainNimEl = document.getElementById("inputNim");
+
+      if (mainEmailEl) mainEmailEl.value = newEmail;
+      if (mainNamaEl && newNama) mainNamaEl.value = newNama;
+      if (mainNimEl && newNim) {
+        mainNimEl.value = newNim;
+        validateNimLive(newNim);
+      }
+
+      validateEmailLive(newEmail);
+      closeSwitchAccountModal();
+      updateAccountHeaderUI();
+
+      // Re-load draft for this new account
+      isDraftAlreadyRestored = false;
+      restoreFormDraft();
+      showToast(`Berhasil beralih ke akun ${newEmail}. Draf untuk akun ini telah dimuat.`, "success");
     }
 
     function resetInMemoryClientFormState() {
@@ -4708,7 +5089,13 @@ function normalizeMediaList(fieldOrMedia) {
     function restoreFormDraft() {
       if (isDraftAlreadyRestored) return;
       try {
-        const raw = localStorage.getItem(getFormDraftKey());
+        const draftKey = getFormDraftKey();
+        let raw = localStorage.getItem(draftKey);
+        if (!raw) {
+          // Fallback check legacy default draft key
+          const legacyKey = "PGSD_FORM_DRAFT_" + (activeFormId || 'BK5E').toUpperCase();
+          raw = localStorage.getItem(legacyKey);
+        }
         if (!raw) {
           updateDraftResetButtonVisibility();
           return;
@@ -4722,7 +5109,7 @@ function normalizeMediaList(fieldOrMedia) {
         // Batas Waktu Draf (TTL: 7 Hari). Jika draf sudah usang, bersihkan otomatis
         const DRAFT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
         if (draft.timestamp && (Date.now() - draft.timestamp > DRAFT_MAX_AGE_MS)) {
-          localStorage.removeItem(getFormDraftKey());
+          localStorage.removeItem(draftKey);
           updateDraftResetButtonVisibility();
           return;
         }
@@ -4752,6 +5139,7 @@ function normalizeMediaList(fieldOrMedia) {
         if (draft.nama) {
           const namaEl = document.getElementById("inputNama");
           if (namaEl) namaEl.value = draft.nama;
+          activeUserAccountName = draft.nama;
         }
         if (draft.email) {
           const emailEl = document.getElementById("inputEmail");
@@ -4759,7 +5147,10 @@ function normalizeMediaList(fieldOrMedia) {
             emailEl.value = draft.email;
             validateEmailLive(draft.email);
           }
+          activeUserAccountEmail = draft.email;
         }
+
+        updateAccountHeaderUI();
 
         // 3. Pulihkan Pemilihan Kelompok & Sub-komponennya
         if (draft.groupName && groupsData && groupsData.length > 0) {
@@ -4833,18 +5224,21 @@ function normalizeMediaList(fieldOrMedia) {
       updateDraftResetButtonVisibility();
     }
 
-    async function clearFormDraftManually() {
-      const ok = await showAppConfirm({
-        title: "Reset Draf Isian?",
-        message: "Apakah Anda yakin ingin mengosongkan dan mereset seluruh draf isian formulir Anda?",
-        confirmText: "Ya, Reset Draf",
-        type: "warning"
-      });
+    async function clearStudentFormDraft(confirmDialog = false) {
+      let ok = true;
+      if (confirmDialog) {
+        ok = await showConfirmModal({
+          title: "Hapus Draf Isian?",
+          message: "Apakah Anda yakin ingin menghapus seluruh draf isian yang tersimpan di akun ini? Anda akan mengulang pengisian dari awal.",
+          confirmText: "Ya, Hapus Draf",
+          cancelText: "Batal",
+          type: "warning"
+        });
+      }
       if (ok) {
         localStorage.removeItem(getFormDraftKey());
-        clientCustomFormAnswers = {};
-        customUploadedFilesMap = {};
-        window.location.reload();
+        showToast("Draf isian berhasil dibersihkan.", "info");
+        setTimeout(() => window.location.reload(), 400);
       }
     }
 
@@ -4852,28 +5246,46 @@ function normalizeMediaList(fieldOrMedia) {
       const msgEl = document.getElementById("emailValidationMsg");
       const iconEl = document.getElementById("emailCheckIcon");
       const emailInput = document.getElementById("inputEmail");
-      const cleanEmail = emailVal.trim().toLowerCase();
+      const cleanEmail = (emailVal || "").trim().toLowerCase();
+
+      const emailMode = appConfig["Mode_Pengumpulan_Email"] || "ULM_ONLY";
+
+      // If Mode is NO_EMAIL, email is completely optional
+      if (emailMode === 'NO_EMAIL') {
+        if (msgEl) msgEl.classList.add("hidden");
+        if (iconEl) iconEl.classList.remove("hidden");
+        if (emailInput) {
+          emailInput.required = false;
+          emailInput.className = "w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm outline-none transition bg-white";
+        }
+        const reqStar = document.getElementById("emailRequiredStar");
+        if (reqStar) reqStar.classList.add("hidden");
+        isEmailValidState = true;
+        return true;
+      }
 
       if (!cleanEmail) {
-        msgEl.classList.add("hidden");
-        iconEl.classList.add("hidden");
-        emailInput.className = "w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 outline-none transition bg-white";
+        if (msgEl) msgEl.classList.add("hidden");
+        if (iconEl) iconEl.classList.add("hidden");
+        if (emailInput) emailInput.className = "w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 outline-none transition bg-white";
         isEmailValidState = false;
         return false;
       }
 
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       if (!emailRegex.test(cleanEmail)) {
-        msgEl.textContent = "Format email belum lengkap";
-        msgEl.className = "text-[11px] text-amber-600 font-medium";
-        msgEl.classList.remove("hidden");
-        iconEl.classList.add("hidden");
+        if (msgEl) {
+          msgEl.textContent = "Format email belum lengkap";
+          msgEl.className = "text-[11px] text-amber-600 font-medium";
+          msgEl.classList.remove("hidden");
+        }
+        if (iconEl) iconEl.classList.add("hidden");
         isEmailValidState = false;
         return false;
       }
 
-      // Hanya wajib domain mhs.ulm.ac.id jika peran adalah Mahasiswa
-      if (currentEvaluatorRole === 'Mahasiswa') {
+      // Mode ULM_ONLY: Mahasiswa wajib domain mhs.ulm.ac.id
+      if (emailMode === 'ULM_ONLY' && currentEvaluatorRole === 'Mahasiswa') {
         const allowedStr = appConfig["Domain_Email_Wajib"] || "mhs.ulm.ac.id, ulm.ac.id";
         const allowedDomains = allowedStr.split(",").map(d => d.trim().toLowerCase()).filter(Boolean);
 
@@ -4886,11 +5298,13 @@ function normalizeMediaList(fieldOrMedia) {
         }
 
         if (!isDomainMatch) {
-          msgEl.textContent = "Alamat email mahasiswa harus menggunakan domain resmi (" + allowedStr + ").";
-          msgEl.className = "text-[11px] text-rose-600 font-medium";
-          msgEl.classList.remove("hidden");
-          iconEl.classList.add("hidden");
-          emailInput.className = "w-full px-3.5 py-2.5 rounded-lg border border-rose-400 text-xs sm:text-sm focus:border-rose-600 outline-none transition bg-white";
+          if (msgEl) {
+            msgEl.textContent = "Mode ULM: Email mahasiswa harus menggunakan domain resmi (" + allowedStr + ").";
+            msgEl.className = "text-[11px] text-rose-600 font-medium";
+            msgEl.classList.remove("hidden");
+          }
+          if (iconEl) iconEl.classList.add("hidden");
+          if (emailInput) emailInput.className = "w-full px-3.5 py-2.5 rounded-xl border border-rose-400 text-xs sm:text-sm focus:border-rose-600 outline-none transition bg-white";
           isEmailValidState = false;
           return false;
         }
@@ -4898,7 +5312,7 @@ function normalizeMediaList(fieldOrMedia) {
 
       if (msgEl) msgEl.classList.add("hidden");
       if (iconEl) iconEl.classList.remove("hidden");
-      if (emailInput) emailInput.className = "w-full px-3.5 py-2.5 rounded-lg border border-emerald-400 text-xs sm:text-sm focus:border-emerald-600 outline-none transition bg-white";
+      if (emailInput) emailInput.className = "w-full px-3.5 py-2.5 rounded-xl border border-emerald-400 text-xs sm:text-sm focus:border-emerald-600 outline-none transition bg-white";
       isEmailValidState = true;
       return true;
     }

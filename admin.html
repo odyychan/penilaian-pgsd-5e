@@ -1129,6 +1129,85 @@
           </div>
         </div>
 
+        <!-- MODE PENGUMPULAN & OTENTIKASI EMAIL (GOOGLE FORMS STYLE) -->
+        <div class="bg-white rounded-xl sm:rounded-2xl border border-zinc-200/90 p-3.5 sm:p-6 shadow-xs space-y-4">
+          <div class="border-b border-zinc-100 pb-3 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center font-bold text-base shrink-0 shadow-2xs">
+                ✉️
+              </div>
+              <div>
+                <h3 class="text-xs sm:text-base font-bold text-zinc-900">Mode Pengumpulan &amp; Otentikasi Email</h3>
+                <p class="text-[10.5px] sm:text-xs text-zinc-500 mt-0.5">Tentukan bagaimana identitas email penilai dikumpulkan dan diikat dengan draf isian.</p>
+              </div>
+            </div>
+            <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-zinc-100 text-zinc-600 border border-zinc-200 hidden sm:inline-block">Google Forms Mode</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            <!-- Mode 1: ULM Only -->
+            <label class="email-mode-card relative p-3.5 rounded-xl border border-indigo-300 bg-indigo-50/40 hover:bg-indigo-50/70 flex flex-col justify-between gap-2.5 cursor-pointer transition select-none group shadow-2xs">
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="text-lg">🎓</span>
+                  <span class="font-bold text-zinc-900 text-xs">Khusus Akun ULM</span>
+                </div>
+                <input 
+                  type="radio" 
+                  name="cfg_Mode_Pengumpulan_Email" 
+                  value="ULM_ONLY" 
+                  onchange="handleEmailModeCardChange(this.value); handleConfigInputAutoSave();" 
+                  class="w-4 h-4 text-indigo-600 focus:ring-indigo-500 cursor-pointer" 
+                  checked
+                >
+              </div>
+              <p class="text-[11px] text-zinc-500 leading-relaxed">
+                Terkunci khusus domain resmi <strong class="text-zinc-700">@mhs.ulm.ac.id</strong> &amp; <strong class="text-zinc-700">@ulm.ac.id</strong> dengan validasi NIM master.
+              </p>
+            </label>
+
+            <!-- Mode 2: All Email -->
+            <label class="email-mode-card relative p-3.5 rounded-xl border border-zinc-200 bg-zinc-50 hover:bg-zinc-100/80 flex flex-col justify-between gap-2.5 cursor-pointer transition select-none group shadow-2xs">
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="text-lg">🌐</span>
+                  <span class="font-bold text-zinc-900 text-xs">Email Umum Bebas</span>
+                </div>
+                <input 
+                  type="radio" 
+                  name="cfg_Mode_Pengumpulan_Email" 
+                  value="ALL_EMAIL" 
+                  onchange="handleEmailModeCardChange(this.value); handleConfigInputAutoSave();" 
+                  class="w-4 h-4 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                >
+              </div>
+              <p class="text-[11px] text-zinc-500 leading-relaxed">
+                Menerima semua email (Gmail, Yahoo, institusi lain). Cocok untuk dosen tamu, praktisi, atau seminar terbuka.
+              </p>
+            </label>
+
+            <!-- Mode 3: No Email (Anonymous) -->
+            <label class="email-mode-card relative p-3.5 rounded-xl border border-zinc-200 bg-zinc-50 hover:bg-zinc-100/80 flex flex-col justify-between gap-2.5 cursor-pointer transition select-none group shadow-2xs">
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="text-lg">🚫</span>
+                  <span class="font-bold text-zinc-900 text-xs">Tanpa Email (Anonim)</span>
+                </div>
+                <input 
+                  type="radio" 
+                  name="cfg_Mode_Pengumpulan_Email" 
+                  value="NO_EMAIL" 
+                  onchange="handleEmailModeCardChange(this.value); handleConfigInputAutoSave();" 
+                  class="w-4 h-4 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                >
+              </div>
+              <p class="text-[11px] text-zinc-500 leading-relaxed">
+                Penilaian instan tanpa meminta alamat email penilai sama sekali (formulir anonim cepat).
+              </p>
+            </label>
+          </div>
+        </div>
+
         <!-- INTEGRITAS & ATURAN PENILAIAN (ANTI-FRAUD & INTEGRITY RULES) -->
         <div class="bg-white rounded-xl sm:rounded-2xl border border-zinc-200/90 p-3.5 sm:p-6 shadow-xs space-y-4">
           <div class="border-b border-zinc-100 pb-3">
@@ -6726,9 +6805,24 @@ function getOrCreateFolder(folderName) {
       });
     }
 
-    // =========================================================================
-    // TAB 2: CONFIG & FORM BUILDER
-    // =========================================================================
+    function updateEmailModeCardsUI(activeMode) {
+      document.querySelectorAll(".email-mode-card").forEach(card => {
+        const input = card.querySelector('input[name="cfg_Mode_Pengumpulan_Email"]');
+        if (input) {
+          if (input.value === activeMode) {
+            card.className = "email-mode-card relative p-3.5 rounded-xl border border-indigo-300 bg-indigo-50/50 flex flex-col justify-between gap-2.5 cursor-pointer transition select-none group shadow-xs";
+          } else {
+            card.className = "email-mode-card relative p-3.5 rounded-xl border border-zinc-200 bg-zinc-50 hover:bg-zinc-100/80 flex flex-col justify-between gap-2.5 cursor-pointer transition select-none group shadow-2xs";
+          }
+        }
+      });
+    }
+
+    function handleEmailModeCardChange(mode) {
+      adminAppConfig["Mode_Pengumpulan_Email"] = mode;
+      updateEmailModeCardsUI(mode);
+    }
+
     // =========================================================================
     // TAB 2: CONFIG & FORM BUILDER
     // =========================================================================
@@ -6763,6 +6857,14 @@ function getOrCreateFolder(folderName) {
           }
         }
       });
+
+      // Sync Mode Pengumpulan Email (Google Forms Style)
+      const currentEmailMode = adminAppConfig["Mode_Pengumpulan_Email"] || "ULM_ONLY";
+      document.querySelectorAll('input[name="cfg_Mode_Pengumpulan_Email"]').forEach(radio => {
+        radio.checked = (radio.value === currentEmailMode);
+      });
+      updateEmailModeCardsUI(currentEmailMode);
+
       handleScheduleToggle(document.getElementById('cfg_Jadwal_Aktif')?.checked || false);
 
       if (document.getElementById('cfg_Judul_Form')) {
@@ -6837,6 +6939,12 @@ function getOrCreateFolder(folderName) {
           }
         }
       });
+
+      const selEmailMode = document.querySelector('input[name="cfg_Mode_Pengumpulan_Email"]:checked');
+      if (selEmailMode) {
+        adminAppConfig["Mode_Pengumpulan_Email"] = selEmailMode.value;
+        updateEmailModeCardsUI(selEmailMode.value);
+      }
 
       if (document.getElementById('cfg_Judul_Form')) {
         updateLiveMathBadge(document.getElementById('cfg_Judul_Form').value, 'liveMathCfgJudul');
