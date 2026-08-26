@@ -6324,103 +6324,137 @@ function normalizeMediaList(fieldOrMedia) {
     }
 
     function downloadDigitalReceiptImage() {
-      if (!currentReceiptData || !currentReceiptData.payload) {
+      if (!currentReceiptData) {
         showToast("Data tanda terima tidak ditemukan.", "error");
         return;
       }
       const data = currentReceiptData;
-      const payload = data.payload;
+      const payload = data.payload || {};
 
       const canvas = document.createElement("canvas");
       canvas.width = 1000;
-      canvas.height = 1300;
+      canvas.height = 1350;
       const ctx = canvas.getContext("2d");
 
-      // 1. Background Card
-      ctx.fillStyle = "#f8fafc";
+      // 1. Background
+      ctx.fillStyle = "#f1f5f9";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+      // 2. White Card Container
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(40, 40, 920, 1270, 24);
+      else ctx.rect(40, 40, 920, 1270);
       ctx.fillStyle = "#ffffff";
-      ctx.roundRect ? ctx.roundRect(40, 40, 920, 1220, 24) : ctx.fillRect(40, 40, 920, 1220);
       ctx.fill();
-      ctx.strokeStyle = "#e2e8f0";
-      ctx.lineWidth = 3;
+      ctx.strokeStyle = "#cbd5e1";
+      ctx.lineWidth = 2.5;
       ctx.stroke();
 
-      // 2. Top Header Banner
+      // 3. Header Banner (Green)
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(40, 40, 920, 130, [24, 24, 0, 0]);
+      else ctx.rect(40, 40, 920, 130);
       ctx.fillStyle = "#059669";
-      ctx.roundRect ? ctx.roundRect(40, 40, 920, 120, [24, 24, 0, 0]) : ctx.fillRect(40, 40, 920, 120);
       ctx.fill();
 
+      // Header Text
       ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 28px sans-serif";
-      ctx.fillText("UNIVERSITAS LAMBUNG MANGKURAT", 70, 90);
-      ctx.font = "normal 18px sans-serif";
+      ctx.font = "bold 26px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      ctx.fillText("UNIVERSITAS LAMBUNG MANGKURAT", 75, 92);
+      ctx.font = "600 16px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
       ctx.fillStyle = "#d1fae5";
-      ctx.fillText("FKIP • Program Studi Pendidikan Guru Sekolah Dasar (PGSD)", 70, 125);
+      ctx.fillText("FKIP • Program Studi Pendidikan Guru Sekolah Dasar (PGSD)", 75, 128);
 
-      // 3. Receipt Title & Verified Badge
+      // 4. Receipt Title & Badge
       ctx.fillStyle = "#0f172a";
-      ctx.font = "bold 32px sans-serif";
-      ctx.fillText("TANDA TERIMA PENILAIAN PEER-ASSESSMENT", 70, 215);
+      ctx.font = "bold 26px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      ctx.fillText("TANDA TERIMA PENILAIAN PEER-ASSESSMENT", 75, 220);
 
+      // Badge "TERVERIFIKASI"
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(75, 242, 230, 36, 18);
+      else ctx.rect(75, 242, 230, 36);
       ctx.fillStyle = "#10b981";
-      ctx.roundRect ? ctx.roundRect(70, 240, 240, 36, 18) : ctx.fillRect(70, 240, 240, 36);
       ctx.fill();
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 15px sans-serif";
-      ctx.fillText("✓ TERVERIFIKASI SISTEM", 92, 264);
 
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 14px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      ctx.fillText("✓ TERVERIFIKASI SISTEM", 95, 266);
+
+      // Ticket ID
       ctx.fillStyle = "#64748b";
       ctx.font = "bold 16px monospace";
-      ctx.fillText(`ID TIKET: ${data.idRespons}`, 330, 264);
+      ctx.fillText(`ID TIKET: ${data.idRespons || '-'}`, 325, 266);
 
-      // 4. Details Table Box
-      const startY = 310;
-      const rowHeight = 70;
+      // 5. Details Table Rows
+      const startY = 305;
+      const rowHeight = 72;
+      const nowStr = (data.timestamp ? new Date(data.timestamp) : new Date()).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'medium' }) + " WITA";
       const details = [
         ["NIM Penilai", payload.nimPenilai || "-"],
         ["Nama Penilai", payload.namaPenilai || "-"],
         ["Peran Penilai", payload.peranPenilai || "Mahasiswa"],
         ["Kelompok yang Dinilai", payload.kelompok || "-"],
-        ["Nilai / Skor Kelompok", `${payload.nilaiKelompok || 0} / 100`],
-        ["Presentator Terbaik", Array.isArray(payload.presentatorTerbaik) ? payload.presentatorTerbaik.join(", ") : (payload.presentatorTerbaik || "-")],
+        ["Nilai / Skor Kelompok", `${payload.nilaiKelompok !== undefined ? payload.nilaiKelompok : 0} / 100`],
+        ["Presentator Terbaik", Array.isArray(payload.presentatorTerbaik) ? (payload.presentatorTerbaik.join(", ") || "-") : (payload.presentatorTerbaik || "-")],
         ["Mata Kuliah", appConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || "-"],
         ["Dosen Pengampu", appConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || "-"],
-        ["Waktu Pengiriman", new Date().toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'medium' }) + " WITA"]
+        ["Waktu Pengiriman", nowStr]
       ];
 
       details.forEach((row, i) => {
         const curY = startY + (i * rowHeight);
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(75, curY, 850, rowHeight - 8, 12);
+        else ctx.rect(75, curY, 850, rowHeight - 8);
         ctx.fillStyle = (i % 2 === 0) ? "#f8fafc" : "#ffffff";
-        ctx.roundRect ? ctx.roundRect(70, curY, 860, rowHeight - 6, 12) : ctx.fillRect(70, curY, 860, rowHeight - 6);
         ctx.fill();
-        ctx.strokeStyle = "#edf2f7";
-        ctx.lineWidth = 1;
+        ctx.strokeStyle = "#e2e8f0";
+        ctx.lineWidth = 1.5;
         ctx.stroke();
 
+        // Label
         ctx.fillStyle = "#64748b";
-        ctx.font = "500 18px sans-serif";
-        ctx.fillText(row[0] + ":", 95, curY + 38);
+        ctx.font = "600 17px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+        ctx.fillText(row[0] + ":", 95, curY + 39);
 
-        ctx.fillStyle = (row[0].includes("Nilai") || row[0].includes("Kelompok yang")) ? "#4f46e5" : "#0f172a";
-        ctx.font = "bold 19px sans-serif";
-        const valText = String(row[1]).length > 45 ? String(row[1]).substring(0, 45) + "..." : String(row[1]);
-        ctx.fillText(valText, 360, curY + 38);
+        // Value
+        const isHighlight = row[0].includes("Nilai") || row[0].includes("Kelompok yang");
+        ctx.fillStyle = isHighlight ? "#4338ca" : "#0f172a";
+        ctx.font = isHighlight ? "bold 19px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" : "bold 17px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+        
+        const rawVal = String(row[1] || "-");
+        const valText = rawVal.length > 44 ? rawVal.substring(0, 42) + "..." : rawVal;
+        ctx.fillText(valText, 340, curY + 39);
       });
 
-      // 5. Footer Notice
-      ctx.fillStyle = "#94a3b8";
-      ctx.font = "italic 15px sans-serif";
+      // 6. Verification Footer Box
+      const footerBoxY = startY + (details.length * rowHeight) + 15;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(75, footerBoxY, 850, 120, 14);
+      else ctx.rect(75, footerBoxY, 850, 120);
+      ctx.fillStyle = "#f8fafc";
+      ctx.fill();
+      ctx.strokeStyle = "#cbd5e1";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.fillStyle = "#0f172a";
+      ctx.font = "bold 15px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("Bukti tanda terima ini sah dan tercatat permanen di basis data server Supabase FKIP ULM.", canvas.width / 2, 1080);
-      ctx.fillText("Simpan bukti ini sebagai konfirmasi resmi keikutsertaan penilaian perkuliahan.", canvas.width / 2, 1110);
+      ctx.fillText("Bukti tanda terima ini sah dan tercatat permanen di basis data server Supabase FKIP ULM.", canvas.width / 2, footerBoxY + 45);
+      ctx.fillStyle = "#64748b";
+      ctx.font = "italic 13.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      ctx.fillText("Simpan bukti ini sebagai konfirmasi resmi keikutsertaan penilaian perkuliahan.", canvas.width / 2, footerBoxY + 75);
+      ctx.fillText(`Timestamp Keamanan: ${new Date().toISOString()}`, canvas.width / 2, footerBoxY + 98);
       ctx.textAlign = "left";
 
-      // Download
+      // 7. Trigger Download
       const dataUrl = canvas.toDataURL("image/png");
       const link = document.createElement("a");
-      link.download = `bukti-penilaian-${(payload.nimPenilai || 'mhs').replace(/\s+/g, '')}-${(payload.kelompok || 'kelompok').replace(/\s+/g, '_')}.png`;
+      const nimSlug = (payload.nimPenilai || 'mhs').replace(/\s+/g, '');
+      const grpSlug = (payload.kelompok || 'kelompok').replace(/\s+/g, '_');
+      link.download = `bukti-penilaian-${nimSlug}-${grpSlug}.png`;
       link.href = dataUrl;
       document.body.appendChild(link);
       link.click();
@@ -6430,7 +6464,110 @@ function normalizeMediaList(fieldOrMedia) {
     }
 
     function printDigitalReceipt() {
+      if (!currentReceiptData) {
+        showToast("Data tanda terima tidak ditemukan.", "error");
+        return;
+      }
+      const data = currentReceiptData;
+      const payload = data.payload || {};
+      const finalId = data.idRespons || ("PGSD-REC-" + activeFormId + "-" + Date.now().toString(36).toUpperCase());
+      const nowStr = (data.timestamp ? new Date(data.timestamp) : new Date()).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'medium' }) + " WITA";
+
+      const printRoot = document.getElementById("printDocumentRoot");
+      if (!printRoot) {
+        window.print();
+        return;
+      }
+
+      const origHtml = printRoot.innerHTML;
+      printRoot.className = "";
+      printRoot.innerHTML = `
+        <div class="print-page-wrapper" style="padding: 24px 32px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #0f172a; max-width: 720px; margin: 0 auto; background: #ffffff;">
+          
+          <!-- Header Instansi -->
+          <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #059669; padding-bottom: 14px; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <div style="width: 44px; height: 44px; border-radius: 10px; background: #059669; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact;">✓</div>
+              <div>
+                <h1 style="font-size: 16px; font-weight: 800; color: #065f46; margin: 0; line-height: 1.2;">UNIVERSITAS LAMBUNG MANGKURAT</h1>
+                <p style="font-size: 11px; font-weight: 600; color: #475569; margin: 3px 0 0 0;">FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN • PRODI PGSD</p>
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <span style="display: inline-block; font-size: 10px; font-weight: 800; background: #d1fae5; color: #065f46; padding: 4px 10px; border-radius: 9999px; border: 1px solid #6ee7b7; letter-spacing: 0.5px; -webkit-print-color-adjust: exact; print-color-adjust: exact;">✓ TERVERIFIKASI SISTEM</span>
+              <p style="font-family: monospace; font-size: 11px; font-weight: 700; color: #64748b; margin: 4px 0 0 0;">${finalId}</p>
+            </div>
+          </div>
+
+          <!-- Title -->
+          <div style="text-align: center; margin-bottom: 22px;">
+            <h2 style="font-size: 15px; font-weight: 800; text-transform: uppercase; color: #0f172a; margin: 0; letter-spacing: 0.4px;">BUKTI TANDA TERIMA PENILAIAN PEER-ASSESSMENT</h2>
+            <p style="font-size: 11px; color: #64748b; margin: 4px 0 0 0;">Dokumen ini adalah bukti sah perekaman penilaian perkuliahan digital.</p>
+          </div>
+
+          <!-- Data Table -->
+          <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #cbd5e1; border-radius: 10px; overflow: hidden; margin-bottom: 22px; font-size: 12.5px;">
+            <tbody>
+              <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                <td style="padding: 10px 14px; color: #64748b; font-weight: 600; width: 34%; border-bottom: 1px solid #e2e8f0;">NIM Penilai</td>
+                <td style="padding: 10px 14px; font-family: monospace; font-weight: 800; color: #0f172a; border-bottom: 1px solid #e2e8f0;">${payload.nimPenilai || '-'}</td>
+              </tr>
+              <tr style="background: #ffffff; border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 10px 14px; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0;">Nama Lengkap Penilai</td>
+                <td style="padding: 10px 14px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #e2e8f0;">${payload.namaPenilai || '-'}</td>
+              </tr>
+              <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                <td style="padding: 10px 14px; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0;">Peran Penilai</td>
+                <td style="padding: 10px 14px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #e2e8f0;">${payload.peranPenilai || 'Mahasiswa'}</td>
+              </tr>
+              <tr style="background: #ffffff; border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 10px 14px; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0;">Kelompok yang Dinilai</td>
+                <td style="padding: 10px 14px; font-weight: 800; color: #4338ca; border-bottom: 1px solid #e2e8f0;">${payload.kelompok || '-'}</td>
+              </tr>
+              <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                <td style="padding: 10px 14px; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0;">Nilai / Skor Kelompok</td>
+                <td style="padding: 10px 14px; font-weight: 800; font-size: 14.5px; color: #059669; border-bottom: 1px solid #e2e8f0;">${payload.nilaiKelompok !== undefined ? payload.nilaiKelompok : 0} / 100</td>
+              </tr>
+              <tr style="background: #ffffff; border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 10px 14px; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0;">Presentator Terbaik</td>
+                <td style="padding: 10px 14px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #e2e8f0;">${Array.isArray(payload.presentatorTerbaik) ? (payload.presentatorTerbaik.join(', ') || '-') : (payload.presentatorTerbaik || '-')}</td>
+              </tr>
+              <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                <td style="padding: 10px 14px; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0;">Mata Kuliah</td>
+                <td style="padding: 10px 14px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #e2e8f0;">${appConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || '-'}</td>
+              </tr>
+              <tr style="background: #ffffff; border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 10px 14px; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0;">Dosen Pengampu</td>
+                <td style="padding: 10px 14px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #e2e8f0;">${appConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || '-'}</td>
+              </tr>
+              <tr style="background: #f8fafc; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                <td style="padding: 10px 14px; color: #64748b; font-weight: 600;">Waktu Pengiriman Resmi</td>
+                <td style="padding: 10px 14px; font-family: monospace; font-weight: 700; color: #0f172a;">${nowStr}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Footer Verification Box -->
+          <div style="border: 1px dashed #94a3b8; border-radius: 10px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px; background: #f8fafc; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+            <div style="font-size: 11px; color: #475569; line-height: 1.45;">
+              <strong style="color: #0f172a; display: block; margin-bottom: 2px; font-size: 11.5px;">Verifikasi Digital Supabase FKIP ULM</strong>
+              Tanda terima ini diterbitkan otomatis oleh sistem dan memiliki kekuatan verifikasi akademik internal yang sah.
+            </div>
+            <div style="font-family: monospace; font-size: 10px; font-weight: 700; color: #64748b; text-align: right; white-space: nowrap;">
+              STATUS: TERVERIFIKASI<br>
+              SERVER: SUPABASE CLOUD
+            </div>
+          </div>
+
+        </div>
+      `;
+
       window.print();
+
+      setTimeout(() => {
+        printRoot.className = "hidden";
+        printRoot.innerHTML = origHtml;
+      }, 1500);
     }
 
     function clearStudentFormDraft(isManual = false) {

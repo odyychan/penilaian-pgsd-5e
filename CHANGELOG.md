@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.60] - 2026-08-26
+
+### 🛠️ Perbaikan Render Gambar Canvas Struk & Pratinjau Cetak Struk Penilaian
+- **🖼️ Perbaikan Render Unduh Gambar Struk (`downloadDigitalReceiptImage`):**
+  - Menambahkan inisialisasi `ctx.beginPath()` pada setiap elemen visual canvas (header instansi, baris tabel rincian nilai, dan kotak verifikasi keabsahan).
+  - Memperbaiki kontras teks, penataan tipografi resolusi tinggi, dan format data penilai sehingga gambar tanda terima terunduh dengan teks yang tajam, jelas, dan tidak lagi kosong/putih.
+- **🖨️ Perbaikan Pratinjau Cetak Struk (`printDigitalReceipt`):**
+  - Mengarahkan pencetakan struk tanda terima ke wadah cetak resmi `#printDocumentRoot` dengan dokumen cetak berformat standar akademik ULM lengkap dengan detail penilai, skor, mata kuliah, dosen, waktu pengiriman, dan stempel verifikasi sistem.
+  - Mengeliminasi halaman kosong pada dialog cetak / Simpan ke PDF (`Save as PDF`).
+
+---
+
 ## [2.3.59] - 2026-08-26
 
 ### 🐛 Konsolidasi Scope Variabel Identitas Global (Zero Temporal Dead Zone)
