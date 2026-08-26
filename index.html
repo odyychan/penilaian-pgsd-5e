@@ -5040,7 +5040,7 @@ function normalizeMediaList(fieldOrMedia) {
     }
 
     async function handleSwitchGoogleAccount() {
-      const ok = await showConfirmModal({
+      const ok = await showAppConfirm({
         title: "Ganti Akun Google?",
         message: "Anda akan dialihkan ke layar pemilihan Akun Google resmi Anda. Draf isian saat ini tetap tersimpan aman di akun ini.",
         confirmText: "Ya, Ganti Akun Google",
@@ -5415,7 +5415,7 @@ function normalizeMediaList(fieldOrMedia) {
     }
 
     async function handleAuthLogout() {
-      const ok = await showConfirmModal({
+      const ok = await showAppConfirm({
         title: "Keluar dari Akun?",
         message: "Apakah Anda yakin ingin keluar dari akun penilai ini? Draf isian Anda tetap tersimpan aman di akun ini.",
         confirmText: "Ya, Keluar Akun",
@@ -8324,7 +8324,7 @@ function normalizeMediaList(fieldOrMedia) {
     }
 
     let toastTimer = null;
-        // UNIVERSAL IN-APP ACTION CONFIRMATION ENGINE
+    // UNIVERSAL IN-APP ACTION CONFIRMATION ENGINE
     function showAppConfirm({
       title = "Konfirmasi Tindakan",
       message = "Apakah Anda yakin ingin melanjutkan tindakan ini?",
@@ -8391,6 +8391,8 @@ function normalizeMediaList(fieldOrMedia) {
         modal.classList.remove("hidden");
       });
     }
+    const showConfirmModal = showAppConfirm;
+    window.showConfirmModal = showAppConfirm;
 
     function showToast(message, type = "info") {
       const toast = document.getElementById("toast");

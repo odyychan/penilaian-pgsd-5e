@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.51] - 2026-08-26
+
+### 🔄 Penyempurnaan Dialog Konfirmasi Keluar & Pergantian Akun Google
+- **🚪 Perbaikan Fungsi Modal Konfirmasi (`showAppConfirm`):**
+  - Memperbaiki pemanggilan modal konfirmasi pada fungsi `handleAuthLogout` dan `handleSwitchGoogleAccount` dengan menghubungkan ke mesin modal universal `showAppConfirm`, sehingga proses keluar akun dan ganti akun Google berjalan mulus tanpa error JavaScript.
+- **✨ Penambahan Alias Global `showConfirmModal`:**
+  - Menyediakan fallback alias `showConfirmModal` untuk menjamin kompatibilitas seluruh komponen modul autentikasi dan penanganan sesi.
+
+---
+
 ## [2.3.50] - 2026-08-26
 
 ### 🛡️ Penyelarasan Komponen Inti CORE_IDENTITY & Optimalisasi Agregasi Real-Time Rekapitulasi
