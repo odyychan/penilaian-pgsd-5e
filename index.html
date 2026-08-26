@@ -1346,6 +1346,13 @@
     let currentFormSchema = null;
     let customFieldsData = [];
     let customUploadedFilesMap = {};
+    let clientCustomFormAnswers = {};
+
+    let activeUserAccountEmail = "";
+    let activeUserAccountName = "";
+    let activeUserAccountNim = "";
+    let activeUserAccountAvatarUrl = "";
+    let currentEvaluatorRole = "Mahasiswa";
 
     let currentStep = 1;
     let appConfig = {};
@@ -2050,8 +2057,6 @@ function normalizeMediaList(fieldOrMedia) {
     // =========================================================================
     // UNIVERSAL DYNAMIC FORM WIZARD & STAGE ENGINE
     // =========================================================================
-    let clientCustomFormAnswers = {};
-
     function handleClientFieldInput(fieldId, value) {
       clientCustomFormAnswers[fieldId] = value;
       saveFormDraft();
@@ -4328,8 +4333,6 @@ function normalizeMediaList(fieldOrMedia) {
     // =========================================================================
     // SMART ROLE & NIM-DRIVEN IDENTITY FUNCTIONS (STEP 1)
     // =========================================================================
-    let currentEvaluatorRole = 'Mahasiswa'; // 'Mahasiswa' | 'Dosen' | 'Lainnya'
-
     function fillNimEmailFormat() {
       const cleanNim = (document.getElementById("inputNim")?.value || "").trim();
       if (!cleanNim) {
@@ -4796,9 +4799,6 @@ function normalizeMediaList(fieldOrMedia) {
     // =========================================================================
     // GOOGLE FORMS STYLE: ACCOUNT SESSION & PROFILE MEMORY
     // =========================================================================
-    let activeUserAccountEmail = "";
-    let activeUserAccountName = "";
-
     function appendEmailDomain(domain) {
       const emailInput = document.getElementById("inputEmail");
       if (!emailInput) return;
@@ -4901,8 +4901,6 @@ function normalizeMediaList(fieldOrMedia) {
       } catch (e) {}
       return null;
     }
-
-    let activeUserAccountAvatarUrl = "";
 
     function setAuthSession(user, remember = true) {
       if (!user || !user.email) return;

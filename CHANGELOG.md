@@ -4,6 +4,15 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.59] - 2026-08-26
+
+### 🐛 Konsolidasi Scope Variabel Identitas Global (Zero Temporal Dead Zone)
+- **🔒 Sentralisasi Variabel State Penilai:**
+  - Memindahkan seluruh deklarasi state penilai (`activeUserAccountEmail`, `activeUserAccountName`, `activeUserAccountNim`, `activeUserAccountAvatarUrl`, `currentEvaluatorRole`, `clientCustomFormAnswers`) langsung ke blok paling atas `<script>`.
+  - Mengeliminasi duplikasi deklarasi dan error runtime `ReferenceError: activeUserAccountNim is not defined` saat pemanggilan fungsi `renderSingleClientFieldHtml`.
+
+---
+
 ## [2.3.58] - 2026-08-26
 
 ### 🐛 Perbaikan Scope Global `currentFormSchema`
