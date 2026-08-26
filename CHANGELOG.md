@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.45] - 2026-08-26
+
+### 🔒 Penetapan Default Tampilan Gerbang Login Google & Penyelarasan Render Overview
+- **🛡️ Penyelarasan DOM Gerbang Masuk:**
+  - Mengatur `#formAuthGateSection` tampil secara default saat halaman dimuat, serta menyembunyikan `#formOverviewSection` secara default untuk mencegah tampilan kosong (*empty overview flash*) sebelum otentikasi.
+- **✨ Render Menyeluruh Alur Tahapan & Informasi Akademik:**
+  - Menjamin kartu informasi akademik dan alur tahapan pengisian ter-render 100% sempurna segera setelah otentikasi akun Google selesai.
+
+---
+
 ## [2.3.44] - 2026-08-26
 
 ### 🚀 Dukungan Penuh Pengujian Berkas Lokal (`file:///`) & Simulator Pratinjau Admin (*Iframe*)
