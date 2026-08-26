@@ -4,6 +4,15 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.33] - 2026-08-26
+
+### 🛡️ Sakelar Interaktif Integritas & Aturan Penilaian (*Integrity Rules Interactive Toggles*)
+- **Sakelar Beralih Fleksibel (*Toggle Switch Controls*):**
+  - Menyempurnakan komponen sakelar beralih (*toggle switch*) pada kartu **"Cegah Penilaian Diri Sendiri"** dan **"Kunci Respons Ganda"** di tab Setelan Panel Admin.
+  - Dosen/Admin kini dapat dengan mudah mengaktifkan (*enable*) atau menonaktifkan (*disable*) aturan integritas tersebut secara interaktif dengan auto-save instan ke database.
+
+---
+
 ## [2.3.32] - 2026-08-26
 
 ### 🌐 Konversi Pintar Zona Waktu Lintas Wilayah (*Smart Cross-Timezone Conversion*)
