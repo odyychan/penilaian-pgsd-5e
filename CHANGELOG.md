@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.7] - 2026-08-26
+
+### 🚀 Optimasi Responsivitas Modal & Pencegahan Dropdown Terpotong (*Zero Clipping*)
+- **📐 Peningkatan Ruang & Penanganan Overflow Modal Batch Group:**
+  - Mengubah modal *Impor & Atur Kelompok* dari `overflow-hidden` menjadi `overflow-y-auto` dengan `min-h-[220px]` pada seluruh tab impor.
+  - Memastikan dialog dapat discroll secara halus tanpa memotong dropdown pilihan formulir sumber atau opsi metode simpan.
+- **🎯 Smart Dropup & Viewport Boundary Auto-Positioning:**
+  - Menambahkan kalkulasi ruang vertikal cerdas pada `enhanceSelectToModernDropdown`: jika ruang di bawah terbatas (`spaceBelow < menuHeight`), menu dropdown otomatis beralih ke atas (*Smart Dropup* `bottom: 100%`).
+  - Menyelaraskan z-index layer (`z-[100]`) dan bayangan lembut untuk visibilitas opsi yang sempurna di seluruh modal.
+
+---
+
 ## [2.4.6] - 2026-08-26
 
 ### 🛡️ Migrasi Autentikasi Admin ke Supabase Secrets & Server-Side Edge Functions

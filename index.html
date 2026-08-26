@@ -1971,8 +1971,8 @@ function normalizeMediaList(fieldOrMedia) {
       triggerBtn.appendChild(chevronSvg);
 
       const menu = document.createElement("div");
-      menu.className = "pgsd-dropdown-menu absolute left-0 mt-1.5 rounded-xl bg-white border border-zinc-200 shadow-xl p-1 space-y-0.5 z-50 text-xs hidden max-h-64 overflow-y-auto no-scrollbar min-w-full w-max max-w-xs sm:max-w-sm";
-      menu.style.boxShadow = "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)";
+      menu.className = "pgsd-dropdown-menu absolute left-0 mt-1.5 rounded-xl bg-white border border-zinc-200 shadow-2xl p-1 space-y-0.5 z-[100] text-xs hidden max-h-56 overflow-y-auto no-scrollbar min-w-full w-max max-w-xs sm:max-w-sm";
+      menu.style.boxShadow = "0 14px 35px -5px rgba(0, 0, 0, 0.15), 0 10px 15px -6px rgba(0, 0, 0, 0.1)";
 
       function rebuildMenuOptions() {
         menu.innerHTML = "";
@@ -2032,15 +2032,33 @@ function normalizeMediaList(fieldOrMedia) {
         chevronSvg.classList.add("rotate-180");
         triggerBtn.classList.add("ring-2", "ring-indigo-500/20", "border-indigo-500");
 
-        // Viewport bounds detection
+        // Smart Viewport & Boundary Bounds Detection (Dropup vs Dropdown)
         requestAnimationFrame(() => {
-          const rect = menu.getBoundingClientRect();
-          if (rect.right > window.innerWidth - 10) {
+          const rect = triggerBtn.getBoundingClientRect();
+          const menuHeight = menu.offsetHeight || 180;
+          const spaceBelow = window.innerHeight - rect.bottom;
+          const spaceAbove = rect.top;
+
+          // Horizontal bounds
+          if (rect.left + menu.offsetWidth > window.innerWidth - 12) {
             menu.classList.remove("left-0");
             menu.classList.add("right-0");
           } else {
             menu.classList.remove("right-0");
             menu.classList.add("left-0");
+          }
+
+          // Vertical bounds (Dropup if space below is limited)
+          if (spaceBelow < menuHeight + 15 && spaceAbove > spaceBelow) {
+            menu.style.top = 'auto';
+            menu.style.bottom = '100%';
+            menu.style.marginTop = '0px';
+            menu.style.marginBottom = '6px';
+          } else {
+            menu.style.bottom = 'auto';
+            menu.style.top = '100%';
+            menu.style.marginBottom = '0px';
+            menu.style.marginTop = '6px';
           }
         });
       }

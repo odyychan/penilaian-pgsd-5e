@@ -2284,7 +2284,7 @@
 
     <!-- MODAL BATCH GROUP IMPORT (MULTI-SOURCE: FROM FORM, CUSTOM GENERATOR, EXCEL) -->
   <div id="modalBatchGroup" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4" onclick="if(event.target === this) closeBatchGroupModal()">
-    <div class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 flex flex-col max-h-[92vh] space-y-4 fade-enter overflow-hidden" onclick="event.stopPropagation()">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl border border-zinc-200 flex flex-col max-h-[92vh] space-y-4 fade-enter overflow-y-auto" onclick="event.stopPropagation()">
       
       <!-- Modal Header -->
       <div class="flex items-center justify-between border-b border-zinc-100 pb-3 flex-shrink-0">
@@ -2316,12 +2316,14 @@
       </div>
 
       <!-- Mode 1: SALIN DARI FORM LAIN -->
-      <div id="importPanel_from_form" class="space-y-3.5 flex-1 overflow-y-auto custom-scrollbar pr-1">
-        <div class="p-3.5 bg-zinc-50 rounded-xl border border-zinc-200 space-y-2 text-xs">
+      <div id="importPanel_from_form" class="space-y-3.5 flex-1 min-h-[220px] overflow-visible pr-1">
+        <div class="p-3.5 bg-zinc-50 rounded-xl border border-zinc-200 space-y-2 text-xs relative overflow-visible">
           <label class="block font-bold text-zinc-800">Pilih Formulir Sumber:</label>
-          <select id="selectSourceFormToImport" onchange="handleSourceFormSelectionChange(this.value)" class="w-full px-3 py-2.5 rounded-xl border border-zinc-300 text-xs font-semibold bg-white outline-none focus:border-indigo-600 cursor-pointer shadow-2xs">
-            <option value="">Pilih Formulir Sumber...</option>
-          </select>
+          <div class="relative overflow-visible">
+            <select id="selectSourceFormToImport" onchange="handleSourceFormSelectionChange(this.value)" class="w-full px-3 py-2.5 rounded-xl border border-zinc-300 text-xs font-semibold bg-white outline-none focus:border-indigo-600 cursor-pointer shadow-2xs">
+              <option value="">Pilih Formulir Sumber...</option>
+            </select>
+          </div>
           <p class="text-[10.5px] text-zinc-400">Pilih form yang sudah memiliki data kelompok untuk disalin ke formulir ini.</p>
         </div>
 
@@ -2341,7 +2343,7 @@
       </div>
 
       <!-- Mode 2: BAGI OTOMATIS / KUSTOM DARI DAFTAR MAHASISWA -->
-      <div id="importPanel_custom_distribute" class="space-y-3 flex-1 overflow-y-auto custom-scrollbar pr-1 hidden">
+      <div id="importPanel_custom_distribute" class="space-y-3 flex-1 min-h-[220px] overflow-y-auto custom-scrollbar pr-1 hidden">
         <div class="space-y-1 text-xs">
           <div class="flex items-center justify-between">
             <label class="font-bold text-zinc-800">Tempel Daftar Nama &amp; NIM Mahasiswa:</label>
@@ -2456,8 +2458,8 @@
       </div>
 
       <!-- Action Mode Option (Append vs Overwrite) -->
-      <div class="flex items-center justify-between pt-2 border-t border-zinc-100 text-xs flex-shrink-0 flex-wrap gap-2">
-        <div class="flex items-center gap-3">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pt-3 border-t border-zinc-100 text-xs flex-shrink-0 gap-3">
+        <div class="flex items-center gap-3 flex-wrap">
           <span class="font-semibold text-zinc-700 text-[11px]">Metode Simpan:</span>
           <label class="flex items-center gap-1.5 font-medium cursor-pointer text-[11px] text-zinc-800">
             <input type="radio" name="batchMode" value="append" checked class="text-zinc-900">
@@ -2469,7 +2471,7 @@
           </label>
         </div>
 
-        <div class="flex items-center gap-2 ml-auto">
+        <div class="flex items-center gap-2 self-end sm:self-auto sm:ml-auto">
           <button type="button" onclick="closeBatchGroupModal()" class="px-4 py-2 rounded-xl border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-medium cursor-pointer transition">
             Batal
           </button>
@@ -5592,8 +5594,8 @@ function getOrCreateFolder(folderName) {
       triggerBtn.appendChild(chevronSvg);
 
       const menu = document.createElement("div");
-      menu.className = "pgsd-dropdown-menu absolute left-0 mt-1.5 rounded-xl bg-white border border-zinc-200 shadow-xl p-1 space-y-0.5 z-50 text-xs hidden max-h-64 overflow-y-auto no-scrollbar min-w-full w-max max-w-xs sm:max-w-sm";
-      menu.style.boxShadow = "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)";
+      menu.className = "pgsd-dropdown-menu absolute left-0 mt-1.5 rounded-xl bg-white border border-zinc-200 shadow-2xl p-1 space-y-0.5 z-[100] text-xs hidden max-h-56 overflow-y-auto no-scrollbar min-w-full w-max max-w-xs sm:max-w-sm";
+      menu.style.boxShadow = "0 14px 35px -5px rgba(0, 0, 0, 0.15), 0 10px 15px -6px rgba(0, 0, 0, 0.1)";
 
       function rebuildMenuOptions() {
         menu.innerHTML = "";
@@ -5653,15 +5655,33 @@ function getOrCreateFolder(folderName) {
         chevronSvg.classList.add("rotate-180");
         triggerBtn.classList.add("ring-2", "ring-indigo-500/20", "border-indigo-500");
 
-        // Viewport bounds detection
+        // Smart Viewport & Boundary Bounds Detection (Dropup vs Dropdown)
         requestAnimationFrame(() => {
-          const rect = menu.getBoundingClientRect();
-          if (rect.right > window.innerWidth - 10) {
+          const rect = triggerBtn.getBoundingClientRect();
+          const menuHeight = menu.offsetHeight || 180;
+          const spaceBelow = window.innerHeight - rect.bottom;
+          const spaceAbove = rect.top;
+
+          // Horizontal bounds
+          if (rect.left + menu.offsetWidth > window.innerWidth - 12) {
             menu.classList.remove("left-0");
             menu.classList.add("right-0");
           } else {
             menu.classList.remove("right-0");
             menu.classList.add("left-0");
+          }
+
+          // Vertical bounds (Dropup if space below is limited)
+          if (spaceBelow < menuHeight + 15 && spaceAbove > spaceBelow) {
+            menu.style.top = 'auto';
+            menu.style.bottom = '100%';
+            menu.style.marginTop = '0px';
+            menu.style.marginBottom = '6px';
+          } else {
+            menu.style.bottom = 'auto';
+            menu.style.top = '100%';
+            menu.style.marginBottom = '0px';
+            menu.style.marginTop = '6px';
           }
         });
       }
