@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.53] - 2026-08-26
+
+### 🛡️ Optimasi Persistensi Client Supabase & Header Cache Edge Vercel
+- **⚡ Inisialisasi Eksplisit Opsi Sesi Supabase Client:**
+  - Menambahkan konfigurasi `persistSession: true`, `autoRefreshToken: true`, `detectSessionInUrl: true`, dan `storage: window.localStorage` pada inisialisasi `supabaseClient`, menjamin deteksi dan pemulihan token otentikasi otomatis seketika saat peramban mendarat dari redirect Google.
+- **🔄 Penyelarasan Parameter Prompt Google OAuth:**
+  - Mengubah parameter kueri OAuth menjadi `prompt: 'select_account'` untuk menjamin pemilih akun Google (*Account Picker*) selalu terbuka dan pengguna dapat memilih akun kampus tanpa hambatan.
+- **🌐 Header Anti-Stale Cache Vercel Edge:**
+  - Menambahkan header `Cache-Control: public, max-age=0, must-revalidate` pada `vercel.json` agar peramban pengguna selalu menyajikan skrip frontend terbaru tanpa terjebak cache lama.
+
+---
+
 ## [2.3.52] - 2026-08-26
 
 ### 🛡️ Penguatan Arsitektur Callback OAuth (PKCE & Implicit) & Anti-Flicker Sesi
