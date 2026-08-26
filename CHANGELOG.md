@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.28] - 2026-08-26
+
+### 💎 Desain Mewah Glassmorphism Kristal Spoiler Blur (*Luxury Crystal Glassmorphism Spoiler*)
+- **Efek Kaca Kristal Mewah & Pendaran Aura (*Luxury Frosted Glass & Ambient Glow*):**
+  - Meningkatkan kualitas efek blur dengan backdrop *Crystal Glassmorphism* (`backdrop-blur-xl`, `filter: blur(10px)`, ambient gradient aura indigo & amber) sehingga tampilan tidak datar/abu-abu, melainkan tampak berkilau dan mewah layaknya antarmuka modern Apple/iOS.
+- **Kartu Melayang Kristal Elegan (*Floating Crystal Glass Card*):**
+  - Mengganti tombol standar dengan kartu kaca mengambang berikon `✨` dengan lencana indigo `"SPOILER"`, bayangan halus (*soft colored drop-shadow*), dan animasi interaktif saat disentuh atau diarahkan kursor (*hover lift*).
+- **Penempatan Presisi di Layar Utama (*Immediate Viewport Alignment*):**
+  - Mengoptimalkan posisi kartu sensor di bagian atas area rincian agar langsung tampak anggun di layar utama tanpa harus menggulir ke bawah.
+- **Tombol Sensor Kembali (*Re-Lock Floating Button*):**
+  - Menghadirkan tombol `[ 🔒 Sensor Kembali ]` setelah sensor dibuka agar pengguna dapat menutup kembali rincian formulir dengan mudah.
+
+---
+
 ## [2.3.27] - 2026-08-26
 
 ### 🌫️ Efek Sensor Kabur Spoiler Kaca Es (*Frosted Glass Spoiler Blur Effect*)

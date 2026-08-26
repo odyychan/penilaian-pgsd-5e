@@ -333,23 +333,54 @@
             <p id="lockBannerDesc" class="text-xs text-amber-900 leading-relaxed pl-10.5"></p>
           </div>
 
-          <!-- SPOILER BLUR CONTAINER (DETAIL INFORMASI & ALUR PERKULIAHAN) -->
-          <div id="overviewSpoilerWrapper" class="relative rounded-2xl transition-all duration-300 overflow-hidden">
-            <!-- SPOILER OVERLAY (TAMPIL HANYA JIKA FORM TERKUNCI / BELUM DIBUKA) -->
+          <!-- LUXURIOUS FROSTED GLASS SPOILER CONTAINER -->
+          <div id="overviewSpoilerWrapper" class="relative rounded-2xl border border-zinc-200/80 bg-linear-to-b from-white via-zinc-50/40 to-zinc-50/70 p-1 sm:p-2 transition-all duration-500 overflow-hidden shadow-2xs">
+            
+            <!-- LUXURY FROSTED GLASS OVERLAY (TAMPIL SAAT FORM TERKUNCI / BELUM DIBUKA) -->
             <div 
               id="overviewSpoilerOverlay" 
               onclick="revealSpoilerBlur()"
-              class="hidden absolute inset-0 z-20 flex-col items-center justify-center p-4 bg-zinc-900/10 backdrop-blur-[6px] hover:backdrop-blur-[4px] rounded-2xl cursor-pointer group/spoiler transition-all duration-300"
+              class="hidden absolute inset-0 z-20 flex-col items-center justify-start pt-12 sm:pt-16 p-6 bg-white/50 backdrop-blur-md hover:backdrop-blur-sm cursor-pointer group/spoiler transition-all duration-300"
             >
-              <div class="px-4 py-2.5 rounded-xl bg-zinc-900/90 group-hover/spoiler:bg-zinc-900 text-white text-xs font-bold shadow-xl border border-zinc-700/60 flex items-center gap-2 transform group-hover/spoiler:scale-105 active:scale-95 transition-all duration-200">
-                <span class="text-sm">👁️</span>
-                <span>Buka Sensor Rincian (Spoiler)</span>
-                <span class="text-[10px] text-zinc-400 font-mono bg-zinc-800 px-1.5 py-0.5 rounded">Detail Form</span>
+              <!-- Decorative Luxury Ambient Glow Aura -->
+              <div class="absolute -top-10 -right-10 w-44 h-44 bg-indigo-300/30 rounded-full blur-2xl pointer-events-none group-hover/spoiler:scale-125 transition-transform duration-500"></div>
+              <div class="absolute -bottom-10 -left-10 w-44 h-44 bg-amber-300/25 rounded-full blur-2xl pointer-events-none group-hover/spoiler:scale-125 transition-transform duration-500"></div>
+
+              <!-- Floating Crystal Glass Pill Card -->
+              <div class="relative z-10 px-5 py-3.5 sm:px-6 sm:py-4 rounded-2xl bg-white/95 hover:bg-white text-zinc-900 shadow-[0_12px_30px_-6px_rgba(79,70,229,0.2),0_4px_12px_rgba(0,0,0,0.06)] border border-indigo-100 ring-1 ring-indigo-500/15 backdrop-blur-xl flex flex-col sm:flex-row items-center gap-3 transform group-hover/spoiler:-translate-y-1 group-hover/spoiler:shadow-[0_20px_35px_-8px_rgba(79,70,229,0.28)] active:scale-97 transition-all duration-300">
+                <div class="w-9 h-9 rounded-xl bg-linear-to-br from-indigo-500 to-indigo-700 text-white flex items-center justify-center text-base shadow-sm shrink-0">
+                  <span>✨</span>
+                </div>
+                <div class="text-center sm:text-left">
+                  <div class="flex items-center justify-center sm:justify-start gap-2">
+                    <span class="text-xs sm:text-sm font-bold text-zinc-900 tracking-tight">Rincian Informasi Disembunyikan</span>
+                    <span class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/70 text-[9.5px] font-mono font-bold uppercase tracking-wider">Spoiler</span>
+                  </div>
+                  <p class="text-[11px] text-zinc-500 mt-0.5">Ketuk di sini untuk membuka sensor dan melihat rincian perkuliahan</p>
+                </div>
+                <div class="hidden sm:flex items-center justify-center w-8 h-8 rounded-full bg-zinc-100 group-hover/spoiler:bg-indigo-50 group-hover/spoiler:text-indigo-600 text-zinc-500 transition ml-1 shrink-0">
+                  <svg class="w-4 h-4 transform group-hover/spoiler:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                  </svg>
+                </div>
               </div>
             </div>
 
+            <!-- RE-LOCK / HIDE BUTTON (WHEN REVEALED) -->
+            <div id="overviewSpoilerReLockWrapper" class="hidden justify-end mb-1.5 px-1">
+              <button 
+                type="button" 
+                onclick="applySpoilerBlur(true)"
+                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10.5px] font-semibold text-zinc-500 hover:text-zinc-800 bg-white hover:bg-zinc-100 border border-zinc-200 shadow-2xs transition cursor-pointer"
+              >
+                <span>🔒</span>
+                <span>Sensor Kembali</span>
+              </button>
+            </div>
+
             <!-- KONTEN RINCIAN (AKAN TER-BLUR SECARA HALUS SAAT FORM TERKUNCI) -->
-            <div id="overviewSpoilerContent" class="space-y-4 sm:space-y-5 transition-all duration-300">
+            <div id="overviewSpoilerContent" class="space-y-4 sm:space-y-5 p-1 sm:p-2 transition-all duration-500">
               <!-- Rincian Identitas / Informasi Tambahan (Dinamis dari Config) -->
               <div id="overviewHeaderInfoGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 text-xs">
                 <!-- Rendered dynamically via renderOverviewHeaderInfoGrid() -->
@@ -3535,16 +3566,27 @@ function normalizeMediaList(fieldOrMedia) {
     function applySpoilerBlur(isBlurred) {
       const spoilerOverlay = document.getElementById("overviewSpoilerOverlay");
       const spoilerContent = document.getElementById("overviewSpoilerContent");
+      const relockWrapper = document.getElementById("overviewSpoilerReLockWrapper");
       if (!spoilerContent || !spoilerOverlay) return;
 
       if (isBlurred) {
-        spoilerContent.classList.add("filter", "blur-[6px]", "select-none", "pointer-events-none", "opacity-50");
+        spoilerContent.classList.add("filter", "blur-[10px]", "select-none", "pointer-events-none", "opacity-40", "scale-[0.99]");
         spoilerOverlay.classList.remove("hidden");
         spoilerOverlay.classList.add("flex");
+        if (relockWrapper) {
+          relockWrapper.classList.add("hidden");
+          relockWrapper.classList.remove("flex");
+        }
       } else {
-        spoilerContent.classList.remove("filter", "blur-[6px]", "select-none", "pointer-events-none", "opacity-50");
+        spoilerContent.classList.remove("filter", "blur-[10px]", "select-none", "pointer-events-none", "opacity-40", "scale-[0.99]");
         spoilerOverlay.classList.add("hidden");
         spoilerOverlay.classList.remove("flex");
+        // Show re-lock button only if form is currently locked/closed
+        const isCurrentlyClosed = document.getElementById("formScheduleLockBanner") && !document.getElementById("formScheduleLockBanner").classList.contains("hidden");
+        if (relockWrapper && isCurrentlyClosed) {
+          relockWrapper.classList.remove("hidden");
+          relockWrapper.classList.add("flex");
+        }
       }
     }
 
