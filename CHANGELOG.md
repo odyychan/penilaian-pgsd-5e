@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.24] - 2026-08-26
+
+### 🧹 Penyelarasan & Penyederhanaan Kolom Deskripsi Formulir (*Seamless In-Place Description Field*)
+- **Penghapusan Tombol Edit & Pratinjau Manual (*Zero-Button Clean Interface*):**
+  - Menghapus tombol pengalih manual `✏️ Edit` dan `👁️ Pratinjau` pada header kolom Petunjuk & Deskripsi Formulir sehingga antarmuka tampak lebih bersih dan seragam.
+- **Penyatuan Interaksi In-Place (*Unified In-Place Rich Field*):**
+  - Mengintegrasikan kolom deskripsi formulir ke dalam mesin *in-place morphing* otomatis: tampil terformat langsung di tempat (link biru, daftar `A.`/`1.`, rumus KaTeX) saat diam, dan langsung aktif ke mode pengetikan saat diklik tanpa memerlukan tombol bantuan.
+
+---
+
 ## [2.3.23] - 2026-08-26
 
 ### 🎨 Tampilan Terformat Langsung Pada Kolom Isian (*True In-Place WYSIWYG Morphing Fields*)
