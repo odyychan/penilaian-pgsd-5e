@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.29] - 2026-08-26
+
+### 🌫️ Desain Spoiler Blur Minimalis & Penyesuaian Intensitas Teks Samar (*Subtle Visible Spoiler Blur*)
+- **Format Spoiler Minimalis (*Clean Minimalist Layout*):**
+  - Mengembalikan format sensor kabur ke gaya minimalis yang ringkas dengan lencana gelap berbayang `[ 👁️ Buka Sensor Rincian (Spoiler) • Detail Form ]`.
+- **Intensitas Kabur Lembut (*Subtly Visible Text Layer*):**
+  - Menyesuaikan tingkat keburaman (`blur-[3.5px]` dan `opacity-75`) sehingga siluet dan teks informasi di bawahnya tetap terlihat secara samar dan estetis, memberikan petunjuk isi tanpa mengorbankan privasi status terkunci.
+- **Posisi Tombol Presisi (*Top-Centered Alignment*):**
+  - Memposisikan lencana pembuka sensor tepat di bagian tengah-atas bidang tampilan sehingga langsung terlihat jelas di layar tanpa perlu menggulir ke bawah.
+
+---
+
 ## [2.3.28] - 2026-08-26
 
 ### 💎 Desain Mewah Glassmorphism Kristal Spoiler Blur (*Luxury Crystal Glassmorphism Spoiler*)
