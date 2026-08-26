@@ -347,18 +347,18 @@
         </div>
       </div>
       <!-- Main Navigation Google Forms Sticky Bar (Visible ONLY inside Single Form Workspace) -->
-      <div id="headerWorkspaceTabs" class="w-full px-2 sm:px-6 lg:px-8 pb-2 pt-0.5 hidden">
+      <div id="headerWorkspaceTabs" class="w-full px-2 sm:px-6 lg:px-8 pb-3 pt-1 hidden">
         
         <!-- AUTHENTIC GOOGLE FORMS STICKY TOP APP BAR (Responsive for Mobile, Tablet & Desktop) -->
-        <div id="headerTabsStandardView" class="w-full bg-zinc-900 rounded-xl border border-zinc-800 p-1 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-1.5 lg:gap-2 text-[11px] sm:text-xs font-semibold shadow-xs">
+        <div id="headerTabsStandardView" class="w-full bg-zinc-900/95 rounded-2xl border border-zinc-800 p-1.5 sm:p-2 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2 text-xs font-semibold shadow-inner">
           
           <!-- Primary Workspace Navigation Tabs (Horizontal scroll on mobile & tablet) -->
-          <div class="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5 shrink-0 max-w-full" style="scrollbar-width: none; -webkit-overflow-scrolling: touch;">
+          <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 shrink-0 max-w-full" style="scrollbar-width: none; -webkit-overflow-scrolling: touch;">
             <!-- 1. Pertanyaan (Google Forms Canvas) -->
             <button 
               id="adminTabBtn_config" 
               onclick="switchAdminTab('config')" 
-              class="py-1.5 sm:py-2 px-2.5 sm:px-3 rounded-lg bg-zinc-100 text-zinc-950 shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer text-center whitespace-nowrap font-bold shrink-0 text-xs"
+              class="h-8.5 sm:h-9 px-3 rounded-xl bg-white text-zinc-950 shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer text-center whitespace-nowrap font-bold shrink-0 text-xs"
             >
               <svg class="w-3.5 h-3.5 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -370,7 +370,7 @@
             <button 
               id="adminTabBtn_responses" 
               onclick="switchAdminTab('responses')" 
-              class="py-1.5 sm:py-2 px-2.5 sm:px-3 rounded-lg text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1.5 cursor-pointer text-center whitespace-nowrap shrink-0 text-xs font-medium"
+              class="h-8.5 sm:h-9 px-3 rounded-xl text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/80 transition flex items-center justify-center gap-1.5 cursor-pointer text-center whitespace-nowrap shrink-0 text-xs font-medium"
             >
               <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
@@ -382,7 +382,7 @@
             <button 
               id="adminTabBtn_data" 
               onclick="switchAdminTab('data')" 
-              class="py-1.5 sm:py-2 px-2.5 sm:px-3 rounded-lg text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1.5 cursor-pointer text-center whitespace-nowrap shrink-0 text-xs font-medium"
+              class="h-8.5 sm:h-9 px-3 rounded-xl text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/80 transition flex items-center justify-center gap-1.5 cursor-pointer text-center whitespace-nowrap shrink-0 text-xs font-medium"
             >
               <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
@@ -394,7 +394,7 @@
             <button 
               id="adminTabBtn_settings" 
               onclick="switchAdminTab('settings')" 
-              class="py-1.5 sm:py-2 px-2.5 sm:px-3 rounded-lg text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1.5 cursor-pointer text-center whitespace-nowrap shrink-0 text-xs font-medium"
+              class="h-8.5 sm:h-9 px-3 rounded-xl text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/80 transition flex items-center justify-center gap-1.5 cursor-pointer text-center whitespace-nowrap shrink-0 text-xs font-medium"
             >
               <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
@@ -407,7 +407,7 @@
             <button 
               id="adminTabBtn_system" 
               onclick="switchAdminTab('system')" 
-              class="py-1.5 sm:py-2 px-2.5 sm:px-3 rounded-lg text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1.5 cursor-pointer text-center whitespace-nowrap shrink-0 text-xs font-medium"
+              class="h-8.5 sm:h-9 px-3 rounded-xl text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/80 transition flex items-center justify-center gap-1.5 cursor-pointer text-center whitespace-nowrap shrink-0 text-xs font-medium"
             >
               <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z"></path>
@@ -417,9 +417,9 @@
           </div>
 
           <!-- Top Action Controls Strip (Always Unified & Accessible) -->
-          <div class="flex items-center justify-between lg:justify-end gap-1 sm:gap-2 pt-1 lg:pt-0 border-t lg:border-t-0 border-zinc-800/80 shrink-0 overflow-x-auto no-scrollbar">
+          <div class="flex items-center justify-between lg:justify-end gap-1.5 sm:gap-2 pt-1 lg:pt-0 border-t lg:border-t-0 border-zinc-800/80 shrink-0 overflow-x-auto no-scrollbar">
             <!-- Undo / Redo in Header (100% Consistent Height & Radius) -->
-            <div class="h-8 sm:h-9 p-0.5 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center shrink-0 shadow-2xs gap-0.5">
+            <div class="h-8.5 sm:h-9 p-0.5 rounded-xl bg-zinc-800/90 border border-zinc-700/80 flex items-center shrink-0 shadow-2xs gap-0.5">
               <button 
                 type="button" 
                 id="btnHeaderBuilderUndo"
@@ -447,7 +447,7 @@
             <button 
               type="button" 
               onclick="openRevisionHistoryModal()" 
-              class="h-8 sm:h-9 px-2.5 sm:px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-xs font-semibold shadow-2xs flex items-center gap-1.5 transition cursor-pointer shrink-0 active:scale-95"
+              class="h-8.5 sm:h-9 px-2.5 sm:px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700/80 text-xs font-semibold shadow-2xs flex items-center gap-1.5 transition cursor-pointer shrink-0 active:scale-95"
               title="Riwayat Perubahan &amp; Versi Formulir"
             >
               <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -458,7 +458,7 @@
             <button 
               type="button" 
               onclick="openLiveFormSimulator()" 
-              class="h-8 sm:h-9 px-2.5 sm:px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-xs font-semibold shadow-xs flex items-center gap-1.5 transition cursor-pointer shrink-0 active:scale-95"
+              class="h-8.5 sm:h-9 px-2.5 sm:px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700/80 text-xs font-semibold shadow-xs flex items-center gap-1.5 transition cursor-pointer shrink-0 active:scale-95"
               title="Buka simulasi pratinjau formulir mahasiswa (👁️)"
             >
               <svg class="w-3.5 h-3.5 text-zinc-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
@@ -470,7 +470,7 @@
               type="button" 
               onclick="publishFormSchema()" 
               id="btnHeaderPublishSchema"
-              class="h-8 sm:h-9 px-3 sm:px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md flex items-center gap-1.5 transition cursor-pointer whitespace-nowrap shrink-0 active:scale-95"
+              class="h-8.5 sm:h-9 px-3 sm:px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition cursor-pointer whitespace-nowrap shrink-0 active:scale-95"
               title="Publikasikan draf agar resmi tayang"
             >
               <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
@@ -6552,14 +6552,14 @@ function getOrCreateFolder(folderName) {
             renderAllMathInElement(view);
           }
           if (btn) {
-            btn.className = "py-1.5 sm:py-2 px-2.5 sm:px-3 rounded-lg bg-zinc-100 text-zinc-950 shadow-xs transition flex items-center justify-center gap-1 cursor-pointer text-center whitespace-nowrap shrink-0 text-xs font-bold";
+            btn.className = "h-8.5 sm:h-9 px-3 rounded-xl bg-white text-zinc-950 shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer text-center whitespace-nowrap shrink-0 text-xs font-bold";
             const icon = btn.querySelector('svg');
             if (icon) icon.className = "w-3.5 h-3.5 text-indigo-600 shrink-0";
           }
         } else {
           if (view) view.classList.add("hidden");
           if (btn) {
-            btn.className = "py-1.5 sm:py-2 px-2.5 sm:px-3 rounded-lg text-zinc-400 hover:text-zinc-100 transition flex items-center justify-center gap-1 cursor-pointer text-center whitespace-nowrap shrink-0 text-xs font-medium";
+            btn.className = "h-8.5 sm:h-9 px-3 rounded-xl text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/80 transition flex items-center justify-center gap-1.5 cursor-pointer text-center whitespace-nowrap shrink-0 text-xs font-medium";
             const icon = btn.querySelector('svg');
             if (icon) icon.className = "w-3.5 h-3.5 shrink-0";
           }

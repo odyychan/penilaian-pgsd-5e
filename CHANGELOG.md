@@ -4,6 +4,16 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.15] - 2026-08-26
+
+### 🎨 Perbaikan Presisi Padding & Border Tombol Bilah Tab Header (*Zero Edge Clipping*)
+- **✨ Optimalisasi Spacing & Radius Bilah Navigasi:**
+  - Menyesuaikan *padding* wadah `#headerWorkspaceTabs` (`pb-3 pt-1`) dan `#headerTabsStandardView` (`p-1.5 sm:p-2`) dengan sudut membulat modern (`rounded-2xl`).
+  - Menstandarkan tinggi dan *breathing room* seluruh tombol tab (`h-8.5 sm:h-9 px-3 rounded-xl`) serta tombol aksi (*Undo/Redo, Riwayat, Pratinjau, Publikasikan*) agar tidak lagi terpotong (*clipped*) atau menempel di batas tepi wadah gelap.
+  - Memastikan *box-shadow* dan *border radius* seluruh tombol ter-render secara utuh dan presisi pada semua resolusi layar.
+
+---
+
 ## [2.4.14] - 2026-08-26
 
 ### 🛡️ Proteksi Tautan Langsung Responden & Eliminasi Total Kebocoran Rute Admin
