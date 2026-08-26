@@ -4,6 +4,21 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.38] - 2026-08-26
+
+### 🌐 Integrasi Resmi Otentikasi Google OAuth via Supabase Auth (*Sign in with Google*)
+- **🔵 Tombol Resmi Masuk dengan Google (`#btnGoogleSignIn`):**
+  - Menghadirkan tombol otentikasi resmi berstandar Google (`Sign in with Google`) di layar gerbang login.
+  - Terkoneksi langsung ke Supabase Auth (`supabase.auth.signInWithOAuth({ provider: 'google' })`) untuk login akun kampus Google Workspace (`@mhs.ulm.ac.id`, `@ulm.ac.id`) maupun akun Google pribadi.
+- **📸 Sinkronisasi Identitas Asli & Foto Profil Google:**
+  - Otomatis mengekstrak nama lengkap resmi, alamat email terverifikasi, dan foto profil asli dari Google untuk ditampilkan pada bar akun aktif dan kartu tanda terima penilaian.
+- **🔍 Deteksi Cerdas NIM & Pencocokan Master Mahasiswa:**
+  - Mendeteksi prefix NIM dari email mahasiswa dan mencocokkan secara otomatis dengan data master mahasiswa ULM (`pgsd_students`).
+- **🔒 Manajemen Sesi Terpadu & Sign-Out Supabase:**
+  - Sesi login terikat aman dengan token JWT Supabase Auth; tombol *[🚪 Keluar]* secara otomatis memanggil `supabase.auth.signOut()` dan membersihkan sesi lokal.
+
+---
+
 ## [2.3.37] - 2026-08-26
 
 ### 🔐 Halaman Gerbang Login Otentikasi Resmi (*Dedicated Sign-In Auth Gate Screen*)

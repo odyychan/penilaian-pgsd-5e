@@ -329,6 +329,30 @@
             </div>
           </div>
 
+          <!-- OFFICIAL GOOGLE OAUTH SIGN-IN BUTTON -->
+          <div class="space-y-3 pt-1">
+            <button 
+              type="button" 
+              id="btnGoogleSignIn"
+              onclick="handleGoogleSignIn()"
+              class="w-full py-3 sm:py-3.5 px-4 rounded-xl bg-white hover:bg-zinc-50 border border-zinc-300 hover:border-zinc-400 text-zinc-800 font-bold text-xs sm:text-sm shadow-xs transition flex items-center justify-center gap-3 cursor-pointer group active:scale-98"
+            >
+              <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.15C3.26 21.36 7.33 24 12 24z"/>
+                <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.24C.45 8.15 0 9.99 0 12s.45 3.85 1.24 5.42l4.04-3.15z"/>
+                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.24 6.58l4.04 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+              </svg>
+              <span class="group-hover:text-zinc-950 transition">Masuk dengan Akun Google (ULM / Gmail)</span>
+            </button>
+
+            <!-- Divider -->
+            <div class="relative flex items-center justify-center">
+              <div class="border-t border-zinc-200 w-full"></div>
+              <span class="bg-white px-3 text-[10.5px] font-mono font-bold text-zinc-400 uppercase tracking-wider relative">atau login mandiri</span>
+            </div>
+          </div>
+
           <!-- Quick One-Click Login with Saved Accounts -->
           <div id="authQuickSavedSection" class="hidden space-y-2.5 bg-indigo-50/50 p-3.5 sm:p-4 rounded-xl border border-indigo-200/80">
             <div class="flex items-center justify-between">
@@ -2236,6 +2260,11 @@ function normalizeMediaList(fieldOrMedia) {
       restoreFormDraft();
       fetchInitialFormData(false);
       
+      // Inisialisasi Listener Google OAuth Supabase
+      if (typeof initSupabaseAuthListener === 'function') {
+        initSupabaseAuthListener();
+      }
+
       // Pre-fetch rekap data secara diam-diam di background agar instan saat dibuka
       setTimeout(() => loadRekapData(true), 400);
 
@@ -5066,8 +5095,13 @@ function normalizeMediaList(fieldOrMedia) {
       const initial = (name ? name.charAt(0) : (email ? email.charAt(0) : "?")).toUpperCase();
       const avatarBox = document.getElementById("accountAvatarBox");
       if (avatarBox) {
-        avatarBox.textContent = initial;
-        avatarBox.className = "w-9 h-9 rounded-full bg-indigo-600 text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-2xs";
+        if (activeUserAccountAvatarUrl) {
+          avatarBox.innerHTML = `<img src="${escapeHtml(activeUserAccountAvatarUrl)}" class="w-full h-full rounded-full object-cover" alt="Avatar" onerror="this.parentElement.textContent='${initial}'">`;
+          avatarBox.className = "w-9 h-9 rounded-full overflow-hidden border border-zinc-200 shrink-0 shadow-2xs bg-zinc-100 flex items-center justify-center";
+        } else {
+          avatarBox.textContent = initial;
+          avatarBox.className = "w-9 h-9 rounded-full bg-indigo-600 text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-2xs";
+        }
       }
 
       const emailEl = document.getElementById("accountActiveEmail");
@@ -5240,6 +5274,8 @@ function normalizeMediaList(fieldOrMedia) {
       return null;
     }
 
+    let activeUserAccountAvatarUrl = "";
+
     function setAuthSession(user, remember = true) {
       if (!user || !user.email) return;
       const key = "PGSD_AUTH_SESSION_" + (activeFormId || 'BK5E').toUpperCase();
@@ -5248,6 +5284,8 @@ function normalizeMediaList(fieldOrMedia) {
         nama: user.nama || user.name || "",
         nim: user.nim || "",
         peran: user.peran || "Mahasiswa",
+        avatarUrl: user.avatarUrl || "",
+        provider: user.provider || "manual",
         loginAt: Date.now()
       };
       if (remember) {
@@ -5258,6 +5296,7 @@ function normalizeMediaList(fieldOrMedia) {
       activeUserAccountEmail = payload.email;
       activeUserAccountName = payload.nama;
       activeUserAccountNim = payload.nim;
+      activeUserAccountAvatarUrl = payload.avatarUrl || "";
       if (payload.peran) currentEvaluatorRole = payload.peran;
       saveAccountProfile(payload.email, payload.nama, payload.nim, payload.peran);
     }
@@ -5269,6 +5308,12 @@ function normalizeMediaList(fieldOrMedia) {
       activeUserAccountEmail = "";
       activeUserAccountName = "";
       activeUserAccountNim = "";
+      activeUserAccountAvatarUrl = "";
+      try {
+        if (supabaseClient && supabaseClient.auth) {
+          supabaseClient.auth.signOut();
+        }
+      } catch (e) {}
     }
 
     function checkAndApplyAuthGate() {
@@ -5590,6 +5635,143 @@ function normalizeMediaList(fieldOrMedia) {
         showToast("Anda telah keluar dari akun.", "info");
         checkAndApplyAuthGate();
       }
+    }
+
+    // =========================================================================
+    // OFFICIAL GOOGLE OAUTH AUTHENTICATION VIA SUPABASE AUTH
+    // =========================================================================
+    async function handleGoogleSignIn() {
+      try {
+        const btn = document.getElementById("btnGoogleSignIn");
+        if (btn) {
+          btn.innerHTML = `
+            <svg class="w-4 h-4 animate-spin text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span class="text-indigo-700 font-bold">Membuka Google OAuth...</span>
+          `;
+        }
+
+        const redirectUrl = window.location.origin + window.location.pathname + (activeFormId ? `?id=${activeFormId}` : '');
+
+        if (!supabaseClient || !supabaseClient.auth) {
+          throw new Error("Supabase Auth Client belum siap.");
+        }
+
+        const { data, error } = await supabaseClient.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: redirectUrl,
+            queryParams: {
+              access_type: 'offline',
+              prompt: 'consent'
+            }
+          }
+        });
+
+        if (error) {
+          showToast("Gagal Google Sign-In: " + error.message, "error");
+          renderGoogleSignInButtonDefault();
+        }
+      } catch (err) {
+        showToast("Google Auth Error: " + err.message, "error");
+        renderGoogleSignInButtonDefault();
+      }
+    }
+
+    function renderGoogleSignInButtonDefault() {
+      const btn = document.getElementById("btnGoogleSignIn");
+      if (btn) {
+        btn.innerHTML = `
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.15C3.26 21.36 7.33 24 12 24z"/>
+            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.24C.45 8.15 0 9.99 0 12s.45 3.85 1.24 5.42l4.04-3.15z"/>
+            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.24 6.58l4.04 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+          </svg>
+          <span class="group-hover:text-zinc-950 transition">Masuk dengan Akun Google (ULM / Gmail)</span>
+        `;
+      }
+    }
+
+    async function initSupabaseAuthListener() {
+      if (!supabaseClient || !supabaseClient.auth) return;
+
+      try {
+        // 1. Check initial session from hash / URL redirect
+        const { data: sessionData } = await supabaseClient.auth.getSession();
+        if (sessionData && sessionData.session && sessionData.session.user) {
+          applySupabaseGoogleUser(sessionData.session.user);
+        }
+
+        // 2. Listen to auth state changes
+        supabaseClient.auth.onAuthStateChange(async (event, session) => {
+          if (event === 'SIGNED_IN' && session && session.user) {
+            applySupabaseGoogleUser(session.user);
+          } else if (event === 'SIGNED_OUT') {
+            clearAuthSession();
+            checkAndApplyAuthGate();
+          }
+        });
+      } catch (e) {
+        console.warn("Supabase auth listener init notice:", e);
+      }
+    }
+
+    function applySupabaseGoogleUser(user) {
+      if (!user || !user.email) return;
+
+      const email = user.email.toLowerCase();
+      const rawName = user.user_metadata?.full_name || user.user_metadata?.name || "";
+      const avatarUrl = user.user_metadata?.avatar_url || user.user_metadata?.picture || "";
+
+      // Smart NIM extraction if email is NIM@mhs.ulm.ac.id
+      let extractedNim = "";
+      let matchedName = rawName;
+      let detectedRole = "Mahasiswa";
+
+      const emailMatch = email.match(/^([0-9]{8,15})@/);
+      if (emailMatch) {
+        extractedNim = emailMatch[1];
+      }
+
+      // Check against master student data
+      if (allStudentsData && allStudentsData.length > 0) {
+        let found = null;
+        if (extractedNim) {
+          found = allStudentsData.find(s => String(s.nim).trim() === extractedNim);
+        }
+        if (!found && rawName) {
+          found = allStudentsData.find(s => (s.name || '').toLowerCase() === rawName.toLowerCase());
+        }
+        if (found) {
+          extractedNim = found.nim;
+          matchedName = found.name;
+          detectedRole = "Mahasiswa";
+        }
+      }
+
+      if (email.endsWith("@ulm.ac.id") && !email.includes("@mhs.")) {
+        detectedRole = "Dosen";
+      }
+
+      const authUser = {
+        email: email,
+        nama: matchedName || email.split("@")[0],
+        nim: extractedNim,
+        peran: detectedRole,
+        avatarUrl: avatarUrl,
+        provider: "google"
+      };
+
+      setAuthSession(authUser, true);
+      activeUserAccountAvatarUrl = avatarUrl;
+      updateAccountHeaderUI();
+      checkAndApplyAuthGate();
+
+      isDraftAlreadyRestored = false;
+      restoreFormDraft();
     }
 
     function resetInMemoryClientFormState() {
