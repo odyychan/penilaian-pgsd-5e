@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.3.56] - 2026-08-26
+
+### 🚀 Penyederhanaan Alur Pengisian Bebas Hambatan (Direct Identity Input)
+- **⚡ Penghapusan Layar Auth Gate:**
+  - Menghapus gerbang login Google yang memblokir tampilan formulir sehingga pengguna dapat langsung mengakses panduan dan membuka formulir penilaian secara instan tanpa penghalang autentikasi.
+- **📝 Penginputan Email & Identitas Langsung di Tahap 1:**
+  - Mengembalikan kolom email penilai menjadi input teks standar yang sepenuhnya dapat diedit langsung, lengkap dengan tombol bantuan domain instan (`+ @mhs.ulm.ac.id`, `+ @ulm.ac.id`, `+ @gmail.com`) dan pengisian otomatis berbasis NIM (`⚡ Isi dari NIM`).
+- **✨ Pembersihan Header Akun:**
+  - Menyederhanakan antarmuka wizard agar fokus penuh pada instrumen penilaian tanpa kartu akun atau banner OAuth di bagian atas.
+
+---
+
 ## [2.3.55] - 2026-08-26
 
 ### 🛡️ Penguatan Persistensi Multi-Key Sesi & Penyelarasan Aturan Domain ULM / Bebas

@@ -301,90 +301,15 @@
     <div id="viewForm" class="space-y-4 sm:space-y-5">
 
       <!-- =================================================================== -->
-      <!-- AUTH GATE SCREEN: GERBANG MASUK OTENTIKASI AKUN RESMI GOOGLE / ULM -->
+      <!-- AUTH GATE SCREEN (NON-BLOCKING / BYPASSED) -->
       <!-- =================================================================== -->
-      <div id="formAuthGateSection" class="step-fade space-y-4 sm:space-y-5">
-        <div class="bg-white rounded-2xl border border-zinc-200 p-5 sm:p-8 shadow-xs space-y-6 text-center max-w-xl mx-auto">
-          <!-- Header Logo & Badge -->
-          <div class="flex flex-col items-center space-y-3">
-            <div class="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center font-bold text-2xl shadow-2xs">
-              🔐
-            </div>
-            <div class="space-y-1">
-              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-indigo-900 text-indigo-100 uppercase tracking-wider" id="authGateModeBadge">OTENTIKASI AKUN RESMI GOOGLE</span>
-              <p class="text-xs text-zinc-400 font-mono">FKIP Universitas Lambung Mangkurat</p>
-            </div>
-          </div>
-
-          <!-- Title & Form Meta -->
-          <div class="space-y-2 border-y border-zinc-100 py-4">
-            <h2 id="authGateJudulForm" class="text-base sm:text-xl font-bold text-zinc-900 leading-snug math-renderable">
-              Penilaian Presentasi Mahasiswa
-            </h2>
-            <p id="authGateSubJudul" class="text-xs sm:text-sm text-zinc-600 leading-relaxed math-renderable">
-              Silakan masuk menggunakan Akun Google resmi Anda untuk membuka dan mengisi formulir evaluasi ini.
-            </p>
-            <div class="pt-1">
-              <span class="text-[11px] font-mono font-bold text-zinc-500 bg-zinc-100 px-3 py-1 rounded-lg border border-zinc-200" id="authGateFormPinBadge">PIN: BK5E</span>
-            </div>
-          </div>
-
-          <!-- PRIMARY GOOGLE SIGN-IN ACTION -->
-          <div class="space-y-3 pt-1">
-            <button 
-              type="button" 
-              id="btnGoogleSignIn"
-              onclick="handleGoogleSignIn()"
-              class="w-full py-3.5 sm:py-4 px-5 rounded-2xl bg-zinc-900 hover:bg-zinc-800 active:scale-98 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-3 cursor-pointer group"
-            >
-              <div class="w-6 h-6 rounded-full bg-white p-0.5 flex items-center justify-center shrink-0 shadow-2xs">
-                <svg class="w-full h-full" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
-                  <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.15C3.26 21.36 7.33 24 12 24z"/>
-                  <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.24C.45 8.15 0 9.99 0 12s.45 3.85 1.24 5.42l4.04-3.15z"/>
-                  <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.24 6.58l4.04 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-                </svg>
-              </div>
-              <span class="group-hover:text-zinc-100 transition">Masuk dengan Akun Google (ULM / Gmail)</span>
-            </button>
-            <p class="text-[11px] text-zinc-500">
-              Gunakan akun Google resmi kampus (<code class="text-indigo-600 font-mono font-semibold">@mhs.ulm.ac.id</code> / <code class="text-indigo-600 font-mono font-semibold">@ulm.ac.id</code>)
-            </p>
-          </div>
-
-          <!-- Quick One-Click Login with Verified Accounts Previously Authenticated -->
-          <div id="authQuickSavedSection" class="hidden space-y-2.5 bg-indigo-50/60 p-3.5 sm:p-4 rounded-xl border border-indigo-200/80 text-left">
-            <div class="flex items-center justify-between">
-              <span class="text-[11px] font-bold text-indigo-900 flex items-center gap-1.5 font-mono uppercase tracking-wider">
-                <span>⚡</span>
-                <span>Akun Google Terverifikasi di Perangkat Ini:</span>
-              </span>
-            </div>
-            <div id="authQuickSavedList" class="grid grid-cols-1 gap-2"></div>
-          </div>
-
-          <!-- Security Badges Footer -->
-          <div class="grid grid-cols-3 gap-2 pt-2 border-t border-zinc-100 text-[10.5px] text-zinc-500 font-medium text-center">
-            <div class="p-2 rounded-xl bg-zinc-50 border border-zinc-100">
-              <span class="block text-base mb-0.5">🛡️</span>
-              <span>Terverifikasi Google OAuth</span>
-            </div>
-            <div class="p-2 rounded-xl bg-zinc-50 border border-zinc-100">
-              <span class="block text-base mb-0.5">📸</span>
-              <span>Foto Profil Otomatis</span>
-            </div>
-            <div class="p-2 rounded-xl bg-zinc-50 border border-zinc-100">
-              <span class="block text-base mb-0.5">💾</span>
-              <span>Draf Sinkron Google</span>
-            </div>
-          </div>
-        </div>
+      <div id="formAuthGateSection" class="hidden step-fade space-y-4 sm:space-y-5">
       </div>
 
       <!-- =================================================================== -->
       <!-- 0: INFORMASI FORMULIR & IDENTITAS AKADEMIK (HALAMAN AWAL) -->
       <!-- =================================================================== -->
-      <div id="formOverviewSection" class="hidden step-fade space-y-4 sm:space-y-5">
+      <div id="formOverviewSection" class="step-fade space-y-4 sm:space-y-5">
         <div class="bg-white rounded-xl sm:rounded-2xl border border-zinc-200 p-3.5 sm:p-7 shadow-xs space-y-4 sm:space-y-5">
           <div class="space-y-1.5 sm:space-y-2 border-b border-zinc-100 pb-3 sm:pb-4">
             <div class="flex items-center gap-1.5">
@@ -2075,31 +2000,13 @@ function normalizeMediaList(fieldOrMedia) {
       initAllModernDropdowns();
       loadLocalCache();
       
-      // Deteksi apakah URL sedang memproses Callback OAuth (PKCE atau Hash)
-      const hasAuthCode = (window.location.search || "").includes("code=");
-      const hasAuthHash = (window.location.hash || "").includes("access_token");
-      const isAuthProcessing = hasAuthCode || hasAuthHash;
-
-      // Inisialisasi Listener Google OAuth Supabase & Tangkap Token Seketika
-      if (typeof initSupabaseAuthListener === 'function') {
-        if (isAuthProcessing) {
-          await initSupabaseAuthListener();
-        } else {
-          initSupabaseAuthListener();
-        }
-      }
-
-      // Pulihkan Active Tab (Formulir vs Rekapitulasi) tanpa merusak token hash
       const hash = (window.location.hash || "").replace("#", "").toLowerCase();
-      const isAuthHashOnly = hash.includes("access_token") || hash.includes("error_description");
-      const savedTab = (!isAuthHashOnly && (hash === "rekap" || hash === "form")) ? hash : (localStorage.getItem("PGSD_ACTIVE_MAIN_TAB") || "form");
+      const savedTab = (hash === "rekap" || hash === "form") ? hash : (localStorage.getItem("PGSD_ACTIVE_MAIN_TAB") || "form");
       
       switchTab(savedTab, false);
       updateStepUI(1);
       
-      // Evaluasi Gerbang Login Otentikasi
       checkAndApplyAuthGate();
-
       restoreFormDraft();
       fetchInitialFormData(false);
 
@@ -2873,25 +2780,18 @@ function normalizeMediaList(fieldOrMedia) {
         const peranMhsLabel = appConfig["Peran_Mahasiswa_Label"] || "Mahasiswa (Anggota Kelas)";
         const peranDosenLabel = appConfig["Peran_Dosen_Label"] || "Dosen (Pengampu / Penguji)";
         const peranTamuLabel = appConfig["Peran_Lainnya_Label"] || "Lainnya / Penilai Tamu";
-        const session = getCurrentAuthSession();
-        const isGoogleAuth = !!(session && session.email);
-        const emailVal = session?.email || '';
-        const nameVal = session?.nama || '';
-        const nimVal = session?.nim || '';
-        const roleVal = session?.peran || 'Mahasiswa';
+        const emailVal = clientCustomFormAnswers[f.id + '_email'] || activeUserAccountEmail || '';
+        const nameVal = clientCustomFormAnswers[f.id + '_nama'] || activeUserAccountName || '';
+        const nimVal = clientCustomFormAnswers[f.id + '_nim'] || activeUserAccountNim || '';
+        const roleVal = clientCustomFormAnswers[f.id + '_peran'] || currentEvaluatorRole || 'Mahasiswa';
 
         return `
           <div class="bg-zinc-50/60 p-4 sm:p-6 rounded-2xl border border-zinc-200/80 space-y-4">
             <div class="border-b border-zinc-200 pb-3 flex items-center justify-between gap-2">
               <div>
                 <h3 class="text-sm sm:text-base font-bold text-zinc-900 math-renderable">${smartMathFormat(f.label || 'Identitas Penilai')}${reqBadge}</h3>
-                <p class="text-xs text-zinc-500 mt-0.5 math-renderable">${smartMathFormat(f.description || 'Data identitas penilai terverifikasi resmi.')}</p>
+                <p class="text-xs text-zinc-500 mt-0.5 math-renderable">${smartMathFormat(f.description || 'Silakan lengkapi identitas Anda sebelum memulai penilaian.')}</p>
               </div>
-              ${isGoogleAuth ? `
-                <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 shrink-0">
-                  ✓ Akun Terverifikasi
-                </span>
-              ` : ''}
             </div>
 
             <!-- 1. Peran Penilai Dropdown -->
@@ -2951,7 +2851,7 @@ function normalizeMediaList(fieldOrMedia) {
                   <label class="block text-xs font-semibold text-zinc-700">
                     Nama Lengkap Penilai <span class="text-rose-500">*</span>
                   </label>
-                  <span id="namaAutoFillNotice" class="text-[10px] text-emerald-700 font-medium ${nameVal ? '' : 'hidden'}">${isGoogleAuth ? '✓ Akun Google' : 'Terisi otomatis'}</span>
+                  <span id="namaAutoFillNotice" class="text-[10px] text-emerald-700 font-medium ${nameVal ? '' : 'hidden'}">Terisi otomatis</span>
                 </div>
                 <input 
                   type="text" 
@@ -2968,16 +2868,16 @@ function normalizeMediaList(fieldOrMedia) {
               <div class="space-y-1.5" id="emailFieldContainer">
                 <div class="flex items-center justify-between">
                   <label id="labelEmailPenilai" class="block text-xs font-semibold text-zinc-700">
-                    Email Penilai ${isGoogleAuth ? '<span class="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 ml-1">✓ Terverifikasi Google</span>' : '<span id="emailRequiredStar" class="text-rose-500">*</span>'}
+                    Email Penilai <span id="emailRequiredStar" class="text-rose-500">*</span>
                   </label>
                   <button 
                     type="button" 
                     id="btnFillNimEmail" 
                     onclick="fillNimEmailFormat()" 
-                    class="${isGoogleAuth ? 'hidden' : 'hidden'} text-[10px] font-mono font-semibold text-zinc-700 hover:text-zinc-950 bg-zinc-100 hover:bg-zinc-200 px-2 py-0.5 rounded border border-zinc-300 transition cursor-pointer flex items-center gap-1"
+                    class="${nimVal ? 'flex' : 'hidden'} text-[10px] font-mono font-semibold text-zinc-700 hover:text-zinc-950 bg-zinc-100 hover:bg-zinc-200 px-2 py-0.5 rounded border border-zinc-300 transition cursor-pointer items-center gap-1"
                     title="Isi otomatis email format NIM@mhs.ulm.ac.id"
                   >
-                    <span>Isi Otomatis</span>
+                    <span>⚡ Isi dari NIM</span>
                   </button>
                 </div>
                 <input 
@@ -2986,12 +2886,11 @@ function normalizeMediaList(fieldOrMedia) {
                   required 
                   inputmode="email"
                   value="${escapeHtml(emailVal)}"
-                  ${isGoogleAuth ? 'readonly' : ''}
-                  placeholder="nama.nim@mhs.ulm.ac.id" 
-                  class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 outline-none transition ${isGoogleAuth ? 'bg-zinc-100 cursor-not-allowed text-zinc-700' : 'bg-white'} placeholder-zinc-400"
+                  placeholder="contoh: nama.nim@mhs.ulm.ac.id" 
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 outline-none transition bg-white placeholder-zinc-400"
                   oninput="validateEmailLive(this.value); updateAccountActiveEmail(this.value); saveFormDraft();"
                 >
-                <div id="emailQuickChips" class="${isGoogleAuth ? 'hidden' : 'flex'} flex-wrap items-center gap-1 pt-0.5">
+                <div id="emailQuickChips" class="flex flex-wrap items-center gap-1 pt-0.5">
                   <span class="text-[9.5px] text-zinc-400 font-mono">Domain:</span>
                   <button type="button" onclick="appendEmailDomain('@mhs.ulm.ac.id')" class="px-1.5 py-0.5 rounded bg-zinc-100 hover:bg-indigo-50 hover:text-indigo-700 text-[10px] font-mono text-zinc-600 border border-zinc-200 transition cursor-pointer">+ @mhs.ulm.ac.id</button>
                   <button type="button" onclick="appendEmailDomain('@ulm.ac.id')" class="px-1.5 py-0.5 rounded bg-zinc-100 hover:bg-indigo-50 hover:text-indigo-700 text-[10px] font-mono text-zinc-600 border border-zinc-200 transition cursor-pointer">+ @ulm.ac.id</button>
@@ -4310,13 +4209,6 @@ function normalizeMediaList(fieldOrMedia) {
 
     // Flow Navigation: Info Form vs Wizard Form
     function startAssessmentForm() {
-      const emailMode = appConfig["Mode_Pengumpulan_Email"] || "ALL_EMAIL";
-      const session = getCurrentAuthSession();
-      const hasEmail = activeUserAccountEmail || (session && session.email);
-      if (emailMode !== 'NO_EMAIL' && !hasEmail) {
-        checkAndApplyAuthGate();
-        return;
-      }
       const authGate = document.getElementById("formAuthGateSection");
       const overview = document.getElementById("formOverviewSection");
       const wizard = document.getElementById("formWizardContainer");
@@ -4934,101 +4826,7 @@ function normalizeMediaList(fieldOrMedia) {
 
     function updateAccountHeaderUI() {
       const card = document.getElementById("formAccountHeaderCard");
-      if (!card) return;
-
-      const mode = appConfig["Mode_Pengumpulan_Email"] || "ULM_ONLY";
-      if (mode === "NO_EMAIL") {
-        card.classList.remove("hidden");
-        const avatarBox = document.getElementById("accountAvatarBox");
-        if (avatarBox) {
-          avatarBox.innerHTML = "👤";
-          avatarBox.className = "w-9 h-9 rounded-full bg-zinc-700 text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-2xs";
-        }
-        const emailEl = document.getElementById("accountActiveEmail");
-        if (emailEl) emailEl.textContent = "Mode Pengisian Anonim (Tanpa Email)";
-        const badgeEl = document.getElementById("accountModeBadge");
-        if (badgeEl) {
-          badgeEl.textContent = "Anonim";
-          badgeEl.className = "px-1.5 py-0.2 rounded-full bg-zinc-200 text-zinc-800 text-[9px] font-mono font-bold";
-        }
-        const noticeEl = document.getElementById("accountNoticeText");
-        if (noticeEl) noticeEl.textContent = "Penilaian ini bersifat terbuka dan tidak merekam alamat email Anda.";
-        return;
-      }
-
-      const email = activeUserAccountEmail || (document.getElementById("inputEmail")?.value.trim()) || "";
-      const name = activeUserAccountName || (document.getElementById("inputNama")?.value.trim()) || "";
-
-      if (!email && !name) {
-        card.classList.add("hidden");
-        return;
-      }
-
-      card.classList.remove("hidden");
-      const initial = (name ? name.charAt(0) : (email ? email.charAt(0) : "?")).toUpperCase();
-      const avatarBox = document.getElementById("accountAvatarBox");
-      if (avatarBox) {
-        if (activeUserAccountAvatarUrl) {
-          avatarBox.innerHTML = `<img src="${escapeHtml(activeUserAccountAvatarUrl)}" class="w-full h-full rounded-full object-cover" alt="Avatar" onerror="this.parentElement.textContent='${initial}'">`;
-          avatarBox.className = "w-9 h-9 rounded-full overflow-hidden border border-zinc-200 shrink-0 shadow-2xs bg-zinc-100 flex items-center justify-center";
-        } else {
-          avatarBox.textContent = initial;
-          avatarBox.className = "w-9 h-9 rounded-full bg-indigo-600 text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-2xs";
-        }
-      }
-
-      const emailEl = document.getElementById("accountActiveEmail");
-      if (emailEl) {
-        emailEl.textContent = email || (name ? `${name} (Belum ada email)` : "Akun Aktif");
-      }
-
-      const badgeEl = document.getElementById("accountModeBadge");
-      if (badgeEl) {
-        if (email.endsWith("@mhs.ulm.ac.id") || email.endsWith("@ulm.ac.id")) {
-          badgeEl.textContent = "Akun Kampus ULM";
-          badgeEl.className = "px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800 text-[9px] font-mono font-bold";
-        } else if (mode === "ALL_EMAIL") {
-          badgeEl.textContent = "Akun Umum";
-          badgeEl.className = "px-1.5 py-0.2 rounded-full bg-indigo-100 text-indigo-800 text-[9px] font-mono font-bold";
-        } else {
-          badgeEl.textContent = "Akun Terverifikasi";
-          badgeEl.className = "px-1.5 py-0.2 rounded-full bg-zinc-100 text-zinc-800 text-[9px] font-mono font-bold";
-        }
-      }
-
-      const noticeEl = document.getElementById("accountNoticeText");
-      if (noticeEl) {
-        noticeEl.textContent = `Draf isian dan tanggapan penilaian Anda direkam otomatis pada akun ini.`;
-      }
-
-      // Sync Step 1 DOM fields with verified Google Account data
-      const session = getCurrentAuthSession();
-      const inputEmail = document.getElementById("inputEmail");
-      const inputNama = document.getElementById("inputNama");
-      const inputNim = document.getElementById("inputNim");
-      const emailChips = document.getElementById("emailQuickChips");
-      const btnFillNim = document.getElementById("btnFillNimEmail");
-      const labelEmail = document.getElementById("labelEmailPenilai");
-
-      if (session && session.email) {
-        if (inputEmail) {
-          inputEmail.value = session.email;
-          inputEmail.readOnly = true;
-          inputEmail.classList.add("bg-zinc-100", "cursor-not-allowed", "text-zinc-600");
-        }
-        if (emailChips) emailChips.classList.add("hidden");
-        if (btnFillNim) btnFillNim.classList.add("hidden");
-        if (labelEmail) {
-          labelEmail.innerHTML = `Email Penilai <span class="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 ml-1">✓ Terverifikasi Google</span>`;
-        }
-        if (inputNama && session.nama && !inputNama.value) {
-          inputNama.value = session.nama;
-        }
-        if (inputNim && session.nim && !inputNim.value) {
-          inputNim.value = session.nim;
-          validateNimLive(session.nim);
-        }
-      }
+      if (card) card.classList.add("hidden");
     }
 
     function getSavedAccountProfiles() {
@@ -5142,110 +4940,14 @@ function normalizeMediaList(fieldOrMedia) {
       const overview = document.getElementById("formOverviewSection");
       const wizard = document.getElementById("formWizardContainer");
 
-      if (!authGate || !overview) return;
+      if (authGate) authGate.classList.add("hidden");
 
-      const emailMode = appConfig["Mode_Pengumpulan_Email"] || "ALL_EMAIL";
-
-      // Render header info in Auth Gate Banner
-      const judulEl = document.getElementById("authGateJudulForm");
-      if (judulEl && appConfig["Judul_Form"]) {
-        judulEl.innerHTML = smartMathFormat(appConfig["Judul_Form"]);
-        renderAllMathInElement(judulEl);
-      }
-      const subJudulEl = document.getElementById("authGateSubJudul");
-      if (subJudulEl && (appConfig["Mata_Kuliah"] || appConfig["Dosen_Pengampu"])) {
-        subJudulEl.innerHTML = smartMathFormat(`Mata Kuliah: **${appConfig["Mata_Kuliah"] || '-'}** • Dosen: **${appConfig["Dosen_Pengampu"] || '-'}** (${appConfig["Kelas"] || 'Kelas 5E'})`);
-        renderAllMathInElement(subJudulEl);
-      }
-      const pinEl = document.getElementById("authGateFormPinBadge");
-      if (pinEl) pinEl.textContent = `PIN: ${activeFormId || 'BK5E'}`;
-
-      const badgeEl = document.getElementById("authGateModeBadge");
-      if (badgeEl) {
-        if (emailMode === 'ULM_ONLY') badgeEl.textContent = "LOGIN AKUN KAMPUS ULM";
-        else if (emailMode === 'ALL_EMAIL') badgeEl.textContent = "LOGIN EMAIL BEBAS";
-        else badgeEl.textContent = "OTENTIKASI PENILAI";
+      // Tampilkan halaman Overview (Panduan Form) secara default jika wizard belum dibuka
+      if (overview && (!wizard || wizard.classList.contains("hidden"))) {
+        overview.classList.remove("hidden");
       }
 
-      // Mode 3: NO_EMAIL -> Bypass Auth Gate completely
-      if (emailMode === "NO_EMAIL") {
-        authGate.classList.add("hidden");
-        if (!wizard || wizard.classList.contains("hidden")) {
-          overview.classList.remove("hidden");
-        }
-        updateAccountHeaderUI();
-        return;
-      }
-
-      // Check active session
-      const session = getCurrentAuthSession();
-      if (session && session.email) {
-        // Authenticated!
-        activeUserAccountEmail = session.email;
-        activeUserAccountName = session.nama || "";
-        activeUserAccountNim = session.nim || "";
-        if (session.peran) currentEvaluatorRole = session.peran;
-
-        authGate.classList.add("hidden");
-        if (!wizard || wizard.classList.contains("hidden")) {
-          overview.classList.remove("hidden");
-        }
-
-        // Populate Step 1 fields
-        const inputEmail = document.getElementById("inputEmail");
-        const inputNama = document.getElementById("inputNama");
-        const inputNim = document.getElementById("inputNim");
-        if (inputEmail && session.email) inputEmail.value = session.email;
-        if (inputNama && session.nama) inputNama.value = session.nama;
-        if (inputNim && session.nim) {
-          inputNim.value = session.nim;
-          validateNimLive(session.nim);
-        }
-        if (session.peran) onRoleChange(session.peran);
-
-        updateAccountHeaderUI();
-        return;
-      }
-
-      // Not authenticated: Show Auth Gate
-      overview.classList.add("hidden");
-      if (wizard) wizard.classList.add("hidden");
-      authGate.classList.remove("hidden");
-
-      renderAuthGateSavedAccounts();
-    }
-
-    function renderAuthGateSavedAccounts() {
-      const section = document.getElementById("authQuickSavedSection");
-      const list = document.getElementById("authQuickSavedList");
-      if (!section || !list) return;
-
-      const profiles = getSavedAccountProfiles();
-      if (!profiles || profiles.length === 0) {
-        section.classList.add("hidden");
-        return;
-      }
-
-      section.classList.remove("hidden");
-      let html = '';
-      profiles.forEach(p => {
-        const initial = (p.name ? p.name.charAt(0) : p.email.charAt(0)).toUpperCase();
-        html += `
-          <div onclick="handleAuthQuickLogin('${escapeHtml(p.email)}', '${escapeHtml(p.name || '')}', '${escapeHtml(p.nim || '')}', '${escapeHtml(p.role || 'Mahasiswa')}')" class="p-2.5 rounded-xl bg-white hover:bg-indigo-50 border border-indigo-200 hover:border-indigo-400 cursor-pointer transition shadow-2xs flex items-center justify-between gap-2 group">
-            <div class="flex items-center gap-2.5 min-w-0">
-              <div class="w-7 h-7 rounded-full bg-indigo-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
-                ${initial}
-              </div>
-              <div class="min-w-0">
-                <p class="font-bold text-zinc-900 text-xs truncate">${escapeHtml(p.email)}</p>
-                <p class="text-[10px] text-zinc-500 truncate">${escapeHtml(p.name || p.nim || p.role)}</p>
-              </div>
-            </div>
-            <span class="text-[10.5px] font-bold text-indigo-600 group-hover:translate-x-0.5 transition shrink-0">Masuk →</span>
-          </div>
-        `;
-      });
-      list.innerHTML = html;
+      updateAccountHeaderUI();
     }
 
     function handleAuthRoleChange(role) {
