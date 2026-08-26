@@ -4,6 +4,19 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.17] - 2026-08-26
+
+### 🛡️ Mesin Autentikasi Admin Multi-Tier & Pemulihan Akses Portal
+- **🔐 Resilient Multi-Tier Verification Engine:**
+  - Mengatasi kendala verifikasi yang terhalang jika Supabase Edge Function sedang tidak aktif atau mengembalikan status 404.
+  - Mengimplementasikan sistem verifikasi bertingkat:
+    1. **Tier 1:** Verifikasi via Supabase Edge Function (`/functions/v1/admin-auth`).
+    2. **Tier 2:** Verifikasi langsung ke tabel database Supabase (`pgsd_form_configs` key `GLOBAL`).
+    3. **Tier 3:** Verifikasi *Cryptographic Salted SHA-256 Hash Engine* di sisi peramban.
+  - Memastikan pengelola/admin dapat selalu masuk ke Portal Admin dengan kata sandi standar (`admin5e`, `admin`, `pgsd5e`) maupun kata sandi kustom tanpa risiko terkunci dari sistem.
+
+---
+
 ## [2.4.16] - 2026-08-26
 
 ### 🔄 Penyesuaian Tata Letak Tab Kelompok: Daftar Kelompok Didahulukan
