@@ -1852,6 +1852,7 @@ function normalizeMediaList(fieldOrMedia) {
                   type="text" 
                   id="inputNim" 
                   inputmode="numeric"
+                  ${roleVal === 'Mahasiswa' ? 'required' : ''}
                   value="${escapeHtml(nimVal)}"
                   placeholder="NIM Mahasiswa ULM..." 
                   ${nimVal ? 'readonly' : ''}
@@ -3387,21 +3388,152 @@ function normalizeMediaList(fieldOrMedia) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    function validateStageRequirements(stageIndex) {
+      const currentStageSec = document.getElementById(`stepSection_${stageIndex}`);
+      if (!currentStageSec) return true;
+
+      // 1. Validasi Khusus Tahap 1 (Identitas Penilai)
+      if (stageIndex === 1) {
+        const roleSelect = document.getElementById("selectPeranPenilai");
+        const role = currentEvaluatorRole || (roleSelect ? roleSelect.value : 'Mahasiswa') || 'Mahasiswa';
+
+        // Validasi NIM untuk Mahasiswa
+        if (role === 'Mahasiswa') {
+          const inputNim = document.getElementById("inputNim");
+          const nimVal = (inputNim ? inputNim.value : '').replace(/\s+/g, '').trim();
+          if (!nimVal) {
+            if (inputNim) {
+              inputNim.focus();
+              inputNim.classList.add("ring-2", "ring-rose-500", "border-rose-500");
+              setTimeout(() => inputNim.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
+            }
+            showToast("Nomor Induk Mahasiswa (NIM) wajib diisi untuk peran Mahasiswa!", "warning");
+            return false;
+          }
+        }
+
+        // Validasi Nama Lengkap Penilai
+        const inputNama = document.getElementById("inputNama");
+        const namaVal = (inputNama ? inputNama.value : '').trim();
+        if (!namaVal) {
+          if (inputNama) {
+            inputNama.focus();
+            inputNama.classList.add("ring-2", "ring-rose-500", "border-rose-500");
+            setTimeout(() => inputNama.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
+          }
+          showToast("Nama Lengkap Penilai wajib diisi sebelum melanjutkan!", "warning");
+          return false;
+        }
+
+        // Validasi Email Penilai
+        const isNoEmail = appConfig && appConfig["Mode_Pengumpulan_Email"] === "NO_EMAIL";
+        if (!isNoEmail) {
+          const inputEmail = document.getElementById("inputEmail");
+          const emailVal = (inputEmail ? inputEmail.value : '').trim();
+          if (!emailVal || !validateEmailLive(emailVal)) {
+            if (inputEmail) inputEmail.focus();
+            showToast("Email Penilai terverifikasi wajib terisi sebelum melanjutkan!", "warning");
+            return false;
+          }
+        }
+      }
+
+      // 2. Validasi Khusus Tahap 2 (Kelompok & Rubrik Dasar)
+      if (stageIndex === 2) {
+        if (currentStageSec.querySelector('#groupsGrid') && !selectedGroupObj) {
+          showToast("Pilih salah satu kelompok presentator sebelum melanjutkan!", "warning");
+          const grpBox = document.getElementById("groupsGrid");
+          if (grpBox) grpBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return false;
+        }
+      }
+
+      // 3. Validasi Seluruh Input Standar Wajib (Text, Number, Select, Textarea)
+      const requiredInputs = currentStageSec.querySelectorAll('input[required]:not([type="radio"]):not([type="checkbox"]):not([type="hidden"]), textarea[required], select[required]');
+      for (let input of requiredInputs) {
+        if (input.offsetParent === null && !input.classList.contains("force-validate")) continue;
+
+        if (!input.value || !input.value.trim()) {
+          input.focus();
+          input.classList.add("ring-2", "ring-rose-500", "border-rose-500");
+          setTimeout(() => input.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
+          showToast("Mohon lengkapi seluruh pertanyaan bertanda wajib (*) sebelum melanjutkan.", "warning");
+          return false;
+        }
+      }
+
+      // 4. Validasi Radio Group Wajib
+      const radioGroups = {};
+      currentStageSec.querySelectorAll('input[type="radio"][required]').forEach(r => {
+        if (r.name) radioGroups[r.name] = true;
+      });
+      for (let groupName in radioGroups) {
+        const checkedRadio = currentStageSec.querySelector(`input[type="radio"][name="${groupName}"]:checked`);
+        if (!checkedRadio) {
+          const firstRadio = currentStageSec.querySelector(`input[type="radio"][name="${groupName}"]`);
+          if (firstRadio) {
+            firstRadio.focus();
+            const parentCard = firstRadio.closest('.bg-white, .border');
+            if (parentCard) {
+              parentCard.classList.add("ring-2", "ring-rose-500", "border-rose-500");
+              setTimeout(() => parentCard.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
+            }
+          }
+          showToast("Mohon pilih salah satu opsi pada pertanyaan bertanda wajib (*).", "warning");
+          return false;
+        }
+      }
+
+      // 5. Validasi Checkbox Group Wajib
+      const checkboxGroups = {};
+      currentStageSec.querySelectorAll('input[type="checkbox"][required]').forEach(cb => {
+        const key = cb.name || cb.id;
+        if (key) checkboxGroups[key] = true;
+      });
+      for (let cbKey in checkboxGroups) {
+        const checkedCb = currentStageSec.querySelector(`input[type="checkbox"][name="${cbKey}"]:checked, input[type="checkbox"]#${cbKey}:checked`);
+        if (!checkedCb) {
+          const firstCb = currentStageSec.querySelector(`input[type="checkbox"][name="${cbKey}"], input[type="checkbox"]#${cbKey}`);
+          if (firstCb) {
+            firstCb.focus();
+            const parentCard = firstCb.closest('.bg-white, .border');
+            if (parentCard) {
+              parentCard.classList.add("ring-2", "ring-rose-500", "border-rose-500");
+              setTimeout(() => parentCard.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
+            }
+          }
+          showToast("Mohon centang opsi bertanda wajib (*) sebelum melanjutkan.", "warning");
+          return false;
+        }
+      }
+
+      // 6. Validasi Kustom Pertanyaan Dinamis
+      const requiredCustomContainers = currentStageSec.querySelectorAll('[data-custom-required="true"]');
+      for (let container of requiredCustomContainers) {
+        const fieldId = container.getAttribute('data-field-id');
+        if (fieldId) {
+          const ans = clientCustomFormAnswers[fieldId];
+          const hasFile = customUploadedFilesMap && customUploadedFilesMap[fieldId];
+          if ((ans === undefined || ans === null || String(ans).trim() === '') && !hasFile) {
+            container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            container.classList.add("ring-2", "ring-rose-500", "border-rose-500");
+            setTimeout(() => container.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
+            showToast("Mohon lengkapi seluruh pertanyaan bertanda wajib (*) pada bagian ini.", "warning");
+            return false;
+          }
+        }
+      }
+
+      return true;
+    }
+
     function goToStep(targetStep) {
       if (targetStep === currentStep) return;
 
       if (targetStep > currentStep) {
-        // Validate required fields inside current stage
-        const currentStageSec = document.getElementById(`stepSection_${currentStep}`);
-        if (currentStageSec) {
-          const requiredInputs = currentStageSec.querySelectorAll('input[required], textarea[required], select[required]');
-          for (let input of requiredInputs) {
-            if (!input.value || !input.value.trim()) {
-              input.focus();
-              showToast("Mohon lengkapi seluruh pertanyaan bertanda wajib (*) sebelum melanjutkan.", "warning");
-              return;
-            }
-          }
+        // Run strict stage validation
+        if (!validateStageRequirements(currentStep)) {
+          return;
         }
 
         // Additional integrity validation when moving from Step 2 to Step 3
@@ -3500,19 +3632,23 @@ function normalizeMediaList(fieldOrMedia) {
 
       if (identityFieldsContainer) identityFieldsContainer.classList.remove("hidden");
 
+      const inputNim = document.getElementById("inputNim");
+
       if (role === 'Mahasiswa') {
+        if (inputNim) inputNim.required = true;
         if (nimContainer) nimContainer.classList.remove("hidden");
         if (step1Subtitle) step1Subtitle.textContent = "Masukkan NIM Anda untuk verifikasi otomatis data mahasiswa.";
         if (inputNama) inputNama.placeholder = "Tuliskan nama lengkap Anda...";
         if (inputEmail) inputEmail.placeholder = "contoh: 221012310001@mhs.ulm.ac.id";
         
-        const currentNim = document.getElementById("inputNim")?.value || "";
+        const currentNim = inputNim?.value || "";
         if (currentNim) {
           validateNimLive(currentNim);
         } else {
           if (btnFillNimEmail) btnFillNimEmail.classList.add("hidden");
         }
       } else if (role === 'Dosen') {
+        if (inputNim) inputNim.required = false;
         if (nimContainer) nimContainer.classList.add("hidden");
         if (autoFillNotice) autoFillNotice.classList.add("hidden");
         if (btnFillNimEmail) btnFillNimEmail.classList.add("hidden");
@@ -3524,6 +3660,7 @@ function normalizeMediaList(fieldOrMedia) {
           inputEmail.placeholder = "email.dosen@ulm.ac.id";
         }
       } else if (role === 'Lainnya') {
+        if (inputNim) inputNim.required = false;
         if (nimContainer) nimContainer.classList.add("hidden");
         if (autoFillNotice) autoFillNotice.classList.add("hidden");
         if (btnFillNimEmail) btnFillNimEmail.classList.add("hidden");
@@ -5158,6 +5295,16 @@ function normalizeMediaList(fieldOrMedia) {
       if (e) e.preventDefault();
 
       const isPreviewMode = new URLSearchParams(window.location.search).get('preview') === 'draft';
+      
+      // Run complete stages validation
+      const totalSteps = Object.keys(stepMetadata).length || 4;
+      for (let s = 1; s <= totalSteps; s++) {
+        if (!validateStageRequirements(s)) {
+          updateStepUI(s);
+          return;
+        }
+      }
+
       if (isPreviewMode) {
         showToast("🎉 Simulasi Pengisian Berhasil! Seluruh isian telah divalidasi dengan sukses (Mode Draf / Simulator — data tidak disimpan ke database).", "success", 5000);
         return;

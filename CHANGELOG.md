@@ -4,6 +4,19 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.40] - 2026-08-27
+
+### 🛡️ Penguatan Validasi Field Wajib & Proteksi Navigasi Tahap (*Airtight Form Guard*)
+- **🔒 Validasi Ketat Field Wajib Sebelum Berpindah Tahap (`validateStageRequirements`):**
+  - Menerapkan fungsi validasi bertingkat komprehensif saat menekan tombol *"Lanjut ke Bagian X"* maupun saat pengiriman akhir (*final submit*).
+  - **Tahap 1 (Identitas Penilai):** Memastikan **NIM** (untuk peran Mahasiswa), **Nama Lengkap**, dan **Email Resmi** wajib terisi dengan benar. Jika masih kosong, sistem otomatis membatalkan navigasi, memfokuskan kursor ke input yang kurang, menyorot kolom dengan *red-ring highlight*, dan menampilkan pesan peringatan yang jelas.
+  - **Tahap 2 (Kelompok Presentator):** Memastikan kelompok presentator telah dipilih sebelum diizinkan melangkah ke rubrik penilaian kualitatif/kuantitatif.
+  - **Pertanyaan Dinamis (Radio, Checkbox, Textarea, File Upload):** Memvalidasi seluruh pertanyaan bertanda bintang merah (`*`) agar tidak ada satupun yang terlewat.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.40`.
+
+---
+
 ## [2.4.39] - 2026-08-27
 
 ### ✍️ Fleksibilitas Identitas Penilai: Nama Lengkap Bebas Diubah (Editable Auto-Fill)
