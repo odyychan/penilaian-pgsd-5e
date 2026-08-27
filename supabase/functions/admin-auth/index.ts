@@ -89,8 +89,16 @@ async function verifySessionToken(token: string): Promise<boolean> {
 // Helper: Verify input password against Database Salted Hash, Supabase Secret, or Fallback
 async function verifyInputPassword(inputPass: string): Promise<{ valid: boolean; source: string }> {
   const inputHash = await hashPassword(inputPass);
+  const envPass = (Deno.env.get("ADMIN_PASSWORD") || Deno.env.get("PGSD_ADMIN_PASSWORD") || "").trim();
 
-  // 1. Priority 1: Check Database stored salted hash in pgsd_admin_secrets
+  // 1. Prioritas 1: Supabase Secrets (ADMIN_PASSWORD di Supabase Edge Function Secrets)
+  if (envPass && inputPass === envPass) {
+    // Sinkronkan hash ke tabel database di background jika berbeda
+    savePasswordHashToDatabase(inputPass).catch(() => {});
+    return { valid: true, source: "SUPABASE_ENV_SECRET" };
+  }
+
+  // 2. Prioritas 2: Hash tersimpan di database pgsd_admin_secrets (dari Ubah Password di Admin)
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
@@ -112,7 +120,6 @@ async function verifyInputPassword(inputPass: string): Promise<{ valid: boolean;
           if (inputHash === dbHash) {
             return { valid: true, source: "SUPABASE_DB_CUSTOM" };
           }
-          return { valid: false, source: "SUPABASE_DB_CUSTOM" };
         }
       }
     } catch {
@@ -120,18 +127,8 @@ async function verifyInputPassword(inputPass: string): Promise<{ valid: boolean;
     }
   }
 
-  // 2. Priority 2: Supabase Secrets (ADMIN_PASSWORD or PGSD_ADMIN_PASSWORD)
-  const envPass = Deno.env.get("ADMIN_PASSWORD") || Deno.env.get("PGSD_ADMIN_PASSWORD");
-  if (envPass && envPass.trim() !== "") {
-    const trimmedEnv = envPass.trim();
-    if (inputPass === trimmedEnv) {
-      return { valid: true, source: "SUPABASE_ENV_SECRET" };
-    }
-    return { valid: false, source: "SUPABASE_ENV_SECRET" };
-  }
-
-  // 3. Priority 3: Fallback default
-  if (inputPass === FALLBACK_PASS) {
+  // 3. Prioritas 3: Fallback default jika belum ada Secret ataupun DB Hash
+  if (!envPass && inputPass === FALLBACK_PASS) {
     return { valid: true, source: "DEFAULT_FALLBACK" };
   }
 

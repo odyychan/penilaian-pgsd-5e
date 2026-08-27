@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.42] - 2026-08-27
+
+### 🔒 Arsitektur Dual-Sync Password Admin: Supabase Secrets & Database Salting
+- **🔄 Sinkronisasi Dua Arah Terpadu (Supabase Secrets ↔ Database Hash):**
+  - Mengintegrasikan mekanisme prioritas cerdas pada Edge Function `admin-auth`: jika kata sandi diubah langsung melalui Supabase Dashboard Secrets (`ADMIN_PASSWORD`), sistem langsung mengenali dan secara otomatis menyinkronkan *salted hash* ke tabel `pgsd_admin_secrets`.
+  - Jika kata sandi diubah melalui antarmuka Panel Admin, sistem menyimpannya sebagai hash terenkripsi (SHA-256 + secret salt) di tabel database `pgsd_admin_secrets` berproteksi RLS ketat.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.42`.
+
+---
+
 ## [2.4.41] - 2026-08-27
 
 ### ⚡ Penyempurnaan Validasi Format Email Resmi & Sinkronisasi Tahap Penilaian
