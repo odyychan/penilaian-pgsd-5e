@@ -1796,8 +1796,8 @@ function normalizeMediaList(fieldOrMedia) {
             </div>
 
             <!-- 3. Nama & Email -->
-            <div id="identityFieldsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1">
-              <div class="space-y-1.5">
+            <div id="identityFieldsContainer" class="grid grid-cols-1 ${isNoEmail ? '' : 'md:grid-cols-2'} gap-3.5 pt-1">
+              <div class="space-y-1.5 ${isNoEmail ? 'col-span-1' : ''}">
                 <div class="flex items-center justify-between">
                   <label class="block text-xs font-semibold text-zinc-700">
                     Nama Lengkap Penilai <span class="text-rose-500">*</span>
@@ -1811,44 +1811,49 @@ function normalizeMediaList(fieldOrMedia) {
                   value="${escapeHtml(nameVal)}"
                   autocapitalize="words"
                   placeholder="Tuliskan nama lengkap Anda..." 
-                  class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 outline-none transition bg-white placeholder-zinc-400"
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 outline-none transition bg-white placeholder-zinc-400 shadow-2xs"
                   oninput="saveFormDraft();"
                 >
               </div>
 
-              <div class="space-y-1.5" id="emailFieldContainer">
-                <div class="flex items-center justify-between">
-                  <label id="labelEmailPenilai" class="block text-xs font-semibold text-zinc-700">
-                    Email Penilai <span id="emailRequiredStar" class="text-rose-500">*</span>
-                  </label>
-                  <button 
-                    type="button" 
-                    id="btnFillNimEmail" 
-                    onclick="fillNimEmailFormat()" 
-                    class="${nimVal ? 'flex' : 'hidden'} text-[10px] font-mono font-semibold text-zinc-700 hover:text-zinc-950 bg-zinc-100 hover:bg-zinc-200 px-2 py-0.5 rounded border border-zinc-300 transition cursor-pointer items-center gap-1"
-                    title="Isi otomatis email format NIM@mhs.ulm.ac.id"
-                  >
-                    <span>⚡ Isi dari NIM</span>
-                  </button>
+              ${isNoEmail ? `
+                <div class="hidden" id="emailFieldContainer">
+                  <input type="hidden" id="inputEmail" value="">
                 </div>
-                <input 
-                  type="email" 
-                  id="inputEmail" 
-                  required 
-                  inputmode="email"
-                  value="${escapeHtml(emailVal)}"
-                  placeholder="contoh: nama.nim@mhs.ulm.ac.id" 
-                  class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 outline-none transition bg-white placeholder-zinc-400"
-                  oninput="validateEmailLive(this.value); updateAccountActiveEmail(this.value); saveFormDraft();"
-                >
-                <div id="emailQuickChips" class="flex flex-wrap items-center gap-1 pt-0.5">
-                  <span class="text-[9.5px] text-zinc-400 font-mono">Domain:</span>
-                  <button type="button" onclick="appendEmailDomain('@mhs.ulm.ac.id')" class="px-1.5 py-0.5 rounded bg-zinc-100 hover:bg-indigo-50 hover:text-indigo-700 text-[10px] font-mono text-zinc-600 border border-zinc-200 transition cursor-pointer">+ @mhs.ulm.ac.id</button>
-                  <button type="button" onclick="appendEmailDomain('@ulm.ac.id')" class="px-1.5 py-0.5 rounded bg-zinc-100 hover:bg-indigo-50 hover:text-indigo-700 text-[10px] font-mono text-zinc-600 border border-zinc-200 transition cursor-pointer">+ @ulm.ac.id</button>
-                  <button type="button" onclick="appendEmailDomain('@gmail.com')" class="px-1.5 py-0.5 rounded bg-zinc-100 hover:bg-indigo-50 hover:text-indigo-700 text-[10px] font-mono text-zinc-600 border border-zinc-200 transition cursor-pointer">+ @gmail.com</button>
+              ` : `
+                <div class="space-y-1.5" id="emailFieldContainer">
+                  <div class="flex items-center justify-between">
+                    <label id="labelEmailPenilai" class="block text-xs font-semibold text-zinc-700">
+                      Email Penilai <span id="emailRequiredStar" class="text-rose-500">*</span>
+                    </label>
+                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9.5px] font-bold">
+                      <svg class="w-3 h-3 text-emerald-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                      <span>Google Verified</span>
+                    </span>
+                  </div>
+                  <div class="relative flex items-center">
+                    <input 
+                      type="email" 
+                      id="inputEmail" 
+                      required 
+                      readonly
+                      value="${escapeHtml(emailVal)}"
+                      placeholder="Akun Google terverifikasi..." 
+                      class="w-full pl-3.5 pr-28 py-2.5 rounded-xl border border-emerald-300 text-xs sm:text-sm bg-emerald-50/40 text-zinc-800 font-mono outline-none cursor-default shadow-2xs"
+                    >
+                    <button 
+                      type="button" 
+                      onclick="handleSwitchGoogleAccount()" 
+                      class="absolute right-1.5 px-2.5 py-1.5 rounded-lg bg-white hover:bg-zinc-100 active:scale-98 text-zinc-700 border border-zinc-200 text-[11px] font-bold transition cursor-pointer shadow-2xs flex items-center gap-1"
+                      title="Ganti akun Google"
+                    >
+                      <span>🔄</span>
+                      <span>Ganti Akun</span>
+                    </button>
+                  </div>
+                  <p class="text-[10px] text-zinc-400">Email diotentikasi resmi via Google Cloud Platform &amp; Supabase.</p>
                 </div>
-                <p id="emailValidationMsg" class="text-[11px] font-medium hidden"></p>
-              </div>
+              `}
             </div>
           </div>
         `;
@@ -3546,33 +3551,36 @@ function normalizeMediaList(fieldOrMedia) {
     }
 
     function nextFromStep1() {
-      const email = document.getElementById("inputEmail").value.trim();
-      const nama = document.getElementById("inputNama").value.trim();
-      const nim = document.getElementById("inputNim") ? document.getElementById("inputNim").value.trim() : "";
+      const emailInput = document.getElementById("inputEmail");
+      const email = emailInput ? emailInput.value.trim() : "";
+      const namaInput = document.getElementById("inputNama");
+      const nama = namaInput ? namaInput.value.trim() : "";
+      const nimInput = document.getElementById("inputNim");
+      const nim = nimInput ? nimInput.value.trim() : "";
 
       if (currentEvaluatorRole === 'Mahasiswa') {
         if (!nim) {
           showToast("Nomor Induk Mahasiswa (NIM) wajib diisi!", "warning");
-          document.getElementById("inputNim").focus();
+          if (nimInput) nimInput.focus();
           return;
         }
         const isNimValid = validateNimLive(nim);
         if (!isNimValid && nim.length < 6) {
           showToast("Masukkan NIM mahasiswa yang valid!", "warning");
-          document.getElementById("inputNim").focus();
+          if (nimInput) nimInput.focus();
           return;
         }
       }
 
       if (!nama) {
         showToast("Nama lengkap penilai wajib diisi!", "warning");
-        document.getElementById("inputNama").focus();
+        if (namaInput) namaInput.focus();
         return;
       }
 
-      if (!validateEmailLive(email)) {
-        showToast("Masukkan alamat email yang valid!", "error");
-        document.getElementById("inputEmail").focus();
+      const emailMode = getCurrentEmailCollectionMode();
+      if (emailMode !== 'NO_EMAIL' && !validateEmailLive(email)) {
+        showToast("Identitas email Google belum terverifikasi dengan benar!", "error");
         return;
       }
 
@@ -4161,13 +4169,17 @@ function normalizeMediaList(fieldOrMedia) {
         type: "info"
       });
       if (ok) {
-        const sb = getSupabaseClient();
-        if (sb && sb.auth) {
-          try { await sb.auth.signOut(); } catch(e) {}
-        }
-        clearAuthSession();
-        handleGoogleSignIn();
+        await handleDirectSwitchGoogle();
       }
+    }
+
+    async function handleDirectSwitchGoogle() {
+      const sb = getSupabaseClient();
+      if (sb && sb.auth) {
+        try { await sb.auth.signOut(); } catch(e) {}
+      }
+      clearAuthSession();
+      handleGoogleSignIn();
     }
 
     async function handleAuthLogout() {

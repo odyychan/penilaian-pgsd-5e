@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.24] - 2026-08-27
+
+### 🔄 Pemurnian Alur Otentikasi Google & Pengalih Akun Instan
+- **🚫 Eliminasi Total Input Email Manual & Chip Domain:**
+  - Menghapus seluruh chip domain manual (`+ @mhs.ulm.ac.id`, `+ @gmail.com`) dan tombol isi NIM pada Tahap 1.
+  - Memastikan seluruh aliran data email dan identitas penilai berasal murni 100% dari sesi Google Cloud OAuth.
+- **🔄 Pengalih Akun Google Instan (1-Click Switcher):**
+  - Mengintegrasikan tombol *"Ganti Akun"* langsung di dalam field input email dan kartu penolakan domain (`handleDirectSwitchGoogle`).
+  - Membuka *Google Account Chooser* (`prompt: 'select_account'`) untuk pemilihan akun Google tanpa pop-up berulang.
+- **🛡️ Proteksi Validasi Null-Safety:**
+  - Memperkuat fungsi navigasi tahapan (`nextFromStep1`) dengan perlindungan *optional chaining* dan sinkronisasi status `NO_EMAIL`.
+
+---
+
 ## [2.4.23] - 2026-08-27
 
 ### 🔐 Integrasi Google Cloud OAuth, Otomasi Identitas, dan Isolasi Draf
