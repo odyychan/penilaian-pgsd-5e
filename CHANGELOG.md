@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.25] - 2026-08-27
+
+### 🎯 Penyempurnaan Form Identitas Penilai & Sinkronisasi Ekstraksi NIM Google
+- **🔒 Penguncian Identitas Terverifikasi Google (Readonly Precision):**
+  - Mengunci seluruh bidang input identitas (*NIM, Nama Lengkap, dan Email*) dengan styling terverifikasi *Google Cloud Platform* yang elegan dan anti-distorsi.
+  - Memperkuat regex ekstraksi NIM (`extractCandidateNim`) agar mampu mengekstrak NIM secara presisi dari berbagai format prefix email ULM (contoh: `2310125210099@mhs.ulm.ac.id`, `nama.2310125210099@mhs.ulm.ac.id`, dll).
+- **✨ Penghapusan False-Positive Warning NIM:**
+  - Mengeliminasi peringatan oranye *"NIM tidak ditemukan"* bagi mahasiswa yang terotentikasi resmi via akun Google `@mhs.ulm.ac.id`.
+  - Menggantinya dengan status verifikasi positif: *"Identitas NIM terverifikasi via Google Cloud ULM"*.
+- **📐 Tata Urutan Rendering Identitas Deterministik:**
+  - Memastikan sinkronisasi peran (`onRoleChange`) dijalankan sebelum penguncian elemen sehingga tata letak grid dan visibilitas container tetap presisi.
+
+---
+
 ## [2.4.24] - 2026-08-27
 
 ### 🔄 Pemurnian Alur Otentikasi Google & Pengalih Akun Instan

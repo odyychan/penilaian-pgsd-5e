@@ -1775,7 +1775,9 @@ function normalizeMediaList(fieldOrMedia) {
                 <label class="block text-xs font-semibold text-zinc-700">
                   Nomor Induk Mahasiswa (NIM) <span class="text-rose-500">*</span>
                 </label>
-                <span id="authNimAutoNotice" class="text-[10px] text-emerald-700 font-medium ${nimVal ? '' : 'hidden'}">Nama terverifikasi</span>
+                <span id="authNimAutoNotice" class="text-[10px] text-emerald-700 font-medium ${nimVal ? '' : 'hidden'}">
+                  ${nimVal ? '✓ Terverifikasi Google' : ''}
+                </span>
               </div>
               <div class="relative">
                 <input 
@@ -1783,8 +1785,9 @@ function normalizeMediaList(fieldOrMedia) {
                   id="inputNim" 
                   inputmode="numeric"
                   value="${escapeHtml(nimVal)}"
-                  placeholder="Masukkan NIM Anda (contoh: 2310125210099)..." 
-                  class="w-full pl-3.5 pr-20 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm font-mono focus:border-zinc-900 outline-none transition bg-white placeholder-zinc-400"
+                  placeholder="NIM Mahasiswa ULM..." 
+                  ${nimVal ? 'readonly' : ''}
+                  class="w-full pl-3.5 pr-20 py-2.5 rounded-xl border ${nimVal ? 'border-emerald-300 bg-emerald-50/40' : 'border-zinc-300 bg-white'} text-xs sm:text-sm font-mono focus:border-zinc-900 outline-none transition placeholder-zinc-400 shadow-2xs"
                   oninput="validateNimLive(this.value); saveFormDraft();"
                 >
                 <div id="nimStatusIcon" class="absolute right-3 top-2.5 ${nimVal ? '' : 'hidden'}">
@@ -3488,10 +3491,10 @@ function normalizeMediaList(fieldOrMedia) {
 
       if (foundStudent) {
         if (iconEl) iconEl.classList.remove("hidden");
-        if (nimInput) nimInput.className = "w-full pl-3.5 pr-16 py-2.5 rounded-lg border border-emerald-500 text-xs sm:text-sm font-mono focus:border-emerald-600 outline-none transition bg-emerald-50/20";
+        if (nimInput) nimInput.className = "w-full pl-3.5 pr-16 py-2.5 rounded-xl border border-emerald-500 text-xs sm:text-sm font-mono focus:border-emerald-600 outline-none transition bg-emerald-50/20";
         
         if (feedbackBox) {
-          feedbackBox.className = "text-xs rounded-lg p-2.5 bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center justify-between";
+          feedbackBox.className = "text-xs rounded-xl p-2.5 bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center justify-between";
           feedbackBox.innerHTML = `
             <div class="flex items-center gap-2">
               <span class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center flex-shrink-0">
@@ -3500,8 +3503,8 @@ function normalizeMediaList(fieldOrMedia) {
                 </svg>
               </span>
               <div>
-                <span class="font-bold block">${foundStudent.name}</span>
-                <span class="text-[10px] text-emerald-700 block font-medium">${foundGroupName} (${foundGroupSesi})</span>
+                <span class="font-bold block">${escapeHtml(foundStudent.name)}</span>
+                <span class="text-[10px] text-emerald-700 block font-medium">${escapeHtml(foundGroupName)} (${escapeHtml(foundGroupSesi)})</span>
               </div>
             </div>
             <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-200/80 font-bold text-emerald-800">Terdaftar</span>
@@ -3509,41 +3512,53 @@ function normalizeMediaList(fieldOrMedia) {
           feedbackBox.classList.remove("hidden");
         }
 
-        // Auto-fill nama mahasiswa (tetap dapat disunting manual)
-        if (inputNama) {
+        if (inputNama && !inputNama.value) {
           inputNama.value = foundStudent.name;
         }
         if (autoFillNotice) autoFillNotice.classList.remove("hidden");
-        
-        // Tampilkan tombol khusus jika ingin mengisi format NIM@mhs.ulm.ac.id
-        if (btnFillNimEmail) {
-          btnFillNimEmail.classList.remove("hidden");
-        }
+        if (btnFillNimEmail) btnFillNimEmail.classList.add("hidden");
 
         activeUserAccountNim = cleanNim;
         renderGroupOptions();
         return true;
       } else {
-        if (iconEl) iconEl.classList.add("hidden");
-        if (autoFillNotice) autoFillNotice.classList.add("hidden");
         if (btnFillNimEmail) btnFillNimEmail.classList.add("hidden");
 
-        if (cleanNim.length >= 6) {
-          if (nimInput) nimInput.className = "w-full pl-3.5 pr-16 py-2.5 rounded-lg border border-amber-400 text-xs sm:text-sm font-mono focus:border-amber-600 outline-none transition bg-amber-50/20";
+        const isGoogleAuthMhs = (activeUserAccountEmail || "").toLowerCase().endsWith("@mhs.ulm.ac.id");
+        if (isGoogleAuthMhs) {
+          if (iconEl) iconEl.classList.remove("hidden");
+          if (nimInput) nimInput.className = "w-full pl-3.5 pr-16 py-2.5 rounded-xl border border-emerald-300 text-xs sm:text-sm font-mono outline-none transition bg-emerald-50/30";
           if (feedbackBox) {
-            feedbackBox.className = "text-[11px] rounded-lg p-2.5 bg-amber-50 border border-amber-200 text-amber-900 flex items-center gap-2";
+            feedbackBox.className = "text-xs rounded-xl p-2.5 bg-emerald-50/60 border border-emerald-200 text-emerald-800 flex items-center gap-2";
+            feedbackBox.innerHTML = `
+              <span class="text-emerald-600 font-bold">✓</span>
+              <span>Identitas NIM <strong>${cleanNim}</strong> terverifikasi via Google Cloud ULM.</span>
+            `;
+            feedbackBox.classList.remove("hidden");
+          }
+          activeUserAccountNim = cleanNim;
+          renderGroupOptions();
+          return true;
+        }
+
+        if (cleanNim.length >= 6) {
+          if (iconEl) iconEl.classList.add("hidden");
+          if (nimInput) nimInput.className = "w-full pl-3.5 pr-16 py-2.5 rounded-xl border border-amber-400 text-xs sm:text-sm font-mono focus:border-amber-600 outline-none transition bg-amber-50/20";
+          if (feedbackBox) {
+            feedbackBox.className = "text-[11px] rounded-xl p-2.5 bg-amber-50 border border-amber-200 text-amber-900 flex items-center gap-2";
             feedbackBox.innerHTML = `
               <span class="p-1 rounded bg-amber-200 text-amber-800 flex-shrink-0">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                 </svg>
               </span>
-              <span>NIM <strong>${cleanNim}</strong> tidak ditemukan di daftar mahasiswa kelas ini. Pastikan digit NIM sudah benar atau pilih peran <em>Dosen / Lainnya</em>.</span>
+              <span>NIM <strong>${cleanNim}</strong> tidak ditemukan di daftar kelas ini. Pastikan NIM benar atau pilih peran <em>Dosen / Lainnya</em>.</span>
             `;
             feedbackBox.classList.remove("hidden");
           }
         } else {
-          if (nimInput) nimInput.className = "w-full pl-3.5 pr-16 py-2.5 rounded-lg border border-zinc-300 text-xs sm:text-sm font-mono focus:border-zinc-900 outline-none transition bg-white placeholder-zinc-400";
+          if (iconEl) iconEl.classList.add("hidden");
+          if (nimInput) nimInput.className = "w-full pl-3.5 pr-16 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm font-mono focus:border-zinc-900 outline-none transition bg-white placeholder-zinc-400";
           if (feedbackBox) feedbackBox.classList.add("hidden");
         }
         activeUserAccountNim = cleanNim;
@@ -3860,8 +3875,9 @@ function normalizeMediaList(fieldOrMedia) {
     function extractCandidateNim(email = '') {
       const normalized = String(email).trim().toLowerCase();
       if (!normalized.endsWith('@mhs.ulm.ac.id')) return null;
-      const candidate = normalized.split('@')[0] || '';
-      if (/^[0-9]{8,15}$/.test(candidate)) return candidate;
+      const prefix = normalized.split('@')[0] || '';
+      const match = prefix.match(/\d{8,15}/);
+      if (match) return match[0];
       return null;
     }
 
@@ -3940,36 +3956,53 @@ function normalizeMediaList(fieldOrMedia) {
       activeUserAccountAvatarUrl = authUser.avatarUrl;
       currentEvaluatorRole = authUser.peran;
 
+      // 1. Sinkronkan tampilan Peran terlebih dahulu
+      if (authUser.peran && typeof onRoleChange === 'function') {
+        onRoleChange(authUser.peran);
+      }
+
       const inputEmail = document.getElementById("inputEmail");
       const inputNama = document.getElementById("inputNama");
       const inputNim = document.getElementById("inputNim");
+      const selectPeran = document.getElementById("selectPeranPenilai");
       const emailChips = document.getElementById("emailQuickChips");
       const btnFillNimEmail = document.getElementById("btnFillNimEmail");
+
+      if (selectPeran) {
+        selectPeran.value = authUser.peran || "Mahasiswa";
+      }
 
       if (inputEmail) {
         inputEmail.value = authUser.email;
         inputEmail.readOnly = true;
-        inputEmail.className = "w-full px-3.5 py-2.5 rounded-xl border border-emerald-300 text-xs sm:text-sm bg-emerald-50/40 text-zinc-800 font-mono outline-none cursor-not-allowed";
+        inputEmail.className = "w-full pl-3.5 pr-28 py-2.5 rounded-xl border border-emerald-300 text-xs sm:text-sm bg-emerald-50/40 text-zinc-800 font-mono outline-none cursor-default shadow-2xs";
       }
+
       if (inputNama) {
         if (authUser.nama) inputNama.value = authUser.nama;
-        if (identity.isRosterVerified) {
-          inputNama.readOnly = true;
-          inputNama.className = "w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 text-xs sm:text-sm bg-zinc-50 text-zinc-800 outline-none cursor-not-allowed";
+        inputNama.readOnly = true;
+        inputNama.className = "w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 text-xs sm:text-sm bg-zinc-50 text-zinc-800 outline-none cursor-default shadow-2xs";
+        const autoNotice = document.getElementById("namaAutoFillNotice");
+        if (autoNotice) {
+          autoNotice.textContent = "Terisi otomatis dari Google";
+          autoNotice.classList.remove("hidden");
         }
       }
+
       if (inputNim && authUser.nim) {
         inputNim.value = authUser.nim;
-        if (identity.isRosterVerified) {
-          inputNim.readOnly = true;
-          inputNim.className = "w-full px-3.5 py-2.5 rounded-xl border border-emerald-300 text-xs sm:text-sm bg-emerald-50/40 text-zinc-800 font-mono outline-none cursor-not-allowed";
-        }
+        inputNim.readOnly = true;
+        inputNim.className = "w-full pl-3.5 pr-20 py-2.5 rounded-xl border border-emerald-300 text-xs sm:text-sm bg-emerald-50/40 text-zinc-800 font-mono outline-none cursor-default shadow-2xs";
         validateNimLive(authUser.nim);
+        const nimNotice = document.getElementById("authNimAutoNotice");
+        if (nimNotice) {
+          nimNotice.textContent = "✓ Terverifikasi Google";
+          nimNotice.classList.remove("hidden");
+        }
       }
+
       if (emailChips) emailChips.classList.add("hidden");
       if (btnFillNimEmail) btnFillNimEmail.classList.add("hidden");
-
-      if (authUser.peran && typeof onRoleChange === 'function') onRoleChange(authUser.peran);
     }
 
     function renderAccountBar(identity) {
