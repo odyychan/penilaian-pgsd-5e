@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.29] - 2026-08-27
+
+### 🧹 Eliminasi Redundansi Pengaturan PIN & Status Form pada Tab Setelan Admin
+- **🎯 Penghapusan Kartu Duplikat (*Zero Clutter & Clean Settings Tab*):**
+  - Menghapus kartu redundan *"Kode PIN / Akses Formulir"* dan *"Status Penerimaan Formulir"* dari dalam tab **Setelan Formulir** (`adminView_settings`), karena seluruh kontrol tersebut telah tersedia permanen di bilah atas (*Top Header*) Workspace (`ID: BK5E ✎`, `• Form Aktif`, `Bagikan QR`, dan `Buka Formulir ↗`).
+- **📐 Tata Letak Setelan yang Lebih Fokus & Rapi:**
+  - Tab **Setelan** kini langsung menyajikan opsi konfigurasi fungsional: *Jadwal & Batas Waktu Akses (Waktu Mulai, Tutup, Kuota Respons)*, *Mode Pengumpulan & Otentikasi Email Google*, *Integritas & Aturan Anti-Fraud (Cegah Nilai Diri Sendiri & Kunci Respons Ganda)*, *Kredit Footer*, serta *Reset ke Bawaan*.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker ke `v2.4.29`.
+
+---
+
 ## [2.4.28] - 2026-08-27
 
 ### 🎨 Redesain Minimalis-Modern Komponen Google Auth & Panel Akun Penilai

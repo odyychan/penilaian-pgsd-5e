@@ -6,7 +6,7 @@
  *   - Assets: Stale-while-revalidate
  * ============================================================ */
 
-const CACHE_VERSION = 'v2.4.28';
+const CACHE_VERSION = 'v2.4.29';
 const STATIC_CACHE  = `pgsd-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `pgsd-runtime-${CACHE_VERSION}`;
 
