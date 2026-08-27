@@ -4492,13 +4492,12 @@ function normalizeMediaList(fieldOrMedia) {
 
       const identity = await resolveStudentIdentity(profile, mode);
 
+      openAssessmentForm();
       applyLockedIdentity(identity);
       renderAccountBar(identity);
 
       isDraftAlreadyRestored = false;
       restoreFormDraft();
-
-      openAssessmentForm();
     }
 
     function openAssessmentForm() {
