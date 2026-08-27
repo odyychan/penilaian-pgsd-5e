@@ -4,6 +4,22 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.37] - 2026-08-27
+
+### ⚡ Eliminasi Total Cache Nyangkut & Sistem Auto-Updater Klien (Zero-Stale Architecture)
+- **🚀 Perbaikan HTTP Cache Header di Edge Hosting (`vercel.json`):**
+  - Mengubah konfigurasi `Cache-Control` untuk seluruh modul JavaScript dan CSS (`/src/*`) dari `max-age=31536000, immutable` (yang sebelumnya menyebabkan browser mengunci berkas lama hingga 1 tahun) menjadi `public, max-age=0, must-revalidate`.
+  - Memastikan browser pengguna selalu memverifikasi ke server hosting untuk setiap rilis berkas baru tanpa tersangkut di cache lokal perangkat.
+- **🏷️ Cache-Busting Versioning Query String:**
+  - Menyematkan parameter versi dinamis `?v=2.4.37` pada seluruh tag `<link rel="stylesheet">` dan `<script src="...">` di [`index.html`](file:///e:/Data/GitHub/Project%20Dede/index.html) dan [`admin.html`](file:///e:/Data/GitHub/Project%20Dede/admin.html).
+- **🔄 Strategi Service Worker Network-First & Auto-Refresh:**
+  - Mengubah strategi *fetch* di [`sw.js`](file:///e:/Data/GitHub/Project%20Dede/sw.js) untuk kode modul dan halaman HTML menjadi **Network-First (Always Fresh)**, dengan *fallback* aman ke cache jika perangkat sedang luring (*offline*).
+  - Menambahkan *auto-update listener* dan penangan `controllerchange` yang secara otomatis mengunduh service worker baru dan memuat ulang halaman (*instant seamless refresh*) begitu versi baru terdeteksi.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker ke `v2.4.37`.
+
+---
+
 ## [2.4.36] - 2026-08-27
 
 ### 🔒 Perbaikan Keamanan Akses & Zero-FOUC View Resolver (Portal PIN vs Form Isolation)
