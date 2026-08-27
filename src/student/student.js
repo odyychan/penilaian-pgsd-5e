@@ -4158,19 +4158,17 @@ function normalizeMediaList(fieldOrMedia) {
       if (wizard) wizard.classList.add("hidden");
       if (authGate) authGate.classList.remove("hidden");
       if (promptCard) promptCard.classList.remove("hidden");
-      if (mismatchCard) mismatchCard.classList.add("hidden");
-
       const mode = getCurrentEmailCollectionMode();
       if (reqDesc) {
         if (mode === 'ULM_ONLY') {
-          reqDesc.textContent = "Formulir ini dikonfigurasi khusus untuk sivitas akademika ULM. Silakan masuk menggunakan akun Google resmi kampus (@mhs.ulm.ac.id atau @ulm.ac.id).";
+          reqDesc.textContent = "Gunakan akun Google resmi kampus (@mhs.ulm.ac.id) untuk melanjutkan pengisian.";
         } else {
-          reqDesc.textContent = "Formulir ini mewajibkan akun Google terverifikasi untuk mencatat identitas penilai dan menyimpan draf penilaian secara otomatis.";
+          reqDesc.textContent = "Masuk untuk verifikasi identitas dan penyimpanan draf otomatis.";
         }
       }
 
       renderGoogleSignInButtonDefault();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'instant' });
     }
 
     function showDomainMismatch(profile) {
@@ -4188,7 +4186,7 @@ function normalizeMediaList(fieldOrMedia) {
       if (mismatchCard) mismatchCard.classList.remove("hidden");
       if (emailEl) emailEl.textContent = profile.email;
 
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'instant' });
     }
 
     function saveAuthIntent(formId) {
@@ -4298,7 +4296,7 @@ function normalizeMediaList(fieldOrMedia) {
               <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.24 6.58l4.04 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
             </svg>
           </div>
-          <span>Masuk dengan Akun Google</span>
+          <span>Lanjutkan dengan Google</span>
         `;
       }
     }

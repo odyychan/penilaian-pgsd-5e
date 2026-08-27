@@ -4,6 +4,21 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.31] - 2026-08-27
+
+### 🎨 Penyederhanaan Desain Minimalis-Modern Layar Autentikasi Google (*Auth Gate*)
+- **🧹 Penghapusan Badge Redundan (*Zero Clutter*):**
+  - Menghapus badge `🔒 AUTENTIKASI GOOGLE` di atas judul form auth gate untuk tampilan yang lebih bersih dan proporsional.
+- **✨ Tipografi & Keterangan yang Lebih Ringkas & Elegan:**
+  - Mengubah judul menjadi *"Masuk dengan Google"* dan merampingkan deskripsi menjadi kalimat lugas dan tidak bertele-tele (*"Masuk untuk verifikasi identitas dan penyimpanan draf otomatis"* / *"Gunakan akun Google resmi kampus (@mhs.ulm.ac.id) untuk melanjutkan pengisian"*).
+  - Mengubah teks tombol aksi utama menjadi *"Lanjutkan dengan Google"* untuk mengeliminasi repetisi kata antar-elemen.
+- **📐 Penyesuaian Proporsi & Border Card:**
+  - Menyesuaikan padding, border halus (`border-zinc-200/80`), dan ukuran tombol aksi agar lebih nyaman di layar seluler maupun desktop.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker ke `v2.4.31`.
+
+---
+
 ## [2.4.30] - 2026-08-27
 
 ### ⚡ Eliminasi Lag & Optimasi Kecepatan Transisi Pasca-Auth Google
