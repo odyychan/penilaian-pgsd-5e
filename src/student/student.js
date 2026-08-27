@@ -3709,6 +3709,15 @@ function normalizeMediaList(fieldOrMedia) {
     // =========================================================================
     // AUTO-SAVE FORM DRAFT ENGINE (PENYIMPANAN OTOMATIS ISIAN MAHASISWA)
     // =========================================================================
+    function getFormDraftKey(specificEmail = null) {
+      const currentEmail = specificEmail || activeUserAccountEmail || (document.getElementById("inputEmail")?.value || "").trim();
+      const cleanEmail = currentEmail.toLowerCase().replace(/[^a-z0-9]/g, '_');
+      if (cleanEmail) {
+        return "PGSD_DRAFT_" + (activeFormId || 'BK5E').toUpperCase() + "_" + cleanEmail;
+      }
+      return "PGSD_DRAFT_" + (activeFormId || 'BK5E').toUpperCase() + "_DEFAULT";
+    }
+
     function hasAnyFormInputFilled() {
       try {
         const nim = document.getElementById("inputNim") ? document.getElementById("inputNim").value.trim() : "";
