@@ -3430,7 +3430,8 @@ function normalizeMediaList(fieldOrMedia) {
         if (!isNoEmail) {
           const inputEmail = document.getElementById("inputEmail");
           const emailVal = (inputEmail ? inputEmail.value : '').trim();
-          if (!emailVal || !validateEmailLive(emailVal)) {
+          const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+          if (!emailVal || !emailRegex.test(emailVal)) {
             if (inputEmail) inputEmail.focus();
             showToast("Email Penilai terverifikasi wajib terisi sebelum melanjutkan!", "warning");
             return false;

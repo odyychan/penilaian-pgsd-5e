@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.41] - 2026-08-27
+
+### ⚡ Penyempurnaan Validasi Format Email Resmi & Sinkronisasi Tahap Penilaian
+- **📧 Validasi Format Email Klien Terstandarisasi:**
+  - Menyelaraskan verifikasi email pada fungsi penjaga tahap (`validateStageRequirements`) menggunakan evaluasi format RFC standard yang kompatibel dengan seluruh akun Google terverifikasi.
+  - Memastikan transisi tahap 1 ke tahap 2 berjalan mulus dan instan tanpa false-rejection setelah seluruh data wajib (NIM, Nama, Email) terisi lengkap.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.41`.
+
+---
+
 ## [2.4.40] - 2026-08-27
 
 ### 🛡️ Penguatan Validasi Field Wajib & Proteksi Navigasi Tahap (*Airtight Form Guard*)
