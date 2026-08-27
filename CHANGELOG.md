@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.35] - 2026-08-27
+
+### ⚡ Perbaikan Bug Loop & Lag Pasca-Autentikasi Google (Seamless Auth Transition)
+- **⚡ Eliminasi Infinite Mutation Loop & Freeze UI:**
+  - Mengisolasi dan menerapkan filter mutasi selektif (`select:not([data-pgsd-dropdown-enhanced="true"])`) dan *debouncing* (100ms) pada `globalDropdownObserver` di `student.js`. Mencegah terjadinya badai mutasi DOM tak terbatas (*infinite render loop*) yang mengunci *main-thread* browser dan menyebabkan lag parah.
+  - Membatasi cakupan *rendering* KaTeX (`renderAllMathInElement`) saat navigasi tahapan agar hanya merender bagian aktif (`stageSec`) tanpa merender ulang seluruh `document.body`.
+- **✨ Transisi Mulus Pasca-Login Google (*Instant Form Auto-Fallback*):**
+  - Mengintegrasikan handler tersentralisasi `handleAuthSessionEstablished` untuk memproses callback OAuth PKCE (`?code=...`), token hash (`#access_token=...`), dan *listener* `onAuthStateChange`.
+  - Sistem kini secara otomatis dan instan (< 30ms) membuka kuesioner penilaian (`continueAssessmentWithAuthenticatedUser`), mengunci identitas Google mahasiswa, dan memulihkan draf isian tanpa jeda atau layar tertahan.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker ke `v2.4.35`.
+
+---
+
 ## [2.4.34] - 2026-08-27
 
 ### 🔒 Penguatan Keamanan Admin: 100% Supabase Edge Function & Verifikasi Sesi Token Server-Side

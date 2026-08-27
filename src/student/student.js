@@ -706,10 +706,28 @@ function normalizeMediaList(fieldOrMedia) {
       });
     }
 
-    // Continuous auto-enhancer for dynamically injected select elements
+    // Continuous auto-enhancer for dynamically injected select elements (debounced & targeted)
     if (typeof MutationObserver !== 'undefined') {
-      const globalDropdownObserver = new MutationObserver(() => {
-        initAllModernDropdowns();
+      let dropdownDebounceTimer = null;
+      const globalDropdownObserver = new MutationObserver((mutations) => {
+        let hasNewSelect = false;
+        for (const m of mutations) {
+          if (m.addedNodes && m.addedNodes.length > 0) {
+            for (const n of m.addedNodes) {
+              if (n.nodeType === 1 && (n.tagName === 'SELECT' || (n.querySelector && n.querySelector('select:not([data-pgsd-dropdown-enhanced="true"])')))) {
+                hasNewSelect = true;
+                break;
+              }
+            }
+          }
+          if (hasNewSelect) break;
+        }
+        if (hasNewSelect) {
+          if (dropdownDebounceTimer) clearTimeout(dropdownDebounceTimer);
+          dropdownDebounceTimer = setTimeout(() => {
+            initAllModernDropdowns();
+          }, 100);
+        }
       });
       document.addEventListener("DOMContentLoaded", () => {
         if (document.body) {
@@ -762,18 +780,18 @@ function normalizeMediaList(fieldOrMedia) {
       switchTab(savedTab, false);
       // Inisialisasi Auth Listener & Session Recovery
       initSupabaseAuthListener();
-      ensureAuthInitialized();
+      await ensureAuthInitialized();
 
       checkAndApplyAuthGate();
       restoreFormDraft();
-      fetchInitialFormData(false);
+      await fetchInitialFormData(false);
 
       // Pre-fetch rekap data secara diam-diam di background agar instan saat dibuka
       setTimeout(() => loadRekapData(true), 400);
 
       // Inisialisasi Sinkronisasi Real-Time 2 Arah
       initRealtimeSyncEngine();
-      setTimeout(() => renderAllMathInElement(document.body), 200);
+      setTimeout(() => renderAllMathInElement(document.getElementById("mainAppRoot") || document.body), 200);
     });
 
 
@@ -3347,7 +3365,6 @@ function normalizeMediaList(fieldOrMedia) {
       setTimeout(() => {
         const stageSec = document.getElementById(`stepSection_${step}`);
         if (stageSec) renderAllMathInElement(stageSec);
-        renderAllMathInElement(document.getElementById("dynamicStagesContainer") || document.body);
       }, 40);
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -4519,8 +4536,7 @@ function normalizeMediaList(fieldOrMedia) {
           if (codeErr) {
             console.warn("Supabase exchangeCodeForSession notice:", codeErr);
           } else if (codeData?.session?.user) {
-            authState.session = codeData.session;
-            authState.user = codeData.session.user;
+            handleAuthSessionEstablished(codeData.session, 'PKCE_CODE');
           }
 
           // Bersihkan code dari URL browser secara aman tanpa menghilangkan ?id={formId}
@@ -4544,8 +4560,7 @@ function normalizeMediaList(fieldOrMedia) {
                 refresh_token: refreshToken
               });
               if (setData?.session?.user) {
-                authState.session = setData.session;
-                authState.user = setData.session.user;
+                handleAuthSessionEstablished(setData.session, 'HASH_TOKEN');
               }
             } catch(e) {}
           }
@@ -4561,8 +4576,7 @@ function normalizeMediaList(fieldOrMedia) {
         if (!authState.session) {
           const { data: sessionData } = await sb.auth.getSession();
           if (sessionData?.session?.user) {
-            authState.session = sessionData.session;
-            authState.user = sessionData.session.user;
+            handleAuthSessionEstablished(sessionData.session, 'GET_SESSION');
           }
         }
 
@@ -4570,32 +4584,15 @@ function normalizeMediaList(fieldOrMedia) {
         if (!authState.user) {
           const localSess = getCurrentAuthSession();
           if (localSess?.email) {
-            authState.user = {
+            const fallbackUser = {
               email: localSess.email,
               user_metadata: {
                 full_name: localSess.nama,
                 avatar_url: localSess.avatarUrl
               }
             };
+            handleAuthSessionEstablished({ user: fallbackUser }, 'LOCAL_CACHE');
           }
-        }
-
-        // 4. Intent Execution Check (Auto-Open form jika login Google dipicu dari tombol Mulai)
-        const rawIntent = sessionStorage.getItem('PGSD_AUTH_INTENT');
-        if (rawIntent) {
-          try {
-            const intent = JSON.parse(rawIntent);
-            const isFresh = (Date.now() - (intent.createdAt || 0)) < (10 * 60 * 1000);
-            const isTargetForm = (intent.formId || '').toUpperCase() === (activeFormId || 'BK5E').toUpperCase();
-
-            if (isFresh && isTargetForm && intent.action === 'START_ASSESSMENT' && authState.user) {
-              sessionStorage.removeItem('PGSD_AUTH_INTENT');
-              const mode = getCurrentEmailCollectionMode();
-              setTimeout(() => {
-                continueAssessmentWithAuthenticatedUser(authState.user, mode);
-              }, 100);
-            }
-          } catch(e) {}
         }
 
       } catch (err) {
@@ -4608,6 +4605,48 @@ function normalizeMediaList(fieldOrMedia) {
       return authState.session;
     }
 
+    let isAuthTransitionInProgress = false;
+    function handleAuthSessionEstablished(session, source = 'INIT') {
+      if (!session || !session.user) return;
+      authState.session = session;
+      authState.user = session.user;
+
+      const profile = extractGoogleProfile(session.user);
+      const mode = getCurrentEmailCollectionMode();
+
+      // Check intent
+      const rawIntent = sessionStorage.getItem('PGSD_AUTH_INTENT');
+      let shouldAutoOpenForm = false;
+      if (rawIntent) {
+        try {
+          const intent = JSON.parse(rawIntent);
+          const isFresh = (Date.now() - (intent.createdAt || 0)) < (15 * 60 * 1000);
+          const isTargetForm = (intent.formId || '').toUpperCase() === (activeFormId || 'BK5E').toUpperCase();
+          if (isFresh && isTargetForm && intent.action === 'START_ASSESSMENT') {
+            shouldAutoOpenForm = true;
+          }
+        } catch(e) {}
+        sessionStorage.removeItem('PGSD_AUTH_INTENT');
+      }
+
+      const authGate = document.getElementById("formAuthGateSection");
+      const isAuthGateVisible = authGate && !authGate.classList.contains("hidden");
+
+      if (shouldAutoOpenForm || isAuthGateVisible) {
+        if (!isAuthTransitionInProgress) {
+          isAuthTransitionInProgress = true;
+          setTimeout(() => {
+            continueAssessmentWithAuthenticatedUser(session.user, mode);
+            isAuthTransitionInProgress = false;
+          }, 30);
+        }
+      } else {
+        const identity = resolveStudentIdentity(profile, mode);
+        applyLockedIdentity(identity);
+        renderAccountBar(identity);
+      }
+    }
+
     async function initSupabaseAuthListener() {
       const sb = getSupabaseClient() || (window.supabase && typeof window.supabase.createClient === "function" ? (supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey)) : null);
       if (!sb || !sb.auth) return;
@@ -4615,8 +4654,7 @@ function normalizeMediaList(fieldOrMedia) {
       try {
         sb.auth.onAuthStateChange(async (event, session) => {
           if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'USER_UPDATED' || event === 'TOKEN_REFRESHED') && session && session.user) {
-            authState.session = session;
-            authState.user = session.user;
+            handleAuthSessionEstablished(session, event);
           } else if (event === 'SIGNED_OUT') {
             authState.session = null;
             authState.user = null;
