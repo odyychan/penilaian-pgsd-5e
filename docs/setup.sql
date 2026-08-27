@@ -107,6 +107,15 @@ CREATE TABLE IF NOT EXISTS pgsd_backups (
 );
 
 -- =========================================================================
+-- 🔐 TABEL 7: pgsd_admin_secrets (Tabel Rahasia & Salted Hash Admin - Service Role Only)
+-- =========================================================================
+CREATE TABLE IF NOT EXISTS pgsd_admin_secrets (
+    key VARCHAR(100) PRIMARY KEY,
+    value_hash TEXT NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- =========================================================================
 -- ⚡ INDEKS PERFORMA TINGGI (B-TREE OPTIMIZATION)
 -- =========================================================================
 CREATE INDEX IF NOT EXISTS idx_pgsd_forms_slug ON pgsd_forms(form_slug);

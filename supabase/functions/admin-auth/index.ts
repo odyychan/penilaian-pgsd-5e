@@ -1,4 +1,4 @@
-﻿import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 // =========================================================================
 // 🛡️ SUPABASE EDGE FUNCTION: SECURE ADMIN AUTHENTICATION & PASSWORD MANAGER
@@ -22,14 +22,19 @@ async function hashPassword(pass: string): Promise<string> {
   return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+// Helper: Get signing secret for session tokens
+function getSigningSecret(): string {
+  return Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || Deno.env.get("JWT_SECRET") || DEFAULT_SALT;
+}
+
 // Helper: Sign session token with HMAC-SHA256
-async function createSessionToken(secretKey: string): Promise<{ token: string; expiresAt: number }> {
+async function createSessionToken(): Promise<{ token: string; expiresAt: number }> {
   const now = Date.now();
   const expiresAt = now + 24 * 60 * 60 * 1000; // 24 hours
   const payload = JSON.stringify({ role: "admin", iat: now, exp: expiresAt });
 
   const encoder = new TextEncoder();
-  const keyData = encoder.encode(secretKey + "_" + DEFAULT_SALT);
+  const keyData = encoder.encode(getSigningSecret() + "_" + DEFAULT_SALT);
   const cryptoKey = await crypto.subtle.importKey(
     "raw",
     keyData,
@@ -49,7 +54,7 @@ async function createSessionToken(secretKey: string): Promise<{ token: string; e
 }
 
 // Helper: Verify session token
-async function verifySessionToken(token: string, secretKey: string): Promise<boolean> {
+async function verifySessionToken(token: string): Promise<boolean> {
   try {
     const parts = token.split(".");
     if (parts.length !== 2) return false;
@@ -59,9 +64,10 @@ async function verifySessionToken(token: string, secretKey: string): Promise<boo
     const payload = JSON.parse(payloadStr);
 
     if (!payload.exp || Date.now() > payload.exp) return false;
+    if (payload.role !== "admin") return false;
 
     const encoder = new TextEncoder();
-    const keyData = encoder.encode(secretKey + "_" + DEFAULT_SALT);
+    const keyData = encoder.encode(getSigningSecret() + "_" + DEFAULT_SALT);
     const cryptoKey = await crypto.subtle.importKey(
       "raw",
       keyData,
@@ -80,22 +86,18 @@ async function verifySessionToken(token: string, secretKey: string): Promise<boo
   }
 }
 
-// Helper: Get active admin password
-async function getEffectiveAdminPassword(): Promise<{ password: string; source: string }> {
-  // 1. Priority 1: Supabase Secrets (ADMIN_PASSWORD or PGSD_ADMIN_PASSWORD)
-  const envPass = Deno.env.get("ADMIN_PASSWORD") || Deno.env.get("PGSD_ADMIN_PASSWORD");
-  if (envPass && envPass.trim() !== "") {
-    return { password: envPass.trim(), source: "SUPABASE_ENV_SECRET" };
-  }
+// Helper: Verify input password against Database Salted Hash, Supabase Secret, or Fallback
+async function verifyInputPassword(inputPass: string): Promise<{ valid: boolean; source: string }> {
+  const inputHash = await hashPassword(inputPass);
 
-  // 2. Priority 2: Database stored custom password
+  // 1. Priority 1: Check Database stored salted hash in pgsd_admin_secrets
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
   if (supabaseUrl && serviceKey) {
     try {
       const res = await fetch(
-        `${supabaseUrl}/rest/v1/pgsd_form_configs?form_id=eq.GLOBAL&select=config_json`,
+        `${supabaseUrl}/rest/v1/pgsd_admin_secrets?key=eq.ADMIN_PASSWORD_HASH&select=value_hash`,
         {
           headers: {
             apikey: serviceKey,
@@ -105,11 +107,12 @@ async function getEffectiveAdminPassword(): Promise<{ password: string; source: 
       );
       if (res.ok) {
         const rows = await res.json();
-        if (rows && rows.length > 0 && rows[0].config_json) {
-          const cfg = rows[0].config_json;
-          if (cfg.admin_password && cfg.admin_password.trim() !== "") {
-            return { password: cfg.admin_password.trim(), source: "SUPABASE_DB_CUSTOM" };
+        if (rows && rows.length > 0 && rows[0].value_hash) {
+          const dbHash = rows[0].value_hash;
+          if (inputHash === dbHash) {
+            return { valid: true, source: "SUPABASE_DB_CUSTOM" };
           }
+          return { valid: false, source: "SUPABASE_DB_CUSTOM" };
         }
       }
     } catch {
@@ -117,26 +120,39 @@ async function getEffectiveAdminPassword(): Promise<{ password: string; source: 
     }
   }
 
+  // 2. Priority 2: Supabase Secrets (ADMIN_PASSWORD or PGSD_ADMIN_PASSWORD)
+  const envPass = Deno.env.get("ADMIN_PASSWORD") || Deno.env.get("PGSD_ADMIN_PASSWORD");
+  if (envPass && envPass.trim() !== "") {
+    const trimmedEnv = envPass.trim();
+    if (inputPass === trimmedEnv) {
+      return { valid: true, source: "SUPABASE_ENV_SECRET" };
+    }
+    return { valid: false, source: "SUPABASE_ENV_SECRET" };
+  }
+
   // 3. Priority 3: Fallback default
-  return { password: FALLBACK_PASS, source: "DEFAULT_FALLBACK" };
+  if (inputPass === FALLBACK_PASS) {
+    return { valid: true, source: "DEFAULT_FALLBACK" };
+  }
+
+  return { valid: false, source: "UNKNOWN" };
 }
 
-// Helper: Save new password to database
-async function savePasswordToDatabase(newPass: string): Promise<boolean> {
+// Helper: Save new salted hash to database pgsd_admin_secrets
+async function savePasswordHashToDatabase(newPass: string): Promise<boolean> {
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (!supabaseUrl || !serviceKey) return false;
 
   try {
+    const newHash = await hashPassword(newPass);
     const payload = {
-      form_id: "GLOBAL",
-      config_json: {
-        admin_password: newPass,
-        updated_at: new Date().toISOString(),
-      },
+      key: "ADMIN_PASSWORD_HASH",
+      value_hash: newHash,
+      updated_at: new Date().toISOString(),
     };
 
-    const res = await fetch(`${supabaseUrl}/rest/v1/pgsd_form_configs`, {
+    const res = await fetch(`${supabaseUrl}/rest/v1/pgsd_admin_secrets`, {
       method: "POST",
       headers: {
         apikey: serviceKey,
@@ -173,16 +189,15 @@ serve(async (req: Request) => {
     }
 
     const action = body.action || url.searchParams.get("action") || "verify";
-    const { password: activePassword, source } = await getEffectiveAdminPassword();
 
     // ACTION: STATUS
     if (action === "status") {
+      const envPass = Deno.env.get("ADMIN_PASSWORD") || Deno.env.get("PGSD_ADMIN_PASSWORD");
       return new Response(
         JSON.stringify({
           success: true,
           auth_ready: true,
-          secret_source: source,
-          has_env_secret: source === "SUPABASE_ENV_SECRET",
+          has_env_secret: !!(envPass && envPass.trim() !== ""),
         }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -201,8 +216,9 @@ serve(async (req: Request) => {
         );
       }
 
-      if (inputPass === activePassword) {
-        const { token, expiresAt } = await createSessionToken(activePassword);
+      const { valid, source } = await verifyInputPassword(inputPass);
+      if (valid) {
+        const { token, expiresAt } = await createSessionToken();
         return new Response(
           JSON.stringify({
             success: true,
@@ -227,7 +243,7 @@ serve(async (req: Request) => {
     // ACTION: VERIFY_TOKEN
     if (action === "verify_token") {
       const token = String(body.token || "").trim();
-      const isValid = await verifySessionToken(token, activePassword);
+      const isValid = await verifySessionToken(token);
       return new Response(
         JSON.stringify({ success: isValid, valid: isValid }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: isValid ? 200 : 401 }
@@ -246,7 +262,8 @@ serve(async (req: Request) => {
         );
       }
 
-      if (currentPass !== activePassword) {
+      const { valid: isCurrentValid } = await verifyInputPassword(currentPass);
+      if (!isCurrentValid) {
         return new Response(
           JSON.stringify({ success: false, error: "Kata sandi saat ini tidak cocok." }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
@@ -260,20 +277,16 @@ serve(async (req: Request) => {
         );
       }
 
-      const saved = await savePasswordToDatabase(newPass);
-      const { token, expiresAt } = await createSessionToken(newPass);
+      const saved = await savePasswordHashToDatabase(newPass);
+      const { token, expiresAt } = await createSessionToken();
 
       return new Response(
         JSON.stringify({
           success: true,
-          message: "Kata sandi admin berhasil diperbarui di database Supabase.",
+          message: "Kata sandi admin berhasil diperbarui secara aman.",
           token: token,
           expires_at: expiresAt,
           saved_to_database: saved,
-          notice:
-            source === "SUPABASE_ENV_SECRET"
-              ? "Catatan: Nilai secret ADMIN_PASSWORD di Supabase Secrets mendahului database. Jika ingin menggunakan kata sandi baru secara permanen, perbarui juga ADMIN_PASSWORD di Supabase Secrets Dashboard."
-              : "Kata sandi baru telah aktif secara instan.",
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
       );

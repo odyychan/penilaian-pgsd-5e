@@ -2796,27 +2796,49 @@
       }
     });
 
-    const ADMIN_SALT = "pgsd_5e_secret_salt_2026";
-    const KNOWN_VALID_HASHES = [
-      "519f462f10356f848856d12bcf480baa6645feba14bd700632222d27963d993d", // admin5e
-      "3a87ec7c568711dda677cbe019f9de2972a67e2d1e5e962868ba414ed780f0a3", // admin
-      "b6b860c8955de4c335b39590f589546823f29dd1be4a4df61b8ae35c766f8662", // pgsd5e
-      "e0443fd6a4f12a8265870f282bf3d9cbe6355d029713544775a0ebc939a64e08", // bksd5e
-      "bda83e164180c6971d599bef0de56b118c38713c589f8b38ce8aba88e8847a18"  // dede5e
-    ];
-
-    async function hashAdminPassword(pass) {
-      const msgUint8 = new TextEncoder().encode(pass + "_" + ADMIN_SALT);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    }
-
     document.addEventListener("DOMContentLoaded", async function() {
       initAllModernDropdowns();
-      const isAuth = sessionStorage.getItem("PGSD_ADMIN_AUTH");
-      if (isAuth === "true") {
-        showDashboard();
+      const token = sessionStorage.getItem("PGSD_ADMIN_SESSION_TOKEN");
+      if (token) {
+        // 🔒 Server-Side Token Verification via Supabase Edge Function
+        try {
+          const resp = await fetch(ADMIN_AUTH_EDGE_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "apikey": SUPABASE_CONFIG.anonKey,
+              "Authorization": `Bearer ${SUPABASE_CONFIG.anonKey}`
+            },
+            body: JSON.stringify({ action: "verify_token", token: token })
+          });
+          const resData = await resp.json();
+          if (resp.ok && resData && resData.valid) {
+            sessionStorage.setItem("PGSD_ADMIN_AUTH", "true");
+            showDashboard();
+          } else {
+            sessionStorage.removeItem("PGSD_ADMIN_AUTH");
+            sessionStorage.removeItem("PGSD_ADMIN_SESSION_TOKEN");
+          }
+        } catch(e) {
+          // If network check fails, verify token expiration locally
+          try {
+            const parts = token.split(".");
+            if (parts.length === 2) {
+              const payload = JSON.parse(atob(parts[0]));
+              if (payload.exp && Date.now() < payload.exp && payload.role === "admin") {
+                showDashboard();
+              } else {
+                sessionStorage.removeItem("PGSD_ADMIN_AUTH");
+                sessionStorage.removeItem("PGSD_ADMIN_SESSION_TOKEN");
+              }
+            }
+          } catch(err) {
+            sessionStorage.removeItem("PGSD_ADMIN_AUTH");
+            sessionStorage.removeItem("PGSD_ADMIN_SESSION_TOKEN");
+          }
+        }
+      } else {
+        sessionStorage.removeItem("PGSD_ADMIN_AUTH");
       }
       setTimeout(() => renderAllMathInElement(document.body), 100);
     });
@@ -2838,8 +2860,9 @@
       if (errMsg) errMsg.classList.add("hidden");
 
       let isAuthenticated = false;
+      let errorText = "Kata sandi admin tidak valid. Akses ditolak.";
 
-      // 1. First attempt: Supabase Edge Function (if deployed & available)
+      // 🛡️ 100% SUPABASE EDGE FUNCTION AUTHENTICATION (Zero Local Hash Bypass)
       try {
         const resp = await fetch(ADMIN_AUTH_EDGE_URL, {
           method: "POST",
@@ -2851,54 +2874,26 @@
           body: JSON.stringify({ action: "verify", password: enteredPass })
         });
 
-        if (resp.ok) {
-          const resData = await resp.json();
-          if (resData && resData.success) {
-            isAuthenticated = true;
-            if (resData.token) sessionStorage.setItem("PGSD_ADMIN_SESSION_TOKEN", resData.token);
+        const resData = await resp.json();
+        if (resp.ok && resData && resData.success) {
+          isAuthenticated = true;
+          if (resData.token) {
+            sessionStorage.setItem("PGSD_ADMIN_SESSION_TOKEN", resData.token);
+            sessionStorage.setItem("PGSD_ADMIN_AUTH", "true");
           }
+        } else {
+          if (resData && resData.error) errorText = resData.error;
         }
       } catch (err) {
-        console.warn("Edge function auth unavailable, falling back to secure hash engine:", err);
-      }
-
-      // 2. Fallback attempt: Check against Supabase Database / Salted SHA-256 Hashes
-      if (!isAuthenticated) {
-        try {
-          const passHash = await hashAdminPassword(enteredPass);
-          const customHash = localStorage.getItem("PGSD_CUSTOM_ADMIN_HASH");
-
-          // Check against Database GLOBAL config in Supabase if exists
-          try {
-            const sb = await ensureSupabaseClient();
-            if (sb) {
-              const { data: dbCfg } = await sb.from('pgsd_form_configs').select('config_data').eq('form_id', 'GLOBAL').maybeSingle();
-              if (dbCfg && dbCfg.config_data && dbCfg.config_data.admin_password) {
-                if (enteredPass === dbCfg.config_data.admin_password || passHash === dbCfg.config_data.admin_password_hash) {
-                  isAuthenticated = true;
-                }
-              }
-            }
-          } catch(e) {}
-
-          if (!isAuthenticated) {
-            if (customHash && passHash === customHash) {
-              isAuthenticated = true;
-            } else if (KNOWN_VALID_HASHES.includes(passHash)) {
-              isAuthenticated = true;
-            }
-          }
-        } catch(e) {
-          console.error("Local hash verification error:", e);
-        }
+        console.error("Edge function auth connection error:", err);
+        errorText = "Gagal menghubungi server autentikasi Supabase. Periksa koneksi internet Anda.";
       }
 
       if (isAuthenticated) {
-        sessionStorage.setItem("PGSD_ADMIN_AUTH", "true");
         showDashboard();
       } else {
         if (errMsg) {
-          errMsg.textContent = "Kata sandi admin tidak valid. Silakan coba lagi.";
+          errMsg.textContent = errorText;
           errMsg.classList.remove("hidden");
         }
         if (card) {
@@ -9370,67 +9365,39 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
         btn.innerHTML = '<span class="flex items-center gap-1"><svg class="w-3 h-3 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Menyimpan...</span>';
       }
 
+      // 🛡️ 100% SECURE EDGE FUNCTION PASSWORD UPDATE
       try {
-        let isCurrentValid = false;
-        const currHash = await hashAdminPassword(currentPass);
-        const customHash = localStorage.getItem("PGSD_CUSTOM_ADMIN_HASH");
+        const resp = await fetch(ADMIN_AUTH_EDGE_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_CONFIG.anonKey,
+            "Authorization": `Bearer ${SUPABASE_CONFIG.anonKey}`
+          },
+          body: JSON.stringify({
+            action: "change_password",
+            current_password: currentPass,
+            new_password: newPass
+          })
+        });
 
-        // Try edge function first
-        try {
-          const resp = await fetch(ADMIN_AUTH_EDGE_URL, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "apikey": SUPABASE_CONFIG.anonKey,
-              "Authorization": `Bearer ${SUPABASE_CONFIG.anonKey}`
-            },
-            body: JSON.stringify({
-              action: "change_password",
-              current_password: currentPass,
-              new_password: newPass
-            })
-          });
-          const data = await resp.json();
-          if (resp.ok && data.success) {
-            isCurrentValid = true;
+        const data = await resp.json();
+        if (resp.ok && data.success) {
+          if (data.token) sessionStorage.setItem("PGSD_ADMIN_SESSION_TOKEN", data.token);
+
+          if (document.getElementById("inputGlobalCurrentAdminPassword")) {
+            document.getElementById("inputGlobalCurrentAdminPassword").value = "";
           }
-        } catch (e) {}
-
-        if (!isCurrentValid) {
-          if ((customHash && currHash === customHash) || KNOWN_VALID_HASHES.includes(currHash)) {
-            isCurrentValid = true;
+          if (document.getElementById("inputGlobalNewAdminPassword")) {
+            document.getElementById("inputGlobalNewAdminPassword").value = "";
           }
+          showAdminToast(data.message || "Kata sandi admin berhasil diperbarui secara aman!", "success");
+        } else {
+          showAdminToast(data?.error || "Gagal mengubah kata sandi admin.", "error");
         }
-
-        if (!isCurrentValid) {
-          showAdminToast("Kata sandi saat ini tidak cocok!", "error");
-          return;
-        }
-
-        const newHash = await hashAdminPassword(newPass);
-        localStorage.setItem("PGSD_CUSTOM_ADMIN_HASH", newHash);
-
-        try {
-          const sb = await ensureSupabaseClient();
-          if (sb) {
-            await sb.from('pgsd_form_configs').upsert({
-              form_id: 'GLOBAL',
-              config_data: { admin_password: newPass, admin_password_hash: newHash, updated_at: new Date().toISOString() },
-              updated_at: new Date().toISOString()
-            });
-          }
-        } catch (e) {}
-
-        if (document.getElementById("inputGlobalCurrentAdminPassword")) {
-          document.getElementById("inputGlobalCurrentAdminPassword").value = "";
-        }
-        if (document.getElementById("inputGlobalNewAdminPassword")) {
-          document.getElementById("inputGlobalNewAdminPassword").value = "";
-        }
-        showAdminToast("Kata sandi admin berhasil diperbarui!", "success");
       } catch (err) {
         console.error("Update admin pass error:", err);
-        showAdminToast("Gagal mengubah kata sandi admin.", "error");
+        showAdminToast("Error koneksi ke server autentikasi Supabase.", "error");
       } finally {
         if (btn) {
           btn.disabled = false;

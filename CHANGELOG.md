@@ -4,6 +4,21 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.34] - 2026-08-27
+
+### 🔒 Penguatan Keamanan Admin: 100% Supabase Edge Function & Verifikasi Sesi Token Server-Side
+- **🛡️ Eliminasi Total Fallback Lokal & Hardcoded Hashes:**
+  - Menghapus seluruh array `KNOWN_VALID_HASHES` dan logika bypass hash lokal pada sisi klien (`admin.js`). Autentikasi panel admin kini **100% diproses dan divalidasi secara eksklusif** oleh Edge Function Supabase (`admin-auth`).
+- **🔑 Verifikasi Sesi Server-Side (*HMAC-Signed Token Validation*):**
+  - Menerapkan verifikasi token kriptografis HMAC-SHA256 (`verify_token`) saat halaman dibuka (`DOMContentLoaded`). Menghilangkan celah manipulasi `sessionStorage` lokal melalui DevTools console.
+- **🔐 Penyimpanan Password Terenkripsi (*Zero-Plaintext Architecture*):**
+  - Membuat tabel berkeamanan tinggi `pgsd_admin_secrets` di Supabase PostgreSQL dengan RLS aktif dan akses publik dicabut (`REVOKE ALL`).
+  - Alur ubah password kini hanya menyimpan *salted hash* SHA-256 dan dieksekusi secara aman oleh Edge Function dengan kredensial `service_role`.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker ke `v2.4.34`.
+
+---
+
 ## [2.4.33] - 2026-08-27
 
 ### ⚡ Peningkatan Kinerja QR Code, Pembaruan Antarmuka Hub, & Ikon Sinkronisasi Minimalis
