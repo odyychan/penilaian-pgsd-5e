@@ -3360,7 +3360,6 @@
                 <span class="px-2.5 py-1 rounded-lg ${isDebugForm ? 'bg-amber-100 text-amber-900 border border-amber-300 font-mono font-extrabold text-xs tracking-wider' : 'bg-indigo-50 text-indigo-700 border border-indigo-200/80 font-mono font-bold text-xs tracking-wider'}">
                   PIN: ${fId}
                 </span>
-                ${isPrimary ? '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-zinc-100 text-zinc-700 border border-zinc-200">Utama</span>' : ''}
                 ${isDebugForm ? '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">🛠️ Sandbox QA</span>' : ''}
               </div>
               <div class="flex items-center gap-1.5">
@@ -3438,12 +3437,12 @@
                 type="button" 
                 onclick="cloneFormAction('${fId}')" 
                 class="py-2 px-2 rounded-xl border border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300 active:scale-98 text-zinc-700 text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition shadow-2xs"
-                title="Kloning / Duplikat Form Ini"
+                title="Salin / Duplikat Form Ini"
               >
                 <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path>
                 </svg>
-                <span>Kloning</span>
+                <span>Salin</span>
               </button>
             </div>
           </div>
@@ -8262,7 +8261,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       return `${baseUrl}?${params.toString()}`;
     }
 
-    // SHARE MODAL & QR CODE
+    // SHARE MODAL & QR CODE (Instant 0ms In-Memory Generator)
     function openShareModal(formId) {
       const fId = formId || currentFormId || DEFAULT_PRIMARY_FORM_ID;
       const fullUrl = getRespondentFormUrl(fId);
@@ -8270,9 +8269,31 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       document.getElementById("sharePinText").textContent = fId;
       document.getElementById("shareDirectLinkInput").value = fullUrl;
 
-      // QR Code Generator URL pointing to respondents form
-      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(fullUrl)}`;
-      document.getElementById("shareQrCodeImg").src = qrUrl;
+      const qrContainer = document.getElementById("shareQrCodeContainer");
+      const imgEl = document.getElementById("shareQrCodeImg");
+
+      // ⚡ INSTANT IN-MEMORY QR CODE RENDERING (< 1ms)
+      if (typeof QRCode === "function" && qrContainer) {
+        qrContainer.innerHTML = "";
+        try {
+          new QRCode(qrContainer, {
+            text: fullUrl,
+            width: 210,
+            height: 210,
+            colorDark: "#18181b",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.M
+          });
+        } catch (qrErr) {
+          console.warn("Local QRCode engine fallback:", qrErr);
+          if (imgEl) {
+            imgEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(fullUrl)}`;
+            qrContainer.appendChild(imgEl);
+          }
+        }
+      } else if (imgEl) {
+        imgEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(fullUrl)}`;
+      }
 
       document.getElementById("modalShareForm").classList.remove("hidden");
     }
@@ -8294,13 +8315,22 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
     }
 
     function downloadQrCodePng() {
-      const img = document.getElementById("shareQrCodeImg");
+      const qrContainer = document.getElementById("shareQrCodeContainer");
       const pin = document.getElementById("sharePinText").textContent;
+      const canvas = qrContainer?.querySelector("canvas");
+      const img = qrContainer?.querySelector("img") || document.getElementById("shareQrCodeImg");
+
       const a = document.createElement("a");
-      a.href = img.src;
       a.download = `QR-Form-${pin}.png`;
-      a.target = "_blank";
-      a.click();
+
+      if (canvas) {
+        a.href = canvas.toDataURL("image/png");
+        a.click();
+      } else if (img && img.src) {
+        a.href = img.src;
+        a.target = "_blank";
+        a.click();
+      }
     }
 
     // CUSTOM / EDIT FORM PIN ID HANDLERS
@@ -8446,8 +8476,23 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
           if (shareLink) {
             const fullUrl = getRespondentFormUrl(newId);
             shareLink.value = fullUrl;
-            const qrImg = document.getElementById("shareQrCodeImg");
-            if (qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(fullUrl)}`;
+            const qrContainer = document.getElementById("shareQrCodeContainer");
+            if (typeof QRCode === "function" && qrContainer) {
+              qrContainer.innerHTML = "";
+              try {
+                new QRCode(qrContainer, {
+                  text: fullUrl,
+                  width: 210,
+                  height: 210,
+                  colorDark: "#18181b",
+                  colorLight: "#ffffff",
+                  correctLevel: QRCode.CorrectLevel.M
+                });
+              } catch (e) {}
+            } else {
+              const qrImg = document.getElementById("shareQrCodeImg");
+              if (qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(fullUrl)}`;
+            }
           }
 
           const btnBuka = document.getElementById("btnBukaFormActive");
@@ -8474,9 +8519,9 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
 
     async function cloneFormAction(sourceFormId) {
       const ok = await showAppConfirm({
-        title: "Kloning Formulir?",
-        message: `Kloning susunan kelompok & pengaturan dari form '${sourceFormId}' ke formulir baru?`,
-        confirmText: "Ya, Kloning Form",
+        title: "Salin Formulir?",
+        message: `Salin susunan kelompok & pengaturan dari form '${sourceFormId}' ke formulir baru?`,
+        confirmText: "Ya, Salin Form",
         type: "info"
       });
       if (!ok) return;

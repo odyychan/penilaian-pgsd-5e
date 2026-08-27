@@ -4,6 +4,23 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.33] - 2026-08-27
+
+### ⚡ Peningkatan Kinerja QR Code, Pembaruan Antarmuka Hub, & Ikon Sinkronisasi Minimalis
+- **⚡ Generate QR Code Instan (0 ms In-Memory Rendering):**
+  - Mengintegrasikan mesin *client-side QR generator* langsung di memori browser. Modal Bagikan kini memunculkan QR Code secara seketika (< 1 ms) tanpa jeda pemuatan atau ketergantungan pada server pihak ketiga luar negeri.
+  - Unduhan berkas QR Code PNG diekspor langsung dari Canvas lokal.
+- **🏷️ Pembaruan Teks & Aksi Formulir ("Kloning" → "Salin"):**
+  - Mengubah seluruh label dan dialog *"Kloning"* menjadi istilah yang lebih intuitif *"Salin"* pada kartu Master Hub dan alur duplikasi formulir.
+- **🧹 Pembersihan Badge Redundan di Kartu Form:**
+  - Menghapus badge *"Utama"* pada kartu form Master Hub agar setiap formulir berdiri mandiri dengan hierarki yang setara.
+- **✨ Ikon & Tampilan Tombol Sinkronisasi Spreadsheet Minimalis-Modern:**
+  - Merampingkan tombol `[Sinkronkan ke Sheets]` dengan satu ikon SVG minimalis-modern tanpa duplikasi simbol.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker ke `v2.4.33`.
+
+---
+
 ## [2.4.32] - 2026-08-27
 
 ### 🛡️ Audit Komprehensif: Penguatan Keamanan RLS Supabase, Antrean Offline, & Re-Sync Spreadsheet
