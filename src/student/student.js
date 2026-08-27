@@ -5824,7 +5824,12 @@ function normalizeMediaList(fieldOrMedia) {
       ctx.fillText("UNIVERSITAS LAMBUNG MANGKURAT", 75, 92);
       ctx.font = "600 16px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
       ctx.fillStyle = "#d1fae5";
-      ctx.fillText("FKIP • Program Studi Pendidikan Guru Sekolah Dasar (PGSD)", 75, 128);
+      const rawJurusanReceipt = (appConfig["Jurusan"] || (currentFormMeta && currentFormMeta.jurusan) || "PGSD").trim();
+      let prodiReceiptCanvas = "FKIP • Program Studi Pendidikan Guru Sekolah Dasar (PGSD)";
+      if (rawJurusanReceipt && rawJurusanReceipt.toUpperCase() !== "PGSD") {
+        prodiReceiptCanvas = `FKIP • ${rawJurusanReceipt.toUpperCase().startsWith("PROGRAM STUDI") ? rawJurusanReceipt : `Program Studi ${rawJurusanReceipt}`}`;
+      }
+      ctx.fillText(prodiReceiptCanvas, 75, 128);
 
       // 4. Receipt Title & Badge
       ctx.fillStyle = "#0f172a";
@@ -5934,6 +5939,12 @@ function normalizeMediaList(fieldOrMedia) {
       const finalId = data.idRespons || ("PGSD-REC-" + activeFormId + "-" + Date.now().toString(36).toUpperCase());
       const nowStr = (data.timestamp ? new Date(data.timestamp) : new Date()).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'medium' }) + " WITA";
 
+      const rawJurusanPrint = (appConfig["Jurusan"] || (currentFormMeta && currentFormMeta.jurusan) || "PGSD").trim();
+      let prodiReceiptPrint = "FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN • PRODI PGSD";
+      if (rawJurusanPrint && rawJurusanPrint.toUpperCase() !== "PGSD") {
+        prodiReceiptPrint = `FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN • ${escapeHtml(rawJurusanPrint.toUpperCase())}`;
+      }
+
       const printRoot = document.getElementById("printDocumentRoot");
       if (!printRoot) {
         window.print();
@@ -5951,7 +5962,7 @@ function normalizeMediaList(fieldOrMedia) {
               <div style="width: 44px; height: 44px; border-radius: 10px; background: #059669; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact;">✓</div>
               <div>
                 <h1 style="font-size: 16px; font-weight: 800; color: #065f46; margin: 0; line-height: 1.2;">UNIVERSITAS LAMBUNG MANGKURAT</h1>
-                <p style="font-size: 11px; font-weight: 600; color: #475569; margin: 3px 0 0 0;">FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN • PRODI PGSD</p>
+                <p style="font-size: 11px; font-weight: 600; color: #475569; margin: 3px 0 0 0;">${prodiReceiptPrint}</p>
               </div>
             </div>
             <div style="text-align: right;">
@@ -7969,9 +7980,18 @@ function normalizeMediaList(fieldOrMedia) {
       const includeReviewerName = document.getElementById("printIncludeReviewerName")?.checked ?? true;
       const includeFooter = document.getElementById("printIncludeFooter")?.checked ?? true;
 
-      const matkul = appConfig["Mata_Kuliah"] || "Bimbingan Konseling di SD";
-      const dosen = appConfig["Dosen_Pengampu"] || "Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.";
-      const kelas = appConfig["Kelas"] || "5E";
+      const matkul = appConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || "Bimbingan Konseling di SD";
+      const dosen = appConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || "Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.";
+      const kelas = appConfig["Kelas"] || (currentFormMeta && currentFormMeta.kelas) || "5E";
+      const rawJurusan = (appConfig["Jurusan"] || (currentFormMeta && currentFormMeta.jurusan) || "PGSD").trim();
+      let prodiKop = "PROGRAM STUDI PENDIDIKAN GURU SEKOLAH DASAR (PGSD)";
+      if (rawJurusan && rawJurusan.toUpperCase() !== "PGSD") {
+        if (rawJurusan.toUpperCase().startsWith("PROGRAM STUDI") || rawJurusan.toUpperCase().startsWith("PRODI")) {
+          prodiKop = rawJurusan.toUpperCase();
+        } else {
+          prodiKop = `PROGRAM STUDI ${rawJurusan.toUpperCase()}`;
+        }
+      }
       const printDateStr = new Intl.DateTimeFormat('id-ID', { dateStyle: 'long' }).format(new Date());
 
       let summaryList = (currentRekapData && currentRekapData.summary) ? [...currentRekapData.summary] : [];
@@ -8033,7 +8053,7 @@ function normalizeMediaList(fieldOrMedia) {
                     <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; line-height: 1.2;">KEMENTERIAN PENDIDIKAN TINGGI, SAINS, DAN TEKNOLOGI</div>
                     <div style="font-size: 15px; font-weight: 900; letter-spacing: 0.03em; text-transform: uppercase; line-height: 1.22; margin-top: 1px;">UNIVERSITAS LAMBUNG MANGKURAT</div>
                     <div style="font-size: 13px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1.2; margin-top: 1px;">FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN</div>
-                    <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; line-height: 1.2; margin-top: 1px;">PROGRAM STUDI PENDIDIKAN GURU SEKOLAH DASAR (PGSD) - KELAS ${kelas}</div>
+                    <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; line-height: 1.2; margin-top: 1px;">${prodiKop}</div>
                     <div style="font-size: 9px; color: #374151; line-height: 1.2; margin-top: 2.5px; font-style: italic;">Jl. Brigjen H. Hasan Basry, Kayu Tangi, Banjarmasin, Kalimantan Selatan 70123 • Laman: fkip.ulm.ac.id</div>
                   </td>
                   <td style="width: 82px; min-width: 82px; max-width: 82px; border: none; padding: 0;"></td>
@@ -8230,7 +8250,7 @@ function normalizeMediaList(fieldOrMedia) {
           ${includeFooter ? `
             <!-- FOOTER DOKUMEN RESMI MINIMALIS ANCHORED AT BOTTOM -->
             <div class="print-avoid-break print-footer" style="page-break-inside: avoid; break-inside: avoid; margin-top: auto; padding-top: 6px; border-top: 0.75px dashed #9ca3af; display: flex; justify-content: space-between; align-items: center; font-size: 8.5px; color: #4b5563; line-height: 1.3; flex-shrink: 0;">
-              <span>Dokumen ini diterbitkan secara otomatis oleh <strong>Sistem Peer-Assessment PGSD Kelas ${kelas}</strong> &bull; Universitas Lambung Mangkurat</span>
+              <span>Dokumen ini diterbitkan secara otomatis oleh <strong>Sistem Peer-Assessment ${escapeHtml(rawJurusan || 'FKIP')} Kelas ${kelas}</strong> &bull; Universitas Lambung Mangkurat</span>
               <span style="font-family: monospace; color: #6b7280; font-weight: 500;">Waktu Cetak: ${printDateStr}</span>
             </div>
           ` : ''}

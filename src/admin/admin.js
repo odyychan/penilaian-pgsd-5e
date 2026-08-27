@@ -9850,7 +9850,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
 
           <!-- Footer Cetak Otomatis -->
           <div class="pt-4 mt-6 border-t border-zinc-300 text-[9.5px] text-zinc-400 flex justify-between">
-            <span>Dicetak otomatis dari Sistem Evaluasi &amp; Peer-Assessment PGSD FKIP ULM</span>
+            <span>Dicetak otomatis dari Sistem Evaluasi &amp; Peer-Assessment ${escapeHtml(prodi || 'FKIP')} ULM</span>
             <span>Halaman 1 dari 1</span>
           </div>
         </div>

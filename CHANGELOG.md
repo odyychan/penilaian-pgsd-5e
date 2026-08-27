@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.43] - 2026-08-28
+
+### 🏛️ Standarisasi Kop Surat Resmi Universal & Eliminasi Hardcode Kelas
+- **🏛️ Standarisasi Kop Surat Institusi Tanpa Hardcode Kelas:**
+  - Menghapus imbuhan `- KELAS 5E` (atau `- KELAS [kelas]`) dari baris nama Program Studi pada Kop Surat resmi kementerian dan instansi di lembar cetak laporan rekapitulasi penilaian.
+  - Memastikan baris ke-4 Kop Surat murni mencantumkan hierarki program studi resmi (`PROGRAM STUDI PENDIDIKAN GURU SEKOLAH DASAR (PGSD)` atau program studi dinamis formulir) sesuai kaidah tata naskah dinas universitas.
+  - Penandaan kelas dan semester tetap tersaji secara spesifik dan proporsional pada tabel metadata laporan (`Kelas / Semester : [Kelas] / Genap (2025/2026)`).
+- **🎓 Dinamisasi Program Studi & Footer Cetak:**
+  - Menyelaraskan teks program studi dan institusi pada kanvas bukti tanda terima digital serta footer laporan cetak agar terhubung dinamis ke konfigurasi program studi/jurusan aktif.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.43`.
+
+---
+
 ## [2.4.42] - 2026-08-27
 
 ### 🔒 Arsitektur Dual-Sync Password Admin: Supabase Secrets & Database Salting
