@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.44] - 2026-08-28
+
+### ⚡ Dynamic Metadata Engine & Universal Non-Course Form Support
+- **📊 Dynamic 2-Column Metadata Grid Renderer:**
+  - Mengubah tabel metadata laporan cetak rekapitulasi agar 100% dinamis membaca `Header_Info_Cards` dari formulir aktif, mengeliminasi teks hardcode semester `Genap (2025/2026)`.
+  - Formulir kini fleksibel mendukung segala jenis kegiatan (perkuliahan, seminar, sidang skripsi, juri lomba, survei) dengan menampilkan kartu identitas asli buatan admin.
+  - Jika seluruh kartu identitas dihapus, tabel metadata otomatis disesuaikan secara minimalis dan bersih tanpa baris kosong.
+- **🛡️ Penyelarasan Judul & Penandatangan Cetak Dinamis:**
+  - Menyelaraskan peran penandatangan pengesahan (*Dosen Pengampu / Penanggung Jawab / Ketua Penguji*) dan judul laporan cetak mengikuti konfigurasi spesifik formulir.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.44`.
+
+---
+
 ## [2.4.43] - 2026-08-28
 
 ### 🏛️ Standarisasi Kop Surat Resmi Universal & Eliminasi Hardcode Kelas

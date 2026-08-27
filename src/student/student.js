@@ -8036,6 +8036,76 @@ function normalizeMediaList(fieldOrMedia) {
       }
       const avgClassScore = evaluatedCount > 0 ? (totalAllScore / evaluatedCount).toFixed(2) : "0.00";
 
+      // Resolve dynamic header cards
+      let cards = appConfig.Header_Info_Cards;
+      if (!cards || !Array.isArray(cards) || cards.length === 0) {
+        const rawMatkul = appConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || "";
+        const rawDosen  = appConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || "";
+        const rawKelas  = appConfig["Kelas"] || (currentFormMeta && currentFormMeta.kelas) || "";
+        const rawProdi  = appConfig["Jurusan"] || (currentFormMeta && currentFormMeta.jurusan) || "";
+        
+        cards = [];
+        if (rawMatkul) cards.push({ label: 'Mata Kuliah:', value: rawMatkul });
+        if (rawDosen)  cards.push({ label: 'Dosen Pengampu:', value: rawDosen });
+        if (rawKelas)  cards.push({ label: 'Kelas:', value: rawKelas });
+        if (rawProdi)  cards.push({ label: 'Program Studi:', value: rawProdi });
+      }
+
+      // Filter active cards with non-empty label or value
+      const activeCards = cards.filter(c => (c.label && c.label.trim()) || (c.value && c.value.trim()));
+
+      // Build metadata items for the report table
+      let metaItems = activeCards.map(c => ({
+        label: (c.label || 'Info').trim().replace(/:$/, ''),
+        value: (c.value || '-').trim()
+      }));
+
+      // Add Cakupan Sesi if not explicitly present in custom cards
+      const hasSesiCard = metaItems.some(item => item.label.toLowerCase().includes('sesi') || item.label.toLowerCase().includes('cakupan'));
+      if (!hasSesiCard) {
+        metaItems.push({
+          label: 'Cakupan Sesi',
+          value: selectedSesi === 'ALL' ? 'Semua Sesi Presentasi' : selectedSesi
+        });
+      }
+
+      // Render dynamic 2-column metadata table
+      let metadataTableHtml = '';
+      if (metaItems.length > 0) {
+        let rowsHtml = '';
+        for (let i = 0; i < metaItems.length; i += 2) {
+          const item1 = metaItems[i];
+          const item2 = metaItems[i + 1];
+          rowsHtml += `
+            <tr style="border: none !important;">
+              <td style="border: none !important; padding: 1.5px 0; width: 16%; font-weight: 600; color: #1f2937; vertical-align: top; font-family: 'Times New Roman', Times, serif;">${escapeHtml(item1.label)}</td>
+              <td style="border: none !important; padding: 1.5px 6px 1.5px 0; width: 38%; font-weight: 700; color: #000000; vertical-align: top; word-break: break-word; font-family: 'Times New Roman', Times, serif;">: ${escapeHtml(item1.value)}</td>
+              ${item2 ? `
+                <td style="border: none !important; padding: 1.5px 0; width: 16%; font-weight: 600; color: #1f2937; vertical-align: top; font-family: 'Times New Roman', Times, serif;">${escapeHtml(item2.label)}</td>
+                <td style="border: none !important; padding: 1.5px 0; width: 30%; font-weight: 700; color: #000000; vertical-align: top; word-break: break-word; font-family: 'Times New Roman', Times, serif;">: ${escapeHtml(item2.value)}</td>
+              ` : `
+                <td style="border: none !important; width: 16%;"></td>
+                <td style="border: none !important; width: 30%;"></td>
+              `}
+            </tr>
+          `;
+        }
+        metadataTableHtml = `
+          <table style="width: 100%; border-collapse: collapse; border: none !important; margin-top: 2px; font-size: 11.5px; text-align: left; table-layout: fixed; font-family: 'Times New Roman', Times, serif;">
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+        `;
+      }
+
+      // Title determination
+      const formTitle = appConfig["Judul_Form"] || (currentFormMeta && currentFormMeta.judulForm) || "";
+      let reportTitle = "LAPORAN REKAPITULASI HASIL PENILAIAN PRESENTASI";
+      if (formTitle && !formTitle.toLowerCase().includes("penilaian presentasi") && formTitle.length < 50) {
+        reportTitle = `LAPORAN REKAPITULASI ${formTitle.toUpperCase().replace(/^PENILAIAN\s+/i, 'HASIL PENILAIAN ')}`;
+      }
+
       // HTML Template
       let html = `
         <div class="print-page-wrapper" style="min-height: 1033px; width: 100%; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; background: #ffffff;">
@@ -8067,25 +8137,9 @@ function normalizeMediaList(fieldOrMedia) {
             <!-- JUDUL LAPORAN & METADATA -->
             <div style="text-align: center; margin-bottom: 8px; font-family: 'Times New Roman', Times, serif; color: #000000;">
               <h2 style="font-size: 13.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em; color: #000000; border-bottom: 1.5px solid #000000; padding-bottom: 2px; display: inline-block; margin: 6pt auto 6px auto; font-family: 'Times New Roman', Times, serif;">
-                LAPORAN REKAPITULASI HASIL PENILAIAN PRESENTASI
+                ${escapeHtml(reportTitle)}
               </h2>
-              
-              <table style="width: 100%; border-collapse: collapse; border: none !important; margin-top: 2px; font-size: 11.5px; text-align: left; table-layout: fixed; font-family: 'Times New Roman', Times, serif;">
-                <tbody>
-                  <tr style="border: none !important;">
-                    <td style="border: none !important; padding: 1.5px 0; width: 15%; font-weight: 600; color: #1f2937; vertical-align: top; font-family: 'Times New Roman', Times, serif;">Mata Kuliah</td>
-                    <td style="border: none !important; padding: 1.5px 6px 1.5px 0; width: 41%; font-weight: 700; color: #000000; vertical-align: top; word-break: break-word; font-family: 'Times New Roman', Times, serif;">: ${matkul}</td>
-                    <td style="border: none !important; padding: 1.5px 0; width: 16%; font-weight: 600; color: #1f2937; vertical-align: top; font-family: 'Times New Roman', Times, serif;">Kelas / Semester</td>
-                    <td style="border: none !important; padding: 1.5px 0; width: 28%; font-weight: 700; color: #000000; vertical-align: top; word-break: break-word; font-family: 'Times New Roman', Times, serif;">: ${kelas} / Genap (2025/2026)</td>
-                  </tr>
-                  <tr style="border: none !important;">
-                    <td style="border: none !important; padding: 1.5px 0; width: 15%; font-weight: 600; color: #1f2937; vertical-align: top; font-family: 'Times New Roman', Times, serif;">Dosen Pengampu</td>
-                    <td style="border: none !important; padding: 1.5px 6px 1.5px 0; width: 41%; font-weight: 700; color: #000000; vertical-align: top; word-break: break-word; font-family: 'Times New Roman', Times, serif;">: ${dosen}</td>
-                    <td style="border: none !important; padding: 1.5px 0; width: 16%; font-weight: 600; color: #1f2937; vertical-align: top; font-family: 'Times New Roman', Times, serif;">Cakupan Sesi</td>
-                    <td style="border: none !important; padding: 1.5px 0; width: 28%; font-weight: 700; color: #000000; vertical-align: top; word-break: break-word; font-family: 'Times New Roman', Times, serif;">: ${selectedSesi === 'ALL' ? 'Semua Sesi Presentasi' : selectedSesi}</td>
-                  </tr>
-                </tbody>
-              </table>
+              ${metadataTableHtml}
             </div>
 
             <!-- 1. TABEL REKAPITULASI NILAI KELOMPOK -->

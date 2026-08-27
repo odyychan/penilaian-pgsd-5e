@@ -9797,6 +9797,19 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
         }
       }
 
+      // Resolve dynamic header cards
+      let adminCards = adminAppConfig.Header_Info_Cards;
+      if (!adminCards || !Array.isArray(adminCards) || adminCards.length === 0) {
+        adminCards = [
+          { label: 'Mata Kuliah:', value: matkul },
+          { label: 'Dosen Pengampu:', value: dosen },
+          { label: 'Kelas:', value: kelas },
+          { label: 'Program Studi:', value: prodi }
+        ];
+      }
+      const activeAdminCards = adminCards.filter(c => (c.label && c.label.trim()) || (c.value && c.value.trim()));
+      const headerMetaText = activeAdminCards.map(c => `${c.label ? c.label.trim().replace(/:$/, '') : 'Info'}: ${c.value || '-'}`).join(' • ');
+
       container.innerHTML = `
         <div class="print-page-wrapper space-y-5">
           <!-- Kop Laporan Resmi -->
@@ -9804,7 +9817,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
             <h2 class="text-xs sm:text-sm font-bold tracking-widest uppercase">UNIVERSITAS LAMBUNG MANGKURAT</h2>
             <h3 class="text-[11px] sm:text-xs font-semibold uppercase">FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN • PROGRAM STUDI ${escapeHtml(prodi)}</h3>
             <h1 class="text-sm sm:text-base font-extrabold uppercase mt-1 math-renderable">${smartMathFormat(title)}</h1>
-            <p class="text-xs font-medium math-renderable">Mata Kuliah: ${smartMathFormat(matkul)} • Kelas: ${escapeHtml(kelas)} • Dosen: ${smartMathFormat(dosen)}</p>
+            ${headerMetaText ? `<p class="text-xs font-medium math-renderable">${smartMathFormat(headerMetaText)}</p>` : ''}
           </div>
 
           <div class="flex justify-between items-center text-[10.5px] text-zinc-700">
