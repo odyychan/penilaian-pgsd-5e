@@ -1875,7 +1875,7 @@ function normalizeMediaList(fieldOrMedia) {
                   <label class="block text-xs font-semibold text-zinc-700">
                     Nama Lengkap Penilai <span class="text-rose-500">*</span>
                   </label>
-                  <span id="namaAutoFillNotice" class="text-[10px] text-emerald-700 font-medium ${nameVal ? '' : 'hidden'}">Terisi otomatis</span>
+                  <span id="namaAutoFillNotice" class="text-[10px] text-emerald-700 font-medium ${nameVal ? '' : 'hidden'}">Terisi otomatis (dapat diubah)</span>
                 </div>
                 <input 
                   type="text" 
@@ -1885,7 +1885,7 @@ function normalizeMediaList(fieldOrMedia) {
                   autocapitalize="words"
                   placeholder="Tuliskan nama lengkap Anda..." 
                   class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 text-xs sm:text-sm focus:border-zinc-900 outline-none transition bg-white placeholder-zinc-400 shadow-2xs"
-                  oninput="saveFormDraft();"
+                  oninput="activeUserAccountName = this.value.trim(); saveFormDraft();"
                 >
               </div>
 
@@ -4100,12 +4100,14 @@ function normalizeMediaList(fieldOrMedia) {
       }
 
       if (inputNama) {
-        if (authUser.nama) inputNama.value = authUser.nama;
-        inputNama.readOnly = true;
-        inputNama.className = "w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 text-xs sm:text-sm bg-zinc-50 text-zinc-800 outline-none cursor-default shadow-2xs";
+        if (authUser.nama && (!inputNama.value || inputNama.value.trim() === '')) {
+          inputNama.value = authUser.nama;
+        }
+        inputNama.readOnly = false;
+        inputNama.className = "w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 text-xs sm:text-sm bg-white text-zinc-900 focus:border-zinc-900 outline-none transition shadow-2xs";
         const autoNotice = document.getElementById("namaAutoFillNotice");
         if (autoNotice) {
-          autoNotice.textContent = "Terisi otomatis dari Google";
+          autoNotice.textContent = "Terisi otomatis (dapat diubah)";
           autoNotice.classList.remove("hidden");
         }
       }

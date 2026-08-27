@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.39] - 2026-08-27
+
+### ✍️ Fleksibilitas Identitas Penilai: Nama Lengkap Bebas Diubah (Editable Auto-Fill)
+- **✏️ Fleksibilitas Pengubahan Nama Lengkap Penilai:**
+  - Mengubah kolom `Nama Lengkap Penilai` (`#inputNama`) agar tidak lagi berstatus *read-only* / terkunci paten saat terisi otomatis dari data profil Google atau presensi kelas.
+  - Mahasiswa dan dosen kini leluasa menyesuaikan atau menyempurnakan ejaan nama lengkap, menghapus nomor absen bawaan akun (seperti `32_Nama`), maupun menambahkan gelar akademik tanpa terhalang proteksi input.
+  - Menampilkan lencana petunjuk *"Terisi otomatis (dapat diubah)"* yang jelas dan ramah pengguna.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.39`.
+
+---
+
 ## [2.4.38] - 2026-08-27
 
 ### ⚡ Perbaikan Kritis Infinite Call Loop & Freeze UI Saat Pemulihan Draf Pasca-Auth
