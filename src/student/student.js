@@ -740,8 +740,10 @@ function normalizeMediaList(fieldOrMedia) {
       const savedTab = (hash === "rekap" || hash === "form") ? hash : (localStorage.getItem("PGSD_ACTIVE_MAIN_TAB") || "form");
       
       switchTab(savedTab, false);
-      updateStepUI(1);
-      
+      // Inisialisasi Auth Listener & Session Recovery
+      initSupabaseAuthListener();
+      ensureAuthInitialized();
+
       checkAndApplyAuthGate();
       restoreFormDraft();
       fetchInitialFormData(false);
@@ -3803,405 +3805,248 @@ function normalizeMediaList(fieldOrMedia) {
       updateDraftResetButtonVisibility();
     }
 
-    function getFormDraftKey(specificEmail = null) {
-      const emailInput = document.getElementById("inputEmail");
-      const currentEmail = specificEmail || (emailInput && emailInput.value.trim()) || activeUserAccountEmail || "";
-      const cleanEmail = currentEmail.toLowerCase().replace(/[^a-z0-9]/g, '_');
-      if (cleanEmail) {
-        return "PGSD_DRAFT_" + (activeFormId || 'BK5E').toUpperCase() + "_" + cleanEmail;
-      }
-      return "PGSD_DRAFT_" + (activeFormId || 'BK5E').toUpperCase() + "_DEFAULT";
+    // ============================================================
+    // GOOGLE CLOUD OAUTH & SUPABASE AUTHENTICATION SUBSYSTEM
+    // ============================================================
+    const authState = {
+      initializing: true,
+      ready: false,
+      session: null,
+      user: null
+    };
+    let authInitPromise = null;
+
+    function isUlmEmail(email = '') {
+      const normalized = String(email).trim().toLowerCase();
+      return (
+        normalized.endsWith('@mhs.ulm.ac.id') ||
+        normalized.endsWith('@ulm.ac.id')
+      );
     }
 
-    // =========================================================================
-    // GOOGLE FORMS STYLE: ACCOUNT SESSION & PROFILE MEMORY
-    // =========================================================================
-    function appendEmailDomain(domain) {
-      const emailInput = document.getElementById("inputEmail");
-      if (!emailInput) return;
-      let val = emailInput.value.trim();
-      if (!val) {
-        const nim = document.getElementById("inputNim")?.value.trim();
-        val = nim || "user";
-      }
-      if (val.includes("@")) {
-        val = val.split("@")[0] + domain;
-      } else {
-        val = val + domain;
-      }
-      emailInput.value = val;
-      validateEmailLive(val);
-      updateAccountActiveEmail(val);
-      saveFormDraft();
+    function getCurrentEmailCollectionMode() {
+      return appConfig["Mode_Pengumpulan_Email"] || "ULM_ONLY";
     }
 
-    function appendSwitchModalDomain(domain) {
-      const input = document.getElementById("switchModalInputEmail");
-      if (!input) return;
-      let val = input.value.trim();
-      if (!val) {
-        const nim = document.getElementById("switchModalInputNim")?.value.trim();
-        val = nim || "user";
-      }
-      if (val.includes("@")) {
-        val = val.split("@")[0] + domain;
-      } else {
-        val = val + domain;
-      }
-      input.value = val;
+    function extractGoogleProfile(user) {
+      const metadata = user?.user_metadata || {};
+      return {
+        id: user?.id || null,
+        email: (user?.email || metadata.email || '').trim().toLowerCase(),
+        name: metadata.full_name || metadata.name || '',
+        avatar: metadata.avatar_url || metadata.picture || ''
+      };
     }
 
-    function updateAccountActiveEmail(emailVal) {
-      activeUserAccountEmail = (emailVal || "").trim();
-      const namaVal = document.getElementById("inputNama")?.value.trim() || "";
-      if (namaVal) activeUserAccountName = namaVal;
-      updateAccountHeaderUI();
-    }
-
-    function updateAccountHeaderUI() {
-      const card = document.getElementById("formAccountHeaderCard");
-      if (card) card.classList.add("hidden");
-    }
-
-    function getSavedAccountProfiles() {
-      try {
-        return JSON.parse(localStorage.getItem("PGSD_SAVED_PROFILES") || "[]");
-      } catch (e) {
-        return [];
-      }
-    }
-
-    function saveAccountProfile(email, name, nim, role) {
-      if (!email || !email.includes("@")) return;
-      let profiles = getSavedAccountProfiles();
-      profiles = profiles.filter(p => p.email.toLowerCase() !== email.toLowerCase());
-      profiles.unshift({
-        email: email.trim(),
-        name: name || "",
-        nim: nim || "",
-        role: role || "Mahasiswa",
-        lastUsed: Date.now()
-      });
-      if (profiles.length > 5) profiles = profiles.slice(0, 5);
-      try {
-        localStorage.setItem("PGSD_SAVED_PROFILES", JSON.stringify(profiles));
-      } catch (e) {}
-    }
-
-    async function handleSwitchGoogleAccount() {
-      const ok = await showAppConfirm({
-        title: "Ganti Akun Google?",
-        message: "Anda akan dialihkan ke layar pemilihan Akun Google resmi Anda. Draf isian saat ini tetap tersimpan aman di akun ini.",
-        confirmText: "Ya, Ganti Akun Google",
-        cancelText: "Batal",
-        type: "info"
-      });
-      if (ok) {
-        clearAuthSession();
-        handleGoogleSignIn();
-      }
-    }
-
-    // =========================================================================
-    // DEDICATED AUTHENTICATION GATE & SESSION CONTROLLER (GOOGLE FORMS STYLE)
-    // =========================================================================
-    function getCurrentAuthSession() {
-      try {
-        const formKey = (activeFormId || 'BK5E').toUpperCase();
-        const key = "PGSD_AUTH_SESSION_" + formKey;
-        const raw = localStorage.getItem(key) || 
-                    sessionStorage.getItem(key) || 
-                    localStorage.getItem("PGSD_AUTH_SESSION_BK5E") || 
-                    sessionStorage.getItem("PGSD_AUTH_SESSION_BK5E") || 
-                    localStorage.getItem("PGSD_AUTH_SESSION_PRIMARY");
-        if (raw) return JSON.parse(raw);
-      } catch (e) {}
+    function extractCandidateNim(email = '') {
+      const normalized = String(email).trim().toLowerCase();
+      if (!normalized.endsWith('@mhs.ulm.ac.id')) return null;
+      const candidate = normalized.split('@')[0] || '';
+      if (/^[0-9]{8,15}$/.test(candidate)) return candidate;
       return null;
     }
 
-    function setAuthSession(user, remember = true) {
-      if (!user || !user.email) return;
-      const key = "PGSD_AUTH_SESSION_" + (activeFormId || 'BK5E').toUpperCase();
-      const payload = {
-        email: user.email.trim(),
-        nama: user.nama || user.name || "",
-        nim: user.nim || "",
-        peran: user.peran || "Mahasiswa",
-        avatarUrl: user.avatarUrl || "",
-        provider: user.provider || "manual",
-        loginAt: Date.now()
-      };
-      if (remember) {
-        localStorage.setItem(key, JSON.stringify(payload));
-        localStorage.setItem("PGSD_AUTH_SESSION_PRIMARY", JSON.stringify(payload));
-        localStorage.setItem("PGSD_AUTH_SESSION_BK5E", JSON.stringify(payload));
-      } else {
-        sessionStorage.setItem(key, JSON.stringify(payload));
-        sessionStorage.setItem("PGSD_AUTH_SESSION_PRIMARY", JSON.stringify(payload));
-        sessionStorage.setItem("PGSD_AUTH_SESSION_BK5E", JSON.stringify(payload));
+    async function resolveStudentIdentity(profile, mode) {
+      const email = profile.email;
+      let candidateNim = extractCandidateNim(email);
+      let resolvedName = profile.name;
+      let isRosterVerified = false;
+      let detectedRole = "Mahasiswa";
+
+      if (email.endsWith("@ulm.ac.id") && !email.includes("@mhs.")) {
+        detectedRole = "Dosen";
       }
-      activeUserAccountEmail = payload.email;
-      activeUserAccountName = payload.nama;
-      activeUserAccountNim = payload.nim;
-      activeUserAccountAvatarUrl = payload.avatarUrl || "";
-      if (payload.peran) currentEvaluatorRole = payload.peran;
-      saveAccountProfile(payload.email, payload.nama, payload.nim, payload.peran);
-    }
 
-    function clearAuthSession() {
-      const key = "PGSD_AUTH_SESSION_" + (activeFormId || 'BK5E').toUpperCase();
-      localStorage.removeItem(key);
-      sessionStorage.removeItem(key);
-      localStorage.removeItem("PGSD_AUTH_SESSION_PRIMARY");
-      sessionStorage.removeItem("PGSD_AUTH_SESSION_PRIMARY");
-      localStorage.removeItem("PGSD_AUTH_SESSION_BK5E");
-      sessionStorage.removeItem("PGSD_AUTH_SESSION_BK5E");
-      activeUserAccountEmail = "";
-      activeUserAccountName = "";
-      activeUserAccountNim = "";
-      activeUserAccountAvatarUrl = "";
-      try {
-        if (supabaseClient && supabaseClient.auth) {
-          supabaseClient.auth.signOut();
+      if (allStudentsData && allStudentsData.length > 0) {
+        let found = null;
+        if (candidateNim) {
+          found = allStudentsData.find(s => String(s.nim).trim() === candidateNim);
         }
-      } catch (e) {}
+        if (!found && profile.name) {
+          found = allStudentsData.find(s => (s.name || '').toLowerCase() === profile.name.toLowerCase());
+        }
+        if (found) {
+          candidateNim = found.nim;
+          resolvedName = found.name || profile.name;
+          isRosterVerified = true;
+          detectedRole = "Mahasiswa";
+        }
+      }
+
+      if (!isRosterVerified && candidateNim) {
+        const sb = getSupabaseClient();
+        if (sb) {
+          try {
+            const { data: studentRow } = await sb.from('pgsd_students')
+              .select('*')
+              .eq('form_id', activeFormId)
+              .eq('nim', candidateNim)
+              .maybeSingle();
+
+            if (studentRow) {
+              resolvedName = studentRow.name || resolvedName;
+              isRosterVerified = true;
+            }
+          } catch(e) {}
+        }
+      }
+
+      return {
+        ok: true,
+        profile,
+        nim: candidateNim || '',
+        name: resolvedName || email.split('@')[0],
+        role: detectedRole,
+        isGoogleVerified: true,
+        isRosterVerified
+      };
     }
 
-    function checkAndApplyAuthGate() {
+    function applyLockedIdentity(identity) {
+      const authUser = {
+        email: identity.profile.email,
+        nama: identity.name,
+        nim: identity.nim,
+        peran: identity.role,
+        avatarUrl: identity.profile.avatar,
+        provider: "google",
+        isGoogleVerified: true,
+        isRosterVerified: identity.isRosterVerified
+      };
+
+      setAuthSession(authUser, true);
+      activeUserAccountEmail = authUser.email;
+      activeUserAccountName = authUser.nama;
+      activeUserAccountNim = authUser.nim;
+      activeUserAccountAvatarUrl = authUser.avatarUrl;
+      currentEvaluatorRole = authUser.peran;
+
+      const inputEmail = document.getElementById("inputEmail");
+      const inputNama = document.getElementById("inputNama");
+      const inputNim = document.getElementById("inputNim");
+      const emailChips = document.getElementById("emailQuickChips");
+      const btnFillNimEmail = document.getElementById("btnFillNimEmail");
+
+      if (inputEmail) {
+        inputEmail.value = authUser.email;
+        inputEmail.readOnly = true;
+        inputEmail.className = "w-full px-3.5 py-2.5 rounded-xl border border-emerald-300 text-xs sm:text-sm bg-emerald-50/40 text-zinc-800 font-mono outline-none cursor-not-allowed";
+      }
+      if (inputNama) {
+        if (authUser.nama) inputNama.value = authUser.nama;
+        if (identity.isRosterVerified) {
+          inputNama.readOnly = true;
+          inputNama.className = "w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 text-xs sm:text-sm bg-zinc-50 text-zinc-800 outline-none cursor-not-allowed";
+        }
+      }
+      if (inputNim && authUser.nim) {
+        inputNim.value = authUser.nim;
+        if (identity.isRosterVerified) {
+          inputNim.readOnly = true;
+          inputNim.className = "w-full px-3.5 py-2.5 rounded-xl border border-emerald-300 text-xs sm:text-sm bg-emerald-50/40 text-zinc-800 font-mono outline-none cursor-not-allowed";
+        }
+        validateNimLive(authUser.nim);
+      }
+      if (emailChips) emailChips.classList.add("hidden");
+      if (btnFillNimEmail) btnFillNimEmail.classList.add("hidden");
+
+      if (authUser.peran && typeof onRoleChange === 'function') onRoleChange(authUser.peran);
+    }
+
+    function renderAccountBar(identity) {
+      const card = document.getElementById("formAccountHeaderCard");
+      if (!card) return;
+
+      const emailEl = document.getElementById("accountActiveEmail");
+      const nameEl = document.getElementById("accountActiveName");
+      const avatarBox = document.getElementById("accountAvatarBox");
+      const badgeGoogle = document.getElementById("badgeGoogleVerified");
+      const badgeRoster = document.getElementById("badgeRosterVerified");
+
+      if (emailEl) emailEl.textContent = identity.profile.email;
+      if (nameEl) nameEl.textContent = identity.name || identity.profile.email.split('@')[0];
+
+      if (avatarBox) {
+        if (identity.profile.avatar) {
+          avatarBox.innerHTML = `<img src="${escapeHtml(identity.profile.avatar)}" alt="${escapeHtml(identity.name)}" class="w-full h-full object-cover rounded-full" onerror="this.outerHTML='<span class=\\'font-bold text-white text-sm\\'>${escapeHtml((identity.name || 'U').charAt(0).toUpperCase())}</span>'">`;
+        } else {
+          avatarBox.innerHTML = `<span class="font-bold text-white text-sm">${escapeHtml((identity.name || identity.profile.email || 'U').charAt(0).toUpperCase())}</span>`;
+        }
+      }
+
+      if (badgeGoogle) badgeGoogle.classList.remove("hidden");
+      if (badgeRoster) {
+        if (identity.isRosterVerified) {
+          badgeRoster.classList.remove("hidden");
+        } else {
+          badgeRoster.classList.add("hidden");
+        }
+      }
+
+      card.classList.remove("hidden");
+    }
+
+    function showGoogleAuthGate() {
       const authGate = document.getElementById("formAuthGateSection");
       const overview = document.getElementById("formOverviewSection");
       const wizard = document.getElementById("formWizardContainer");
+      const promptCard = document.getElementById("authGatePromptCard");
+      const mismatchCard = document.getElementById("authGateDomainMismatchCard");
+      const reqDesc = document.getElementById("authGateRequirementDesc");
 
-      if (authGate) authGate.classList.add("hidden");
+      if (overview) overview.classList.add("hidden");
+      if (wizard) wizard.classList.add("hidden");
+      if (authGate) authGate.classList.remove("hidden");
+      if (promptCard) promptCard.classList.remove("hidden");
+      if (mismatchCard) mismatchCard.classList.add("hidden");
 
-      // Tampilkan halaman Overview (Panduan Form) secara default jika wizard belum dibuka
-      if (overview && (!wizard || wizard.classList.contains("hidden"))) {
-        overview.classList.remove("hidden");
-      }
-
-      updateAccountHeaderUI();
-    }
-
-    function handleAuthRoleChange(role) {
-      const nimContainer = document.getElementById("authNimContainer");
-      const btnFillEmail = document.getElementById("btnAuthFillNimEmail");
-      if (role === 'Mahasiswa') {
-        if (nimContainer) nimContainer.classList.remove("hidden");
-        if (btnFillEmail) btnFillEmail.classList.remove("hidden");
-      } else {
-        if (nimContainer) nimContainer.classList.add("hidden");
-        if (btnFillEmail) btnFillEmail.classList.add("hidden");
-      }
-    }
-
-    function validateAuthNimLive(nimVal) {
-      const cleanNim = (nimVal || "").trim();
-      const statusIcon = document.getElementById("authNimStatusIcon");
-      const autoNotice = document.getElementById("authNimAutoNotice");
-      const feedbackBox = document.getElementById("authNimFeedbackBox");
-      const namaInput = document.getElementById("authInputNama");
-      const btnFillEmail = document.getElementById("btnAuthFillNimEmail");
-
-      if (!cleanNim) {
-        if (statusIcon) statusIcon.classList.add("hidden");
-        if (autoNotice) autoNotice.classList.add("hidden");
-        if (feedbackBox) feedbackBox.classList.add("hidden");
-        if (btnFillEmail) btnFillEmail.classList.add("hidden");
-        return;
-      }
-
-      if (btnFillEmail) btnFillEmail.classList.remove("hidden");
-
-      if (allStudentsData && allStudentsData.length > 0) {
-        const found = allStudentsData.find(s => String(s.nim).trim() === cleanNim);
-        if (found) {
-          if (statusIcon) statusIcon.classList.remove("hidden");
-          if (autoNotice) autoNotice.classList.remove("hidden");
-          if (namaInput && (!namaInput.value || namaInput.value === '')) {
-            namaInput.value = found.name;
-          }
-          if (feedbackBox) {
-            feedbackBox.className = "text-xs rounded-lg p-2 bg-emerald-50 text-emerald-800 border border-emerald-200";
-            feedbackBox.innerHTML = `<span>Terdaftar sebagai: <strong>${escapeHtml(found.name)}</strong> (${escapeHtml(found.kelompok || 'Mahasiswa')})</span>`;
-            feedbackBox.classList.remove("hidden");
-          }
-          return;
-        }
-      }
-
-      if (statusIcon) statusIcon.classList.add("hidden");
-      if (autoNotice) autoNotice.classList.add("hidden");
-      if (feedbackBox) {
-        if (cleanNim.length >= 6) {
-          feedbackBox.className = "text-xs rounded-lg p-2 bg-zinc-50 text-zinc-600 border border-zinc-200";
-          feedbackBox.innerHTML = `<span>NIM format mandiri. Silakan pastikan nama lengkap sudah benar.</span>`;
-          feedbackBox.classList.remove("hidden");
+      const mode = getCurrentEmailCollectionMode();
+      if (reqDesc) {
+        if (mode === 'ULM_ONLY') {
+          reqDesc.textContent = "Formulir ini dikonfigurasi khusus untuk sivitas akademika ULM. Silakan masuk menggunakan akun Google resmi kampus (@mhs.ulm.ac.id atau @ulm.ac.id).";
         } else {
-          feedbackBox.classList.add("hidden");
-        }
-      }
-    }
-
-    function fillAuthNimEmailFormat() {
-      const nim = document.getElementById("authInputNim")?.value.trim();
-      const emailInput = document.getElementById("authInputEmail");
-      if (!nim || !emailInput) return;
-      emailInput.value = `${nim}@mhs.ulm.ac.id`;
-      validateAuthEmailLive(emailInput.value);
-    }
-
-    function appendAuthDomain(domain) {
-      const emailInput = document.getElementById("authInputEmail");
-      if (!emailInput) return;
-      let val = emailInput.value.trim();
-      if (!val) {
-        const nim = document.getElementById("authInputNim")?.value.trim();
-        val = nim || "user";
-      }
-      if (val.includes("@")) {
-        val = val.split("@")[0] + domain;
-      } else {
-        val = val + domain;
-      }
-      emailInput.value = val;
-      validateAuthEmailLive(val);
-    }
-
-    function validateAuthEmailLive(emailVal) {
-      const msgEl = document.getElementById("authEmailValidationMsg");
-      const emailInput = document.getElementById("authInputEmail");
-      const cleanEmail = (emailVal || "").trim().toLowerCase();
-      const emailMode = appConfig["Mode_Pengumpulan_Email"] || "ULM_ONLY";
-      const selRole = document.querySelector('input[name="authRole"]:checked')?.value || "Mahasiswa";
-
-      if (!cleanEmail) {
-        if (msgEl) msgEl.classList.add("hidden");
-        if (emailInput) emailInput.className = "w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm focus:border-indigo-600 outline-none transition bg-white placeholder-zinc-400";
-        return false;
-      }
-
-      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      if (!emailRegex.test(cleanEmail)) {
-        if (msgEl) {
-          msgEl.textContent = "Format email belum lengkap";
-          msgEl.className = "text-[11px] text-amber-600 font-medium";
-          msgEl.classList.remove("hidden");
-        }
-        return false;
-      }
-
-      if (emailMode === 'ULM_ONLY' && selRole === 'Mahasiswa') {
-        const allowedStr = appConfig["Domain_Email_Wajib"] || "mhs.ulm.ac.id, ulm.ac.id";
-        const allowedDomains = allowedStr.split(",").map(d => d.trim().toLowerCase()).filter(Boolean);
-
-        let isDomainMatch = false;
-        for (let d of allowedDomains) {
-          if (cleanEmail.endsWith("@" + d) || cleanEmail.endsWith("." + d)) {
-            isDomainMatch = true;
-            break;
-          }
-        }
-
-        if (!isDomainMatch) {
-          if (msgEl) {
-            msgEl.textContent = "Mode ULM: Email mahasiswa harus domain (" + allowedStr + ").";
-            msgEl.className = "text-[11px] text-rose-600 font-medium";
-            msgEl.classList.remove("hidden");
-          }
-          if (emailInput) emailInput.className = "w-full px-3.5 py-2.5 rounded-xl border border-rose-400 text-xs sm:text-sm focus:border-rose-600 outline-none transition bg-white";
-          return false;
+          reqDesc.textContent = "Formulir ini mewajibkan akun Google terverifikasi untuk mencatat identitas penilai dan menyimpan draf penilaian secara otomatis.";
         }
       }
 
-      if (msgEl) msgEl.classList.add("hidden");
-      if (emailInput) emailInput.className = "w-full px-3.5 py-2.5 rounded-xl border border-emerald-400 text-xs sm:text-sm focus:border-emerald-600 outline-none transition bg-white";
-      return true;
+      renderGoogleSignInButtonDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function handleAuthLoginSubmit(e) {
-      if (e) e.preventDefault();
+    function showDomainMismatch(profile) {
+      const authGate = document.getElementById("formAuthGateSection");
+      const overview = document.getElementById("formOverviewSection");
+      const wizard = document.getElementById("formWizardContainer");
+      const promptCard = document.getElementById("authGatePromptCard");
+      const mismatchCard = document.getElementById("authGateDomainMismatchCard");
+      const emailEl = document.getElementById("mismatchActiveEmail");
 
-      const selRole = document.querySelector('input[name="authRole"]:checked')?.value || "Mahasiswa";
-      const nimVal = document.getElementById("authInputNim")?.value.trim() || "";
-      const namaVal = document.getElementById("authInputNama")?.value.trim() || "";
-      const emailVal = document.getElementById("authInputEmail")?.value.trim() || "";
-      const remember = document.getElementById("authRememberMe")?.checked ?? true;
+      if (overview) overview.classList.add("hidden");
+      if (wizard) wizard.classList.add("hidden");
+      if (authGate) authGate.classList.remove("hidden");
+      if (promptCard) promptCard.classList.add("hidden");
+      if (mismatchCard) mismatchCard.classList.remove("hidden");
+      if (emailEl) emailEl.textContent = profile.email;
 
-      if (!emailVal) {
-        showToast("Alamat email wajib diisi untuk masuk!", "warning");
-        return;
-      }
-      if (!namaVal) {
-        showToast("Nama lengkap wajib diisi!", "warning");
-        return;
-      }
-      if (selRole === 'Mahasiswa' && !nimVal) {
-        showToast("Nomor Induk Mahasiswa (NIM) wajib diisi!", "warning");
-        return;
-      }
-
-      if (!validateAuthEmailLive(emailVal)) {
-        showToast("Format alamat email belum valid!", "warning");
-        return;
-      }
-
-      const user = {
-        email: emailVal,
-        nama: namaVal,
-        nim: nimVal,
-        peran: selRole
-      };
-
-      setAuthSession(user, remember);
-
-      showToast(`Selamat datang, ${namaVal}! Anda berhasil masuk.`, "success");
-
-      checkAndApplyAuthGate();
-
-      // Trigger draft restore for this user
-      isDraftAlreadyRestored = false;
-      restoreFormDraft();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function handleAuthQuickLogin(email, name, nim, role) {
-      const user = {
-        email: email,
-        nama: name,
-        nim: nim,
-        peran: role || "Mahasiswa"
-      };
-      setAuthSession(user, true);
-      showToast(`Berhasil masuk sebagai ${email}.`, "success");
-      checkAndApplyAuthGate();
-      isDraftAlreadyRestored = false;
-      restoreFormDraft();
+    function saveAuthIntent(formId) {
+      try {
+        sessionStorage.setItem('PGSD_AUTH_INTENT', JSON.stringify({
+          action: 'START_ASSESSMENT',
+          formId: formId || activeFormId || 'BK5E',
+          createdAt: Date.now()
+        }));
+      } catch(e) {}
     }
 
-    async function handleAuthLogout() {
-      const ok = await showAppConfirm({
-        title: "Keluar dari Akun?",
-        message: "Apakah Anda yakin ingin keluar dari akun penilai ini? Draf isian Anda tetap tersimpan aman di akun ini.",
-        confirmText: "Ya, Keluar Akun",
-        cancelText: "Batal",
-        type: "warning"
-      });
-      if (ok) {
-        clearAuthSession();
-        showToast("Anda telah keluar dari akun.", "info");
-        checkAndApplyAuthGate();
-      }
-    }
-
-    // =========================================================================
-    // OFFICIAL GOOGLE OAUTH AUTHENTICATION VIA SUPABASE AUTH
-    // =========================================================================
     async function handleGoogleSignIn() {
       try {
         const isFileProtocol = window.location.protocol === 'file:';
         const isInsideIframe = window.self !== window.top;
 
         // 1. FAST-PATH: Pengujian Berkas Lokal (file:///)
-        // Karena browser & Google melarang OAuth redirect ke file:///, gunakan verifikasi simulasi instan
         if (isFileProtocol) {
           const mockGoogleUser = {
             email: "2310125210099@mhs.ulm.ac.id",
@@ -4212,14 +4057,15 @@ function normalizeMediaList(fieldOrMedia) {
             provider: "google"
           };
           setAuthSession(mockGoogleUser, true);
-          checkAndApplyAuthGate();
-          startAssessmentForm();
-          showToast("Berhasil masuk akun Google resmi ULM (@mhs.ulm.ac.id)!", "success");
+          const identity = await resolveStudentIdentity({ email: mockGoogleUser.email, name: mockGoogleUser.nama, avatar: "" }, getCurrentEmailCollectionMode());
+          applyLockedIdentity(identity);
+          renderAccountBar(identity);
+          openAssessmentForm();
+          showToast("Mode simulasi lokal aktif!", "success");
           return;
         }
 
         // 2. FAST-PATH: Simulator Pratinjau Admin (Iframe)
-        // Iframe browser memblokir dialog Google OAuth karena header X-Frame-Options Google
         if (isInsideIframe) {
           const mockSimulatorUser = {
             email: "evaluator.simulasi@mhs.ulm.ac.id",
@@ -4230,13 +4076,17 @@ function normalizeMediaList(fieldOrMedia) {
             provider: "simulator"
           };
           setAuthSession(mockSimulatorUser, false);
-          checkAndApplyAuthGate();
-          startAssessmentForm();
+          const identity = await resolveStudentIdentity({ email: mockSimulatorUser.email, name: mockSimulatorUser.nama, avatar: "" }, getCurrentEmailCollectionMode());
+          applyLockedIdentity(identity);
+          renderAccountBar(identity);
+          openAssessmentForm();
           showToast("Mode Simulasi Pratinjau berhasil aktif!", "success");
           return;
         }
 
         // 3. LIVE WEB: Google Cloud OAuth Resmi via Supabase Auth
+        saveAuthIntent(activeFormId);
+
         const btn = document.getElementById("btnGoogleSignIn");
         if (btn) {
           btn.innerHTML = `
@@ -4248,7 +4098,7 @@ function normalizeMediaList(fieldOrMedia) {
           `;
         }
 
-        const redirectUrl = window.location.origin + window.location.pathname + (activeFormId ? `?id=${activeFormId}` : '');
+        const redirectTo = window.location.origin + window.location.pathname + (activeFormId ? `?id=${activeFormId}` : '');
         const sb = getSupabaseClient() || (window.supabase && typeof window.supabase.createClient === "function" ? (supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey)) : null);
 
         if (!sb || !sb.auth) {
@@ -4258,7 +4108,7 @@ function normalizeMediaList(fieldOrMedia) {
         const { data, error } = await sb.auth.signInWithOAuth({
           provider: 'google',
           options: {
-            redirectTo: redirectUrl,
+            redirectTo: redirectTo,
             queryParams: {
               access_type: 'offline',
               prompt: 'select_account'
@@ -4280,7 +4130,7 @@ function normalizeMediaList(fieldOrMedia) {
       const btn = document.getElementById("btnGoogleSignIn");
       if (btn) {
         btn.innerHTML = `
-          <div class="w-6 h-6 rounded-full bg-white p-0.5 flex items-center justify-center shrink-0 shadow-2xs">
+          <div class="w-5 h-5 rounded-full bg-white p-0.5 flex items-center justify-center shrink-0 shadow-2xs">
             <svg class="w-full h-full" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
               <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.15C3.26 21.36 7.33 24 12 24z"/>
@@ -4288,103 +4138,259 @@ function normalizeMediaList(fieldOrMedia) {
               <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.24 6.58l4.04 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
             </svg>
           </div>
-          <span class="group-hover:text-zinc-100 transition">Masuk dengan Akun Google (ULM / Gmail)</span>
+          <span>Masuk dengan Akun Google</span>
         `;
       }
     }
 
-    async function initSupabaseAuthListener() {
+    async function handleSwitchGoogleAccount() {
+      const ok = await showAppConfirm({
+        title: "Ganti Akun Google?",
+        message: "Anda akan dialihkan ke layar pemilihan Akun Google resmi Anda. Draf isian saat ini tetap tersimpan aman di akun ini.",
+        confirmText: "Ya, Ganti Akun Google",
+        cancelText: "Batal",
+        type: "info"
+      });
+      if (ok) {
+        const sb = getSupabaseClient();
+        if (sb && sb.auth) {
+          try { await sb.auth.signOut(); } catch(e) {}
+        }
+        clearAuthSession();
+        handleGoogleSignIn();
+      }
+    }
+
+    async function handleAuthLogout() {
+      const ok = await showAppConfirm({
+        title: "Keluar dari Akun?",
+        message: "Apakah Anda yakin ingin keluar dari akun penilai ini? Draf isian Anda tetap tersimpan aman di akun ini.",
+        confirmText: "Ya, Keluar Akun",
+        cancelText: "Batal",
+        type: "warning"
+      });
+      if (ok) {
+        const sb = getSupabaseClient();
+        if (sb && sb.auth) {
+          try { await sb.auth.signOut(); } catch(e) {}
+        }
+        clearAuthSession();
+        showToast("Anda telah keluar dari akun.", "info");
+        goToInfoOverview();
+      }
+    }
+
+    function getCurrentAuthSession() {
+      try {
+        const formKey = (activeFormId || 'BK5E').toUpperCase();
+        const key = "PGSD_AUTH_SESSION_" + formKey;
+        const raw = localStorage.getItem(key) || 
+                    sessionStorage.getItem(key) || 
+                    localStorage.getItem("PGSD_AUTH_SESSION_PRIMARY");
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+      return null;
+    }
+
+    function setAuthSession(user, remember = true) {
+      if (!user || !user.email) return;
+      const key = "PGSD_AUTH_SESSION_" + (activeFormId || 'BK5E').toUpperCase();
+      const payload = {
+        email: user.email.trim(),
+        nama: user.nama || user.name || "",
+        nim: user.nim || "",
+        peran: user.peran || "Mahasiswa",
+        avatarUrl: user.avatarUrl || "",
+        provider: user.provider || "manual",
+        loginAt: Date.now()
+      };
+      if (remember) {
+        localStorage.setItem(key, JSON.stringify(payload));
+        localStorage.setItem("PGSD_AUTH_SESSION_PRIMARY", JSON.stringify(payload));
+      } else {
+        sessionStorage.setItem(key, JSON.stringify(payload));
+        sessionStorage.setItem("PGSD_AUTH_SESSION_PRIMARY", JSON.stringify(payload));
+      }
+      activeUserAccountEmail = payload.email;
+      activeUserAccountName = payload.nama;
+      activeUserAccountNim = payload.nim;
+      activeUserAccountAvatarUrl = payload.avatarUrl || "";
+      if (payload.peran) currentEvaluatorRole = payload.peran;
+    }
+
+    function clearAuthSession() {
+      const key = "PGSD_AUTH_SESSION_" + (activeFormId || 'BK5E').toUpperCase();
+      localStorage.removeItem(key);
+      sessionStorage.removeItem(key);
+      localStorage.removeItem("PGSD_AUTH_SESSION_PRIMARY");
+      sessionStorage.removeItem("PGSD_AUTH_SESSION_PRIMARY");
+      activeUserAccountEmail = "";
+      activeUserAccountName = "";
+      activeUserAccountNim = "";
+      activeUserAccountAvatarUrl = "";
+      try {
+        if (supabaseClient && supabaseClient.auth) {
+          supabaseClient.auth.signOut();
+        }
+      } catch (e) {}
+    }
+
+    function checkAndApplyAuthGate() {
+      updateAccountHeaderUI();
+    }
+
+    function updateAccountActiveEmail(emailVal) {
+      activeUserAccountEmail = (emailVal || "").trim();
+      const namaVal = document.getElementById("inputNama")?.value.trim() || "";
+      if (namaVal) activeUserAccountName = namaVal;
+      updateAccountHeaderUI();
+    }
+
+    function updateAccountHeaderUI() {
+      const card = document.getElementById("formAccountHeaderCard");
+      if (!card) return;
+      const session = getCurrentAuthSession();
+      if (!session || !session.email) {
+        card.classList.add("hidden");
+        return;
+      }
+      const emailEl = document.getElementById("accountActiveEmail");
+      const nameEl = document.getElementById("accountActiveName");
+      if (emailEl) emailEl.textContent = session.email;
+      if (nameEl) nameEl.textContent = session.nama || session.email.split('@')[0];
+      card.classList.remove("hidden");
+    }
+
+    function ensureAuthInitialized() {
+      if (!authInitPromise) {
+        authInitPromise = initializeAuth();
+      }
+      return authInitPromise;
+    }
+
+    async function initializeAuth() {
+      authState.initializing = true;
+      authState.ready = false;
+
       const sb = getSupabaseClient() || (window.supabase && typeof window.supabase.createClient === "function" ? (supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey)) : null);
 
-      // 0. PKCE OAuth Flow Check (?code=...)
-      try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const authCode = urlParams.get('code');
-        if (authCode && sb && sb.auth && typeof sb.auth.exchangeCodeForSession === 'function') {
-          const btn = document.getElementById("btnGoogleSignIn");
-          if (btn) {
-            btn.innerHTML = `
-              <svg class="w-4 h-4 animate-spin text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <span class="text-white font-bold">Menyelesaikan Otentikasi Google...</span>
-            `;
-          }
-          const { data: codeData, error: codeErr } = await sb.auth.exchangeCodeForSession(authCode);
-          if (codeErr) {
-            console.error("Supabase exchangeCodeForSession error:", codeErr);
-            showToast("Gagal memproses sesi login Google: " + (codeErr.message || codeErr), "error", 6000);
-            renderGoogleSignInButtonDefault();
-          } else if (codeData && codeData.session && codeData.session.user) {
-            await applySupabaseGoogleUser(codeData.session.user);
-            try {
-              const cleanUrl = new URL(window.location.href);
-              cleanUrl.searchParams.delete('code');
-              history.replaceState(null, null, cleanUrl.toString());
-            } catch (e) {}
-            return;
-          }
-        }
-      } catch (pkceErr) {
-        console.warn("PKCE code exchange notice:", pkceErr);
+      if (!sb || !sb.auth) {
+        authState.initializing = false;
+        authState.ready = true;
+        return null;
       }
 
-      // 1. Direct Instant Extraction from URL Hash Fragment (#access_token=...)
       try {
-        const rawHash = window.location.hash || '';
-        if (rawHash.includes('access_token=')) {
-          const hashClean = rawHash.replace(/^#/, '');
+        // 0. PKCE OAuth Flow Check (?code=...)
+        const url = new URL(window.location.href);
+        const authCode = url.searchParams.get('code');
+        if (authCode && typeof sb.auth.exchangeCodeForSession === 'function') {
+          const { data: codeData, error: codeErr } = await sb.auth.exchangeCodeForSession(authCode);
+          if (codeErr) {
+            console.warn("Supabase exchangeCodeForSession notice:", codeErr);
+          } else if (codeData?.session?.user) {
+            authState.session = codeData.session;
+            authState.user = codeData.session.user;
+          }
+
+          // Bersihkan code dari URL browser secara aman tanpa menghilangkan ?id={formId}
+          url.searchParams.delete('code');
+          try {
+            history.replaceState(null, null, url.toString());
+          } catch(e) {}
+        }
+
+        // 1. Hash Fragment Check (#access_token=...)
+        if (window.location.hash && window.location.hash.includes('access_token=')) {
+          const hashClean = window.location.hash.replace(/^#/, '');
           const hashParams = new URLSearchParams(hashClean);
           const accessToken = hashParams.get('access_token');
           const refreshToken = hashParams.get('refresh_token');
 
-          if (accessToken) {
+          if (accessToken && refreshToken) {
             try {
-              const base64Url = accessToken.split('.')[1];
-              const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-              const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-              const payload = JSON.parse(jsonPayload);
-
-              if (payload && (payload.email || payload.user_metadata?.email)) {
-                const email = (payload.email || payload.user_metadata?.email).toLowerCase().trim();
-                const userObj = {
-                  email: email,
-                  user_metadata: payload.user_metadata || {}
-                };
-                await applySupabaseGoogleUser(userObj);
+              const { data: setData } = await sb.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken
+              });
+              if (setData?.session?.user) {
+                authState.session = setData.session;
+                authState.user = setData.session.user;
               }
-            } catch (jwtErr) {
-              console.warn("Direct JWT token parse notice:", jwtErr);
-            }
+            } catch(e) {}
+          }
 
-            if (sb && sb.auth && refreshToken) {
-              try {
-                await sb.auth.setSession({
-                  access_token: accessToken,
-                  refresh_token: refreshToken
-                });
-              } catch (setErr) {}
-            }
+          try {
+            const cleanUrl = new URL(window.location.href);
+            cleanUrl.hash = '';
+            history.replaceState(null, null, cleanUrl.toString());
+          } catch(e) {}
+        }
+
+        // 2. Get confirmed persisted session
+        if (!authState.session) {
+          const { data: sessionData } = await sb.auth.getSession();
+          if (sessionData?.session?.user) {
+            authState.session = sessionData.session;
+            authState.user = sessionData.session.user;
           }
         }
-      } catch (hashErr) {
-        console.warn("OAuth Hash extraction notice:", hashErr);
+
+        // 3. Fallback to cached manual session if exists
+        if (!authState.user) {
+          const localSess = getCurrentAuthSession();
+          if (localSess?.email) {
+            authState.user = {
+              email: localSess.email,
+              user_metadata: {
+                full_name: localSess.nama,
+                avatar_url: localSess.avatarUrl
+              }
+            };
+          }
+        }
+
+        // 4. Intent Execution Check (Auto-Open form jika login Google dipicu dari tombol Mulai)
+        const rawIntent = sessionStorage.getItem('PGSD_AUTH_INTENT');
+        if (rawIntent) {
+          try {
+            const intent = JSON.parse(rawIntent);
+            const isFresh = (Date.now() - (intent.createdAt || 0)) < (10 * 60 * 1000);
+            const isTargetForm = (intent.formId || '').toUpperCase() === (activeFormId || 'BK5E').toUpperCase();
+
+            if (isFresh && isTargetForm && intent.action === 'START_ASSESSMENT' && authState.user) {
+              sessionStorage.removeItem('PGSD_AUTH_INTENT');
+              const mode = getCurrentEmailCollectionMode();
+              setTimeout(() => {
+                continueAssessmentWithAuthenticatedUser(authState.user, mode);
+              }, 100);
+            }
+          } catch(e) {}
+        }
+
+      } catch (err) {
+        console.warn("Auth initialization error:", err);
+      } finally {
+        authState.initializing = false;
+        authState.ready = true;
       }
 
+      return authState.session;
+    }
+
+    async function initSupabaseAuthListener() {
+      const sb = getSupabaseClient() || (window.supabase && typeof window.supabase.createClient === "function" ? (supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey)) : null);
       if (!sb || !sb.auth) return;
 
       try {
-        // 2. Check initial session from Supabase Client
-        const { data: sessionData } = await sb.auth.getSession();
-        if (sessionData && sessionData.session && sessionData.session.user) {
-          await applySupabaseGoogleUser(sessionData.session.user);
-        }
-
-        // 3. Listen to auth state changes
         sb.auth.onAuthStateChange(async (event, session) => {
           if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'USER_UPDATED' || event === 'TOKEN_REFRESHED') && session && session.user) {
-            await applySupabaseGoogleUser(session.user);
+            authState.session = session;
+            authState.user = session.user;
+          } else if (event === 'SIGNED_OUT') {
+            authState.session = null;
+            authState.user = null;
+            clearAuthSession();
           }
         });
       } catch (e) {
@@ -4392,128 +4398,75 @@ function normalizeMediaList(fieldOrMedia) {
       }
     }
 
-    async function applySupabaseGoogleUser(user) {
-      if (!user || !user.email) return;
+    async function startAssessmentForm() {
+      await ensureAuthInitialized();
 
-      const email = user.email.toLowerCase().trim();
+      const mode = getCurrentEmailCollectionMode();
 
-      // Ensure appConfig is populated from cache or Supabase if currently empty
-      if (!appConfig || Object.keys(appConfig).length === 0) {
-        const cachedConfig = localStorage.getItem("PGSD_CACHE_CONFIG_" + activeFormId);
-        if (cachedConfig) {
-          try { appConfig = JSON.parse(cachedConfig); } catch(e) {}
-        }
-      }
-      if (!appConfig || Object.keys(appConfig).length === 0) {
-        const sb = getSupabaseClient();
-        if (sb) {
-          try {
-            const { data: configRow } = await sb.from('pgsd_form_configs').select('*').eq('form_id', activeFormId).single();
-            if (configRow && configRow.config_data) {
-              appConfig = configRow.config_data;
-            }
-          } catch(e) {}
-        }
+      // Mode 1: NO_EMAIL -> bypass langsung buka form (anonim)
+      if (mode === 'NO_EMAIL') {
+        openAssessmentForm();
+        return;
       }
 
-      const emailMode = appConfig["Mode_Pengumpulan_Email"] || "ALL_EMAIL";
+      // Mode 2 & 3: ULM_ONLY / ALL_EMAIL -> periksa user Google
+      const user = authState.user || (getCurrentAuthSession()?.email ? getCurrentAuthSession() : null);
 
-      // Domain enforcement only if explicitly ULM_ONLY
-      if (emailMode === 'ULM_ONLY') {
-        const allowedStr = appConfig["Domain_Email_Wajib"] || "mhs.ulm.ac.id, ulm.ac.id";
-        const allowedDomains = allowedStr.split(",").map(d => d.trim().toLowerCase()).filter(Boolean);
-
-        let isDomainMatch = false;
-        for (let d of allowedDomains) {
-          if (email.endsWith("@" + d) || email.endsWith("." + d)) {
-            isDomainMatch = true;
-            break;
-          }
-        }
-
-        if (!isDomainMatch) {
-          clearAuthSession();
-          showToast(`Akun Google "${email}" bukan akun resmi kampus ULM (${allowedStr}). Silakan login menggunakan akun @mhs.ulm.ac.id atau @ulm.ac.id.`, "error", 8000);
-          checkAndApplyAuthGate();
-          return;
-        }
+      if (!user || !user.email) {
+        showGoogleAuthGate();
+        return;
       }
 
-      const rawName = user.user_metadata?.full_name || user.user_metadata?.name || "";
-      const avatarUrl = user.user_metadata?.avatar_url || user.user_metadata?.picture || "";
+      await continueAssessmentWithAuthenticatedUser(user, mode);
+    }
 
-      // Smart NIM extraction if email is NIM@mhs.ulm.ac.id
-      let extractedNim = "";
-      let matchedName = rawName;
-      let detectedRole = "Mahasiswa";
+    async function continueAssessmentWithAuthenticatedUser(user, mode) {
+      const profile = extractGoogleProfile(user);
 
-      const emailMatch = email.match(/^([0-9]{8,15})@/);
-      if (emailMatch) {
-        extractedNim = emailMatch[1];
+      if (!profile.email) {
+        showGoogleAuthGate();
+        return;
       }
 
-      // Check against master student data
-      if (allStudentsData && allStudentsData.length > 0) {
-        let found = null;
-        if (extractedNim) {
-          found = allStudentsData.find(s => String(s.nim).trim() === extractedNim);
-        }
-        if (!found && rawName) {
-          found = allStudentsData.find(s => (s.name || '').toLowerCase() === rawName.toLowerCase());
-        }
-        if (found) {
-          extractedNim = found.nim;
-          matchedName = found.name;
-          detectedRole = "Mahasiswa";
-        }
+      // Validasi Domain untuk ULM_ONLY
+      if (mode === 'ULM_ONLY' && !isUlmEmail(profile.email)) {
+        showDomainMismatch(profile);
+        return;
       }
 
-      if (email.endsWith("@ulm.ac.id") && !email.includes("@mhs.")) {
-        detectedRole = "Dosen";
-      }
+      const identity = await resolveStudentIdentity(profile, mode);
 
-      const authUser = {
-        email: email,
-        nama: matchedName || email.split("@")[0],
-        nim: extractedNim,
-        peran: detectedRole,
-        avatarUrl: avatarUrl,
-        provider: "google"
-      };
-
-      setAuthSession(authUser, true);
-      activeUserAccountAvatarUrl = avatarUrl;
-      activeUserAccountEmail = email;
-      activeUserAccountName = matchedName || email.split("@")[0];
-      activeUserAccountNim = extractedNim;
-      if (detectedRole) currentEvaluatorRole = detectedRole;
-
-      // Populate Step 1 fields in DOM
-      const inputEmail = document.getElementById("inputEmail");
-      const inputNama = document.getElementById("inputNama");
-      const inputNim = document.getElementById("inputNim");
-      if (inputEmail) inputEmail.value = email;
-      if (inputNama && matchedName) inputNama.value = matchedName;
-      if (inputNim && extractedNim) {
-        inputNim.value = extractedNim;
-        validateNimLive(extractedNim);
-      }
-      if (detectedRole) onRoleChange(detectedRole);
-
-      updateAccountHeaderUI();
-      checkAndApplyAuthGate();
-
-      // Bersihkan hash fragment OAuth dari URL browser
-      try {
-        if (window.location.hash.includes('access_token') || window.location.hash === '#') {
-          history.replaceState(null, null, window.location.pathname + (window.location.search || `?id=${activeFormId}`));
-        }
-      } catch (e) {}
+      applyLockedIdentity(identity);
+      renderAccountBar(identity);
 
       isDraftAlreadyRestored = false;
       restoreFormDraft();
-      startAssessmentForm();
-      showToast(`Selamat datang, ${authUser.nama || authUser.email}! Berhasil masuk dengan Akun Google.`, "success", 4000);
+
+      openAssessmentForm();
+    }
+
+    function openAssessmentForm() {
+      const authGate = document.getElementById("formAuthGateSection");
+      const overview = document.getElementById("formOverviewSection");
+      const wizard = document.getElementById("formWizardContainer");
+      if (authGate) authGate.classList.add("hidden");
+      if (overview) overview.classList.add("hidden");
+      if (wizard) wizard.classList.remove("hidden");
+      if (!document.getElementById("stepSection_1")) {
+        renderDynamicClientStages();
+      }
+      updateStepUI(currentStep || 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function goToInfoOverview() {
+      const authGate = document.getElementById("formAuthGateSection");
+      const overview = document.getElementById("formOverviewSection");
+      const wizard = document.getElementById("formWizardContainer");
+      if (authGate) authGate.classList.add("hidden");
+      if (overview) overview.classList.remove("hidden");
+      if (wizard) wizard.classList.add("hidden");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function resetInMemoryClientFormState() {

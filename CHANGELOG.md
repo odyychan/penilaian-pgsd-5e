@@ -4,6 +4,27 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.23] - 2026-08-27
+
+### 🔐 Integrasi Google Cloud OAuth, Otomasi Identitas, dan Isolasi Draf
+- **✨ Google Cloud Console & Supabase Auth Subsystem:**
+  - Mengintegrasikan autentikasi resmi Google OAuth 2.0 via Supabase Auth dengan alur *PKCE code exchange* dan penanganan token instan.
+  - Mencegah *OAuth login loop* melalui state machine deterministik `authInitializing` dan `authReady`.
+- **🚪 Google Auth Gate & Intent Auto-Open:**
+  - Menampilkan layar otentikasi Google modern ketika pengguna menekan tombol *"Mulai Mengisi Penilaian"*.
+  - Menyimpan intent otentikasi (`START_ASSESSMENT`) ber-TTL sehingga setelah login Google berhasil, pengguna langsung diarahkan masuk ke form tanpa perlu klik ulang.
+- **🎓 Validasi Domain Suffix Presisi (`ULM_ONLY`):**
+  - Menerapkan verifikasi ketat domain `@mhs.ulm.ac.id` dan `@ulm.ac.id` dengan penolakan ramah dan tombol 1-klik *"Pilih Akun Google ULM Lain"* jika masuk menggunakan Gmail pribadi.
+- **🔒 Auto-Populate & Penguncian Identitas Terverifikasi:**
+  - Mengekstrak nama, email, dan avatar dari metadata Google, serta mencocokkan candidate NIM dengan data roster database `pgsd_students`.
+  - Mengunci input identitas (read-only) dengan badge *Google Verified* dan *Roster Terdaftar*.
+- **💾 Isolasi Draf per Akun Google:**
+  - Mengikat kunci penyimpanan draf unik berbasis email: `PGSD_DRAFT_{formId}_{cleanGoogleEmail}` untuk mencegah tabrakan data pada perangkat bersama.
+- **📖 Dokumentasi Konfigurasi Lengkap:**
+  - Menambahkan panduan resmi konfigurasi Google Cloud Console & Supabase Auth di [`docs/google_oauth_setup.md`](file:///e:/Data/GitHub/Project%20Dede/docs/google_oauth_setup.md).
+
+---
+
 ## [2.4.22] - 2026-08-27
 
 ### 🛠️ Lingkungan Sandbox Debugging Terisolasi & Standar Pengujian Mandiri
