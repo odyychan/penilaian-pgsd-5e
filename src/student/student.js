@@ -1730,7 +1730,8 @@ function normalizeMediaList(fieldOrMedia) {
       if (f.type === 'CORE_IDENTITY' || f.type === 'CORE_IDENTITAS') {
         const peranMhsLabel = appConfig["Peran_Mahasiswa_Label"] || "Mahasiswa (Anggota Kelas)";
         const peranDosenLabel = appConfig["Peran_Dosen_Label"] || "Dosen (Pengampu / Penguji)";
-        const peranTamuLabel = appConfig["Peran_Lainnya_Label"] || "Lainnya / Penilai Tamu";
+        const emailMode = getCurrentEmailCollectionMode();
+        const isNoEmail = (emailMode === 'NO_EMAIL');
         const emailVal = clientCustomFormAnswers[f.id + '_email'] || activeUserAccountEmail || '';
         const nameVal = clientCustomFormAnswers[f.id + '_nama'] || activeUserAccountName || '';
         const nimVal = clientCustomFormAnswers[f.id + '_nim'] || activeUserAccountNim || '';
