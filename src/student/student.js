@@ -771,6 +771,15 @@ function normalizeMediaList(fieldOrMedia) {
       }
 
       // Explicit Form Mode (e.g. ?id=BK5E)
+      document.documentElement.classList.add('form-mode-active');
+      document.documentElement.classList.remove('portal-mode-active');
+      const viewPortal = document.getElementById("viewPortal");
+      if (viewPortal) viewPortal.classList.add("hidden");
+      const navTabContainer = document.getElementById("navTabContainer");
+      if (navTabContainer) navTabContainer.classList.remove("hidden");
+      const badgeSesiTop = document.getElementById("badgeSesiTop");
+      if (badgeSesiTop) badgeSesiTop.classList.remove("hidden");
+
       saveVisitedFormHistory(activeFormId);
       loadLocalCache();
       
@@ -990,19 +999,27 @@ function normalizeMediaList(fieldOrMedia) {
 
     function showPortalView() {
       isPortalMode = true;
+      document.documentElement.classList.add('portal-mode-active');
+      document.documentElement.classList.remove('form-mode-active');
+      document.title = "Portal Akses Formulir • FKIP ULM";
+
       const viewPortal = document.getElementById("viewPortal");
       const viewForm = document.getElementById("viewForm");
       const viewRekap = document.getElementById("viewRekap");
       const navTabContainer = document.getElementById("navTabContainer");
       const pinEl = document.getElementById("navPinBadge");
-      const badgeSesiTopText = document.getElementById("badgeSesiTopText");
+      const badgeSesiTop = document.getElementById("badgeSesiTop");
+      const navTitle = document.getElementById("navTitle");
+      const navSubtitle = document.getElementById("navSubtitle");
 
       if (viewPortal) viewPortal.classList.remove("hidden");
       if (viewForm) viewForm.classList.add("hidden");
       if (viewRekap) viewRekap.classList.add("hidden");
       if (navTabContainer) navTabContainer.classList.add("hidden");
+      if (badgeSesiTop) badgeSesiTop.classList.add("hidden");
+      if (navTitle) navTitle.textContent = "Portal Penilaian Akademik";
+      if (navSubtitle) navSubtitle.textContent = "Universitas Lambung Mangkurat";
       if (pinEl) pinEl.textContent = "🔑 Masukkan PIN";
-      if (badgeSesiTopText) badgeSesiTopText.textContent = "Portal Akses";
 
       renderPortalHistoryCards();
       setTimeout(() => {

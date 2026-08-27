@@ -33,6 +33,37 @@
   </script>
 
   <link rel="stylesheet" href="src/student/index.css">
+  
+  <!-- Instant Zero-FOUC View Resolver (Runs synchronously before HTML paint) -->
+  <script>
+    (function() {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var pin = (params.get('id') || params.get('form') || '').trim();
+        if (!pin) {
+          document.documentElement.classList.add('portal-mode-active');
+        } else {
+          document.documentElement.classList.add('form-mode-active');
+        }
+      } catch(e) {}
+    })();
+  </script>
+  <style>
+    /* Instant Portal & Form View Isolation (Zero Flash of Wrong Content) */
+    html.portal-mode-active #viewForm,
+    html.portal-mode-active #viewRekap,
+    html.portal-mode-active #navTabContainer,
+    html.portal-mode-active #badgeSesiTop {
+      display: none !important;
+    }
+    html.portal-mode-active #viewPortal {
+      display: block !important;
+    }
+    html.form-mode-active #viewPortal {
+      display: none !important;
+    }
+  </style>
+
   <!-- KaTeX CSS & JS for Universal Math / LaTeX / AI & Word Formula Rendering -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -57,7 +88,7 @@
         <div class="min-w-0 flex-1">
           <div class="flex items-center gap-1 sm:gap-2">
             <h1 class="font-bold text-xs sm:text-sm text-zinc-100 truncate" id="navTitle">
-              Penilaian Akademik Mahasiswa
+              Portal Penilaian Akademik
             </h1>
             <span class="hidden xs:inline-block px-1.5 py-0.2 rounded text-[9.5px] font-mono font-semibold bg-zinc-800 text-zinc-300 border border-zinc-700 shrink-0">
               FKIP ULM
@@ -234,7 +265,7 @@
     <!-- ========================================================================= -->
     <!-- TAB 1: FORM PENILAIAN (MODERN-MINIMALIST MULTI-STEP) -->
     <!-- ========================================================================= -->
-    <div id="viewForm" class="space-y-4 sm:space-y-5">
+    <div id="viewForm" class="hidden space-y-4 sm:space-y-5">
 
       <!-- =================================================================== -->
       <!-- =================================================================== -->

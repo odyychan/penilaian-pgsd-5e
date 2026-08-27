@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.36] - 2026-08-27
+
+### 🔒 Perbaikan Keamanan Akses & Zero-FOUC View Resolver (Portal PIN vs Form Isolation)
+- **🛡️ Eliminasi Celah Bocor Pratinjau Form (*Zero Flash of Unwanted Content*):**
+  - Menerapkan *synchronous view resolver script* dan *CSS isolation rules* pada `<head>` `index.html` yang dieksekusi sebelum *first paint* peramban.
+  - Memastikan jika URL tidak mengandung parameter PIN (`?id=...` / `?form=...`), seluruh container formulir (`viewForm`), rekapitulasi (`viewRekap`), dan tab navigasi tersembunyi secara permanen sejak level render CSS awal.
+  - Menghilangkan sepenuhnya celah kedipan antarmuka (*flash*) yang sempat menampilkan formulir penilaian perkuliahan sebelum berpindah ke portal PIN.
+- **✨ Konsistensi Header & Brand Portal Hub:**
+  - Menetapkan judul default navbar sebagai *"Portal Penilaian Akademik"* dan menyembunyikan lencana sesi saat berada di mode portal.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker ke `v2.4.36`.
+
+---
+
 ## [2.4.35] - 2026-08-27
 
 ### ⚡ Perbaikan Bug Loop & Lag Pasca-Autentikasi Google (Seamless Auth Transition)
