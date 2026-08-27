@@ -4242,12 +4242,30 @@ function normalizeMediaList(fieldOrMedia) {
       }
     }
 
-    async function handleDirectSwitchGoogle() {
-      const sb = getSupabaseClient();
-      if (sb && sb.auth) {
-        try { await sb.auth.signOut(); } catch(e) {}
+    let isPerformingSignOut = false;
+    async function executeSupabaseSignOut() {
+      if (isPerformingSignOut) return;
+      isPerformingSignOut = true;
+      try {
+        const sb = getSupabaseClient();
+        if (sb && sb.auth) {
+          await Promise.race([
+            sb.auth.signOut({ scope: 'local' }).catch(() => {}),
+            new Promise(resolve => setTimeout(resolve, 800))
+          ]);
+        }
+      } catch (e) {
+        console.warn("Supabase signOut notice:", e);
+      } finally {
+        clearAuthSession();
+        isPerformingSignOut = false;
       }
-      clearAuthSession();
+    }
+
+    async function handleDirectSwitchGoogle() {
+      await executeSupabaseSignOut();
+      resetLockedIdentityInputs();
+      updateAccountHeaderUI();
       handleGoogleSignIn();
     }
 
@@ -4260,14 +4278,44 @@ function normalizeMediaList(fieldOrMedia) {
         type: "warning"
       });
       if (ok) {
-        const sb = getSupabaseClient();
-        if (sb && sb.auth) {
-          try { await sb.auth.signOut(); } catch(e) {}
-        }
-        clearAuthSession();
+        await executeSupabaseSignOut();
+        resetLockedIdentityInputs();
+        updateAccountHeaderUI();
         showToast("Anda telah keluar dari akun.", "info");
         goToInfoOverview();
       }
+    }
+
+    function resetLockedIdentityInputs() {
+      const inputEmail = document.getElementById("inputEmail");
+      const inputNama = document.getElementById("inputNama");
+      const inputNim = document.getElementById("inputNim");
+      const autoNotice = document.getElementById("namaAutoFillNotice");
+      const nimNotice = document.getElementById("authNimAutoNotice");
+      const nimFeedback = document.getElementById("nimFeedbackBox");
+      const nimStatus = document.getElementById("nimStatusIcon");
+      const card = document.getElementById("formAccountHeaderCard");
+
+      if (inputEmail) {
+        inputEmail.value = "";
+        inputEmail.readOnly = false;
+        inputEmail.className = "w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-zinc-200 text-xs sm:text-sm bg-white text-zinc-900 outline-none focus:border-zinc-900 transition";
+      }
+      if (inputNama) {
+        inputNama.value = "";
+        inputNama.readOnly = false;
+        inputNama.className = "w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 text-xs sm:text-sm bg-white text-zinc-900 outline-none focus:border-zinc-900 transition";
+      }
+      if (inputNim) {
+        inputNim.value = "";
+        inputNim.readOnly = false;
+        inputNim.className = "w-full pl-3.5 pr-20 py-2.5 rounded-xl border border-zinc-200 text-xs sm:text-sm bg-white text-zinc-900 outline-none focus:border-zinc-900 transition";
+      }
+      if (autoNotice) autoNotice.classList.add("hidden");
+      if (nimNotice) nimNotice.classList.add("hidden");
+      if (nimFeedback) nimFeedback.classList.add("hidden");
+      if (nimStatus) nimStatus.classList.add("hidden");
+      if (card) card.classList.add("hidden");
     }
 
     function getCurrentAuthSession() {
@@ -4309,19 +4357,33 @@ function normalizeMediaList(fieldOrMedia) {
     }
 
     function clearAuthSession() {
-      const key = "PGSD_AUTH_SESSION_" + (activeFormId || 'BK5E').toUpperCase();
-      localStorage.removeItem(key);
-      sessionStorage.removeItem(key);
-      localStorage.removeItem("PGSD_AUTH_SESSION_PRIMARY");
-      sessionStorage.removeItem("PGSD_AUTH_SESSION_PRIMARY");
+      const formKey = (activeFormId || 'BK5E').toUpperCase();
+      try {
+        localStorage.removeItem("PGSD_AUTH_SESSION_" + formKey);
+        sessionStorage.removeItem("PGSD_AUTH_SESSION_" + formKey);
+        localStorage.removeItem("PGSD_AUTH_SESSION_PRIMARY");
+        sessionStorage.removeItem("PGSD_AUTH_SESSION_PRIMARY");
+        sessionStorage.removeItem("PGSD_AUTH_INTENT");
+      } catch (e) {}
+
       activeUserAccountEmail = "";
       activeUserAccountName = "";
       activeUserAccountNim = "";
       activeUserAccountAvatarUrl = "";
+      authState.user = null;
+      authState.session = null;
+
       try {
-        if (supabaseClient && supabaseClient.auth) {
-          supabaseClient.auth.signOut();
-        }
+        Object.keys(localStorage).forEach(k => {
+          if (k.startsWith('sb-') && k.endsWith('-auth-token')) {
+            localStorage.removeItem(k);
+          }
+        });
+        Object.keys(sessionStorage).forEach(k => {
+          if (k.startsWith('sb-') && k.endsWith('-auth-token')) {
+            sessionStorage.removeItem(k);
+          }
+        });
       } catch (e) {}
     }
 
@@ -7392,19 +7454,41 @@ function normalizeMediaList(fieldOrMedia) {
 
         const cleanup = () => {
           modal.classList.add("hidden");
-          btnOk.onclick = null;
-          btnCancel.onclick = null;
+          if (btnOk) btnOk.onclick = null;
+          if (btnCancel) btnCancel.onclick = null;
+          modal.onclick = null;
+          document.removeEventListener("keydown", handleKeydown);
         };
 
-        btnOk.onclick = () => {
-          cleanup();
-          resolve(true);
+        const handleKeydown = (e) => {
+          if (e.key === "Escape") {
+            cleanup();
+            resolve(false);
+          }
         };
 
-        btnCancel.onclick = () => {
-          cleanup();
-          resolve(false);
+        modal.onclick = (e) => {
+          if (e.target === modal) {
+            cleanup();
+            resolve(false);
+          }
         };
+
+        document.addEventListener("keydown", handleKeydown);
+
+        if (btnOk) {
+          btnOk.onclick = () => {
+            cleanup();
+            resolve(true);
+          };
+        }
+
+        if (btnCancel) {
+          btnCancel.onclick = () => {
+            cleanup();
+            resolve(false);
+          };
+        }
 
         modal.classList.remove("hidden");
       });

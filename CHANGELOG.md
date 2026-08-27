@@ -4,6 +4,21 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.27] - 2026-08-27
+
+### 🚪 Perbaikan Total Bug Tombol Keluar Akun & Eliminasi Infinite Loop SignOut
+- **🚫 Eliminasi Rekursi Tak Terbatas (*Infinite Event Loop Fix*):**
+  - Menghapus pemanggilan `supabaseClient.auth.signOut()` dari dalam fungsi `clearAuthSession()`, mencegah loop rekursif tak berujung antara event `onAuthStateChange('SIGNED_OUT')` dan pembersihan sesi lokal yang menyebabkan browser hang / stuck total.
+- **⚡ SignOut Asinkron Terisolasi & Anti-Freeze (`executeSupabaseSignOut`):**
+  - Mengimplementasikan `executeSupabaseSignOut()` dengan proteksi timeout non-blocking (maksimal 800ms) menggunakan `Promise.race`, memastikan antarmuka tidak pernah terhenti meskipun terjadi kendala jaringan saat berkomunikasi dengan server Supabase.
+  - Memastikan token otentikasi di `localStorage` dan `sessionStorage` dibersihkan tuntas secara instan.
+- **🔓 Reset Status Form & Pembukaan Kunci Input Identitas:**
+  - Menambahkan `resetLockedIdentityInputs()` yang secara otomatis membuka kunci (*unlock readonly*), mereset nilai bidang input (*NIM, Nama, Email*), menyembunyikan badge verifikasi Google, dan mengembalikan pengguna ke halaman panduan awal dengan tampilan yang bersih.
+- **🪟 Peningkatan Dialog Konfirmasi & Responsivitas Modal:**
+  - Menambahkan listener penutupan modal via klik area luar (*backdrop*) dan tombol `Escape` pada mesin `showAppConfirm()`, serta menaikkan derajat z-index menjadi `z-[9999]`.
+
+---
+
 ## [2.4.26] - 2026-08-27
 
 ### 🛠️ Perbaikan Alur Tahapan Pengisian & Pencegahan Layout Blank pada Halaman Panduan
