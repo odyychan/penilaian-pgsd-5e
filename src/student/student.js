@@ -2401,6 +2401,45 @@ function normalizeMediaList(fieldOrMedia) {
           };
         }
 
+        // 4. Default fallback for BK5E primary form if no local cache exists
+        if (isDefault) {
+          if (!appConfig || Object.keys(appConfig).length === 0) {
+            appConfig = {
+              "Judul_Form": "Penilaian Presentasi Kelas 5E PGSD 2026",
+              "Mata_Kuliah": "Bimbingan Konseling di SD",
+              "Dosen_Pengampu": "Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.",
+              "Kelas": "5E",
+              "Jurusan": "PGSD",
+              "Sesi_Minggu_Aktif": "Minggu 1",
+              "Nilai_Kelompok_Min": "50",
+              "Nilai_Kelompok_Max": "100"
+            };
+          }
+          if (!currentFormMeta) {
+            currentFormMeta = {
+              formId: "BK5E",
+              formSlug: "bk-5e",
+              judulForm: "Penilaian Presentasi Kelas 5E PGSD 2026",
+              mataKuliah: "Bimbingan Konseling di SD",
+              dosen: "Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.",
+              kelas: "5E",
+              jurusan: "PGSD",
+              sesiAktif: "Minggu 1",
+              status: "AKTIF"
+            };
+          }
+          if (!currentFormSchema || !Array.isArray(currentFormSchema.tahapan) || currentFormSchema.tahapan.length === 0) {
+            currentFormSchema = {
+              tahapan: [
+                { id: "tahap_1", title: "Identitas & Akses Penilai", description: "Isi identitas diri Anda sebelum menilai.", fields: [{ id: "fld_core_identity", type: "CORE_IDENTITY", label: "Identitas Penilai", required: true }] },
+                { id: "tahap_2", title: "Pemilihan Kelompok Presentator", description: "Pilih kelompok yang sedang presentasi.", fields: [{ id: "fld_core_group", type: "CORE_GROUP_SELECT", label: "Kelompok yang Dinilai", required: true }] },
+                { id: "tahap_3", title: "Skor Rubrik & Voting Presentator", description: "Berikan nilai presentasi dan pilih pemateri terbaik.", fields: [{ id: "fld_core_score", type: "CORE_SCORE_RUBRIC", label: "Nilai Presentasi", required: true }, { id: "fld_core_voting", type: "CORE_BEST_PRESENTER", label: "Presentator Terbaik", required: true }] },
+                { id: "tahap_4", title: "Evaluasi Masukan Kualitatif", description: "Tuliskan masukan apresiasi dan catatan untuk pemateri.", fields: [{ id: "fld_core_feedback", type: "CORE_MEMBER_FEEDBACK", label: "Evaluasi Masukan Kualitatif Tiap Pemateri", required: true }] }
+              ]
+            };
+          }
+        }
+
         // Exact In-Memory / Local Draft Schema & Config for Preview Mode
         if (isPreviewMode) {
           const draftSchemaStr = sessionStorage.getItem("PGSD_DRAFT_SCHEMA_" + activeFormId) || localStorage.getItem("PGSD_DRAFT_SCHEMA_" + activeFormId);
@@ -2888,9 +2927,18 @@ function normalizeMediaList(fieldOrMedia) {
       const rawDesc = appConfig["Deskripsi_Form"] || (currentFormMeta && currentFormMeta.deskripsi) || (currentFormSchema && currentFormSchema.tahapan && currentFormSchema.tahapan[0] && currentFormSchema.tahapan[0].description) || `Formulir penilaian perkuliahan ${matkul} (${appConfig["Kelas"] || ''}) yang diisi oleh mahasiswa/penilai.`;
       const formattedDesc = smartMathFormat(rawDesc);
 
-      document.getElementById("navTitle").innerHTML = formattedTitle;
-      document.getElementById("navSubtitle").innerHTML = smartMathFormat(matkul);
-      document.getElementById("badgeSesiTopText").textContent = sesi;
+      const navTitle = document.getElementById("navTitle");
+      if (navTitle) {
+        navTitle.innerHTML = formattedTitle;
+        navTitle.classList.add("math-renderable");
+      }
+      const navSubtitle = document.getElementById("navSubtitle");
+      if (navSubtitle) {
+        navSubtitle.innerHTML = smartMathFormat(matkul);
+        navSubtitle.classList.add("math-renderable");
+      }
+      const badgeSesi = document.getElementById("badgeSesiTopText");
+      if (badgeSesi) badgeSesi.textContent = sesi;
 
       // Update Landing Hero Title & Description
       const overviewJudulEl = document.getElementById("overviewJudulForm");
@@ -2913,19 +2961,30 @@ function normalizeMediaList(fieldOrMedia) {
       renderDynamicClientStages();
 
       setTimeout(() => {
-        renderAllMathInElement(document.getElementById("formOverviewSection"));
-        renderAllMathInElement(document.body);
+        const ovSec = document.getElementById("formOverviewSection");
+        if (ovSec) renderAllMathInElement(ovSec);
+        if (document.body) renderAllMathInElement(document.body);
       }, 50);
 
       const minVal = parseInt(appConfig["Nilai_Kelompok_Min"] || 50);
       const maxVal = parseInt(appConfig["Nilai_Kelompok_Max"] || 100);
-      document.getElementById("sliderMinLabel").textContent = `Min: ${minVal}`;
-      document.getElementById("sliderMaxLabel").textContent = `Max: ${maxVal}`;
-      document.getElementById("inputNilaiSlider").min = minVal;
-      document.getElementById("inputNilaiSlider").max = maxVal;
-      document.getElementById("inputNilaiNumber").min = minVal;
-      document.getElementById("inputNilaiNumber").max = maxVal;
-      updateScoreBadge(document.getElementById("inputNilaiNumber").value || 85);
+      const sliderMinLbl = document.getElementById("sliderMinLabel");
+      if (sliderMinLbl) sliderMinLbl.textContent = `Min: ${minVal}`;
+      const sliderMaxLbl = document.getElementById("sliderMaxLabel");
+      if (sliderMaxLbl) sliderMaxLbl.textContent = `Max: ${maxVal}`;
+      const sliderInput = document.getElementById("inputNilaiSlider");
+      if (sliderInput) {
+        sliderInput.min = minVal;
+        sliderInput.max = maxVal;
+      }
+      const numInput = document.getElementById("inputNilaiNumber");
+      if (numInput) {
+        numInput.min = minVal;
+        numInput.max = maxVal;
+        if (typeof updateScoreBadge === 'function') {
+          updateScoreBadge(numInput.value || 85);
+        }
+      }
       evaluateFormScheduleStatus();
 
       // Dynamic Role & Group Labels (Inline Editable Sync)
@@ -3198,31 +3257,6 @@ function normalizeMediaList(fieldOrMedia) {
       }
 
       saveFormDraft();
-    }
-
-    // Flow Navigation: Info Form vs Wizard Form
-    function startAssessmentForm() {
-      const authGate = document.getElementById("formAuthGateSection");
-      const overview = document.getElementById("formOverviewSection");
-      const wizard = document.getElementById("formWizardContainer");
-      if (authGate) authGate.classList.add("hidden");
-      if (overview) overview.classList.add("hidden");
-      if (wizard) wizard.classList.remove("hidden");
-      if (!document.getElementById("stepSection_1")) {
-        renderDynamicClientStages();
-      }
-      updateStepUI(currentStep || 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function goToInfoOverview() {
-      const authGate = document.getElementById("formAuthGateSection");
-      const overview = document.getElementById("formOverviewSection");
-      const wizard = document.getElementById("formWizardContainer");
-      if (authGate) authGate.classList.add("hidden");
-      if (overview) overview.classList.remove("hidden");
-      if (wizard) wizard.classList.add("hidden");
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     // Navigation Step

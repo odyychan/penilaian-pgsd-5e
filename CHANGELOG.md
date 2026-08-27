@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.26] - 2026-08-27
+
+### 🛠️ Perbaikan Alur Tahapan Pengisian & Pencegahan Layout Blank pada Halaman Panduan
+- **🌟 Eliminasi Tampilan Kosong pada Kotak Alur Tahapan (*Zero Blank Flash*):**
+  - Mengisi elemen `#overviewAlurTahapanGrid` dan `#overviewHeaderInfoGrid` dengan kartu informasi fallback instan pada HTML statis awal (`index.html`) agar pengguna tidak pernah melihat kotak alur kosong saat halaman dimuat.
+  - Memperbarui skema fallback deterministik pada `loadLocalCache()` dan `renderConfigHeader()` sehingga seluruh 4 tahapan formulir (*Identitas, Pilih Kelompok, Skor Rubrik, dan Evaluasi Masukan*) langsung ter-render dengan sempurna bahkan sebelum respon jaringan database selesai.
+- **🛡️ Penguatan Proteksi Null-Safety Elemen DOM:**
+  - Menambahkan *null-check guards* lengkap pada pengaksesan elemen `sliderMinLabel`, `sliderMaxLabel`, `inputNilaiSlider`, `inputNilaiNumber`, `navTitle`, dan `navSubtitle` di dalam `renderConfigHeader()` untuk mencegah runtime exception.
+  - Menghapus definisi fungsi duplikat legacy `startAssessmentForm()` dan `goToInfoOverview()` demi konsistensi alur otentikasi Google Cloud.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker ke `v2.4.26` untuk memastikan seluruh perbaikan diterapkan secara instan ke seluruh klien browser.
+
+---
+
 ## [2.4.25] - 2026-08-27
 
 ### 🎯 Penyempurnaan Form Identitas Penilai & Sinkronisasi Ekstraksi NIM Google

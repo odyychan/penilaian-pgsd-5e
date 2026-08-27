@@ -408,15 +408,57 @@
             <!-- KONTEN RINCIAN (TER-BLUR SECARA HALUS DAN TEKS TETAP SEDIKIT TERLIHAT) -->
             <div id="overviewSpoilerContent" class="space-y-4 sm:space-y-5 transition-all duration-300">
               <!-- Rincian Identitas / Informasi Tambahan (Dinamis dari Config) -->
-              <div id="overviewHeaderInfoGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 text-xs">
-                <!-- Rendered dynamically via renderOverviewHeaderInfoGrid() -->
+              <div id="overviewHeaderInfoGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3 text-xs">
+                <div class="p-2.5 sm:p-3 rounded-xl bg-zinc-50 border border-zinc-200/80 space-y-0.5">
+                  <span class="text-zinc-400 block text-[10.5px] sm:text-[11px] font-medium math-renderable">Mata Kuliah:</span>
+                  <span class="font-semibold text-zinc-900 mt-0.5 block break-words leading-tight math-renderable">Bimbingan Konseling di SD</span>
+                </div>
+                <div class="p-2.5 sm:p-3 rounded-xl bg-zinc-50 border border-zinc-200/80 space-y-0.5">
+                  <span class="text-zinc-400 block text-[10.5px] sm:text-[11px] font-medium math-renderable">Dosen Pengampu:</span>
+                  <span class="font-semibold text-zinc-900 mt-0.5 block break-words leading-tight math-renderable">Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.</span>
+                </div>
+                <div class="p-2.5 sm:p-3 rounded-xl bg-zinc-50 border border-zinc-200/80 space-y-0.5">
+                  <span class="text-zinc-400 block text-[10.5px] sm:text-[11px] font-medium math-renderable">Kelas:</span>
+                  <span class="font-semibold text-zinc-900 mt-0.5 block break-words leading-tight math-renderable">5E</span>
+                </div>
+                <div class="p-2.5 sm:p-3 rounded-xl bg-zinc-50 border border-zinc-200/80 space-y-0.5">
+                  <span class="text-zinc-400 block text-[10.5px] sm:text-[11px] font-medium math-renderable">Program Studi:</span>
+                  <span class="font-semibold text-zinc-900 mt-0.5 block break-words leading-tight math-renderable">PGSD</span>
+                </div>
               </div>
 
               <!-- Alur Tahapan Pengisian (Dinamis dari Schema) -->
               <div class="bg-zinc-50 rounded-xl p-3 sm:p-4 border border-zinc-200/70 space-y-2.5 sm:space-y-3">
                 <h4 class="text-[11px] sm:text-xs font-bold text-zinc-800 uppercase tracking-wider font-mono">Alur Tahapan Pengisian:</h4>
                 <div id="overviewAlurTahapanGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5 text-xs">
-                  <!-- Rendered dynamically via renderOverviewAlurTahapan() -->
+                  <div class="p-2.5 rounded-lg bg-white border border-zinc-200/60 flex items-start gap-2.5">
+                    <span class="w-5 h-5 rounded-full bg-zinc-900 text-white font-mono text-[10px] font-bold flex items-center justify-center flex-shrink-0">1</span>
+                    <div class="min-w-0">
+                      <div class="font-semibold text-zinc-900 truncate math-renderable" title="Identitas & Akses Penilai">Identitas &amp; Akses Penilai</div>
+                      <div class="text-[11px] text-zinc-500 line-clamp-1 math-renderable" title="Isi identitas diri Anda sebelum menilai.">Isi identitas diri Anda sebelum menilai.</div>
+                    </div>
+                  </div>
+                  <div class="p-2.5 rounded-lg bg-white border border-zinc-200/60 flex items-start gap-2.5">
+                    <span class="w-5 h-5 rounded-full bg-zinc-900 text-white font-mono text-[10px] font-bold flex items-center justify-center flex-shrink-0">2</span>
+                    <div class="min-w-0">
+                      <div class="font-semibold text-zinc-900 truncate math-renderable" title="Pemilihan Kelompok Presentator">Pemilihan Kelompok Presentator</div>
+                      <div class="text-[11px] text-zinc-500 line-clamp-1 math-renderable" title="Pilih kelompok yang sedang presentasi.">Pilih kelompok yang sedang presentasi.</div>
+                    </div>
+                  </div>
+                  <div class="p-2.5 rounded-lg bg-white border border-zinc-200/60 flex items-start gap-2.5">
+                    <span class="w-5 h-5 rounded-full bg-zinc-900 text-white font-mono text-[10px] font-bold flex items-center justify-center flex-shrink-0">3</span>
+                    <div class="min-w-0">
+                      <div class="font-semibold text-zinc-900 truncate math-renderable" title="Skor Rubrik & Voting Presentator">Skor Rubrik &amp; Voting Presentator</div>
+                      <div class="text-[11px] text-zinc-500 line-clamp-1 math-renderable" title="Berikan nilai presentasi dan pilih pemateri terbaik.">Berikan nilai presentasi dan pilih pemateri terbaik.</div>
+                    </div>
+                  </div>
+                  <div class="p-2.5 rounded-lg bg-white border border-zinc-200/60 flex items-start gap-2.5">
+                    <span class="w-5 h-5 rounded-full bg-zinc-900 text-white font-mono text-[10px] font-bold flex items-center justify-center flex-shrink-0">4</span>
+                    <div class="min-w-0">
+                      <div class="font-semibold text-zinc-900 truncate math-renderable" title="Evaluasi Masukan Kualitatif">Evaluasi Masukan Kualitatif</div>
+                      <div class="text-[11px] text-zinc-500 line-clamp-1 math-renderable" title="Tuliskan masukan apresiasi dan catatan untuk pemateri.">Tuliskan masukan apresiasi dan catatan untuk pemateri.</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
