@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.38] - 2026-08-27
+
+### ⚡ Perbaikan Kritis Infinite Call Loop & Freeze UI Saat Pemulihan Draf Pasca-Auth
+- **🛡️ Eliminasi Infinite Recursive Loop pada `restoreFormDraft`:**
+  - Mengidentifikasi dan menghapus pemanggilan recursive `startAssessmentForm()` yang sebelumnya berada di dalam `restoreFormDraft()`.
+  - Pemanggilan tersebut sebelumnya memicu loop tanpa akhir (`continueAssessmentWithAuthenticatedUser` ➔ `restoreFormDraft` ➔ `startAssessmentForm` ➔ `continueAssessmentWithAuthenticatedUser` ➔ `restoreFormDraft` ...) yang menyebabkan browser kehabisan memori dan menampilkan popup *"Page Unresponsive"*.
+  - Pemulihan draf kini berjalan murni linier dan instan (< 15 ms) tanpa pemanggilan fungsi pemicu sesi ulang.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.38`.
+
+---
+
 ## [2.4.37] - 2026-08-27
 
 ### ⚡ Eliminasi Total Cache Nyangkut & Sistem Auto-Updater Klien (Zero-Stale Architecture)

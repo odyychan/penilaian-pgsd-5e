@@ -4905,21 +4905,21 @@ function normalizeMediaList(fieldOrMedia) {
         if (draft.email || draft.nama || draft.nim || draft.groupName) {
           isDraftAlreadyRestored = true;
 
-          if (isAuthenticated) {
-            startAssessmentForm();
-
-            const targetStep = (draft.step && draft.step >= 1 && draft.step <= (Object.keys(stepMetadata).length || 4))
-              ? draft.step
-              : 1;
+          const targetStep = (draft.step && draft.step >= 1 && draft.step <= (Object.keys(stepMetadata).length || 4))
+            ? draft.step
+            : (currentStep || 1);
+          
+          const wizard = document.getElementById("formWizardContainer");
+          if (wizard && !wizard.classList.contains("hidden")) {
             updateStepUI(targetStep, true);
-
-            const banner = document.getElementById("studentDraftRestoreBanner");
-            if (banner) banner.classList.remove("hidden");
-            const indicator = document.getElementById("autoSaveIndicator");
-            if (indicator) indicator.classList.remove("hidden");
-
-            showToast("Draf isian sebelumnya berhasil dipulihkan.", "info");
           }
+
+          const banner = document.getElementById("studentDraftRestoreBanner");
+          if (banner) banner.classList.remove("hidden");
+          const indicator = document.getElementById("autoSaveIndicator");
+          if (indicator) indicator.classList.remove("hidden");
+
+          showToast("Draf isian sebelumnya berhasil dipulihkan.", "info");
         }
       } catch (e) {
         console.warn("Restore draft error notice:", e);
