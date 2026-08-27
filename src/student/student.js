@@ -165,24 +165,44 @@
     }
 
     function renderAllMathInElement(domElement) {
-      const target = domElement || document.body;
+      if (typeof renderMathInElement !== 'function') return;
+      const target = domElement || document.getElementById("mainAppRoot") || document.body;
       if (!target) return;
-      if (typeof renderMathInElement === 'function') {
-        try {
-          renderMathInElement(target, {
-            delimiters: [
-              { left: '$$', right: '$$', display: true },
-              { left: '$', right: '$', display: false },
-              { left: '\\(', right: '\\)', display: false },
-              { left: '\\[', right: '\\]', display: true }
-            ],
-            ignoredTags: ["script", "noscript", "style", "textarea", "pre", "code", "option"],
-            throwOnError: false,
-            trust: true
+
+      try {
+        const mathNodes = target.querySelectorAll ? target.querySelectorAll(".math-renderable") : null;
+        if (mathNodes && mathNodes.length > 0 && mathNodes.length <= 50) {
+          mathNodes.forEach(node => {
+            try {
+              renderMathInElement(node, {
+                delimiters: [
+                  { left: '$$', right: '$$', display: true },
+                  { left: '$', right: '$', display: false },
+                  { left: '\\(', right: '\\)', display: false },
+                  { left: '\\[', right: '\\]', display: true }
+                ],
+                ignoredTags: ["script", "noscript", "style", "textarea", "pre", "code", "option", "input", "select"],
+                throwOnError: false,
+                trust: true
+              });
+            } catch(e) {}
           });
-        } catch(e) {
-          console.warn("KaTeX render error:", e);
+          return;
         }
+
+        renderMathInElement(target, {
+          delimiters: [
+            { left: '$$', right: '$$', display: true },
+            { left: '$', right: '$', display: false },
+            { left: '\\(', right: '\\)', display: false },
+            { left: '\\[', right: '\\]', display: true }
+          ],
+          ignoredTags: ["script", "noscript", "style", "textarea", "pre", "code", "option", "input", "select"],
+          throwOnError: false,
+          trust: true
+        });
+      } catch(e) {
+        console.warn("KaTeX render notice:", e);
       }
     }
 
@@ -1326,10 +1346,24 @@ function normalizeMediaList(fieldOrMedia) {
       renderAllMathInElement(container);
     }
 
-    function renderDynamicClientStages() {
+    let lastRenderedSchemaHash = "";
+    function renderDynamicClientStages(force = false) {
       const container = document.getElementById("dynamicClientStagesContainer");
       if (!container) return;
 
+      const currentSchemaStr = JSON.stringify(currentFormSchema || {});
+      const hasExistingDom = !!document.getElementById("stepSection_1");
+
+      if (!force && hasExistingDom && lastRenderedSchemaHash === currentSchemaStr) {
+        updateStepMetadataFromSchema();
+        renderDynamicStepTabs();
+        if (groupsData && groupsData.length > 0) {
+          renderGroupOptions();
+        }
+        return;
+      }
+
+      lastRenderedSchemaHash = currentSchemaStr;
       updateStepMetadataFromSchema();
       renderDynamicStepTabs();
 
@@ -1413,8 +1447,7 @@ function normalizeMediaList(fieldOrMedia) {
 
       setTimeout(() => {
         renderAllMathInElement(container);
-        renderAllMathInElement(document.getElementById("formOverviewSection"));
-      }, 50);
+      }, 30);
     }
 
     function renderSingleClientFieldHtml(f) {
@@ -2572,7 +2605,7 @@ function normalizeMediaList(fieldOrMedia) {
 
             renderConfigHeader();
             renderGroupOptions();
-            renderDynamicClientStages();
+            renderDynamicClientStages(false);
             restoreFormDraft();
             updateStepUI(currentStep || 1);
             updateAccountHeaderUI();
@@ -3915,10 +3948,10 @@ function normalizeMediaList(fieldOrMedia) {
       return null;
     }
 
-    async function resolveStudentIdentity(profile, mode) {
-      const email = profile.email;
+    function resolveStudentIdentity(profile, mode) {
+      const email = profile.email || "";
       let candidateNim = extractCandidateNim(email);
-      let resolvedName = profile.name;
+      let resolvedName = profile.name || "";
       let isRosterVerified = false;
       let detectedRole = "Mahasiswa";
 
@@ -3926,6 +3959,7 @@ function normalizeMediaList(fieldOrMedia) {
         detectedRole = "Dosen";
       }
 
+      // Fast synchronous lookup in memory from allStudentsData
       if (allStudentsData && allStudentsData.length > 0) {
         let found = null;
         if (candidateNim) {
@@ -3942,29 +3976,48 @@ function normalizeMediaList(fieldOrMedia) {
         }
       }
 
-      if (!isRosterVerified && candidateNim) {
-        const sb = getSupabaseClient();
-        if (sb) {
-          try {
-            const { data: studentRow } = await sb.from('pgsd_students')
-              .select('*')
-              .eq('form_id', activeFormId)
-              .eq('nim', candidateNim)
-              .maybeSingle();
+      // Fallback lookup in memory from groupsData
+      if (!isRosterVerified && groupsData && groupsData.length > 0 && candidateNim) {
+        for (const g of groupsData) {
+          const m = (g.members || []).find(mem => String(mem.nim).trim() === candidateNim);
+          if (m) {
+            resolvedName = m.name || resolvedName;
+            isRosterVerified = true;
+            break;
+          }
+        }
+      }
 
-            if (studentRow) {
-              resolvedName = studentRow.name || resolvedName;
-              isRosterVerified = true;
+      // Non-blocking background sync if not verified yet
+      if (!isRosterVerified && candidateNim) {
+        setTimeout(async () => {
+          try {
+            const sb = getSupabaseClient();
+            if (sb) {
+              const { data: studentRow } = await sb.from('pgsd_students')
+                .select('*')
+                .eq('form_id', activeFormId)
+                .eq('nim', candidateNim)
+                .maybeSingle();
+
+              if (studentRow && studentRow.name) {
+                const inputNama = document.getElementById("inputNama");
+                if (inputNama && (!inputNama.value || inputNama.value === email.split('@')[0])) {
+                  inputNama.value = studentRow.name;
+                }
+                const accountName = document.getElementById("accountActiveName");
+                if (accountName) accountName.textContent = studentRow.name;
+              }
             }
           } catch(e) {}
-        }
+        }, 80);
       }
 
       return {
         ok: true,
         profile,
         nim: candidateNim || '',
-        name: resolvedName || email.split('@')[0],
+        name: resolvedName || (email ? email.split('@')[0] : "Penilai"),
         role: detectedRole,
         isGoogleVerified: true,
         isRosterVerified
@@ -4596,10 +4649,10 @@ function normalizeMediaList(fieldOrMedia) {
         return;
       }
 
-      await continueAssessmentWithAuthenticatedUser(user, mode);
+      continueAssessmentWithAuthenticatedUser(user, mode);
     }
 
-    async function continueAssessmentWithAuthenticatedUser(user, mode) {
+    function continueAssessmentWithAuthenticatedUser(user, mode) {
       const profile = extractGoogleProfile(user);
 
       if (!profile.email) {
@@ -4613,7 +4666,7 @@ function normalizeMediaList(fieldOrMedia) {
         return;
       }
 
-      const identity = await resolveStudentIdentity(profile, mode);
+      const identity = resolveStudentIdentity(profile, mode);
 
       openAssessmentForm();
       applyLockedIdentity(identity);
@@ -4631,10 +4684,10 @@ function normalizeMediaList(fieldOrMedia) {
       if (overview) overview.classList.add("hidden");
       if (wizard) wizard.classList.remove("hidden");
       if (!document.getElementById("stepSection_1")) {
-        renderDynamicClientStages();
+        renderDynamicClientStages(false);
       }
       updateStepUI(currentStep || 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'instant' });
     }
 
     function goToInfoOverview() {

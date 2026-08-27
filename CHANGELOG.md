@@ -4,6 +4,21 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.30] - 2026-08-27
+
+### ⚡ Eliminasi Lag & Optimasi Kecepatan Transisi Pasca-Auth Google
+- **🚀 Transisi Layar Instan Tanpa Blokir (*Zero-Latency Form Fallback*):**
+  - Mengubah `resolveStudentIdentity()` dan `continueAssessmentWithAuthenticatedUser()` menjadi proses sinkron berbasis memori (*in-memory fast-path*) 0ms, menghilangkan query jaringan pemblokir UI saat transisi dari otentikasi Google ke wizard formulir.
+  - Penyelarasan verifikasi nama/NIM yang belum tersinkron dijalankan secara asinkron di latar belakang tanpa menunda transisi pengguna.
+- **🛡️ Caching Pintar DOM Formulir (`lastRenderedSchemaHash`):**
+  - Mencegah siklus penghancuran dan pembuatan ulang DOM yang berulang pada `renderDynamicClientStages()` ketika struktur tahapan formulir tidak mengalami perubahan.
+- **🎯 Optimasi Rendering KaTeX Terarah:**
+  - Mengoptimalkan `renderAllMathInElement()` agar hanya memproses node berkelas `.math-renderable` secara spesifik, menghindari pemindaian rekursif berat di seluruh `document.body` yang sebelumnya menyebabkan micro-stutter / lag pada browser.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker ke `v2.4.30`.
+
+---
+
 ## [2.4.29] - 2026-08-27
 
 ### 🧹 Eliminasi Redundansi Pengaturan PIN & Status Form pada Tab Setelan Admin
