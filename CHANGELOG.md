@@ -4,6 +4,23 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.28] - 2026-08-27
+
+### 🎨 Redesain Minimalis-Modern Komponen Google Auth & Panel Akun Penilai
+- **✨ Strip Status Akun Google Minimalis-Modern (`#formAccountHeaderCard`):**
+  - Merombak total bilah informasi akun menjadi profil strip modern (*Linear/Apple-style clean design*) dengan latar kartu putih bersih, border lembut (`border-zinc-200/80`), dan elevasi halus.
+  - Menambahkan *micro Google logo badge* pada sudut avatar pengguna untuk menegaskan keaslian sesi otentikasi Google Workspace.
+  - Mengganti tombol aksi lama dengan *sleek action pills* ("Ganti Akun" dan "Keluar") yang dilengkapi ikon SVG proporsional, tactile micro-interaction (`active:scale-95`), dan warna yang lebih elegan.
+- **🛡️ Layar Autentikasi Google (*Auth Gate Screen*) yang Lebih Estetik:**
+  - Mendesain ulang kartu prompt masuk Google dengan kartu melengkung modern (*rounded-3xl*), floating Google logo icon, badge status keamanan, dan tombol login bertekstur modern dengan kontras tinggi.
+  - Memperbarui kartu peringatan *Domain Mismatch* akun Google non-ULM agar lebih informatif, jelas, dan rapi.
+- **📝 Konsistensi Bidang Input Identitas Step 1 (`CORE_IDENTITY`):**
+  - Menyelaraskan tampilan input Email, NIM, dan Nama penilai dengan desain token minimalis modern berbingkai bersih dan badge terverifikasi Google (*animated pulse indicator*).
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker ke `v2.4.28`.
+
+---
+
 ## [2.4.27] - 2026-08-27
 
 ### 🚪 Perbaikan Total Bug Tombol Keluar Akun & Eliminasi Infinite Loop SignOut

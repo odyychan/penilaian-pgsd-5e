@@ -1739,8 +1739,8 @@ function normalizeMediaList(fieldOrMedia) {
         const roleVal = clientCustomFormAnswers[f.id + '_peran'] || currentEvaluatorRole || 'Mahasiswa';
 
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-6 rounded-2xl border border-zinc-200/80 space-y-4">
-            <div class="border-b border-zinc-200 pb-3 flex items-center justify-between gap-2">
+          <div class="bg-white p-4 sm:p-6 rounded-2xl border border-zinc-200/80 space-y-4 shadow-xs">
+            <div class="border-b border-zinc-100 pb-3 flex items-center justify-between gap-2">
               <div>
                 <h3 class="text-sm sm:text-base font-bold text-zinc-900 math-renderable">${smartMathFormat(f.label || 'Identitas Penilai')}${reqBadge}</h3>
                 <p class="text-xs text-zinc-500 mt-0.5 math-renderable">${smartMathFormat(f.description || 'Silakan lengkapi identitas Anda sebelum memulai penilaian.')}</p>
@@ -1756,7 +1756,7 @@ function normalizeMediaList(fieldOrMedia) {
                 <select 
                   id="selectPeranPenilai" 
                   onchange="onRoleChange(this.value)" 
-                  class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm font-semibold text-zinc-900 bg-white focus:border-zinc-900 outline-none transition cursor-pointer appearance-none pr-9 shadow-2xs"
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 text-xs sm:text-sm font-semibold text-zinc-900 bg-white focus:border-zinc-900 outline-none transition cursor-pointer appearance-none pr-9 shadow-2xs"
                 >
                   <option value="" disabled>-- Pilih Peran Penilai Terlebih Dahulu --</option>
                   <option value="Mahasiswa" ${roleVal === 'Mahasiswa' ? 'selected' : ''}>${escapeHtml(peranMhsLabel)}</option>
@@ -1787,7 +1787,7 @@ function normalizeMediaList(fieldOrMedia) {
                   value="${escapeHtml(nimVal)}"
                   placeholder="NIM Mahasiswa ULM..." 
                   ${nimVal ? 'readonly' : ''}
-                  class="w-full pl-3.5 pr-20 py-2.5 rounded-xl border ${nimVal ? 'border-emerald-300 bg-emerald-50/40' : 'border-zinc-300 bg-white'} text-xs sm:text-sm font-mono focus:border-zinc-900 outline-none transition placeholder-zinc-400 shadow-2xs"
+                  class="w-full pl-3.5 pr-20 py-2.5 rounded-xl border ${nimVal ? 'border-zinc-200 bg-zinc-50/80 text-zinc-900' : 'border-zinc-200 bg-white text-zinc-900'} text-xs sm:text-sm font-mono focus:border-zinc-900 outline-none transition placeholder-zinc-400 shadow-2xs"
                   oninput="validateNimLive(this.value); saveFormDraft();"
                 >
                 <div id="nimStatusIcon" class="absolute right-3 top-2.5 ${nimVal ? '' : 'hidden'}">
@@ -1816,7 +1816,7 @@ function normalizeMediaList(fieldOrMedia) {
                   value="${escapeHtml(nameVal)}"
                   autocapitalize="words"
                   placeholder="Tuliskan nama lengkap Anda..." 
-                  class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 outline-none transition bg-white placeholder-zinc-400 shadow-2xs"
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 text-xs sm:text-sm focus:border-zinc-900 outline-none transition bg-white placeholder-zinc-400 shadow-2xs"
                   oninput="saveFormDraft();"
                 >
               </div>
@@ -1831,8 +1831,8 @@ function normalizeMediaList(fieldOrMedia) {
                     <label id="labelEmailPenilai" class="block text-xs font-semibold text-zinc-700">
                       Email Penilai <span id="emailRequiredStar" class="text-rose-500">*</span>
                     </label>
-                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9.5px] font-bold">
-                      <svg class="w-3 h-3 text-emerald-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 text-[10px] font-semibold">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                       <span>Google Verified</span>
                     </span>
                   </div>
@@ -1844,19 +1844,19 @@ function normalizeMediaList(fieldOrMedia) {
                       readonly
                       value="${escapeHtml(emailVal)}"
                       placeholder="Akun Google terverifikasi..." 
-                      class="w-full pl-3.5 pr-28 py-2.5 rounded-xl border border-emerald-300 text-xs sm:text-sm bg-emerald-50/40 text-zinc-800 font-mono outline-none cursor-default shadow-2xs"
+                      class="w-full pl-3.5 pr-24 py-2.5 rounded-xl border border-zinc-200 text-xs sm:text-sm bg-zinc-50/80 text-zinc-800 font-mono outline-none cursor-default shadow-2xs"
                     >
                     <button 
                       type="button" 
                       onclick="handleSwitchGoogleAccount()" 
-                      class="absolute right-1.5 px-2.5 py-1.5 rounded-lg bg-white hover:bg-zinc-100 active:scale-98 text-zinc-700 border border-zinc-200 text-[11px] font-bold transition cursor-pointer shadow-2xs flex items-center gap-1"
+                      class="absolute right-1.5 min-h-[30px] px-2.5 py-1 rounded-lg bg-white hover:bg-zinc-100 active:scale-95 text-zinc-700 border border-zinc-200 text-[11px] font-semibold transition cursor-pointer shadow-2xs flex items-center gap-1.5"
                       title="Ganti akun Google"
                     >
-                      <span>🔄</span>
-                      <span>Ganti Akun</span>
+                      <svg class="w-3 h-3 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                      <span>Ganti</span>
                     </button>
                   </div>
-                  <p class="text-[10px] text-zinc-400">Email diotentikasi resmi via Google Cloud Platform &amp; Supabase.</p>
+                  <p class="text-[10px] text-zinc-400">Email diotentikasi via Google Cloud Platform.</p>
                 </div>
               `}
             </div>
@@ -4049,14 +4049,35 @@ function normalizeMediaList(fieldOrMedia) {
       const badgeGoogle = document.getElementById("badgeGoogleVerified");
       const badgeRoster = document.getElementById("badgeRosterVerified");
 
-      if (emailEl) emailEl.textContent = identity.profile.email;
-      if (nameEl) nameEl.textContent = identity.name || identity.profile.email.split('@')[0];
+      const email = (identity.profile && identity.profile.email) || identity.email || "";
+      const name = identity.name || (identity.profile && identity.profile.name) || (email ? email.split('@')[0] : "Penilai");
+      const avatar = (identity.profile && identity.profile.avatar) || identity.avatarUrl || "";
+
+      if (emailEl) emailEl.textContent = email;
+      if (nameEl) nameEl.textContent = name;
 
       if (avatarBox) {
-        if (identity.profile.avatar) {
-          avatarBox.innerHTML = `<img src="${escapeHtml(identity.profile.avatar)}" alt="${escapeHtml(identity.name)}" class="w-full h-full object-cover rounded-full" onerror="this.outerHTML='<span class=\\'font-bold text-white text-sm\\'>${escapeHtml((identity.name || 'U').charAt(0).toUpperCase())}</span>'">`;
+        const initial = (name || email || 'U').charAt(0).toUpperCase();
+        const googleMiniIcon = `
+          <div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-white rounded-full flex items-center justify-center shadow-xs border border-zinc-200 pointer-events-none">
+            <svg class="w-2.5 h-2.5" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.15C3.26 21.36 7.33 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.24C.45 8.15 0 9.99 0 12s.45 3.85 1.24 5.42l4.04-3.15z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.24 6.58l4.04 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+            </svg>
+          </div>
+        `;
+        if (avatar) {
+          avatarBox.innerHTML = `
+            <img src="${escapeHtml(avatar)}" alt="${escapeHtml(name)}" class="w-full h-full object-cover rounded-full" onerror="this.outerHTML='<span class=\\'font-bold text-white text-sm\\'>${escapeHtml(initial)}</span>'">
+            ${googleMiniIcon}
+          `;
         } else {
-          avatarBox.innerHTML = `<span class="font-bold text-white text-sm">${escapeHtml((identity.name || identity.profile.email || 'U').charAt(0).toUpperCase())}</span>`;
+          avatarBox.innerHTML = `
+            <span class="font-bold text-white text-sm">${escapeHtml(initial)}</span>
+            ${googleMiniIcon}
+          `;
         }
       }
 
@@ -4406,11 +4427,17 @@ function normalizeMediaList(fieldOrMedia) {
         card.classList.add("hidden");
         return;
       }
-      const emailEl = document.getElementById("accountActiveEmail");
-      const nameEl = document.getElementById("accountActiveName");
-      if (emailEl) emailEl.textContent = session.email;
-      if (nameEl) nameEl.textContent = session.nama || session.email.split('@')[0];
-      card.classList.remove("hidden");
+      renderAccountBar({
+        profile: {
+          email: session.email,
+          name: session.nama,
+          avatar: session.avatarUrl
+        },
+        name: session.nama,
+        email: session.email,
+        avatarUrl: session.avatarUrl,
+        isRosterVerified: session.isRosterVerified
+      });
     }
 
     function ensureAuthInitialized() {
