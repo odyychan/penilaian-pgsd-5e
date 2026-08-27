@@ -5248,6 +5248,19 @@ function normalizeMediaList(fieldOrMedia) {
       let sbSuccess = false;
       const idRespons = "PGSD-REC-" + activeFormId + "-" + Date.now().toString(36).toUpperCase();
 
+      // 🔑 Pre-flight Auth Token Refresh (mencegah kegagalan token expire pada pengisian lama)
+      if (sb && sb.auth) {
+        try {
+          const { data: sessionData } = await sb.auth.getSession();
+          if (sessionData?.session) {
+            authState.session = sessionData.session;
+            authState.user = sessionData.session.user;
+          }
+        } catch (e) {
+          console.warn("Session pre-flight check notice:", e);
+        }
+      }
+
       // ⚡ FAST-PATH (< 50ms): Simpan langsung data transaksi penilaian ke Supabase PostgreSQL
       if (sb) {
         try {
@@ -5385,7 +5398,7 @@ function normalizeMediaList(fieldOrMedia) {
         if (spinner) spinner.classList.add("hidden");
         
         closePreSubmitReviewModal();
-        savePendingSubmission(payload);
+        savePendingSubmission(payload, idRespons);
         clearStudentFormDraft(false);
         showSuccessModal(payload.kelompok, true, payload, idRespons);
       }
@@ -5399,10 +5412,14 @@ function normalizeMediaList(fieldOrMedia) {
       }
     }
 
-    function savePendingSubmission(payload) {
+    function savePendingSubmission(payload, idRespons = '') {
       let pending = getPendingSubmissions();
       pending = pending.filter(p => !(p.payload.email === payload.email && p.payload.kelompok === payload.kelompok && p.payload.sesi === payload.sesi));
-      pending.push({ payload, timestamp: Date.now() });
+      pending.push({ 
+        payload, 
+        idRespons: idRespons || ("PGSD-REC-" + (payload.formId || activeFormId) + "-" + Date.now().toString(36).toUpperCase()), 
+        timestamp: Date.now() 
+      });
       localStorage.setItem("PGSD_PENDING_SUBMISSIONS", JSON.stringify(pending));
     }
 
@@ -5410,28 +5427,68 @@ function normalizeMediaList(fieldOrMedia) {
       const pending = getPendingSubmissions();
       if (pending.length === 0 || !navigator.onLine) return;
 
-      const apiUrl = getApiUrl();
+      const sb = getSupabaseClient();
+      const defaultSheetUrl = DEFAULT_API_URL;
+      const customSheetUrl = (appConfig && appConfig["Spreadsheet_Webhook_Url"]) || localStorage.getItem("PGSD_GLOBAL_API_URL");
+      const apiUrl = customSheetUrl || defaultSheetUrl;
       const remaining = [];
 
       for (let item of pending) {
-        try {
-          const res = await fetch(apiUrl, {
-            method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify(item.payload)
-          });
-          const data = await res.json();
-          if (!data.success && !data.error?.includes("sudah pernah mengirimkan")) {
-            remaining.push(item);
-          }
-        } catch(e) {
+        let sent = false;
+        const idRespons = item.idRespons || ("PGSD-REC-" + (item.payload.formId || activeFormId) + "-" + Date.now().toString(36).toUpperCase());
+
+        // 1. Coba kirim ke Supabase
+        if (sb) {
+          try {
+            const respRow = {
+              id_respons: idRespons,
+              form_id: item.payload.formId || activeFormId,
+              sesi: item.payload.sesi,
+              email: item.payload.email,
+              nama_penilai: item.payload.namaPenilai,
+              nim_penilai: item.payload.nimPenilai || "-",
+              peran_penilai: item.payload.peranPenilai || "Mahasiswa",
+              kelompok_dinilai: item.payload.kelompok,
+              nilai_kelompok: parseFloat(item.payload.nilaiKelompok) || 0,
+              best_presenter_1: (item.payload.presentatorTerbaik && item.payload.presentatorTerbaik[0]) || "-",
+              best_presenter_2: (item.payload.presentatorTerbaik && item.payload.presentatorTerbaik[1]) || "-",
+              evaluasi_detail: item.payload.evaluasiDetail || {},
+              custom_answers: item.payload.customAnswers || {},
+              synced_to_sheets: false
+            };
+            const { error: insErr } = await sb.from('pgsd_responses').upsert([respRow], { onConflict: 'id_respons' });
+            if (!insErr) {
+              sent = true;
+            }
+          } catch(e) {}
+        }
+
+        // 2. Coba kirim ke Apps Script Webhook
+        if (apiUrl) {
+          try {
+            const res = await fetch(apiUrl, {
+              method: "POST",
+              headers: { "Content-Type": "text/plain;charset=utf-8" },
+              body: JSON.stringify(item.payload)
+            });
+            const data = await res.json();
+            if (data && data.success) {
+              sent = true;
+              if (sb) {
+                sb.from('pgsd_responses').update({ synced_to_sheets: true, synced_at: new Date().toISOString() }).eq('id_respons', idRespons);
+              }
+            }
+          } catch(e) {}
+        }
+
+        if (!sent) {
           remaining.push(item);
         }
       }
 
       if (remaining.length === 0) {
         localStorage.removeItem("PGSD_PENDING_SUBMISSIONS");
-        showToast("Seluruh data penilaian offline berhasil dikirim ke Spreadsheet.", "success");
+        showToast("Seluruh draf penilaian antrean offline berhasil disinkronkan.", "success");
         loadRekapData(true);
       } else {
         localStorage.setItem("PGSD_PENDING_SUBMISSIONS", JSON.stringify(remaining));

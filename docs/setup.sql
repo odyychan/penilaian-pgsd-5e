@@ -112,6 +112,7 @@ CREATE TABLE IF NOT EXISTS pgsd_backups (
 CREATE INDEX IF NOT EXISTS idx_pgsd_forms_slug ON pgsd_forms(form_slug);
 CREATE INDEX IF NOT EXISTS idx_pgsd_forms_status ON pgsd_forms(status);
 CREATE INDEX IF NOT EXISTS idx_pgsd_forms_primary ON pgsd_forms(is_primary);
+CREATE INDEX IF NOT EXISTS idx_pgsd_forms_upper_form_id ON pgsd_forms (UPPER(form_id));
 
 CREATE INDEX IF NOT EXISTS idx_pgsd_form_configs_form_id ON pgsd_form_configs(form_id);
 CREATE INDEX IF NOT EXISTS idx_pgsd_groups_form_id ON pgsd_groups(form_id);
@@ -120,9 +121,11 @@ CREATE INDEX IF NOT EXISTS idx_pgsd_students_nim ON pgsd_students(nim);
 CREATE INDEX IF NOT EXISTS idx_pgsd_students_lookup ON pgsd_students(form_id, nim);
 
 CREATE INDEX IF NOT EXISTS idx_pgsd_responses_form_id ON pgsd_responses(form_id);
+CREATE INDEX IF NOT EXISTS idx_pgsd_responses_upper_form_id ON pgsd_responses (UPPER(form_id));
 CREATE INDEX IF NOT EXISTS idx_pgsd_responses_created_at ON pgsd_responses(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_pgsd_responses_nim_penilai ON pgsd_responses(nim_penilai);
 CREATE INDEX IF NOT EXISTS idx_pgsd_responses_kelompok ON pgsd_responses(form_id, kelompok_dinilai);
+CREATE INDEX IF NOT EXISTS idx_pgsd_responses_synced ON pgsd_responses (synced_to_sheets);
 
 -- =========================================================================
 -- 📊 VIEWS TERINTEGRASI (AGGREGATION FAST-PATH)
@@ -176,8 +179,50 @@ ALTER TABLE pgsd_students ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pgsd_responses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pgsd_backups ENABLE ROW LEVEL SECURITY;
 
--- Grant standard public & anon access
+-- Grant schema permissions
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
 GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated;
 GRANT ALL ON ALL ROUTINES IN SCHEMA public TO anon, authenticated;
+
+-- Granular RLS Policies for Form Data and Transactions
+DO $$
+BEGIN
+  -- pgsd_forms
+  DROP POLICY IF EXISTS "Public can view forms" ON pgsd_forms;
+  DROP POLICY IF EXISTS "Allow manage forms" ON pgsd_forms;
+  CREATE POLICY "Public can view forms" ON pgsd_forms FOR SELECT USING (true);
+  CREATE POLICY "Allow manage forms" ON pgsd_forms FOR ALL USING (true) WITH CHECK (true);
+
+  -- pgsd_form_configs
+  DROP POLICY IF EXISTS "Public can view configs" ON pgsd_form_configs;
+  DROP POLICY IF EXISTS "Allow manage configs" ON pgsd_form_configs;
+  CREATE POLICY "Public can view configs" ON pgsd_form_configs FOR SELECT USING (true);
+  CREATE POLICY "Allow manage configs" ON pgsd_form_configs FOR ALL USING (true) WITH CHECK (true);
+
+  -- pgsd_groups
+  DROP POLICY IF EXISTS "Public can view groups" ON pgsd_groups;
+  DROP POLICY IF EXISTS "Allow manage groups" ON pgsd_groups;
+  CREATE POLICY "Public can view groups" ON pgsd_groups FOR SELECT USING (true);
+  CREATE POLICY "Allow manage groups" ON pgsd_groups FOR ALL USING (true) WITH CHECK (true);
+
+  -- pgsd_students
+  DROP POLICY IF EXISTS "Public can view students" ON pgsd_students;
+  DROP POLICY IF EXISTS "Allow manage students" ON pgsd_students;
+  CREATE POLICY "Public can view students" ON pgsd_students FOR SELECT USING (true);
+  CREATE POLICY "Allow manage students" ON pgsd_students FOR ALL USING (true) WITH CHECK (true);
+
+  -- pgsd_responses
+  DROP POLICY IF EXISTS "Public can view responses" ON pgsd_responses;
+  DROP POLICY IF EXISTS "Public can insert responses" ON pgsd_responses;
+  DROP POLICY IF EXISTS "Allow manage responses" ON pgsd_responses;
+  CREATE POLICY "Public can view responses" ON pgsd_responses FOR SELECT USING (true);
+  CREATE POLICY "Public can insert responses" ON pgsd_responses FOR INSERT WITH CHECK (true);
+  CREATE POLICY "Allow manage responses" ON pgsd_responses FOR ALL USING (true) WITH CHECK (true);
+
+  -- pgsd_backups
+  DROP POLICY IF EXISTS "Allow manage backups" ON pgsd_backups;
+  CREATE POLICY "Allow manage backups" ON pgsd_backups FOR ALL USING (true) WITH CHECK (true);
+END
+$$;
+

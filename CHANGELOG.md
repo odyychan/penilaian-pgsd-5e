@@ -4,6 +4,24 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.32] - 2026-08-27
+
+### 🛡️ Audit Komprehensif: Penguatan Keamanan RLS Supabase, Antrean Offline, & Re-Sync Spreadsheet
+- **🔒 Penegakan Row Level Security (RLS) & Granular Database Policies:**
+  - Menerapkan kebijakan keamanan RLS pada seluruh tabel basis data (`pgsd_forms`, `pgsd_form_configs`, `pgsd_groups`, `pgsd_students`, `pgsd_responses`, `pgsd_backups`) untuk membatasi operasi penulisan/modifikasi tak terotorisasi pada level database.
+  - Menambahkan indeks B-Tree case-insensitive pada `UPPER(form_id)` dan indeks status sinkronisasi `idx_pgsd_responses_synced`.
+- **🔑 Pre-Flight Token Refresh Google Auth:**
+  - Menambahkan verifikasi dan penyegaran token sesi Google Auth otomatis sebelum proses pengiriman nilai, mencegah kegagalan pengiriman akibat *token expired* saat mahasiswa mengisi form dalam durasi yang lama (> 1 jam).
+- **📶 Ketahanan Jaringan & Antrean Pengiriman Offline (*Offline Outbox Queue*):**
+  - Mengintegrasikan antrean lokal `PGSD_PENDING_SUBMISSIONS` dengan pipa ganda (Supabase + Google Webhook). Saat jaringan terputus, data penilaian tetap aman dan otomatis disinkronkan saat koneksi internet kembali online.
+- **⚡ Fitur Sinkronisasi Ulang Spreadsheet di Panel Admin:**
+  - Menambahkan tombol aksi `[⚡ Sinkronkan ke Sheets]` di toolbar respons admin untuk mengirim ulang seluruh respons yang belum tercatat di Google Spreadsheet dosen dalam 1-klik.
+  - Menampilkan badge status sinkronisasi (*✓ Sheets* / *⏳ Belum Sinkron*) pada setiap kartu respons mahasiswa.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker ke `v2.4.32`.
+
+---
+
 ## [2.4.31] - 2026-08-27
 
 ### 🎨 Penyederhanaan Desain Minimalis-Modern Layar Autentikasi Google (*Auth Gate*)

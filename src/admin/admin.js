@@ -7392,7 +7392,9 @@
               best2: r.best_presenter_2,
               evaluasiDetail: JSON.stringify(r.evaluasi_detail || {}),
               customAnswers: JSON.stringify(r.custom_answers || {}),
-              status: r.status || "VALID"
+              status: r.status || "VALID",
+              syncedToSheets: r.synced_to_sheets || false,
+              syncedAt: r.synced_at
             }));
             try {
               localStorage.setItem(`PGSD_CACHE_RESPONSES_${targetForm}`, JSON.stringify(adminResponsesList));
@@ -7683,11 +7685,18 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
         const card = document.createElement("div");
         card.className = "bg-white rounded-xl border border-zinc-200 p-4 shadow-xs space-y-3 flex flex-col justify-between";
 
+        const sheetsBadge = r.syncedToSheets 
+          ? `<span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">✓ Sheets</span>`
+          : `<span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-medium">⏳ Belum Sinkron</span>`;
+
         card.innerHTML = `
           <div class="space-y-2">
             <div class="flex items-center justify-between gap-1 text-[10px] text-zinc-400 font-mono">
               <span>${r.timestamp}</span>
-              <span class="px-1.5 py-0.5 rounded bg-zinc-100 font-semibold text-zinc-700">${r.sesi}</span>
+              <div class="flex items-center gap-1">
+                ${sheetsBadge}
+                <span class="px-1.5 py-0.5 rounded bg-zinc-100 font-semibold text-zinc-700">${r.sesi}</span>
+              </div>
             </div>
             <div>
               <div class="flex items-center gap-1.5">
@@ -7722,6 +7731,85 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       if (visibleCount === 0) emptyEl.classList.remove("hidden");
       else emptyEl.classList.add("hidden");
       renderAdminAttendanceTracker();
+    }
+
+    async function syncUnsyncedResponsesToSheets() {
+      const targetForm = currentFormId || DEFAULT_PRIMARY_FORM_ID;
+      const sb = await ensureSupabaseClient();
+      const apiUrl = (currentFormConfig && currentFormConfig["Spreadsheet_Webhook_Url"]) || localStorage.getItem("PGSD_GLOBAL_API_URL") || getApiUrl();
+
+      if (!apiUrl) {
+        showAdminToast("Tautan Spreadsheet Webhook belum dikonfigurasi.", "warning");
+        return;
+      }
+
+      const btn = document.getElementById("btnSyncUnsyncedToSheets");
+      if (btn) btn.disabled = true;
+      showAdminToast("Memeriksa respons yang belum tersinkron ke Spreadsheet...", "info");
+
+      try {
+        let unsyncedList = [];
+        if (sb) {
+          const { data, error } = await sb
+            .from('pgsd_responses')
+            .select('*')
+            .eq('form_id', targetForm)
+            .or('synced_to_sheets.is.null,synced_to_sheets.eq.false');
+          if (!error && Array.isArray(data)) {
+            unsyncedList = data;
+          }
+        }
+
+        if (unsyncedList.length === 0) {
+          showAdminToast("Seluruh respons sudah tersinkronisasi 100% dengan Google Spreadsheet.", "success");
+          if (btn) btn.disabled = false;
+          return;
+        }
+
+        let successCount = 0;
+        for (const r of unsyncedList) {
+          const payload = {
+            action: "submitAssessment",
+            formId: r.form_id,
+            peranPenilai: r.peran_penilai || "Mahasiswa",
+            nimPenilai: r.nim_penilai || "-",
+            email: r.email,
+            namaPenilai: r.nama_penilai,
+            kelompok: r.kelompok_dinilai,
+            sesi: r.sesi,
+            nilaiKelompok: r.nilai_kelompok,
+            presentatorTerbaik: [r.best_presenter_1, r.best_presenter_2].filter(Boolean),
+            evaluasiDetail: r.evaluasi_detail || {},
+            customAnswers: r.custom_answers || {},
+            driveFolderName: (currentFormConfig && currentFormConfig["Google_Drive_Folder_Name"]) || "https://drive.google.com/drive/folders/1ZYnP40AaCoaqu6-H2ZNfYuS-RshCWURK"
+          };
+
+          try {
+            const res = await fetch(apiUrl, {
+              method: "POST",
+              headers: { "Content-Type": "text/plain;charset=utf-8" },
+              body: JSON.stringify(payload)
+            });
+            const resJson = await res.json();
+            if (resJson && resJson.success) {
+              successCount++;
+              if (sb) {
+                await sb.from('pgsd_responses').update({
+                  synced_to_sheets: true,
+                  synced_at: new Date().toISOString()
+                }).eq('id', r.id);
+              }
+            }
+          } catch(e) {}
+        }
+
+        showAdminToast(`Berhasil menyinkronkan ${successCount} dari ${unsyncedList.length} respons ke Spreadsheet.`, "success");
+        fetchAdminResponsesList(true);
+      } catch (err) {
+        showAdminToast("Sinkronisasi gagal: " + err.message, "error");
+      } finally {
+        if (btn) btn.disabled = false;
+      }
     }
 
     async function deleteSingleResponse(idRespons, rowIndex) {
