@@ -3208,18 +3208,34 @@ function normalizeMediaList(fieldOrMedia) {
 
       // Update footer kredit pembuat web / link portal admin
       const isDef = (activeFormId === 'BK5E' || !activeFormId);
-      const pembuatNama = (appConfig["Pembuat_Web_Nama"] || (currentFormMeta && (currentFormMeta.pembuatNama || currentFormMeta.pembuat_nama)) || (isDef ? "Rodhiyah" : "")).trim();
-      const pembuatPrefix = (appConfig["Pembuat_Web_Prefix"] || (currentFormMeta && (currentFormMeta.pembuatPrefix || currentFormMeta.pembuat_prefix)) || "Dibuat oleh").trim();
+      const pembuatNama = (
+        (appConfig && appConfig["Pembuat_Web_Nama"]) || 
+        (currentFormMeta && (currentFormMeta.pembuatNama || currentFormMeta.pembuat_nama)) || 
+        (isDef ? "Rodhiyah" : "")
+      ).trim();
+      const pembuatPrefix = (
+        (appConfig && appConfig["Pembuat_Web_Prefix"]) || 
+        (currentFormMeta && (currentFormMeta.pembuatPrefix || currentFormMeta.pembuat_prefix)) || 
+        (isDef ? "Dibuat oleh" : "")
+      ).trim();
+
       const prefixEl = document.getElementById("footerPembuatPrefix");
       const footerLink = document.getElementById("footerAdminLink");
       if (footerLink) {
-        if (pembuatNama) {
-          if (prefixEl) {
-            prefixEl.innerHTML = `${smartMathFormat(pembuatPrefix)} `;
-            prefixEl.classList.remove("hidden");
+        if (!isPortalMode && pembuatNama) {
+          if (pembuatPrefix) {
+            if (prefixEl) {
+              prefixEl.innerHTML = `${smartMathFormat(pembuatPrefix)} `;
+              prefixEl.classList.remove("hidden");
+            }
+          } else {
+            if (prefixEl) {
+              prefixEl.textContent = "";
+              prefixEl.classList.add("hidden");
+            }
           }
           footerLink.innerHTML = smartMathFormat(pembuatNama);
-          footerLink.title = `${pembuatPrefix} ${pembuatNama} — Klik untuk menuju ke Admin`;
+          footerLink.title = `${pembuatPrefix ? pembuatPrefix + ' ' : ''}${pembuatNama} — Klik untuk menuju ke Admin`;
         } else {
           if (prefixEl) {
             prefixEl.textContent = "";

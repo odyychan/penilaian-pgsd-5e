@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.60] - 2026-08-28
+
+### 🏷️ Refined Footer Branding & Dynamic Creator Link Engine
+- **🎯 Ketentuan Teks Footer Presisi:**
+  - Label `Admin` ditampilkan secara eksklusif hanya saat berada di Dashboard Utama / Portal Hub (`isPortalMode === true`) atau saat formulir tidak memiliki konfigurasi nama identitas pembuat.
+  - Saat berada di dalam formulir dan identitas pembuat dikonfigurasi: teks footer secara langsung menampilkan `[Prefix] [Nama]` (contoh: *Dibuat oleh Rodhiyah*), di mana **Nama Pembuat** berfungsi sebagai tombol interaktif untuk menuju ke portal Admin.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.60`.
+
+---
+
 ## [2.4.59] - 2026-08-28
 
 ### 🔄 Tab Navigation & Rekapitulasi Hasil View Logic Restoration
