@@ -10250,6 +10250,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
           .sort((a, b) => b.votes - a.votes);
 
         // Aggregate qualitative reviews
+        const allAdminStudents = (adminMasterGroups || []).flatMap(g => (g.members || []).map(m => ({ ...m, kelompok: g.name })));
         const evaluasiList = {};
         groupResponses.forEach(r => {
           const penilaiName = r.nama_penilai || r.namaPenilai || 'Penilai';
@@ -10258,7 +10259,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
             Object.entries(evalDetail).forEach(([memberKey, ulasanText]) => {
               if (memberKey === 'uploadedFiles' || !ulasanText) return;
               let memberName = memberKey;
-              const foundStud = (adminMasterStudents || []).find(s => String(s.nim).trim() === String(memberKey).trim());
+              const foundStud = allAdminStudents.find(s => String(s.nim).trim() === String(memberKey).trim());
               if (foundStud && foundStud.name) {
                 memberName = `${foundStud.name} (${memberKey})`;
               }
@@ -10298,13 +10299,9 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       // Hitung Total Mahasiswa Terdaftar
       const activeGroupNames = new Set(summaryList.map(g => g.kelompok));
       let totalMahasiswa = 0;
-      if (adminMasterStudents && adminMasterStudents.length > 0) {
-        totalMahasiswa = adminMasterStudents.filter(s => activeGroupNames.has(s.kelompok)).length;
-      } else if (adminMasterGroups && adminMasterGroups.length > 0) {
-        adminMasterGroups.filter(g => activeGroupNames.has(g.name)).forEach(g => {
-          totalMahasiswa += (g.members || []).length;
-        });
-      }
+      (adminMasterGroups || []).filter(g => activeGroupNames.has(g.name)).forEach(g => {
+        totalMahasiswa += (g.members || []).length;
+      });
       const avgClassScore = evaluatedCount > 0 ? (totalAllScore / evaluatedCount).toFixed(2) : "0.00";
 
       // Resolve dynamic header cards
