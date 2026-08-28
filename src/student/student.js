@@ -1027,7 +1027,7 @@ function normalizeMediaList(fieldOrMedia) {
       }
       const footerLink = document.getElementById("footerAdminLink");
       if (footerLink) {
-        footerLink.textContent = "Portal Admin";
+        footerLink.textContent = "Admin";
         footerLink.title = "Akses Portal Pengelolaan Admin";
       }
 
@@ -3102,13 +3102,13 @@ function normalizeMediaList(fieldOrMedia) {
             prefixEl.classList.remove("hidden");
           }
           footerLink.innerHTML = smartMathFormat(pembuatNama);
-          footerLink.title = `${pembuatPrefix} ${pembuatNama} — Klik untuk menuju ke Portal Admin`;
+          footerLink.title = `${pembuatPrefix} ${pembuatNama} — Klik untuk menuju ke Admin`;
         } else {
           if (prefixEl) {
             prefixEl.textContent = "";
             prefixEl.classList.add("hidden");
           }
-          footerLink.textContent = "Portal Admin";
+          footerLink.textContent = "Admin";
           footerLink.title = "Akses Portal Pengelolaan Admin";
         }
       }

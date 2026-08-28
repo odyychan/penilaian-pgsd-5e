@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.53] - 2026-08-28
+
+### 🏷️ Footer Admin Link Simplification
+- **✨ Penyederhanaan Teks Tautan Admin:**
+  - Mengubah label default tautan footer dari *"Portal Admin"* menjadi *"Admin"*.
+  - Menghasilkan format minimalis yang sangat ringkas: `© 2026 • Admin` (atau `© 2026 • Dibuat oleh Rodhiyah`).
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.53`.
+
+---
+
 ## [2.4.52] - 2026-08-28
 
 ### 🏛️ Footer Institution Label Standardization
