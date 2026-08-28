@@ -8970,38 +8970,65 @@ function normalizeMediaList(fieldOrMedia) {
       // Filter active cards with non-empty label or value
       const activeCards = cards.filter(c => (c.label && c.label.trim()) || (c.value && c.value.trim()));
 
-      // Build metadata items for the report table
-      let metaItems = activeCards.map(c => ({
+      // Build raw metadata items
+      let rawMetaItems = activeCards.map(c => ({
         label: (c.label || 'Info').trim().replace(/:$/, ''),
         value: (c.value || '-').trim()
       }));
 
       // Add Cakupan Sesi if not explicitly present in custom cards
-      const hasSesiCard = metaItems.some(item => item.label.toLowerCase().includes('sesi') || item.label.toLowerCase().includes('cakupan'));
+      const hasSesiCard = rawMetaItems.some(item => item.label.toLowerCase().includes('sesi') || item.label.toLowerCase().includes('cakupan'));
       if (!hasSesiCard) {
-        metaItems.push({
+        rawMetaItems.push({
           label: 'Cakupan Sesi',
           value: selectedSesi === 'ALL' ? 'Semua Sesi Presentasi' : selectedSesi
         });
       }
 
-      // Render dynamic 2-column metadata table
+      // 🎯 Smart Academic Metadata Pairing:
+      // Left Column (Primary / Long Content): Mata Kuliah, Dosen Pengampu, Cakupan Sesi
+      // Right Column (Secondary / Compact Badges): Kelas, Program Studi, Sesi
+      const leftColItems = [];
+      const rightColItems = [];
+
+      rawMetaItems.forEach(item => {
+        const lblLower = item.label.toLowerCase();
+        if (lblLower.includes('matkul') || lblLower.includes('mata kuliah') || lblLower.includes('dosen') || lblLower.includes('pengampu')) {
+          leftColItems.push(item);
+        } else if (lblLower.includes('kelas') || lblLower.includes('prodi') || lblLower.includes('jurusan') || lblLower.includes('program studi')) {
+          rightColItems.push(item);
+        } else {
+          if (leftColItems.length <= rightColItems.length) {
+            leftColItems.push(item);
+          } else {
+            rightColItems.push(item);
+          }
+        }
+      });
+
+      // Render dynamic 2-column metadata table with generous width for lecturer name & titles
+      const maxRows = Math.max(leftColItems.length, rightColItems.length);
       let metadataTableHtml = '';
-      if (metaItems.length > 0) {
+      if (maxRows > 0) {
         let rowsHtml = '';
-        for (let i = 0; i < metaItems.length; i += 2) {
-          const item1 = metaItems[i];
-          const item2 = metaItems[i + 1];
+        for (let i = 0; i < maxRows; i++) {
+          const leftItem = leftColItems[i];
+          const rightItem = rightColItems[i];
           rowsHtml += `
             <tr style="border: none !important;">
-              <td style="border: none !important; padding: 1.5px 0; width: 16%; font-weight: 600; color: #1f2937; vertical-align: top; font-family: 'Times New Roman', Times, serif;">${escapeHtml(item1.label)}</td>
-              <td style="border: none !important; padding: 1.5px 6px 1.5px 0; width: 38%; font-weight: 700; color: #000000; vertical-align: top; word-break: break-word; font-family: 'Times New Roman', Times, serif;">: ${escapeHtml(item1.value)}</td>
-              ${item2 ? `
-                <td style="border: none !important; padding: 1.5px 0; width: 16%; font-weight: 600; color: #1f2937; vertical-align: top; font-family: 'Times New Roman', Times, serif;">${escapeHtml(item2.label)}</td>
-                <td style="border: none !important; padding: 1.5px 0; width: 30%; font-weight: 700; color: #000000; vertical-align: top; word-break: break-word; font-family: 'Times New Roman', Times, serif;">: ${escapeHtml(item2.value)}</td>
+              ${leftItem ? `
+                <td style="border: none !important; padding: 1.5px 0; width: 17%; font-weight: 600; color: #1f2937; vertical-align: top; font-family: 'Times New Roman', Times, serif; white-space: nowrap;">${escapeHtml(leftItem.label)}</td>
+                <td style="border: none !important; padding: 1.5px 8px 1.5px 0; width: 47%; font-weight: 700; color: #000000; vertical-align: top; word-break: break-word; font-family: 'Times New Roman', Times, serif; line-height: 1.25;">: ${escapeHtml(leftItem.value)}</td>
+              ` : `
+                <td style="border: none !important; width: 17%;"></td>
+                <td style="border: none !important; width: 47%;"></td>
+              `}
+              ${rightItem ? `
+                <td style="border: none !important; padding: 1.5px 0; width: 16%; font-weight: 600; color: #1f2937; vertical-align: top; font-family: 'Times New Roman', Times, serif; white-space: nowrap;">${escapeHtml(rightItem.label)}</td>
+                <td style="border: none !important; padding: 1.5px 0; width: 20%; font-weight: 700; color: #000000; vertical-align: top; word-break: break-word; font-family: 'Times New Roman', Times, serif; line-height: 1.25;">: ${escapeHtml(rightItem.value)}</td>
               ` : `
                 <td style="border: none !important; width: 16%;"></td>
-                <td style="border: none !important; width: 30%;"></td>
+                <td style="border: none !important; width: 20%;"></td>
               `}
             </tr>
           `;
@@ -9204,11 +9231,11 @@ function normalizeMediaList(fieldOrMedia) {
       html += `
             <!-- LEMBAR PENGESAHAN RESMI DOSEN PENGAMPU -->
             <div class="print-signature print-avoid-break" style="page-break-inside: avoid; break-inside: avoid; margin-top: 16px; display: flex; justify-content: flex-end; font-family: 'Times New Roman', Times, serif;">
-              <div style="text-align: center; min-width: 240px; max-width: 300px; font-family: 'Times New Roman', Times, serif;">
+              <div style="text-align: center; min-width: 260px; max-width: 380px; width: fit-content; font-family: 'Times New Roman', Times, serif;">
                 <p style="margin: 0; font-size: 11.5px; color: #000000; font-family: 'Times New Roman', Times, serif;">Banjarmasin, ${printDateStr}</p>
                 <p style="margin: 1.5px 0 0 0; font-size: 11.5px; font-weight: 700; color: #000000; font-family: 'Times New Roman', Times, serif;">Dosen Pengampu Mata Kuliah,</p>
-                <div style="height: 62px;"></div>
-                <div style="margin-top: 1px; padding-bottom: 1.5px; border-bottom: 1.5px solid #000000; display: inline-block; min-width: 210px; max-width: 100%;">
+                <div style="height: 60px;"></div>
+                <div style="margin-top: 1px; padding: 0 6px 1.5px 6px; border-bottom: 1.5px solid #000000; display: inline-block; min-width: 220px; max-width: 100%;">
                   <span style="font-size: 12px; font-weight: 800; color: #000000; white-space: nowrap; letter-spacing: 0.01em; font-family: 'Times New Roman', Times, serif;">${dosen}</span>
                 </div>
                 <p style="margin: 2px 0 0 0; font-size: 11px; color: #000000; font-weight: 600; font-family: 'Times New Roman', Times, serif;">NIP. 19830514 200812 2 003</p>

@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.65] - 2026-08-29
+
+### 🖨️ Print & Report Engine: Smart Metadata Pairing & Layout Alignment Fix
+- **📄 Penataan Distribusi Metadata Laporan Rekapitulasi:**
+  - Memperbaiki tata letak tabel metadata pada lembar cetak rekapitulasi nilai (`renderPrintPreviewContent`) dengan memasangkan data secara proporsional.
+  - Menempatkan **Mata Kuliah** dan **Dosen Pengampu** pada kolom kiri dengan alokasi lebar $47\%$ (~325–360 px), mencegah pemotongan kata atau turun baris (*awkward text wrap*) pada nama dosen bergelar panjang.
+  - Menempatkan elemen ringkas (**Kelas**, **Program Studi**, **Cakupan Sesi**) pada kolom kanan secara seimbang dan simetris.
+- **✍️ Lembar Pengesahan & Tanda Tangan Dosen:**
+  - Menyesuaikan batas lebar kotak tanda tangan (`min-width: 260px`, `max-width: 380px`) dan garis bawah nama dosen agar mengembang dinamis mengikuti panjang nama dan gelar akademik resmi tanpa terpotong.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.65`.
+
+---
+
 ## [2.4.64] - 2026-08-28
 
 ### 🌟 Form Builder & Assessment Engine: Advanced Question Types & Smart Validation

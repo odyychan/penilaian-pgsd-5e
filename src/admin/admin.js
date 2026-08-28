@@ -10339,13 +10339,13 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
           <!-- Lembar Pengesahan & Tanda Tangan Dosen -->
           ${includeFooter ? `
             <div class="pt-8 mt-8 flex justify-end text-xs">
-              <div class="text-center w-64 space-y-12">
+              <div class="text-center min-w-[260px] max-w-[380px] w-fit space-y-12">
                 <div>
                   <p class="text-[11px] text-zinc-600">Banjarmasin, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                   <p class="font-bold text-[11px]">Dosen Pengampu Mata Kuliah,</p>
                 </div>
                 <div>
-                  <p class="font-bold underline math-renderable">${smartMathFormat(dosen)}</p>
+                  <p class="font-bold underline whitespace-nowrap math-renderable">${smartMathFormat(dosen)}</p>
                   <p class="text-[10px] text-zinc-500 font-mono">Dosen FKIP ULM</p>
                 </div>
               </div>
