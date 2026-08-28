@@ -4,6 +4,22 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.57] - 2026-08-28
+
+### ⚡ Instant SPA Form Navigation & Zero-Blank FCP Architecture
+- **🚀 Transisi Formulir Instan (*Instant In-Memory SPA Transition*):**
+  - Mengubah mekanisme pembukaan formulir dari *Recent History* dan input manual PIN agar tidak lagi memicu reload halaman penuh (`window.location.href`).
+  - Sistem kini menggunakan `history.pushState` dan aktivasi instan di memori (`activateFormViewByPin`), menghasilkan perpindahan form secepat kilat (**$< 15\text{ ms}$**) tanpa kedipan layar (*zero flicker*).
+- **🎨 Proteksi Isolasi Zero-Blank CSS di `<head>`:**
+  - Menambahkan aturan CSS eksplisit pada level `<head>` untuk `html.form-mode-active #viewForm`, `html.form-mode-active #navTabContainer`, dan `html.form-mode-active #badgeSesiTop`.
+  - Mencegah fenomena layar tengah putih/kosong saat membuka form ketika JavaScript/Service Worker sedang dalam proses unduh/revalidasi.
+- **🛡️ Penanganan Navigasi Riwayat Browser (*Popstate Event*):**
+  - Mendukung navigasi tombol Back/Forward browser secara mulus antara Portal Hub dan Formulir tanpa reload halaman.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.57`.
+
+---
+
 ## [2.4.56] - 2026-08-28
 
 ### 🛡️ Comprehensive Security Hardening: Anti-Tampering & Concurrency Lock

@@ -803,6 +803,16 @@ function normalizeMediaList(fieldOrMedia) {
       setTimeout(() => renderAllMathInElement(document.getElementById("mainAppRoot") || document.body), 200);
     });
 
+    window.addEventListener('popstate', function() {
+      const params = new URLSearchParams(window.location.search);
+      const pin = (params.get('id') || params.get('form') || '').trim();
+      if (!pin) {
+        showPortalView();
+      } else if (pin !== activeFormId) {
+        activateFormViewByPin(pin);
+      }
+    });
+
 
     // =========================================================================
     // MULTI-FORM PIN PORTAL & HISTORY MANAGEMENT ENGINE
@@ -964,8 +974,9 @@ function normalizeMediaList(fieldOrMedia) {
         } catch (e) {}
       }
 
-      // Also check default fallback forms like BK5E
-      if (!formExists && pin === 'BK5E') {
+      // Also check local cache or default fallback forms like BK5E
+      const hasLocalCache = localStorage.getItem("PGSD_CACHE_GROUPS_" + pin) || localStorage.getItem("PGSD_CACHE_CONFIG_" + pin);
+      if (!formExists && (pin === 'BK5E' || hasLocalCache)) {
         formExists = true;
       }
 
@@ -978,15 +989,66 @@ function normalizeMediaList(fieldOrMedia) {
         return;
       }
 
-      // Save to history & navigate to form
+      // Save to history & navigate to form seamlessly (Instant SPA Switch)
       saveVisitedFormHistory(pin, formMeta);
       localStorage.setItem("PGSD_ACTIVE_CLIENT_FORM_ID", pin);
       
-      // Update URL to ?id=PIN
+      // Update URL without full page reload
       const url = new URL(window.location.href);
       url.searchParams.set('id', pin);
       url.searchParams.delete('form');
-      window.location.href = url.toString();
+      try {
+        window.history.pushState({ formId: pin }, '', url.toString());
+      } catch(e) {}
+
+      // Instant SPA Form Activation (< 15ms)
+      activateFormViewByPin(pin);
+    }
+
+    function activateFormViewByPin(pin) {
+      activeFormId = pin;
+      isPortalMode = false;
+
+      // 1. Instantly switch CSS mode
+      document.documentElement.classList.add('form-mode-active');
+      document.documentElement.classList.remove('portal-mode-active');
+
+      const viewPortal = document.getElementById("viewPortal");
+      const viewForm = document.getElementById("viewForm");
+      const navTabContainer = document.getElementById("navTabContainer");
+      const badgeSesiTop = document.getElementById("badgeSesiTop");
+      const pinEl = document.getElementById("navPinBadge");
+
+      if (viewPortal) viewPortal.classList.add("hidden");
+      if (viewForm) viewForm.classList.remove("hidden");
+      if (navTabContainer) navTabContainer.classList.remove("hidden");
+      if (badgeSesiTop) badgeSesiTop.classList.remove("hidden");
+      if (pinEl) pinEl.textContent = `PIN: ${pin}`;
+
+      // Reset state for new form
+      resetInMemoryClientFormState();
+
+      // 2. Optimistic Rendering from Local Cache (0ms)
+      loadLocalCache();
+      renderConfigHeader();
+      renderGroupOptions();
+      renderDynamicCustomFields();
+      renderDynamicClientStages();
+
+      const hash = (window.location.hash || "").replace("#", "").toLowerCase();
+      const savedTab = (hash === "rekap" || hash === "form") ? hash : (localStorage.getItem("PGSD_ACTIVE_MAIN_TAB") || "form");
+      switchTab(savedTab, false);
+
+      updateStepUI(1);
+      updateAccountHeaderUI();
+      checkAndApplyAuthGate();
+      restoreFormDraft();
+
+      // 3. Background Revalidation from Supabase
+      fetchInitialFormData(false);
+      setTimeout(() => loadRekapData(true), 300);
+
+      window.scrollTo({ top: 0, behavior: 'instant' });
     }
 
     function goToPortalHub() {
@@ -994,7 +1056,11 @@ function normalizeMediaList(fieldOrMedia) {
       url.searchParams.delete('id');
       url.searchParams.delete('form');
       url.searchParams.delete('preview');
-      window.location.href = url.origin + url.pathname;
+      try {
+        window.history.pushState({ portal: true }, '', url.origin + url.pathname);
+      } catch(e) {}
+      showPortalView();
+      window.scrollTo({ top: 0, behavior: 'instant' });
     }
 
     function showPortalView() {
@@ -4706,6 +4772,14 @@ function normalizeMediaList(fieldOrMedia) {
 
     function checkAndApplyAuthGate() {
       updateAccountHeaderUI();
+      const authGate = document.getElementById("formAuthGateSection");
+      const overview = document.getElementById("formOverviewSection");
+      const wizard = document.getElementById("formWizardContainer");
+
+      // Safeguard: Ensure overview is visible if wizard and authGate are not actively in use
+      if (overview && (!wizard || wizard.classList.contains("hidden")) && (!authGate || authGate.classList.contains("hidden"))) {
+        overview.classList.remove("hidden");
+      }
     }
 
     function updateAccountActiveEmail(emailVal) {
