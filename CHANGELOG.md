@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.51] - 2026-08-28
+
+### 🏷️ Minimalist Footer Format Refinement
+- **✨ Penyederhanaan Teks Copyright Footer:**
+  - Menyederhanakan format copyright pada footer publik menjadi ringkas dan minimalis: `© 2026 • Dibuat oleh Rodhiyah` (atau `© 2026 • Portal Admin`).
+  - Menghilangkan teks institusi yang redundan di footer sehingga tampilan lebih bersih dan modern.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.51`.
+
+---
+
 ## [2.4.50] - 2026-08-28
 
 ### 🏷️ Footer Prefix & Credit Integration Enhancement
