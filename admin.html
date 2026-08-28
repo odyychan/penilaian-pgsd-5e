@@ -32,7 +32,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="src/admin/admin.css?v=2.4.67">
+  <link rel="stylesheet" href="src/admin/admin.css?v=2.4.68">
   <!-- KaTeX CSS & JS for Universal Math / LaTeX / AI & Word Formula Rendering -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -274,7 +274,19 @@
               <span>Setelan</span>
             </button>
 
-            <!-- 5. Integrasi & Cloud (Google Cloud, Sheets, Drive, Database) -->
+            <!-- 5. Format Cetak (Print & Report Builder) -->
+            <button 
+              id="adminTabBtn_print" 
+              onclick="switchAdminTab('print')" 
+              class="h-8.5 sm:h-9 px-3 rounded-xl text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/80 transition flex items-center justify-center gap-1.5 cursor-pointer text-center whitespace-nowrap shrink-0 text-xs font-medium"
+            >
+              <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+              </svg>
+              <span>Format Cetak</span>
+            </button>
+
+            <!-- 6. Integrasi & Cloud (Google Cloud, Sheets, Drive, Database) -->
             <button 
               id="adminTabBtn_system" 
               onclick="switchAdminTab('system')" 
@@ -1319,7 +1331,86 @@
       </div>
 
       <!-- ===================================================================== -->
-      <!-- TAB 4: SISTEM & PENGATURAN DATABASE -->
+      <!-- TAB 5: FORMAT CETAK (CUSTOMIZABLE VISUAL REPORT BUILDER & LIVE PREVIEW) -->
+      <!-- ===================================================================== -->
+      <div id="adminView_print" class="flex flex-col gap-3 sm:gap-4 fade-enter hidden">
+        <!-- Top Toolbar Banner -->
+        <div class="bg-white rounded-2xl sm:rounded-3xl border border-zinc-200 p-4 sm:p-5 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-sm sm:text-base font-bold text-zinc-900">Desain &amp; Format Dokumen Cetak</h2>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 font-mono">Live Visual Builder</span>
+            </div>
+            <p class="text-xs text-zinc-500 mt-0.5 leading-relaxed">
+              Atur dan kustomisasi seluruh elemen dokumen laporan resmi A4/PDF formulir ini secara real-time.
+            </p>
+          </div>
+          <div class="flex items-center flex-wrap gap-2 w-full md:w-auto justify-start md:justify-end">
+            <button 
+              type="button" 
+              onclick="resetPrintConfigToDefault()" 
+              class="px-3.5 py-2 rounded-xl border border-zinc-300 hover:bg-zinc-100 text-zinc-700 text-xs font-semibold flex items-center gap-1.5 transition active:scale-98 cursor-pointer shadow-2xs"
+              title="Kembalikan ke susunan standar resmi dinas FKIP ULM"
+            >
+              <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+              <span>Reset Standar ULM</span>
+            </button>
+            <button 
+              type="button" 
+              onclick="executeAdminBrowserPrintFromBuilder()" 
+              class="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold flex items-center gap-1.5 transition active:scale-98 cursor-pointer shadow-xs"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+              </svg>
+              <span>Cetak / Simpan PDF</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Side-by-Side Main Container (Split Grid) -->
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
+          
+          <!-- LEFT PANEL: Visual Modular Blocks Builder Form (xl:col-span-5) -->
+          <div class="xl:col-span-5 space-y-3.5" id="printConfigBlocksContainer">
+            <!-- Dynamic Modular Blocks Rendered Here by JS -->
+          </div>
+
+          <!-- RIGHT PANEL: Live Virtual Paper A4 Preview (xl:col-span-7) -->
+          <div class="xl:col-span-7 bg-zinc-800/10 rounded-2xl sm:rounded-3xl border border-zinc-200 p-3 sm:p-4 flex flex-col items-center sticky top-24 shadow-inner">
+            
+            <!-- Floating Zoom Toolbar -->
+            <div class="w-full bg-white rounded-xl border border-zinc-200/90 p-2 mb-3 flex items-center justify-between shadow-2xs">
+              <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="text-[11px] font-bold text-zinc-700">Live Pratinjau Kertas A4</span>
+              </div>
+              <div class="flex items-center gap-1">
+                <button type="button" onclick="adjustPrintBuilderZoom(-0.1)" class="w-7 h-7 rounded-lg border border-zinc-200 hover:bg-zinc-100 flex items-center justify-center text-xs font-bold text-zinc-700 cursor-pointer">−</button>
+                <span id="printBuilderZoomBadge" class="text-[11px] font-mono font-semibold px-2 text-zinc-600">Fit</span>
+                <button type="button" onclick="adjustPrintBuilderZoom(0.1)" class="w-7 h-7 rounded-lg border border-zinc-200 hover:bg-zinc-100 flex items-center justify-center text-xs font-bold text-zinc-700 cursor-pointer">+</button>
+                <button type="button" onclick="resetPrintBuilderZoom()" class="px-2 py-1 rounded-lg border border-zinc-200 hover:bg-zinc-100 text-[10px] font-bold text-zinc-700 cursor-pointer ml-1">Fit</button>
+              </div>
+            </div>
+
+            <!-- Virtual Paper Scroll Viewport -->
+            <div id="printBuilderScrollArea" class="w-full max-h-[calc(100vh-210px)] overflow-auto custom-scrollbar flex justify-center items-start p-1 sm:p-2">
+              <div id="printBuilderPaperWrapper" style="margin: 0 auto; position: relative; transition: width 0.12s ease, height 0.12s ease;">
+                <div id="adminLivePrintPreviewArea" class="bg-white rounded-lg border border-zinc-300 shadow-xl text-zinc-900 text-xs w-[794px] min-w-[794px] max-w-[794px]" style="background: #ffffff; color: #000000; box-sizing: border-box; padding: 45px 50px; min-height: 1123px; transform-origin: top left; position: absolute; top: 0; left: 0;">
+                  <!-- Dynamic Rendered Document -->
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- TAB 6: SISTEM & PENGATURAN DATABASE -->
       <!-- ===================================================================== -->
       <div id="adminView_system" class="flex flex-col gap-2.5 sm:gap-4 fade-enter hidden">
         
@@ -2939,13 +3030,13 @@ function getOrCreateFolder(folderName) {
   <!-- ========================================================================= -->
   <!-- JAVASCRIPT APP LOGIC: MULTI-FORM & ISOLATED SANDBOX ENGINE -->
   <!-- ========================================================================= -->
-  <script src="src/admin/admin.js?v=2.4.67"></script>
+  <script src="src/admin/admin.js?v=2.4.68"></script>
 
   <!-- Progressive Web App (PWA) & Instant Auto-Updater Engine -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js?v=2.4.67').then(function(reg) {
+        navigator.serviceWorker.register('/sw.js?v=2.4.68').then(function(reg) {
           reg.update();
           reg.addEventListener('updatefound', function() {
             var newWorker = reg.installing;

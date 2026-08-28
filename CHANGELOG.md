@@ -4,6 +4,30 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.68] - 2026-08-29
+
+### 🖨️ Tab "Format Cetak": Customizable Visual Report Builder & Live Side-by-Side Preview
+- **📑 Tab Navigasi Mandiri "Format Cetak" pada Panel Workspace Admin:**
+  - Menghadirkan tab baru **"Format Cetak"** (`#adminTabBtn_print` & `#adminView_print`) di Master Hub Admin dengan tata letak visual modern terbelah dua (*Side-by-Side Split View*).
+  - **Panel Kiri (Visual Builder)**: Kontrol konfigurasi 6 blok modular (*Kop Surat Dinas, Judul & Identitas, Tabel Rekapitulasi & Rubrik, Evaluasi Masukan Kualitatif, Lembar Pengesahan, dan Footer Dokumen*).
+  - **Panel Kanan (Live Virtual Paper A4)**: Pratinjau cetak real-time interaktif dengan zoom otomatis (*Fit-to-Screen*), tombol penyesuaian skala zoom (`+`, `-`, `Fit`), serta render dokumen berstandar kertas A4 ($794 \times 1123\text{ px}$).
+- **🧩 6 Blok Modular yang Bebas Dikustomisasi & Diubah Urutannya:**
+  - **Kop Surat Dinas**: Sakelar Aktif/Nonaktif, kustomisasi logo URL, teks instansi bertingkat (*Kementerian, Universitas, Fakultas, Program Studi, Alamat*), dan gaya garis pembatas (*Ganda / Tunggal / Polos*).
+  - **Judul & Identitas**: Pengaturan judul laporan cetak kustom serta sakelar visibilitas tabel metadata identitas.
+  - **Tabel Rekapitulasi & Rubrik**: Kustomisasi sub-judul tabel, teks skala rubrik, sakelar & penamaan label kustom untuk setiap kolom (*Rank, Kelompok, Sesi, Penilai, Rata-Rata, Presentator Terbaik, Predikat*), serta sakelar baris rata-rata kelas.
+  - **Evaluasi Masukan Kualitatif**: Sakelar aktif/nonaktif, penamaan bagian evaluasi, dan opsi penyertaan nama penilai mahasiswa.
+  - **Lembar Pengesahan Multi-Penandatangan**: Dukungan fleksibel multi-penandatangan ($1, 2, 3+$ penandatangan) dengan pengaturan jabatan, nama bergelar, NIP/NIDN, kota instansi, dan tanggal cetak.
+  - **Footer Dokumen**: Teks catatan kaki kustom dan stempel waktu cetak otomatis.
+  - **Fitur Geser Posisi Naik / Turun (`▲` / `▼`)**: Pengaturan urutan tata letak dokumen cetak yang bebas dipindahkan sesuai kebutuhan institusi.
+  - **Tombol Reset Standar ULM**: Mengembalikan seluruh susunan dokumen ke format dinas resmi FKIP ULM dalam satu kali klik.
+- **⚡ Sinkronisasi Per-Formulir & Integrasi Mahasiswa:**
+  - Konfigurasi format cetak tersimpan per-formulir di Supabase & Local Cache (`adminAppConfig.Print_Config`).
+  - Halaman pratinjau cetak mahasiswa (`student.js`) dan popup cetak admin respons (`admin.js`) secara otomatis mengonsumsi konfigurasi format cetak kustom yang diatur admin.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.68`.
+
+---
+
 ## [2.4.67] - 2026-08-29
 
 ### 🖨️ Universal Adaptive Print Engine: Fully Dynamic Metadata, Custom Identity Cards & Adaptive Signatory

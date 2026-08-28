@@ -3524,7 +3524,7 @@
       if (!tabKey) tabKey = 'config';
       currentAdminTab = tabKey;
       localStorage.setItem("PGSD_ADMIN_ACTIVE_TAB", tabKey);
-      const tabs = ['config', 'settings', 'responses', 'data', 'system'];
+      const tabs = ['config', 'settings', 'responses', 'data', 'print', 'system'];
       
       tabs.forEach(t => {
         const view = document.getElementById(`adminView_${t}`);
@@ -3563,6 +3563,10 @@
 
       if (tabKey === 'responses' && adminResponsesList.length === 0) {
         fetchAdminResponsesList();
+      }
+
+      if (tabKey === 'print') {
+        initAndRenderPrintBuilder();
       }
     }
 
@@ -10162,8 +10166,933 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       }
     }
 
-    // PRINT MODAL FUNCTIONS
+    // =========================================================================
+    // UNIVERSAL CUSTOMIZABLE PRINT & REPORT BUILDER ENGINE (LIVE SPLIT EDITOR)
+    // =========================================================================
     let adminPrintZoom = 1.0;
+    let printBuilderZoom = 1.0;
+
+    function getDefaultPrintConfig() {
+      const rawMatkul = adminAppConfig["Mata_Kuliah"] || (currentFormMeta?.mataKuliah || "");
+      const rawDosen  = adminAppConfig["Dosen_Pengampu"] || (currentFormMeta?.dosen || "Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.");
+      const rawKelas  = adminAppConfig["Kelas"] || (currentFormMeta?.kelas || "5E");
+      const rawProdi  = adminAppConfig["Program_Studi"] || adminAppConfig["Jurusan"] || (currentFormMeta?.jurusan || "PGSD");
+      const rawTitle  = adminAppConfig["Judul_Form"] || (currentFormMeta?.judulForm || "");
+      let reportTitle = "LAPORAN REKAPITULASI HASIL PENILAIAN PRESENTASI";
+      if (rawTitle && !rawTitle.toLowerCase().includes("penilaian presentasi") && rawTitle.length < 50) {
+        reportTitle = `LAPORAN REKAPITULASI ${rawTitle.toUpperCase().replace(/^PENILAIAN\s+/i, 'HASIL PENILAIAN ')}`;
+      }
+
+      const minScore = (adminAppConfig && adminAppConfig["Nilai_Kelompok_Min"] !== undefined) ? adminAppConfig["Nilai_Kelompok_Min"] : 0;
+      const maxScore = (adminAppConfig && adminAppConfig["Nilai_Kelompok_Max"] !== undefined) ? adminAppConfig["Nilai_Kelompok_Max"] : 100;
+
+      return {
+        version: 1,
+        blocksOrder: ['kop', 'identity', 'rekap', 'reviews', 'signatures', 'footer'],
+        kop: {
+          enabled: true,
+          logoUrl: adminAppConfig["Logo_Url"] || "assets/logo-ulm.png",
+          kementerian: adminAppConfig["Kementerian"] || "KEMENTERIAN PENDIDIKAN TINGGI, SAINS, DAN TEKNOLOGI",
+          universitas: adminAppConfig["Universitas"] || "UNIVERSITAS LAMBUNG MANGKURAT",
+          fakultas: adminAppConfig["Fakultas"] || "FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN",
+          programStudi: rawProdi,
+          alamat: adminAppConfig["Alamat_Instansi"] || "Jl. Brigjen H. Hasan Basry, Kayu Tangi, Banjarmasin, Kalimantan Selatan 70123 • Laman: fkip.ulm.ac.id",
+          dividerStyle: "double"
+        },
+        identity: {
+          enabled: true,
+          reportTitle: reportTitle,
+          showMetadataTable: true
+        },
+        rekap: {
+          enabled: true,
+          sectionTitle: "A. Rekapitulasi Nilai & Peringkat Performa Kelompok",
+          scaleText: `Skala Penilaian: ${minScore} - ${maxScore}`,
+          columns: {
+            rank: { enabled: true, label: "Rank", width: "6%" },
+            group: { enabled: true, label: "Kelompok Presentasi", width: "19%" },
+            sesi: { enabled: true, label: "Sesi", width: "10%" },
+            reviewers: { enabled: true, label: "Penilai", width: "9%" },
+            score: { enabled: true, label: "Rata-Rata", width: "11%" },
+            presenter: { enabled: true, label: "Presentator Terbaik", width: "31%" },
+            predicate: { enabled: true, label: "Predikat", width: "14%" }
+          },
+          showClassAverage: true,
+          showTotalCount: true
+        },
+        reviews: {
+          enabled: true,
+          sectionTitle: "B. Rangkuman Catatan Evaluasi Masukan Mahasiswa",
+          showReviewerName: true,
+          layoutMode: "grid"
+        },
+        signatures: {
+          enabled: true,
+          kota: adminAppConfig["Kota_Instansi"] || "Banjarmasin",
+          showDate: true,
+          signatories: [
+            {
+              id: "sig_1",
+              title: adminAppConfig["Jabatan_Penandatangan"] || "Dosen Pengampu Mata Kuliah",
+              name: rawDosen || "Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.",
+              nip: adminAppConfig["NIP_Dosen"] || "19830514 200812 2 003",
+              spaceHeight: 60
+            }
+          ]
+        },
+        footer: {
+          enabled: true,
+          customText: "",
+          showPrintDate: true
+        }
+      };
+    }
+
+    function initOrGetPrintConfig() {
+      if (!adminAppConfig.Print_Config || typeof adminAppConfig.Print_Config !== 'object' || !Array.isArray(adminAppConfig.Print_Config.blocksOrder)) {
+        adminAppConfig.Print_Config = getDefaultPrintConfig();
+      }
+      const defaultOrder = ['kop', 'identity', 'rekap', 'reviews', 'signatures', 'footer'];
+      defaultOrder.forEach(b => {
+        if (!adminAppConfig.Print_Config[b]) {
+          const def = getDefaultPrintConfig()[b];
+          if (def) adminAppConfig.Print_Config[b] = def;
+        }
+        if (!adminAppConfig.Print_Config.blocksOrder.includes(b)) {
+          adminAppConfig.Print_Config.blocksOrder.push(b);
+        }
+      });
+      return adminAppConfig.Print_Config;
+    }
+
+    function savePrintConfig(notify = false) {
+      const targetForm = currentFormId || "BK5E";
+      localStorage.setItem(`PGSD_CACHE_CONFIG_${targetForm}`, JSON.stringify(adminAppConfig));
+      queueSyncTask('config', adminAppConfig);
+      updateLivePrintPreview();
+      if (notify) showAdminToast("Format cetak berhasil disimpan!", "success");
+    }
+
+    function resetPrintConfigToDefault() {
+      adminAppConfig.Print_Config = getDefaultPrintConfig();
+      savePrintConfig(false);
+      renderPrintConfigBlocks();
+      updateLivePrintPreview();
+      showAdminToast("Format cetak berhasil direset ke standar resmi FKIP ULM!", "info");
+    }
+
+    function movePrintBlock(blockKey, direction) {
+      const cfg = initOrGetPrintConfig();
+      const order = cfg.blocksOrder;
+      const idx = order.indexOf(blockKey);
+      if (idx === -1) return;
+      const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+      if (targetIdx < 0 || targetIdx >= order.length) return;
+      const temp = order[idx];
+      order[idx] = order[targetIdx];
+      order[targetIdx] = temp;
+      savePrintConfig(false);
+      renderPrintConfigBlocks();
+      updateLivePrintPreview();
+    }
+
+    function togglePrintBlock(blockKey, enabled) {
+      const cfg = initOrGetPrintConfig();
+      if (cfg[blockKey]) {
+        cfg[blockKey].enabled = !!enabled;
+        savePrintConfig(false);
+        renderPrintConfigBlocks();
+        updateLivePrintPreview();
+      }
+    }
+
+    function updatePrintConfigValue(path, value) {
+      const cfg = initOrGetPrintConfig();
+      const keys = path.split('.');
+      let cur = cfg;
+      for (let i = 0; i < keys.length - 1; i++) {
+        if (!cur[keys[i]]) cur[keys[i]] = {};
+        cur = cur[keys[i]];
+      }
+      cur[keys[keys.length - 1]] = value;
+      savePrintConfig(false);
+      updateLivePrintPreview();
+    }
+
+    function addPrintSignatory() {
+      const cfg = initOrGetPrintConfig();
+      if (!cfg.signatures.signatories) cfg.signatures.signatories = [];
+      cfg.signatures.signatories.push({
+        id: 'sig_' + Date.now(),
+        title: "Dosen Pengampu / Penguji",
+        name: "Nama Dosen Lengkap & Gelar",
+        nip: "-",
+        spaceHeight: 60
+      });
+      savePrintConfig(false);
+      renderPrintConfigBlocks();
+      updateLivePrintPreview();
+    }
+
+    function removePrintSignatory(idx) {
+      const cfg = initOrGetPrintConfig();
+      if (cfg.signatures.signatories && cfg.signatures.signatories.length > 1) {
+        cfg.signatures.signatories.splice(idx, 1);
+        savePrintConfig(false);
+        renderPrintConfigBlocks();
+        updateLivePrintPreview();
+      } else {
+        showAdminToast("Minimal harus menyisakan 1 penandatangan jika blok pengesahan aktif.", "info");
+      }
+    }
+
+    function initAndRenderPrintBuilder() {
+      initOrGetPrintConfig();
+      renderPrintConfigBlocks();
+      updateLivePrintPreview();
+      setTimeout(() => {
+        resetPrintBuilderZoom();
+      }, 60);
+    }
+
+    const PRINT_BLOCK_NAMES = {
+      kop: { name: "1. Kop Surat Dinas", icon: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" },
+      identity: { name: "2. Judul & Identitas", icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" },
+      rekap: { name: "3. Tabel Nilai & Rubrik", icon: "M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" },
+      reviews: { name: "4. Evaluasi Kualitatif", icon: "M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" },
+      signatures: { name: "5. Lembar Pengesahan", icon: "M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" },
+      footer: { name: "6. Footer Dokumen", icon: "M4 6h16M4 12h16m-7 6h7" }
+    };
+
+    function renderPrintConfigBlocks() {
+      const container = document.getElementById("printConfigBlocksContainer");
+      if (!container) return;
+
+      const cfg = initOrGetPrintConfig();
+      const order = cfg.blocksOrder || ['kop', 'identity', 'rekap', 'reviews', 'signatures', 'footer'];
+
+      let html = '';
+      order.forEach((blockKey, idx) => {
+        const info = PRINT_BLOCK_NAMES[blockKey] || { name: blockKey, icon: "M4 6h16M4 12h16" };
+        const blockData = cfg[blockKey] || {};
+        const isEnabled = blockData.enabled !== false;
+        const isFirst = idx === 0;
+        const isLast = idx === order.length - 1;
+
+        html += `
+          <div class="bg-white rounded-2xl border ${isEnabled ? 'border-zinc-200/90 shadow-2xs' : 'border-zinc-200/50 bg-zinc-50/50 opacity-80'} transition overflow-hidden">
+            
+            <!-- Accordion Header -->
+            <div class="p-3.5 sm:p-4 flex items-center justify-between gap-2 border-b border-zinc-100 bg-white cursor-pointer select-none" onclick="togglePrintBlockAccordion('${blockKey}')">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-8 h-8 rounded-xl ${isEnabled ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' : 'bg-zinc-100 text-zinc-400'} flex items-center justify-center shrink-0">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${info.icon}"></path>
+                  </svg>
+                </div>
+                <div class="min-w-0">
+                  <h4 class="font-bold text-xs sm:text-sm text-zinc-900 truncate">${escapeHtml(info.name)}</h4>
+                  <span class="text-[10px] ${isEnabled ? 'text-emerald-600 font-semibold' : 'text-zinc-400 italic'}">${isEnabled ? '● Aktif pada Cetakan' : '○ Dinonaktifkan'}</span>
+                </div>
+              </div>
+
+              <!-- Header Action Controls -->
+              <div class="flex items-center gap-1.5 shrink-0" onclick="event.stopPropagation()">
+                <!-- Move Up -->
+                <button type="button" onclick="movePrintBlock('${blockKey}', 'up')" ${isFirst ? 'disabled' : ''} class="w-7 h-7 rounded-lg border border-zinc-200 hover:bg-zinc-100 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center text-xs text-zinc-600 transition cursor-pointer" title="Geser ke Atas">▲</button>
+                <!-- Move Down -->
+                <button type="button" onclick="movePrintBlock('${blockKey}', 'down')" ${isLast ? 'disabled' : ''} class="w-7 h-7 rounded-lg border border-zinc-200 hover:bg-zinc-100 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center text-xs text-zinc-600 transition cursor-pointer" title="Geser ke Bawah">▼</button>
+                <!-- Toggle Switch -->
+                <label class="relative inline-flex items-center cursor-pointer ml-1">
+                  <input type="checkbox" ${isEnabled ? 'checked' : ''} onchange="togglePrintBlock('${blockKey}', this.checked)" class="sr-only peer">
+                  <div class="w-9 h-5 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Accordion Body -->
+            <div id="printBlockBody_${blockKey}" class="p-3.5 sm:p-4 space-y-3 bg-zinc-50/40 border-t border-zinc-100 text-xs">
+              ${renderPrintBlockSpecificForm(blockKey, blockData)}
+            </div>
+
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function togglePrintBlockAccordion(blockKey) {
+      const el = document.getElementById(`printBlockBody_${blockKey}`);
+      if (el) el.classList.toggle("hidden");
+    }
+
+    function renderPrintBlockSpecificForm(blockKey, data) {
+      if (blockKey === 'kop') {
+        return `
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div class="sm:col-span-2">
+              <label class="block font-semibold text-zinc-700 text-[11px] mb-1">Logo Instansi (URL atau Path Gambar):</label>
+              <input type="text" value="${escapeHtml(data.logoUrl || 'assets/logo-ulm.png')}" oninput="updatePrintConfigValue('kop.logoUrl', this.value)" class="w-full px-3 py-2 rounded-xl border border-zinc-300 font-mono text-xs bg-white focus:border-indigo-600 outline-none shadow-2xs">
+            </div>
+            <div>
+              <label class="block font-semibold text-zinc-700 text-[11px] mb-1">Kementerian:</label>
+              <input type="text" value="${escapeHtml(data.kementerian || '')}" oninput="updatePrintConfigValue('kop.kementerian', this.value)" class="w-full px-3 py-2 rounded-xl border border-zinc-300 text-xs bg-white focus:border-indigo-600 outline-none shadow-2xs">
+            </div>
+            <div>
+              <label class="block font-semibold text-zinc-700 text-[11px] mb-1">Universitas / Perguruan Tinggi:</label>
+              <input type="text" value="${escapeHtml(data.universitas || '')}" oninput="updatePrintConfigValue('kop.universitas', this.value)" class="w-full px-3 py-2 rounded-xl border border-zinc-300 text-xs bg-white focus:border-indigo-600 outline-none shadow-2xs">
+            </div>
+            <div>
+              <label class="block font-semibold text-zinc-700 text-[11px] mb-1">Fakultas:</label>
+              <input type="text" value="${escapeHtml(data.fakultas || '')}" oninput="updatePrintConfigValue('kop.fakultas', this.value)" class="w-full px-3 py-2 rounded-xl border border-zinc-300 text-xs bg-white focus:border-indigo-600 outline-none shadow-2xs">
+            </div>
+            <div>
+              <label class="block font-semibold text-zinc-700 text-[11px] mb-1">Program Studi:</label>
+              <input type="text" value="${escapeHtml(data.programStudi || '')}" oninput="updatePrintConfigValue('kop.programStudi', this.value)" class="w-full px-3 py-2 rounded-xl border border-zinc-300 text-xs bg-white focus:border-indigo-600 outline-none shadow-2xs">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block font-semibold text-zinc-700 text-[11px] mb-1">Alamat Lengkap &amp; Laman Web:</label>
+              <input type="text" value="${escapeHtml(data.alamat || '')}" oninput="updatePrintConfigValue('kop.alamat', this.value)" class="w-full px-3 py-2 rounded-xl border border-zinc-300 text-xs bg-white focus:border-indigo-600 outline-none shadow-2xs">
+            </div>
+            <div>
+              <label class="block font-semibold text-zinc-700 text-[11px] mb-1">Garis Pembatas Kop:</label>
+              <select onchange="updatePrintConfigValue('kop.dividerStyle', this.value)" class="w-full px-3 py-2 rounded-xl border border-zinc-300 text-xs bg-white focus:border-indigo-600 outline-none shadow-2xs font-semibold">
+                <option value="double" ${data.dividerStyle === 'double' ? 'selected' : ''}>Garis Ganda (Tebal &amp; Tipis Resmi)</option>
+                <option value="single" ${data.dividerStyle === 'single' ? 'selected' : ''}>Garis Tunggal (Solid)</option>
+                <option value="none" ${data.dividerStyle === 'none' ? 'selected' : ''}>Tanpa Garis Pembatas</option>
+              </select>
+            </div>
+          </div>
+        `;
+      }
+
+      if (blockKey === 'identity') {
+        return `
+          <div class="space-y-2.5">
+            <div>
+              <label class="block font-semibold text-zinc-700 text-[11px] mb-1">Judul Dokumen Laporan Cetak:</label>
+              <input type="text" value="${escapeHtml(data.reportTitle || '')}" oninput="updatePrintConfigValue('identity.reportTitle', this.value)" class="w-full px-3 py-2 rounded-xl border border-zinc-300 font-bold text-xs bg-white focus:border-indigo-600 outline-none shadow-2xs">
+            </div>
+            <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+              <input type="checkbox" ${data.showMetadataTable !== false ? 'checked' : ''} onchange="updatePrintConfigValue('identity.showMetadataTable', this.checked)" class="w-4 h-4 text-indigo-600 rounded">
+              <span class="font-medium text-zinc-700">Tampilkan Tabel Metadata Identitas (Mata Kuliah, Dosen, Kelas, Prodi, Sesi)</span>
+            </label>
+          </div>
+        `;
+      }
+
+      if (blockKey === 'rekap') {
+        const cols = data.columns || {};
+        return `
+          <div class="space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div>
+                <label class="block font-semibold text-zinc-700 text-[11px] mb-1">Judul Sub-bagian Tabel:</label>
+                <input type="text" value="${escapeHtml(data.sectionTitle || '')}" oninput="updatePrintConfigValue('rekap.sectionTitle', this.value)" class="w-full px-3 py-2 rounded-xl border border-zinc-300 text-xs bg-white focus:border-indigo-600 outline-none shadow-2xs">
+              </div>
+              <div>
+                <label class="block font-semibold text-zinc-700 text-[11px] mb-1">Label Skala Penilaian:</label>
+                <input type="text" value="${escapeHtml(data.scaleText || '')}" oninput="updatePrintConfigValue('rekap.scaleText', this.value)" class="w-full px-3 py-2 rounded-xl border border-zinc-300 text-xs bg-white focus:border-indigo-600 outline-none shadow-2xs">
+              </div>
+            </div>
+
+            <!-- Columns Checklist & Custom Headers -->
+            <div>
+              <label class="block font-bold text-zinc-800 text-[11px] mb-1.5">Kolom Tabel Rekapitulasi yang Ditampilkan:</label>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 p-2.5 rounded-xl bg-white border border-zinc-200">
+                ${[
+                  { id: 'rank', def: 'Rank' },
+                  { id: 'group', def: 'Kelompok Presentasi' },
+                  { id: 'sesi', def: 'Sesi' },
+                  { id: 'reviewers', def: 'Penilai' },
+                  { id: 'score', def: 'Rata-Rata' },
+                  { id: 'presenter', def: 'Presentator Terbaik' },
+                  { id: 'predicate', def: 'Predikat' }
+                ].map(c => `
+                  <div class="flex items-center gap-2 text-xs">
+                    <input type="checkbox" id="col_chk_${c.id}" ${cols[c.id]?.enabled !== false ? 'checked' : ''} onchange="updatePrintConfigValue('rekap.columns.${c.id}.enabled', this.checked)" class="w-3.5 h-3.5 text-indigo-600 rounded">
+                    <input type="text" value="${escapeHtml(cols[c.id]?.label || c.def)}" oninput="updatePrintConfigValue('rekap.columns.${c.id}.label', this.value)" class="w-full px-2 py-1 rounded-lg border border-zinc-200 text-[11px] bg-zinc-50 focus:bg-white focus:border-indigo-600 outline-none">
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <div class="flex items-center flex-wrap gap-3 pt-1">
+              <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+                <input type="checkbox" ${data.showClassAverage !== false ? 'checked' : ''} onchange="updatePrintConfigValue('rekap.showClassAverage', this.checked)" class="w-4 h-4 text-indigo-600 rounded">
+                <span class="font-medium text-zinc-700">Tampilkan Baris Rata-Rata Keseluruhan Kelas</span>
+              </label>
+            </div>
+          </div>
+        `;
+      }
+
+      if (blockKey === 'reviews') {
+        return `
+          <div class="space-y-2.5">
+            <div>
+              <label class="block font-semibold text-zinc-700 text-[11px] mb-1">Judul Bagian Evaluasi Kualitatif:</label>
+              <input type="text" value="${escapeHtml(data.sectionTitle || '')}" oninput="updatePrintConfigValue('reviews.sectionTitle', this.value)" class="w-full px-3 py-2 rounded-xl border border-zinc-300 text-xs bg-white focus:border-indigo-600 outline-none shadow-2xs">
+            </div>
+            <div class="flex items-center flex-wrap gap-3">
+              <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+                <input type="checkbox" ${data.showReviewerName !== false ? 'checked' : ''} onchange="updatePrintConfigValue('reviews.showReviewerName', this.checked)" class="w-4 h-4 text-indigo-600 rounded">
+                <span class="font-medium text-zinc-700">Sertakan Nama Mahasiswa Penilai</span>
+              </label>
+            </div>
+          </div>
+        `;
+      }
+
+      if (blockKey === 'signatures') {
+        const sigs = data.signatories || [];
+        return `
+          <div class="space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div>
+                <label class="block font-semibold text-zinc-700 text-[11px] mb-1">Kota Tempat Pengesahan:</label>
+                <input type="text" value="${escapeHtml(data.kota || 'Banjarmasin')}" oninput="updatePrintConfigValue('signatures.kota', this.value)" class="w-full px-3 py-2 rounded-xl border border-zinc-300 text-xs bg-white focus:border-indigo-600 outline-none shadow-2xs">
+              </div>
+              <div class="flex items-end pb-2">
+                <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+                  <input type="checkbox" ${data.showDate !== false ? 'checked' : ''} onchange="updatePrintConfigValue('signatures.showDate', this.checked)" class="w-4 h-4 text-indigo-600 rounded">
+                  <span class="font-medium text-zinc-700">Sertakan Tanggal Hari Cetak</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Signatories List -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <label class="block font-bold text-zinc-800 text-[11px]">Daftar Penandatangan Dokumen:</label>
+                <button type="button" onclick="addPrintSignatory()" class="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[11px] font-bold flex items-center gap-1 transition cursor-pointer">
+                  <span>+ Tambah Penandatangan</span>
+                </button>
+              </div>
+
+              <div class="space-y-2">
+                ${sigs.map((s, sIdx) => `
+                  <div class="p-3 rounded-xl bg-white border border-zinc-200/90 shadow-2xs space-y-2">
+                    <div class="flex items-center justify-between border-b border-zinc-100 pb-1.5">
+                      <span class="font-bold text-zinc-800 text-[11px]">Penandatangan #${sIdx + 1}</span>
+                      ${sigs.length > 1 ? `
+                        <button type="button" onclick="removePrintSignatory(${sIdx})" class="text-rose-500 hover:text-rose-700 text-[10.5px] font-semibold cursor-pointer">Hapus</button>
+                      ` : ''}
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                      <div>
+                        <label class="block text-[10px] text-zinc-500 font-semibold mb-0.5">Jabatan:</label>
+                        <input type="text" value="${escapeHtml(s.title || '')}" oninput="updatePrintSignatoryField(${sIdx}, 'title', this.value)" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-200 text-xs bg-zinc-50 focus:bg-white outline-none">
+                      </div>
+                      <div>
+                        <label class="block text-[10px] text-zinc-500 font-semibold mb-0.5">Nama &amp; Gelar:</label>
+                        <input type="text" value="${escapeHtml(s.name || '')}" oninput="updatePrintSignatoryField(${sIdx}, 'name', this.value)" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-200 text-xs font-bold bg-zinc-50 focus:bg-white outline-none">
+                      </div>
+                      <div>
+                        <label class="block text-[10px] text-zinc-500 font-semibold mb-0.5">NIP / NIDN (Opsional):</label>
+                        <input type="text" value="${escapeHtml(s.nip || '')}" oninput="updatePrintSignatoryField(${sIdx}, 'nip', this.value)" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-200 text-xs font-mono bg-zinc-50 focus:bg-white outline-none">
+                      </div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      if (blockKey === 'footer') {
+        return `
+          <div class="space-y-2.5">
+            <div>
+              <label class="block font-semibold text-zinc-700 text-[11px] mb-1">Teks Kustom Catatan Kaki (Kosongkan untuk bawaan sistem):</label>
+              <input type="text" value="${escapeHtml(data.customText || '')}" placeholder="Otomatis: Dokumen ini diterbitkan oleh Sistem..." oninput="updatePrintConfigValue('footer.customText', this.value)" class="w-full px-3 py-2 rounded-xl border border-zinc-300 text-xs bg-white focus:border-indigo-600 outline-none shadow-2xs">
+            </div>
+            <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+              <input type="checkbox" ${data.showPrintDate !== false ? 'checked' : ''} onchange="updatePrintConfigValue('footer.showPrintDate', this.checked)" class="w-4 h-4 text-indigo-600 rounded">
+              <span class="font-medium text-zinc-700">Tampilkan Stempel Waktu Cetak</span>
+            </label>
+          </div>
+        `;
+      }
+
+      return '';
+    }
+
+    function updatePrintSignatoryField(idx, field, val) {
+      const cfg = initOrGetPrintConfig();
+      if (cfg.signatures && cfg.signatures.signatories && cfg.signatures.signatories[idx]) {
+        cfg.signatures.signatories[idx][field] = val;
+        savePrintConfig(false);
+        updateLivePrintPreview();
+      }
+    }
+
+    // =========================================================================
+    // UNIFIED DOCUMENT HTML GENERATOR (USED BY BUILDER, MODAL & CLIENT)
+    // =========================================================================
+    function generateOfficialPrintDocumentHtml(cfg, scopeGroup = "ALL", scopeSesi = "ALL", overrideReviews = null, overrideReviewer = null, overrideFooter = null) {
+      if (!cfg) cfg = initOrGetPrintConfig();
+
+      const printDateStr = new Intl.DateTimeFormat('id-ID', { dateStyle: 'long' }).format(new Date());
+      const order = cfg.blocksOrder || ['kop', 'identity', 'rekap', 'reviews', 'signatures', 'footer'];
+
+      const allResponses = Array.isArray(adminResponsesList) ? adminResponsesList : [];
+      let groupsToDisplay = Array.isArray(adminMasterGroups) ? [...adminMasterGroups] : [];
+
+      if (scopeGroup !== "ALL") {
+        groupsToDisplay = groupsToDisplay.filter(g => g.name === scopeGroup);
+      }
+      if (scopeSesi !== "ALL") {
+        groupsToDisplay = groupsToDisplay.filter(g => (g.sesi || "Minggu 1") === scopeSesi);
+      }
+
+      let summaryList = groupsToDisplay.map(g => {
+        const groupResponses = allResponses.filter(r => (r.kelompok_dinilai || r.kelompok) === g.name && (scopeSesi === 'ALL' || (r.sesi || 'Minggu 1') === (g.sesi || 'Minggu 1')));
+        const countPenilai = groupResponses.length;
+        let avgScore = 0;
+        if (countPenilai > 0) {
+          const sum = groupResponses.reduce((acc, r) => acc + (parseFloat(r.nilai_kelompok || r.nilaiKelompok) || 0), 0);
+          avgScore = parseFloat((sum / countPenilai).toFixed(2));
+        }
+
+        const presenterVotes = {};
+        groupResponses.forEach(r => {
+          [r.best_presenter_1, r.best_presenter_2].forEach(p => {
+            if (p && p !== '-' && p !== 'null') {
+              presenterVotes[p] = (presenterVotes[p] || 0) + 1;
+            }
+          });
+        });
+        const rankedPresenters = Object.entries(presenterVotes)
+          .map(([name, votes]) => ({ name, votes }))
+          .sort((a, b) => b.votes - a.votes);
+
+        const allAdminStudents = (adminMasterGroups || []).flatMap(grp => (grp.members || []).map(m => ({ ...m, kelompok: grp.name })));
+        const evaluasiList = {};
+        groupResponses.forEach(r => {
+          const penilaiName = r.nama_penilai || r.namaPenilai || 'Penilai';
+          const evalDetail = r.evaluasi_detail || r.evaluasiDetail || {};
+          if (typeof evalDetail === 'object' && evalDetail !== null) {
+            Object.entries(evalDetail).forEach(([memberKey, ulasanText]) => {
+              if (memberKey === 'uploadedFiles' || !ulasanText) return;
+              let memberName = memberKey;
+              const foundStud = allAdminStudents.find(s => String(s.nim).trim() === String(memberKey).trim());
+              if (foundStud && foundStud.name) {
+                memberName = `${foundStud.name} (${memberKey})`;
+              }
+              if (!evaluasiList[memberName]) evaluasiList[memberName] = [];
+              evaluasiList[memberName].push({
+                penilai: penilaiName,
+                ulasan: ulasanText
+              });
+            });
+          }
+        });
+
+        return {
+          kelompok: g.name,
+          sesi: g.sesi || 'Minggu 1',
+          totalPenilai: countPenilai,
+          rataRataSkor: avgScore,
+          rankedPresenters: rankedPresenters,
+          evaluasiList: evaluasiList
+        };
+      });
+
+      if (summaryList.length === 0 && groupsToDisplay.length === 0) {
+        summaryList = [
+          { kelompok: "Kelompok 1", sesi: "Minggu 1", totalPenilai: 24, rataRataSkor: 87.50, rankedPresenters: [{ name: "Ahmad Fauzi", votes: 14 }], evaluasiList: { "Ahmad Fauzi": [{ penilai: "Siti Rahma", ulasan: "Penyampaian materi sangat runut dan interaktif." }] } },
+          { kelompok: "Kelompok 2", sesi: "Minggu 1", totalPenilai: 24, rataRataSkor: 84.20, rankedPresenters: [{ name: "Nurul Hidayah", votes: 11 }], evaluasiList: { "Nurul Hidayah": [{ penilai: "Budi Santoso", ulasan: "Slide presentasi sangat menarik dan jelas." }] } }
+        ];
+      }
+
+      let totalAllScore = 0;
+      let totalAllPenilai = 0;
+      let evaluatedCount = 0;
+      summaryList.forEach(g => {
+        const s = parseFloat(g.rataRataSkor || 0);
+        const p = parseInt(g.totalPenilai) || 0;
+        if (p > 0) {
+          totalAllScore += s;
+          totalAllPenilai += p;
+          evaluatedCount++;
+        }
+      });
+
+      const activeGroupNames = new Set(summaryList.map(g => g.kelompok));
+      let totalMahasiswa = 0;
+      (adminMasterGroups || []).filter(g => activeGroupNames.has(g.name)).forEach(g => {
+        totalMahasiswa += (g.members || []).length;
+      });
+      if (totalMahasiswa === 0) totalMahasiswa = summaryList.length * 5;
+      const avgClassScore = evaluatedCount > 0 ? (totalAllScore / evaluatedCount).toFixed(2) : "0.00";
+
+      let mainContentHtml = '';
+
+      order.forEach(blockKey => {
+        const block = cfg[blockKey];
+        if (!block || block.enabled === false) return;
+
+        if (blockKey === 'kop') {
+          let dividerCss = 'border-top: 2.5px solid #000000; border-bottom: 0.75px solid #000000; height: 2px; margin: 2px 0 8px 0;';
+          if (block.dividerStyle === 'single') dividerCss = 'border-top: 1.5px solid #000000; margin: 3px 0 8px 0;';
+          else if (block.dividerStyle === 'none') dividerCss = 'display: none;';
+
+          mainContentHtml += `
+            <table style="width: 100%; border-collapse: collapse; border: none; margin: 0 0 2px 0; padding: 0; table-layout: fixed;">
+              <tbody>
+                <tr style="border: none;">
+                  <td style="width: 82px; min-width: 82px; max-width: 82px; vertical-align: middle; text-align: center; border: none; padding: 0 6px 0 0;">
+                    <img src="${escapeHtml(block.logoUrl || 'assets/logo-ulm.png')}" alt="Logo Instansi" style="width: 76px; height: 76px; object-fit: contain; display: block; margin: 0 auto;" onerror="this.src='assets/logo-ulm.png'" />
+                  </td>
+                  <td style="text-align: center; vertical-align: middle; border: none; padding: 0 2px; font-family: 'Times New Roman', Times, serif; color: #000000;">
+                    <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; line-height: 1.2;">${escapeHtml(block.kementerian || '')}</div>
+                    <div style="font-size: 15px; font-weight: 900; letter-spacing: 0.03em; text-transform: uppercase; line-height: 1.22; margin-top: 1px;">${escapeHtml(block.universitas || '')}</div>
+                    <div style="font-size: 13px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1.2; margin-top: 1px;">${escapeHtml(block.fakultas || '')}</div>
+                    ${block.programStudi ? `<div style="font-size: 12px; font-weight: 700; text-transform: uppercase; line-height: 1.2; margin-top: 1px;">${escapeHtml(block.programStudi.toUpperCase().startsWith('PROGRAM STUDI') ? block.programStudi : 'PROGRAM STUDI ' + block.programStudi)}</div>` : ''}
+                    ${block.alamat ? `<div style="font-size: 9px; color: #374151; line-height: 1.2; margin-top: 2.5px; font-style: italic;">${escapeHtml(block.alamat)}</div>` : ''}
+                  </td>
+                  <td style="width: 82px; min-width: 82px; max-width: 82px; border: none; padding: 0;"></td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="${dividerCss}"></div>
+          `;
+        }
+
+        if (blockKey === 'identity') {
+          let metadataTableHtml = '';
+          if (block.showMetadataTable !== false) {
+            let cards = adminAppConfig.Header_Info_Cards;
+            if (!cards || !Array.isArray(cards) || cards.length === 0) {
+              const rawMatkul = adminAppConfig["Mata_Kuliah"] || (currentFormMeta?.mataKuliah || "");
+              const rawDosen  = adminAppConfig["Dosen_Pengampu"] || (currentFormMeta?.dosen || "");
+              const rawKelas  = adminAppConfig["Kelas"] || (currentFormMeta?.kelas || "");
+              const rawProdi  = adminAppConfig["Jurusan"] || (currentFormMeta?.jurusan || "");
+              cards = [];
+              if (rawMatkul) cards.push({ label: 'Mata Kuliah:', value: rawMatkul });
+              if (rawDosen)  cards.push({ label: 'Dosen Pengampu:', value: rawDosen });
+              if (rawKelas)  cards.push({ label: 'Kelas:', value: rawKelas });
+              if (rawProdi)  cards.push({ label: 'Program Studi:', value: rawProdi });
+            }
+
+            const activeCards = (cards || []).filter(c => (c.label && c.label.trim()) || (c.value && c.value.trim()));
+            let rawMetaItems = activeCards.map(c => ({
+              label: (c.label || 'Info').trim().replace(/:$/, ''),
+              value: (c.value || '-').trim()
+            }));
+
+            const hasSesiCard = rawMetaItems.some(item => item.label.toLowerCase().includes('sesi') || item.label.toLowerCase().includes('cakupan'));
+            if (!hasSesiCard) {
+              rawMetaItems.push({
+                label: 'Cakupan Sesi',
+                value: scopeSesi === 'ALL' ? 'Semua Sesi Presentasi' : scopeSesi
+              });
+            }
+
+            const leftColItems = [];
+            const rightColItems = [];
+            rawMetaItems.forEach(item => {
+              const lblLower = item.label.toLowerCase();
+              if (lblLower.includes('matkul') || lblLower.includes('mata kuliah') || lblLower.includes('dosen') || lblLower.includes('pengampu') || lblLower.includes('pembimbing') || lblLower.includes('penguji') || lblLower.includes('koordinator') || lblLower.includes('judul') || lblLower.includes('topik')) {
+                leftColItems.push(item);
+              } else if (lblLower.includes('kelas') || lblLower.includes('prodi') || lblLower.includes('jurusan') || lblLower.includes('program studi') || lblLower.includes('ruang') || lblLower.includes('semester') || lblLower.includes('tahun')) {
+                rightColItems.push(item);
+              } else {
+                if (leftColItems.length <= rightColItems.length) leftColItems.push(item);
+                else rightColItems.push(item);
+              }
+            });
+
+            const maxRows = Math.max(leftColItems.length, rightColItems.length);
+            if (maxRows > 0) {
+              let rowsHtml = '';
+              for (let i = 0; i < maxRows; i++) {
+                const leftItem = leftColItems[i];
+                const rightItem = rightColItems[i];
+                rowsHtml += `
+                  <tr style="border: none !important;">
+                    ${leftItem ? `
+                      <td style="border: none !important; padding: 1.5px 0; width: 22%; font-weight: 600; color: #1f2937; vertical-align: top; font-family: 'Times New Roman', Times, serif; white-space: nowrap;">${escapeHtml(leftItem.label)}</td>
+                      <td style="border: none !important; padding: 1.5px 8px 1.5px 0; width: 42%; font-weight: 700; color: #000000; vertical-align: top; word-break: break-word; font-family: 'Times New Roman', Times, serif; line-height: 1.25;">: ${escapeHtml(leftItem.value)}</td>
+                    ` : `
+                      <td style="border: none !important; width: 22%;"></td>
+                      <td style="border: none !important; width: 42%;"></td>
+                    `}
+                    ${rightItem ? `
+                      <td style="border: none !important; padding: 1.5px 0; width: 15%; font-weight: 600; color: #1f2937; vertical-align: top; font-family: 'Times New Roman', Times, serif; white-space: nowrap;">${escapeHtml(rightItem.label)}</td>
+                      <td style="border: none !important; padding: 1.5px 0; width: 21%; font-weight: 700; color: #000000; vertical-align: top; word-break: break-word; font-family: 'Times New Roman', Times, serif; line-height: 1.25;">: ${escapeHtml(rightItem.value)}</td>
+                    ` : `
+                      <td style="border: none !important; width: 15%;"></td>
+                      <td style="border: none !important; width: 21%;"></td>
+                    `}
+                  </tr>
+                `;
+              }
+              metadataTableHtml = `
+                <table style="width: 100%; border-collapse: collapse; border: none !important; margin-top: 2px; font-size: 11.5px; text-align: left; table-layout: fixed; font-family: 'Times New Roman', Times, serif;">
+                  <tbody>${rowsHtml}</tbody>
+                </table>
+              `;
+            }
+          }
+
+          mainContentHtml += `
+            <div style="text-align: center; margin-bottom: 8px; font-family: 'Times New Roman', Times, serif; color: #000000;">
+              <h2 style="font-size: 13.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em; color: #000000; border-bottom: 1.5px solid #000000; padding-bottom: 2px; display: inline-block; margin: 6pt auto 6px auto; font-family: 'Times New Roman', Times, serif;">
+                ${escapeHtml(block.reportTitle || 'LAPORAN REKAPITULASI HASIL PENILAIAN PRESENTASI')}
+              </h2>
+              ${metadataTableHtml}
+            </div>
+          `;
+        }
+
+        if (blockKey === 'rekap') {
+          const cols = block.columns || {};
+          const isCol = (id) => cols[id]?.enabled !== false;
+          const getColLbl = (id, def) => cols[id]?.label || def;
+
+          mainContentHtml += `
+            <div class="space-y-1 print-avoid-break" style="margin-top: 14px; padding-top: 2px; margin-bottom: 8px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px;">
+                <span style="font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.02em; color: #000000; font-family: 'Times New Roman', Times, serif;">${escapeHtml(block.sectionTitle || 'A. Rekapitulasi Nilai & Peringkat Performa Kelompok')}</span>
+                <span style="font-size: 10px; font-family: monospace; color: #4b5563;">${escapeHtml(block.scaleText || 'Skala Penilaian: 0 - 100')}</span>
+              </div>
+              
+              <div class="overflow-x-auto" style="overflow: visible;">
+                <table class="w-full text-left text-xs" style="table-layout: fixed; width: 100%; border-collapse: collapse; border: 1.5px solid #000000; box-sizing: border-box; font-family: 'Times New Roman', Times, serif;">
+                  <thead>
+                    <tr style="background-color: #f3f4f6; text-align: center; font-weight: bold; border-bottom: 1.5px solid #000000; font-family: 'Times New Roman', Times, serif;">
+                      ${isCol('rank') ? `<th style="padding: 5px 2px; border: 1px solid #000000; width: 6%; text-align: center; vertical-align: middle; font-size: 11.5px;">${escapeHtml(getColLbl('rank', 'Rank'))}</th>` : ''}
+                      ${isCol('group') ? `<th style="padding: 5px 4px; border: 1px solid #000000; text-align: center; vertical-align: middle; width: 22%; font-size: 11.5px;">${escapeHtml(getColLbl('group', 'Kelompok Presentasi'))}</th>` : ''}
+                      ${isCol('sesi') ? `<th style="padding: 5px 3px; border: 1px solid #000000; width: 10%; text-align: center; vertical-align: middle; font-size: 11.5px;">${escapeHtml(getColLbl('sesi', 'Sesi'))}</th>` : ''}
+                      ${isCol('reviewers') ? `<th style="padding: 5px 3px; border: 1px solid #000000; width: 10%; text-align: center; vertical-align: middle; font-size: 11.5px;">${escapeHtml(getColLbl('reviewers', 'Penilai'))}</th>` : ''}
+                      ${isCol('score') ? `<th style="padding: 5px 3px; border: 1px solid #000000; width: 11%; text-align: center; vertical-align: middle; font-size: 11.5px;">${escapeHtml(getColLbl('score', 'Rata-Rata'))}</th>` : ''}
+                      ${isCol('presenter') ? `<th style="padding: 5px 4px; border: 1px solid #000000; text-align: center; vertical-align: middle; width: 27%; font-size: 11.5px; word-break: break-word;">${escapeHtml(getColLbl('presenter', 'Presentator Terbaik'))}</th>` : ''}
+                      ${isCol('predicate') ? `<th style="padding: 5px 3px; border: 1px solid #000000; width: 14%; text-align: center; vertical-align: middle; font-size: 11.5px;">${escapeHtml(getColLbl('predicate', 'Predikat'))}</th>` : ''}
+                    </tr>
+                  </thead>
+                  <tbody>
+          `;
+
+          const sorted = [...summaryList].sort((a, b) => parseFloat(b.rataRataSkor || 0) - parseFloat(a.rataRataSkor || 0));
+          sorted.forEach((g, idx) => {
+            const scoreNum = parseFloat(g.rataRataSkor || 0);
+            const totalP = parseInt(g.totalPenilai) || 0;
+            let predikat = "-";
+            if (totalP > 0) {
+              if (scoreNum >= 80) predikat = "A";
+              else if (scoreNum >= 77) predikat = "A-";
+              else if (scoreNum >= 75) predikat = "B+";
+              else if (scoreNum >= 70) predikat = "B";
+              else if (scoreNum >= 67) predikat = "B-";
+              else if (scoreNum >= 64) predikat = "C+";
+              else if (scoreNum >= 60) predikat = "C";
+              else if (scoreNum >= 50) predikat = "D+";
+              else if (scoreNum >= 40) predikat = "D";
+              else predikat = "E";
+            }
+
+            const presenters = g.rankedPresenters || [];
+            const topPresentersText = (presenters.length > 0)
+              ? presenters.map(p => `${p.name} (${p.votes} Suara)`).join(", ")
+              : "-";
+
+            mainContentHtml += `
+              <tr style="border-bottom: 1px solid #000000; ${idx % 2 === 0 ? 'background-color: #ffffff;' : 'background-color: #fafafa;'}">
+                ${isCol('rank') ? `<td style="padding: 4.5px 2px; border: 1px solid #000000; text-align: center; font-weight: bold; font-size: 11.5px;">#${idx + 1}</td>` : ''}
+                ${isCol('group') ? `<td style="padding: 4.5px 5px; border: 1px solid #000000; font-weight: bold; color: #000000; font-size: 11.5px; word-break: break-word;">${escapeHtml(g.kelompok)}</td>` : ''}
+                ${isCol('sesi') ? `<td style="padding: 4.5px 3px; border: 1px solid #000000; text-align: center; font-size: 11.5px;">${escapeHtml(g.sesi || 'Minggu 1')}</td>` : ''}
+                ${isCol('reviewers') ? `<td style="padding: 4.5px 3px; border: 1px solid #000000; text-align: center; font-size: 11.5px;">${totalP} Mhs</td>` : ''}
+                ${isCol('score') ? `<td style="padding: 4.5px 3px; border: 1px solid #000000; text-align: center; font-weight: bold; color: #000000; font-size: 11.5px;">${totalP > 0 ? scoreNum.toFixed(2) : '-'}</td>` : ''}
+                ${isCol('presenter') ? `<td style="padding: 4.5px 5px; border: 1px solid #000000; color: #000000; font-size: 11px; word-break: break-word; line-height: 1.25;">${escapeHtml(topPresentersText)}</td>` : ''}
+                ${isCol('predicate') ? `<td style="padding: 4.5px 3px; border: 1px solid #000000; text-align: center; font-weight: 600; font-size: 11.5px;">${predikat}</td>` : ''}
+              </tr>
+            `;
+          });
+
+          if (block.showClassAverage !== false) {
+            mainContentHtml += `
+              <tr style="background-color: #f3f4f6; font-weight: bold; border-top: 1.5px solid #000000; text-align: center;">
+                <td colspan="4" style="padding: 5px 6px; text-align: center; vertical-align: middle; border: 1px solid #000000; font-size: 11.5px;">Rata-Rata Keseluruhan Kelas</td>
+                <td style="padding: 5px 4px; border: 1px solid #000000; font-size: 12px; color: #000000; text-align: center; vertical-align: middle;">${avgClassScore}</td>
+                <td colspan="2" style="padding: 5px 6px; text-align: center; vertical-align: middle; border: 1px solid #000000; font-size: 11px; color: #000000;">Total ${summaryList.length} Kelompok (${totalMahasiswa} Mahasiswa)</td>
+              </tr>
+            `;
+          }
+
+          mainContentHtml += `
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          `;
+        }
+
+        const showRev = overrideReviews !== null ? overrideReviews : (block.enabled !== false);
+        const showRevName = overrideReviewer !== null ? overrideReviewer : (block.showReviewerName !== false);
+
+        if (blockKey === 'reviews' && showRev && summaryList.length > 0) {
+          mainContentHtml += `
+            <div class="space-y-1.5" style="margin-top: 16px; padding-top: 2px; margin-bottom: 6px;">
+              <h4 style="font-size: 12px; font-weight: 800; margin: 0 0 3px 0; page-break-after: avoid; break-after: avoid; font-family: 'Times New Roman', Times, serif; color: #000000; text-transform: uppercase;">
+                ${escapeHtml(block.sectionTitle || 'B. Rangkuman Catatan Evaluasi Masukan Mahasiswa')}
+              </h4>
+          `;
+
+          summaryList.forEach(g => {
+            const evalList = g.evaluasiList || {};
+            const studentKeys = Object.keys(evalList);
+
+            if (studentKeys.length > 0) {
+              mainContentHtml += `
+                <div style="page-break-inside: avoid; break-inside: avoid; border: 1px solid #9ca3af; border-radius: 4px; padding: 5px 8px; margin-bottom: 6px; background-color: #fafafa;">
+                  <div style="border-bottom: 1px solid #d1d5db; padding-bottom: 2.5px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 11.5px; font-weight: 800; color: #000000;">${escapeHtml(g.kelompok)}</span>
+                    <span style="font-size: 10px; font-family: monospace; background: #e5e7eb; padding: 1px 5px; border-radius: 3px;">${escapeHtml(g.sesi || 'Minggu 1')}</span>
+                  </div>
+                  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; padding-top: 4px;">
+              `;
+
+              studentKeys.forEach(name => {
+                const reviews = evalList[name] || [];
+                if (reviews.length > 0) {
+                  mainContentHtml += `
+                    <div style="page-break-inside: avoid; break-inside: avoid; border: 1px solid #e5e7eb; border-radius: 4px; padding: 4px 6.5px; background: #ffffff;">
+                      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px dashed #e5e7eb; padding-bottom: 2px; margin-bottom: 3px;">
+                        <span style="font-size: 11px; font-weight: 700; color: #111827;">${escapeHtml(name)}</span>
+                        <span style="font-size: 9.5px; font-weight: 600; color: #4b5563; font-family: monospace; background: #f3f4f6; padding: 0.5px 4px; border-radius: 3px;">${reviews.length} Masukan</span>
+                      </div>
+                      <ul style="list-style-type: disc; padding-left: 14px; margin: 0; font-size: 10.5px; line-height: 1.3; color: #1f2937;">
+                        ${reviews.slice(0, 4).map(r => `
+                          <li style="margin-bottom: 2px;">
+                            <span style="font-style: italic; color: #111827;">"${escapeHtml(r.ulasan)}"</span>
+                            ${showRevName ? `<span style="font-size: 9px; color: #4b5563; font-weight: 600; font-style: normal; margin-left: 3px;">— ${escapeHtml(r.penilai || 'Penilai')}</span>` : ''}
+                          </li>
+                        `).join("")}
+                        ${reviews.length > 4 ? `<li style="list-style: none; font-size: 9.5px; color: #6b7280; font-style: italic; margin-top: 1px; padding-left: 0;">+ ${reviews.length - 4} catatan masukan lainnya...</li>` : ''}
+                      </ul>
+                    </div>
+                  `;
+                }
+              });
+
+              mainContentHtml += `
+                  </div>
+                </div>
+              `;
+            }
+          });
+
+          mainContentHtml += `</div>`;
+        }
+
+        if (blockKey === 'signatures') {
+          const sigs = block.signatories || [];
+          const kotaStr = block.kota || adminAppConfig["Kota_Instansi"] || "Banjarmasin";
+          const dateStr = block.showDate !== false ? `${kotaStr}, ${printDateStr}` : kotaStr;
+
+          if (sigs.length > 0) {
+            mainContentHtml += `
+              <div class="print-signature print-avoid-break" style="page-break-inside: avoid; break-inside: avoid; margin-top: 18px; font-family: 'Times New Roman', Times, serif;">
+                <div style="display: flex; justify-content: ${sigs.length === 1 ? 'flex-end' : 'space-around'}; align-items: flex-start; gap: 20px; flex-wrap: wrap;">
+                  ${sigs.map(s => `
+                    <div style="text-align: center; min-width: 220px; max-width: 320px; font-family: 'Times New Roman', Times, serif;">
+                      <p style="margin: 0; font-size: 11.5px; color: #000000;">${escapeHtml(dateStr)}</p>
+                      <p style="margin: 1.5px 0 0 0; font-size: 11.5px; font-weight: 700; color: #000000;">${escapeHtml(s.title || 'Dosen Pengampu Mata Kuliah')},</p>
+                      <div style="height: ${s.spaceHeight || 60}px;"></div>
+                      <div style="margin-top: 1px; padding: 0 6px 1.5px 6px; border-bottom: 1.5px solid #000000; display: inline-block; min-width: 200px; max-width: 100%;">
+                        <span style="font-size: 12px; font-weight: 800; color: #000000; white-space: nowrap; letter-spacing: 0.01em;">${escapeHtml(s.name || '-')}</span>
+                      </div>
+                      ${(s.nip && s.nip !== '-') ? `<p style="margin: 2px 0 0 0; font-size: 11px; color: #000000; font-weight: 600;">NIP. ${escapeHtml(s.nip)}</p>` : ''}
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            `;
+          }
+        }
+      });
+
+      const footerBlock = cfg.footer || {};
+      const showFooterFinal = overrideFooter !== null ? overrideFooter : (footerBlock.enabled !== false);
+      let footerHtml = '';
+      if (showFooterFinal && order.includes('footer')) {
+        const rawProdi = adminAppConfig["Program_Studi"] || adminAppConfig["Jurusan"] || (currentFormMeta && currentFormMeta.jurusan) || "PGSD";
+        const univ = cfg.kop?.universitas || adminAppConfig["Universitas"] || "Universitas Lambung Mangkurat";
+        const customFoot = footerBlock.customText || `Dokumen ini diterbitkan secara otomatis oleh <strong>Sistem Peer-Assessment ${escapeHtml(rawProdi || 'FKIP')}</strong> &bull; ${escapeHtml(univ)}`;
+
+        footerHtml = `
+          <div class="print-avoid-break print-footer" style="page-break-inside: avoid; break-inside: avoid; margin-top: auto; padding-top: 6px; border-top: 0.75px dashed #9ca3af; display: flex; justify-content: space-between; align-items: center; font-size: 8.5px; color: #4b5563; line-height: 1.3; flex-shrink: 0;">
+            <span>${customFoot}</span>
+            ${footerBlock.showPrintDate !== false ? `<span style="font-family: monospace; color: #6b7280; font-weight: 500;">Waktu Cetak: ${printDateStr}</span>` : ''}
+          </div>
+        `;
+      }
+
+      return `
+        <div class="print-page-wrapper" style="min-height: 1033px; width: 100%; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; background: #ffffff; font-family: 'Times New Roman', Times, serif;">
+          <div style="flex: 1 0 auto;">
+            ${mainContentHtml}
+          </div>
+          ${footerHtml}
+        </div>
+      `;
+    }
+
+    function updateLivePrintPreview() {
+      const area = document.getElementById("adminLivePrintPreviewArea");
+      if (!area) return;
+      const cfg = initOrGetPrintConfig();
+      area.innerHTML = generateOfficialPrintDocumentHtml(cfg);
+      requestAnimationFrame(() => {
+        applyPrintBuilderZoom();
+      });
+    }
+
+    function adjustPrintBuilderZoom(delta) {
+      printBuilderZoom = Math.max(0.3, Math.min(1.8, Math.round((printBuilderZoom + delta) * 10) / 10));
+      applyPrintBuilderZoom(false);
+    }
+
+    function resetPrintBuilderZoom() {
+      const scrollContainer = document.getElementById("printBuilderScrollArea");
+      if (scrollContainer) {
+        const availableW = scrollContainer.clientWidth - 30;
+        const autoFitScale = Math.min(1.0, Math.max(0.35, availableW / 820));
+        printBuilderZoom = Math.round(autoFitScale * 100) / 100;
+      } else {
+        printBuilderZoom = 0.75;
+      }
+      applyPrintBuilderZoom(true);
+    }
+
+    function applyPrintBuilderZoom(isFit = false) {
+      const area = document.getElementById("adminLivePrintPreviewArea");
+      const wrapper = document.getElementById("printBuilderPaperWrapper");
+      const badge = document.getElementById("printBuilderZoomBadge");
+
+      if (area && wrapper) {
+        const actualH = area.scrollHeight || 1123;
+        area.style.transform = `scale(${printBuilderZoom})`;
+        wrapper.style.width = `${Math.round(794 * printBuilderZoom)}px`;
+        wrapper.style.height = `${Math.round(actualH * printBuilderZoom)}px`;
+      }
+      if (badge) {
+        badge.textContent = isFit ? `Fit (${Math.round(printBuilderZoom * 100)}%)` : `${Math.round(printBuilderZoom * 100)}%`;
+      }
+    }
+
+    function executeAdminBrowserPrintFromBuilder() {
+      const area = document.getElementById("adminLivePrintPreviewArea");
+      const root = document.getElementById("printDocumentRoot");
+      if (area && root) {
+        root.innerHTML = area.innerHTML;
+        window.print();
+      }
+    }
 
     function openAdminPrintModal() {
       populateAdminPrintScopeOptions();
@@ -10202,449 +11131,8 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       const includeReviewerName = document.getElementById("adminPrintIncludeReviewerName")?.checked ?? true;
       const includeFooter = document.getElementById("adminPrintIncludeFooter")?.checked ?? true;
 
-      // 🏛️ Dynamic Institutional Metadata
-      const kementerian = adminAppConfig["Kementerian"] || "KEMENTERIAN PENDIDIKAN TINGGI, SAINS, DAN TEKNOLOGI";
-      const universitas = adminAppConfig["Universitas"] || "UNIVERSITAS LAMBUNG MANGKURAT";
-      const fakultas = adminAppConfig["Fakultas"] || "FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN";
-      const rawJurusan = (adminAppConfig["Program_Studi"] || adminAppConfig["Jurusan"] || (currentFormMeta && currentFormMeta.jurusan) || "PGSD").trim();
-      let prodiKop = "PROGRAM STUDI PENDIDIKAN GURU SEKOLAH DASAR (PGSD)";
-      if (rawJurusan) {
-        if (rawJurusan.toUpperCase().startsWith("PROGRAM STUDI") || rawJurusan.toUpperCase().startsWith("PRODI")) {
-          prodiKop = rawJurusan.toUpperCase();
-        } else {
-          prodiKop = `PROGRAM STUDI ${rawJurusan.toUpperCase()}`;
-        }
-      }
-      const alamatInstansi = adminAppConfig["Alamat_Instansi"] || "Jl. Brigjen H. Hasan Basry, Kayu Tangi, Banjarmasin, Kalimantan Selatan 70123 • Laman: fkip.ulm.ac.id";
-      const logoUrl = adminAppConfig["Logo_Url"] || "assets/logo-ulm.png";
-      const kotaInstansi = adminAppConfig["Kota_Instansi"] || "Banjarmasin";
-      const minScore = (adminAppConfig && adminAppConfig["Nilai_Kelompok_Min"] !== undefined) ? adminAppConfig["Nilai_Kelompok_Min"] : 0;
-      const maxScore = (adminAppConfig && adminAppConfig["Nilai_Kelompok_Max"] !== undefined) ? adminAppConfig["Nilai_Kelompok_Max"] : 100;
-      const printDateStr = new Intl.DateTimeFormat('id-ID', { dateStyle: 'long' }).format(new Date());
-
-      // Filter groups & build unified summary list
-      const allResponses = Array.isArray(adminResponsesList) ? adminResponsesList : [];
-      let groupsToDisplay = Array.isArray(adminMasterGroups) ? [...adminMasterGroups] : [];
-
-      if (scopeGroup !== "ALL") {
-        groupsToDisplay = groupsToDisplay.filter(g => g.name === scopeGroup);
-      }
-      if (scopeSesi !== "ALL") {
-        groupsToDisplay = groupsToDisplay.filter(g => (g.sesi || "Minggu 1") === scopeSesi);
-      }
-
-      let summaryList = groupsToDisplay.map(g => {
-        const groupResponses = allResponses.filter(r => (r.kelompok_dinilai || r.kelompok) === g.name && (scopeSesi === 'ALL' || (r.sesi || 'Minggu 1') === (g.sesi || 'Minggu 1')));
-        const countPenilai = groupResponses.length;
-        let avgScore = 0;
-        if (countPenilai > 0) {
-          const sum = groupResponses.reduce((acc, r) => acc + (parseFloat(r.nilai_kelompok || r.nilaiKelompok) || 0), 0);
-          avgScore = parseFloat((sum / countPenilai).toFixed(2));
-        }
-
-        // Aggregate best presenters
-        const presenterVotes = {};
-        groupResponses.forEach(r => {
-          [r.best_presenter_1, r.best_presenter_2].forEach(p => {
-            if (p && p !== '-' && p !== 'null') {
-              presenterVotes[p] = (presenterVotes[p] || 0) + 1;
-            }
-          });
-        });
-        const rankedPresenters = Object.entries(presenterVotes)
-          .map(([name, votes]) => ({ name, votes }))
-          .sort((a, b) => b.votes - a.votes);
-
-        // Aggregate qualitative reviews
-        const allAdminStudents = (adminMasterGroups || []).flatMap(g => (g.members || []).map(m => ({ ...m, kelompok: g.name })));
-        const evaluasiList = {};
-        groupResponses.forEach(r => {
-          const penilaiName = r.nama_penilai || r.namaPenilai || 'Penilai';
-          const evalDetail = r.evaluasi_detail || r.evaluasiDetail || {};
-          if (typeof evalDetail === 'object' && evalDetail !== null) {
-            Object.entries(evalDetail).forEach(([memberKey, ulasanText]) => {
-              if (memberKey === 'uploadedFiles' || !ulasanText) return;
-              let memberName = memberKey;
-              const foundStud = allAdminStudents.find(s => String(s.nim).trim() === String(memberKey).trim());
-              if (foundStud && foundStud.name) {
-                memberName = `${foundStud.name} (${memberKey})`;
-              }
-              if (!evaluasiList[memberName]) evaluasiList[memberName] = [];
-              evaluasiList[memberName].push({
-                penilai: penilaiName,
-                ulasan: ulasanText
-              });
-            });
-          }
-        });
-
-        return {
-          kelompok: g.name,
-          sesi: g.sesi || 'Minggu 1',
-          totalPenilai: countPenilai,
-          rataRataSkor: avgScore,
-          rankedPresenters: rankedPresenters,
-          evaluasiList: evaluasiList
-        };
-      });
-
-      // Hitung Rata-Rata Keseluruhan
-      let totalAllScore = 0;
-      let totalAllPenilai = 0;
-      let evaluatedCount = 0;
-      summaryList.forEach(g => {
-        const s = parseFloat(g.rataRataSkor || 0);
-        const p = parseInt(g.totalPenilai) || 0;
-        if (p > 0) {
-          totalAllScore += s;
-          totalAllPenilai += p;
-          evaluatedCount++;
-        }
-      });
-
-      // Hitung Total Mahasiswa Terdaftar
-      const activeGroupNames = new Set(summaryList.map(g => g.kelompok));
-      let totalMahasiswa = 0;
-      (adminMasterGroups || []).filter(g => activeGroupNames.has(g.name)).forEach(g => {
-        totalMahasiswa += (g.members || []).length;
-      });
-      const avgClassScore = evaluatedCount > 0 ? (totalAllScore / evaluatedCount).toFixed(2) : "0.00";
-
-      // 🔍 Dynamic Header Info Cards Resolution (Fully Adaptive)
-      let cards = adminAppConfig.Header_Info_Cards;
-      if (!cards || !Array.isArray(cards) || cards.length === 0) {
-        const rawMatkul = adminAppConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || "";
-        const rawDosen  = adminAppConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || "";
-        const rawKelas  = adminAppConfig["Kelas"] || (currentFormMeta && currentFormMeta.kelas) || "";
-        const rawProdi  = adminAppConfig["Jurusan"] || (currentFormMeta && currentFormMeta.jurusan) || "";
-        
-        cards = [];
-        if (rawMatkul) cards.push({ label: 'Mata Kuliah:', value: rawMatkul });
-        if (rawDosen)  cards.push({ label: 'Dosen Pengampu:', value: rawDosen });
-        if (rawKelas)  cards.push({ label: 'Kelas:', value: rawKelas });
-        if (rawProdi)  cards.push({ label: 'Program Studi:', value: rawProdi });
-      }
-
-      // Filter active cards with non-empty label or value
-      const activeCards = (cards || []).filter(c => (c.label && c.label.trim()) || (c.value && c.value.trim()));
-
-      // Build raw metadata items
-      let rawMetaItems = activeCards.map(c => ({
-        label: (c.label || 'Info').trim().replace(/:$/, ''),
-        value: (c.value || '-').trim()
-      }));
-
-      // Add Cakupan Sesi if not explicitly present in custom cards
-      const hasSesiCard = rawMetaItems.some(item => item.label.toLowerCase().includes('sesi') || item.label.toLowerCase().includes('cakupan'));
-      if (!hasSesiCard && summaryList.length > 0) {
-        rawMetaItems.push({
-          label: 'Cakupan Sesi',
-          value: scopeSesi === 'ALL' ? 'Semua Sesi Presentasi' : scopeSesi
-        });
-      }
-
-      // 🎯 Smart Academic Metadata Pairing:
-      // Left Column (Primary / Long Content): Mata Kuliah, Dosen, Pengampu, Pembimbing, Penguji, Koordinator, Topik, Judul, Sesi
-      // Right Column (Secondary / Compact Badges): Kelas, Program Studi, Ruang, Semester, Tahun
-      const leftColItems = [];
-      const rightColItems = [];
-
-      rawMetaItems.forEach(item => {
-        const lblLower = item.label.toLowerCase();
-        if (lblLower.includes('matkul') || lblLower.includes('mata kuliah') || lblLower.includes('dosen') || lblLower.includes('pengampu') || lblLower.includes('pembimbing') || lblLower.includes('penguji') || lblLower.includes('koordinator') || lblLower.includes('judul') || lblLower.includes('topik')) {
-          leftColItems.push(item);
-        } else if (lblLower.includes('kelas') || lblLower.includes('prodi') || lblLower.includes('jurusan') || lblLower.includes('program studi') || lblLower.includes('ruang') || lblLower.includes('semester') || lblLower.includes('tahun')) {
-          rightColItems.push(item);
-        } else {
-          if (leftColItems.length <= rightColItems.length) {
-            leftColItems.push(item);
-          } else {
-            rightColItems.push(item);
-          }
-        }
-      });
-
-      // Render dynamic 2-column metadata table with generous width for left column
-      const maxRows = Math.max(leftColItems.length, rightColItems.length);
-      let metadataTableHtml = '';
-      if (maxRows > 0) {
-        let rowsHtml = '';
-        for (let i = 0; i < maxRows; i++) {
-          const leftItem = leftColItems[i];
-          const rightItem = rightColItems[i];
-          rowsHtml += `
-            <tr style="border: none !important;">
-              ${leftItem ? `
-                <td style="border: none !important; padding: 1.5px 0; width: 22%; font-weight: 600; color: #1f2937; vertical-align: top; font-family: 'Times New Roman', Times, serif; white-space: nowrap;">${escapeHtml(leftItem.label)}</td>
-                <td style="border: none !important; padding: 1.5px 8px 1.5px 0; width: 42%; font-weight: 700; color: #000000; vertical-align: top; word-break: break-word; font-family: 'Times New Roman', Times, serif; line-height: 1.25;">: ${escapeHtml(leftItem.value)}</td>
-              ` : `
-                <td style="border: none !important; width: 22%;"></td>
-                <td style="border: none !important; width: 42%;"></td>
-              `}
-              ${rightItem ? `
-                <td style="border: none !important; padding: 1.5px 0; width: 15%; font-weight: 600; color: #1f2937; vertical-align: top; font-family: 'Times New Roman', Times, serif; white-space: nowrap;">${escapeHtml(rightItem.label)}</td>
-                <td style="border: none !important; padding: 1.5px 0; width: 21%; font-weight: 700; color: #000000; vertical-align: top; word-break: break-word; font-family: 'Times New Roman', Times, serif; line-height: 1.25;">: ${escapeHtml(rightItem.value)}</td>
-              ` : `
-                <td style="border: none !important; width: 15%;"></td>
-                <td style="border: none !important; width: 21%;"></td>
-              `}
-            </tr>
-          `;
-        }
-        metadataTableHtml = `
-          <table style="width: 100%; border-collapse: collapse; border: none !important; margin-top: 2px; font-size: 11.5px; text-align: left; table-layout: fixed; font-family: 'Times New Roman', Times, serif;">
-            <tbody>
-              ${rowsHtml}
-            </tbody>
-          </table>
-        `;
-      }
-
-      // ✍️ Smart Dynamic Signatory Resolution
-      let signatoryTitle = adminAppConfig["Jabatan_Penandatangan"] || "Dosen Pengampu Mata Kuliah";
-      let signatoryName = adminAppConfig["Dosen_Pengampu"] || adminAppConfig["Nama_Penandatangan"] || (currentFormMeta && currentFormMeta.dosen) || "";
-      let signatoryNip = adminAppConfig["NIP_Dosen"] || adminAppConfig["NIP_Pengampu"] || adminAppConfig["NIP_Penandatangan"] || "";
-
-      if (cards && Array.isArray(cards)) {
-        const signatoryCard = cards.find(c => {
-          const l = (c.label || "").toLowerCase();
-          return l.includes('dosen') || l.includes('pengampu') || l.includes('pembimbing') || l.includes('penguji') || l.includes('penanggung jawab') || l.includes('koordinator') || l.includes('instruktur') || l.includes('guru pamong');
-        });
-        if (signatoryCard && signatoryCard.value && signatoryCard.value.trim()) {
-          signatoryName = signatoryCard.value.trim();
-          const rawLabel = (signatoryCard.label || '').trim().replace(/:$/, '');
-          if (rawLabel && !adminAppConfig["Jabatan_Penandatangan"]) {
-            signatoryTitle = rawLabel.toLowerCase().includes('dosen') ? `${rawLabel} Mata Kuliah` : rawLabel;
-          }
-        }
-      }
-
-      if (!signatoryNip && signatoryName && signatoryName.toLowerCase().includes("ririanti")) {
-        signatoryNip = "19830514 200812 2 003";
-      }
-
-      // Title determination
-      const formTitle = adminAppConfig["Judul_Form"] || (currentFormMeta && currentFormMeta.judulForm) || "";
-      let reportTitle = "LAPORAN REKAPITULASI HASIL PENILAIAN PRESENTASI";
-      if (formTitle && !formTitle.toLowerCase().includes("penilaian presentasi") && formTitle.length < 50) {
-        reportTitle = `LAPORAN REKAPITULASI ${formTitle.toUpperCase().replace(/^PENILAIAN\s+/i, 'HASIL PENILAIAN ')}`;
-      }
-
-      // HTML Template
-      let html = `
-        <div class="print-page-wrapper" style="min-height: 1033px; width: 100%; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; background: #ffffff;">
-          
-          <!-- TOP & MAIN CONTENT AREA -->
-          <div style="flex: 1 0 auto;">
-            <!-- KOP SURAT RESMI DINAS -->
-            <table style="width: 100%; border-collapse: collapse; border: none; margin: 0 0 2px 0; padding: 0; table-layout: fixed;">
-              <tbody>
-                <tr style="border: none;">
-                  <td style="width: 82px; min-width: 82px; max-width: 82px; vertical-align: middle; text-align: center; border: none; padding: 0 6px 0 0;">
-                    <img src="${escapeHtml(logoUrl)}" alt="Logo Instansi" style="width: 76px; height: 76px; object-fit: contain; display: block; margin: 0 auto;" onerror="this.src='assets/logo-ulm.png'" />
-                  </td>
-                  <td style="text-align: center; vertical-align: middle; border: none; padding: 0 2px; font-family: 'Times New Roman', Times, serif; color: #000000;">
-                    <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; line-height: 1.2;">${escapeHtml(kementerian)}</div>
-                    <div style="font-size: 15px; font-weight: 900; letter-spacing: 0.03em; text-transform: uppercase; line-height: 1.22; margin-top: 1px;">${escapeHtml(universitas)}</div>
-                    <div style="font-size: 13px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1.2; margin-top: 1px;">${escapeHtml(fakultas)}</div>
-                    ${prodiKop ? `<div style="font-size: 12px; font-weight: 700; text-transform: uppercase; line-height: 1.2; margin-top: 1px;">${escapeHtml(prodiKop)}</div>` : ''}
-                    ${alamatInstansi ? `<div style="font-size: 9px; color: #374151; line-height: 1.2; margin-top: 2.5px; font-style: italic;">${escapeHtml(alamatInstansi)}</div>` : ''}
-                  </td>
-                  <td style="width: 82px; min-width: 82px; max-width: 82px; border: none; padding: 0;"></td>
-                </tr>
-              </tbody>
-            </table>
-
-            <!-- GARIS PEMBATAS KOP RESMI DINAS (DOUBLE LINE TEBAL & TIPIS) -->
-            <div style="border-top: 2.5px solid #000000; border-bottom: 0.75px solid #000000; height: 2px; margin: 2px 0 8px 0;"></div>
-
-            <!-- JUDUL LAPORAN & METADATA -->
-            <div style="text-align: center; margin-bottom: 8px; font-family: 'Times New Roman', Times, serif; color: #000000;">
-              <h2 style="font-size: 13.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em; color: #000000; border-bottom: 1.5px solid #000000; padding-bottom: 2px; display: inline-block; margin: 6pt auto 6px auto; font-family: 'Times New Roman', Times, serif;">
-                ${escapeHtml(reportTitle)}
-              </h2>
-              ${metadataTableHtml}
-            </div>
-
-            <!-- 1. TABEL REKAPITULASI NILAI KELOMPOK -->
-            <div class="space-y-1 print-avoid-break" style="margin-top: 14px; padding-top: 2px; margin-bottom: 8px;">
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px;">
-                <span style="font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.02em; color: #000000; font-family: 'Times New Roman', Times, serif;">A. Rekapitulasi Nilai &amp; Peringkat Performa Kelompok</span>
-                <span style="font-size: 10px; font-family: monospace; color: #4b5563;">Skala Penilaian: ${minScore} - ${maxScore}</span>
-              </div>
-              
-              <div class="overflow-x-auto" style="overflow: visible;">
-                <table class="w-full text-left text-xs" style="table-layout: fixed; width: 100%; border-collapse: collapse; border: 1.5px solid #000000; box-sizing: border-box; font-family: 'Times New Roman', Times, serif;">
-                  <thead>
-                    <tr style="background-color: #f3f4f6; text-align: center; font-weight: bold; border-bottom: 1.5px solid #000000; font-family: 'Times New Roman', Times, serif;">
-                      <th style="padding: 5px 2px; border: 1px solid #000000; width: 6%; text-align: center; vertical-align: middle; font-size: 11.5px; font-family: 'Times New Roman', Times, serif;">Rank</th>
-                      <th style="padding: 5px 4px; border: 1px solid #000000; text-align: center; vertical-align: middle; width: 19%; font-size: 11.5px; font-family: 'Times New Roman', Times, serif;">Kelompok Presentasi</th>
-                      <th style="padding: 5px 3px; border: 1px solid #000000; width: 10%; text-align: center; vertical-align: middle; font-size: 11.5px; font-family: 'Times New Roman', Times, serif;">Sesi</th>
-                      <th style="padding: 5px 3px; border: 1px solid #000000; width: 9%; text-align: center; vertical-align: middle; font-size: 11.5px; font-family: 'Times New Roman', Times, serif;">Penilai</th>
-                      <th style="padding: 5px 3px; border: 1px solid #000000; width: 11%; text-align: center; vertical-align: middle; font-size: 11.5px; font-family: 'Times New Roman', Times, serif;">Rata-Rata</th>
-                      <th style="padding: 5px 4px; border: 1px solid #000000; text-align: center; vertical-align: middle; width: 31%; font-size: 11.5px; font-family: 'Times New Roman', Times, serif; word-break: break-word;">Presentator Terbaik</th>
-                      <th style="padding: 5px 3px; border: 1px solid #000000; width: 14%; text-align: center; vertical-align: middle; font-size: 11.5px; font-family: 'Times New Roman', Times, serif;">Predikat</th>
-                    </tr>
-                  </thead>
-                  <tbody style="font-family: 'Times New Roman', Times, serif;">
-      `;
-
-      if (summaryList.length === 0) {
-        html += `
-          <tr>
-            <td colspan="7" style="padding: 10px; text-align: center; color: #6b7280; font-style: italic; border: 1px solid #000000; font-family: 'Times New Roman', Times, serif;">
-              Tidak ada data penilaian yang sesuai dengan kriteria filter.
-            </td>
-          </tr>
-        `;
-      } else {
-        const sorted = [...summaryList].sort((a, b) => parseFloat(b.rataRataSkor || 0) - parseFloat(a.rataRataSkor || 0));
-        sorted.forEach((g, idx) => {
-          const scoreNum = parseFloat(g.rataRataSkor || 0);
-          const totalP = parseInt(g.totalPenilai) || 0;
-          let predikat = "-";
-          if (totalP > 0) {
-            if (scoreNum >= 80) predikat = "A";
-            else if (scoreNum >= 77) predikat = "A-";
-            else if (scoreNum >= 75) predikat = "B+";
-            else if (scoreNum >= 70) predikat = "B";
-            else if (scoreNum >= 67) predikat = "B-";
-            else if (scoreNum >= 64) predikat = "C+";
-            else if (scoreNum >= 60) predikat = "C";
-            else if (scoreNum >= 50) predikat = "D+";
-            else if (scoreNum >= 40) predikat = "D";
-            else predikat = "E";
-          }
-
-          const presenters = g.rankedPresenters || [];
-          const topPresentersText = (presenters.length > 0)
-            ? presenters.map(p => `${p.name} (${p.votes} Suara)`).join(", ")
-            : "-";
-
-          html += `
-            <tr style="border-bottom: 1px solid #000000; font-family: 'Times New Roman', Times, serif; ${idx % 2 === 0 ? 'background-color: #ffffff;' : 'background-color: #fafafa;'}">
-              <td style="padding: 4.5px 2px; border: 1px solid #000000; text-align: center; font-weight: bold; font-family: 'Times New Roman', Times, serif; font-size: 11.5px;">#${idx + 1}</td>
-              <td style="padding: 4.5px 5px; border: 1px solid #000000; font-weight: bold; color: #000000; font-size: 11.5px; font-family: 'Times New Roman', Times, serif; word-break: break-word;">${escapeHtml(g.kelompok)}</td>
-              <td style="padding: 4.5px 3px; border: 1px solid #000000; text-align: center; font-size: 11.5px; font-family: 'Times New Roman', Times, serif;">${escapeHtml(g.sesi || 'Minggu 1')}</td>
-              <td style="padding: 4.5px 3px; border: 1px solid #000000; text-align: center; font-family: 'Times New Roman', Times, serif; font-size: 11.5px;">${totalP} Mhs</td>
-              <td style="padding: 4.5px 3px; border: 1px solid #000000; text-align: center; font-weight: bold; font-family: 'Times New Roman', Times, serif; color: #000000; font-size: 11.5px;">${totalP > 0 ? scoreNum.toFixed(2) : '-'}</td>
-              <td style="padding: 4.5px 5px; border: 1px solid #000000; color: #000000; font-size: 11px; font-family: 'Times New Roman', Times, serif; word-break: break-word; overflow-wrap: break-word; line-height: 1.25;">${escapeHtml(topPresentersText)}</td>
-              <td style="padding: 4.5px 3px; border: 1px solid #000000; text-align: center; font-weight: 600; font-size: 11.5px; font-family: 'Times New Roman', Times, serif;">${predikat}</td>
-            </tr>
-          `;
-        });
-
-        // Summary Row
-        html += `
-          <tr style="background-color: #f3f4f6; font-weight: bold; border-top: 1.5px solid #000000; text-align: center; font-family: 'Times New Roman', Times, serif;">
-            <td colspan="4" style="padding: 5px 6px; text-align: center; vertical-align: middle; border: 1px solid #000000; font-size: 11.5px; font-family: 'Times New Roman', Times, serif;">Rata-Rata Keseluruhan Kelas</td>
-            <td style="padding: 5px 4px; border: 1px solid #000000; font-family: 'Times New Roman', Times, serif; font-size: 12px; color: #000000; text-align: center; vertical-align: middle;">${avgClassScore}</td>
-            <td colspan="2" style="padding: 5px 6px; text-align: center; vertical-align: middle; border: 1px solid #000000; font-size: 11px; font-family: 'Times New Roman', Times, serif; color: #000000;">Total ${summaryList.length} Kelompok (${totalMahasiswa} Mahasiswa)</td>
-          </tr>
-        `;
-      }
-
-      html += `
-                  </tbody>
-                </table>
-              </div>
-            </div>
-      `;
-
-      // 2. BAGIAN EVALUASI KUALITATIF JIKA DICENTANG
-      if (includeReviews && summaryList.length > 0) {
-        html += `
-          <div class="space-y-1.5" style="margin-top: 16px; padding-top: 2px; margin-bottom: 6px;">
-            <h4 class="font-bold uppercase tracking-wider text-zinc-950 print-section-header" style="font-size: 12px; font-weight: 800; margin: 0 0 3px 0; page-break-after: avoid; break-after: avoid; font-family: 'Times New Roman', Times, serif; color: #000000;">
-              B. Rangkuman Catatan Evaluasi Masukan Mahasiswa
-            </h4>
-        `;
-
-        summaryList.forEach(g => {
-          const evalList = g.evaluasiList || {};
-          const studentKeys = Object.keys(evalList);
-
-          if (studentKeys.length > 0) {
-            html += `
-              <div class="print-card print-avoid-break rounded border border-zinc-400 bg-zinc-50/50 space-y-1 mb-1.5" style="page-break-inside: avoid; break-inside: avoid; border: 1px solid #9ca3af; border-radius: 4px; padding: 5px 8px;">
-                <div class="font-bold text-zinc-950 border-b border-zinc-300 flex items-center justify-between" style="border-bottom: 1px solid #d1d5db; padding-bottom: 2.5px;">
-                  <span class="font-extrabold" style="font-size: 11.5px; font-weight: 800;">${escapeHtml(g.kelompok)}</span>
-                  <span class="font-medium font-mono text-zinc-700 bg-zinc-200/80 px-1.5 py-0.5 rounded" style="font-size: 10px;">${escapeHtml(g.sesi || 'Minggu 1')}</span>
-                </div>
-                <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; padding-top: 2.5px;">
-            `;
-
-            studentKeys.forEach(name => {
-              const reviews = evalList[name] || [];
-              if (reviews.length > 0) {
-                html += `
-                  <div class="rounded bg-white border border-zinc-200 shadow-2xs" style="page-break-inside: avoid; break-inside: avoid; border: 1px solid #e5e7eb; border-radius: 4px; padding: 4px 6.5px;">
-                    <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px dashed #e5e7eb; padding-bottom: 2px; margin-bottom: 3px;">
-                      <span style="font-size: 11px; font-weight: 700; color: #111827;">${escapeHtml(name)}</span>
-                      <span style="font-size: 9.5px; font-weight: 600; color: #4b5563; font-family: monospace; background: #f3f4f6; padding: 0.5px 4px; border-radius: 3px;">${reviews.length} Masukan</span>
-                    </div>
-                    <ul style="list-style-type: disc; padding-left: 14px; margin: 0; font-size: 10.5px; line-height: 1.3; color: #1f2937;">
-                      ${reviews.slice(0, 4).map(r => `
-                        <li style="margin-bottom: 2px;">
-                          <span style="font-style: italic; color: #111827;">"${escapeHtml(r.ulasan)}"</span>
-                          ${includeReviewerName ? `<span style="font-size: 9px; color: #4b5563; font-weight: 600; font-style: normal; margin-left: 3px;">— ${escapeHtml(r.penilai || 'Penilai')}</span>` : ''}
-                        </li>
-                      `).join("")}
-                      ${reviews.length > 4 ? `<li style="list-style: none; font-size: 9.5px; color: #6b7280; font-style: italic; margin-top: 1px; padding-left: 0;">+ ${reviews.length - 4} catatan masukan lainnya...</li>` : ''}
-                    </ul>
-                  </div>
-                `;
-              }
-            });
-
-            html += `
-                </div>
-              </div>
-            `;
-          }
-        });
-
-        html += `</div>`;
-      }
-
-      // LEMBAR TANDA TANGAN / PENGESAHAN RESMI DOSEN
-      html += `
-            <!-- LEMBAR PENGESAHAN RESMI -->
-            ${signatoryName ? `
-              <div class="print-signature print-avoid-break" style="page-break-inside: avoid; break-inside: avoid; margin-top: 16px; display: flex; justify-content: flex-end; font-family: 'Times New Roman', Times, serif;">
-                <div style="text-align: center; min-width: 260px; max-width: 380px; width: fit-content; font-family: 'Times New Roman', Times, serif;">
-                  <p style="margin: 0; font-size: 11.5px; color: #000000; font-family: 'Times New Roman', Times, serif;">${escapeHtml(kotaInstansi)}, ${printDateStr}</p>
-                  <p style="margin: 1.5px 0 0 0; font-size: 11.5px; font-weight: 700; color: #000000; font-family: 'Times New Roman', Times, serif;">${escapeHtml(signatoryTitle)},</p>
-                  <div style="height: 60px;"></div>
-                  <div style="margin-top: 1px; padding: 0 6px 1.5px 6px; border-bottom: 1.5px solid #000000; display: inline-block; min-width: 220px; max-width: 100%;">
-                    <span style="font-size: 12px; font-weight: 800; color: #000000; white-space: nowrap; letter-spacing: 0.01em; font-family: 'Times New Roman', Times, serif;">${escapeHtml(signatoryName)}</span>
-                  </div>
-                  ${signatoryNip ? `<p style="margin: 2px 0 0 0; font-size: 11px; color: #000000; font-weight: 600; font-family: 'Times New Roman', Times, serif;">NIP. ${escapeHtml(signatoryNip)}</p>` : ''}
-                </div>
-              </div>
-            ` : `
-              <div class="print-signature print-avoid-break" style="page-break-inside: avoid; break-inside: avoid; margin-top: 16px; display: flex; justify-content: flex-end; font-family: 'Times New Roman', Times, serif;">
-                <div style="text-align: right; font-family: 'Times New Roman', Times, serif; font-size: 11px; color: #374151;">
-                  <p style="margin: 0; font-style: italic;">Diterbitkan dan diverifikasi otomatis oleh Sistem Evaluasi &amp; Peer-Assessment</p>
-                  <p style="margin: 2px 0 0 0; font-weight: 700; color: #000000;">${escapeHtml(kotaInstansi)}, ${printDateStr}</p>
-                </div>
-              </div>
-            `}
-
-          </div>
-
-          ${includeFooter ? `
-            <!-- FOOTER DOKUMEN RESMI MINIMALIS ANCHORED AT BOTTOM -->
-            <div class="print-avoid-break print-footer" style="page-break-inside: avoid; break-inside: avoid; margin-top: auto; padding-top: 6px; border-top: 0.75px dashed #9ca3af; display: flex; justify-content: space-between; align-items: center; font-size: 8.5px; color: #4b5563; line-height: 1.3; flex-shrink: 0;">
-              <span>Dokumen ini diterbitkan secara otomatis oleh <strong>Sistem Peer-Assessment ${escapeHtml(rawJurusan || 'FKIP')}</strong> &bull; ${escapeHtml(universitas)}</span>
-              <span style="font-family: monospace; color: #6b7280; font-weight: 500;">Waktu Cetak: ${printDateStr}</span>
-            </div>
-          ` : ''}
-
-        </div>
-      `;
-
-      container.innerHTML = html;
+      const cfg = initOrGetPrintConfig();
+      container.innerHTML = generateOfficialPrintDocumentHtml(cfg, scopeGroup, scopeSesi, includeReviews, includeReviewerName, includeFooter);
       requestAnimationFrame(() => {
         applyPrintZoom();
       });
@@ -10691,4 +11179,3 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
         window.print();
       }
     }
-  
