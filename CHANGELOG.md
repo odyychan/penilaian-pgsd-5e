@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.48] - 2026-08-28
+
+### 🧹 Minimalist UI: Relokasi Tombol Hapus Draf & Eliminasi Banner Mencolok
+- **✨ Relokasi Tombol Hapus Draf ke Bilah Aksi Navigasi:**
+  - Menghapus banner peringatan draf (`#studentDraftRestoreBanner`) yang sebelumnya memakan ruang vertikal di atas formulir.
+  - Memindahkan opsi *Hapus Draf* menjadi tombol minimalis elegan (`.btnResetDraft`) tepat di sebelah tombol navigasi *"Lanjut / Kirim Penilaian"* pada bagian bawah setiap tahapan formulir.
+  - Tombol otomatis tampil hanya ketika ada draf isian aktif yang tersimpan dan dilengkapi konfirmasi pengamanan sebelum reset isian dilakukan.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.48`.
+
+---
+
 ## [2.4.47] - 2026-08-28
 
 ### 🎨 Google Profile Badge Fix: Eliminasi Masking & Clipping Avatar Circle

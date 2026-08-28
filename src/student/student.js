@@ -1449,13 +1449,25 @@ function normalizeMediaList(fieldOrMedia) {
             </div>
 
             <!-- Stage Navigation Actions -->
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-1">
               ${stepNum > 1 
-                ? `<button type="button" onclick="goToStep(${stepNum - 1})" class="min-h-[44px] px-5 py-3 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5"><span>← Sebelumnya</span></button>`
-                : `<button type="button" onclick="goToInfoOverview()" class="min-h-[44px] px-5 py-3 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5"><span>← Info Formulir</span></button>`
+                ? `<button type="button" onclick="goToStep(${stepNum - 1})" class="min-h-[44px] px-5 py-3 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 shrink-0"><span>← Sebelumnya</span></button>`
+                : `<button type="button" onclick="goToInfoOverview()" class="min-h-[44px] px-5 py-3 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 shrink-0"><span>← Info Formulir</span></button>`
               }
 
               <div class="flex items-center gap-2 sm:gap-2.5 flex-1 sm:flex-none justify-end">
+                <button 
+                  type="button" 
+                  onclick="clearStudentFormDraft(true)" 
+                  class="btnResetDraft hidden min-h-[44px] px-3.5 py-2.5 rounded-lg border border-zinc-200 hover:border-rose-300 hover:bg-rose-50 text-zinc-500 hover:text-rose-600 text-xs font-medium transition cursor-pointer flex items-center justify-center gap-1.5 active:scale-98 shrink-0 shadow-2xs"
+                  title="Hapus seluruh draf isian dan ulangi pengisian formulir dari awal"
+                >
+                  <svg class="w-3.5 h-3.5 text-zinc-400 group-hover:text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                  </svg>
+                  <span>Hapus Draf</span>
+                </button>
+
                 ${stepNum < totalSteps 
                   ? `<button type="button" onclick="goToStep(${stepNum + 1})" class="flex-1 sm:flex-none min-h-[44px] px-6 py-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 flex items-center justify-center gap-2 cursor-pointer shadow-xs"><span>Lanjut ke Bagian ${stepNum + 1}</span><span>→</span></button>`
                   : `<button type="submit" class="flex-1 sm:flex-none min-h-[44px] px-7 py-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition active:scale-98 flex items-center justify-center gap-2 cursor-pointer shadow-md"><span>Kirim Penilaian Sekarang</span><span>✓</span></button>`
@@ -1482,6 +1494,7 @@ function normalizeMediaList(fieldOrMedia) {
 
       setTimeout(() => {
         renderAllMathInElement(container);
+        updateDraftResetButtonVisibility();
       }, 30);
     }
 
@@ -3990,6 +4003,8 @@ function normalizeMediaList(fieldOrMedia) {
         if (nim.length > 0 || nama.length > 0 || email.length > 0) return true;
         if (selectedGroupObj) return true;
         if (selectedBestPresenters && selectedBestPresenters.length > 0) return true;
+        if (clientCustomFormAnswers && Object.keys(clientCustomFormAnswers).length > 0) return true;
+        if (customUploadedFilesMap && Object.keys(customUploadedFilesMap).length > 0) return true;
 
         let hasEval = false;
         document.querySelectorAll("#evaluationInputsContainer textarea").forEach(ta => {
@@ -4000,7 +4015,7 @@ function normalizeMediaList(fieldOrMedia) {
         const raw = localStorage.getItem(getFormDraftKey());
         if (raw) {
           const d = JSON.parse(raw);
-          if (d && (d.nim || d.nama || d.email || d.groupName || (d.bestPresenters && d.bestPresenters.length > 0) || (d.evaluasi && Object.keys(d.evaluasi).length > 0))) {
+          if (d && (d.nim || d.nama || d.email || d.groupName || (d.bestPresenters && d.bestPresenters.length > 0) || (d.evaluasi && Object.keys(d.evaluasi).length > 0) || (d.customAnswers && Object.keys(d.customAnswers).length > 0))) {
             return true;
           }
         }
@@ -5045,8 +5060,6 @@ function normalizeMediaList(fieldOrMedia) {
             updateStepUI(targetStep, true);
           }
 
-          const banner = document.getElementById("studentDraftRestoreBanner");
-          if (banner) banner.classList.remove("hidden");
           const indicator = document.getElementById("autoSaveIndicator");
           if (indicator) indicator.classList.remove("hidden");
 
@@ -5063,16 +5076,31 @@ function normalizeMediaList(fieldOrMedia) {
       if (confirmDialog) {
         ok = await showConfirmModal({
           title: "Hapus Draf Isian?",
-          message: "Apakah Anda yakin ingin menghapus seluruh draf isian yang tersimpan di akun ini? Anda akan mengulang pengisian dari awal.",
+          message: "Apakah Anda yakin ingin menghapus seluruh draf isian yang tersimpan di akun ini? Anda akan mengulang pengisian formulir dari awal.",
           confirmText: "Ya, Hapus Draf",
           cancelText: "Batal",
           type: "warning"
         });
       }
-      if (ok) {
+      if (!ok) return;
+
+      try {
         localStorage.removeItem(getFormDraftKey());
+        localStorage.removeItem("PGSD_FORM_DRAFT");
+      } catch (e) {}
+
+      clientCustomFormAnswers = {};
+      customUploadedFilesMap = {};
+
+      const indicator = document.getElementById("autoSaveIndicator");
+      if (indicator) indicator.classList.add("hidden");
+
+      if (confirmDialog) {
+        resetStudentForm();
+        updateDraftResetButtonVisibility();
         showToast("Draf isian berhasil dibersihkan.", "info");
-        setTimeout(() => window.location.reload(), 400);
+      } else {
+        updateDraftResetButtonVisibility();
       }
     }
 
@@ -6031,20 +6059,6 @@ function normalizeMediaList(fieldOrMedia) {
         printRoot.className = "hidden";
         printRoot.innerHTML = origHtml;
       }, 1500);
-    }
-
-    function clearStudentFormDraft(isManual = false) {
-      localStorage.removeItem(getFormDraftKey());
-      localStorage.removeItem("PGSD_FORM_DRAFT");
-      clientCustomFormAnswers = {};
-      customUploadedFilesMap = {};
-      const banner = document.getElementById("studentDraftRestoreBanner");
-      if (banner) banner.classList.add("hidden");
-
-      if (isManual) {
-        resetStudentForm();
-        showToast("Draf isian berhasil dihapus.", "info");
-      }
     }
 
     function resetStudentForm() {

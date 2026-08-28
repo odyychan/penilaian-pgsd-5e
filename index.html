@@ -32,7 +32,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="src/student/index.css?v=2.4.47">
+  <link rel="stylesheet" href="src/student/index.css?v=2.4.48">
   
   <!-- Instant Zero-FOUC View Resolver (Runs synchronously before HTML paint) -->
   <script>
@@ -618,21 +618,6 @@
               <span>Keluar</span>
             </button>
           </div>
-        </div>
-
-        <!-- RESTORE DRAFT NOTIFICATION BANNER -->
-        <div id="studentDraftRestoreBanner" class="hidden p-3 rounded-xl bg-indigo-50/90 border border-indigo-200 text-xs text-indigo-900 flex items-center justify-between gap-2 transition-all duration-300 shadow-2xs">
-          <div class="flex items-center gap-2 min-w-0">
-            <span class="text-base shrink-0">💾</span>
-            <span class="truncate">Draf isian Anda sebelumnya telah dipulihkan otomatis.</span>
-          </div>
-          <button 
-            type="button" 
-            onclick="clearStudentFormDraft(true)"
-            class="px-2.5 py-1 rounded-lg bg-white hover:bg-rose-50 text-rose-600 hover:text-rose-700 border border-indigo-200 hover:border-rose-300 font-semibold text-[11px] shrink-0 transition cursor-pointer shadow-2xs"
-          >
-            🗑️ Hapus Draf
-          </button>
         </div>
 
         <!-- FORM CONTAINER -->
@@ -1440,13 +1425,13 @@
   <!-- ========================================================================= -->
   <!-- SCRIPT LOGIC -->
   <!-- ========================================================================= -->
-  <script src="src/student/student.js?v=2.4.47"></script>
+  <script src="src/student/student.js?v=2.4.48"></script>
 
   <!-- Progressive Web App (PWA) & Instant Auto-Updater Engine -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js?v=2.4.47').then(function(reg) {
+        navigator.serviceWorker.register('/sw.js?v=2.4.48').then(function(reg) {
           reg.update();
           reg.addEventListener('updatefound', function() {
             var newWorker = reg.installing;
