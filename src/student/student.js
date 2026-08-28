@@ -3182,8 +3182,15 @@ function normalizeMediaList(fieldOrMedia) {
       ).trim().toLowerCase();
       
       let evaluatorStudentGroup = "";
-      if (currentEvaluatorRole === 'Mahasiswa' && currentNim) {
-        const found = (allStudentsData || []).find(s => String(s.nim || "").replace(/\s+/g, "").trim().toLowerCase() === currentNim);
+      const googleNimCandidate = extractCandidateNim(activeUserAccountEmail || currentEmail || "");
+      const isMhsRole = (currentEvaluatorRole === 'Mahasiswa' || (currentEmail && currentEmail.endsWith('@mhs.ulm.ac.id')));
+      if (isMhsRole) {
+        const found = (allStudentsData || []).find(s => {
+          const sNim = String(s.nim || "").replace(/\s+/g, "").trim().toLowerCase();
+          return (currentNim && sNim === currentNim) || 
+                 (googleNimCandidate && sNim === googleNimCandidate) || 
+                 (currentName && s.name && s.name.toLowerCase() === currentName.toLowerCase());
+        });
         if (found) evaluatorStudentGroup = found.kelompok || "";
       }
 
@@ -5411,13 +5418,17 @@ function normalizeMediaList(fieldOrMedia) {
 
       // 🛡️ INTEGRITY GUARD 1: Cegah Penilaian Kelompok Sendiri (Self-Evaluation Guard)
       const antiSelfEval = appConfig && appConfig["Cegah_Penilaian_Diri"] !== false && appConfig["Cegah_Penilaian_Diri"] !== "false";
-      if (antiSelfEval && currentEvaluatorRole === 'Mahasiswa') {
+      const isMhsAccount = (currentEvaluatorRole === 'Mahasiswa' || (email && email.endsWith('@mhs.ulm.ac.id')) || (activeUserAccountEmail && activeUserAccountEmail.endsWith('@mhs.ulm.ac.id')));
+      if (antiSelfEval && isMhsAccount) {
         const studentNimClean = (nim || "").replace(/\s+/g, "").trim().toLowerCase();
+        const googleNimClean = extractCandidateNim(activeUserAccountEmail || email || "");
         const studentNamaClean = (nama || "").trim().toLowerCase();
-        const ownStudent = (allStudentsData || []).find(s => 
-          (s.nim && String(s.nim).replace(/\s+/g, "").trim().toLowerCase() === studentNimClean) || 
-          (s.name && String(s.name).trim().toLowerCase() === studentNamaClean)
-        );
+        const ownStudent = (allStudentsData || []).find(s => {
+          const sNim = String(s.nim || "").replace(/\s+/g, "").trim().toLowerCase();
+          return (studentNimClean && sNim === studentNimClean) || 
+                 (googleNimClean && sNim === googleNimClean) || 
+                 (s.name && String(s.name).trim().toLowerCase() === studentNamaClean);
+        });
 
         if (ownStudent && ownStudent.kelompok && selectedGroupObj && selectedGroupObj.name.toLowerCase() === ownStudent.kelompok.toLowerCase()) {
           showToast(`Sesuai aturan integritas, Anda tidak dapat menilai kelompok Anda sendiri (${ownStudent.kelompok}).`, "error");
@@ -5531,8 +5542,12 @@ function normalizeMediaList(fieldOrMedia) {
       openPreSubmitReviewModal(payload);
     }
 
+    let isSubmittingFinalAssessment = false;
     async function executeConfirmedFinalSubmit() {
       if (!currentPendingSubmissionPayload) return;
+      if (isSubmittingFinalAssessment) return;
+      isSubmittingFinalAssessment = true;
+
       const payload = currentPendingSubmissionPayload;
 
       const confirmBtn = document.getElementById("btnConfirmFinalSubmit");
@@ -5545,165 +5560,169 @@ function normalizeMediaList(fieldOrMedia) {
       if (submitBtn) submitBtn.disabled = true;
       if (spinner) spinner.classList.remove("hidden");
 
-      const effectiveSpreadsheetUrl = (appConfig && appConfig["Spreadsheet_Webhook_Url"]) || localStorage.getItem("PGSD_GLOBAL_API_URL") || getApiUrl();
-      const apiUrl = effectiveSpreadsheetUrl;
-      const sb = getSupabaseClient();
-      let sbSuccess = false;
-      const idRespons = "PGSD-REC-" + activeFormId + "-" + Date.now().toString(36).toUpperCase();
+      try {
+        const effectiveSpreadsheetUrl = (appConfig && appConfig["Spreadsheet_Webhook_Url"]) || localStorage.getItem("PGSD_GLOBAL_API_URL") || getApiUrl();
+        const apiUrl = effectiveSpreadsheetUrl;
+        const sb = getSupabaseClient();
+        let sbSuccess = false;
+        const idRespons = "PGSD-REC-" + activeFormId + "-" + Date.now().toString(36).toUpperCase();
 
-      // 🔑 Pre-flight Auth Token Refresh (mencegah kegagalan token expire pada pengisian lama)
-      if (sb && sb.auth) {
-        try {
-          const { data: sessionData } = await sb.auth.getSession();
-          if (sessionData?.session) {
-            authState.session = sessionData.session;
-            authState.user = sessionData.session.user;
+        // 🔑 Pre-flight Auth Token Refresh (mencegah kegagalan token expire pada pengisian lama)
+        if (sb && sb.auth) {
+          try {
+            const { data: sessionData } = await sb.auth.getSession();
+            if (sessionData?.session) {
+              authState.session = sessionData.session;
+              authState.user = sessionData.session.user;
+            }
+          } catch (e) {
+            console.warn("Session pre-flight check notice:", e);
           }
-        } catch (e) {
-          console.warn("Session pre-flight check notice:", e);
         }
-      }
 
-      // ⚡ FAST-PATH (< 50ms): Simpan langsung data transaksi penilaian ke Supabase PostgreSQL
-      if (sb) {
-        try {
-          if (customUploadedFilesMap && Object.keys(customUploadedFilesMap).length > 0) {
-            for (let fldId in customUploadedFilesMap) {
-              const fileObj = customUploadedFilesMap[fldId];
-              if (fileObj && fileObj.name) {
-                payload.customAnswers[fldId] = fileObj.name;
-                if (!payload.evaluasiDetail.uploadedFiles) payload.evaluasiDetail.uploadedFiles = {};
-                payload.evaluasiDetail.uploadedFiles[fldId] = {
-                  fileName: fileObj.name,
-                  fileSize: fileObj.size || 0,
-                  mimeType: fileObj.type || 'application/octet-stream',
-                  fileUrl: fileObj.url || fileObj.dataUrl || ""
-                };
+        // ⚡ FAST-PATH (< 50ms): Simpan langsung data transaksi penilaian ke Supabase PostgreSQL
+        if (sb) {
+          try {
+            if (customUploadedFilesMap && Object.keys(customUploadedFilesMap).length > 0) {
+              for (let fldId in customUploadedFilesMap) {
+                const fileObj = customUploadedFilesMap[fldId];
+                if (fileObj && fileObj.name) {
+                  payload.customAnswers[fldId] = fileObj.name;
+                  if (!payload.evaluasiDetail.uploadedFiles) payload.evaluasiDetail.uploadedFiles = {};
+                  payload.evaluasiDetail.uploadedFiles[fldId] = {
+                    fileName: fileObj.name,
+                    fileSize: fileObj.size || 0,
+                    mimeType: fileObj.type || 'application/octet-stream',
+                    fileUrl: fileObj.url || fileObj.dataUrl || ""
+                  };
+                }
               }
             }
-          }
 
-          const respRow = {
-            id_respons: idRespons,
-            form_id: activeFormId,
-            sesi: payload.sesi,
-            email: payload.email,
-            nama_penilai: payload.namaPenilai,
-            nim_penilai: payload.nimPenilai || "-",
-            peran_penilai: payload.peranPenilai || "Mahasiswa",
-            kelompok_dinilai: payload.kelompok,
-            nilai_kelompok: parseFloat(payload.nilaiKelompok) || 0,
-            best_presenter_1: (payload.presentatorTerbaik && payload.presentatorTerbaik[0]) || "-",
-            best_presenter_2: (payload.presentatorTerbaik && payload.presentatorTerbaik[1]) || "-",
-            evaluasi_detail: payload.evaluasiDetail || {},
-            custom_answers: payload.customAnswers || {},
-            synced_to_sheets: false
-          };
-          const { error: sbErr } = await sb.from('pgsd_responses').insert([respRow]);
-          if (!sbErr) {
-            sbSuccess = true;
-          }
-        } catch (err) {
-          console.warn("Supabase fast-path fallback notice:", err);
-        }
-      }
-
-      if (sbSuccess) {
-        if (confirmBtn) confirmBtn.disabled = false;
-        if (confirmSpinner) confirmSpinner.classList.add("hidden");
-        if (submitBtn) submitBtn.disabled = false;
-        if (spinner) spinner.classList.add("hidden");
-
-        closePreSubmitReviewModal();
-        clearStudentFormDraft(false);
-
-        clientCustomFormAnswers = {};
-        localStorage.removeItem("PGSD_CACHE_REKAP_" + activeFormId);
-        localStorage.setItem("PGSD_LAST_SUBMISSION_EVENT", Date.now().toString());
-
-        loadRekapData(true);
-        showSuccessModal(payload.kelompok, false, payload, idRespons);
-
-        // 🔄 Background Pipeline: Sinkronkan ke Google Spreadsheet secara asinkron
-        const defaultSheetUrl = DEFAULT_API_URL;
-        const customSheetUrl = (appConfig && appConfig["Spreadsheet_Webhook_Url"]) || localStorage.getItem("PGSD_GLOBAL_API_URL");
-
-        if (defaultSheetUrl) {
-          fetch(defaultSheetUrl, {
-            method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify(payload)
-          }).then(r => r.json()).then(res => {
-            if (res && res.success && sb) {
-              sb.from('pgsd_responses').update({ 
-                synced_to_sheets: true, 
-                synced_at: new Date().toISOString() 
-              }).eq('id_respons', idRespons);
+            const respRow = {
+              id_respons: idRespons,
+              form_id: activeFormId,
+              sesi: payload.sesi,
+              email: payload.email,
+              nama_penilai: payload.namaPenilai,
+              nim_penilai: payload.nimPenilai || "-",
+              peran_penilai: payload.peranPenilai || "Mahasiswa",
+              kelompok_dinilai: payload.kelompok,
+              nilai_kelompok: parseFloat(payload.nilaiKelompok) || 0,
+              best_presenter_1: (payload.presentatorTerbaik && payload.presentatorTerbaik[0]) || "-",
+              best_presenter_2: (payload.presentatorTerbaik && payload.presentatorTerbaik[1]) || "-",
+              evaluasi_detail: payload.evaluasiDetail || {},
+              custom_answers: payload.customAnswers || {},
+              synced_to_sheets: false
+            };
+            const { error: sbErr } = await sb.from('pgsd_responses').insert([respRow]);
+            if (!sbErr) {
+              sbSuccess = true;
             }
-          }).catch(e => console.warn("Primary sheet sync notice:", e));
+          } catch (err) {
+            console.warn("Supabase fast-path fallback notice:", err);
+          }
         }
 
-        if (customSheetUrl && customSheetUrl !== defaultSheetUrl) {
-          fetch(customSheetUrl, {
-            method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify(payload)
-          }).then(r => r.json()).then(res => {
-            if (res && res.success && sb) {
-              sb.from('pgsd_responses').update({ 
-                synced_to_sheets: true, 
-                synced_at: new Date().toISOString() 
-              }).eq('id_respons', idRespons);
-            }
-          }).catch(e => console.warn("Custom sheet sync notice:", e));
-        }
-        return;
-      }
+        if (sbSuccess) {
+          if (confirmBtn) confirmBtn.disabled = false;
+          if (confirmSpinner) confirmSpinner.classList.add("hidden");
+          if (submitBtn) submitBtn.disabled = false;
+          if (spinner) spinner.classList.add("hidden");
 
-      // 🛡️ Fallback Standar: Kirim via Apps Script
-      const fetchWithTimeout = (url, opts, ms = 12000) => {
-        return Promise.race([
-          fetch(url, opts),
-          new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), ms))
-        ]);
-      };
-
-      try {
-        const response = await fetchWithTimeout(apiUrl, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(payload)
-        }, 12000);
-
-        const res = await response.json();
-        if (confirmBtn) confirmBtn.disabled = false;
-        if (confirmSpinner) confirmSpinner.classList.add("hidden");
-        if (submitBtn) submitBtn.disabled = false;
-        if (spinner) spinner.classList.add("hidden");
-
-        if (res && res.success) {
           closePreSubmitReviewModal();
           clearStudentFormDraft(false);
 
           clientCustomFormAnswers = {};
           localStorage.removeItem("PGSD_CACHE_REKAP_" + activeFormId);
           localStorage.setItem("PGSD_LAST_SUBMISSION_EVENT", Date.now().toString());
-          
+
           loadRekapData(true);
           showSuccessModal(payload.kelompok, false, payload, idRespons);
-        } else {
-          showToast(res?.error || "Gagal mengirim penilaian.", "error");
+
+          // 🔄 Background Pipeline: Sinkronkan ke Google Spreadsheet secara asinkron
+          const defaultSheetUrl = DEFAULT_API_URL;
+          const customSheetUrl = (appConfig && appConfig["Spreadsheet_Webhook_Url"]) || localStorage.getItem("PGSD_GLOBAL_API_URL");
+
+          if (defaultSheetUrl) {
+            fetch(defaultSheetUrl, {
+              method: "POST",
+              headers: { "Content-Type": "text/plain;charset=utf-8" },
+              body: JSON.stringify(payload)
+            }).then(r => r.json()).then(res => {
+              if (res && res.success && sb) {
+                sb.from('pgsd_responses').update({ 
+                  synced_to_sheets: true, 
+                  synced_at: new Date().toISOString() 
+                }).eq('id_respons', idRespons);
+              }
+            }).catch(e => console.warn("Primary sheet sync notice:", e));
+          }
+
+          if (customSheetUrl && customSheetUrl !== defaultSheetUrl) {
+            fetch(customSheetUrl, {
+              method: "POST",
+              headers: { "Content-Type": "text/plain;charset=utf-8" },
+              body: JSON.stringify(payload)
+            }).then(r => r.json()).then(res => {
+              if (res && res.success && sb) {
+                sb.from('pgsd_responses').update({ 
+                  synced_to_sheets: true, 
+                  synced_at: new Date().toISOString() 
+                }).eq('id_respons', idRespons);
+              }
+            }).catch(e => console.warn("Custom sheet sync notice:", e));
+          }
+          return;
         }
-      } catch (err) {
-        if (confirmBtn) confirmBtn.disabled = false;
-        if (confirmSpinner) confirmSpinner.classList.add("hidden");
-        if (submitBtn) submitBtn.disabled = false;
-        if (spinner) spinner.classList.add("hidden");
-        
-        closePreSubmitReviewModal();
-        savePendingSubmission(payload, idRespons);
-        clearStudentFormDraft(false);
-        showSuccessModal(payload.kelompok, true, payload, idRespons);
+
+        // 🛡️ Fallback Standar: Kirim via Apps Script
+        const fetchWithTimeout = (url, opts, ms = 12000) => {
+          return Promise.race([
+            fetch(url, opts),
+            new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), ms))
+          ]);
+        };
+
+        try {
+          const response = await fetchWithTimeout(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(payload)
+          }, 12000);
+
+          const res = await response.json();
+          if (confirmBtn) confirmBtn.disabled = false;
+          if (confirmSpinner) confirmSpinner.classList.add("hidden");
+          if (submitBtn) submitBtn.disabled = false;
+          if (spinner) spinner.classList.add("hidden");
+
+          if (res && res.success) {
+            closePreSubmitReviewModal();
+            clearStudentFormDraft(false);
+
+            clientCustomFormAnswers = {};
+            localStorage.removeItem("PGSD_CACHE_REKAP_" + activeFormId);
+            localStorage.setItem("PGSD_LAST_SUBMISSION_EVENT", Date.now().toString());
+            
+            loadRekapData(true);
+            showSuccessModal(payload.kelompok, false, payload, idRespons);
+          } else {
+            showToast(res?.error || "Gagal mengirim penilaian.", "error");
+          }
+        } catch (err) {
+          if (confirmBtn) confirmBtn.disabled = false;
+          if (confirmSpinner) confirmSpinner.classList.add("hidden");
+          if (submitBtn) submitBtn.disabled = false;
+          if (spinner) spinner.classList.add("hidden");
+          
+          closePreSubmitReviewModal();
+          savePendingSubmission(payload, idRespons);
+          clearStudentFormDraft(false);
+          showSuccessModal(payload.kelompok, true, payload, idRespons);
+        }
+      } finally {
+        isSubmittingFinalAssessment = false;
       }
     }
 

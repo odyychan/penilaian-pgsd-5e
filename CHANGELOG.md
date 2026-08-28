@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.56] - 2026-08-28
+
+### 🛡️ Comprehensive Security Hardening: Anti-Tampering & Concurrency Lock
+- **🔒 Perlindungan Penilaian Kelompok Sendiri (Anti-Tampering Guard):**
+  - Mengamankan deteksi kelompok asal penilai agar tidak dapat diakali dengan mengubah isi kolom NIM atau mengubah pilihan peran. Sistem memvalidasi ganda identitas mahasiswa langsung dari token autentikasi Google ULM (@mhs.ulm.ac.id).
+- **⚡ Kunci Konkurensi Pengiriman (*Atomic Concurrency Lock*):**
+  - Menerapkan *state lock* (`isSubmittingFinalAssessment`) dengan blok `try-finally` untuk mencegah serangan *race condition* atau pengiriman ganda akibat klik cepat (*rapid double-clicking*) sebelum respon pertama selesai tersimpan di database.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.56`.
+
+---
+
 ## [2.4.55] - 2026-08-28
 
 ### 🔒 Dual-Key Duplicate Lock & Flexible NIM Customization
