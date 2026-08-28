@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.47] - 2026-08-28
+
+### 🎨 Google Profile Badge Fix: Eliminasi Masking & Clipping Avatar Circle
+- **🔍 Perbaikan Posisi Micro-Badge Google pada Avatar Pengguna:**
+  - Memisahkan elemen lencana mini Google (`#accountGoogleMiniBadge`) keluar dari kontainer sirkular `overflow-hidden` avatar (`#accountAvatarBox`) ke level pembungkus relatif luar (`z-10`).
+  - Ikon Google kini tampil 100% utuh, tajam, dan tidak lagi terpotong/terpotong separuh oleh radius lingkaran avatar foto/inisial pengguna.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.47`.
+
+---
+
 ## [2.4.46] - 2026-08-28
 
 ### 🔑 Visual Cleanup: Eliminasi Ikon Kunci Ganda pada Tombol PIN
