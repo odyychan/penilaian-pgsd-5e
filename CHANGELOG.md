@@ -4,6 +4,19 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.67] - 2026-08-29
+
+### 🖨️ Universal Adaptive Print Engine: Fully Dynamic Metadata, Custom Identity Cards & Adaptive Signatory
+- **🧩 Desain Adaptif & Resilien Terhadap Seluruh Modifikasi Builder:**
+  - Menghubungkan seluruh elemen laporan cetak resmi (*Kop Surat, Judul, Kartu Metadata, Rubrik Skala, Lembar Pengesahan, dan Footer*) secara dinamis ke konfigurasi Form Builder (`Header_Info_Cards`, `appConfig`, metadata formulir).
+  - **Tabel Metadata Dinamis**: Secara otomatis menyusun dan menyeimbangkan berapapun jumlah kartu identitas kustom (0, 1, 2, 3, 4, 6+ kartu) ke dalam grid 2-kolom tanpa merusak tata letak jika ada kartu yang dihapus, diganti, atau ditambah.
+  - **Penyesuaian Lembar Pengesahan Pintar**: Mendeteksi perubahan jabatan penandatangan (*Dosen Pengampu, Dosen Pembimbing, Koordinator, dsb.*), nama bergelar, dan NIP dinamis. Jika identitas pengampu dihapus/anonim, sistem bertransisi mulus ke tanda pengesahan verifikasi digital institusi.
+  - **Skala & Indikator Rentang Skor Fleksibel**: Menampilkan rentang skala penilaian yang aktif (*0 - 100, 1 - 4, dll.*) secara otomatis sesuai konfigurasi form.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.67`.
+
+---
+
 ## [2.4.66] - 2026-08-29
 
 ### 🖨️ Admin & Client Report Engine: 100% Unified Formal Academic Print Layout

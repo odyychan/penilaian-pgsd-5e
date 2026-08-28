@@ -10202,18 +10202,24 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       const includeReviewerName = document.getElementById("adminPrintIncludeReviewerName")?.checked ?? true;
       const includeFooter = document.getElementById("adminPrintIncludeFooter")?.checked ?? true;
 
-      const matkul = adminAppConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || "Bimbingan Konseling di SD";
-      const dosen = adminAppConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || "Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.";
-      const kelas = adminAppConfig["Kelas"] || (currentFormMeta && currentFormMeta.kelas) || "5E";
-      const rawJurusan = (adminAppConfig["Jurusan"] || (currentFormMeta && currentFormMeta.jurusan) || "PGSD").trim();
+      // 🏛️ Dynamic Institutional Metadata
+      const kementerian = adminAppConfig["Kementerian"] || "KEMENTERIAN PENDIDIKAN TINGGI, SAINS, DAN TEKNOLOGI";
+      const universitas = adminAppConfig["Universitas"] || "UNIVERSITAS LAMBUNG MANGKURAT";
+      const fakultas = adminAppConfig["Fakultas"] || "FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN";
+      const rawJurusan = (adminAppConfig["Program_Studi"] || adminAppConfig["Jurusan"] || (currentFormMeta && currentFormMeta.jurusan) || "PGSD").trim();
       let prodiKop = "PROGRAM STUDI PENDIDIKAN GURU SEKOLAH DASAR (PGSD)";
-      if (rawJurusan && rawJurusan.toUpperCase() !== "PGSD") {
+      if (rawJurusan) {
         if (rawJurusan.toUpperCase().startsWith("PROGRAM STUDI") || rawJurusan.toUpperCase().startsWith("PRODI")) {
           prodiKop = rawJurusan.toUpperCase();
         } else {
           prodiKop = `PROGRAM STUDI ${rawJurusan.toUpperCase()}`;
         }
       }
+      const alamatInstansi = adminAppConfig["Alamat_Instansi"] || "Jl. Brigjen H. Hasan Basry, Kayu Tangi, Banjarmasin, Kalimantan Selatan 70123 • Laman: fkip.ulm.ac.id";
+      const logoUrl = adminAppConfig["Logo_Url"] || "assets/logo-ulm.png";
+      const kotaInstansi = adminAppConfig["Kota_Instansi"] || "Banjarmasin";
+      const minScore = (adminAppConfig && adminAppConfig["Nilai_Kelompok_Min"] !== undefined) ? adminAppConfig["Nilai_Kelompok_Min"] : 0;
+      const maxScore = (adminAppConfig && adminAppConfig["Nilai_Kelompok_Max"] !== undefined) ? adminAppConfig["Nilai_Kelompok_Max"] : 100;
       const printDateStr = new Intl.DateTimeFormat('id-ID', { dateStyle: 'long' }).format(new Date());
 
       // Filter groups & build unified summary list
@@ -10304,7 +10310,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       });
       const avgClassScore = evaluatedCount > 0 ? (totalAllScore / evaluatedCount).toFixed(2) : "0.00";
 
-      // Resolve dynamic header cards
+      // 🔍 Dynamic Header Info Cards Resolution (Fully Adaptive)
       let cards = adminAppConfig.Header_Info_Cards;
       if (!cards || !Array.isArray(cards) || cards.length === 0) {
         const rawMatkul = adminAppConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || "";
@@ -10319,29 +10325,35 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
         if (rawProdi)  cards.push({ label: 'Program Studi:', value: rawProdi });
       }
 
-      const activeCards = cards.filter(c => (c.label && c.label.trim()) || (c.value && c.value.trim()));
+      // Filter active cards with non-empty label or value
+      const activeCards = (cards || []).filter(c => (c.label && c.label.trim()) || (c.value && c.value.trim()));
+
+      // Build raw metadata items
       let rawMetaItems = activeCards.map(c => ({
         label: (c.label || 'Info').trim().replace(/:$/, ''),
         value: (c.value || '-').trim()
       }));
 
+      // Add Cakupan Sesi if not explicitly present in custom cards
       const hasSesiCard = rawMetaItems.some(item => item.label.toLowerCase().includes('sesi') || item.label.toLowerCase().includes('cakupan'));
-      if (!hasSesiCard) {
+      if (!hasSesiCard && summaryList.length > 0) {
         rawMetaItems.push({
           label: 'Cakupan Sesi',
           value: scopeSesi === 'ALL' ? 'Semua Sesi Presentasi' : scopeSesi
         });
       }
 
-      // Smart Academic Metadata Pairing
+      // 🎯 Smart Academic Metadata Pairing:
+      // Left Column (Primary / Long Content): Mata Kuliah, Dosen, Pengampu, Pembimbing, Penguji, Koordinator, Topik, Judul, Sesi
+      // Right Column (Secondary / Compact Badges): Kelas, Program Studi, Ruang, Semester, Tahun
       const leftColItems = [];
       const rightColItems = [];
 
       rawMetaItems.forEach(item => {
         const lblLower = item.label.toLowerCase();
-        if (lblLower.includes('matkul') || lblLower.includes('mata kuliah') || lblLower.includes('dosen') || lblLower.includes('pengampu')) {
+        if (lblLower.includes('matkul') || lblLower.includes('mata kuliah') || lblLower.includes('dosen') || lblLower.includes('pengampu') || lblLower.includes('pembimbing') || lblLower.includes('penguji') || lblLower.includes('koordinator') || lblLower.includes('judul') || lblLower.includes('topik')) {
           leftColItems.push(item);
-        } else if (lblLower.includes('kelas') || lblLower.includes('prodi') || lblLower.includes('jurusan') || lblLower.includes('program studi')) {
+        } else if (lblLower.includes('kelas') || lblLower.includes('prodi') || lblLower.includes('jurusan') || lblLower.includes('program studi') || lblLower.includes('ruang') || lblLower.includes('semester') || lblLower.includes('tahun')) {
           rightColItems.push(item);
         } else {
           if (leftColItems.length <= rightColItems.length) {
@@ -10352,6 +10364,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
         }
       });
 
+      // Render dynamic 2-column metadata table with generous width for left column
       const maxRows = Math.max(leftColItems.length, rightColItems.length);
       let metadataTableHtml = '';
       if (maxRows > 0) {
@@ -10362,18 +10375,18 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
           rowsHtml += `
             <tr style="border: none !important;">
               ${leftItem ? `
-                <td style="border: none !important; padding: 1.5px 0; width: 17%; font-weight: 600; color: #1f2937; vertical-align: top; font-family: 'Times New Roman', Times, serif; white-space: nowrap;">${escapeHtml(leftItem.label)}</td>
-                <td style="border: none !important; padding: 1.5px 8px 1.5px 0; width: 47%; font-weight: 700; color: #000000; vertical-align: top; word-break: break-word; font-family: 'Times New Roman', Times, serif; line-height: 1.25;">: ${escapeHtml(leftItem.value)}</td>
+                <td style="border: none !important; padding: 1.5px 0; width: 22%; font-weight: 600; color: #1f2937; vertical-align: top; font-family: 'Times New Roman', Times, serif; white-space: nowrap;">${escapeHtml(leftItem.label)}</td>
+                <td style="border: none !important; padding: 1.5px 8px 1.5px 0; width: 42%; font-weight: 700; color: #000000; vertical-align: top; word-break: break-word; font-family: 'Times New Roman', Times, serif; line-height: 1.25;">: ${escapeHtml(leftItem.value)}</td>
               ` : `
-                <td style="border: none !important; width: 17%;"></td>
-                <td style="border: none !important; width: 47%;"></td>
+                <td style="border: none !important; width: 22%;"></td>
+                <td style="border: none !important; width: 42%;"></td>
               `}
               ${rightItem ? `
-                <td style="border: none !important; padding: 1.5px 0; width: 16%; font-weight: 600; color: #1f2937; vertical-align: top; font-family: 'Times New Roman', Times, serif; white-space: nowrap;">${escapeHtml(rightItem.label)}</td>
-                <td style="border: none !important; padding: 1.5px 0; width: 20%; font-weight: 700; color: #000000; vertical-align: top; word-break: break-word; font-family: 'Times New Roman', Times, serif; line-height: 1.25;">: ${escapeHtml(rightItem.value)}</td>
+                <td style="border: none !important; padding: 1.5px 0; width: 15%; font-weight: 600; color: #1f2937; vertical-align: top; font-family: 'Times New Roman', Times, serif; white-space: nowrap;">${escapeHtml(rightItem.label)}</td>
+                <td style="border: none !important; padding: 1.5px 0; width: 21%; font-weight: 700; color: #000000; vertical-align: top; word-break: break-word; font-family: 'Times New Roman', Times, serif; line-height: 1.25;">: ${escapeHtml(rightItem.value)}</td>
               ` : `
-                <td style="border: none !important; width: 16%;"></td>
-                <td style="border: none !important; width: 20%;"></td>
+                <td style="border: none !important; width: 15%;"></td>
+                <td style="border: none !important; width: 21%;"></td>
               `}
             </tr>
           `;
@@ -10385,6 +10398,29 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
             </tbody>
           </table>
         `;
+      }
+
+      // ✍️ Smart Dynamic Signatory Resolution
+      let signatoryTitle = adminAppConfig["Jabatan_Penandatangan"] || "Dosen Pengampu Mata Kuliah";
+      let signatoryName = adminAppConfig["Dosen_Pengampu"] || adminAppConfig["Nama_Penandatangan"] || (currentFormMeta && currentFormMeta.dosen) || "";
+      let signatoryNip = adminAppConfig["NIP_Dosen"] || adminAppConfig["NIP_Pengampu"] || adminAppConfig["NIP_Penandatangan"] || "";
+
+      if (cards && Array.isArray(cards)) {
+        const signatoryCard = cards.find(c => {
+          const l = (c.label || "").toLowerCase();
+          return l.includes('dosen') || l.includes('pengampu') || l.includes('pembimbing') || l.includes('penguji') || l.includes('penanggung jawab') || l.includes('koordinator') || l.includes('instruktur') || l.includes('guru pamong');
+        });
+        if (signatoryCard && signatoryCard.value && signatoryCard.value.trim()) {
+          signatoryName = signatoryCard.value.trim();
+          const rawLabel = (signatoryCard.label || '').trim().replace(/:$/, '');
+          if (rawLabel && !adminAppConfig["Jabatan_Penandatangan"]) {
+            signatoryTitle = rawLabel.toLowerCase().includes('dosen') ? `${rawLabel} Mata Kuliah` : rawLabel;
+          }
+        }
+      }
+
+      if (!signatoryNip && signatoryName && signatoryName.toLowerCase().includes("ririanti")) {
+        signatoryNip = "19830514 200812 2 003";
       }
 
       // Title determination
@@ -10400,19 +10436,19 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
           
           <!-- TOP & MAIN CONTENT AREA -->
           <div style="flex: 1 0 auto;">
-            <!-- KOP SURAT RESMI DINAS FKIP ULM -->
+            <!-- KOP SURAT RESMI DINAS -->
             <table style="width: 100%; border-collapse: collapse; border: none; margin: 0 0 2px 0; padding: 0; table-layout: fixed;">
               <tbody>
                 <tr style="border: none;">
                   <td style="width: 82px; min-width: 82px; max-width: 82px; vertical-align: middle; text-align: center; border: none; padding: 0 6px 0 0;">
-                    <img src="assets/logo-ulm.png" alt="Logo ULM" style="width: 76px; height: 76px; object-fit: contain; display: block; margin: 0 auto;" onerror="this.src='logo-ulm.png'" />
+                    <img src="${escapeHtml(logoUrl)}" alt="Logo Instansi" style="width: 76px; height: 76px; object-fit: contain; display: block; margin: 0 auto;" onerror="this.src='assets/logo-ulm.png'" />
                   </td>
                   <td style="text-align: center; vertical-align: middle; border: none; padding: 0 2px; font-family: 'Times New Roman', Times, serif; color: #000000;">
-                    <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; line-height: 1.2;">KEMENTERIAN PENDIDIKAN TINGGI, SAINS, DAN TEKNOLOGI</div>
-                    <div style="font-size: 15px; font-weight: 900; letter-spacing: 0.03em; text-transform: uppercase; line-height: 1.22; margin-top: 1px;">UNIVERSITAS LAMBUNG MANGKURAT</div>
-                    <div style="font-size: 13px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1.2; margin-top: 1px;">FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN</div>
-                    <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; line-height: 1.2; margin-top: 1px;">${prodiKop}</div>
-                    <div style="font-size: 9px; color: #374151; line-height: 1.2; margin-top: 2.5px; font-style: italic;">Jl. Brigjen H. Hasan Basry, Kayu Tangi, Banjarmasin, Kalimantan Selatan 70123 • Laman: fkip.ulm.ac.id</div>
+                    <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; line-height: 1.2;">${escapeHtml(kementerian)}</div>
+                    <div style="font-size: 15px; font-weight: 900; letter-spacing: 0.03em; text-transform: uppercase; line-height: 1.22; margin-top: 1px;">${escapeHtml(universitas)}</div>
+                    <div style="font-size: 13px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1.2; margin-top: 1px;">${escapeHtml(fakultas)}</div>
+                    ${prodiKop ? `<div style="font-size: 12px; font-weight: 700; text-transform: uppercase; line-height: 1.2; margin-top: 1px;">${escapeHtml(prodiKop)}</div>` : ''}
+                    ${alamatInstansi ? `<div style="font-size: 9px; color: #374151; line-height: 1.2; margin-top: 2.5px; font-style: italic;">${escapeHtml(alamatInstansi)}</div>` : ''}
                   </td>
                   <td style="width: 82px; min-width: 82px; max-width: 82px; border: none; padding: 0;"></td>
                 </tr>
@@ -10434,7 +10470,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
             <div class="space-y-1 print-avoid-break" style="margin-top: 14px; padding-top: 2px; margin-bottom: 8px;">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px;">
                 <span style="font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.02em; color: #000000; font-family: 'Times New Roman', Times, serif;">A. Rekapitulasi Nilai &amp; Peringkat Performa Kelompok</span>
-                <span style="font-size: 10px; font-family: monospace; color: #4b5563;">Skala Penilaian: 0 - 100</span>
+                <span style="font-size: 10px; font-family: monospace; color: #4b5563;">Skala Penilaian: ${minScore} - ${maxScore}</span>
               </div>
               
               <div class="overflow-x-auto" style="overflow: visible;">
@@ -10573,25 +10609,34 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
 
       // LEMBAR TANDA TANGAN / PENGESAHAN RESMI DOSEN
       html += `
-            <!-- LEMBAR PENGESAHAN RESMI DOSEN PENGAMPU -->
-            <div class="print-signature print-avoid-break" style="page-break-inside: avoid; break-inside: avoid; margin-top: 16px; display: flex; justify-content: flex-end; font-family: 'Times New Roman', Times, serif;">
-              <div style="text-align: center; min-width: 260px; max-width: 380px; width: fit-content; font-family: 'Times New Roman', Times, serif;">
-                <p style="margin: 0; font-size: 11.5px; color: #000000; font-family: 'Times New Roman', Times, serif;">Banjarmasin, ${printDateStr}</p>
-                <p style="margin: 1.5px 0 0 0; font-size: 11.5px; font-weight: 700; color: #000000; font-family: 'Times New Roman', Times, serif;">Dosen Pengampu Mata Kuliah,</p>
-                <div style="height: 60px;"></div>
-                <div style="margin-top: 1px; padding: 0 6px 1.5px 6px; border-bottom: 1.5px solid #000000; display: inline-block; min-width: 220px; max-width: 100%;">
-                  <span style="font-size: 12px; font-weight: 800; color: #000000; white-space: nowrap; letter-spacing: 0.01em; font-family: 'Times New Roman', Times, serif;">${escapeHtml(dosen)}</span>
+            <!-- LEMBAR PENGESAHAN RESMI -->
+            ${signatoryName ? `
+              <div class="print-signature print-avoid-break" style="page-break-inside: avoid; break-inside: avoid; margin-top: 16px; display: flex; justify-content: flex-end; font-family: 'Times New Roman', Times, serif;">
+                <div style="text-align: center; min-width: 260px; max-width: 380px; width: fit-content; font-family: 'Times New Roman', Times, serif;">
+                  <p style="margin: 0; font-size: 11.5px; color: #000000; font-family: 'Times New Roman', Times, serif;">${escapeHtml(kotaInstansi)}, ${printDateStr}</p>
+                  <p style="margin: 1.5px 0 0 0; font-size: 11.5px; font-weight: 700; color: #000000; font-family: 'Times New Roman', Times, serif;">${escapeHtml(signatoryTitle)},</p>
+                  <div style="height: 60px;"></div>
+                  <div style="margin-top: 1px; padding: 0 6px 1.5px 6px; border-bottom: 1.5px solid #000000; display: inline-block; min-width: 220px; max-width: 100%;">
+                    <span style="font-size: 12px; font-weight: 800; color: #000000; white-space: nowrap; letter-spacing: 0.01em; font-family: 'Times New Roman', Times, serif;">${escapeHtml(signatoryName)}</span>
+                  </div>
+                  ${signatoryNip ? `<p style="margin: 2px 0 0 0; font-size: 11px; color: #000000; font-weight: 600; font-family: 'Times New Roman', Times, serif;">NIP. ${escapeHtml(signatoryNip)}</p>` : ''}
                 </div>
-                <p style="margin: 2px 0 0 0; font-size: 11px; color: #000000; font-weight: 600; font-family: 'Times New Roman', Times, serif;">NIP. 19830514 200812 2 003</p>
               </div>
-            </div>
+            ` : `
+              <div class="print-signature print-avoid-break" style="page-break-inside: avoid; break-inside: avoid; margin-top: 16px; display: flex; justify-content: flex-end; font-family: 'Times New Roman', Times, serif;">
+                <div style="text-align: right; font-family: 'Times New Roman', Times, serif; font-size: 11px; color: #374151;">
+                  <p style="margin: 0; font-style: italic;">Diterbitkan dan diverifikasi otomatis oleh Sistem Evaluasi &amp; Peer-Assessment</p>
+                  <p style="margin: 2px 0 0 0; font-weight: 700; color: #000000;">${escapeHtml(kotaInstansi)}, ${printDateStr}</p>
+                </div>
+              </div>
+            `}
 
           </div>
 
           ${includeFooter ? `
             <!-- FOOTER DOKUMEN RESMI MINIMALIS ANCHORED AT BOTTOM -->
             <div class="print-avoid-break print-footer" style="page-break-inside: avoid; break-inside: avoid; margin-top: auto; padding-top: 6px; border-top: 0.75px dashed #9ca3af; display: flex; justify-content: space-between; align-items: center; font-size: 8.5px; color: #4b5563; line-height: 1.3; flex-shrink: 0;">
-              <span>Dokumen ini diterbitkan secara otomatis oleh <strong>Sistem Peer-Assessment ${escapeHtml(rawJurusan || 'FKIP')} Kelas ${escapeHtml(kelas)}</strong> &bull; Universitas Lambung Mangkurat</span>
+              <span>Dokumen ini diterbitkan secara otomatis oleh <strong>Sistem Peer-Assessment ${escapeHtml(rawJurusan || 'FKIP')}</strong> &bull; ${escapeHtml(universitas)}</span>
               <span style="font-family: monospace; color: #6b7280; font-weight: 500;">Waktu Cetak: ${printDateStr}</span>
             </div>
           ` : ''}
