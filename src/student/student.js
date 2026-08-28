@@ -1020,6 +1020,11 @@ function normalizeMediaList(fieldOrMedia) {
       if (navTitle) navTitle.textContent = "Portal Penilaian Akademik";
       if (navSubtitle) navSubtitle.textContent = "Universitas Lambung Mangkurat";
       if (pinEl) pinEl.textContent = "Masukkan PIN";
+      const prefixEl = document.getElementById("footerPembuatPrefix");
+      if (prefixEl) {
+        prefixEl.textContent = "";
+        prefixEl.classList.add("hidden");
+      }
       const footerLink = document.getElementById("footerAdminLink");
       if (footerLink) {
         footerLink.textContent = "Portal Admin";
@@ -3087,12 +3092,22 @@ function normalizeMediaList(fieldOrMedia) {
 
       // Update footer kredit pembuat web / link portal admin
       const pembuatNama = (appConfig["Pembuat_Web_Nama"] || "").trim();
+      const pembuatPrefix = (appConfig["Pembuat_Web_Prefix"] || "Dibuat oleh").trim();
+      const prefixEl = document.getElementById("footerPembuatPrefix");
       const footerLink = document.getElementById("footerAdminLink");
       if (footerLink) {
         if (pembuatNama) {
+          if (prefixEl) {
+            prefixEl.innerHTML = `${smartMathFormat(pembuatPrefix)} `;
+            prefixEl.classList.remove("hidden");
+          }
           footerLink.innerHTML = smartMathFormat(pembuatNama);
-          footerLink.title = `Dibuat oleh ${pembuatNama} — Klik untuk menuju ke Portal Admin`;
+          footerLink.title = `${pembuatPrefix} ${pembuatNama} — Klik untuk menuju ke Portal Admin`;
         } else {
+          if (prefixEl) {
+            prefixEl.textContent = "";
+            prefixEl.classList.add("hidden");
+          }
           footerLink.textContent = "Portal Admin";
           footerLink.title = "Akses Portal Pengelolaan Admin";
         }

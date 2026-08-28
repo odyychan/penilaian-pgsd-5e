@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.50] - 2026-08-28
+
+### 🏷️ Footer Prefix & Credit Integration Enhancement
+- **✨ Penyelarasan Prefix & Tautan Nama Pembuat di Footer:**
+  - Menyertakan kembali teks prefix dinamis (`#footerPembuatPrefix`, misal *"Dibuat oleh "*, *"Dikembangkan oleh "*, dsb.) tepat sebelum nama pembuat.
+  - Nama pembuat (*misal "Rodhiyah"*) berfungsi sebagai tautan langsung ke Portal Admin dengan format rapi dan tidak terpotong: `© 2026 FKIP Universitas Lambung Mangkurat • Dibuat oleh Rodhiyah`.
+  - Jika nama pembuat kosong, footer otomatis kembali ke format standar: `© 2026 FKIP Universitas Lambung Mangkurat • Portal Admin`.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.50`.
+
+---
+
 ## [2.4.49] - 2026-08-28
 
 ### 🏷️ Footer Dynamic Branding: Seamless Credit Link Integration
