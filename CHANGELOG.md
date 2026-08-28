@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.66] - 2026-08-29
+
+### 🖨️ Admin & Client Report Engine: 100% Unified Formal Academic Print Layout
+- **🏛️ Standarisasi Format Cetak Laporan Resmi FKIP ULM di Seluruh Antarmuka:**
+  - Menyelaraskan seluruh arsitektur cetak pada Panel Admin (`renderAdminPrintPreviewContent`) agar **100% identik dan konsisten** dengan cetak rekapitulasi halaman mahasiswa (`renderPrintPreviewContent`).
+  - Menyematkan **Kop Surat Resmi Dinas FKIP ULM** berlogo Universitas Lambung Mangkurat dengan garis pembatas ganda (*double black line divider*) dan tipografi resmi `'Times New Roman', Times, serif`.
+  - Mengintegrasikan tabel metadata akademik 2 kolom terstruktur (*Mata Kuliah, Dosen Pengampu, Kelas, Program Studi, Cakupan Sesi*).
+  - Melengkapi tabel rekapitulasi nilai dengan kolom **Peringkat (`Rank #`)**, **Presentator Terbaik**, **Predikat Skor (`A, B+, B...`)**, serta baris kalkulasi **Rata-Rata Keseluruhan Kelas**.
+  - Mengadopsi tata letak kartu evaluasi kualitatif 2 kolom berbingkai rapi serta lembar pengesahan resmi bertanda tangan dosen pengampu lengkap dengan NIP.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.66`.
+
+---
+
 ## [2.4.65] - 2026-08-29
 
 ### 🖨️ Print & Report Engine: Smart Metadata Pairing & Layout Alignment Fix

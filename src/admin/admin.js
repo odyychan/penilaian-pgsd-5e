@@ -10196,172 +10196,414 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       const container = document.getElementById("printableReportArea");
       if (!container) return;
 
-      const title = currentFormMeta?.judulForm || adminAppConfig["Judul_Form"] || "PENILAIAN PRESENTASI";
-      const matkul = currentFormMeta?.mataKuliah || adminAppConfig["Mata_Kuliah"] || "Bimbingan Konseling di SD";
-      const dosen = currentFormMeta?.dosen || adminAppConfig["Dosen_Pengampu"] || "Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.";
-      const kelas = currentFormMeta?.kelas || adminAppConfig["Kelas"] || "5E";
-      const prodi = currentFormMeta?.jurusan || adminAppConfig["Jurusan"] || "PGSD";
-
       const scopeGroup = document.getElementById("adminPrintScopeGroupSelect")?.value || "ALL";
       const scopeSesi = document.getElementById("adminPrintScopeSesiSelect")?.value || "ALL";
       const includeReviews = document.getElementById("adminPrintIncludeReviews")?.checked ?? true;
       const includeReviewerName = document.getElementById("adminPrintIncludeReviewerName")?.checked ?? true;
       const includeFooter = document.getElementById("adminPrintIncludeFooter")?.checked ?? true;
 
-      // Filter groups
+      const matkul = adminAppConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || "Bimbingan Konseling di SD";
+      const dosen = adminAppConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || "Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd.";
+      const kelas = adminAppConfig["Kelas"] || (currentFormMeta && currentFormMeta.kelas) || "5E";
+      const rawJurusan = (adminAppConfig["Jurusan"] || (currentFormMeta && currentFormMeta.jurusan) || "PGSD").trim();
+      let prodiKop = "PROGRAM STUDI PENDIDIKAN GURU SEKOLAH DASAR (PGSD)";
+      if (rawJurusan && rawJurusan.toUpperCase() !== "PGSD") {
+        if (rawJurusan.toUpperCase().startsWith("PROGRAM STUDI") || rawJurusan.toUpperCase().startsWith("PRODI")) {
+          prodiKop = rawJurusan.toUpperCase();
+        } else {
+          prodiKop = `PROGRAM STUDI ${rawJurusan.toUpperCase()}`;
+        }
+      }
+      const printDateStr = new Intl.DateTimeFormat('id-ID', { dateStyle: 'long' }).format(new Date());
+
+      // Filter groups & build unified summary list
+      const allResponses = Array.isArray(adminResponsesList) ? adminResponsesList : [];
       let groupsToDisplay = Array.isArray(adminMasterGroups) ? [...adminMasterGroups] : [];
+
       if (scopeGroup !== "ALL") {
         groupsToDisplay = groupsToDisplay.filter(g => g.name === scopeGroup);
       }
       if (scopeSesi !== "ALL") {
-        groupsToDisplay = groupsToDisplay.filter(g => g.sesi === scopeSesi);
+        groupsToDisplay = groupsToDisplay.filter(g => (g.sesi || "Minggu 1") === scopeSesi);
       }
 
-      // Filter responses
-      const allResponses = Array.isArray(adminResponsesList) ? adminResponsesList : [];
+      let summaryList = groupsToDisplay.map(g => {
+        const groupResponses = allResponses.filter(r => (r.kelompok_dinilai || r.kelompok) === g.name && (scopeSesi === 'ALL' || (r.sesi || 'Minggu 1') === (g.sesi || 'Minggu 1')));
+        const countPenilai = groupResponses.length;
+        let avgScore = 0;
+        if (countPenilai > 0) {
+          const sum = groupResponses.reduce((acc, r) => acc + (parseFloat(r.nilai_kelompok || r.nilaiKelompok) || 0), 0);
+          avgScore = parseFloat((sum / countPenilai).toFixed(2));
+        }
 
-      let groupRowsHtml = '';
-      if (groupsToDisplay.length === 0) {
-        groupRowsHtml = `
-          <tr>
-            <td colspan="5" class="p-4 text-center text-zinc-400 italic">Belum ada data kelompok yang sesuai dengan filter.</td>
-          </tr>
-        `;
-      } else {
-        groupsToDisplay.forEach((g, idx) => {
-          const groupResponses = allResponses.filter(r => (r.kelompok === g.name) && (scopeSesi === 'ALL' || r.sesi === scopeSesi));
-          const countPenilai = groupResponses.length;
-          let avgScore = "-";
-          if (countPenilai > 0) {
-            const sum = groupResponses.reduce((acc, r) => acc + (parseFloat(r.nilaiKelompok) || 0), 0);
-            avgScore = (sum / countPenilai).toFixed(2);
+        // Aggregate best presenters
+        const presenterVotes = {};
+        groupResponses.forEach(r => {
+          [r.best_presenter_1, r.best_presenter_2].forEach(p => {
+            if (p && p !== '-' && p !== 'null') {
+              presenterVotes[p] = (presenterVotes[p] || 0) + 1;
+            }
+          });
+        });
+        const rankedPresenters = Object.entries(presenterVotes)
+          .map(([name, votes]) => ({ name, votes }))
+          .sort((a, b) => b.votes - a.votes);
+
+        // Aggregate qualitative reviews
+        const evaluasiList = {};
+        groupResponses.forEach(r => {
+          const penilaiName = r.nama_penilai || r.namaPenilai || 'Penilai';
+          const evalDetail = r.evaluasi_detail || r.evaluasiDetail || {};
+          if (typeof evalDetail === 'object' && evalDetail !== null) {
+            Object.entries(evalDetail).forEach(([memberKey, ulasanText]) => {
+              if (memberKey === 'uploadedFiles' || !ulasanText) return;
+              let memberName = memberKey;
+              const foundStud = (adminMasterStudents || []).find(s => String(s.nim).trim() === String(memberKey).trim());
+              if (foundStud && foundStud.name) {
+                memberName = `${foundStud.name} (${memberKey})`;
+              }
+              if (!evaluasiList[memberName]) evaluasiList[memberName] = [];
+              evaluasiList[memberName].push({
+                penilai: penilaiName,
+                ulasan: ulasanText
+              });
+            });
           }
+        });
 
-          groupRowsHtml += `
-            <tr class="border-b border-black">
-              <td class="p-2 border-r border-black text-center font-mono">${idx + 1}</td>
-              <td class="p-2 border-r border-black font-bold">${escapeHtml(g.name)}</td>
-              <td class="p-2 border-r border-black text-center font-mono">${escapeHtml(g.sesi || '-')}</td>
-              <td class="p-2 border-r border-black text-center font-mono">${countPenilai} Penilai</td>
-              <td class="p-2 text-center font-mono font-bold bg-zinc-50">${avgScore}</td>
-            </tr>
-          `;
+        return {
+          kelompok: g.name,
+          sesi: g.sesi || 'Minggu 1',
+          totalPenilai: countPenilai,
+          rataRataSkor: avgScore,
+          rankedPresenters: rankedPresenters,
+          evaluasiList: evaluasiList
+        };
+      });
+
+      // Hitung Rata-Rata Keseluruhan
+      let totalAllScore = 0;
+      let totalAllPenilai = 0;
+      let evaluatedCount = 0;
+      summaryList.forEach(g => {
+        const s = parseFloat(g.rataRataSkor || 0);
+        const p = parseInt(g.totalPenilai) || 0;
+        if (p > 0) {
+          totalAllScore += s;
+          totalAllPenilai += p;
+          evaluatedCount++;
+        }
+      });
+
+      // Hitung Total Mahasiswa Terdaftar
+      const activeGroupNames = new Set(summaryList.map(g => g.kelompok));
+      let totalMahasiswa = 0;
+      if (adminMasterStudents && adminMasterStudents.length > 0) {
+        totalMahasiswa = adminMasterStudents.filter(s => activeGroupNames.has(s.kelompok)).length;
+      } else if (adminMasterGroups && adminMasterGroups.length > 0) {
+        adminMasterGroups.filter(g => activeGroupNames.has(g.name)).forEach(g => {
+          totalMahasiswa += (g.members || []).length;
+        });
+      }
+      const avgClassScore = evaluatedCount > 0 ? (totalAllScore / evaluatedCount).toFixed(2) : "0.00";
+
+      // Resolve dynamic header cards
+      let cards = adminAppConfig.Header_Info_Cards;
+      if (!cards || !Array.isArray(cards) || cards.length === 0) {
+        const rawMatkul = adminAppConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || "";
+        const rawDosen  = adminAppConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || "";
+        const rawKelas  = adminAppConfig["Kelas"] || (currentFormMeta && currentFormMeta.kelas) || "";
+        const rawProdi  = adminAppConfig["Jurusan"] || (currentFormMeta && currentFormMeta.jurusan) || "";
+        
+        cards = [];
+        if (rawMatkul) cards.push({ label: 'Mata Kuliah:', value: rawMatkul });
+        if (rawDosen)  cards.push({ label: 'Dosen Pengampu:', value: rawDosen });
+        if (rawKelas)  cards.push({ label: 'Kelas:', value: rawKelas });
+        if (rawProdi)  cards.push({ label: 'Program Studi:', value: rawProdi });
+      }
+
+      const activeCards = cards.filter(c => (c.label && c.label.trim()) || (c.value && c.value.trim()));
+      let rawMetaItems = activeCards.map(c => ({
+        label: (c.label || 'Info').trim().replace(/:$/, ''),
+        value: (c.value || '-').trim()
+      }));
+
+      const hasSesiCard = rawMetaItems.some(item => item.label.toLowerCase().includes('sesi') || item.label.toLowerCase().includes('cakupan'));
+      if (!hasSesiCard) {
+        rawMetaItems.push({
+          label: 'Cakupan Sesi',
+          value: scopeSesi === 'ALL' ? 'Semua Sesi Presentasi' : scopeSesi
         });
       }
 
-      // Reviews block if selected
-      let reviewsSectionHtml = '';
-      if (includeReviews && allResponses.length > 0) {
-        const filteredResponses = allResponses.filter(r => 
-          (scopeGroup === 'ALL' || r.kelompok === scopeGroup) &&
-          (scopeSesi === 'ALL' || r.sesi === scopeSesi)
-        );
+      // Smart Academic Metadata Pairing
+      const leftColItems = [];
+      const rightColItems = [];
 
-        if (filteredResponses.length > 0) {
-          const sampleReviews = filteredResponses.slice(0, 8);
-          reviewsSectionHtml = `
-            <div class="mt-6 pt-4 border-t border-black space-y-2">
-              <h4 class="font-bold text-xs uppercase tracking-wider">Catatan & Evaluasi Kualitatif Mahasiswa</h4>
-              <div class="space-y-2 text-[10.5px]">
-                ${sampleReviews.map(r => {
-                  let evalText = "";
-                  try {
-                    const parsed = typeof r.evaluasiDetail === 'object' ? r.evaluasiDetail : JSON.parse(r.evaluasiDetail || "{}");
-                    evalText = Object.entries(parsed).map(([k, v]) => `<strong>${escapeHtml(k)}:</strong> ${escapeHtml(v)}`).join(" | ");
-                  } catch(e) {
-                    evalText = escapeHtml(r.evaluasiDetail || "-");
-                  }
-                  if (!evalText) return '';
-                  return `
-                    <div class="p-2 rounded bg-zinc-50 border border-zinc-300">
-                      <div class="flex justify-between items-center text-[9.5px] text-zinc-500 mb-1">
-                        <span><strong>Kelompok Dinilai:</strong> ${escapeHtml(r.kelompok)}</span>
-                        ${includeReviewerName ? `<span><strong>Penilai:</strong> ${escapeHtml(r.namaPenilai)} (${escapeHtml(r.nim)})</span>` : ''}
-                      </div>
-                      <p class="leading-relaxed text-zinc-800">${evalText}</p>
-                    </div>
-                  `;
-                }).filter(Boolean).join("")}
-              </div>
-            </div>
+      rawMetaItems.forEach(item => {
+        const lblLower = item.label.toLowerCase();
+        if (lblLower.includes('matkul') || lblLower.includes('mata kuliah') || lblLower.includes('dosen') || lblLower.includes('pengampu')) {
+          leftColItems.push(item);
+        } else if (lblLower.includes('kelas') || lblLower.includes('prodi') || lblLower.includes('jurusan') || lblLower.includes('program studi')) {
+          rightColItems.push(item);
+        } else {
+          if (leftColItems.length <= rightColItems.length) {
+            leftColItems.push(item);
+          } else {
+            rightColItems.push(item);
+          }
+        }
+      });
+
+      const maxRows = Math.max(leftColItems.length, rightColItems.length);
+      let metadataTableHtml = '';
+      if (maxRows > 0) {
+        let rowsHtml = '';
+        for (let i = 0; i < maxRows; i++) {
+          const leftItem = leftColItems[i];
+          const rightItem = rightColItems[i];
+          rowsHtml += `
+            <tr style="border: none !important;">
+              ${leftItem ? `
+                <td style="border: none !important; padding: 1.5px 0; width: 17%; font-weight: 600; color: #1f2937; vertical-align: top; font-family: 'Times New Roman', Times, serif; white-space: nowrap;">${escapeHtml(leftItem.label)}</td>
+                <td style="border: none !important; padding: 1.5px 8px 1.5px 0; width: 47%; font-weight: 700; color: #000000; vertical-align: top; word-break: break-word; font-family: 'Times New Roman', Times, serif; line-height: 1.25;">: ${escapeHtml(leftItem.value)}</td>
+              ` : `
+                <td style="border: none !important; width: 17%;"></td>
+                <td style="border: none !important; width: 47%;"></td>
+              `}
+              ${rightItem ? `
+                <td style="border: none !important; padding: 1.5px 0; width: 16%; font-weight: 600; color: #1f2937; vertical-align: top; font-family: 'Times New Roman', Times, serif; white-space: nowrap;">${escapeHtml(rightItem.label)}</td>
+                <td style="border: none !important; padding: 1.5px 0; width: 20%; font-weight: 700; color: #000000; vertical-align: top; word-break: break-word; font-family: 'Times New Roman', Times, serif; line-height: 1.25;">: ${escapeHtml(rightItem.value)}</td>
+              ` : `
+                <td style="border: none !important; width: 16%;"></td>
+                <td style="border: none !important; width: 20%;"></td>
+              `}
+            </tr>
           `;
         }
+        metadataTableHtml = `
+          <table style="width: 100%; border-collapse: collapse; border: none !important; margin-top: 2px; font-size: 11.5px; text-align: left; table-layout: fixed; font-family: 'Times New Roman', Times, serif;">
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+        `;
       }
 
-      // Resolve dynamic header cards
-      let adminCards = adminAppConfig.Header_Info_Cards;
-      if (!adminCards || !Array.isArray(adminCards) || adminCards.length === 0) {
-        adminCards = [
-          { label: 'Mata Kuliah:', value: matkul },
-          { label: 'Dosen Pengampu:', value: dosen },
-          { label: 'Kelas:', value: kelas },
-          { label: 'Program Studi:', value: prodi }
-        ];
+      // Title determination
+      const formTitle = adminAppConfig["Judul_Form"] || (currentFormMeta && currentFormMeta.judulForm) || "";
+      let reportTitle = "LAPORAN REKAPITULASI HASIL PENILAIAN PRESENTASI";
+      if (formTitle && !formTitle.toLowerCase().includes("penilaian presentasi") && formTitle.length < 50) {
+        reportTitle = `LAPORAN REKAPITULASI ${formTitle.toUpperCase().replace(/^PENILAIAN\s+/i, 'HASIL PENILAIAN ')}`;
       }
-      const activeAdminCards = adminCards.filter(c => (c.label && c.label.trim()) || (c.value && c.value.trim()));
-      const headerMetaText = activeAdminCards.map(c => `${c.label ? c.label.trim().replace(/:$/, '') : 'Info'}: ${c.value || '-'}`).join(' • ');
 
-      container.innerHTML = `
-        <div class="print-page-wrapper space-y-5">
-          <!-- Kop Laporan Resmi -->
-          <div class="border-b-2 border-black pb-3 text-center space-y-1">
-            <h2 class="text-xs sm:text-sm font-bold tracking-widest uppercase">UNIVERSITAS LAMBUNG MANGKURAT</h2>
-            <h3 class="text-[11px] sm:text-xs font-semibold uppercase">FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN • PROGRAM STUDI ${escapeHtml(prodi)}</h3>
-            <h1 class="text-sm sm:text-base font-extrabold uppercase mt-1 math-renderable">${smartMathFormat(title)}</h1>
-            ${headerMetaText ? `<p class="text-xs font-medium math-renderable">${smartMathFormat(headerMetaText)}</p>` : ''}
-          </div>
-
-          <div class="flex justify-between items-center text-[10.5px] text-zinc-700">
-            <span><strong>Cakupan:</strong> ${scopeGroup === 'ALL' ? 'Semua Kelompok' : escapeHtml(scopeGroup)} (${scopeSesi === 'ALL' ? 'Semua Sesi' : escapeHtml(scopeSesi)})</span>
-            <span><strong>Tanggal Cetak:</strong> ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-          </div>
-
-          <!-- Table Data Rekapitulasi -->
-          <div>
-            <table class="w-full border border-black text-xs">
-              <thead>
-                <tr class="bg-zinc-100 font-bold border-b border-black text-[11px]">
-                  <th class="p-2 border-r border-black text-center w-10">No</th>
-                  <th class="p-2 border-r border-black text-left">Kelompok Presentator</th>
-                  <th class="p-2 border-r border-black text-center w-24">Sesi</th>
-                  <th class="p-2 border-r border-black text-center w-28">Jumlah Penilai</th>
-                  <th class="p-2 text-center w-28">Nilai Rata-Rata</th>
-                </tr>
-              </thead>
+      // HTML Template
+      let html = `
+        <div class="print-page-wrapper" style="min-height: 1033px; width: 100%; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; background: #ffffff;">
+          
+          <!-- TOP & MAIN CONTENT AREA -->
+          <div style="flex: 1 0 auto;">
+            <!-- KOP SURAT RESMI DINAS FKIP ULM -->
+            <table style="width: 100%; border-collapse: collapse; border: none; margin: 0 0 2px 0; padding: 0; table-layout: fixed;">
               <tbody>
-                ${groupRowsHtml}
+                <tr style="border: none;">
+                  <td style="width: 82px; min-width: 82px; max-width: 82px; vertical-align: middle; text-align: center; border: none; padding: 0 6px 0 0;">
+                    <img src="assets/logo-ulm.png" alt="Logo ULM" style="width: 76px; height: 76px; object-fit: contain; display: block; margin: 0 auto;" onerror="this.src='logo-ulm.png'" />
+                  </td>
+                  <td style="text-align: center; vertical-align: middle; border: none; padding: 0 2px; font-family: 'Times New Roman', Times, serif; color: #000000;">
+                    <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; line-height: 1.2;">KEMENTERIAN PENDIDIKAN TINGGI, SAINS, DAN TEKNOLOGI</div>
+                    <div style="font-size: 15px; font-weight: 900; letter-spacing: 0.03em; text-transform: uppercase; line-height: 1.22; margin-top: 1px;">UNIVERSITAS LAMBUNG MANGKURAT</div>
+                    <div style="font-size: 13px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1.2; margin-top: 1px;">FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN</div>
+                    <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; line-height: 1.2; margin-top: 1px;">${prodiKop}</div>
+                    <div style="font-size: 9px; color: #374151; line-height: 1.2; margin-top: 2.5px; font-style: italic;">Jl. Brigjen H. Hasan Basry, Kayu Tangi, Banjarmasin, Kalimantan Selatan 70123 • Laman: fkip.ulm.ac.id</div>
+                  </td>
+                  <td style="width: 82px; min-width: 82px; max-width: 82px; border: none; padding: 0;"></td>
+                </tr>
               </tbody>
             </table>
-          </div>
 
-          ${reviewsSectionHtml}
+            <!-- GARIS PEMBATAS KOP RESMI DINAS (DOUBLE LINE TEBAL & TIPIS) -->
+            <div style="border-top: 2.5px solid #000000; border-bottom: 0.75px solid #000000; height: 2px; margin: 2px 0 8px 0;"></div>
 
-          <!-- Lembar Pengesahan & Tanda Tangan Dosen -->
-          ${includeFooter ? `
-            <div class="pt-8 mt-8 flex justify-end text-xs">
-              <div class="text-center min-w-[260px] max-w-[380px] w-fit space-y-12">
-                <div>
-                  <p class="text-[11px] text-zinc-600">Banjarmasin, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-                  <p class="font-bold text-[11px]">Dosen Pengampu Mata Kuliah,</p>
+            <!-- JUDUL LAPORAN & METADATA -->
+            <div style="text-align: center; margin-bottom: 8px; font-family: 'Times New Roman', Times, serif; color: #000000;">
+              <h2 style="font-size: 13.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em; color: #000000; border-bottom: 1.5px solid #000000; padding-bottom: 2px; display: inline-block; margin: 6pt auto 6px auto; font-family: 'Times New Roman', Times, serif;">
+                ${escapeHtml(reportTitle)}
+              </h2>
+              ${metadataTableHtml}
+            </div>
+
+            <!-- 1. TABEL REKAPITULASI NILAI KELOMPOK -->
+            <div class="space-y-1 print-avoid-break" style="margin-top: 14px; padding-top: 2px; margin-bottom: 8px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px;">
+                <span style="font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.02em; color: #000000; font-family: 'Times New Roman', Times, serif;">A. Rekapitulasi Nilai &amp; Peringkat Performa Kelompok</span>
+                <span style="font-size: 10px; font-family: monospace; color: #4b5563;">Skala Penilaian: 0 - 100</span>
+              </div>
+              
+              <div class="overflow-x-auto" style="overflow: visible;">
+                <table class="w-full text-left text-xs" style="table-layout: fixed; width: 100%; border-collapse: collapse; border: 1.5px solid #000000; box-sizing: border-box; font-family: 'Times New Roman', Times, serif;">
+                  <thead>
+                    <tr style="background-color: #f3f4f6; text-align: center; font-weight: bold; border-bottom: 1.5px solid #000000; font-family: 'Times New Roman', Times, serif;">
+                      <th style="padding: 5px 2px; border: 1px solid #000000; width: 6%; text-align: center; vertical-align: middle; font-size: 11.5px; font-family: 'Times New Roman', Times, serif;">Rank</th>
+                      <th style="padding: 5px 4px; border: 1px solid #000000; text-align: center; vertical-align: middle; width: 19%; font-size: 11.5px; font-family: 'Times New Roman', Times, serif;">Kelompok Presentasi</th>
+                      <th style="padding: 5px 3px; border: 1px solid #000000; width: 10%; text-align: center; vertical-align: middle; font-size: 11.5px; font-family: 'Times New Roman', Times, serif;">Sesi</th>
+                      <th style="padding: 5px 3px; border: 1px solid #000000; width: 9%; text-align: center; vertical-align: middle; font-size: 11.5px; font-family: 'Times New Roman', Times, serif;">Penilai</th>
+                      <th style="padding: 5px 3px; border: 1px solid #000000; width: 11%; text-align: center; vertical-align: middle; font-size: 11.5px; font-family: 'Times New Roman', Times, serif;">Rata-Rata</th>
+                      <th style="padding: 5px 4px; border: 1px solid #000000; text-align: center; vertical-align: middle; width: 31%; font-size: 11.5px; font-family: 'Times New Roman', Times, serif; word-break: break-word;">Presentator Terbaik</th>
+                      <th style="padding: 5px 3px; border: 1px solid #000000; width: 14%; text-align: center; vertical-align: middle; font-size: 11.5px; font-family: 'Times New Roman', Times, serif;">Predikat</th>
+                    </tr>
+                  </thead>
+                  <tbody style="font-family: 'Times New Roman', Times, serif;">
+      `;
+
+      if (summaryList.length === 0) {
+        html += `
+          <tr>
+            <td colspan="7" style="padding: 10px; text-align: center; color: #6b7280; font-style: italic; border: 1px solid #000000; font-family: 'Times New Roman', Times, serif;">
+              Tidak ada data penilaian yang sesuai dengan kriteria filter.
+            </td>
+          </tr>
+        `;
+      } else {
+        const sorted = [...summaryList].sort((a, b) => parseFloat(b.rataRataSkor || 0) - parseFloat(a.rataRataSkor || 0));
+        sorted.forEach((g, idx) => {
+          const scoreNum = parseFloat(g.rataRataSkor || 0);
+          const totalP = parseInt(g.totalPenilai) || 0;
+          let predikat = "-";
+          if (totalP > 0) {
+            if (scoreNum >= 80) predikat = "A";
+            else if (scoreNum >= 77) predikat = "A-";
+            else if (scoreNum >= 75) predikat = "B+";
+            else if (scoreNum >= 70) predikat = "B";
+            else if (scoreNum >= 67) predikat = "B-";
+            else if (scoreNum >= 64) predikat = "C+";
+            else if (scoreNum >= 60) predikat = "C";
+            else if (scoreNum >= 50) predikat = "D+";
+            else if (scoreNum >= 40) predikat = "D";
+            else predikat = "E";
+          }
+
+          const presenters = g.rankedPresenters || [];
+          const topPresentersText = (presenters.length > 0)
+            ? presenters.map(p => `${p.name} (${p.votes} Suara)`).join(", ")
+            : "-";
+
+          html += `
+            <tr style="border-bottom: 1px solid #000000; font-family: 'Times New Roman', Times, serif; ${idx % 2 === 0 ? 'background-color: #ffffff;' : 'background-color: #fafafa;'}">
+              <td style="padding: 4.5px 2px; border: 1px solid #000000; text-align: center; font-weight: bold; font-family: 'Times New Roman', Times, serif; font-size: 11.5px;">#${idx + 1}</td>
+              <td style="padding: 4.5px 5px; border: 1px solid #000000; font-weight: bold; color: #000000; font-size: 11.5px; font-family: 'Times New Roman', Times, serif; word-break: break-word;">${escapeHtml(g.kelompok)}</td>
+              <td style="padding: 4.5px 3px; border: 1px solid #000000; text-align: center; font-size: 11.5px; font-family: 'Times New Roman', Times, serif;">${escapeHtml(g.sesi || 'Minggu 1')}</td>
+              <td style="padding: 4.5px 3px; border: 1px solid #000000; text-align: center; font-family: 'Times New Roman', Times, serif; font-size: 11.5px;">${totalP} Mhs</td>
+              <td style="padding: 4.5px 3px; border: 1px solid #000000; text-align: center; font-weight: bold; font-family: 'Times New Roman', Times, serif; color: #000000; font-size: 11.5px;">${totalP > 0 ? scoreNum.toFixed(2) : '-'}</td>
+              <td style="padding: 4.5px 5px; border: 1px solid #000000; color: #000000; font-size: 11px; font-family: 'Times New Roman', Times, serif; word-break: break-word; overflow-wrap: break-word; line-height: 1.25;">${escapeHtml(topPresentersText)}</td>
+              <td style="padding: 4.5px 3px; border: 1px solid #000000; text-align: center; font-weight: 600; font-size: 11.5px; font-family: 'Times New Roman', Times, serif;">${predikat}</td>
+            </tr>
+          `;
+        });
+
+        // Summary Row
+        html += `
+          <tr style="background-color: #f3f4f6; font-weight: bold; border-top: 1.5px solid #000000; text-align: center; font-family: 'Times New Roman', Times, serif;">
+            <td colspan="4" style="padding: 5px 6px; text-align: center; vertical-align: middle; border: 1px solid #000000; font-size: 11.5px; font-family: 'Times New Roman', Times, serif;">Rata-Rata Keseluruhan Kelas</td>
+            <td style="padding: 5px 4px; border: 1px solid #000000; font-family: 'Times New Roman', Times, serif; font-size: 12px; color: #000000; text-align: center; vertical-align: middle;">${avgClassScore}</td>
+            <td colspan="2" style="padding: 5px 6px; text-align: center; vertical-align: middle; border: 1px solid #000000; font-size: 11px; font-family: 'Times New Roman', Times, serif; color: #000000;">Total ${summaryList.length} Kelompok (${totalMahasiswa} Mahasiswa)</td>
+          </tr>
+        `;
+      }
+
+      html += `
+                  </tbody>
+                </table>
+              </div>
+            </div>
+      `;
+
+      // 2. BAGIAN EVALUASI KUALITATIF JIKA DICENTANG
+      if (includeReviews && summaryList.length > 0) {
+        html += `
+          <div class="space-y-1.5" style="margin-top: 16px; padding-top: 2px; margin-bottom: 6px;">
+            <h4 class="font-bold uppercase tracking-wider text-zinc-950 print-section-header" style="font-size: 12px; font-weight: 800; margin: 0 0 3px 0; page-break-after: avoid; break-after: avoid; font-family: 'Times New Roman', Times, serif; color: #000000;">
+              B. Rangkuman Catatan Evaluasi Masukan Mahasiswa
+            </h4>
+        `;
+
+        summaryList.forEach(g => {
+          const evalList = g.evaluasiList || {};
+          const studentKeys = Object.keys(evalList);
+
+          if (studentKeys.length > 0) {
+            html += `
+              <div class="print-card print-avoid-break rounded border border-zinc-400 bg-zinc-50/50 space-y-1 mb-1.5" style="page-break-inside: avoid; break-inside: avoid; border: 1px solid #9ca3af; border-radius: 4px; padding: 5px 8px;">
+                <div class="font-bold text-zinc-950 border-b border-zinc-300 flex items-center justify-between" style="border-bottom: 1px solid #d1d5db; padding-bottom: 2.5px;">
+                  <span class="font-extrabold" style="font-size: 11.5px; font-weight: 800;">${escapeHtml(g.kelompok)}</span>
+                  <span class="font-medium font-mono text-zinc-700 bg-zinc-200/80 px-1.5 py-0.5 rounded" style="font-size: 10px;">${escapeHtml(g.sesi || 'Minggu 1')}</span>
                 </div>
-                <div>
-                  <p class="font-bold underline whitespace-nowrap math-renderable">${smartMathFormat(dosen)}</p>
-                  <p class="text-[10px] text-zinc-500 font-mono">Dosen FKIP ULM</p>
+                <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; padding-top: 2.5px;">
+            `;
+
+            studentKeys.forEach(name => {
+              const reviews = evalList[name] || [];
+              if (reviews.length > 0) {
+                html += `
+                  <div class="rounded bg-white border border-zinc-200 shadow-2xs" style="page-break-inside: avoid; break-inside: avoid; border: 1px solid #e5e7eb; border-radius: 4px; padding: 4px 6.5px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px dashed #e5e7eb; padding-bottom: 2px; margin-bottom: 3px;">
+                      <span style="font-size: 11px; font-weight: 700; color: #111827;">${escapeHtml(name)}</span>
+                      <span style="font-size: 9.5px; font-weight: 600; color: #4b5563; font-family: monospace; background: #f3f4f6; padding: 0.5px 4px; border-radius: 3px;">${reviews.length} Masukan</span>
+                    </div>
+                    <ul style="list-style-type: disc; padding-left: 14px; margin: 0; font-size: 10.5px; line-height: 1.3; color: #1f2937;">
+                      ${reviews.slice(0, 4).map(r => `
+                        <li style="margin-bottom: 2px;">
+                          <span style="font-style: italic; color: #111827;">"${escapeHtml(r.ulasan)}"</span>
+                          ${includeReviewerName ? `<span style="font-size: 9px; color: #4b5563; font-weight: 600; font-style: normal; margin-left: 3px;">— ${escapeHtml(r.penilai || 'Penilai')}</span>` : ''}
+                        </li>
+                      `).join("")}
+                      ${reviews.length > 4 ? `<li style="list-style: none; font-size: 9.5px; color: #6b7280; font-style: italic; margin-top: 1px; padding-left: 0;">+ ${reviews.length - 4} catatan masukan lainnya...</li>` : ''}
+                    </ul>
+                  </div>
+                `;
+              }
+            });
+
+            html += `
                 </div>
               </div>
+            `;
+          }
+        });
+
+        html += `</div>`;
+      }
+
+      // LEMBAR TANDA TANGAN / PENGESAHAN RESMI DOSEN
+      html += `
+            <!-- LEMBAR PENGESAHAN RESMI DOSEN PENGAMPU -->
+            <div class="print-signature print-avoid-break" style="page-break-inside: avoid; break-inside: avoid; margin-top: 16px; display: flex; justify-content: flex-end; font-family: 'Times New Roman', Times, serif;">
+              <div style="text-align: center; min-width: 260px; max-width: 380px; width: fit-content; font-family: 'Times New Roman', Times, serif;">
+                <p style="margin: 0; font-size: 11.5px; color: #000000; font-family: 'Times New Roman', Times, serif;">Banjarmasin, ${printDateStr}</p>
+                <p style="margin: 1.5px 0 0 0; font-size: 11.5px; font-weight: 700; color: #000000; font-family: 'Times New Roman', Times, serif;">Dosen Pengampu Mata Kuliah,</p>
+                <div style="height: 60px;"></div>
+                <div style="margin-top: 1px; padding: 0 6px 1.5px 6px; border-bottom: 1.5px solid #000000; display: inline-block; min-width: 220px; max-width: 100%;">
+                  <span style="font-size: 12px; font-weight: 800; color: #000000; white-space: nowrap; letter-spacing: 0.01em; font-family: 'Times New Roman', Times, serif;">${escapeHtml(dosen)}</span>
+                </div>
+                <p style="margin: 2px 0 0 0; font-size: 11px; color: #000000; font-weight: 600; font-family: 'Times New Roman', Times, serif;">NIP. 19830514 200812 2 003</p>
+              </div>
+            </div>
+
+          </div>
+
+          ${includeFooter ? `
+            <!-- FOOTER DOKUMEN RESMI MINIMALIS ANCHORED AT BOTTOM -->
+            <div class="print-avoid-break print-footer" style="page-break-inside: avoid; break-inside: avoid; margin-top: auto; padding-top: 6px; border-top: 0.75px dashed #9ca3af; display: flex; justify-content: space-between; align-items: center; font-size: 8.5px; color: #4b5563; line-height: 1.3; flex-shrink: 0;">
+              <span>Dokumen ini diterbitkan secara otomatis oleh <strong>Sistem Peer-Assessment ${escapeHtml(rawJurusan || 'FKIP')} Kelas ${escapeHtml(kelas)}</strong> &bull; Universitas Lambung Mangkurat</span>
+              <span style="font-family: monospace; color: #6b7280; font-weight: 500;">Waktu Cetak: ${printDateStr}</span>
             </div>
           ` : ''}
 
-          <!-- Footer Cetak Otomatis -->
-          <div class="pt-4 mt-6 border-t border-zinc-300 text-[9.5px] text-zinc-400 flex justify-between">
-            <span>Dicetak otomatis dari Sistem Evaluasi &amp; Peer-Assessment ${escapeHtml(prodi || 'FKIP')} ULM</span>
-            <span>Halaman 1 dari 1</span>
-          </div>
         </div>
       `;
 
+      container.innerHTML = html;
       requestAnimationFrame(() => {
-        renderAllMathInElement(container);
         applyPrintZoom();
       });
     }
