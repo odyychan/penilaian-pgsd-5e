@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.45] - 2026-08-28
+
+### 🖥️ Full-Width Edge-to-Edge Layout: Header & Footer Expansion
+- **📱 Pelebaran Header & Footer Menyeluruh (Edge-to-Edge Widescreen):**
+  - Mengubah kontainer `<header>`, bilah navigasi tab `#navTabContainer`, serta `<footer>` pada antarmuka publik mahasiswa/portal (`index.html`) dari batasan `max-w-7xl mx-auto` menjadi `w-full px-4 sm:px-6 lg:px-8`.
+  - Brand identitas dan tombol aksi PIN kini merapat proporsional dan elegan ke sisi kiri dan kanan layar penuh pada monitor widescreen/desktop tanpa celah kosong berlebih.
+  - Konten utama formulir (`<main>`) tetap dipertahankan terpusat rapi dan ergonomis untuk kenyamanan membaca responden.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.45`.
+
+---
+
 ## [2.4.44] - 2026-08-28
 
 ### ⚡ Dynamic Metadata Engine & Universal Non-Course Form Support
