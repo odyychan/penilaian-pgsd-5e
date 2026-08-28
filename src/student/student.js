@@ -1823,11 +1823,25 @@ function normalizeMediaList(fieldOrMedia) {
         const peranDosenLabel = appConfig["Peran_Dosen_Label"] || "Dosen (Pengampu / Penguji)";
         const peranTamuLabel = appConfig["Peran_Lainnya_Label"] || "Lainnya / Penilai Tamu";
         const emailMode = getCurrentEmailCollectionMode();
-        const isNoEmail = (emailMode === 'NO_EMAIL');
         const emailVal = clientCustomFormAnswers[f.id + '_email'] || activeUserAccountEmail || '';
-        const nameVal = clientCustomFormAnswers[f.id + '_nama'] || activeUserAccountName || '';
+        let nameVal = clientCustomFormAnswers[f.id + '_nama'] || '';
         const nimVal = clientCustomFormAnswers[f.id + '_nim'] || activeUserAccountNim || '';
         const roleVal = clientCustomFormAnswers[f.id + '_peran'] || currentEvaluatorRole || 'Mahasiswa';
+
+        // Auto-resolve nama mahasiswa dari data NIM form
+        if (!nameVal && nimVal && allStudentsData && allStudentsData.length > 0) {
+          const s = allStudentsData.find(st => String(st.nim).replace(/\s+/g, '').trim().toLowerCase() === String(nimVal).replace(/\s+/g, '').trim().toLowerCase());
+          if (s && s.name) nameVal = s.name;
+        }
+        if (!nameVal && nimVal && groupsData && groupsData.length > 0) {
+          for (const g of groupsData) {
+            const m = (g.members || []).find(mem => String(mem.nim).replace(/\s+/g, '').trim().toLowerCase() === String(nimVal).replace(/\s+/g, '').trim().toLowerCase());
+            if (m && m.name) {
+              nameVal = m.name;
+              break;
+            }
+          }
+        }
 
         return `
           <div class="bg-white p-4 sm:p-6 rounded-2xl border border-zinc-200/80 space-y-4 shadow-xs">
@@ -2581,6 +2595,12 @@ function normalizeMediaList(fieldOrMedia) {
         renderDynamicCustomFields();
         renderDynamicClientStages();
 
+        // Re-evaluasi nama mahasiswa dari data NIM form secara instan
+        const currentNimInput = document.getElementById("inputNim")?.value || activeUserAccountNim || "";
+        if (currentNimInput && currentEvaluatorRole === 'Mahasiswa') {
+          validateNimLive(currentNimInput);
+        }
+
         const cachedRekap = localStorage.getItem("PGSD_CACHE_REKAP_" + activeFormId) || (isDefault ? localStorage.getItem("PGSD_CACHE_REKAP") : null);
         if (cachedRekap) {
           try {
@@ -2669,6 +2689,13 @@ function normalizeMediaList(fieldOrMedia) {
             updateStepUI(currentStep || 1);
             updateAccountHeaderUI();
             checkAndApplyAuthGate();
+
+            // Re-evaluasi nama mahasiswa dari data NIM form secara instan
+            const currentNimInput = document.getElementById("inputNim")?.value || activeUserAccountNim || "";
+            if (currentNimInput && currentEvaluatorRole === 'Mahasiswa') {
+              validateNimLive(currentNimInput);
+            }
+
             loadRekapData(true);
             return;
           }
@@ -3780,13 +3807,17 @@ function normalizeMediaList(fieldOrMedia) {
           feedbackBox.classList.remove("hidden");
         }
 
-        if (inputNama && !inputNama.value) {
+        if (inputNama) {
           inputNama.value = foundStudent.name;
         }
-        if (autoFillNotice) autoFillNotice.classList.remove("hidden");
+        if (autoFillNotice) {
+          autoFillNotice.textContent = "Terisi otomatis (dapat diubah)";
+          autoFillNotice.classList.remove("hidden");
+        }
         if (btnFillNimEmail) btnFillNimEmail.classList.add("hidden");
 
         activeUserAccountNim = cleanNim;
+        activeUserAccountName = foundStudent.name;
         renderGroupOptions();
         return true;
       } else {
@@ -4154,7 +4185,7 @@ function normalizeMediaList(fieldOrMedia) {
     function resolveStudentIdentity(profile, mode) {
       const email = profile.email || "";
       let candidateNim = extractCandidateNim(email);
-      let resolvedName = profile.name || "";
+      let resolvedName = "";
       let isRosterVerified = false;
       let detectedRole = "Mahasiswa";
 
@@ -4173,7 +4204,7 @@ function normalizeMediaList(fieldOrMedia) {
         }
         if (found) {
           candidateNim = found.nim;
-          resolvedName = found.name || profile.name;
+          resolvedName = found.name;
           isRosterVerified = true;
           detectedRole = "Mahasiswa";
         }
@@ -4184,7 +4215,7 @@ function normalizeMediaList(fieldOrMedia) {
         for (const g of groupsData) {
           const m = (g.members || []).find(mem => String(mem.nim).trim() === candidateNim);
           if (m) {
-            resolvedName = m.name || resolvedName;
+            resolvedName = m.name;
             isRosterVerified = true;
             break;
           }
@@ -4205,11 +4236,17 @@ function normalizeMediaList(fieldOrMedia) {
 
               if (studentRow && studentRow.name) {
                 const inputNama = document.getElementById("inputNama");
-                if (inputNama && (!inputNama.value || inputNama.value === email.split('@')[0])) {
+                if (inputNama) {
                   inputNama.value = studentRow.name;
                 }
                 const accountName = document.getElementById("accountActiveName");
                 if (accountName) accountName.textContent = studentRow.name;
+                const autoNotice = document.getElementById("namaAutoFillNotice");
+                if (autoNotice) {
+                  autoNotice.textContent = "Terisi otomatis (dapat diubah)";
+                  autoNotice.classList.remove("hidden");
+                }
+                activeUserAccountName = studentRow.name;
               }
             }
           } catch(e) {}
@@ -4220,7 +4257,7 @@ function normalizeMediaList(fieldOrMedia) {
         ok: true,
         profile,
         nim: candidateNim || '',
-        name: resolvedName || (email ? email.split('@')[0] : "Penilai"),
+        name: resolvedName,
         role: detectedRole,
         isGoogleVerified: true,
         isRosterVerified
@@ -4269,15 +4306,21 @@ function normalizeMediaList(fieldOrMedia) {
       }
 
       if (inputNama) {
-        if (authUser.nama && (!inputNama.value || inputNama.value.trim() === '')) {
-          inputNama.value = authUser.nama;
+        if (identity.isRosterVerified && identity.name) {
+          inputNama.value = identity.name;
+        } else {
+          inputNama.value = "";
         }
         inputNama.readOnly = false;
         inputNama.className = "w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 text-xs sm:text-sm bg-white text-zinc-900 focus:border-zinc-900 outline-none transition shadow-2xs";
         const autoNotice = document.getElementById("namaAutoFillNotice");
         if (autoNotice) {
-          autoNotice.textContent = "Terisi otomatis (dapat diubah)";
-          autoNotice.classList.remove("hidden");
+          if (inputNama.value) {
+            autoNotice.textContent = "Terisi otomatis (dapat diubah)";
+            autoNotice.classList.remove("hidden");
+          } else {
+            autoNotice.classList.add("hidden");
+          }
         }
       }
 

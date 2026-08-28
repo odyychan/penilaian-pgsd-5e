@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.54] - 2026-08-28
+
+### 🎓 Academic Identity Auto-Fill: Prioritas Data NIM Roster Form
+- **📋 Pengisian Otomatis Nama Penilai dari Basis Data NIM Form:**
+  - Mengubah mekanisme pengisian kolom `Nama Lengkap Penilai` (`#inputNama`): sistem kini secara eksklusif mengambil nama resmi mahasiswa dari basis data NIM / roster form perkuliahan aktif (`pgsd_students` / `allStudentsData`), bukan dari nama akun profil Google (nama alias/display name).
+  - Saat login Google Cloud ULM (@mhs.ulm.ac.id), NIM penilai yang terverifikasi akan mencocokkan nama mahasiswa di daftar kelas dan mengisikannya ke formulir secara presisi.
+  - Memastikan sinkronisasi instan saat formulir dimuat ulang baik melalui Supabase fast-path maupun cache lokal.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.54`.
+
+---
+
 ## [2.4.53] - 2026-08-28
 
 ### 🏷️ Footer Admin Link Simplification
