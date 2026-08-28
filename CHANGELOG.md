@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.55] - 2026-08-28
+
+### 🔒 Dual-Key Duplicate Lock & Flexible NIM Customization
+- **✍️ Fleksibilitas Pengeditan NIM Pengguna:**
+  - Kolom input NIM (`#inputNim`) pada akun ULM kini tetap dapat diubah/disesuaikan (*editable*) oleh responden secara fleksibel jika ada penyesuaian format di kemudian hari, tanpa mengorbankan fitur *auto-fill*.
+- **🛡️ Penguatan Standar Kunci Respons Ganda (Dual-Verification):**
+  - **Mode ULM & Mode Bebas:** Sistem memvalidasi ganda berdasarkan **Email (Utama)** dan **NIM** (jika ada). Jika salah satu kunci identitas (Email atau NIM) sudah pernah menilai kelompok tersebut pada form ini, pengiriman otomatis ditolak dengan pesan yang jelas.
+  - **Mode Tanpa Email:** Memvalidasi kombinasi NIM input dan riwayat pengiriman.
+  - **Sakelar Global Kunci Respons Ganda:** Jika opsi *Kunci Respons Ganda* dimatikan oleh admin (`false`), seluruh pembatasan duplikasi di-bypass secara menyeluruh sehingga responden bebas menilai berkali-kali.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.55`.
+
+---
+
 ## [2.4.54] - 2026-08-28
 
 ### 🎓 Academic Identity Auto-Fill: Prioritas Data NIM Roster Form

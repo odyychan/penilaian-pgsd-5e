@@ -1881,7 +1881,7 @@ function normalizeMediaList(fieldOrMedia) {
                   Nomor Induk Mahasiswa (NIM) <span class="text-rose-500">*</span>
                 </label>
                 <span id="authNimAutoNotice" class="text-[10px] text-emerald-700 font-medium ${nimVal ? '' : 'hidden'}">
-                  ${nimVal ? '✓ Terverifikasi Google' : ''}
+                  Terisi otomatis (dapat diubah)
                 </span>
               </div>
               <div class="relative">
@@ -1892,8 +1892,7 @@ function normalizeMediaList(fieldOrMedia) {
                   ${roleVal === 'Mahasiswa' ? 'required' : ''}
                   value="${escapeHtml(nimVal)}"
                   placeholder="NIM Mahasiswa ULM..." 
-                  ${nimVal ? 'readonly' : ''}
-                  class="w-full pl-3.5 pr-20 py-2.5 rounded-xl border ${nimVal ? 'border-zinc-200 bg-zinc-50/80 text-zinc-900' : 'border-zinc-200 bg-white text-zinc-900'} text-xs sm:text-sm font-mono focus:border-zinc-900 outline-none transition placeholder-zinc-400 shadow-2xs"
+                  class="w-full pl-3.5 pr-20 py-2.5 rounded-xl border border-zinc-200 bg-white text-zinc-900 text-xs sm:text-sm font-mono focus:border-zinc-900 outline-none transition placeholder-zinc-400 shadow-2xs"
                   oninput="validateNimLive(this.value); saveFormDraft();"
                 >
                 <div id="nimStatusIcon" class="absolute right-3 top-2.5 ${nimVal ? '' : 'hidden'}">
@@ -4326,12 +4325,12 @@ function normalizeMediaList(fieldOrMedia) {
 
       if (inputNim && authUser.nim) {
         inputNim.value = authUser.nim;
-        inputNim.readOnly = true;
-        inputNim.className = "w-full pl-3.5 pr-20 py-2.5 rounded-xl border border-emerald-300 text-xs sm:text-sm bg-emerald-50/40 text-zinc-800 font-mono outline-none cursor-default shadow-2xs";
+        inputNim.readOnly = false;
+        inputNim.className = "w-full pl-3.5 pr-20 py-2.5 rounded-xl border border-zinc-200 text-xs sm:text-sm bg-white text-zinc-900 font-mono focus:border-zinc-900 outline-none transition shadow-2xs";
         validateNimLive(authUser.nim);
         const nimNotice = document.getElementById("authNimAutoNotice");
         if (nimNotice) {
-          nimNotice.textContent = "✓ Terverifikasi Google";
+          nimNotice.textContent = "Terisi otomatis (dapat diubah)";
           nimNotice.classList.remove("hidden");
         }
       }
@@ -5427,25 +5426,46 @@ function normalizeMediaList(fieldOrMedia) {
         }
       }
 
-      // 🛡️ INTEGRITY GUARD 2: Kunci Respons Ganda (Single Submission Lock)
+      // 🛡️ INTEGRITY GUARD 2: Kunci Respons Ganda (Dual-Verification: Email + NIM)
       const singleSubmissionLock = appConfig && appConfig["Kunci_Respons_Ganda"] !== false && appConfig["Kunci_Respons_Ganda"] !== "false";
-      if (singleSubmissionLock && currentEvaluatorRole === 'Mahasiswa' && selectedGroupObj) {
+      if (singleSubmissionLock && selectedGroupObj) {
         const sb = getSupabaseClient();
-        if (sb && nim && nim !== "-") {
+        if (sb) {
           try {
-            const { data: existingResp, error: checkErr } = await sb.from('pgsd_responses')
-              .select('id_respons')
-              .eq('form_id', activeFormId)
-              .eq('nim_penilai', nim)
-              .eq('kelompok_dinilai', selectedGroupObj.name)
-              .limit(1);
+            const cleanEmail = (email || activeUserAccountEmail || "").trim().toLowerCase();
+            const cleanNim = (nim && nim !== "-" ? String(nim).replace(/\s+/g, "").trim() : "");
 
-            if (!checkErr && existingResp && existingResp.length > 0) {
-              showToast(`Anda sudah pernah mengirimkan penilaian untuk ${selectedGroupObj.name}. Respons ganda tidak diizinkan.`, "error");
-              return;
+            // 1. Verifikasi Email (Utama)
+            if (cleanEmail) {
+              const { data: emailResp } = await sb.from('pgsd_responses')
+                .select('id_respons')
+                .eq('form_id', activeFormId)
+                .eq('email_penilai', cleanEmail)
+                .eq('kelompok_dinilai', selectedGroupObj.name)
+                .limit(1);
+
+              if (emailResp && emailResp.length > 0) {
+                showToast(`Akun email ini (${cleanEmail}) sudah pernah mengirimkan penilaian untuk ${selectedGroupObj.name}. Respons ganda tidak diizinkan.`, "error");
+                return;
+              }
+            }
+
+            // 2. Verifikasi NIM (Jika ada input NIM)
+            if (cleanNim) {
+              const { data: nimResp } = await sb.from('pgsd_responses')
+                .select('id_respons')
+                .eq('form_id', activeFormId)
+                .eq('nim_penilai', cleanNim)
+                .eq('kelompok_dinilai', selectedGroupObj.name)
+                .limit(1);
+
+              if (nimResp && nimResp.length > 0) {
+                showToast(`NIM ${cleanNim} sudah pernah mengirimkan penilaian untuk ${selectedGroupObj.name}. Respons ganda tidak diizinkan.`, "error");
+                return;
+              }
             }
           } catch(dupErr) {
-            console.warn("Duplicate check fallback notice:", dupErr);
+            console.warn("Duplicate check notice:", dupErr);
           }
         }
       }
