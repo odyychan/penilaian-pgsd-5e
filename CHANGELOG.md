@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.52] - 2026-08-28
+
+### 🏛️ Footer Institution Label Standardization
+- **🏛️ Standarisasi Label Institusi di Sisi Kanan Footer:**
+  - Mengubah teks di sisi kanan footer dari *"Sistem Penilaian Peer-Assessment & Evaluasi Akademik"* menjadi *"FKIP Universitas Lambung Mangkurat"*.
+  - Menghasilkan keselarasan estetika footer: `© 2026 • Dibuat oleh Rodhiyah` di sisi kiri dan `FKIP Universitas Lambung Mangkurat` di sisi kanan.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.52`.
+
+---
+
 ## [2.4.51] - 2026-08-28
 
 ### 🏷️ Minimalist Footer Format Refinement
