@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.49] - 2026-08-28
+
+### 🏷️ Footer Dynamic Branding: Seamless Credit Link Integration
+- **🔗 Integrasi Dinamis Kredit Pembuat & Tautan Portal Admin:**
+  - Mengubah tautan footer `#footerAdminLink` agar dinamis: jika formulir memiliki konfigurasi *Nama Pembuat / Pengembang*, footer hanya menampilkan nama pembuat tersebut sebagai tautan langsung ke Portal Admin (*tanpa teks redundant "Portal Admin / Dibuat oleh..."*).
+  - Jika konfigurasi *Nama Pembuat* kosong (default), tautan otomatis kembali menampilkan teks standar *"Portal Admin"*.
+  - Tampilan footer menjadi jauh lebih bersih, ringkas, dan profesional.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.49`.
+
+---
+
 ## [2.4.48] - 2026-08-28
 
 ### 🧹 Minimalist UI: Relokasi Tombol Hapus Draf & Eliminasi Banner Mencolok

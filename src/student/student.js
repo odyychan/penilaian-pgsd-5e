@@ -1020,6 +1020,11 @@ function normalizeMediaList(fieldOrMedia) {
       if (navTitle) navTitle.textContent = "Portal Penilaian Akademik";
       if (navSubtitle) navSubtitle.textContent = "Universitas Lambung Mangkurat";
       if (pinEl) pinEl.textContent = "Masukkan PIN";
+      const footerLink = document.getElementById("footerAdminLink");
+      if (footerLink) {
+        footerLink.textContent = "Portal Admin";
+        footerLink.title = "Akses Portal Pengelolaan Admin";
+      }
 
       renderPortalHistoryCards();
       setTimeout(() => {
@@ -3080,20 +3085,16 @@ function normalizeMediaList(fieldOrMedia) {
       const groupSubtitle = document.getElementById('step2Subtitle');
       if (groupSubtitle && appConfig['Pilih_Kelompok_Label']) groupSubtitle.textContent = appConfig['Pilih_Kelompok_Label'];
 
-      // Update footer kredit pembuat web
-      const pembuatNama   = (appConfig["Pembuat_Web_Nama"]   || "").trim();
-      const pembuatPrefix = (appConfig["Pembuat_Web_Prefix"] || "Dibuat oleh").trim();
-      const footerEl = document.getElementById("footerPembuat");
-      const footerSep = document.getElementById("footerPembuatSep");
-      if (footerEl) {
+      // Update footer kredit pembuat web / link portal admin
+      const pembuatNama = (appConfig["Pembuat_Web_Nama"] || "").trim();
+      const footerLink = document.getElementById("footerAdminLink");
+      if (footerLink) {
         if (pembuatNama) {
-          footerEl.innerHTML = `${smartMathFormat(pembuatPrefix)} ${smartMathFormat(pembuatNama)}`;
-          footerEl.classList.add("math-renderable");
-          footerEl.classList.remove("hidden");
-          if (footerSep) footerSep.classList.remove("hidden");
+          footerLink.innerHTML = smartMathFormat(pembuatNama);
+          footerLink.title = `Dibuat oleh ${pembuatNama} — Klik untuk menuju ke Portal Admin`;
         } else {
-          footerEl.classList.add("hidden");
-          if (footerSep) footerSep.classList.add("hidden");
+          footerLink.textContent = "Portal Admin";
+          footerLink.title = "Akses Portal Pengelolaan Admin";
         }
       }
     }
