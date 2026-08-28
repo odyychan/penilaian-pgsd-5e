@@ -6079,17 +6079,38 @@ function normalizeMediaList(fieldOrMedia) {
         for (let fldId in payload.customAnswers) {
           const ans = payload.customAnswers[fldId];
           if (ans) {
+            let fldDef = null;
             let fldLabel = fldId;
             if (currentFormSchema && Array.isArray(currentFormSchema.tahapan)) {
               for (let stg of currentFormSchema.tahapan) {
-                const foundFld = (stg.fields || []).find(f => f.id === fldId);
-                if (foundFld) { fldLabel = foundFld.label; break; }
+                fldDef = (stg.fields || []).find(f => f.id === fldId);
+                if (fldDef) { fldLabel = fldDef.label || fldId; break; }
               }
             }
+
+            let displayVal = '';
+            if (typeof ans === 'string' && ans.startsWith('data:image/')) {
+              displayVal = `<img src="${ans}" alt="Tanda Tangan" class="h-10 max-w-[140px] object-contain border border-zinc-200 rounded-lg bg-white p-1 ml-auto">`;
+            } else if (typeof ans === 'object' && !Array.isArray(ans)) {
+              const rows = fldDef?.matrixRows || [];
+              const items = Object.keys(ans).map(k => {
+                const rowName = rows[parseInt(k)] || `Kriteria ${parseInt(k)+1}`;
+                return `<div class="text-[10.5px] text-zinc-700 leading-tight py-0.5"><span class="font-medium">${escapeHtml(rowName)}:</span> <span class="font-bold text-zinc-900">${escapeHtml(ans[k])}</span></div>`;
+              }).join('');
+              displayVal = `<div class="space-y-0.5 text-right w-full pt-1">${items}</div>`;
+            } else if (Array.isArray(ans)) {
+              displayVal = `<span class="font-bold text-zinc-900 text-right">${ans.map(escapeHtml).join(', ')}</span>`;
+            } else {
+              displayVal = `<span class="font-bold text-zinc-900 text-right">${escapeHtml(String(ans))}</span>`;
+            }
+
             customAnswersHtml += `
-              <div class="flex items-start justify-between py-1 border-b border-zinc-100 last:border-0 gap-2">
-                <span class="text-zinc-500 font-medium">${fldLabel}:</span>
-                <span class="font-bold text-zinc-900 text-right">${Array.isArray(ans) ? ans.join(', ') : ans}</span>
+              <div class="py-1.5 border-b border-zinc-100 last:border-0">
+                <div class="flex items-start justify-between gap-2">
+                  <span class="text-zinc-600 font-medium text-xs math-renderable">${smartMathFormat(fldLabel)}:</span>
+                  ${typeof ans === 'object' && !Array.isArray(ans) ? '' : displayVal}
+                </div>
+                ${typeof ans === 'object' && !Array.isArray(ans) ? displayVal : ''}
               </div>
             `;
           }

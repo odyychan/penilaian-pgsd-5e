@@ -8066,11 +8066,20 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
             </div>
           </div>
 
-          <div class="flex items-center justify-between pt-2 border-t border-zinc-100 text-xs">
-            <span class="text-[10px] text-zinc-400 font-mono truncate">ID: ${r.idRespons}</span>
-            <button type="button" onclick="deleteSingleResponse('${r.idRespons}', ${r.rowIndex})" class="p-1 text-rose-600 hover:bg-rose-50 rounded transition cursor-pointer" title="Hapus Data Ini">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+          <div class="flex items-center justify-between pt-2.5 border-t border-zinc-100 text-xs">
+            <button 
+              type="button" 
+              onclick="openAdminResponseDetailModal('${escapeHtml(r.idRespons)}')" 
+              class="px-2.5 py-1 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-semibold text-[11px] flex items-center gap-1 transition cursor-pointer"
+            >
+              <span>🔍 Detail</span>
             </button>
+            <div class="flex items-center gap-1">
+              <span class="text-[10px] text-zinc-400 font-mono">ID: ${r.idRespons}</span>
+              <button type="button" onclick="deleteSingleResponse('${r.idRespons}', ${r.rowIndex})" class="p-1 text-rose-600 hover:bg-rose-50 rounded transition cursor-pointer" title="Hapus Data Ini">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              </button>
+            </div>
           </div>
         `;
 
@@ -8080,6 +8089,133 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       if (visibleCount === 0) emptyEl.classList.remove("hidden");
       else emptyEl.classList.add("hidden");
       renderAdminAttendanceTracker();
+    }
+
+    function openAdminResponseDetailModal(idRespons) {
+      const resp = adminResponsesList.find(r => String(r.idRespons) === String(idRespons));
+      if (!resp) return;
+
+      const modal = document.getElementById("modalAdminResponseDetail");
+      const body = document.getElementById("adminResponseDetailBody");
+      if (!modal || !body) return;
+
+      let customAnsObj = {};
+      try {
+        customAnsObj = typeof resp.customAnswers === 'string' ? JSON.parse(resp.customAnswers) : (resp.customAnswers || {});
+      } catch(e) {
+        customAnsObj = {};
+      }
+
+      let evalDetailObj = {};
+      try {
+        evalDetailObj = typeof resp.evaluasiDetail === 'string' ? JSON.parse(resp.evaluasiDetail) : (resp.evaluasiDetail || {});
+      } catch(e) {
+        evalDetailObj = {};
+      }
+
+      let customAnswersHtml = '';
+      if (Object.keys(customAnsObj).length > 0) {
+        for (let fldId in customAnsObj) {
+          const ans = customAnsObj[fldId];
+          if (ans !== undefined && ans !== null && ans !== '') {
+            let fldDef = null;
+            let fldLabel = fldId;
+            if (adminFormSchema && Array.isArray(adminFormSchema.tahapan)) {
+              for (let stg of adminFormSchema.tahapan) {
+                fldDef = (stg.fields || []).find(f => f.id === fldId);
+                if (fldDef) { fldLabel = fldDef.label || fldId; break; }
+              }
+            }
+
+            let displayVal = '';
+            if (typeof ans === 'string' && ans.startsWith('data:image/')) {
+              displayVal = `
+                <div class="mt-1">
+                  <img src="${ans}" alt="Tanda Tangan Digital" class="h-16 max-w-[220px] object-contain border border-zinc-200 rounded-xl bg-white p-2 shadow-2xs">
+                  <span class="text-[10px] text-zinc-400 font-mono block mt-1">Tanda Tangan Digital Terverifikasi</span>
+                </div>
+              `;
+            } else if (typeof ans === 'object' && !Array.isArray(ans)) {
+              const rows = fldDef?.matrixRows || [];
+              const items = Object.keys(ans).map(k => {
+                const rowName = rows[parseInt(k)] || `Kriteria ${parseInt(k)+1}`;
+                return `<div class="text-xs text-zinc-700 py-1 flex items-center justify-between border-b border-zinc-100 last:border-0"><span class="font-medium">${escapeHtml(rowName)}</span> <span class="font-bold text-zinc-900 bg-zinc-100 px-2 py-0.5 rounded">${escapeHtml(ans[k])}</span></div>`;
+              }).join('');
+              displayVal = `<div class="mt-1.5 p-2.5 rounded-xl bg-zinc-50 border border-zinc-200/80 space-y-0.5">${items}</div>`;
+            } else if (Array.isArray(ans)) {
+              displayVal = `<span class="font-bold text-zinc-900">${ans.map(escapeHtml).join(', ')}</span>`;
+            } else if (String(ans).startsWith('http://') || String(ans).startsWith('https://')) {
+              displayVal = `<a href="${escapeHtml(ans)}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:underline font-mono font-semibold text-xs flex items-center gap-1"><span>${escapeHtml(ans)}</span> <span>↗</span></a>`;
+            } else {
+              displayVal = `<span class="font-bold text-zinc-900">${escapeHtml(String(ans))}</span>`;
+            }
+
+            customAnswersHtml += `
+              <div class="p-3.5 rounded-2xl bg-white border border-zinc-200/80 space-y-1">
+                <span class="text-[11px] font-bold text-zinc-500 uppercase font-mono">${escapeHtml(fldLabel)}</span>
+                <div>${displayVal}</div>
+              </div>
+            `;
+          }
+        }
+      }
+
+      let evalHtml = '';
+      if (Object.keys(evalDetailObj).length > 0) {
+        for (let mNim in evalDetailObj) {
+          const ulasan = evalDetailObj[mNim];
+          evalHtml += `
+            <div class="p-3 rounded-xl bg-white border border-zinc-200/70 space-y-1 text-xs">
+              <span class="font-semibold text-zinc-800">👤 Mahasiswa / NIM: <span class="font-mono text-zinc-600">${escapeHtml(mNim)}</span></span>
+              <p class="text-zinc-700 italic bg-zinc-50 p-2.5 rounded-lg border border-zinc-100 whitespace-pre-wrap">"${escapeHtml(ulasan)}"</p>
+            </div>
+          `;
+        }
+      }
+
+      body.innerHTML = `
+        <!-- Identitas Penilai & Target -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="p-3.5 rounded-2xl bg-white border border-zinc-200 space-y-1.5 text-xs">
+            <span class="text-[10.5px] font-bold text-zinc-400 uppercase font-mono">Penilai</span>
+            <p class="font-bold text-zinc-900 text-sm">${escapeHtml(resp.namaPenilai)}</p>
+            <p class="font-mono text-zinc-500 text-[11px]">NIM: ${escapeHtml(resp.nim || '-')} • Peran: ${escapeHtml(resp.peran || 'Mahasiswa')}</p>
+            <p class="font-mono text-zinc-500 text-[11px] truncate">${escapeHtml(resp.email || '-')}</p>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-100 space-y-1.5 text-xs">
+            <span class="text-[10.5px] font-bold text-indigo-700 uppercase font-mono">Kelompok & Nilai</span>
+            <p class="font-bold text-indigo-950 text-sm">${escapeHtml(resp.kelompok)}</p>
+            <div class="flex items-center gap-2 pt-0.5">
+              <span class="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold font-mono text-xs">Skor: ${resp.nilaiKelompok} / 100</span>
+              <span class="px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-700 font-medium text-[11px]">${escapeHtml(resp.sesi || 'Sesi')}</span>
+            </div>
+            <p class="text-[11px] text-zinc-500">Waktu: ${escapeHtml(resp.timestamp)}</p>
+          </div>
+        </div>
+
+        <!-- Ulasan Kualitatif Pemateri -->
+        ${evalHtml ? `
+          <div class="p-3.5 rounded-2xl bg-zinc-50/80 border border-zinc-200 space-y-2.5">
+            <span class="text-[11px] font-bold text-zinc-500 uppercase font-mono">Catatan Ulasan Pemateri</span>
+            <div class="space-y-2">${evalHtml}</div>
+          </div>
+        ` : ''}
+
+        <!-- Rubrik & Pertanyaan Kustom -->
+        ${customAnswersHtml ? `
+          <div class="space-y-2.5">
+            <span class="text-[11px] font-bold text-zinc-500 uppercase font-mono px-1">Jawaban Rubrik & Pertanyaan Tambahan</span>
+            <div class="space-y-2">${customAnswersHtml}</div>
+          </div>
+        ` : ''}
+      `;
+
+      modal.classList.remove("hidden");
+    }
+
+    function closeAdminResponseDetailModal() {
+      const modal = document.getElementById("modalAdminResponseDetail");
+      if (modal) modal.classList.add("hidden");
     }
 
     async function syncUnsyncedResponsesToSheets() {
