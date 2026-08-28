@@ -2883,7 +2883,8 @@ function normalizeMediaList(fieldOrMedia) {
         updateAccountHeaderUI();
         checkAndApplyAuthGate();
       } finally {
-        if (loading) loading.classList.add("hidden");
+        const loadingEl = document.getElementById("groupsLoading");
+        if (loadingEl) loadingEl.classList.add("hidden");
       }
     }
 

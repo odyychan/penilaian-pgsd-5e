@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.61] - 2026-08-28
+
+### 🐛 Fetch Pipeline Exception Fix & Creator Footer Sync
+- **🛡️ Perbaikan ReferenceError pada Pipeline Unduh Data:**
+  - Memperbaiki deklarasi variabel elemen `loading` pada blok `finally` di fungsi `fetchInitialFormData()` yang sebelumnya memicu `ReferenceError: loading is not defined`.
+  - Memastikan proses inisialisasi form dan pembaruan identitas pembuat web (`Pembuat_Web_Nama` & `Pembuat_Web_Prefix`) pada footer berjalan 100% tuntas tanpa error runtime tersembunyi.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.61`.
+
+---
+
 ## [2.4.60] - 2026-08-28
 
 ### 🏷️ Refined Footer Branding & Dynamic Creator Link Engine
