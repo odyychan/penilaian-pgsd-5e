@@ -1019,7 +1019,7 @@ function normalizeMediaList(fieldOrMedia) {
       if (badgeSesiTop) badgeSesiTop.classList.add("hidden");
       if (navTitle) navTitle.textContent = "Portal Penilaian Akademik";
       if (navSubtitle) navSubtitle.textContent = "Universitas Lambung Mangkurat";
-      if (pinEl) pinEl.textContent = "🔑 Masukkan PIN";
+      if (pinEl) pinEl.textContent = "Masukkan PIN";
 
       renderPortalHistoryCards();
       setTimeout(() => {

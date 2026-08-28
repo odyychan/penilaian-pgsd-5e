@@ -4,6 +4,17 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.46] - 2026-08-28
+
+### 🔑 Visual Cleanup: Eliminasi Ikon Kunci Ganda pada Tombol PIN
+- **🎨 Eliminasi Ikon Redundan pada Tombol PIN Header:**
+  - Menghapus emoji kunci ganda (`🔑`) pada label tombol `#navPinBadge` sehingga hanya menampilkan satu ikon vektor SVG kunci yang tajam dan elegan di sisi kiri teks.
+  - Tampilan tombol menjadi bersih, profesional, dan serasi (*"🔑 Masukkan PIN"* / *"🔑 PIN: BK5E"* tanpa duplikasi ikon).
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.46`.
+
+---
+
 ## [2.4.45] - 2026-08-28
 
 ### 🖥️ Full-Width Edge-to-Edge Layout: Header & Footer Expansion
