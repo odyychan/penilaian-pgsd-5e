@@ -5520,7 +5520,16 @@ function normalizeMediaList(fieldOrMedia) {
       const email = emailEl ? emailEl.value.trim() : "";
       const nama = namaEl ? namaEl.value.trim() : "";
       const nim = nimEl ? nimEl.value.trim() : "-";
-      const nilai = nilaiEl ? parseFloat(nilaiEl.value) : 85;
+      let nilai = nilaiEl ? parseFloat(nilaiEl.value) : 85;
+      if (isNaN(nilai)) nilai = 85;
+
+      const minScore = parseFloat((appConfig && appConfig["Nilai_Kelompok_Min"]) || 50);
+      const maxScore = parseFloat((appConfig && appConfig["Nilai_Kelompok_Max"]) || 100);
+      if (nilai < minScore || nilai > maxScore) {
+        showToast(`Nilai presentasi harus berada dalam rentang skor ${minScore} hingga ${maxScore}.`, "error");
+        updateStepUI(3);
+        return;
+      }
 
       if (emailEl && !validateEmailLive(email)) {
         showToast("Email penilai belum valid!", "error");
@@ -7958,9 +7967,9 @@ function normalizeMediaList(fieldOrMedia) {
               <span>#${idx + 1} Catatan Audiens</span>
               <span>${groupSesi}</span>
             </div>
-            <p class="leading-relaxed text-zinc-900 font-medium">"${u.ulasan}"</p>
+            <p class="leading-relaxed text-zinc-900 font-medium">"${escapeHtml(u.ulasan)}"</p>
             <div class="text-[10px] text-zinc-500 pt-1 border-t border-zinc-100 text-right">
-              Penilai: <strong class="text-zinc-700">${u.penilai}</strong>
+              Penilai: <strong class="text-zinc-700">${escapeHtml(u.penilai)}</strong>
             </div>
           `;
           listEl.appendChild(li);

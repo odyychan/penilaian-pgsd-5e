@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.63] - 2026-08-28
+
+### 🔒 Security Hardening: Score Boundary Clamping & XSS Sanitization
+- **🛡️ Validasi Batas Rentang Skor Presentasi:**
+  - Menambahkan pengecekan batas rentang skor (`Nilai_Kelompok_Min` hingga `Nilai_Kelompok_Max`) pada `submitEvaluation()` untuk mencegah manipulasi nilai via manipulasi DOM atau Inspect Element.
+- **🛡️ Sanitasi Ulasan Kualitatif Publik:**
+  - Menerapkan fungsi `escapeHtml()` pada modal ulasan catatan audiens (`openStudentReviewModal`) untuk mencegah celah injeksi Cross-Site Scripting (XSS) dari input masukan kualitatif.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.63`.
+
+---
+
 ## [2.4.62] - 2026-08-28
 
 ### 🛡️ Runtime Render Safety & Complete Creator Footer Hydration
