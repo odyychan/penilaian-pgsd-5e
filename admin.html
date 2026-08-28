@@ -32,7 +32,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="src/admin/admin.css?v=2.4.63">
+  <link rel="stylesheet" href="src/admin/admin.css?v=2.4.64">
   <!-- KaTeX CSS & JS for Universal Math / LaTeX / AI & Word Formula Rendering -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -2036,24 +2036,72 @@
 
           <div class="space-y-1">
             <label class="block font-semibold text-zinc-700">Tipe Input / Jawaban</label>
-            <select id="q_type" onchange="handleQuestionTypeChange()" class="w-full px-3 py-2 rounded-lg border border-zinc-300 bg-white text-xs font-medium focus:border-zinc-900 outline-none cursor-pointer">
-              <option value="TEXTAREA">Paragraf Panjang (Textarea)</option>
-              <option value="SHORT_TEXT">Teks Singkat (1 Baris)</option>
-              <option value="RATING_SCALE">Skala Angka / Nilai Rubrik (1-5)</option>
-              <option value="RADIO">Pilihan Ganda (Radio)</option>
-              <option value="CHECKBOX">Kotak Centang (Checkboxes)</option>
-              <option value="FILE_UPLOAD">Unggah Berkas (PDF / Gambar ke Drive)</option>
+            <select id="q_type" onchange="handleQuestionTypeChange()" class="w-full px-3 py-2 rounded-lg border border-zinc-300 bg-white text-xs font-semibold focus:border-zinc-900 outline-none cursor-pointer">
+              <optgroup label="Tipe Teks & Pilihan Umum">
+                <option value="SHORT_TEXT">Teks Singkat (1 Baris)</option>
+                <option value="TEXTAREA">Paragraf Panjang (Textarea)</option>
+                <option value="RADIO">Pilihan Ganda (Radio)</option>
+                <option value="CHECKBOX">Kotak Centang (Checkboxes)</option>
+                <option value="DROPDOWN">Menu Dropdown Pilihan</option>
+              </optgroup>
+              <optgroup label="Instrumen & Rubrik Penilaian Khusus">
+                <option value="MATRIX_GRID">📊 Matriks Rubrik Kisi (Baris × Kolom)</option>
+                <option value="STAR_RATING">⭐ Skala Bintang (1-5 / 1-10)</option>
+                <option value="RATING_SCALE">Skala Angka Linier (1-5)</option>
+                <option value="RANKING">🔢 Peringkat / Urutan Prioritas</option>
+                <option value="SIGNATURE">✍️ Tanda Tangan Digital Canvas</option>
+                <option value="URL_LINK">🌐 Input Tautan / Link Berkas</option>
+              </optgroup>
+              <optgroup label="Tanggal, Waktu & Berkas">
+                <option value="DATE">Pilihan Tanggal (Date Picker)</option>
+                <option value="TIME">Pilihan Waktu (Time Picker)</option>
+                <option value="FILE_UPLOAD">Unggah Berkas (Google Drive)</option>
+              </optgroup>
             </select>
           </div>
         </div>
 
-        <!-- Options Container (for Radio / Checkbox) -->
-        <div id="q_options_container" class="space-y-1.5 hidden">
-          <label class="block font-semibold text-zinc-700">Opsi Pilihan (Pisahkan dengan koma atau enter):</label>
-          <textarea id="q_options_text" rows="3" placeholder="Sangat Baik, Cukup, Perlu Perbaikan" class="w-full p-2.5 rounded-lg border border-zinc-300 text-xs outline-none focus:border-zinc-900"></textarea>
+        <!-- Options Container (for Radio / Checkbox / Dropdown / Ranking) -->
+        <div id="q_options_container" class="space-y-2 hidden">
+          <div class="flex items-center justify-between">
+            <label class="block font-semibold text-zinc-700">Opsi Pilihan (Pisahkan dengan baris baru atau koma):</label>
+            <label id="q_allow_other_label" class="inline-flex items-center gap-1.5 cursor-pointer text-[11px] text-indigo-700 font-semibold">
+              <input type="checkbox" id="q_allow_other" class="w-3.5 h-3.5 rounded text-indigo-600">
+              <span>Sertakan Opsi "Lainnya..."</span>
+            </label>
+          </div>
+          <textarea id="q_options_text" rows="3" placeholder="Sangat Baik&#10;Cukup Baik&#10;Perlu Peningkatan" class="w-full p-2.5 rounded-lg border border-zinc-300 text-xs outline-none focus:border-zinc-900"></textarea>
         </div>
 
-        <!-- Rating Config Container -->
+        <!-- Matrix Grid Config Container -->
+        <div id="q_matrix_container" class="space-y-3 hidden p-3 rounded-xl bg-zinc-50 border border-zinc-200">
+          <div class="space-y-1">
+            <label class="block font-bold text-zinc-800 text-[11px]">Baris Kriteria Penilaian (1 Baris per Kriteria):</label>
+            <textarea id="q_matrix_rows" rows="3" placeholder="Sistematika Materi Presentasi&#10;Penguasaan Teori & Konsep&#10;Kerapian Slide & Visual&#10;Kemampuan Menjawab Pertanyaan" class="w-full p-2 rounded-lg border border-zinc-300 text-xs bg-white focus:border-indigo-600 outline-none"></textarea>
+          </div>
+          <div class="space-y-1">
+            <label class="block font-bold text-zinc-800 text-[11px]">Kolom Skala / Opsi Jawaban (Pisahkan dengan koma atau enter):</label>
+            <textarea id="q_matrix_cols" rows="2" placeholder="1: Kurang, 2: Cukup, 3: Baik, 4: Sangat Baik" class="w-full p-2 rounded-lg border border-zinc-300 text-xs bg-white focus:border-indigo-600 outline-none"></textarea>
+          </div>
+        </div>
+
+        <!-- Star Rating Config Container -->
+        <div id="q_star_container" class="grid grid-cols-2 gap-3 hidden">
+          <div class="space-y-1">
+            <label class="block font-semibold text-zinc-700">Jumlah Bintang Maksimum</label>
+            <select id="q_star_max" class="w-full px-3 py-2 rounded-lg border border-zinc-300 bg-white font-mono text-xs">
+              <option value="5" selected>5 Bintang (⭐⭐⭐⭐⭐)</option>
+              <option value="7">7 Bintang</option>
+              <option value="10">10 Bintang</option>
+            </select>
+          </div>
+          <div class="space-y-1">
+            <label class="block font-semibold text-zinc-700">Skala Penilaian</label>
+            <input type="text" id="q_star_label" placeholder="contoh: Kepuasan Performa" class="w-full px-3 py-2 rounded-lg border border-zinc-300 text-xs">
+          </div>
+        </div>
+
+        <!-- Rating Linear Config Container -->
         <div id="q_rating_container" class="grid grid-cols-2 gap-3 hidden">
           <div class="space-y-1">
             <label class="block font-semibold text-zinc-700">Skor Minimum</label>
@@ -2062,6 +2110,43 @@
           <div class="space-y-1">
             <label class="block font-semibold text-zinc-700">Skor Maksimum</label>
             <input type="number" id="q_max_val" value="5" class="w-full px-3 py-2 rounded-lg border border-zinc-300 font-mono text-xs">
+          </div>
+        </div>
+
+        <!-- Constraints & Limits Container -->
+        <div id="q_constraints_container" class="p-3 bg-zinc-50 rounded-xl border border-zinc-200 space-y-2.5">
+          <span class="text-[10.5px] font-bold uppercase tracking-wider text-zinc-500 font-mono block">Pengaturan Tambahan & Validasi:</span>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div class="space-y-1">
+              <label class="block text-[11px] font-medium text-zinc-700">Teks Petunjuk / Placeholder:</label>
+              <input type="text" id="q_placeholder" placeholder="contoh: Tuliskan ulasan Anda..." class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 text-xs bg-white outline-none">
+            </div>
+            <div class="space-y-1">
+              <label class="block text-[11px] font-medium text-zinc-700">Tooltip Rubrik / Info Panduan (?):</label>
+              <input type="text" id="q_hint" placeholder="Penjelasan kriteria penilaian..." class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 text-xs bg-white outline-none">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
+            <div class="space-y-0.5">
+              <label class="text-zinc-500">Min. Karakter:</label>
+              <input type="number" id="q_min_chars" placeholder="0" class="w-full px-2 py-1 rounded-lg border border-zinc-300 text-xs bg-white font-mono">
+            </div>
+            <div class="space-y-0.5">
+              <label class="text-zinc-500">Maks. Karakter:</label>
+              <input type="number" id="q_max_chars" placeholder="500" class="w-full px-2 py-1 rounded-lg border border-zinc-300 text-xs bg-white font-mono">
+            </div>
+            <div class="space-y-0.5">
+              <label class="text-zinc-500">Min. Pilihan Centang:</label>
+              <input type="number" id="q_min_select" placeholder="0" class="w-full px-2 py-1 rounded-lg border border-zinc-300 text-xs bg-white font-mono">
+            </div>
+            <div class="space-y-0.5">
+              <label class="text-zinc-500">Maks. Pilihan Centang:</label>
+              <input type="number" id="q_max_select" placeholder="0" class="w-full px-2 py-1 rounded-lg border border-zinc-300 text-xs bg-white font-mono">
+            </div>
+          </div>
+          <div class="space-y-1 pt-1">
+            <label class="block text-[11px] font-medium text-zinc-700">URL Gambar / Bagan Panduan Soal (Opsional):</label>
+            <input type="url" id="q_media_url" placeholder="https://example.com/diagram-panduan.png" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 text-xs bg-white outline-none font-mono">
           </div>
         </div>
 
@@ -2854,13 +2939,13 @@ function getOrCreateFolder(folderName) {
   <!-- ========================================================================= -->
   <!-- JAVASCRIPT APP LOGIC: MULTI-FORM & ISOLATED SANDBOX ENGINE -->
   <!-- ========================================================================= -->
-  <script src="src/admin/admin.js?v=2.4.63"></script>
+  <script src="src/admin/admin.js?v=2.4.64"></script>
 
   <!-- Progressive Web App (PWA) & Instant Auto-Updater Engine -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js?v=2.4.63').then(function(reg) {
+        navigator.serviceWorker.register('/sw.js?v=2.4.64').then(function(reg) {
           reg.update();
           reg.addEventListener('updatefound', function() {
             var newWorker = reg.installing;

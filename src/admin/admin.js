@@ -5047,6 +5047,13 @@
           { type: "SHORT_TEXT", label: "Jawaban Singkat", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h10M4 18h6"></path></svg>` },
           { type: "TEXTAREA", label: "Paragraf / Ulasan", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h10"></path></svg>` },
           { type: "RATING_SCALE", label: "Skala Linier", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>` },
+          { type: "STAR_RATING", label: "Rating Bintang ⭐", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>` },
+          { type: "MATRIX_GRID", label: "Matriks Rubrik Kisi", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16M10 6v12M16 6v12"></path></svg>` },
+          { type: "RANKING", label: "Peringkat Prioritas", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path></svg>` },
+          { type: "SIGNATURE", label: "Tanda Tangan Digital", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>` },
+          { type: "URL_LINK", label: "Input Tautan / Link", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>` },
+          { type: "DATE", label: "Tanggal", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>` },
+          { type: "TIME", label: "Waktu / Jam", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>` },
           { type: "FILE_UPLOAD", label: "Upload Berkas", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>` },
           { type: "TITLE_DESC", label: "Judul & Deskripsi Teks", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>` },
         ]
@@ -5321,6 +5328,54 @@
       const f = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
       if (!f || !f.options || f.options.length <= 1) return;
       f.options.splice(optIdx, 1);
+      renderDynamicStagesCanvas();
+      markSchemaAsDirty();
+    }
+
+    function handleInlineMatrixRowUpdate(sIdx, fIdx, rIdx, val) {
+      const f = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
+      if (!f || !f.matrixRows) return;
+      f.matrixRows[rIdx] = val;
+      markSchemaAsDirty();
+    }
+
+    function handleInlineAddMatrixRow(sIdx, fIdx) {
+      const f = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
+      if (!f) return;
+      if (!f.matrixRows) f.matrixRows = [];
+      f.matrixRows.push(`Kriteria ${f.matrixRows.length + 1}`);
+      renderDynamicStagesCanvas();
+      markSchemaAsDirty();
+    }
+
+    function handleInlineDeleteMatrixRow(sIdx, fIdx, rIdx) {
+      const f = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
+      if (!f || !f.matrixRows || f.matrixRows.length <= 1) return;
+      f.matrixRows.splice(rIdx, 1);
+      renderDynamicStagesCanvas();
+      markSchemaAsDirty();
+    }
+
+    function handleInlineMatrixColUpdate(sIdx, fIdx, cIdx, val) {
+      const f = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
+      if (!f || !f.matrixCols) return;
+      f.matrixCols[cIdx] = val;
+      markSchemaAsDirty();
+    }
+
+    function handleInlineAddMatrixCol(sIdx, fIdx) {
+      const f = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
+      if (!f) return;
+      if (!f.matrixCols) f.matrixCols = [];
+      f.matrixCols.push(`${f.matrixCols.length + 1}: Pilihan`);
+      renderDynamicStagesCanvas();
+      markSchemaAsDirty();
+    }
+
+    function handleInlineDeleteMatrixCol(sIdx, fIdx, cIdx) {
+      const f = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
+      if (!f || !f.matrixCols || f.matrixCols.length <= 1) return;
+      f.matrixCols.splice(cIdx, 1);
       renderDynamicStagesCanvas();
       markSchemaAsDirty();
     }
@@ -5614,6 +5669,199 @@
                 ${pointInputsHtml}
               </div>
             </div>
+          </div>
+        `;
+      }
+
+      // 6B. STAR_RATING / RATING BINTANG
+      if (f.type === 'STAR_RATING') {
+        const maxStars = f.maxStars || 5;
+        let starsHtml = '';
+        for (let i = 1; i <= maxStars; i++) {
+          starsHtml += `
+            <span class="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 text-amber-500 flex items-center justify-center text-base shadow-2xs">
+              ★
+            </span>
+          `;
+        }
+        return `
+          <div class="space-y-3 pt-2 text-xs">
+            <div class="flex items-center gap-3">
+              <span class="text-zinc-600 font-bold">Maksimal Bintang:</span>
+              <select 
+                onchange="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'maxStars', parseInt(this.value))"
+                class="px-3 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-mono font-bold cursor-pointer"
+              >
+                <option value="5" ${maxStars === 5 ? 'selected' : ''}>5 Bintang (⭐⭐⭐⭐⭐)</option>
+                <option value="7" ${maxStars === 7 ? 'selected' : ''}>7 Bintang</option>
+                <option value="10" ${maxStars === 10 ? 'selected' : ''}>10 Bintang</option>
+              </select>
+            </div>
+            <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 flex items-center gap-2 overflow-x-auto">
+              ${starsHtml}
+              <span class="text-xs text-zinc-500 font-medium ml-2">(${maxStars} Skala Penilaian Bintang)</span>
+            </div>
+          </div>
+        `;
+      }
+
+      // 6C. MATRIX_GRID / RUBRIK MATRIKS KISI
+      if (f.type === 'MATRIX_GRID') {
+        const rows = (f.matrixRows && f.matrixRows.length > 0) ? f.matrixRows : ['Kriteria 1: Sistematika', 'Kriteria 2: Penguasaan Teori', 'Kriteria 3: Kerapian Slide'];
+        const cols = (f.matrixCols && f.matrixCols.length > 0) ? f.matrixCols : ['1: Kurang', '2: Cukup', '3: Baik', '4: Sangat Baik'];
+
+        const rowsHtml = rows.map((r, rIdx) => `
+          <div class="flex items-center gap-2 text-xs">
+            <span class="w-5 font-mono text-zinc-400 font-bold text-xs shrink-0 text-center">${rIdx + 1}.</span>
+            <input 
+              type="text" 
+              value="${escapeHtml(r)}" 
+              placeholder="Nama Kriteria / Indikator ${rIdx + 1}..."
+              oninput="handleInlineMatrixRowUpdate(${sIdx}, ${fIdx}, ${rIdx}, this.value)"
+              class="flex-1 px-2.5 py-1.5 rounded-lg border border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 bg-white text-xs text-zinc-800 outline-none transition shadow-2xs"
+            >
+            <button 
+              type="button" 
+              onclick="handleInlineDeleteMatrixRow(${sIdx}, ${fIdx}, ${rIdx})" 
+              ${rows.length <= 1 ? 'disabled' : ''}
+              class="w-6 h-6 rounded-full hover:bg-rose-100 text-zinc-400 hover:text-rose-600 disabled:opacity-20 flex items-center justify-center cursor-pointer transition" 
+              title="Hapus Kriteria"
+            >✕</button>
+          </div>
+        `).join('');
+
+        const colsHtml = cols.map((c, cIdx) => `
+          <div class="flex items-center gap-1.5 text-xs">
+            <span class="w-4 font-mono text-indigo-400 font-bold text-xs shrink-0">${cIdx + 1}</span>
+            <input 
+              type="text" 
+              value="${escapeHtml(c)}" 
+              placeholder="Opsi ${cIdx + 1}..."
+              oninput="handleInlineMatrixColUpdate(${sIdx}, ${fIdx}, ${cIdx}, this.value)"
+              class="w-28 px-2 py-1 rounded-lg border border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 bg-white text-xs text-zinc-800 outline-none transition shadow-2xs"
+            >
+            <button 
+              type="button" 
+              onclick="handleInlineDeleteMatrixCol(${sIdx}, ${fIdx}, ${cIdx})" 
+              ${cols.length <= 1 ? 'disabled' : ''}
+              class="w-5 h-5 rounded-full hover:bg-rose-100 text-zinc-400 hover:text-rose-600 disabled:opacity-20 flex items-center justify-center cursor-pointer transition" 
+              title="Hapus Kolom"
+            >✕</button>
+          </div>
+        `).join('');
+
+        return `
+          <div class="space-y-3 pt-2 text-xs">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <!-- Baris Kriteria -->
+              <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-zinc-700 uppercase tracking-wider font-mono text-[10.5px]">Baris Kriteria (${rows.length})</span>
+                  <button type="button" onclick="handleInlineAddMatrixRow(${sIdx}, ${fIdx})" class="text-indigo-600 hover:text-indigo-800 font-bold transition cursor-pointer text-[11px]">+ Tambah Kriteria</button>
+                </div>
+                <div class="space-y-1.5">${rowsHtml}</div>
+              </div>
+
+              <!-- Kolom Skala -->
+              <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-zinc-700 uppercase tracking-wider font-mono text-[10.5px]">Kolom Skala / Opsi (${cols.length})</span>
+                  <button type="button" onclick="handleInlineAddMatrixCol(${sIdx}, ${fIdx})" class="text-indigo-600 hover:text-indigo-800 font-bold transition cursor-pointer text-[11px]">+ Tambah Kolom</button>
+                </div>
+                <div class="flex flex-wrap gap-2">${colsHtml}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // 6D. RANKING / PERINGKAT PRIORITAS
+      if (f.type === 'RANKING') {
+        const options = (f.options && f.options.length > 0) ? f.options : ['Pilihan 1', 'Pilihan 2', 'Pilihan 3'];
+        const optsHtml = options.map((o, optIdx) => `
+          <div class="flex items-center gap-2.5 text-xs p-2 bg-white rounded-lg border border-zinc-200 shadow-2xs">
+            <span class="w-6 h-6 rounded-md bg-indigo-50 text-indigo-700 font-mono font-bold flex items-center justify-center text-xs shrink-0">${optIdx + 1}</span>
+            <input 
+              type="text" 
+              value="${escapeHtml(o)}" 
+              placeholder="Opsi peringkat ${optIdx + 1}..."
+              oninput="handleInlineOptionUpdate(${sIdx}, ${fIdx}, ${optIdx}, this.value)"
+              class="flex-1 px-2 py-1 rounded border-b border-transparent focus:border-indigo-600 text-xs text-zinc-800 outline-none transition"
+            >
+            <div class="flex items-center gap-1 text-zinc-400">
+              <span class="text-[10px] font-mono">▲▼</span>
+            </div>
+            <button 
+              type="button" 
+              onclick="handleInlineDeleteOption(${sIdx}, ${fIdx}, ${optIdx})" 
+              ${options.length <= 2 ? 'disabled' : ''}
+              class="w-6 h-6 rounded-full hover:bg-rose-100 text-zinc-400 hover:text-rose-600 disabled:opacity-20 flex items-center justify-center cursor-pointer transition"
+            >✕</button>
+          </div>
+        `).join('');
+
+        return `
+          <div class="space-y-2 pt-1 text-xs">
+            <div class="space-y-1.5">${optsHtml}</div>
+            <button type="button" onclick="handleInlineAddOption(${sIdx}, ${fIdx})" class="font-semibold text-indigo-600 hover:text-indigo-800 transition cursor-pointer text-xs pt-1">
+              + Tambahkan Opsi Peringkat
+            </button>
+          </div>
+        `;
+      }
+
+      // 6E. SIGNATURE / TANDA TANGAN DIGITAL
+      if (f.type === 'SIGNATURE') {
+        return `
+          <div class="pt-2">
+            <div class="p-4 rounded-xl border-2 border-dashed border-zinc-300 bg-zinc-50/70 flex flex-col items-center justify-center text-center space-y-2 text-xs">
+              <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+              </div>
+              <div>
+                <h5 class="font-bold text-zinc-800">Pad Tanda Tangan Digital (Canvas)</h5>
+                <p class="text-[11px] text-zinc-500">Responden akan membubuhkan tanda tangan langsung di layar sentuh / kursor mouse sebagai pengesahan evaluasi.</p>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // 6F. URL_LINK / INPUT TAUTAN
+      if (f.type === 'URL_LINK') {
+        return `
+          <div class="pt-2 pb-1 space-y-1.5 text-xs">
+            <div class="flex items-center gap-2">
+              <div class="relative flex-1">
+                <span class="absolute left-3 top-2.5 text-zinc-400">🔗</span>
+                <input 
+                  type="text" 
+                  value="${f.placeholder || ''}" 
+                  placeholder="https://drive.google.com/... atau https://canva.com/..." 
+                  oninput="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'placeholder', this.value)"
+                  class="w-full pl-8 pr-3 py-2 rounded-lg border border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 text-xs text-zinc-800 bg-white outline-none transition shadow-2xs font-mono"
+                >
+              </div>
+            </div>
+            <p class="text-[10.5px] text-zinc-400 italic">Validasi URL tautan otomatis (Google Drive, Canva, SlideShare, GitHub, dll).</p>
+          </div>
+        `;
+      }
+
+      // 6G. DATE & TIME
+      if (f.type === 'DATE') {
+        return `
+          <div class="pt-2 text-xs">
+            <input type="date" disabled class="px-3 py-2 rounded-lg border border-zinc-300 bg-zinc-50 text-zinc-600 font-mono text-xs cursor-not-allowed">
+            <span class="text-zinc-400 text-xs ml-2 italic">(Pemilih Tanggal Kalender)</span>
+          </div>
+        `;
+      }
+      if (f.type === 'TIME') {
+        return `
+          <div class="pt-2 text-xs">
+            <input type="time" disabled class="px-3 py-2 rounded-lg border border-zinc-300 bg-zinc-50 text-zinc-600 font-mono text-xs cursor-not-allowed">
+            <span class="text-zinc-400 text-xs ml-2 italic">(Pemilih Waktu / Jam)</span>
           </div>
         `;
       }
@@ -6577,6 +6825,20 @@
       document.getElementById("q_scope").value = "GLOBAL";
       document.getElementById("q_type").value = "SHORT_TEXT";
       document.getElementById("q_required").checked = false;
+      document.getElementById("q_options_text").value = "";
+      document.getElementById("q_allow_other").checked = false;
+      document.getElementById("q_matrix_rows").value = "Sistematika Presentasi\nPenguasaan Teori & Konsep\nKerapian Slide & Visual\nKemampuan Menjawab Pertanyaan";
+      document.getElementById("q_matrix_cols").value = "1: Kurang, 2: Cukup, 3: Baik, 4: Sangat Baik";
+      document.getElementById("q_star_max").value = "5";
+      document.getElementById("q_min_val").value = "1";
+      document.getElementById("q_max_val").value = "5";
+      document.getElementById("q_placeholder").value = "";
+      document.getElementById("q_hint").value = "";
+      document.getElementById("q_min_chars").value = "";
+      document.getElementById("q_max_chars").value = "";
+      document.getElementById("q_min_select").value = "";
+      document.getElementById("q_max_select").value = "";
+      document.getElementById("q_media_url").value = "";
 
       handleQuestionTypeChange();
       document.getElementById("modalCustomQuestion").classList.remove("hidden");
@@ -6595,9 +6857,20 @@
       document.getElementById("q_type").value = field.type || "SHORT_TEXT";
       document.getElementById("q_required").checked = !!field.required;
 
-      if (field.options) document.getElementById("q_options_text").value = field.options.join(", ");
-      if (field.minVal) document.getElementById("q_min_val").value = field.minVal;
-      if (field.maxVal) document.getElementById("q_max_val").value = field.maxVal;
+      document.getElementById("q_options_text").value = (field.options || []).join("\n");
+      document.getElementById("q_allow_other").checked = !!field.hasOtherOption;
+      document.getElementById("q_matrix_rows").value = (field.matrixRows || []).join("\n");
+      document.getElementById("q_matrix_cols").value = (field.matrixCols || []).join(", ");
+      document.getElementById("q_star_max").value = String(field.maxStars || 5);
+      document.getElementById("q_min_val").value = field.minVal !== undefined ? field.minVal : 1;
+      document.getElementById("q_max_val").value = field.maxVal !== undefined ? field.maxVal : 5;
+      document.getElementById("q_placeholder").value = field.placeholder || "";
+      document.getElementById("q_hint").value = field.hint || field.rubricHint || "";
+      document.getElementById("q_min_chars").value = field.minChars || "";
+      document.getElementById("q_max_chars").value = field.maxChars || "";
+      document.getElementById("q_min_select").value = field.minSelect || "";
+      document.getElementById("q_max_select").value = field.maxSelect || "";
+      document.getElementById("q_media_url").value = (field.media?.url || field.mediaUrl || "");
 
       handleQuestionTypeChange();
       document.getElementById("modalCustomQuestion").classList.remove("hidden");
@@ -6611,6 +6884,43 @@
       else if (coreType === 'CORE_MEMBER_FEEDBACK') openEditCoreFieldModal('REVIEW');
     }
 
+    function handleQuestionTypeChange() {
+      const t = document.getElementById("q_type").value;
+      const optBox = document.getElementById("q_options_container");
+      const allowOtherLabel = document.getElementById("q_allow_other_label");
+      const matrixBox = document.getElementById("q_matrix_container");
+      const starBox = document.getElementById("q_star_container");
+      const rateBox = document.getElementById("q_rating_container");
+
+      if (optBox) {
+        if (['RADIO', 'CHECKBOX', 'DROPDOWN', 'RANKING'].includes(t)) {
+          optBox.classList.remove("hidden");
+          if (['RADIO', 'CHECKBOX'].includes(t)) {
+            allowOtherLabel?.classList.remove("hidden");
+          } else {
+            allowOtherLabel?.classList.add("hidden");
+          }
+        } else {
+          optBox.classList.add("hidden");
+        }
+      }
+
+      if (matrixBox) {
+        if (t === 'MATRIX_GRID') matrixBox.classList.remove("hidden");
+        else matrixBox.classList.add("hidden");
+      }
+
+      if (starBox) {
+        if (t === 'STAR_RATING') starBox.classList.remove("hidden");
+        else starBox.classList.add("hidden");
+      }
+
+      if (rateBox) {
+        if (t === 'RATING_SCALE') rateBox.classList.remove("hidden");
+        else rateBox.classList.add("hidden");
+      }
+    }
+
     function handleSaveCustomQuestion(e) {
       e.preventDefault();
       const editId = document.getElementById("q_edit_id").value;
@@ -6618,17 +6928,45 @@
       const scope = document.getElementById("q_scope").value;
       const type = document.getElementById("q_type").value;
       const required = document.getElementById("q_required").checked;
+      const allowOther = document.getElementById("q_allow_other").checked;
 
       let options = [];
-      if (type === 'RADIO' || type === 'CHECKBOX' || type === 'DROPDOWN') {
+      if (['RADIO', 'CHECKBOX', 'DROPDOWN', 'RANKING'].includes(type)) {
         options = document.getElementById("q_options_text").value
           .split(/[\n,]/)
           .map(s => s.trim())
           .filter(Boolean);
+        if (options.length === 0) {
+          options = type === 'RANKING' ? ['Pilihan 1', 'Pilihan 2', 'Pilihan 3'] : ['Opsi 1', 'Opsi 2'];
+        }
       }
 
+      let matrixRows = [];
+      let matrixCols = [];
+      if (type === 'MATRIX_GRID') {
+        matrixRows = document.getElementById("q_matrix_rows").value
+          .split(/\n/)
+          .map(s => s.trim())
+          .filter(Boolean);
+        if (matrixRows.length === 0) matrixRows = ['Kriteria 1', 'Kriteria 2'];
+
+        matrixCols = document.getElementById("q_matrix_cols").value
+          .split(/[\n,]/)
+          .map(s => s.trim())
+          .filter(Boolean);
+        if (matrixCols.length === 0) matrixCols = ['1: Kurang', '2: Cukup', '3: Baik', '4: Sangat Baik'];
+      }
+
+      const maxStars = parseInt(document.getElementById("q_star_max").value || 5);
       const minVal = parseInt(document.getElementById("q_min_val").value || 1);
       const maxVal = parseInt(document.getElementById("q_max_val").value || 5);
+      const placeholder = document.getElementById("q_placeholder").value.trim();
+      const hint = document.getElementById("q_hint").value.trim();
+      const minChars = parseInt(document.getElementById("q_min_chars").value) || null;
+      const maxChars = parseInt(document.getElementById("q_max_chars").value) || null;
+      const minSelect = parseInt(document.getElementById("q_min_select").value) || null;
+      const maxSelect = parseInt(document.getElementById("q_max_select").value) || null;
+      const mediaUrl = document.getElementById("q_media_url").value.trim();
 
       const fieldObj = {
         id: editId || ("fld_" + Date.now().toString(36)),
@@ -6637,11 +6975,28 @@
         type: type,
         required: required,
         options: options,
+        hasOtherOption: allowOther,
+        matrixRows: matrixRows,
+        matrixCols: matrixCols,
+        maxStars: maxStars,
         minVal: minVal,
-        maxVal: maxVal
+        maxVal: maxVal,
+        placeholder: placeholder,
+        hint: hint,
+        minChars: minChars,
+        maxChars: maxChars,
+        minSelect: minSelect,
+        maxSelect: maxSelect
       };
 
+      if (mediaUrl) {
+        fieldObj.media = { url: mediaUrl, position: 'ABOVE_QUESTION' };
+      }
+
       const sIdx = editingFieldStageIdx >= 0 ? editingFieldStageIdx : 0;
+      if (!adminFormSchema.tahapan[sIdx]) {
+        adminFormSchema.tahapan[sIdx] = { id: `tahap_${sIdx + 1}`, title: `Tahap ${sIdx + 1}`, fields: [] };
+      }
       if (!adminFormSchema.tahapan[sIdx].fields) adminFormSchema.tahapan[sIdx].fields = [];
 
       if (editingFieldIndex >= 0) {
@@ -6653,7 +7008,7 @@
       closeCustomQuestionModal();
       renderDynamicStagesCanvas();
       triggerAutoSaveSchema();
-      showAdminToast("Input berhasil disimpan ke Tahap " + (sIdx + 1), "success");
+      showAdminToast("Pertanyaan berhasil disimpan ke Tahap " + (sIdx + 1), "success");
     }
 
     function moveField(sIdx, fIdx, dir) {

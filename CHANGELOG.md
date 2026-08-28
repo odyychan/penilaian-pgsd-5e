@@ -4,6 +4,29 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.64] - 2026-08-28
+
+### 🌟 Form Builder & Assessment Engine: Advanced Question Types & Smart Validation
+- **📊 Matriks Rubrik Kisi (`MATRIX_GRID`):**
+  - Implementasi tipe soal kisi/matriks evaluasi (baris kriteria penilaian $\times$ kolom skala/skor) dengan antarmuka tabel responsif di desktop dan tampilan kartu rapi di mobile.
+- **⭐ Skala Rating Bintang (`STAR_RATING`):**
+  - Komponen penilaian bintang interaktif ($1 \dots 5 / 10$ bintang) dengan hover/tap feedback responsif dan tombol reset.
+- **🔢 Peringkat & Urutan Prioritas (`RANKING`):**
+  - Instrumen penentuan urutan prioritas/peringkat dengan kontrol panah naik/turun (`▲`/`▼`).
+- **✍️ Pad Tanda Tangan Digital Canvas (`SIGNATURE`):**
+  - Komponen tanda tangan digital interaktif berbasis HTML5 Canvas untuk pengesahan penilaian dengan resolusi tinggi (High-DPI support), pen stroke mulus, dan tombol reset.
+- **🌐 Input Tautan & Resource Digital (`URL_LINK`):**
+  - Input URL terverifikasi dengan auto-prefixing dan tombol cepat pengujian tautan (*external preview*).
+- **🔤 Batasan & Validasi Cerdas (Constraints):**
+  - Validasi panjang karakter minimal & maksimal (*Min/Max Chars*) pada isian teks dan ulasan.
+  - Batasan jumlah pilihan centang (*Min/Max Selection*) pada kotak centang (*Checkbox*).
+  - Opsi dinamis *"Lainnya..."* pada Radio dan Checkbox dengan input teks otomatis.
+  - Tooltip panduan rubrik `(?)` beranimasi popover dan dukungan rumus KaTeX.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.64`.
+
+---
+
 ## [2.4.63] - 2026-08-28
 
 ### 🔒 Security Hardening: Score Boundary Clamping & XSS Sanitization

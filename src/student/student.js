@@ -1575,17 +1575,32 @@ function normalizeMediaList(fieldOrMedia) {
       setTimeout(() => {
         renderAllMathInElement(container);
         updateDraftResetButtonVisibility();
-      }, 30);
+        initClientSignaturePads();
+      }, 50);
     }
 
     function renderSingleClientFieldHtml(f) {
       if (!f) return '';
       const reqBadge = f.required ? '<span class="text-rose-500 font-bold ml-0.5">*</span>' : '';
-      const savedVal = clientCustomFormAnswers[f.id] || '';
+      const savedVal = clientCustomFormAnswers[f.id] !== undefined ? clientCustomFormAnswers[f.id] : '';
 
-      const hasMedia = (f.mediaList?.length > 0 || f.media?.url); const mediaPos = f.mediaPosition || f.media?.position || 'ABOVE_QUESTION'; const mediaAbove = (hasMedia && mediaPos === 'ABOVE_QUESTION') ? renderClientMediaHtml(f) : '';
+      const hasMedia = (f.mediaList?.length > 0 || f.media?.url); 
+      const mediaPos = f.mediaPosition || f.media?.position || 'ABOVE_QUESTION'; 
+      const mediaAbove = (hasMedia && mediaPos === 'ABOVE_QUESTION') ? renderClientMediaHtml(f) : '';
       const mediaBelow = (hasMedia && mediaPos === 'BELOW_QUESTION') ? renderClientMediaHtml(f) : '';
       const mediaHtml = renderClientMediaHtml(f.media);
+
+      const hintText = f.hint || f.rubricHint;
+      const hintHtml = hintText ? `
+        <div class="relative inline-block ml-1 group/hint">
+          <button type="button" class="w-4 h-4 rounded-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold text-[10px] inline-flex items-center justify-center cursor-pointer transition shadow-2xs" title="Lihat Petunjuk">
+            ?
+          </button>
+          <div class="hidden group-hover/hint:block group-focus/hint:block absolute z-30 left-0 bottom-full mb-1.5 w-64 p-2.5 bg-zinc-900 text-white text-[11px] rounded-xl shadow-xl leading-relaxed math-renderable pointer-events-none">
+            ${smartMathFormat(hintText)}
+          </div>
+        </div>
+      ` : '';
 
       // 0. TITLE_DESC / BLOK JUDUL, DESKRIPSI & MEDIA / GAMBAR SAJA
       if (f.type === 'TITLE_DESC') {
@@ -1594,7 +1609,6 @@ function normalizeMediaList(fieldOrMedia) {
         const hasCustomLabel = rawLabel !== '' && rawLabel !== 'Pertanyaan tanpa judul' && rawLabel !== 'Judul & Deskripsi Teks';
         const hasCustomDesc = rawDesc !== '';
 
-        // If it only has an image/media and no custom text
         if (!hasCustomLabel && !hasCustomDesc && mediaHtml) {
           return `
             <div class="p-3 sm:p-4 rounded-2xl border border-zinc-200/80 bg-zinc-50/50 space-y-2">
@@ -1603,7 +1617,6 @@ function normalizeMediaList(fieldOrMedia) {
           `;
         }
 
-        // If it has label or description or both with media
         return `
           <div class="bg-indigo-50/60 p-4 sm:p-5 rounded-2xl border border-indigo-100/90 space-y-2.5">
             ${mediaAbove}
@@ -1621,73 +1634,154 @@ function normalizeMediaList(fieldOrMedia) {
 
       // 1. SHORT_TEXT
       if (f.type === 'SHORT_TEXT') {
+        const strVal = typeof savedVal === 'string' ? savedVal : '';
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5">
+          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${mediaAbove}
-            <div>
-              <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Pertanyaan')}${reqBadge}</label>
-              ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Pertanyaan')}${reqBadge}</label>
+                ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
+              </div>
+              ${hintHtml}
             </div>
             ${mediaBelow}
-            <textarea 
-              rows="1" 
-              placeholder="${f.placeholder || 'Jawaban Anda...'}" 
-              ${f.required ? 'required' : ''} 
-              oninput="autoResizeTextarea(this); handleClientFieldInput('${f.id}', this.value)" 
-              class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm bg-white text-zinc-900 focus:border-zinc-900 outline-none transition shadow-2xs resize-none overflow-hidden block whitespace-pre-wrap break-words leading-relaxed"
-            >${escapeHtml(savedVal)}</textarea>
+            <div class="space-y-1">
+              <input 
+                type="text" 
+                value="${escapeHtml(strVal)}" 
+                placeholder="${f.placeholder || 'Jawaban Anda...'}" 
+                ${f.required ? 'required' : ''} 
+                oninput="
+                  handleClientFieldInput('${f.id}', this.value);
+                  const lenEl = document.getElementById('charCount_${f.id}');
+                  if (lenEl) lenEl.textContent = this.value.length;
+                " 
+                class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm bg-white text-zinc-900 focus:border-zinc-900 outline-none transition shadow-2xs leading-relaxed"
+              >
+              ${(f.minChars || f.maxChars) ? `
+                <div class="flex items-center justify-end text-[10.5px] font-mono text-zinc-400">
+                  <span id="charCount_${f.id}">${strVal.length}</span>
+                  ${f.minChars ? ` / min ${f.minChars}` : ''}
+                  ${f.maxChars ? ` (maks ${f.maxChars})` : ''} karakter
+                </div>
+              ` : ''}
+            </div>
           </div>
         `;
       }
 
       // 2. PARAGRAPH / TEXTAREA
       if (f.type === 'PARAGRAPH' || f.type === 'TEXTAREA') {
+        const strVal = typeof savedVal === 'string' ? savedVal : '';
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5">
+          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${mediaAbove}
-            <div>
-              <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Pertanyaan')}${reqBadge}</label>
-              ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Pertanyaan')}${reqBadge}</label>
+                ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
+              </div>
+              ${hintHtml}
             </div>
             ${mediaBelow}
-            <textarea 
-              rows="2" 
-              placeholder="${f.placeholder || 'Tuliskan ulasan atau jawaban lengkap Anda...'}" 
-              ${f.required ? 'required' : ''} 
-              oninput="autoResizeTextarea(this); handleClientFieldInput('${f.id}', this.value)" 
-              class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm bg-white text-zinc-900 focus:border-zinc-900 outline-none transition shadow-2xs leading-relaxed resize-none overflow-hidden block whitespace-pre-wrap break-words"
-            >${escapeHtml(savedVal)}</textarea>
+            <div class="space-y-1">
+              <textarea 
+                rows="2" 
+                placeholder="${f.placeholder || 'Tuliskan ulasan atau jawaban lengkap Anda...'}" 
+                ${f.required ? 'required' : ''} 
+                oninput="
+                  autoResizeTextarea(this); 
+                  handleClientFieldInput('${f.id}', this.value);
+                  const lenEl = document.getElementById('charCount_${f.id}');
+                  if (lenEl) lenEl.textContent = this.value.length;
+                " 
+                class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm bg-white text-zinc-900 focus:border-zinc-900 outline-none transition shadow-2xs leading-relaxed resize-none overflow-hidden block whitespace-pre-wrap break-words"
+              >${escapeHtml(strVal)}</textarea>
+              ${(f.minChars || f.maxChars) ? `
+                <div class="flex items-center justify-end text-[10.5px] font-mono text-zinc-400">
+                  <span id="charCount_${f.id}">${strVal.length}</span>
+                  ${f.minChars ? ` / min ${f.minChars}` : ''}
+                  ${f.maxChars ? ` (maks ${f.maxChars})` : ''} karakter
+                </div>
+              ` : ''}
+            </div>
           </div>
         `;
       }
 
       // 3. RADIO
       if (f.type === 'RADIO') {
-        const opts = f.options || ['Opsi 1', 'Opsi 2'];
+        const opts = (f.options && f.options.length > 0) ? f.options : ['Opsi 1', 'Opsi 2'];
+        let isCustomOther = false;
+        if (f.hasOtherOption && savedVal && !opts.includes(savedVal)) {
+          isCustomOther = true;
+        }
+
         let optsHtml = '';
-        opts.forEach((opt, oIdx) => {
+        opts.forEach((opt) => {
           const isChecked = savedVal === opt;
           optsHtml += `
-            <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white border border-zinc-200 hover:border-zinc-400 cursor-pointer transition text-xs">
+            <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white border ${isChecked ? 'border-zinc-900 bg-zinc-50 font-semibold' : 'border-zinc-200 hover:border-zinc-400'} cursor-pointer transition text-xs">
               <input 
                 type="radio" 
                 name="fld_radio_${f.id}" 
-                value="${opt}" 
+                value="${escapeHtml(opt)}" 
                 ${isChecked ? 'checked' : ''} 
                 ${f.required ? 'required' : ''} 
-                onchange="handleClientFieldInput('${f.id}', this.value)" 
+                onchange="
+                  handleClientFieldInput('${f.id}', this.value);
+                  const otherBox = document.getElementById('otherInputBox_${f.id}');
+                  if (otherBox) otherBox.classList.add('hidden');
+                " 
                 class="w-4 h-4 text-zinc-900 focus:ring-zinc-900 cursor-pointer"
               >
-              <span class="text-zinc-800 font-medium math-renderable">${smartMathFormat(opt)}</span>
+              <span class="text-zinc-800 math-renderable">${smartMathFormat(opt)}</span>
             </label>
           `;
         });
+
+        if (f.hasOtherOption) {
+          optsHtml += `
+            <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white border ${isCustomOther ? 'border-zinc-900 bg-zinc-50 font-semibold' : 'border-zinc-200 hover:border-zinc-400'} cursor-pointer transition text-xs">
+              <input 
+                type="radio" 
+                name="fld_radio_${f.id}" 
+                value="__OTHER__" 
+                ${isCustomOther ? 'checked' : ''} 
+                onchange="
+                  const otherBox = document.getElementById('otherInputBox_${f.id}');
+                  if (otherBox) {
+                    otherBox.classList.remove('hidden');
+                    const inp = otherBox.querySelector('input');
+                    if (inp) { inp.focus(); handleClientFieldInput('${f.id}', inp.value || 'Lainnya'); }
+                  }
+                " 
+                class="w-4 h-4 text-zinc-900 focus:ring-zinc-900 cursor-pointer"
+              >
+              <span class="text-zinc-800">Lainnya...</span>
+            </label>
+            <div id="otherInputBox_${f.id}" class="pl-7 pt-1 ${isCustomOther ? '' : 'hidden'}">
+              <input 
+                type="text" 
+                value="${isCustomOther ? escapeHtml(savedVal) : ''}" 
+                placeholder="Tuliskan jawaban Anda..."
+                oninput="handleClientFieldInput('${f.id}', this.value)"
+                class="w-full px-3 py-2 rounded-lg border border-zinc-300 text-xs bg-white text-zinc-900 focus:border-zinc-900 outline-none"
+              >
+            </div>
+          `;
+        }
+
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5">
+          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${mediaAbove}
-            <div>
-              <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Pilihan')}${reqBadge}</label>
-              ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Pilihan')}${reqBadge}</label>
+                ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
+              </div>
+              ${hintHtml}
             </div>
             ${mediaBelow}
             <div class="space-y-2">
@@ -1699,63 +1793,78 @@ function normalizeMediaList(fieldOrMedia) {
 
       // 4. CHECKBOX
       if (f.type === 'CHECKBOX') {
-        const opts = f.options || ['Opsi 1', 'Opsi 2'];
+        const opts = (f.options && f.options.length > 0) ? f.options : ['Opsi 1', 'Opsi 2'];
         let checkedList = Array.isArray(savedVal) ? savedVal : [];
         let optsHtml = '';
-        opts.forEach((opt, oIdx) => {
+        opts.forEach((opt) => {
           const isChecked = checkedList.includes(opt);
           optsHtml += `
-            <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white border border-zinc-200 hover:border-zinc-400 cursor-pointer transition text-xs">
+            <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white border ${isChecked ? 'border-zinc-900 bg-zinc-50 font-semibold' : 'border-zinc-200 hover:border-zinc-400'} cursor-pointer transition text-xs">
               <input 
                 type="checkbox" 
-                value="${opt}" 
+                value="${escapeHtml(opt)}" 
                 ${isChecked ? 'checked' : ''} 
                 onchange="
                   let cur = Array.isArray(clientCustomFormAnswers['${f.id}']) ? clientCustomFormAnswers['${f.id}'] : [];
                   if (this.checked) cur.push(this.value);
                   else cur = cur.filter(v => v !== this.value);
                   handleClientFieldInput('${f.id}', cur);
+                  const cnt = document.getElementById('cbCount_${f.id}');
+                  if (cnt) cnt.textContent = cur.length;
                 " 
                 class="w-4 h-4 rounded text-zinc-900 focus:ring-zinc-900 cursor-pointer"
               >
-              <span class="text-zinc-800 font-medium math-renderable">${smartMathFormat(opt)}</span>
+              <span class="text-zinc-800 math-renderable">${smartMathFormat(opt)}</span>
             </label>
           `;
         });
+
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5">
+          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${mediaAbove}
-            <div>
-              <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Pilihan Kotak Centang')}${reqBadge}</label>
-              ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Pilihan Kotak Centang')}${reqBadge}</label>
+                ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
+              </div>
+              ${hintHtml}
             </div>
             ${mediaBelow}
             <div class="space-y-2">
               ${optsHtml}
             </div>
+            ${(f.minSelect || f.maxSelect) ? `
+              <div class="flex items-center justify-between text-[10.5px] font-mono text-zinc-400 pt-1">
+                <span>Terpilih: <b id="cbCount_${f.id}" class="text-zinc-700">${checkedList.length}</b></span>
+                <span>${f.minSelect ? `Min. ${f.minSelect} pilihan ` : ''}${f.maxSelect ? `(Maks. ${f.maxSelect})` : ''}</span>
+              </div>
+            ` : ''}
           </div>
         `;
       }
 
       // 5. DROPDOWN
       if (f.type === 'DROPDOWN') {
-        const opts = f.options || ['Opsi 1', 'Opsi 2'];
+        const opts = (f.options && f.options.length > 0) ? f.options : ['Opsi 1', 'Opsi 2'];
         let optsHtml = '<option value="" disabled selected>-- Pilih Opsi --</option>';
         opts.forEach(opt => {
-          optsHtml += `<option value="${opt}" ${savedVal === opt ? 'selected' : ''}>${opt}</option>`;
+          optsHtml += `<option value="${escapeHtml(opt)}" ${savedVal === opt ? 'selected' : ''}>${opt}</option>`;
         });
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5">
+          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${mediaAbove}
-            <div>
-              <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Pilih Menu Dropdown')}${reqBadge}</label>
-              ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Pilih Menu Dropdown')}${reqBadge}</label>
+                ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
+              </div>
+              ${hintHtml}
             </div>
             ${mediaBelow}
             <select 
               ${f.required ? 'required' : ''} 
               onchange="handleClientFieldInput('${f.id}', this.value)" 
-              class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm bg-white text-zinc-900 focus:border-zinc-900 outline-none transition shadow-2xs"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm bg-white text-zinc-900 focus:border-zinc-900 outline-none transition shadow-2xs cursor-pointer"
             >
               ${optsHtml}
             </select>
@@ -1792,11 +1901,14 @@ function normalizeMediaList(fieldOrMedia) {
         }
 
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5">
+          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${mediaAbove}
-            <div>
-              <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Skala Penilaian')}${reqBadge}</label>
-              ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Skala Penilaian')}${reqBadge}</label>
+                ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
+              </div>
+              ${hintHtml}
             </div>
             ${mediaBelow}
             <div class="space-y-2 pt-1">
@@ -1808,11 +1920,313 @@ function normalizeMediaList(fieldOrMedia) {
         `;
       }
 
+      // 6B. STAR_RATING / RATING BINTANG
+      if (f.type === 'STAR_RATING') {
+        const maxStars = f.maxStars || 5;
+        const currentRating = parseInt(savedVal) || 0;
+        let starsHtml = '';
+        for (let i = 1; i <= maxStars; i++) {
+          const isFilled = i <= currentRating;
+          starsHtml += `
+            <button 
+              type="button" 
+              onclick="handleClientFieldInput('${f.id}', ${i}); updateClientStarRatingUI('${f.id}', ${i}, ${maxStars});" 
+              class="client-star-${f.id} w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center text-xl sm:text-2xl transition cursor-pointer active:scale-90 ${isFilled ? 'text-amber-400 bg-amber-50/80 border border-amber-300 shadow-2xs' : 'text-zinc-300 bg-white border border-zinc-200 hover:text-amber-300 hover:border-amber-200'}"
+              data-star-idx="${i}"
+              title="Beri ${i} Bintang"
+            >
+              ★
+            </button>
+          `;
+        }
+        return `
+          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-3" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
+            ${mediaAbove}
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Rating Bintang')}${reqBadge}</label>
+                ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
+              </div>
+              ${hintHtml}
+            </div>
+            ${mediaBelow}
+            <div class="space-y-2 pt-1">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                ${starsHtml}
+                <span id="starRatingLabel_${f.id}" class="text-xs font-bold font-mono text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 ml-1">
+                  ${currentRating > 0 ? `${currentRating} / ${maxStars} Bintang` : 'Belum dinilai'}
+                </span>
+                ${currentRating > 0 ? `
+                  <button type="button" onclick="handleClientFieldInput('${f.id}', 0); updateClientStarRatingUI('${f.id}', 0, ${maxStars});" class="text-[11px] text-zinc-400 hover:text-rose-600 font-medium ml-1 cursor-pointer transition">
+                    Reset
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // 6C. MATRIX_GRID / RUBRIK MATRIKS KISI
+      if (f.type === 'MATRIX_GRID') {
+        const rows = (f.matrixRows && f.matrixRows.length > 0) ? f.matrixRows : ['Kriteria 1', 'Kriteria 2'];
+        const cols = (f.matrixCols && f.matrixCols.length > 0) ? f.matrixCols : ['1: Kurang', '2: Cukup', '3: Baik', '4: Sangat Baik'];
+        const matrixAnswers = (savedVal && typeof savedVal === 'object') ? savedVal : {};
+
+        let tableRowsHtml = '';
+        rows.forEach((rowText, rIdx) => {
+          const selectedCol = matrixAnswers[String(rIdx)];
+          let colCellsHtml = '';
+          cols.forEach((colText) => {
+            const isChecked = selectedCol === colText;
+            colCellsHtml += `
+              <td class="p-3 text-center">
+                <label class="inline-flex items-center justify-center p-2 rounded-xl hover:bg-indigo-50/80 cursor-pointer transition">
+                  <input 
+                    type="radio" 
+                    name="matrix_${f.id}_row_${rIdx}" 
+                    value="${escapeHtml(colText)}" 
+                    ${isChecked ? 'checked' : ''} 
+                    onchange="
+                      let currentAns = clientCustomFormAnswers['${f.id}'] || {};
+                      if (typeof currentAns !== 'object') currentAns = {};
+                      currentAns['${rIdx}'] = this.value;
+                      handleClientFieldInput('${f.id}', currentAns);
+                    "
+                    class="w-4 h-4 text-indigo-600 focus:ring-indigo-600 cursor-pointer"
+                  >
+                </label>
+              </td>
+            `;
+          });
+
+          tableRowsHtml += `
+            <tr class="border-b border-zinc-100 hover:bg-zinc-50/50 transition">
+              <td class="p-3 text-xs font-semibold text-zinc-800 leading-snug math-renderable">
+                <div class="flex items-center gap-2">
+                  <span class="w-5 h-5 rounded-md bg-zinc-100 font-mono font-bold text-[10.5px] text-zinc-600 flex items-center justify-center shrink-0">${rIdx + 1}</span>
+                  <span>${smartMathFormat(rowText)}</span>
+                </div>
+              </td>
+              ${colCellsHtml}
+            </tr>
+          `;
+        });
+
+        // Mobile cards version
+        let mobileCardsHtml = '';
+        rows.forEach((rowText, rIdx) => {
+          const selectedCol = matrixAnswers[String(rIdx)];
+          let colRadiosHtml = '';
+          cols.forEach((colText) => {
+            const isChecked = selectedCol === colText;
+            colRadiosHtml += `
+              <label class="flex items-center gap-2 p-2.5 rounded-xl border ${isChecked ? 'bg-indigo-50 border-indigo-300 text-indigo-900 font-bold' : 'bg-white border-zinc-200 text-zinc-700 font-medium'} cursor-pointer transition text-xs">
+                <input 
+                  type="radio" 
+                  name="m_matrix_${f.id}_row_${rIdx}" 
+                  value="${escapeHtml(colText)}" 
+                  ${isChecked ? 'checked' : ''} 
+                  onchange="
+                    let currentAns = clientCustomFormAnswers['${f.id}'] || {};
+                    if (typeof currentAns !== 'object') currentAns = {};
+                    currentAns['${rIdx}'] = this.value;
+                    handleClientFieldInput('${f.id}', currentAns);
+                  "
+                  class="w-4 h-4 text-indigo-600 focus:ring-indigo-600 cursor-pointer"
+                >
+                <span class="math-renderable">${smartMathFormat(colText)}</span>
+              </label>
+            `;
+          });
+
+          mobileCardsHtml += `
+            <div class="p-3.5 bg-white rounded-xl border border-zinc-200 space-y-2.5 shadow-2xs">
+              <div class="flex items-center gap-2 text-xs font-bold text-zinc-900 leading-snug math-renderable">
+                <span class="w-5 h-5 rounded-md bg-indigo-50 text-indigo-700 font-mono text-[10.5px] flex items-center justify-center shrink-0">${rIdx + 1}</span>
+                <span>${smartMathFormat(rowText)}</span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-0.5">
+                ${colRadiosHtml}
+              </div>
+            </div>
+          `;
+        });
+
+        return `
+          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-3" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
+            ${mediaAbove}
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Matriks Rubrik Penilaian')}${reqBadge}</label>
+                ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
+              </div>
+              ${hintHtml}
+            </div>
+            ${mediaBelow}
+
+            <!-- Desktop / Tablet Table View -->
+            <div class="hidden md:block overflow-x-auto bg-white rounded-xl border border-zinc-200 shadow-2xs">
+              <table class="w-full text-xs text-left border-collapse">
+                <thead>
+                  <tr class="bg-zinc-50/80 border-b border-zinc-200 text-zinc-700 font-bold">
+                    <th class="p-3 font-mono text-[11px] uppercase tracking-wider text-zinc-500 min-w-[200px]">Kriteria / Indikator</th>
+                    ${cols.map(c => `<th class="p-3 text-center font-bold text-xs math-renderable">${smartMathFormat(c)}</th>`).join('')}
+                  </tr>
+                </thead>
+                <tbody>
+                  ${tableRowsHtml}
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Mobile Stacked Card View -->
+            <div class="md:hidden space-y-2.5">
+              ${mobileCardsHtml}
+            </div>
+          </div>
+        `;
+      }
+
+      // 6D. RANKING / PERINGKAT PRIORITAS
+      if (f.type === 'RANKING') {
+        const defaultOpts = (f.options && f.options.length > 0) ? f.options : ['Pilihan A', 'Pilihan B', 'Pilihan C'];
+        let currentOrder = Array.isArray(savedVal) && savedVal.length === defaultOpts.length ? savedVal : [...defaultOpts];
+        
+        let itemsHtml = '';
+        currentOrder.forEach((itemText, itIdx) => {
+          itemsHtml += `
+            <div class="flex items-center justify-between gap-2 p-2.5 sm:p-3 bg-white rounded-xl border border-zinc-200/90 shadow-2xs hover:border-zinc-300 transition text-xs" data-ranking-idx="${itIdx}">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <span class="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-700 font-mono font-bold flex items-center justify-center text-xs shrink-0">${itIdx + 1}</span>
+                <span class="font-semibold text-zinc-800 truncate math-renderable">${smartMathFormat(itemText)}</span>
+              </div>
+              <div class="flex items-center gap-1 shrink-0">
+                <button 
+                  type="button" 
+                  onclick="handleClientRankingMove('${f.id}', ${itIdx}, -1)" 
+                  ${itIdx === 0 ? 'disabled' : ''} 
+                  class="w-7 h-7 rounded-lg border border-zinc-200 hover:bg-zinc-100 disabled:opacity-20 text-zinc-600 flex items-center justify-center cursor-pointer transition shadow-2xs"
+                  title="Pindah ke atas"
+                >▲</button>
+                <button 
+                  type="button" 
+                  onclick="handleClientRankingMove('${f.id}', ${itIdx}, 1)" 
+                  ${itIdx === currentOrder.length - 1 ? 'disabled' : ''} 
+                  class="w-7 h-7 rounded-lg border border-zinc-200 hover:bg-zinc-100 disabled:opacity-20 text-zinc-600 flex items-center justify-center cursor-pointer transition shadow-2xs"
+                  title="Pindah ke bawah"
+                >▼</button>
+              </div>
+            </div>
+          `;
+        });
+
+        return `
+          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-3" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
+            ${mediaAbove}
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Urutan Prioritas / Peringkat')}${reqBadge}</label>
+                <p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description || 'Gunakan tombol panah ▲ / ▼ untuk menyusun urutan dari paling prioritas (1) ke bawah.')}</p>
+              </div>
+              ${hintHtml}
+            </div>
+            ${mediaBelow}
+            <div id="rankingListContainer_${f.id}" class="space-y-1.5 pt-1">
+              ${itemsHtml}
+            </div>
+          </div>
+        `;
+      }
+
+      // 6E. SIGNATURE / TANDA TANGAN DIGITAL
+      if (f.type === 'SIGNATURE') {
+        const hasSignature = !!savedVal;
+        return `
+          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-3" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
+            ${mediaAbove}
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Tanda Tangan Digital Pengesahan')}${reqBadge}</label>
+                <p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description || 'Bubuhkan tanda tangan Anda di dalam kotak di bawah ini menggunakan jari sentuh atau kursor mouse.')}</p>
+              </div>
+              ${hintHtml}
+            </div>
+            ${mediaBelow}
+            <div class="space-y-2 pt-1">
+              <div class="relative bg-white rounded-2xl border-2 border-dashed border-zinc-300 hover:border-zinc-400 overflow-hidden shadow-inner flex flex-col items-center justify-center">
+                <canvas 
+                  id="canvas_sig_${f.id}" 
+                  class="w-full h-36 touch-none cursor-crosshair block bg-transparent"
+                  style="touch-action: none;"
+                ></canvas>
+                <div id="sigPlaceholder_${f.id}" class="absolute pointer-events-none text-zinc-300 font-medium text-xs sm:text-sm flex items-center gap-1.5 ${hasSignature ? 'hidden' : ''}">
+                  <span>✍️ Bubuhkan tanda tangan di sini</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-[11px] text-zinc-400 font-mono">Tanda tangan tersimpan otomatis</span>
+                <button 
+                  type="button" 
+                  onclick="clearClientSignature('${f.id}')" 
+                  class="px-3 py-1.5 rounded-lg border border-zinc-200 hover:bg-rose-50 hover:text-rose-600 text-zinc-600 font-semibold cursor-pointer transition active:scale-95 text-xs flex items-center gap-1"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                  <span>Hapus & Ulangi</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // 6F. URL_LINK / INPUT TAUTAN
+      if (f.type === 'URL_LINK') {
+        const strVal = typeof savedVal === 'string' ? savedVal : '';
+        return `
+          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
+            ${mediaAbove}
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Tautan / Link Berkas')}${reqBadge}</label>
+                ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
+              </div>
+              ${hintHtml}
+            </div>
+            ${mediaBelow}
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <div class="relative flex-1">
+                <span class="absolute left-3.5 top-3 text-zinc-400 text-xs font-mono">🔗</span>
+                <input 
+                  type="url" 
+                  value="${escapeHtml(strVal)}" 
+                  placeholder="${f.placeholder || 'https://drive.google.com/... atau https://canva.com/...'}" 
+                  ${f.required ? 'required' : ''} 
+                  oninput="handleClientFieldInput('${f.id}', this.value.trim())" 
+                  class="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm bg-white text-zinc-900 focus:border-zinc-900 outline-none transition shadow-2xs font-mono"
+                >
+              </div>
+              ${strVal ? `
+                <a 
+                  href="${strVal.startsWith('http') ? strVal : 'https://' + strVal}" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  class="px-4 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-xs font-semibold shrink-0 flex items-center justify-center gap-1.5 transition active:scale-95 shadow-2xs"
+                >
+                  <span>Buka Link</span>
+                  <span>↗</span>
+                </a>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }
+
       // 7. FILE_UPLOAD
       if (f.type === 'FILE_UPLOAD') {
         const fileObj = (savedVal && typeof savedVal === 'object' && savedVal.name) ? savedVal : (customUploadedFilesMap[f.id] || null);
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-3">
+          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-3" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             <div>
               <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Unggah Berkas / Dokumen')}${reqBadge}</label>
               <p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description || 'Mendukung berkas PDF, PPTX, DOCX, Foto JPG/PNG (Maks 10 MB).')}</p>
@@ -1856,7 +2270,7 @@ function normalizeMediaList(fieldOrMedia) {
       // 8. DATE
       if (f.type === 'DATE') {
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2">
+          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             <label class="block text-xs font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Tanggal')}${reqBadge}</label>
             ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed math-renderable">${smartMathFormat(f.description)}</p>` : ''}
             <input 
@@ -1873,7 +2287,7 @@ function normalizeMediaList(fieldOrMedia) {
       // 9. TIME
       if (f.type === 'TIME') {
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2">
+          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             <label class="block text-xs font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Waktu')}${reqBadge}</label>
             ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed math-renderable">${smartMathFormat(f.description)}</p>` : ''}
             <input 
@@ -2177,6 +2591,146 @@ function normalizeMediaList(fieldOrMedia) {
       return '';
     }
 
+    function updateClientStarRatingUI(fieldId, rating, maxStars) {
+      const btns = document.querySelectorAll(`.client-star-${fieldId}`);
+      btns.forEach((btn, idx) => {
+        const starNum = idx + 1;
+        if (starNum <= rating) {
+          btn.className = `client-star-${fieldId} w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center text-xl sm:text-2xl transition cursor-pointer active:scale-90 text-amber-400 bg-amber-50/80 border border-amber-300 shadow-2xs`;
+        } else {
+          btn.className = `client-star-${fieldId} w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center text-xl sm:text-2xl transition cursor-pointer active:scale-90 text-zinc-300 bg-white border border-zinc-200 hover:text-amber-300 hover:border-amber-200`;
+        }
+      });
+      const lbl = document.getElementById(`starRatingLabel_${fieldId}`);
+      if (lbl) {
+        lbl.textContent = rating > 0 ? `${rating} / ${maxStars} Bintang` : 'Belum dinilai';
+      }
+    }
+
+    function handleClientRankingMove(fieldId, fromIdx, dir) {
+      const currentOrder = Array.isArray(clientCustomFormAnswers[fieldId]) ? [...clientCustomFormAnswers[fieldId]] : [];
+      if (currentOrder.length === 0) {
+        // Find default options from schema
+        if (currentFormSchema && Array.isArray(currentFormSchema.tahapan)) {
+          for (let st of currentFormSchema.tahapan) {
+            const f = (st.fields || []).find(x => x.id === fieldId);
+            if (f && Array.isArray(f.options)) {
+              currentOrder.push(...f.options);
+              break;
+            }
+          }
+        }
+      }
+      const targetIdx = fromIdx + dir;
+      if (targetIdx < 0 || targetIdx >= currentOrder.length) return;
+      const temp = currentOrder[fromIdx];
+      currentOrder[fromIdx] = currentOrder[targetIdx];
+      currentOrder[targetIdx] = temp;
+      handleClientFieldInput(fieldId, currentOrder);
+      renderDynamicClientStages();
+    }
+
+    function initClientSignaturePads() {
+      if (!currentFormSchema || !currentFormSchema.tahapan) return;
+      currentFormSchema.tahapan.forEach(st => {
+        (st.fields || []).forEach(f => {
+          if (f.type === 'SIGNATURE') {
+            const canvas = document.getElementById(`canvas_sig_${f.id}`);
+            if (!canvas) return;
+            
+            // Adjust canvas resolution for high-DPI displays
+            const rect = canvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            const w = rect.width > 0 ? rect.width : 340;
+            const h = rect.height > 0 ? rect.height : 144;
+            canvas.width = w * dpr;
+            canvas.height = h * dpr;
+            const ctx = canvas.getContext('2d');
+            ctx.scale(dpr, dpr);
+            ctx.lineWidth = 2.5;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.strokeStyle = '#1e1b4b'; // indigo-950
+
+            // If already has saved signature data URL, restore it
+            const saved = clientCustomFormAnswers[f.id];
+            if (saved && typeof saved === 'string' && saved.startsWith('data:image/')) {
+              const img = new Image();
+              img.onload = () => {
+                ctx.drawImage(img, 0, 0, w, h);
+              };
+              img.src = saved;
+            }
+
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
+
+            function getPos(e) {
+              const r = canvas.getBoundingClientRect();
+              const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+              const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+              return {
+                x: clientX - r.left,
+                y: clientY - r.top
+              };
+            }
+
+            function startDrawing(e) {
+              isDrawing = true;
+              const pos = getPos(e);
+              lastX = pos.x;
+              lastY = pos.y;
+              ctx.beginPath();
+              ctx.moveTo(lastX, lastY);
+              const ph = document.getElementById(`sigPlaceholder_${f.id}`);
+              if (ph) ph.classList.add('hidden');
+            }
+
+            function draw(e) {
+              if (!isDrawing) return;
+              if (e.cancelable) e.preventDefault();
+              const pos = getPos(e);
+              ctx.lineTo(pos.x, pos.y);
+              ctx.stroke();
+              lastX = pos.x;
+              lastY = pos.y;
+            }
+
+            function stopDrawing() {
+              if (!isDrawing) return;
+              isDrawing = false;
+              ctx.closePath();
+              try {
+                const dataUrl = canvas.toDataURL('image/png');
+                handleClientFieldInput(f.id, dataUrl);
+              } catch(err) {
+                console.warn("Signature export error:", err);
+              }
+            }
+
+            canvas.onpointerdown = startDrawing;
+            canvas.onpointermove = draw;
+            canvas.onpointerup = stopDrawing;
+            canvas.onpointercancel = stopDrawing;
+            canvas.onpointerleave = stopDrawing;
+          }
+        });
+      });
+    }
+
+    function clearClientSignature(fieldId) {
+      const canvas = document.getElementById(`canvas_sig_${fieldId}`);
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      const ph = document.getElementById(`sigPlaceholder_${fieldId}`);
+      if (ph) ph.classList.remove('hidden');
+      handleClientFieldInput(fieldId, '');
+      showToast("Tanda tangan telah direset. Silakan bubuhkan ulang.", "info");
+    }
+
     function renderDynamicCustomFields() {
       const pkContainer = document.getElementById("perKelompokCustomFieldsContainer");
       const globContainer = document.getElementById("globalCustomFieldsContainer");
@@ -2442,24 +2996,42 @@ function normalizeMediaList(fieldOrMedia) {
 
     function collectCustomFieldsAnswers() {
       const answers = {};
-      if (!customFieldsData || customFieldsData.length === 0) return answers;
 
-      customFieldsData.forEach(f => {
-        if (f.type === 'SHORT_TEXT' || f.type === 'TEXTAREA') {
-          const el = document.getElementById(`cust_${f.id}`);
-          if (el) answers[f.id] = el.value.trim();
-        } else if (f.type === 'RATING_SCALE' || f.type === 'RADIO') {
-          const selected = document.querySelector(`input[name="cust_${f.id}"]:checked`);
-          if (selected) answers[f.id] = selected.value;
-        } else if (f.type === 'CHECKBOX') {
-          const checked = Array.from(document.querySelectorAll(`input[name="cust_${f.id}"]:checked`)).map(c => c.value);
-          if (checked.length > 0) answers[f.id] = checked.join(", ");
-        } else if (f.type === 'FILE_UPLOAD') {
-          if (customUploadedFilesMap[f.id]) {
-            answers[f.id] = customUploadedFilesMap[f.id].name;
+      // 1. Collect from clientCustomFormAnswers (Modern Multi-Stage Form Wizard)
+      if (clientCustomFormAnswers && typeof clientCustomFormAnswers === 'object') {
+        for (let k in clientCustomFormAnswers) {
+          if (k.startsWith('fld_core_') || k.startsWith('_')) continue;
+          const val = clientCustomFormAnswers[k];
+          if (val !== undefined && val !== null && val !== '') {
+            if (typeof val === 'object') {
+              answers[k] = JSON.parse(JSON.stringify(val));
+            } else {
+              answers[k] = val;
+            }
           }
         }
-      });
+      }
+
+      // 2. Legacy fallback from DOM for customFieldsData
+      if (customFieldsData && Array.isArray(customFieldsData)) {
+        customFieldsData.forEach(f => {
+          if (answers[f.id] !== undefined) return;
+          if (f.type === 'SHORT_TEXT' || f.type === 'TEXTAREA') {
+            const el = document.getElementById(`cust_${f.id}`);
+            if (el && el.value.trim()) answers[f.id] = el.value.trim();
+          } else if (f.type === 'RATING_SCALE' || f.type === 'RADIO') {
+            const selected = document.querySelector(`input[name="cust_${f.id}"]:checked`);
+            if (selected) answers[f.id] = selected.value;
+          } else if (f.type === 'CHECKBOX') {
+            const checked = Array.from(document.querySelectorAll(`input[name="cust_${f.id}"]:checked`)).map(c => c.value);
+            if (checked.length > 0) answers[f.id] = checked;
+          } else if (f.type === 'FILE_UPLOAD') {
+            if (customUploadedFilesMap[f.id]) {
+              answers[f.id] = customUploadedFilesMap[f.id].name;
+            }
+          }
+        });
+      }
 
       return answers;
     }
@@ -3679,19 +4251,111 @@ function normalizeMediaList(fieldOrMedia) {
         }
       }
 
-      // 6. Validasi Kustom Pertanyaan Dinamis
-      const requiredCustomContainers = currentStageSec.querySelectorAll('[data-custom-required="true"]');
-      for (let container of requiredCustomContainers) {
+      // 6. Validasi Kustom Pertanyaan Dinamis & Batasan Lanjutan
+      const customContainers = currentStageSec.querySelectorAll('[data-field-id]');
+      for (let container of customContainers) {
         const fieldId = container.getAttribute('data-field-id');
-        if (fieldId) {
-          const ans = clientCustomFormAnswers[fieldId];
-          const hasFile = customUploadedFilesMap && customUploadedFilesMap[fieldId];
-          if ((ans === undefined || ans === null || String(ans).trim() === '') && !hasFile) {
+        const isRequired = container.getAttribute('data-custom-required') === 'true';
+        if (!fieldId) continue;
+
+        // Find field schema definition
+        let fDef = null;
+        if (currentFormSchema && Array.isArray(currentFormSchema.tahapan)) {
+          for (let st of currentFormSchema.tahapan) {
+            fDef = (st.fields || []).find(x => x.id === fieldId);
+            if (fDef) break;
+          }
+        }
+
+        const ans = clientCustomFormAnswers[fieldId];
+        const hasFile = customUploadedFilesMap && customUploadedFilesMap[fieldId];
+
+        // Required check
+        if (isRequired) {
+          if (fDef?.type === 'STAR_RATING') {
+            if (!ans || parseInt(ans) <= 0) {
+              container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              container.classList.add("ring-2", "ring-rose-500", "border-rose-500");
+              setTimeout(() => container.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
+              showToast(`Mohon berikan rating bintang pada '${fDef.label || 'Pertanyaan'}' sebelum melanjutkan.`, "warning");
+              return false;
+            }
+          } else if (fDef?.type === 'MATRIX_GRID') {
+            const rows = fDef.matrixRows || [];
+            const ansObj = (typeof ans === 'object' && ans !== null) ? ans : {};
+            const answeredCount = Object.keys(ansObj).length;
+            if (answeredCount < rows.length) {
+              container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              container.classList.add("ring-2", "ring-rose-500", "border-rose-500");
+              setTimeout(() => container.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
+              showToast(`Mohon lengkapi seluruh baris matriks (${answeredCount}/${rows.length}) pada '${fDef.label || 'Rubrik'}' sebelum melanjutkan.`, "warning");
+              return false;
+            }
+          } else if (fDef?.type === 'SIGNATURE') {
+            if (!ans || typeof ans !== 'string' || !ans.startsWith('data:image/')) {
+              container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              container.classList.add("ring-2", "ring-rose-500", "border-rose-500");
+              setTimeout(() => container.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
+              showToast(`Mohon bubuhkan tanda tangan digital Anda sebelum melanjutkan.`, "warning");
+              return false;
+            }
+          } else if (fDef?.type === 'CHECKBOX') {
+            const checkedList = Array.isArray(ans) ? ans : [];
+            if (checkedList.length === 0) {
+              container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              container.classList.add("ring-2", "ring-rose-500", "border-rose-500");
+              setTimeout(() => container.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
+              showToast(`Mohon pilih opsi pada '${fDef.label || 'Pertanyaan'}' sebelum melanjutkan.`, "warning");
+              return false;
+            }
+          } else if ((ans === undefined || ans === null || String(ans).trim() === '') && !hasFile) {
             container.scrollIntoView({ behavior: 'smooth', block: 'center' });
             container.classList.add("ring-2", "ring-rose-500", "border-rose-500");
             setTimeout(() => container.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
-            showToast("Mohon lengkapi seluruh pertanyaan bertanda wajib (*) pada bagian ini.", "warning");
+            showToast(`Pertanyaan '${fDef?.label || 'ini'}' wajib diisi sebelum melanjutkan.`, "warning");
             return false;
+          }
+        }
+
+        // Min / Max characters constraint check
+        if (fDef && (fDef.type === 'SHORT_TEXT' || fDef.type === 'TEXTAREA' || fDef.type === 'PARAGRAPH')) {
+          const textLen = String(ans || '').trim().length;
+          if (textLen > 0) {
+            if (fDef.minChars && textLen < fDef.minChars) {
+              container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              container.classList.add("ring-2", "ring-rose-500", "border-rose-500");
+              setTimeout(() => container.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
+              showToast(`Jawaban '${fDef.label || 'ini'}' minimal ${fDef.minChars} karakter (saat ini ${textLen} karakter).`, "warning");
+              return false;
+            }
+            if (fDef.maxChars && textLen > fDef.maxChars) {
+              container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              container.classList.add("ring-2", "ring-rose-500", "border-rose-500");
+              setTimeout(() => container.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
+              showToast(`Jawaban '${fDef.label || 'ini'}' melebihi batas maksimal ${fDef.maxChars} karakter.`, "warning");
+              return false;
+            }
+          }
+        }
+
+        // Checkbox Min / Max selection constraint check
+        if (fDef && fDef.type === 'CHECKBOX') {
+          const checkedCount = Array.isArray(ans) ? ans.length : (ans ? 1 : 0);
+          if (checkedCount > 0) {
+            if (fDef.minSelect && checkedCount < fDef.minSelect) {
+              container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              container.classList.add("ring-2", "ring-rose-500", "border-rose-500");
+              setTimeout(() => container.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
+              showToast(`Mohon pilih minimal ${fDef.minSelect} opsi pada '${fDef.label || 'pertanyaan ini'}'.`, "warning");
+              return false;
+            }
+            if (fDef.maxSelect && checkedCount > fDef.maxSelect) {
+              container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              container.classList.add("ring-2", "ring-rose-500", "border-rose-500");
+              setTimeout(() => container.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
+              showToast(`Pilihan Anda melebihi batas maksimal ${fDef.maxSelect} opsi pada '${fDef.label || 'pertanyaan ini'}'.`, "warning");
+              return false;
+            }
           }
         }
       }
