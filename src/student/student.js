@@ -6304,16 +6304,16 @@ function normalizeMediaList(fieldOrMedia) {
       }
 
       if (tab === 'form') {
-        viewForm.classList.remove("hidden");
-        viewRekap.classList.add("hidden");
-        tabFormBtn.className = "py-1.5 px-3 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer";
-        tabRekapBtn.className = "py-1.5 px-3 rounded-md text-zinc-400 hover:text-zinc-100 transition-all flex items-center justify-center gap-1.5 cursor-pointer";
+        if (viewForm) viewForm.classList.remove("hidden");
+        if (viewRekap) viewRekap.classList.add("hidden");
+        if (tabFormBtn) tabFormBtn.className = "py-1.5 px-2 sm:px-3 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition-all flex items-center justify-center gap-1 cursor-pointer text-xs font-bold";
+        if (tabRekapBtn) tabRekapBtn.className = "py-1.5 px-2 sm:px-3 rounded-md text-zinc-400 hover:text-zinc-100 transition-all flex items-center justify-center gap-1 cursor-pointer text-xs font-medium";
         checkAndApplyAuthGate();
       } else {
-        viewForm.classList.add("hidden");
-        viewRekap.classList.remove("hidden");
-        tabRekapBtn.className = "py-1.5 px-3 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer";
-        tabFormBtn.className = "py-1.5 px-3 rounded-md text-zinc-400 hover:text-zinc-100 transition-all flex items-center justify-center gap-1.5 cursor-pointer";
+        if (viewForm) viewForm.classList.add("hidden");
+        if (viewRekap) viewRekap.classList.remove("hidden");
+        if (tabRekapBtn) tabRekapBtn.className = "py-1.5 px-2 sm:px-3 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition-all flex items-center justify-center gap-1 cursor-pointer text-xs font-bold";
+        if (tabFormBtn) tabFormBtn.className = "py-1.5 px-2 sm:px-3 rounded-md text-zinc-400 hover:text-zinc-100 transition-all flex items-center justify-center gap-1 cursor-pointer text-xs font-medium";
         
         const savedSub = localStorage.getItem("PGSD_ACTIVE_REKAP_SUBTAB") || "kelompok";
         const hasLocalData = currentRekapData && currentRekapData.summary && currentRekapData.summary.length > 0;
@@ -6322,7 +6322,7 @@ function normalizeMediaList(fieldOrMedia) {
         if (hasLocalData) {
           renderBothRekapViews();
         }
-        loadRekapData(true);
+        loadRekapData(false);
       }
     }
 

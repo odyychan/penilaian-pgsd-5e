@@ -5,7 +5,7 @@
  *   - Assets (images, fonts): Stale-while-revalidate
  * ============================================================ */
 
-const CACHE_VERSION = 'v2.4.58';
+const CACHE_VERSION = 'v2.4.59';
 const STATIC_CACHE  = `pgsd-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `pgsd-runtime-${CACHE_VERSION}`;
 
@@ -16,10 +16,10 @@ const PRECACHE_MODULES = [
   '/admin',
   '/admin.html',
   '/manifest.json',
-  '/src/admin/admin.css?v=2.4.58',
-  '/src/admin/admin.js?v=2.4.58',
-  '/src/student/index.css?v=2.4.58',
-  '/src/student/student.js?v=2.4.58',
+  '/src/admin/admin.css?v=2.4.59',
+  '/src/admin/admin.js?v=2.4.59',
+  '/src/student/index.css?v=2.4.59',
+  '/src/student/student.js?v=2.4.59',
   '/assets/logo-ulm.png',
   '/assets/icon-192.png',
   '/assets/icon-512.png',

@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.59] - 2026-08-28
+
+### 🔄 Tab Navigation & Rekapitulasi Hasil View Logic Restoration
+- **🎯 Pemulihan Total Logika Navigasi Tab:**
+  - Mengembalikan dan membersihkan aturan CSS pada `<head>` agar pergantian tab (*Formulir Penilaian* vs *Rekapitulasi Hasil*) tidak lagi terblokir oleh aturan `!important`.
+  - Mengembalikan status aktif (*font-bold, background active*) dan inaktif pada tombol `#tabFormBtn` dan `#tabRekapBtn` di `#navTabContainer`.
+  - Memastikan tampilan Rekapitulasi Hasil (`#viewRekap`) dengan seluruh subtab (*Kelompok, Pemateri, Status Presensi*) dapat terbuka dan berganti secara mulus dan responsif.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.59`.
+
+---
+
 ## [2.4.58] - 2026-08-28
 
 ### 🏷️ Footer Credit & Creator Identity Dynamic Resolution Fix

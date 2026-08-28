@@ -32,7 +32,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="src/student/index.css?v=2.4.58">
+  <link rel="stylesheet" href="src/student/index.css?v=2.4.59">
   
   <!-- Instant Zero-FOUC View Resolver (Runs synchronously before HTML paint) -->
   <script>
@@ -49,7 +49,7 @@
     })();
   </script>
   <style>
-    /* Instant Portal & Form View Isolation (Zero Flash of Wrong Content & Zero-Blank FCP) */
+    /* Instant Portal & Form View Isolation (Zero Flash of Wrong Content) */
     html.portal-mode-active #viewForm,
     html.portal-mode-active #viewRekap,
     html.portal-mode-active #navTabContainer,
@@ -62,15 +62,6 @@
 
     html.form-mode-active #viewPortal {
       display: none !important;
-    }
-    html.form-mode-active #viewForm {
-      display: block !important;
-    }
-    html.form-mode-active #navTabContainer {
-      display: flex !important;
-    }
-    html.form-mode-active #badgeSesiTop {
-      display: flex !important;
     }
   </style>
 
@@ -1433,13 +1424,13 @@
   <!-- ========================================================================= -->
   <!-- SCRIPT LOGIC -->
   <!-- ========================================================================= -->
-  <script src="src/student/student.js?v=2.4.58"></script>
+  <script src="src/student/student.js?v=2.4.59"></script>
 
   <!-- Progressive Web App (PWA) & Instant Auto-Updater Engine -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js?v=2.4.58').then(function(reg) {
+        navigator.serviceWorker.register('/sw.js?v=2.4.59').then(function(reg) {
           reg.update();
           reg.addEventListener('updatefound', function() {
             var newWorker = reg.installing;
