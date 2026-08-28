@@ -4,6 +4,18 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.58] - 2026-08-28
+
+### 🏷️ Footer Credit & Creator Identity Dynamic Resolution Fix
+- **✨ Sinkronisasi Footer Kredit Pembuat Web:**
+  - Memperbaiki alur resolusi identitas pembuat web (`Pembuat_Web_Nama` dan `Pembuat_Web_Prefix`) pada footer saat membuka formulir penilaian.
+  - Memastikan data pembuat tersimpan ke riwayat formulir (`saveVisitedFormHistory`) dan terhidrasi secara optimistik dari cache lokal (`loadLocalCache`), riwayat perangkat, serta fallback master (`Rodhiyah` - *Dibuat oleh*).
+  - Tautan footer `#footerAdminLink` dan `#footerPembuatPrefix` kini selalu menampilkan nama pengembang/pembuat formulir secara dinamis dan presisi saat berada di dalam formulir.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.58`.
+
+---
+
 ## [2.4.57] - 2026-08-28
 
 ### ⚡ Instant SPA Form Navigation & Zero-Blank FCP Architecture

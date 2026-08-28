@@ -837,12 +837,16 @@ function normalizeMediaList(fieldOrMedia) {
       const title = (formMeta && (formMeta.judul_form || formMeta.judulForm || formMeta.title)) || (config && config["Judul_Form"]) || (currentFormMeta && currentFormMeta.judulForm) || `Penilaian Form ${pin}`;
       const matkul = (formMeta && (formMeta.mata_kuliah || formMeta.mataKuliah)) || (config && config["Mata_Kuliah"]) || (currentFormMeta && currentFormMeta.mataKuliah) || "";
       const dosen = (formMeta && (formMeta.dosen || formMeta.dosenPengampu)) || (config && config["Dosen_Pengampu"]) || (currentFormMeta && currentFormMeta.dosen) || "";
+      const pembuatNama = (config && config["Pembuat_Web_Nama"]) || (formMeta && (formMeta.pembuat_nama || formMeta.pembuatNama)) || (appConfig && appConfig["Pembuat_Web_Nama"]) || "";
+      const pembuatPrefix = (config && config["Pembuat_Web_Prefix"]) || (formMeta && (formMeta.pembuat_prefix || formMeta.pembuatPrefix)) || (appConfig && appConfig["Pembuat_Web_Prefix"]) || "Dibuat oleh";
 
       list.unshift({
         pin: pin,
         title: title,
         matkul: matkul,
         dosen: dosen,
+        pembuatNama: pembuatNama,
+        pembuatPrefix: pembuatPrefix,
         lastVisited: Date.now()
       });
 
@@ -2568,13 +2572,28 @@ function normalizeMediaList(fieldOrMedia) {
             "Mata_Kuliah": foundMeta.mataKuliah || "",
             "Dosen_Pengampu": foundMeta.dosen || "",
             "Kelas": foundMeta.kelas || "",
-            "Sesi_Minggu_Aktif": foundMeta.sesiAktif || "SEMUA"
+            "Jurusan": foundMeta.jurusan || "",
+            "Sesi_Minggu_Aktif": foundMeta.sesiAktif || "Minggu 1",
+            "Pembuat_Web_Nama": foundMeta.pembuatNama || foundMeta.pembuat_nama || (isDefault ? "Rodhiyah" : ""),
+            "Pembuat_Web_Prefix": foundMeta.pembuatPrefix || foundMeta.pembuat_prefix || "Dibuat oleh"
           };
+        }
+
+        if (!appConfig) appConfig = {};
+
+        // Check visited form history for creator credentials if missing in config
+        if (!appConfig["Pembuat_Web_Nama"]) {
+          const visitedList = getVisitedFormsHistory();
+          const visitedItem = visitedList.find(item => (item.pin || '').toUpperCase() === activeFormId);
+          if (visitedItem && visitedItem.pembuatNama) {
+            appConfig["Pembuat_Web_Nama"] = visitedItem.pembuatNama;
+            appConfig["Pembuat_Web_Prefix"] = visitedItem.pembuatPrefix || "Dibuat oleh";
+          }
         }
 
         // 4. Default fallback for BK5E primary form if no local cache exists
         if (isDefault) {
-          if (!appConfig || Object.keys(appConfig).length === 0) {
+          if (Object.keys(appConfig).length === 0) {
             appConfig = {
               "Judul_Form": "Penilaian Presentasi Kelas 5E PGSD 2026",
               "Mata_Kuliah": "Bimbingan Konseling di SD",
@@ -2583,8 +2602,13 @@ function normalizeMediaList(fieldOrMedia) {
               "Jurusan": "PGSD",
               "Sesi_Minggu_Aktif": "Minggu 1",
               "Nilai_Kelompok_Min": "50",
-              "Nilai_Kelompok_Max": "100"
+              "Nilai_Kelompok_Max": "100",
+              "Pembuat_Web_Nama": "Rodhiyah",
+              "Pembuat_Web_Prefix": "Dibuat oleh"
             };
+          } else if (!appConfig["Pembuat_Web_Nama"]) {
+            appConfig["Pembuat_Web_Nama"] = "Rodhiyah";
+            appConfig["Pembuat_Web_Prefix"] = appConfig["Pembuat_Web_Prefix"] || "Dibuat oleh";
           }
           if (!currentFormMeta) {
             currentFormMeta = {
@@ -3183,8 +3207,9 @@ function normalizeMediaList(fieldOrMedia) {
       if (groupSubtitle && appConfig['Pilih_Kelompok_Label']) groupSubtitle.textContent = appConfig['Pilih_Kelompok_Label'];
 
       // Update footer kredit pembuat web / link portal admin
-      const pembuatNama = (appConfig["Pembuat_Web_Nama"] || "").trim();
-      const pembuatPrefix = (appConfig["Pembuat_Web_Prefix"] || "Dibuat oleh").trim();
+      const isDef = (activeFormId === 'BK5E' || !activeFormId);
+      const pembuatNama = (appConfig["Pembuat_Web_Nama"] || (currentFormMeta && (currentFormMeta.pembuatNama || currentFormMeta.pembuat_nama)) || (isDef ? "Rodhiyah" : "")).trim();
+      const pembuatPrefix = (appConfig["Pembuat_Web_Prefix"] || (currentFormMeta && (currentFormMeta.pembuatPrefix || currentFormMeta.pembuat_prefix)) || "Dibuat oleh").trim();
       const prefixEl = document.getElementById("footerPembuatPrefix");
       const footerLink = document.getElementById("footerAdminLink");
       if (footerLink) {
@@ -8064,7 +8089,9 @@ function normalizeMediaList(fieldOrMedia) {
         "Nilai_Kelompok_Min": "50",
         "Nilai_Kelompok_Max": "100",
         "Maksimal_Karakter_Evaluasi": "500",
-        "Maksimal_Pilihan_Presentator_Terbaik": "2"
+        "Maksimal_Pilihan_Presentator_Terbaik": "2",
+        "Pembuat_Web_Nama": "Rodhiyah",
+        "Pembuat_Web_Prefix": "Dibuat oleh"
       };
 
       groupsData = [
