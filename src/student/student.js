@@ -1893,6 +1893,7 @@ function normalizeMediaList(fieldOrMedia) {
         const peranDosenLabel = appConfig["Peran_Dosen_Label"] || "Dosen (Pengampu / Penguji)";
         const peranTamuLabel = appConfig["Peran_Lainnya_Label"] || "Lainnya / Penilai Tamu";
         const emailMode = getCurrentEmailCollectionMode();
+        const isNoEmail = (emailMode === 'NO_EMAIL');
         const emailVal = clientCustomFormAnswers[f.id + '_email'] || activeUserAccountEmail || '';
         let nameVal = clientCustomFormAnswers[f.id + '_nama'] || '';
         const nimVal = clientCustomFormAnswers[f.id + '_nim'] || activeUserAccountNim || '';
