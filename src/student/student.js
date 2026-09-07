@@ -6442,6 +6442,7 @@ function normalizeMediaList(fieldOrMedia) {
         renderDynamicClientStages(false);
       }
       updateStepUI(currentStep || 1, false, false);
+      initExamTimerEngine();
       try {
         const currentUrl = new URL(window.location.href);
         if (activeFormId) currentUrl.searchParams.set('id', activeFormId);
@@ -6467,6 +6468,8 @@ function normalizeMediaList(fieldOrMedia) {
       if (authGate) authGate.classList.add("hidden");
       if (overview) overview.classList.remove("hidden");
       if (wizard) wizard.classList.add("hidden");
+      const timerBar = document.getElementById("floatingExamTimerBar");
+      if (timerBar) timerBar.classList.add("hidden");
       try {
         const currentUrl = new URL(window.location.href);
         if (activeFormId) currentUrl.searchParams.set('id', activeFormId);
@@ -6920,17 +6923,19 @@ function normalizeMediaList(fieldOrMedia) {
       `;
     }
 
-    async function handleFinalSubmit(e) {
+    async function handleFinalSubmit(e, isAutoSubmit = false) {
       if (e) e.preventDefault();
 
       const isPreviewMode = new URLSearchParams(window.location.search).get('preview') === 'draft' || new URLSearchParams(window.location.search).get('preview') === 'true';
       
-      // Run complete stages validation
-      const totalSteps = Object.keys(stepMetadata).length || 4;
-      for (let s = 1; s <= totalSteps; s++) {
-        if (!validateStageRequirements(s)) {
-          updateStepUI(s);
-          return;
+      if (!isAutoSubmit) {
+        // Run complete stages validation
+        const totalSteps = Object.keys(stepMetadata).length || 4;
+        for (let s = 1; s <= totalSteps; s++) {
+          if (!validateStageRequirements(s)) {
+            updateStepUI(s);
+            return;
+          }
         }
       }
 
@@ -7117,6 +7122,13 @@ function normalizeMediaList(fieldOrMedia) {
         uploadedFiles: mergedUploadedFiles,
         driveFolderName: (appConfig && appConfig["Google_Drive_Folder_Name"]) || localStorage.getItem("PGSD_GLOBAL_DRIVE_FOLDER") || localStorage.getItem("PGSD_DRIVE_FOLDER_NAME") || "https://drive.google.com/drive/folders/1ZYnP40AaCoaqu6-H2ZNfYuS-RshCWURK"
       };
+
+      // 🔍 JIKA AUTO-SUBMIT (WAKTU HABIS), LANGSUNG PROSES TANPA MODAL REVIEW
+      if (isAutoSubmit) {
+        currentPendingSubmissionPayload = payload;
+        await executeConfirmedFinalSubmit();
+        return;
+      }
 
       // 🔍 BUKA MODAL PRATINJAU RINGKASAN SEBELUM KIRIM
       openPreSubmitReviewModal(payload);
@@ -7722,6 +7734,12 @@ function normalizeMediaList(fieldOrMedia) {
         }
       }
 
+      // Hentikan exam timer & bersihkan sesi pengerjaan
+      stopExamTimerEngine(true);
+
+      // Periksa dan Render Auto E-Sertifikat Digital (Feature C)
+      checkAndRenderCertificate(payload, quizResult);
+
       modal.classList.remove("hidden");
       modal.classList.add("flex");
     }
@@ -7983,6 +8001,599 @@ function normalizeMediaList(fieldOrMedia) {
         printRoot.innerHTML = origHtml;
       }, 1500);
     }
+
+    // =========================================================================
+    // ⏱️ FLOATING COUNTDOWN EXAM TIMER & ANTI-CHEAT ENGINE (FEATURE B)
+    // =========================================================================
+    let examTimerInterval = null;
+    let examTimerRemainingSec = 0;
+    let isExamTimerActive = false;
+    let antiCheatViolationCount = 0;
+    let isAntiCheatListening = false;
+    let examTimerWarned5m = false;
+    let examTimerWarned1m = false;
+
+    function initExamTimerEngine() {
+      const isTimerEnabled = (appConfig["Timer_Ujian_Aktif"] === true || appConfig["Timer_Ujian_Aktif"] === "true");
+      const timerBar = document.getElementById("floatingExamTimerBar");
+
+      if (!isTimerEnabled) {
+        if (timerBar) timerBar.classList.add("hidden");
+        stopExamTimerEngine(false);
+        return;
+      }
+
+      const durationMin = parseInt(appConfig["Durasi_Pengerjaan_Menit"] || 30, 10);
+      const totalDurationSec = Math.max(60, durationMin * 60);
+
+      const storageKey = `PGSD_EXAM_START_${activeFormId}`;
+      let startTimestamp = sessionStorage.getItem(storageKey);
+      if (!startTimestamp) {
+        startTimestamp = Date.now().toString();
+        sessionStorage.setItem(storageKey, startTimestamp);
+      }
+
+      const elapsedSec = Math.floor((Date.now() - parseInt(startTimestamp, 10)) / 1000);
+      examTimerRemainingSec = Math.max(0, totalDurationSec - elapsedSec);
+
+      if (timerBar) {
+        timerBar.classList.remove("hidden");
+        const titleEl = document.getElementById("timerExamTitle");
+        if (titleEl) {
+          titleEl.textContent = appConfig["Judul_Form"] || (currentFormMeta && currentFormMeta.judulForm) || "Kuis Aktif";
+        }
+      }
+
+      updateTimerDisplay(examTimerRemainingSec);
+
+      if (examTimerInterval) {
+        clearInterval(examTimerInterval);
+        examTimerInterval = null;
+      }
+
+      isExamTimerActive = true;
+      examTimerInterval = setInterval(() => {
+        if (!isExamTimerActive) return;
+        examTimerRemainingSec--;
+
+        if (examTimerRemainingSec <= 0) {
+          stopExamTimerEngine(false);
+          updateTimerDisplay(0);
+          handleExamTimeout();
+        } else {
+          updateTimerDisplay(examTimerRemainingSec);
+        }
+      }, 1000);
+
+      initAntiCheatEngine();
+    }
+
+    function stopExamTimerEngine(clearStorage = false) {
+      isExamTimerActive = false;
+      if (examTimerInterval) {
+        clearInterval(examTimerInterval);
+        examTimerInterval = null;
+      }
+      const timerBar = document.getElementById("floatingExamTimerBar");
+      if (timerBar) timerBar.classList.add("hidden");
+
+      if (clearStorage && activeFormId) {
+        sessionStorage.removeItem(`PGSD_EXAM_START_${activeFormId}`);
+        sessionStorage.removeItem(`PGSD_ANTI_CHEAT_${activeFormId}`);
+      }
+    }
+
+    function updateTimerDisplay(remainingSec) {
+      const minEl = document.getElementById("timerMinutes");
+      const secEl = document.getElementById("timerSeconds");
+      const badgeEl = document.getElementById("timerCountdownBadge");
+      const pulseDot = document.getElementById("timerPulseDot");
+
+      const m = Math.floor(remainingSec / 60);
+      const s = remainingSec % 60;
+
+      if (minEl) minEl.textContent = String(m).padStart(2, '0');
+      if (secEl) secEl.textContent = String(s).padStart(2, '0');
+
+      if (!badgeEl) return;
+
+      if (remainingSec <= 60) {
+        badgeEl.className = "flex items-baseline gap-0.5 sm:gap-1 px-2.5 sm:px-3.5 py-1 rounded-xl bg-rose-950/80 border border-rose-500 font-mono font-extrabold text-base sm:text-xl text-rose-400 shadow-inner animate-pulse";
+        if (pulseDot) pulseDot.className = "w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping shrink-0";
+        if (!examTimerWarned1m) {
+          examTimerWarned1m = true;
+          showToast("⚠️ Peringatan: Waktu pengerjaan tersisa kurang dari 1 menit!", "error", 6000);
+        }
+      } else if (remainingSec <= 300) {
+        badgeEl.className = "flex items-baseline gap-0.5 sm:gap-1 px-2.5 sm:px-3.5 py-1 rounded-xl bg-amber-950/60 border border-amber-500/70 font-mono font-extrabold text-base sm:text-xl text-amber-400 shadow-inner";
+        if (pulseDot) pulseDot.className = "w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse shrink-0";
+        if (!examTimerWarned5m) {
+          examTimerWarned5m = true;
+          showToast("⏱️ Perhatian: Waktu pengerjaan tersisa 5 menit!", "warning", 5000);
+        }
+      } else {
+        badgeEl.className = "flex items-baseline gap-0.5 sm:gap-1 px-2.5 sm:px-3.5 py-1 rounded-xl bg-zinc-900 border border-zinc-700/80 font-mono font-extrabold text-base sm:text-xl text-emerald-400 shadow-inner";
+        if (pulseDot) pulseDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0";
+      }
+    }
+
+    function handleExamTimeout() {
+      const autoSubmit = (appConfig["Auto_Submit_Saat_Habis"] !== false && appConfig["Auto_Submit_Saat_Habis"] !== "false");
+      if (autoSubmit) {
+        showToast("⌛ Waktu ujian telah habis! Sistem mengirimkan jawaban Anda secara otomatis...", "warning", 7000);
+        setTimeout(() => {
+          handleFinalSubmit(null, true);
+        }, 1000);
+      } else {
+        showToast("⌛ Waktu ujian telah habis! Silakan segera kirimkan jawaban Anda.", "error", 10000);
+      }
+    }
+
+    function initAntiCheatEngine() {
+      const isAntiCheatActive = (appConfig["Anti_Cheat_Aktif"] === true || appConfig["Anti_Cheat_Aktif"] === "true");
+      if (!isAntiCheatActive || isAntiCheatListening) return;
+
+      isAntiCheatListening = true;
+      document.addEventListener("visibilitychange", () => {
+        const wizard = document.getElementById("formWizardContainer");
+        const isWizardVisible = wizard && !wizard.classList.contains("hidden");
+        const successModal = document.getElementById("successModal");
+        const isSubmitted = successModal && !successModal.classList.contains("hidden");
+
+        if (!isWizardVisible || isSubmitted) return;
+
+        if (document.hidden) {
+          antiCheatViolationCount++;
+          sessionStorage.setItem(`PGSD_ANTI_CHEAT_${activeFormId}`, antiCheatViolationCount.toString());
+        } else {
+          const warningModal = document.getElementById("modalAntiCheatWarning");
+          const countEl = document.getElementById("antiCheatViolationCount");
+          const maxEl = document.getElementById("antiCheatMaxViolations");
+          if (countEl) countEl.textContent = `${antiCheatViolationCount}x`;
+          if (maxEl) maxEl.textContent = "3x";
+          if (warningModal) {
+            warningModal.classList.remove("hidden");
+            warningModal.classList.add("flex");
+          }
+          showToast(`⚠️ Deteksi: Anda berpindah jendela browser (${antiCheatViolationCount}x).`, "error", 5000);
+
+          if (antiCheatViolationCount >= 3) {
+            showToast("Batas perpindahan tab telah terlampaui. Mengirimkan jawaban secara otomatis...", "error", 6000);
+            setTimeout(() => {
+              closeAntiCheatWarningModal();
+              handleFinalSubmit(null, true);
+            }, 1200);
+          }
+        }
+      });
+    }
+
+    function closeAntiCheatWarningModal() {
+      const warningModal = document.getElementById("modalAntiCheatWarning");
+      if (warningModal) {
+        warningModal.classList.add("hidden");
+        warningModal.classList.remove("flex");
+      }
+    }
+    window.closeAntiCheatWarningModal = closeAntiCheatWarningModal;
+
+    function scrollToFirstUnansweredQuestion() {
+      const unanswered = document.querySelector(".quiz-card-unanswered, .question-card:not(.answered), input:invalid, textarea:invalid");
+      if (unanswered) {
+        unanswered.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        const wizard = document.getElementById("formWizardContainer");
+        if (wizard) wizard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+    window.scrollToFirstUnansweredQuestion = scrollToFirstUnansweredQuestion;
+
+    // =========================================================================
+    // 📜 AUTO E-CERTIFICATE GENERATOR (FEATURE C: 300-DPI RESOLUTION)
+    // =========================================================================
+    let currentCertificateData = null;
+
+    function checkAndRenderCertificate(payload, quizResult) {
+      const certCard = document.getElementById("certificateSuccessCard");
+      if (!certCard) return;
+
+      const isCertEnabled = (appConfig["Sertifikat_Aktif"] === true || appConfig["Sertifikat_Aktif"] === "true");
+      if (!isCertEnabled) {
+        certCard.classList.add("hidden");
+        return;
+      }
+
+      const certReq = appConfig["Sertifikat_Syarat"] || "SEMUA";
+      let isEligible = false;
+
+      if (certReq === "SEMUA") {
+        isEligible = true;
+      } else if (certReq === "LULUS") {
+        isEligible = !!(quizResult && quizResult.isPassed);
+      } else if (certReq === "SKOR_MIN") {
+        const minScore = parseFloat(appConfig["Sertifikat_Nilai_Min"] || 75);
+        const score = quizResult ? parseFloat(quizResult.percentage || 0) : (parseFloat(payload?.nilaiKelompok) || 0);
+        isEligible = score >= minScore;
+      }
+
+      if (!isEligible) {
+        certCard.classList.add("hidden");
+        return;
+      }
+
+      certCard.classList.remove("hidden");
+
+      const recipientName = (payload && payload.namaPenilai && payload.namaPenilai !== "-") 
+        ? payload.namaPenilai 
+        : (activeUserAccountName || document.getElementById("inputNama")?.value || "Peserta Didik");
+      
+      const recipientNim = (payload && payload.nimPenilai && payload.nimPenilai !== "-")
+        ? payload.nimPenilai
+        : (activeUserAccountNim || document.getElementById("inputNim")?.value || "-");
+
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const randCode = Math.random().toString(36).substring(2, 6).toUpperCase();
+      const certNo = `CERT/PGSD/${activeFormId}/${year}/${month}/${randCode}`;
+
+      const certNumEl = document.getElementById("certNumberDisplay");
+      const certRecipEl = document.getElementById("certRecipientDisplay");
+      if (certNumEl) certNumEl.textContent = certNo;
+      if (certRecipEl) certRecipEl.textContent = recipientName;
+
+      currentCertificateData = {
+        certNo: certNo,
+        recipientName: recipientName,
+        recipientNim: recipientNim,
+        eventTitle: appConfig["Sertifikat_Judul"] || "Sertifikat Penyelesaian & Penghargaan Akademik",
+        organizer: appConfig["Sertifikat_Penyelenggara"] || "Program Studi Pendidikan Guru Sekolah Dasar (PGSD) FKIP ULM",
+        signerName: appConfig["Sertifikat_Nama_Penandatangan"] || appConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || "Dosen Pengampu",
+        signerTitle: appConfig["Sertifikat_Jabatan_Penandatangan"] || "Dosen Pengampu Mata Kuliah",
+        matkul: appConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || "-",
+        scoreText: quizResult ? `Skor: ${quizResult.percentage}/100 (${quizResult.isPassed ? 'LULUS' : 'SELESAI'})` : `Evaluasi Peer-Assessment Mahasiswa`,
+        dateText: now.toLocaleDateString("id-ID", { day: 'numeric', month: 'long', year: 'numeric' })
+      };
+
+      generateStudentCertificateCanvas(currentCertificateData);
+    }
+
+    function generateStudentCertificateCanvas(certData) {
+      const canvas = document.getElementById("studentCertificateCanvas");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      const w = 1920;
+      const h = 1080;
+      canvas.width = w;
+      canvas.height = h;
+
+      // 1. Luxury Ivory Parchment Background
+      ctx.fillStyle = "#faf9f5";
+      ctx.fillRect(0, 0, w, h);
+
+      // Micro Background Texture Pattern
+      ctx.save();
+      ctx.strokeStyle = "rgba(180, 83, 9, 0.03)";
+      ctx.lineWidth = 1;
+      for (let i = 0; i < w; i += 45) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(w, h - i);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // 2. Borders
+      // Outer Dark Slate Border
+      ctx.lineWidth = 14;
+      ctx.strokeStyle = "#0f172a";
+      ctx.strokeRect(36, 36, w - 72, h - 72);
+
+      // Mid Thin Border
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "rgba(15, 23, 42, 0.35)";
+      ctx.strokeRect(48, 48, w - 96, h - 96);
+
+      // Inner Luxury Gold Border
+      ctx.lineWidth = 4.5;
+      ctx.strokeStyle = "#b45309";
+      ctx.strokeRect(58, 58, w - 116, h - 116);
+
+      // Corner Ornaments
+      const drawCornerFlourish = (cx, cy, flipX, flipY) => {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.scale(flipX ? -1 : 1, flipY ? -1 : 1);
+        ctx.fillStyle = "#b45309";
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(32, 0);
+        ctx.lineTo(0, 32);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = "#b45309";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(14, 14, 6, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      };
+      drawCornerFlourish(62, 62, false, false);
+      drawCornerFlourish(w - 62, 62, true, false);
+      drawCornerFlourish(62, h - 62, false, true);
+      drawCornerFlourish(w - 62, h - 62, true, true);
+
+      // 3. Header Text
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#64748b";
+      ctx.font = "600 15px 'Inter', sans-serif";
+      ctx.letterSpacing = "2px";
+      ctx.fillText("KEMENTERIAN PENDIDIKAN, KEBUDAYAAN, RISET, DAN TEKNOLOGI", w / 2, 115);
+
+      ctx.fillStyle = "#0f172a";
+      ctx.font = "800 24px 'Playfair Display', Georgia, serif";
+      ctx.letterSpacing = "1px";
+      ctx.fillText("UNIVERSITAS LAMBUNG MANGKURAT", w / 2, 150);
+
+      ctx.fillStyle = "#334155";
+      ctx.font = "700 17px 'Inter', sans-serif";
+      ctx.fillText("FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN", w / 2, 178);
+
+      ctx.fillStyle = "#b45309";
+      ctx.font = "600 14px 'Inter', monospace";
+      ctx.fillText("PROGRAM STUDI PENDIDIKAN GURU SEKOLAH DASAR (PGSD)", w / 2, 202);
+
+      // Divider Line with Central Star
+      ctx.strokeStyle = "#cbd5e1";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(w / 2 - 350, 222);
+      ctx.lineTo(w / 2 + 350, 222);
+      ctx.stroke();
+
+      ctx.fillStyle = "#b45309";
+      ctx.font = "16px sans-serif";
+      ctx.fillText("★ ★ ★", w / 2, 228);
+
+      // 4. Certificate Main Title
+      ctx.fillStyle = "#0f172a";
+      ctx.font = "800 46px 'Playfair Display', Georgia, serif";
+      ctx.fillText("SERTIFIKAT PENGHARGAAN", w / 2, 292);
+
+      ctx.fillStyle = "#64748b";
+      ctx.font = "600 14px 'Courier New', monospace";
+      ctx.fillText(`Nomor Dokumen: ${certData.certNo}`, w / 2, 322);
+
+      // 5. Salutation
+      ctx.fillStyle = "#475569";
+      ctx.font = "italic 400 20px Georgia, serif";
+      ctx.fillText("Diberikan dengan penuh kehormatan dan apresiasi kepada:", w / 2, 382);
+
+      // 6. Recipient Name
+      ctx.fillStyle = "#0f172a";
+      ctx.font = "bold 48px 'Playfair Display', Georgia, serif";
+      let nameFontSize = 48;
+      let measuredWidth = ctx.measureText(certData.recipientName).width;
+      if (measuredWidth > 1100) {
+        nameFontSize = 36;
+        ctx.font = `bold ${nameFontSize}px 'Playfair Display', Georgia, serif`;
+        measuredWidth = ctx.measureText(certData.recipientName).width;
+      }
+      ctx.fillText(certData.recipientName, w / 2, 448);
+
+      // Underline flourish
+      ctx.strokeStyle = "#b45309";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(w / 2 - measuredWidth / 2 - 25, 464);
+      ctx.lineTo(w / 2 + measuredWidth / 2 + 25, 464);
+      ctx.stroke();
+
+      // Recipient NIM
+      if (certData.recipientNim && certData.recipientNim !== "-") {
+        ctx.fillStyle = "#475569";
+        ctx.font = "600 18px 'Courier New', monospace";
+        ctx.fillText(`NIM: ${certData.recipientNim}`, w / 2, 496);
+      }
+
+      // 7. Statement Body
+      ctx.fillStyle = "#334155";
+      ctx.font = "400 20px 'Inter', sans-serif";
+      ctx.fillText("Atas dedikasi, integritas, serta keberhasilan menyelesaikan evaluasi akademik pada mata kuliah:", w / 2, 558);
+
+      ctx.fillStyle = "#0f172a";
+      ctx.font = "bold 26px 'Inter', sans-serif";
+      ctx.fillText(certData.matkul, w / 2, 598);
+
+      if (certData.scoreText) {
+        ctx.fillStyle = "#047857";
+        ctx.font = "700 20px 'Inter', monospace";
+        ctx.fillText(`Capaian: ${certData.scoreText}`, w / 2, 638);
+      }
+
+      // 8. Footer: QR Code Left, Seal Center, Signature Right
+      const footerY = 820;
+
+      // (A) QR Code Left
+      const qrX = 140;
+      const qrY = footerY - 50;
+      ctx.textAlign = "left";
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(qrX, qrY, 130, 130);
+      ctx.strokeStyle = "#cbd5e1";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(qrX, qrY, 130, 130);
+
+      const qrData = `PGSD-CERT|NO:${certData.certNo}|NAME:${certData.recipientName}|NIM:${certData.recipientNim}|DATE:${certData.dateText}`;
+      const qrImg = new Image();
+      qrImg.crossOrigin = "anonymous";
+      qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=0&data=${encodeURIComponent(qrData)}`;
+      qrImg.onload = () => {
+        ctx.drawImage(qrImg, qrX + 5, qrY + 5, 120, 120);
+      };
+      qrImg.onerror = () => {
+        ctx.fillStyle = "#0f172a";
+        ctx.font = "bold 11px monospace";
+        ctx.fillText("✓ VERIFIED", qrX + 25, qrY + 60);
+        ctx.fillText("DIGITAL CERT", qrX + 18, qrY + 76);
+      };
+
+      ctx.fillStyle = "#475569";
+      ctx.font = "700 13px 'Inter', sans-serif";
+      ctx.fillText("Validasi Keaslian Dokumen", qrX + 145, qrY + 45);
+      ctx.fillStyle = "#64748b";
+      ctx.font = "400 12px 'Inter', sans-serif";
+      ctx.fillText("Pindai kode QR untuk", qrX + 145, qrY + 68);
+      ctx.fillText("memverifikasi integritas sertifikat", qrX + 145, qrY + 86);
+      ctx.font = "600 11px monospace";
+      ctx.fillStyle = "#047857";
+      ctx.fillText("STATUS: TERTANDATANGANI SECARA DIGITAL", qrX + 145, qrY + 110);
+
+      // (B) Center Seal
+      const sealX = w / 2;
+      const sealY = footerY + 20;
+      ctx.save();
+      ctx.translate(sealX, sealY);
+      ctx.beginPath();
+      ctx.arc(0, 0, 52, 0, Math.PI * 2);
+      ctx.fillStyle = "#fef3c7";
+      ctx.fill();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = "#b45309";
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(0, 0, 44, 0, Math.PI * 2);
+      ctx.setLineDash([4, 3]);
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = "#92400e";
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#92400e";
+      ctx.font = "bold 10px 'Inter', sans-serif";
+      ctx.fillText("MUTU AKADEMIK", 0, -16);
+      ctx.font = "800 18px 'Inter', sans-serif";
+      ctx.fillText("UNGGUL", 0, 6);
+      ctx.font = "600 9px monospace";
+      ctx.fillText("FKIP ULM", 0, 24);
+      ctx.restore();
+
+      // (C) Signature Right
+      const sigX = w - 210;
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#475569";
+      ctx.font = "400 15px 'Inter', sans-serif";
+      ctx.fillText(`Banjarmasin, ${certData.dateText}`, sigX, footerY - 50);
+      ctx.fillText(certData.signerTitle, sigX, footerY - 26);
+
+      // Signature flourish
+      ctx.save();
+      ctx.strokeStyle = "#1e3a8a";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(sigX - 70, footerY + 25);
+      ctx.bezierCurveTo(sigX - 40, footerY - 10, sigX - 10, footerY + 50, sigX + 20, footerY + 15);
+      ctx.bezierCurveTo(sigX + 30, footerY + 2, sigX + 50, footerY + 30, sigX + 80, footerY + 18);
+      ctx.stroke();
+      ctx.restore();
+
+      ctx.fillStyle = "#0f172a";
+      ctx.font = "bold 18px 'Inter', sans-serif";
+      ctx.fillText(certData.signerName, sigX, footerY + 68);
+
+      ctx.strokeStyle = "#0f172a";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(sigX - 120, footerY + 75);
+      ctx.lineTo(sigX + 120, footerY + 75);
+      ctx.stroke();
+
+      ctx.fillStyle = "#64748b";
+      ctx.font = "400 12px 'Courier New', monospace";
+      ctx.fillText(certData.organizer, sigX, footerY + 95);
+    }
+
+    function downloadStudentCertificate(format = 'png') {
+      const canvas = document.getElementById("studentCertificateCanvas");
+      if (!canvas) {
+        showToast("Kanvas sertifikat belum siap.", "error");
+        return;
+      }
+
+      const certNumEl = document.getElementById("certNumberDisplay");
+      const cleanCertNo = (certNumEl?.textContent || `CERT-${activeFormId}`).replace(/[^a-zA-Z0-9]/g, '_');
+      const filename = `Sertifikat_${cleanCertNo}`;
+
+      if (format === 'png') {
+        try {
+          const dataUrl = canvas.toDataURL("image/png");
+          const a = document.createElement("a");
+          a.href = dataUrl;
+          a.download = `${filename}.png`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          showToast("Sertifikat berhasil diunduh dalam format PNG!", "success");
+        } catch(e) {
+          console.error("Error exporting PNG certificate:", e);
+          showToast("Gagal mengunduh sertifikat: " + (e.message || e), "error");
+        }
+      } else if (format === 'pdf') {
+        try {
+          const dataUrl = canvas.toDataURL("image/png");
+          const printWindow = window.open("", "_blank");
+          if (!printWindow) {
+            showToast("Harap izinkan popup browser untuk mencetak sertifikat.", "warning");
+            return;
+          }
+          printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+              <title>${filename} - Cetak Sertifikat</title>
+              <style>
+                @page {
+                  size: A4 landscape;
+                  margin: 0;
+                }
+                body {
+                  margin: 0;
+                  padding: 0;
+                  background-color: #faf9f5;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  min-height: 100vh;
+                  -webkit-print-color-adjust: exact;
+                  print-color-adjust: exact;
+                }
+                img {
+                  width: 100vw;
+                  height: 100vh;
+                  object-fit: contain;
+                  display: block;
+                }
+              </style>
+            </head>
+            <body>
+              <img src="${dataUrl}" onload="setTimeout(function(){ window.print(); }, 400);" />
+            </body>
+            </html>
+          `);
+          printWindow.document.close();
+          showToast("Jendela cetak / simpan PDF sertifikat telah dibuka.", "success");
+        } catch(e) {
+          console.error("Error opening PDF print window:", e);
+          showToast("Gagal membuka jendela cetak PDF: " + (e.message || e), "error");
+        }
+      }
+    }
+    window.downloadStudentCertificate = downloadStudentCertificate;
 
     function resetStudentForm() {
       const radioChecked = document.querySelector("input[name='selectedGroup']:checked");

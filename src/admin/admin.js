@@ -4460,7 +4460,10 @@
         "Pesan_Form_Belum_Buka", "Pesan_Form_Ditutup",
         "Cegah_Penilaian_Diri", "Kunci_Respons_Ganda",
         "KKM_Nilai_Kuis", "Mode_Rilis_Nilai_Kuis",
-        "Tampilkan_Kunci_Jawaban_Kuis", "Tampilkan_Poin_Kuis", "Tampilkan_Pembahasan_Kuis"
+        "Tampilkan_Kunci_Jawaban_Kuis", "Tampilkan_Poin_Kuis", "Tampilkan_Pembahasan_Kuis",
+        "Timer_Ujian_Aktif", "Durasi_Ujian_Menit", "Auto_Submit_Timeout", "Peringatan_Pindah_Tab",
+        "Sertifikat_Aktif", "Sertifikat_Judul", "Sertifikat_Penyelenggara",
+        "Sertifikat_Penandatangan", "Sertifikat_Jabatan", "Sertifikat_Syarat"
       ];
 
       keys.forEach(k => {
@@ -4553,7 +4556,10 @@
         "Pesan_Form_Belum_Buka", "Pesan_Form_Ditutup",
         "Cegah_Penilaian_Diri", "Kunci_Respons_Ganda",
         "KKM_Nilai_Kuis", "Mode_Rilis_Nilai_Kuis",
-        "Tampilkan_Kunci_Jawaban_Kuis", "Tampilkan_Poin_Kuis", "Tampilkan_Pembahasan_Kuis"
+        "Tampilkan_Kunci_Jawaban_Kuis", "Tampilkan_Poin_Kuis", "Tampilkan_Pembahasan_Kuis",
+        "Timer_Ujian_Aktif", "Durasi_Ujian_Menit", "Auto_Submit_Timeout", "Peringatan_Pindah_Tab",
+        "Sertifikat_Aktif", "Sertifikat_Judul", "Sertifikat_Penyelenggara",
+        "Sertifikat_Penandatangan", "Sertifikat_Jabatan", "Sertifikat_Syarat"
       ];
 
       keys.forEach(k => {
@@ -4637,6 +4643,14 @@
       document.getElementById("labelCurrentActiveSesi").textContent = val;
       triggerAutoSaveConfig();
       showAdminToast(`Sesi aktif diubah menjadi '${val}' (Tersimpan Otomatis).`, "success");
+    }
+
+    function setQuickExamDuration(minutes) {
+      const input = document.getElementById("cfg_Durasi_Ujian_Menit");
+      if (input) input.value = minutes;
+      adminAppConfig["Durasi_Ujian_Menit"] = minutes;
+      handleConfigInputAutoSave(true);
+      showAdminToast(`Durasi ujian diatur menjadi ${minutes} menit.`, "info", 2000);
     }
 
     // Prefix Custom Logic (Max 50 Characters)
@@ -9620,6 +9634,487 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       const modal = document.getElementById("modalAdminResponseDetail");
       if (modal) modal.classList.add("hidden");
     }
+
+    // =========================================================================
+    // GOOGLE FORMS STYLE DUAL-VIEW RESPONSES & ANALYTICS DASHBOARD ENGINE
+    // =========================================================================
+    let currentResponsesSubView = 'analytics';
+
+    function switchResponsesSubView(mode) {
+      currentResponsesSubView = mode || 'analytics';
+      const btnAnalytics = document.getElementById("btnResponsesSubView_analytics");
+      const btnCards = document.getElementById("btnResponsesSubView_cards");
+      const viewAnalytics = document.getElementById("responsesSubView_analytics");
+      const viewCards = document.getElementById("responsesSubView_cards");
+
+      if (currentResponsesSubView === 'analytics') {
+        if (btnAnalytics) {
+          btnAnalytics.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-zinc-900 shadow-xs flex items-center gap-1.5 transition cursor-pointer";
+          btnAnalytics.querySelector('svg')?.classList.add('text-indigo-600');
+        }
+        if (btnCards) {
+          btnCards.className = "px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-500 hover:text-zinc-900 transition flex items-center gap-1.5 cursor-pointer";
+          btnCards.querySelector('svg')?.classList.remove('text-indigo-600');
+        }
+        if (viewAnalytics) viewAnalytics.classList.remove("hidden");
+        if (viewCards) viewCards.classList.add("hidden");
+        renderResponsesAnalyticsDashboard();
+      } else {
+        if (btnCards) {
+          btnCards.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-zinc-900 shadow-xs flex items-center gap-1.5 transition cursor-pointer";
+          btnCards.querySelector('svg')?.classList.add('text-indigo-600');
+        }
+        if (btnAnalytics) {
+          btnAnalytics.className = "px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-500 hover:text-zinc-900 transition flex items-center gap-1.5 cursor-pointer";
+          btnAnalytics.querySelector('svg')?.classList.remove('text-indigo-600');
+        }
+        if (viewCards) viewCards.classList.remove("hidden");
+        if (viewAnalytics) viewAnalytics.classList.add("hidden");
+        renderAdminResponsesList();
+      }
+    }
+
+    function renderResponsesAnalyticsDashboard() {
+      const container = document.getElementById("analyticsQuestionsContainer");
+      const emptyEl = document.getElementById("emptyAnalyticsState");
+      if (!container) return;
+
+      const total = adminResponsesList.length;
+      if (total === 0) {
+        if (emptyEl) emptyEl.classList.remove("hidden");
+        container.innerHTML = "";
+        const elTotal = document.getElementById("analyticsTotalResponses");
+        const elAvg = document.getElementById("analyticsAvgScore");
+        const elPass = document.getElementById("analyticsPassRate");
+        const elSpread = document.getElementById("analyticsScoreSpread");
+        if (elTotal) elTotal.textContent = "0";
+        if (elAvg) elAvg.textContent = "0.0";
+        if (elPass) elPass.textContent = "0%";
+        if (elSpread) elSpread.textContent = "0 - 0";
+        return;
+      }
+
+      if (emptyEl) emptyEl.classList.add("hidden");
+
+      // 1. Executive Metrics Calculation
+      const scores = adminResponsesList
+        .map(r => parseFloat(r.nilaiKelompok))
+        .filter(n => !isNaN(n));
+
+      const avgScore = scores.length ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1) : "0.0";
+      const sortedScores = [...scores].sort((a, b) => a - b);
+      let medianScore = "0.0";
+      if (sortedScores.length > 0) {
+        const mid = Math.floor(sortedScores.length / 2);
+        medianScore = sortedScores.length % 2 !== 0 
+          ? sortedScores[mid].toFixed(1) 
+          : ((sortedScores[mid - 1] + sortedScores[mid]) / 2).toFixed(1);
+      }
+      const minScore = sortedScores.length ? sortedScores[0] : 0;
+      const maxScore = sortedScores.length ? sortedScores[sortedScores.length - 1] : 0;
+      const kkm = parseFloat(adminAppConfig["KKM_Nilai_Kuis"] || 75);
+      const passedCount = scores.filter(s => s >= kkm).length;
+      const passRate = scores.length ? Math.round((passedCount / scores.length) * 100) : 0;
+
+      // Update executive metric elements
+      const elTotal = document.getElementById("analyticsTotalResponses");
+      const elAvg = document.getElementById("analyticsAvgScore");
+      const elMedian = document.getElementById("analyticsMedianText");
+      const elPass = document.getElementById("analyticsPassRate");
+      const elKkm = document.getElementById("analyticsKkmTargetText");
+      const elSpread = document.getElementById("analyticsScoreSpread");
+      const elLast = document.getElementById("analyticsLastActivityText");
+
+      if (elTotal) elTotal.textContent = total.toLocaleString('id-ID');
+      if (elAvg) elAvg.textContent = avgScore;
+      if (elMedian) elMedian.textContent = `Median: ${medianScore}`;
+      if (elPass) elPass.textContent = `${passRate}%`;
+      if (elKkm) elKkm.textContent = `KKM: ${kkm} (${passedCount}/${scores.length} Lulus)`;
+      if (elSpread) elSpread.textContent = `${minScore} - ${maxScore}`;
+      if (elLast) elLast.textContent = adminResponsesList[0]?.timestamp ? `Respons terakhir: ${adminResponsesList[0].timestamp}` : 'Aktif';
+
+      // 2. Parse Custom Answers for All Responses
+      const answersByField = {};
+      adminResponsesList.forEach(r => {
+        let ansObj = {};
+        if (typeof r.customAnswers === 'string') {
+          try { ansObj = JSON.parse(r.customAnswers || '{}'); } catch(e) {}
+        } else if (typeof r.customAnswers === 'object' && r.customAnswers) {
+          ansObj = r.customAnswers;
+        }
+        for (const [fId, val] of Object.entries(ansObj)) {
+          if (!answersByField[fId]) answersByField[fId] = [];
+          if (val !== undefined && val !== null && val !== "") {
+            answersByField[fId].push(val);
+          }
+        }
+      });
+
+      // 3. Render Cards Per Question
+      let cardsHtml = '';
+
+      // Card 0: Score Distribution Histogram (if any scores exist)
+      if (scores.length > 0) {
+        cardsHtml += `
+          <div class="bg-white rounded-2xl border border-zinc-200 p-4 sm:p-5 shadow-xs space-y-3">
+            <div class="flex items-center justify-between border-b border-zinc-100 pb-2.5">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
+                <h4 class="font-bold text-xs sm:text-sm text-zinc-900">Distribusi Skor Penilaian &amp; Kuis</h4>
+              </div>
+              <span class="text-[10.5px] px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-mono font-semibold border border-indigo-200">
+                ${scores.length} Skor Terdata
+              </span>
+            </div>
+            ${renderScoreHistogramSvg(scores, kkm)}
+          </div>
+        `;
+      }
+
+      // Group Presentations & Presenters (if PEER_ASSESSMENT mode)
+      const formMode = adminAppConfig["form_mode"] || adminAppConfig["Form_Mode"] || "PEER_ASSESSMENT";
+      if (formMode === "PEER_ASSESSMENT") {
+        const grpCounts = {};
+        const bestVotes = {};
+        adminResponsesList.forEach(r => {
+          if (r.kelompok) {
+            grpCounts[r.kelompok] = (grpCounts[r.kelompok] || 0) + 1;
+          }
+          if (r.best1) bestVotes[r.best1] = (bestVotes[r.best1] || 0) + 1;
+          if (r.best2) bestVotes[r.best2] = (bestVotes[r.best2] || 0) + 1;
+        });
+
+        if (Object.keys(grpCounts).length > 0) {
+          cardsHtml += `
+            <div class="bg-white rounded-2xl border border-zinc-200 p-4 sm:p-5 shadow-xs space-y-3">
+              <div class="flex items-center justify-between border-b border-zinc-100 pb-2.5">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                  <h4 class="font-bold text-xs sm:text-sm text-zinc-900">Sebaran Penilaian per Kelompok Presentasi</h4>
+                </div>
+                <span class="text-[10.5px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-mono font-semibold border border-emerald-200">
+                  ${Object.keys(grpCounts).length} Kelompok
+                </span>
+              </div>
+              ${renderBarChartSvg(grpCounts, total)}
+            </div>
+          `;
+        }
+
+        if (Object.keys(bestVotes).length > 0) {
+          cardsHtml += `
+            <div class="bg-white rounded-2xl border border-zinc-200 p-4 sm:p-5 shadow-xs space-y-3">
+              <div class="flex items-center justify-between border-b border-zinc-100 pb-2.5">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                  <h4 class="font-bold text-xs sm:text-sm text-zinc-900">Perolehan Suara Presentator Terbaik</h4>
+                </div>
+                <span class="text-[10.5px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 font-mono font-semibold border border-amber-200">
+                  ${Object.keys(bestVotes).length} Nominator
+                </span>
+              </div>
+              ${renderBarChartSvg(bestVotes, total)}
+            </div>
+          `;
+        }
+      }
+
+      // Questions from Form Schema
+      const stages = (adminFormSchema && adminFormSchema.tahapan) || [];
+      stages.forEach((stage, sIdx) => {
+        (stage.fields || []).forEach((field, fIdx) => {
+          if (['SECTION_HEADER', 'VIDEO', 'IMAGE', 'DIVIDER'].includes(field.type)) return;
+          if (field.id === 'fld_core_group' || field.id === 'fld_core_score' || field.id === 'fld_core_voting') return;
+
+          const fAnswers = answersByField[field.id] || [];
+          const fTotal = fAnswers.length;
+
+          let chartContent = '';
+          if (field.type === 'RADIO' || field.type === 'DROPDOWN') {
+            const counts = {};
+            (field.options || []).forEach(opt => { counts[opt] = 0; });
+            fAnswers.forEach(ans => {
+              const strAns = String(ans).trim();
+              counts[strAns] = (counts[strAns] || 0) + 1;
+            });
+            chartContent = renderDonutChartSvg(counts, fTotal);
+          } else if (field.type === 'CHECKBOX') {
+            const counts = {};
+            (field.options || []).forEach(opt => { counts[opt] = 0; });
+            fAnswers.forEach(ans => {
+              const list = Array.isArray(ans) ? ans : [ans];
+              list.forEach(item => {
+                const s = String(item).trim();
+                counts[s] = (counts[s] || 0) + 1;
+              });
+            });
+            chartContent = renderBarChartSvg(counts, fTotal);
+          } else if (field.type === 'LINEAR_SCALE' || field.type === 'RATING') {
+            const counts = {};
+            const min = field.scaleMin || 1;
+            const max = field.scaleMax || 5;
+            for (let i = min; i <= max; i++) { counts[i] = 0; }
+            fAnswers.forEach(ans => {
+              const v = parseInt(ans);
+              if (!isNaN(v)) counts[v] = (counts[v] || 0) + 1;
+            });
+            chartContent = renderBarChartSvg(counts, fTotal);
+          } else {
+            // Textual / Paragraph Qualitative List
+            chartContent = renderTextResponsesFeed(field.id, fAnswers);
+          }
+
+          cardsHtml += `
+            <div class="bg-white rounded-2xl border border-zinc-200 p-4 sm:p-5 shadow-xs space-y-3">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 border-b border-zinc-100 pb-2.5">
+                <div>
+                  <h4 class="font-bold text-xs sm:text-sm text-zinc-900">${escapeHtml(field.label || 'Pertanyaan')}</h4>
+                  ${field.description ? `<p class="text-[11px] text-zinc-400 mt-0.5">${escapeHtml(field.description)}</p>` : ''}
+                </div>
+                <div class="flex items-center gap-1.5 self-start sm:self-auto shrink-0">
+                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600 font-mono font-medium">${escapeHtml(field.type)}</span>
+                  <span class="text-[10.5px] px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-mono font-semibold border border-indigo-200">
+                    ${fTotal} Tanggapan
+                  </span>
+                </div>
+              </div>
+              ${chartContent}
+            </div>
+          `;
+        });
+      });
+
+      container.innerHTML = cardsHtml;
+      renderAllMathInElement(container);
+    }
+
+    // Chart Renderer 1: SVG Donut Chart with Colored Breakdown Legend
+    function renderDonutChartSvg(countsObj, total) {
+      const palette = ['#4f46e5', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#3b82f6', '#14b8a6', '#f97316'];
+      const entries = Object.entries(countsObj).filter(([_, c]) => c > 0);
+      if (entries.length === 0 || total === 0) {
+        return `<p class="text-xs text-zinc-400 italic py-3 text-center">Belum ada tanggapan untuk pertanyaan ini.</p>`;
+      }
+
+      const r = 60;
+      const circ = 2 * Math.PI * r;
+      let offset = 0;
+      const slicesSvg = entries.map(([label, count], idx) => {
+        const frac = count / total;
+        const dash = frac * circ;
+        const color = palette[idx % palette.length];
+        const svgCircle = `<circle r="${r}" cx="90" cy="90" fill="transparent" stroke="${color}" stroke-width="28" stroke-dasharray="${dash} ${circ - dash}" stroke-dashoffset="-${offset}" stroke-linecap="round" class="transition-all duration-500"></circle>`;
+        offset += dash;
+        return svgCircle;
+      }).join('');
+
+      const legendHtml = entries.map(([label, count], idx) => {
+        const pct = Math.round((count / total) * 100);
+        const color = palette[idx % palette.length];
+        return `
+          <div class="flex items-center justify-between gap-2 text-xs py-1 border-b border-zinc-100 last:border-0">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${color}"></span>
+              <span class="text-zinc-700 font-medium truncate">${escapeHtml(label)}</span>
+            </div>
+            <div class="flex items-center gap-2 shrink-0 font-mono text-[11px]">
+              <span class="font-bold text-zinc-900">${count}</span>
+              <span class="text-zinc-400 text-[10px]">(${pct}%)</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center pt-2">
+          <div class="sm:col-span-5 flex items-center justify-center">
+            <div class="relative w-[180px] h-[180px]">
+              <svg viewBox="0 0 180 180" class="w-full h-full -rotate-90">
+                ${slicesSvg}
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <span class="text-xs font-bold text-zinc-900 font-mono">${total}</span>
+                <span class="text-[9.5px] text-zinc-400 uppercase tracking-wider font-semibold">Total</span>
+              </div>
+            </div>
+          </div>
+          <div class="sm:col-span-7 space-y-1 max-h-[220px] overflow-y-auto custom-scrollbar pr-1">
+            ${legendHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    // Chart Renderer 2: Horizontal Proportional Bar Chart
+    function renderBarChartSvg(countsObj, total) {
+      const entries = Object.entries(countsObj).sort((a, b) => b[1] - a[1]);
+      if (entries.length === 0 || total === 0) {
+        return `<p class="text-xs text-zinc-400 italic py-3 text-center">Belum ada tanggapan.</p>`;
+      }
+
+      const maxCount = Math.max(...entries.map(e => e[1])) || 1;
+
+      return `
+        <div class="space-y-2.5 pt-1.5 max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
+          ${entries.map(([label, count]) => {
+            const pct = Math.round((count / total) * 100);
+            const barWidth = Math.max(4, Math.round((count / maxCount) * 100));
+            return `
+              <div class="space-y-1 text-xs">
+                <div class="flex items-center justify-between text-zinc-700">
+                  <span class="font-medium truncate pr-2">${escapeHtml(label)}</span>
+                  <div class="flex items-center gap-1.5 shrink-0 font-mono text-[11px]">
+                    <span class="font-bold text-zinc-900">${count}</span>
+                    <span class="text-zinc-400 text-[10px]">(${pct}%)</span>
+                  </div>
+                </div>
+                <div class="w-full h-2.5 rounded-full bg-zinc-100 overflow-hidden">
+                  <div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-indigo-600 transition-all duration-500" style="width: ${barWidth}%"></div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    // Chart Renderer 3: Score Distribution Histogram
+    function renderScoreHistogramSvg(scores, kkm) {
+      const buckets = [
+        { label: "< 50", min: 0, max: 49.99, color: "bg-rose-500", border: "border-rose-400" },
+        { label: "50 - 69", min: 50, max: 69.99, color: "bg-amber-500", border: "border-amber-400" },
+        { label: "70 - 84", min: 70, max: 84.99, color: "bg-indigo-500", border: "border-indigo-400" },
+        { label: "85 - 100", min: 85, max: 100, color: "bg-emerald-500", border: "border-emerald-400" }
+      ];
+
+      buckets.forEach(b => {
+        b.count = scores.filter(s => s >= b.min && s <= b.max).length;
+      });
+
+      const maxB = Math.max(...buckets.map(b => b.count)) || 1;
+
+      return `
+        <div class="space-y-3 pt-2">
+          <div class="grid grid-cols-4 gap-2.5 text-center items-end h-[120px] pb-1 border-b border-zinc-100">
+            ${buckets.map(b => {
+              const hPct = Math.max(8, Math.round((b.count / maxB) * 100));
+              return `
+                <div class="flex flex-col items-center justify-end h-full gap-1.5">
+                  <span class="text-[10px] font-bold font-mono text-zinc-700">${b.count}</span>
+                  <div class="w-full max-w-[48px] rounded-t-lg ${b.color} transition-all duration-500 shadow-xs" style="height: ${hPct}%"></div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+          <div class="grid grid-cols-4 gap-2.5 text-center font-mono text-[10px] text-zinc-500 font-semibold">
+            ${buckets.map(b => `<div>${b.label}</div>`).join('')}
+          </div>
+          <div class="p-2.5 rounded-xl bg-zinc-50 border border-zinc-200 text-xs flex items-center justify-between text-zinc-600">
+            <span>Ambang Kelulusan (KKM): <strong class="text-zinc-900">${kkm} Poin</strong></span>
+            <span class="text-[11px] font-semibold text-emerald-700 font-mono">
+              ${scores.filter(s => s >= kkm).length} dari ${scores.length} Mahasiswa Lulus
+            </span>
+          </div>
+        </div>
+      `;
+    }
+
+    // Chart Renderer 4: Qualitative Text Responses Feed
+    function renderTextResponsesFeed(fieldId, answersList) {
+      if (!answersList || answersList.length === 0) {
+        return `<p class="text-xs text-zinc-400 italic py-2">Belum ada respons tertulis.</p>`;
+      }
+
+      return `
+        <div class="space-y-2 pt-1">
+          <div class="relative">
+            <input 
+              type="text" 
+              placeholder="Saring respons tertulis..." 
+              oninput="filterQualitativeAnswers('${fieldId}', this.value)"
+              class="w-full pl-7 pr-3 py-1.5 rounded-lg border border-zinc-200 text-xs focus:border-indigo-600 outline-none bg-zinc-50 focus:bg-white"
+            >
+            <span class="absolute left-2.5 top-2 text-zinc-400 text-xs">🔍</span>
+          </div>
+          <div id="qualitativeList_${fieldId}" class="space-y-1.5 max-h-[180px] overflow-y-auto custom-scrollbar pr-1">
+            ${answersList.map((txt, idx) => `
+              <div class="p-2 rounded-xl bg-zinc-50 border border-zinc-200/80 text-xs text-zinc-700 flex items-start gap-2">
+                <span class="w-4 h-4 rounded-full bg-zinc-200 text-zinc-600 text-[10px] font-mono flex items-center justify-center shrink-0 mt-0.5">${idx + 1}</span>
+                <span class="leading-relaxed break-words">${escapeHtml(String(txt))}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function filterQualitativeAnswers(fieldId, query) {
+      const container = document.getElementById(`qualitativeList_${fieldId}`);
+      if (!container) return;
+      const q = (query || "").trim().toLowerCase();
+      const items = container.querySelectorAll("div.p-2");
+      items.forEach(it => {
+        if (!q || it.textContent.toLowerCase().includes(q)) {
+          it.style.display = "";
+        } else {
+          it.style.display = "none";
+        }
+      });
+    }
+
+    function printResponsesAnalyticsReport() {
+      const targetForm = currentFormId || DEFAULT_PRIMARY_FORM_ID;
+      const formTitle = adminAppConfig["Judul_Form"] || (currentFormMeta?.judulForm) || "Formulir";
+      const total = adminResponsesList.length;
+
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        window.print();
+        return;
+      }
+
+      const contentHtml = document.getElementById("responsesSubView_analytics")?.innerHTML || "";
+
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html lang="id">
+        <head>
+          <meta charset="UTF-8">
+          <title>Laporan Analitik • ${escapeHtml(formTitle)}</title>
+          <script src="https://cdn.tailwindcss.com"></script>
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+          <style>
+            @media print { body { padding: 10px; } }
+            body { font-family: 'Inter', system-ui, sans-serif; background: #fff; color: #18181b; }
+          </style>
+        </head>
+        <body class="p-6 max-w-4xl mx-auto space-y-6">
+          <div class="border-b-2 border-zinc-900 pb-4 flex items-center justify-between">
+            <div>
+              <h1 class="text-xl font-bold">${escapeHtml(formTitle)}</h1>
+              <p class="text-xs text-zinc-500 mt-1">Laporan Ringkasan Analitik Tanggapan Responden • PIN Form: ${escapeHtml(targetForm)}</p>
+            </div>
+            <div class="text-right text-xs font-mono text-zinc-500">
+              <p>Total: ${total} Respons</p>
+              <p>${new Date().toLocaleString('id-ID')}</p>
+            </div>
+          </div>
+          <div>${contentHtml}</div>
+          <script>
+            window.onload = function() {
+              setTimeout(function() { window.print(); }, 500);
+            };
+          </script>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+    }
+
+    window.switchResponsesSubView = switchResponsesSubView;
+    window.renderResponsesAnalyticsDashboard = renderResponsesAnalyticsDashboard;
+    window.printResponsesAnalyticsReport = printResponsesAnalyticsReport;
+    window.filterQualitativeAnswers = filterQualitativeAnswers;
 
     async function syncUnsyncedResponsesToSheets() {
       const targetForm = currentFormId || DEFAULT_PRIMARY_FORM_ID;

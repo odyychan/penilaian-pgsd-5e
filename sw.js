@@ -5,8 +5,8 @@
  *   - Assets (images, fonts): Stale-while-revalidate
  * ============================================================ */
 
-const CACHE_VERSION = 'v2.4.87';
-const CACHE_NAME = `pgsd-peer-assessment-${CACHE_VERSION}`;
+const CACHE_VERSION = 'v2.4.88';
+const CACHE_NAME = `pgsd-cache-${CACHE_VERSION}`;
 const OFFLINE_URL = '/index.html';
 const STATIC_CACHE  = `pgsd-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `pgsd-runtime-${CACHE_VERSION}`;
@@ -19,14 +19,13 @@ const PRECACHE_MODULES = [
   '/rekap.html',
   '/manifest.json',
   '/favicon.ico',
-  '/logo-ulm.png',
-  '/src/admin/admin.css?v=2.4.87',
-  '/src/admin/admin.js?v=2.4.87',
-  '/src/student/index.css?v=2.4.87',
-  '/src/student/student.js?v=2.4.87',
   '/assets/logo-ulm.png',
-  '/assets/icon-192.png',
-  '/assets/icon-512.png',
+  '/assets/pwa-icon-192.png',
+  '/assets/pwa-icon-512.png',
+  '/src/admin/admin.css?v=2.4.88',
+  '/src/admin/admin.js?v=2.4.88',
+  '/src/student/index.css?v=2.4.88',
+  '/src/student/student.js?v=2.4.88',
 ];
 
 // ---- INSTALL: Activate immediately & precache ----

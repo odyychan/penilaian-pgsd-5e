@@ -35,7 +35,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="src/admin/admin.css?v=2.4.87">
+  <link rel="stylesheet" href="src/admin/admin.css?v=2.4.88">
   <!-- KaTeX CSS & JS for Universal Math / LaTeX / AI & Word Formula Rendering -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -1075,6 +1075,152 @@
               </div>
             </div>
           </div>
+
+          <!-- BATAS WAKTU UJIAN / FLOATING EXAM TIMER -->
+          <div class="mt-3.5 pt-3.5 border-t border-amber-200/80 space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-zinc-900">⏱️ Batas Waktu Ujian (Countdown Exam Timer)</span>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-semibold">CBT Mode</span>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="cfg_Timer_Ujian_Aktif" onchange="handleConfigInputChange('Timer_Ujian_Aktif', this.checked); handleConfigInputAutoSave();" class="sr-only peer">
+                <div class="w-9 h-5 bg-zinc-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-600"></div>
+              </label>
+            </div>
+
+            <div id="quizTimerDetailsRow" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs pt-1">
+              <!-- Durasi Menit -->
+              <div class="p-3 rounded-xl bg-amber-50/60 border border-amber-200/80 space-y-2">
+                <label class="block font-bold text-zinc-800 text-xs">Durasi Waktu Pengerjaan:</label>
+                <div class="flex items-center gap-2">
+                  <input 
+                    type="number" 
+                    id="cfg_Durasi_Ujian_Menit" 
+                    min="1" 
+                    max="360" 
+                    value="30" 
+                    onchange="handleConfigInputChange('Durasi_Ujian_Menit', this.value); handleConfigInputAutoSave();" 
+                    class="w-20 px-3 py-1.5 rounded-lg border border-amber-300 bg-white font-mono font-bold text-zinc-800 text-xs focus:border-amber-600 outline-none"
+                  >
+                  <span class="text-zinc-600 font-semibold text-xs">Menit</span>
+                </div>
+                <!-- Quick duration buttons -->
+                <div class="flex items-center gap-1.5 pt-0.5">
+                  <button type="button" onclick="setQuickExamDuration(15)" class="px-2 py-0.5 rounded bg-white hover:bg-amber-100 text-[10.5px] border border-amber-300 text-amber-800 font-medium cursor-pointer">15m</button>
+                  <button type="button" onclick="setQuickExamDuration(30)" class="px-2 py-0.5 rounded bg-white hover:bg-amber-100 text-[10.5px] border border-amber-300 text-amber-800 font-medium cursor-pointer">30m</button>
+                  <button type="button" onclick="setQuickExamDuration(45)" class="px-2 py-0.5 rounded bg-white hover:bg-amber-100 text-[10.5px] border border-amber-300 text-amber-800 font-medium cursor-pointer">45m</button>
+                  <button type="button" onclick="setQuickExamDuration(60)" class="px-2 py-0.5 rounded bg-white hover:bg-amber-100 text-[10.5px] border border-amber-300 text-amber-800 font-medium cursor-pointer">60m</button>
+                </div>
+              </div>
+
+              <!-- Auto-Submit on Timeout -->
+              <div class="p-3 rounded-xl bg-amber-50/60 border border-amber-200/80 space-y-1.5">
+                <label class="flex items-center gap-2 cursor-pointer select-none">
+                  <input type="checkbox" id="cfg_Auto_Submit_Timeout" onchange="handleConfigInputChange('Auto_Submit_Timeout', this.checked); handleConfigInputAutoSave();" checked class="w-4 h-4 text-amber-600 rounded cursor-pointer">
+                  <span class="text-xs font-bold text-zinc-800">Auto-Submit Saat Waktu Habis</span>
+                </label>
+                <p class="text-[11px] text-zinc-500">Secara otomatis mengirim jawaban yang sudah terisi saat hitung mundur mencapai 00:00.</p>
+              </div>
+
+              <!-- Anti-Cheat Tab Detection -->
+              <div class="p-3 rounded-xl bg-amber-50/60 border border-amber-200/80 space-y-1.5">
+                <label class="flex items-center gap-2 cursor-pointer select-none">
+                  <input type="checkbox" id="cfg_Peringatan_Pindah_Tab" onchange="handleConfigInputChange('Peringatan_Pindah_Tab', this.checked); handleConfigInputAutoSave();" class="w-4 h-4 text-amber-600 rounded cursor-pointer">
+                  <span class="text-xs font-bold text-zinc-800">Peringatan Pindah Tab (Anti-Cheat)</span>
+                </label>
+                <p class="text-[11px] text-zinc-500">Menampilkan dialog peringatan interaktif jika responden membuka tab atau aplikasi lain.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- E-SERTIFIKAT DIGITAL OTOMATIS (AUTO-CERTIFICATE ENGINE) -->
+        <div id="certificateSettingsCard" class="bg-white rounded-xl sm:rounded-2xl border border-indigo-200/90 p-3.5 sm:p-6 shadow-xs space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 pb-3.5">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-200 flex items-center justify-center shrink-0 shadow-2xs">
+                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-xs sm:text-base font-bold text-zinc-900">Penerbitan e-Sertifikat Digital Otomatis</h3>
+                <p class="text-[10.5px] sm:text-xs text-zinc-500 mt-0.5">Terbitkan e-Sertifikat resmi beresolusi tinggi dengan QR Code verifikasi untuk peserta kuis atau pendaftar acara.</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-2 self-end sm:self-auto shrink-0">
+              <span class="text-[11px] font-semibold text-zinc-600">Sertifikat Aktif:</span>
+              <label class="relative inline-flex items-center cursor-pointer select-none">
+                <input type="checkbox" id="cfg_Sertifikat_Aktif" onchange="handleConfigInputChange('Sertifikat_Aktif', this.checked); handleConfigInputAutoSave();" class="sr-only peer">
+                <div class="w-11 h-6 bg-zinc-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+              </label>
+            </div>
+          </div>
+
+          <div id="certificateDetailsContainer" class="space-y-3.5 text-xs">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="space-y-1">
+                <label class="block font-bold text-zinc-700 text-xs">Judul / Keterangan Sertifikat:</label>
+                <input 
+                  type="text" 
+                  id="cfg_Sertifikat_Judul" 
+                  placeholder="Contoh: SERTIFIKAT KELULUSAN / SERTIFIKAT PARTISIPASI" 
+                  value="SERTIFIKAT KELULUSAN" 
+                  oninput="handleConfigInputAutoSave();"
+                  class="w-full px-3 py-2 rounded-lg border border-zinc-300 text-xs font-semibold focus:border-indigo-600 outline-none"
+                >
+              </div>
+              <div class="space-y-1">
+                <label class="block font-bold text-zinc-700 text-xs">Institusi Penyelenggara:</label>
+                <input 
+                  type="text" 
+                  id="cfg_Sertifikat_Penyelenggara" 
+                  placeholder="Program Studi Pendidikan Guru Sekolah Dasar FKIP ULM" 
+                  value="Program Studi Pendidikan Guru Sekolah Dasar FKIP ULM" 
+                  oninput="handleConfigInputAutoSave();"
+                  class="w-full px-3 py-2 rounded-lg border border-zinc-300 text-xs focus:border-indigo-600 outline-none"
+                >
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div class="space-y-1">
+                <label class="block font-bold text-zinc-700 text-xs">Nama Penandatangan:</label>
+                <input 
+                  type="text" 
+                  id="cfg_Sertifikat_Penandatangan" 
+                  placeholder="Dr. Ririanti Rachmayanie Jamain, S.Psi., M.Pd." 
+                  value="" 
+                  oninput="handleConfigInputAutoSave();"
+                  class="w-full px-3 py-2 rounded-lg border border-zinc-300 text-xs focus:border-indigo-600 outline-none"
+                >
+              </div>
+              <div class="space-y-1">
+                <label class="block font-bold text-zinc-700 text-xs">Jabatan Penandatangan:</label>
+                <input 
+                  type="text" 
+                  id="cfg_Sertifikat_Jabatan" 
+                  placeholder="Dosen Pengampu / Penanggung Jawab" 
+                  value="Dosen Pengampu / Penanggung Jawab" 
+                  oninput="handleConfigInputAutoSave();"
+                  class="w-full px-3 py-2 rounded-lg border border-zinc-300 text-xs focus:border-indigo-600 outline-none"
+                >
+              </div>
+              <div class="space-y-1">
+                <label class="block font-bold text-zinc-700 text-xs">Syarat Penerbitan Sertifikat:</label>
+                <select 
+                  id="cfg_Sertifikat_Syarat" 
+                  onchange="handleConfigInputAutoSave();" 
+                  class="w-full px-3 py-2 rounded-lg border border-zinc-300 bg-white text-xs font-semibold focus:border-indigo-600 outline-none cursor-pointer"
+                >
+                  <option value="LULUS_KKM">Khusus Peserta Lulus KKM (Nilai &ge; KKM)</option>
+                  <option value="ALL">Seluruh Responden / Pendaftar Terdata</option>
+                </select>
+              </div>
+            </div>
+          </div>
         </div>
         
         <!-- JADWAL & BATAS WAKTU AKSES FORMULIR (SCHEDULE & DEADLINE) -->
@@ -1471,8 +1617,84 @@
             </div>
           </div>
 
-          <!-- Toolbar Respons Filter -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+          <!-- Responses Sub-View Selector (Google Forms Authentic Dual View) -->
+          <div class="flex items-center justify-between border-b border-zinc-200 pb-2.5 pt-1">
+            <div class="flex items-center gap-1.5 bg-zinc-100 p-1 rounded-xl">
+              <button 
+                type="button" 
+                id="btnResponsesSubView_analytics" 
+                onclick="switchResponsesSubView('analytics')" 
+                class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-zinc-900 shadow-xs flex items-center gap-1.5 transition cursor-pointer"
+              >
+                <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                <span>Ringkasan Analitik</span>
+              </button>
+              <button 
+                type="button" 
+                id="btnResponsesSubView_cards" 
+                onclick="switchResponsesSubView('cards')" 
+                class="px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-500 hover:text-zinc-900 transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                <span>Respons Individual</span>
+              </button>
+            </div>
+            
+            <div id="analyticsHeaderActions" class="flex items-center gap-2">
+              <button 
+                type="button" 
+                onclick="printResponsesAnalyticsReport()" 
+                class="px-2.5 py-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
+                title="Cetak atau Simpan Laporan Ringkasan Analitik ke PDF"
+              >
+                <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                <span class="hidden sm:inline">Cetak Ringkasan</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- SUB-VIEW 1: RINGKASAN ANALITIK VISUAL (GOOGLE FORMS STYLE SUMMARY) -->
+          <div id="responsesSubView_analytics" class="space-y-4">
+            <!-- Executive Metrics Row -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 text-xs">
+              <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
+                <span class="text-[11px] text-zinc-500 font-medium">Total Respons</span>
+                <div class="text-lg sm:text-xl font-bold font-mono text-zinc-900" id="analyticsTotalResponses">0</div>
+                <div class="text-[10px] text-emerald-600 font-semibold" id="analyticsLastActivityText">Belum ada respons</div>
+              </div>
+              <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
+                <span class="text-[11px] text-zinc-500 font-medium">Nilai Rata-rata</span>
+                <div class="text-lg sm:text-xl font-bold font-mono text-indigo-600" id="analyticsAvgScore">0.0</div>
+                <div class="text-[10px] text-zinc-400" id="analyticsMedianText">Median: 0.0</div>
+              </div>
+              <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
+                <span class="text-[11px] text-zinc-500 font-medium">Tingkat Kelulusan</span>
+                <div class="text-lg sm:text-xl font-bold font-mono text-emerald-600" id="analyticsPassRate">0%</div>
+                <div class="text-[10px] text-zinc-400" id="analyticsKkmTargetText">KKM: 75</div>
+              </div>
+              <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
+                <span class="text-[11px] text-zinc-500 font-medium">Rentang Skor</span>
+                <div class="text-lg sm:text-xl font-bold font-mono text-zinc-900" id="analyticsScoreSpread">0 - 0</div>
+                <div class="text-[10px] text-zinc-400" id="analyticsQuotaRemainingText">Selesai</div>
+              </div>
+            </div>
+
+            <!-- Dynamic Question Charts Container -->
+            <div id="analyticsQuestionsContainer" class="space-y-4">
+              <!-- Dynamically populated via renderResponsesAnalyticsDashboard() -->
+            </div>
+
+            <!-- Empty Analytics State -->
+            <div id="emptyAnalyticsState" class="hidden p-8 text-center bg-zinc-50 rounded-xl border border-dashed border-zinc-300 space-y-2">
+              <p class="text-xs font-semibold text-zinc-600">Belum ada data untuk dianalisis.</p>
+              <p class="text-[11px] text-zinc-400">Bagikan formulir untuk mengumpulkan jawaban dari responden.</p>
+            </div>
+          </div>
+
+          <!-- SUB-VIEW 2: RESPONS INDIVIDUAL (ORIGINAL CARDS LIST) -->
+          <div id="responsesSubView_cards" class="space-y-3 sm:space-y-4 hidden">
+            <!-- Toolbar Respons Filter -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
             <div class="relative sm:col-span-1">
               <input 
                 type="text" 
@@ -1533,6 +1755,7 @@
             <p class="text-[10.5px] sm:text-[11px] text-zinc-400">Bagikan tautan formulir atau QR Code kepada mahasiswa untuk mulai mengumpulkan penilaian.</p>
           </div>
         </div>
+      </div>
 
         <!-- Reset Respons Form Ini (Danger Zone) -->
         <div class="bg-white rounded-xl sm:rounded-2xl border border-zinc-200/90 p-4 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
@@ -3562,13 +3785,13 @@ function getOrCreateFolder(folderName) {
   <!-- ========================================================================= -->
   <!-- JAVASCRIPT APP LOGIC: MULTI-FORM & ISOLATED SANDBOX ENGINE -->
   <!-- ========================================================================= -->
-  <script src="src/admin/admin.js?v=2.4.87"></script>
+  <script src="src/admin/admin.js?v=2.4.88"></script>
 
   <!-- Progressive Web App (PWA) & Instant Auto-Updater Engine -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js?v=2.4.87').then(function(reg) {
+        navigator.serviceWorker.register('/sw.js?v=2.4.88').then(function(reg) {
           reg.update();
           reg.addEventListener('updatefound', function() {
             var newWorker = reg.installing;

@@ -2,6 +2,32 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.4.88] - 2026-09-07
+
+### 📊 Suite Fitur Lanjutan: Tab Analitik Visual, Timer Ujian & E-Sertifikat Digital 300-DPI
+- **📊 Tab Analitik Visual & Ringkasan Grafik Interaktif (Google Forms Style Dashboard):**
+  - Mengintegrasikan pemilih sub-tampilan respons cerdas (*Dual-View Sub-Selector*) antara **Kartu Respons Rinci** dan **Ringkasan Analitik Visual**.
+  - Merancang *Executive Metrics Bar* dengan statistik instan: Total Respons Masuk, Rata-Rata Skor, Partisipan Tertinggi, dan Kelompok Terfavorit.
+  - Mengembangkan mesin grafik murni inline SVG (*Zero External CDN Dependencies*) dengan performa render $<1\text{ ms}$:
+    - *Interactive SVG Donut Charts* dengan palet warna modern, persentase dinamis, dan legenda rapi untuk pertanyaan pilihan ganda (*Single Choice*).
+    - *Horizontal Progress Bar Charts* beranimasi mulus untuk pertanyaan multi-pilihan (*Checkboxes / Multi Choice*).
+    - *Score Distribution Histogram* 5-rentang (A/B/C/D/E) untuk memetakan sebaran nilai kuantitatif.
+  - Umpan respons kualitatif (*Qualitative Text Responses Feed*) dilengkapi filter pencarian kata kunci langsung (*live keyword search filter*) dan tombol Cetak/PDF Ringkasan Analitik siap cetak (*Print Report*).
+- **⏱️ Floating Countdown Exam Timer & Sistem Pengawasan Anti-Cheat:**
+  - Menghadirkan bilah hitung mundur mengambang (*Sticky Floating Exam Timer Bar*) dengan status denyut visual (*pulse dot*) dan tampilan waktu presisi berbasis `sessionStorage` (tahan *refresh* browser).
+  - Indikator urgensi adaptif 3-fase: Status Normal Hijau ($> 5$ menit), Peringatan Kuning/Amber ($\le 5$ menit), dan Darurat Merah Berkedip ($\le 1$ menit).
+  - Mekanisme penyerahan otomatis (*Auto-Submit Engine*) saat durasi waktu berakhir tanpa membebani responden.
+  - Pengawas aktivitas jendela (*Anti-Cheat Tab-Switch Monitor* via `visibilitychange`) yang mendeteksi dan menghitung perpindahan tab serta memunculkan modal peringatan disiplin ujian.
+- **📜 Generator E-Sertifikat Otomatis Beresolusi Tinggi 300-DPI:**
+  - Pembuat sertifikat digital otomatis berbasis Canvas HTML5 ($1920\times 1080\text{ px}$) berdesain prestisius dengan bingkai ganda *Navy & Gold*, ornamen sudut klasik, dan lambang mutu akademik ULM.
+  - Pencantuman nomor dokumen terverifikasi unik (`CERT/PGSD/...`), identitas nama dan NIM peserta didik, judul evaluasi, predikat/skor kuis, tanda tangan digital dosen pengampu, serta stempel resmi.
+  - Kode QR validasi integritas dokumen terintegrasi langsung pada kanvas sertifikat.
+  - Fitur ekspor langsung: Unduh berkas PNG definisi tinggi dan Cetak/Simpan PDF format lanskap A4 instan.
+- **⚡ Pembaruan Versi Cache & Service Worker:**
+  - Meningkatkan versi Service Worker, aset CSS, dan skrip aplikasi ke `v2.4.88`.
+
+---
+
 ## [2.4.87] - 2026-09-07
 
 ### 🛠️ Perbaikan Konfigurasi Header Keamanan & Mesin Simulasi Formulir Interaktif

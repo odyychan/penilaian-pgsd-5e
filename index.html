@@ -35,7 +35,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="src/student/index.css?v=2.4.87">
+  <link rel="stylesheet" href="src/student/index.css?v=2.4.88">
   
   <!-- Instant Zero-FOUC View Resolver (Runs synchronously before HTML paint) -->
   <script>
@@ -151,6 +151,24 @@
   <!-- MAIN CONTAINER -->
   <!-- ========================================================================= -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-2.5 sm:px-6 lg:px-8 py-3.5 sm:py-7 space-y-4 sm:space-y-6">
+
+    <!-- FLOATING COUNTDOWN EXAM TIMER BAR (QUIZ MODE ENGINE) -->
+    <div id="floatingExamTimerBar" class="hidden sticky top-2 sm:top-4 z-40 w-full transition-all fade-enter">
+      <div id="floatingExamTimerInner" class="flex items-center justify-between px-3.5 sm:px-5 py-2.5 rounded-2xl bg-zinc-950/95 text-white backdrop-blur-md border border-zinc-800 shadow-xl shadow-zinc-950/20">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <span id="timerPulseDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+          <div class="leading-none min-w-0">
+            <span class="text-[9.5px] sm:text-[10.5px] font-mono font-semibold uppercase tracking-wider text-zinc-400 block truncate">Sisa Waktu Pengerjaan</span>
+            <span id="timerExamTitle" class="text-[11px] sm:text-xs font-bold text-zinc-100 truncate max-w-[150px] sm:max-w-md block mt-0.5">Kuis Aktif</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <div id="timerCountdownBadge" class="flex items-baseline gap-0.5 sm:gap-1 px-2.5 sm:px-3.5 py-1 rounded-xl bg-zinc-900 border border-zinc-700/80 font-mono font-extrabold text-base sm:text-xl text-emerald-400 shadow-inner">
+            <span id="timerMinutes">00</span><span class="text-xs text-zinc-400 animate-pulse">:</span><span id="timerSeconds">00</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- FLOATING TOAST NOTIFICATION (MOBILE: TOP CENTER, DESKTOP: BOTTOM RIGHT) -->
     <div id="toast" class="hidden fixed top-3 left-3 right-3 sm:top-auto sm:bottom-5 sm:right-6 sm:left-auto sm:max-w-sm z-50 p-3.5 rounded-2xl shadow-2xl text-xs font-semibold flex items-center gap-2.5 transition-all border backdrop-blur-md">
@@ -1170,6 +1188,48 @@
   </div>
 
   <!-- ========================================================================= -->
+  <!-- MODAL: PERINGATAN PENGAWASAN UJIAN (ANTI-CHEAT TAB SWITCH DETECTOR) -->
+  <!-- ========================================================================= -->
+  <div id="modalAntiCheatWarning" class="hidden fixed inset-0 z-50 bg-zinc-950/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-rose-300/80 text-center space-y-4 my-auto fade-enter" onclick="event.stopPropagation()">
+      <div class="w-14 h-14 rounded-2xl bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center mx-auto shadow-xs">
+        <svg class="w-7 h-7 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+      </div>
+      <div class="space-y-1.5">
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10.5px] font-mono font-bold">
+          <span>⚠️</span>
+          <span>DETEKSI AKTIVITAS JENDELA</span>
+        </div>
+        <h3 class="text-lg sm:text-xl font-extrabold text-zinc-900 tracking-tight">
+          Peringatan Pengawasan Ujian
+        </h3>
+        <p class="text-xs text-zinc-600 leading-relaxed max-w-xs mx-auto">
+          Sistem mendeteksi perpindahan tab atau jendela peramban. Seluruh riwayat aktivitas dicatat untuk keperluan evaluasi integritas akademik. Harap tetap berada pada lembar pengerjaan kuis.
+        </p>
+      </div>
+      <div class="p-3 rounded-2xl bg-zinc-50 border border-zinc-200/80 text-xs font-mono text-zinc-700 space-y-1.5">
+        <div class="flex items-center justify-between">
+          <span class="text-zinc-500 font-sans">Jumlah Pelanggaran:</span>
+          <span id="antiCheatViolationCount" class="font-bold text-rose-600 px-2 py-0.5 rounded-md bg-rose-50 border border-rose-200">1x</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-zinc-500 font-sans">Batas Maksimal Tab:</span>
+          <span id="antiCheatMaxViolations" class="font-bold text-zinc-800">3x</span>
+        </div>
+      </div>
+      <button 
+        type="button" 
+        onclick="closeAntiCheatWarningModal()" 
+        class="w-full min-h-[44px] py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm transition active:scale-[0.99] cursor-pointer shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+      >
+        <span>Saya Mengerti &amp; Kembali ke Kuis</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
   <!-- MODAL: PRATINJAU & KONFIRMASI PENILAIAN SEBELUM KIRIM (PRE-SUBMIT REVIEW) -->
   <!-- ========================================================================= -->
   <div id="modalPreSubmitReview" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
@@ -1287,6 +1347,62 @@
           </div>
           <div id="quizReviewContainer" class="space-y-2 max-h-60 overflow-y-auto pr-1">
             <!-- Dynamic Question Review Cards rendered here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- =================================================================== -->
+      <!-- AUTO E-CERTIFICATE CARD (FEATURE C: 300-DPI DIGITAL CERTIFICATE) -->
+      <!-- =================================================================== -->
+      <div id="certificateSuccessCard" class="hidden space-y-3 text-left">
+        <div class="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-amber-50/90 via-yellow-50/60 to-emerald-50/50 border border-amber-200/90 shadow-xs space-y-3.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-amber-950 uppercase tracking-wider font-mono flex items-center gap-1.5">
+              <span>🎓</span>
+              <span>E-Sertifikat Penghargaan</span>
+            </span>
+            <span id="certEligibleBadge" class="text-[10px] sm:text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">TERVERIFIKASI</span>
+          </div>
+
+          <!-- Responsive Certificate Canvas Container -->
+          <div class="relative rounded-xl overflow-hidden border border-amber-300/80 shadow-sm bg-white aspect-[16/9]">
+            <canvas id="studentCertificateCanvas" width="1920" height="1080" class="w-full h-full object-contain block"></canvas>
+            <div id="certGeneratingIndicator" class="hidden absolute inset-0 bg-white/90 backdrop-blur-xs flex flex-col items-center justify-center gap-2">
+              <svg class="w-6 h-6 animate-spin text-amber-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+              <span class="text-[11px] font-semibold text-amber-900">Merender E-Sertifikat Resolusi Tinggi...</span>
+            </div>
+          </div>
+
+          <!-- Certificate Metadata Row -->
+          <div class="grid grid-cols-2 gap-2 text-[11px] font-mono">
+            <div class="p-2 rounded-xl bg-white/90 border border-amber-200/60 shadow-2xs">
+              <span class="text-[10px] text-zinc-400 block font-sans">Nomor Sertifikat</span>
+              <span id="certNumberDisplay" class="font-bold text-zinc-800 truncate block">-</span>
+            </div>
+            <div class="p-2 rounded-xl bg-white/90 border border-amber-200/60 shadow-2xs">
+              <span class="text-[10px] text-zinc-400 block font-sans">Nama Penerima</span>
+              <span id="certRecipientDisplay" class="font-bold text-zinc-800 truncate block">-</span>
+            </div>
+          </div>
+
+          <!-- Certificate Action Buttons -->
+          <div class="grid grid-cols-2 gap-2 pt-0.5">
+            <button 
+              type="button" 
+              onclick="downloadStudentCertificate('png')" 
+              class="min-h-[44px] py-2.5 px-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs transition active:scale-95 cursor-pointer shadow-xs flex items-center justify-center gap-1.5"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+              <span>Unduh PNG</span>
+            </button>
+            <button 
+              type="button" 
+              onclick="downloadStudentCertificate('pdf')" 
+              class="min-h-[44px] py-2.5 px-3 rounded-xl bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-800 font-bold text-xs transition active:scale-95 cursor-pointer shadow-xs flex items-center justify-center gap-1.5"
+            >
+              <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+              <span>Cetak / PDF</span>
+            </button>
           </div>
         </div>
       </div>
@@ -1480,13 +1596,13 @@
   <!-- ========================================================================= -->
   <!-- SCRIPT LOGIC -->
   <!-- ========================================================================= -->
-  <script src="src/student/student.js?v=2.4.87"></script>
+  <script src="src/student/student.js?v=2.4.88"></script>
 
   <!-- Progressive Web App (PWA) & Instant Auto-Updater Engine -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js?v=2.4.87').then(function(reg) {
+        navigator.serviceWorker.register('/sw.js?v=2.4.88').then(function(reg) {
           reg.update();
           reg.addEventListener('updatefound', function() {
             var newWorker = reg.installing;
