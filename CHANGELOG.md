@@ -2,6 +2,24 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.4.78] - 2026-09-07
+
+### 🧹 Audit Komprehensif & Penyempurnaan Salinan Teks (Human Academic Phrasing)
+- **💬 Penataan Ulang Pesan Notifikasi Toast & Status Mahasiswa:**
+  - Mengubah seluruh pesan pembaruan rekapitulasi nilai (`"Data rekapitulasi diperbarui dari Supabase (< 30ms)."` dan `"Data rekapitulasi berhasil diperbarui dari server cloud."`) menjadi kalimat yang ringkas, baku, dan profesional: `"Data rekapitulasi berhasil diperbarui."`
+  - Memperbarui label verifikasi akun dan identitas mahasiswa (`"Google Verified"` ➔ `"Akun Terverifikasi"`, `"Roster Terdaftar"` ➔ `"Mahasiswa Terdaftar"`).
+  - Menyempurnakan catatan kaki bukti tanda terima resmi (`"Verifikasi Digital Sistem FKIP ULM"` & `"SISTEM: PORTAL EVALUASI AKADEMIK"`).
+  - Membersihkan istilah teknis basis data dari pesan kesalahan pencarian formulir (`"Formulir dengan PIN \"...\" tidak ditemukan. Pastikan kode PIN sudah benar."`).
+- **🛡️ Penyelarasan Salinan Teks Panel Pengelola & Integrasi Admin:**
+  - Menghilangkan eksposur nama mesin basis data internal pada pesan keberhasilan (`"Formulir '...' berhasil dihapus."` dan `"Data sistem berhasil dipulihkan secara utuh!"`).
+  - Memperhalus pesan penyalinan skrip dan akun integrasi (`"Alamat email bot integrasi berhasil disalin ke papan klip!"` dan `"Kode skrip integrasi berhasil disalin ke papan klip!"`).
+  - Mengganti tajuk modul integrasi Google Spreadsheet & Drive menjadi `"Skrip Otomasi Google Spreadsheet & Drive"` dan tab navigasi menjadi `"Integrasi & Ekosistem"`.
+  - Memperbarui status konektivitas data master menjadi `"Pusat Data Akademik Terpadu · Tersambung · Aktif"`.
+- **⚡ Pembaruan Versi Cache & Service Worker:**
+  - Meningkatkan versi Service Worker dan seluruh aset statis ke `v2.4.78`.
+
+---
+
 ## [2.4.77] - 2026-09-07
 
 ### 🎯 Fitur Baru: Filter Cakupan Sesi (Session Scope) & Rekapitulasi Penilaian Fleksibel

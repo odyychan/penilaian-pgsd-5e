@@ -32,7 +32,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="src/admin/admin.css?v=2.4.77">
+  <link rel="stylesheet" href="src/admin/admin.css?v=2.4.78">
   <!-- KaTeX CSS & JS for Universal Math / LaTeX / AI & Word Formula Rendering -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -298,7 +298,7 @@
               <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z"></path>
               </svg>
-              <span>Integrasi & Cloud</span>
+              <span>Integrasi & Ekosistem</span>
             </button>
           </div>
 
@@ -529,7 +529,7 @@
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-zinc-100 pb-3">
             <div>
               <h2 class="text-sm sm:text-base font-bold text-zinc-900">Daftar Kelompok &amp; Mahasiswa</h2>
-              <p class="text-[10.5px] sm:text-xs text-zinc-500 mt-0.5">Tambah, ubah, atau atur anggota tiap kelompok presentasi. <em>Tersimpan otomatis ke Spreadsheet.</em></p>
+              <p class="text-[10.5px] sm:text-xs text-zinc-500 mt-0.5">Tambah, ubah, atau atur anggota tiap kelompok presentasi. <em>Tersimpan otomatis seketika.</em></p>
             </div>
             
             <div class="flex items-center gap-2 flex-wrap">
@@ -585,7 +585,7 @@
                 type="button" 
                 id="btnRefreshMasterData" 
                 onclick="fetchAdminFullData()" 
-                title="Segarkan dari Google Sheets" 
+                title="Segarkan Data Mahasiswa" 
                 class="px-2.5 sm:px-3 py-2 rounded-lg border border-zinc-200 hover:bg-zinc-100 text-zinc-700 text-xs font-medium flex items-center gap-1.5 transition cursor-pointer"
               >
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1451,7 +1451,7 @@
             <div class="flex items-center justify-between flex-wrap gap-2">
               <div class="flex items-center gap-2">
                 <h2 class="text-sm sm:text-base font-bold text-zinc-900">Hubungkan ke Google Sheets &amp; Google Drive</h2>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono">Google Cloud API</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">Layanan Integrasi</span>
               </div>
             </div>
             <p class="text-xs text-zinc-500 leading-relaxed">
@@ -2786,8 +2786,8 @@
             &lt;/&gt;
           </div>
           <div>
-            <h3 class="font-bold text-sm sm:text-base text-zinc-900">Skrip Mini 30-Baris Universal</h3>
-            <p class="text-[11px] text-zinc-500">Pasang 1 kali saja di Google Spreadsheet. Tidak perlu diubah/dideploy ulang lagi.</p>
+            <h3 class="font-bold text-sm sm:text-base text-zinc-900">Skrip Otomasi Google Spreadsheet &amp; Drive</h3>
+            <p class="text-[11px] text-zinc-500">Pasang satu kali pada lembar kerja Google Spreadsheet untuk sinkronisasi otomatis.</p>
           </div>
         </div>
         <button type="button" onclick="closeUniversalScriptModal()" class="w-8 h-8 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center cursor-pointer transition">
@@ -2923,9 +2923,9 @@ function getOrCreateFolder(folderName) {
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center gap-2">
               <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
-              <span class="text-xs font-semibold text-zinc-200">Supabase PostgreSQL · Dedicated</span>
+              <span class="text-xs font-semibold text-zinc-200">Pusat Data Akademik Terpadu</span>
             </div>
-            <span class="px-2 py-0.5 rounded-lg bg-emerald-500/15 text-emerald-400 font-mono text-[10px] border border-emerald-500/25 font-semibold">&lt; 30 ms · Aktif</span>
+            <span class="px-2 py-0.5 rounded-lg bg-emerald-500/15 text-emerald-400 font-mono text-[10px] border border-emerald-500/25 font-semibold">Tersambung · Aktif</span>
           </div>
           <div class="grid grid-cols-3 gap-2">
             <div class="bg-white/5 rounded-xl p-2.5 text-center">
@@ -2989,7 +2989,7 @@ function getOrCreateFolder(folderName) {
         <div class="space-y-2">
           <div>
             <p class="text-xs font-bold text-zinc-800">Cadangan & Pemulihan Data</p>
-            <p class="text-[11px] text-zinc-400 mt-0.5">Ekspor atau pulihkan seluruh data Supabase dalam format JSON.</p>
+            <p class="text-[11px] text-zinc-400 mt-0.5">Ekspor atau pulihkan seluruh konfigurasi formulir &amp; respons penilaian secara aman.</p>
           </div>
           <div class="grid grid-cols-2 gap-2">
             <button type="button" onclick="downloadGlobalDatabaseBackup()" class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition cursor-pointer">
@@ -3080,13 +3080,13 @@ function getOrCreateFolder(folderName) {
   <!-- ========================================================================= -->
   <!-- JAVASCRIPT APP LOGIC: MULTI-FORM & ISOLATED SANDBOX ENGINE -->
   <!-- ========================================================================= -->
-  <script src="src/admin/admin.js?v=2.4.77"></script>
+  <script src="src/admin/admin.js?v=2.4.78"></script>
 
   <!-- Progressive Web App (PWA) & Instant Auto-Updater Engine -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js?v=2.4.77').then(function(reg) {
+        navigator.serviceWorker.register('/sw.js?v=2.4.78').then(function(reg) {
           reg.update();
           reg.addEventListener('updatefound', function() {
             var newWorker = reg.installing;
@@ -3164,7 +3164,7 @@ function getOrCreateFolder(folderName) {
       <div class="bg-zinc-950 px-4 py-2 border-t border-zinc-800 flex items-center justify-between text-xs text-zinc-400 flex-shrink-0">
         <div class="flex items-center gap-2 text-[11px]">
           <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-          <span>Draf Sedang Disimulasikan: <strong class="text-white" id="simActiveTitle">Penilaian</strong> (Tidak mengubah respons database)</span>
+          <span>Draf Sedang Disimulasikan: <strong class="text-white" id="simActiveTitle">Penilaian</strong> (Tidak memengaruhi data nyata)</span>
         </div>
         <button type="button" onclick="closeLiveFormSimulator()" class="px-3 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold transition cursor-pointer">
           Tutup

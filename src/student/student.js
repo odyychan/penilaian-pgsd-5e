@@ -1305,7 +1305,7 @@ function normalizeMediaList(fieldOrMedia) {
       if (spinner) spinner.classList.add("hidden");
 
       if (!formExists) {
-        showToast(`Formulir dengan PIN "${pin}" tidak ditemukan di database. Pastikan kode PIN sudah benar.`, "error");
+        showToast(`Formulir dengan PIN "${pin}" tidak ditemukan. Pastikan kode PIN sudah benar.`, "error");
         if (pinInput) pinInput.focus();
         return;
       }
@@ -2765,7 +2765,7 @@ function normalizeMediaList(fieldOrMedia) {
                       <span>Ganti</span>
                     </button>
                   </div>
-                  <p class="text-[10px] text-zinc-400">Email diotentikasi via Google Cloud Platform.</p>
+                  <p class="text-[10px] text-zinc-400">Email diverifikasi melalui akun Google terdaftar.</p>
                 </div>
               `}
             </div>
@@ -4264,7 +4264,7 @@ function normalizeMediaList(fieldOrMedia) {
           <div class="flex flex-wrap gap-1 mt-2.5 pt-2 border-t border-zinc-100">
             ${memberPills}
           </div>
-          ${cardState === 'already_filled' ? '<p class="text-[10.5px] text-emerald-800 font-medium mt-2 pt-1 border-t border-emerald-200/60">Penilaian Anda untuk kelompok ini telah resmi tersimpan di database.</p>' : ''}
+          ${cardState === 'already_filled' ? '<p class="text-[10.5px] text-emerald-800 font-medium mt-2 pt-1 border-t border-emerald-200/60">Penilaian Anda untuk kelompok ini telah resmi terkirim dan tersimpan.</p>' : ''}
           ${cardState === 'self' ? '<p class="text-[10.5px] text-purple-800 font-medium mt-2 pt-1 border-t border-purple-200/60">Anda adalah anggota penyaji kelompok ini (tidak dapat menilai diri sendiri).</p>' : ''}
         `;
 
@@ -4920,7 +4920,7 @@ function normalizeMediaList(fieldOrMedia) {
             feedbackBox.className = "text-xs rounded-xl p-2.5 bg-emerald-50/60 border border-emerald-200 text-emerald-800 flex items-center gap-2";
             feedbackBox.innerHTML = `
               <span class="text-emerald-600 font-bold">✓</span>
-              <span>Identitas NIM <strong>${cleanNim}</strong> terverifikasi via Google Cloud ULM.</span>
+              <span>Identitas NIM <strong>${cleanNim}</strong> terverifikasi resmi FKIP ULM.</span>
             `;
             feedbackBox.classList.remove("hidden");
           }
@@ -5588,7 +5588,7 @@ function normalizeMediaList(fieldOrMedia) {
         const sb = getSupabaseClient() || (window.supabase && typeof window.supabase.createClient === "function" ? (supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey)) : null);
 
         if (!sb || !sb.auth) {
-          throw new Error("Supabase Auth Client belum siap. Silakan coba kembali dalam beberapa detik.");
+          throw new Error("Layanan autentikasi belum siap. Silakan coba kembali dalam beberapa saat.");
         }
 
         const { data, error } = await sb.auth.signInWithOAuth({
@@ -7288,12 +7288,12 @@ function normalizeMediaList(fieldOrMedia) {
           <!-- Footer Verification Box -->
           <div style="border: 1px dashed #94a3b8; border-radius: 10px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px; background: #f8fafc; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
             <div style="font-size: 11px; color: #475569; line-height: 1.45;">
-              <strong style="color: #0f172a; display: block; margin-bottom: 2px; font-size: 11.5px;">Verifikasi Digital Supabase FKIP ULM</strong>
+              <strong style="color: #0f172a; display: block; margin-bottom: 2px; font-size: 11.5px;">Verifikasi Digital Sistem FKIP ULM</strong>
               Tanda terima ini diterbitkan otomatis oleh sistem dan memiliki kekuatan verifikasi akademik internal yang sah.
             </div>
             <div style="font-family: monospace; font-size: 10px; font-weight: 700; color: #64748b; text-align: right; white-space: nowrap;">
               STATUS: TERVERIFIKASI<br>
-              SERVER: SUPABASE CLOUD
+              SISTEM: PORTAL EVALUASI AKADEMIK
             </div>
           </div>
 
@@ -7625,7 +7625,7 @@ function normalizeMediaList(fieldOrMedia) {
             renderGroupOptions();
             if (!isSilent) {
               setBtnSuccess();
-              showToast("Data rekapitulasi diperbarui dari Supabase (< 30ms).", "success");
+              showToast("Data rekapitulasi berhasil diperbarui.", "success");
             }
             return;
           }
@@ -7666,13 +7666,13 @@ function normalizeMediaList(fieldOrMedia) {
           }
           if (!isSilent) {
             setBtnSuccess();
-            showToast("Data rekapitulasi berhasil diperbarui dari server cloud.", "success");
+            showToast("Data rekapitulasi berhasil diperbarui.", "success");
           }
         } else {
           if (!hasLocalData && empty) empty.classList.remove("hidden");
           if (!isSilent) {
             setBtnFallback();
-            showToast("Gagal memperbarui rekap: " + (res?.error || "Respon server tidak valid"), "warning");
+            showToast("Gagal memperbarui data rekapitulasi: " + (res?.error || "Respons tidak valid"), "warning");
           }
         }
       } catch (err) {
@@ -7682,7 +7682,7 @@ function normalizeMediaList(fieldOrMedia) {
         }
         if (!isSilent) {
           setBtnFallback();
-          showToast("Koneksi cloud terputus/lambat. Menampilkan data tersimpan di perangkat.", "warning");
+          showToast("Koneksi internet tidak stabil. Menampilkan data yang tersimpan di perangkat.", "warning");
         }
       }
     }

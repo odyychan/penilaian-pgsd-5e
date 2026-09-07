@@ -3137,7 +3137,7 @@
         }
       } catch (err) {
         console.error("Edge function auth connection error:", err);
-        errorText = "Gagal menghubungi server autentikasi Supabase. Periksa koneksi internet Anda.";
+        errorText = "Gagal menghubungi server autentikasi. Silakan periksa koneksi internet Anda.";
       }
 
       if (isAuthenticated) {
@@ -8720,7 +8720,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
           showAdminToast("Gagal menghapus: " + res.error, "error");
         }
       } catch (e) {
-        showAdminToast("Error koneksi saat menghapus respons.", "error");
+        showAdminToast("Gagal menghapus respons karena kendala koneksi.", "error");
       }
     }
 
@@ -8818,7 +8818,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
           showAdminToast("Gagal menghapus: " + res.error, "error");
         }
       } catch (err) {
-        showAdminToast("Error server saat menghapus.", "error");
+        showAdminToast("Terjadi kendala saat menghapus data respons.", "error");
       }
     }
 
@@ -9028,7 +9028,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       const btn = document.getElementById("btnConfirmExecuteDeleteForm");
       
       btn.disabled = true;
-      btn.innerHTML = `<span>Menghapus dari Database...</span>`;
+      btn.innerHTML = `<span>Menghapus formulir...</span>`;
 
       try {
         // ⚡ FAST-PATH (< 30ms): Hapus langsung di Supabase (Cascade otomatis menghapus configs, groups, students, responses)
@@ -9053,7 +9053,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
         localStorage.setItem("PGSD_CACHE_REGISTRY_FORMS", JSON.stringify(formsRegistryList));
 
         closeDeleteFormModal();
-        showAdminToast(`Formulir '${formIdToDelete}' berhasil dihapus dari Supabase.`, "success");
+        showAdminToast(`Formulir '${formIdToDelete}' berhasil dihapus.`, "success");
 
         // Background forward ke Google Apps Script & Cloud Webhook untuk hapus sheet & folder Drive
         const defaultSheetUrl = DEFAULT_API_URL;
@@ -9298,7 +9298,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
 
           if (updateErr) {
             console.error("Supabase form_id update error:", updateErr);
-            throw new Error(updateErr.message || "Gagal memperbarui ID di database Supabase.");
+            throw new Error(updateErr.message || "Gagal memperbarui PIN formulir.");
           }
         }
 
@@ -9511,7 +9511,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
         await fetchFormsRegistry(true);
         openFormWorkspace(newPin);
       } catch (e) {
-        showAdminToast("Error saat kloning form: " + e.message, "error");
+        showAdminToast("Gagal menduplikasi formulir: " + e.message, "error");
       }
     }
 
@@ -10281,7 +10281,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
         }
       } catch (err) {
         console.error("Update admin pass error:", err);
-        showAdminToast("Error koneksi ke server autentikasi Supabase.", "error");
+        showAdminToast("Gagal menghubungi server autentikasi. Silakan periksa koneksi internet Anda.", "error");
       } finally {
         if (btn) {
           btn.disabled = false;
@@ -10313,7 +10313,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
     function copyBotEmailToClipboard(btn) {
       const email = "form-web-bot@form-web-506515.iam.gserviceaccount.com";
       navigator.clipboard.writeText(email).then(() => {
-        showAdminToast("Email Bot Google Cloud berhasil disalin ke clipboard!", "success");
+        showAdminToast("Alamat email bot integrasi berhasil disalin ke papan klip!", "success");
         if (btn) {
           const originalText = btn.innerHTML;
           btn.innerHTML = `<span class="text-emerald-700 font-bold">✓ Email Tersalin!</span>`;
@@ -10374,7 +10374,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       textarea.select();
       textarea.setSelectionRange(0, 99999);
       navigator.clipboard.writeText(textarea.value).then(() => {
-        showAdminToast("Kode skrip 30-baris berhasil disalin ke clipboard!", "success");
+        showAdminToast("Kode skrip integrasi berhasil disalin ke papan klip!", "success");
         if (btn) {
           const originalText = btn.innerHTML;
           btn.innerHTML = `<span>✓ Tersalin!</span>`;
@@ -10489,9 +10489,9 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
           }]).then(() => {});
         }
 
-        showAdminToast(`Cadangan database (${forms.length} form, ${students.length} mhs) berhasil diunduh!`, "success");
+        showAdminToast(`Berkas cadangan sistem (${forms.length} formulir, ${students.length} mahasiswa) berhasil diunduh!`, "success");
       } catch (err) {
-        showAdminToast("Gagal membuat cadangan database: " + err, "error");
+        showAdminToast("Gagal membuat berkas cadangan: " + err, "error");
       } finally {
         hideGlobalLoadingProgress();
       }
@@ -10513,8 +10513,8 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
 
         const counts = backupObj.counts || {};
         const ok = await showAppConfirm({
-          title: "Pulihkan Basis Data?",
-          message: `File ini berisi: ${counts.forms || 0} Formulir, ${counts.groups || 0} Kelompok, ${counts.students || 0} Mahasiswa, ${counts.responses || 0} Respons. Lanjutkan pemulihan ke Supabase?`,
+          title: "Pulihkan Data Sistem?",
+          message: `File ini berisi: ${counts.forms || 0} Formulir, ${counts.groups || 0} Kelompok, ${counts.students || 0} Mahasiswa, ${counts.responses || 0} Respons. Lanjutkan proses pemulihan data?`,
           confirmText: "Ya, Pulihkan Sekarang",
           type: "warning"
         });
@@ -10545,10 +10545,10 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
           }
         }
 
-        showAdminToast("Basis data berhasil dipulihkan secara utuh!", "success");
+        showAdminToast("Data sistem berhasil dipulihkan secara utuh!", "success");
         await fetchFormsRegistry(true);
       } catch (err) {
-        showAdminToast("Gagal memulihkan database: " + err, "error");
+        showAdminToast("Gagal memulihkan data sistem: " + err, "error");
       } finally {
         input.value = "";
         hideGlobalLoadingProgress();
