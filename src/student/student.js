@@ -1849,7 +1849,7 @@ function normalizeMediaList(fieldOrMedia) {
             <!-- Stage Navigation Actions -->
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-1">
               ${stepNum > 1 
-                ? `<button type="button" onclick="goToStep(${stepNum - 1})" class="min-h-[44px] px-5 py-3 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 shrink-0"><span>← Sebelumnya</span></button>`
+                ? `<button type="button" onclick="navigateStageBackward(${stepNum})" class="min-h-[44px] px-5 py-3 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 shrink-0"><span>← Sebelumnya</span></button>`
                 : `<button type="button" onclick="goToInfoOverview()" class="min-h-[44px] px-5 py-3 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-98 cursor-pointer flex items-center justify-center gap-1.5 shrink-0"><span>← Info Formulir</span></button>`
               }
 
@@ -1867,8 +1867,8 @@ function normalizeMediaList(fieldOrMedia) {
                 </button>
 
                 ${stepNum < totalSteps 
-                  ? `<button type="button" onclick="goToStep(${stepNum + 1})" class="flex-1 sm:flex-none min-h-[44px] px-6 py-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 flex items-center justify-center gap-2 cursor-pointer shadow-xs"><span>Lanjut ke Bagian ${stepNum + 1}</span><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></button>`
-                  : `<button type="submit" class="flex-1 sm:flex-none min-h-[44px] px-7 py-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition active:scale-98 flex items-center justify-center gap-2 cursor-pointer shadow-md"><span>Kirim Penilaian Sekarang</span><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></button>`
+                  ? `<button type="button" onclick="navigateStageForward(${stepNum})" class="flex-1 sm:flex-none min-h-[44px] px-6 py-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 flex items-center justify-center gap-2 cursor-pointer shadow-xs"><span>Lanjut</span><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></button>`
+                  : `<button type="button" onclick="navigateStageForward(${stepNum})" class="flex-1 sm:flex-none min-h-[44px] px-7 py-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition active:scale-98 flex items-center justify-center gap-2 cursor-pointer shadow-md"><span>Kirim Penilaian Sekarang</span><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></button>`
                 }
               </div>
             </div>
@@ -4814,9 +4814,203 @@ function normalizeMediaList(fieldOrMedia) {
             }
           }
         }
+
+        // Advanced Custom Field Validation Engine
+        if (fDef && fDef.hasValidation) {
+          const vType = fDef.validationType || 'NUMBER';
+          const vSub = fDef.validationSubtype;
+          const p1 = fDef.validationParam1 !== undefined ? fDef.validationParam1 : '';
+          const p2 = fDef.validationParam2 !== undefined ? fDef.validationParam2 : '';
+          const customErr = (fDef.validationErrorMsg || '').trim();
+          const textVal = String(ans || '').trim();
+
+          // Only validate if field has content (or if field is CHECKBOX)
+          if (textVal || fDef.type === 'CHECKBOX') {
+            let isValid = true;
+            let defaultErrMsg = "Input tidak sesuai ketentuan validasi.";
+
+            if (vType === 'NUMBER') {
+              const num = parseFloat(textVal);
+              const targetNum = parseFloat(p1);
+              const targetNum2 = parseFloat(p2);
+              if (isNaN(num)) {
+                isValid = false;
+                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' harus berupa angka yang valid.`;
+              } else if (vSub === 'GT' && !(num > targetNum)) {
+                isValid = false;
+                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' harus lebih besar dari ${targetNum}.`;
+              } else if (vSub === 'GTE' && !(num >= targetNum)) {
+                isValid = false;
+                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' harus lebih besar atau sama dengan ${targetNum}.`;
+              } else if (vSub === 'LT' && !(num < targetNum)) {
+                isValid = false;
+                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' harus lebih kecil dari ${targetNum}.`;
+              } else if (vSub === 'LTE' && !(num <= targetNum)) {
+                isValid = false;
+                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' harus lebih kecil atau sama dengan ${targetNum}.`;
+              } else if (vSub === 'EQ' && !(num === targetNum)) {
+                isValid = false;
+                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' harus sama dengan ${targetNum}.`;
+              } else if (vSub === 'NEQ' && !(num !== targetNum)) {
+                isValid = false;
+                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' tidak boleh sama dengan ${targetNum}.`;
+              } else if (vSub === 'BETWEEN' && !(num >= targetNum && num <= targetNum2)) {
+                isValid = false;
+                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' harus berada di antara ${targetNum} dan ${targetNum2}.`;
+              } else if (vSub === 'IS_NUMBER') {
+                isValid = !isNaN(num);
+                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' harus berupa angka.`;
+              } else if (vSub === 'WHOLE_NUMBER') {
+                isValid = Number.isInteger(num);
+                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' harus berupa bilangan bulat.`;
+              }
+            } else if (vType === 'TEXT') {
+              if (vSub === 'EMAIL') {
+                isValid = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(textVal);
+                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' harus berupa alamat email yang valid.`;
+              } else if (vSub === 'URL') {
+                isValid = /^(https?:\/\/)?[\w.-]+\.[a-z]{2,}(\/.*)?$/i.test(textVal);
+                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' harus berupa URL / tautan web yang valid.`;
+              } else if (vSub === 'CONTAINS' && !textVal.includes(p1 || '')) {
+                isValid = false;
+                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' harus memuat teks '${p1}'.`;
+              } else if (vSub === 'NOT_CONTAINS' && textVal.includes(p1 || '')) {
+                isValid = false;
+                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' tidak boleh memuat teks '${p1}'.`;
+              }
+            } else if (vType === 'LENGTH') {
+              const len = textVal.length;
+              const targetLen = parseInt(p1, 10) || 0;
+              if (vSub === 'MIN_CHARS' && len < targetLen) {
+                isValid = false;
+                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' minimal berisi ${targetLen} karakter (saat ini ${len}).`;
+              } else if (vSub === 'MAX_CHARS' && len > targetLen) {
+                isValid = false;
+                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' maksimal berisi ${targetLen} karakter (saat ini ${len}).`;
+              }
+            } else if (vType === 'WHATSAPP') {
+              const cleanPhone = textVal.replace(/[-\s]/g, '');
+              isValid = /^(\+62|62|0)8[1-9][0-9]{6,11}$/.test(cleanPhone);
+              defaultErrMsg = `Nomor WhatsApp pada '${fDef.label || 'Pertanyaan'}' tidak valid. Gunakan format nomor Indonesia (contoh: 081234567890 atau +6281234567890).`;
+            } else if (vType === 'REGEX') {
+              try {
+                const re = new RegExp(p1);
+                if (vSub === 'NOT_MATCHES') {
+                  isValid = !re.test(textVal);
+                } else {
+                  isValid = re.test(textVal);
+                }
+              } catch (e) {
+                isValid = true;
+              }
+              defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' tidak sesuai dengan format yang ditentukan.`;
+            } else if (vType === 'SELECT_AT_LEAST' || vType === 'SELECT_AT_MOST' || vType === 'SELECT_EXACT') {
+              const checkedCount = Array.isArray(ans) ? ans.length : (ans ? 1 : 0);
+              const targetCount = parseInt(p1, 10) || 1;
+              if (vType === 'SELECT_AT_LEAST' && checkedCount < targetCount) {
+                isValid = false;
+                defaultErrMsg = `Pilih setidaknya ${targetCount} opsi pada '${fDef.label || 'pertanyaan ini'}'.`;
+              } else if (vType === 'SELECT_AT_MOST' && checkedCount > targetCount) {
+                isValid = false;
+                defaultErrMsg = `Pilih paling banyak ${targetCount} opsi pada '${fDef.label || 'pertanyaan ini'}'.`;
+              } else if (vType === 'SELECT_EXACT' && checkedCount !== targetCount) {
+                isValid = false;
+                defaultErrMsg = `Pilih tepat ${targetCount} opsi pada '${fDef.label || 'pertanyaan ini'}'.`;
+              }
+            }
+
+            if (!isValid) {
+              container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              container.classList.add("ring-2", "ring-rose-500", "border-rose-500");
+              setTimeout(() => container.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3500);
+              showToast(customErr || defaultErrMsg, "warning");
+              return false;
+            }
+          }
+        }
       }
 
       return true;
+    }
+
+    // ADVANCED SECTION FLOW ROUTER & SKIP LOGIC NAVIGATION
+    let studentStepHistory = [];
+
+    function navigateStageForward(stepNum) {
+      if (!validateStageRequirements(stepNum)) {
+        return;
+      }
+
+      // Additional peer-assessment check for step 2
+      if (stepNum === 2 && currentStep === 2) {
+        const isGenMode = (appConfig && (appConfig.form_mode === 'GENERAL_SURVEY' || appConfig.Form_Mode === 'GENERAL_SURVEY' || appConfig.formMode === 'GENERAL_SURVEY')) || (currentFormMeta && (currentFormMeta.formMode === 'GENERAL_SURVEY' || currentFormMeta.form_mode === 'GENERAL_SURVEY'));
+        if (!isGenMode && !selectedGroupObj) {
+          showToast("Pilih salah satu kelompok presentator sebelum melanjutkan!", "warning");
+          return;
+        }
+      }
+
+      const tahapan = (currentFormSchema && Array.isArray(currentFormSchema.tahapan)) ? currentFormSchema.tahapan : [];
+      const currentStage = tahapan[stepNum - 1];
+      let destination = 'continue';
+
+      // 1. Check question-level skip logic first
+      if (currentStage && Array.isArray(currentStage.fields)) {
+        for (let fld of currentStage.fields) {
+          if (fld.hasSkipLogic && (fld.type === 'RADIO' || fld.type === 'DROPDOWN') && fld.optionRoutes) {
+            const userAns = clientCustomFormAnswers[fld.id];
+            if (userAns !== undefined && userAns !== null && userAns !== '') {
+              let route = fld.optionRoutes[userAns];
+              if (!route && Array.isArray(fld.options)) {
+                const optIdx = fld.options.indexOf(userAns);
+                if (optIdx !== -1) route = fld.optionRoutes[optIdx];
+              }
+              if (route && route !== 'continue') {
+                destination = route;
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      // 2. Fall back to section-level default routing
+      if (destination === 'continue' && currentStage?.nextAction && currentStage.nextAction !== 'continue') {
+        destination = currentStage.nextAction;
+      }
+
+      // 3. Execute destination
+      if (destination === 'submit') {
+        submitAssessment();
+        return;
+      }
+
+      if (destination.startsWith('section_')) {
+        const targetIdx = parseInt(destination.replace('section_', ''), 10);
+        const targetStep = targetIdx + 1;
+        studentStepHistory.push(stepNum);
+        goToStep(targetStep);
+        return;
+      }
+
+      // Default sequential next step
+      if (stepNum < tahapan.length) {
+        studentStepHistory.push(stepNum);
+        goToStep(stepNum + 1);
+      } else {
+        submitAssessment();
+      }
+    }
+
+    function navigateStageBackward(stepNum) {
+      if (studentStepHistory.length > 0) {
+        const prevStep = studentStepHistory.pop();
+        goToStep(prevStep, true);
+      } else if (stepNum > 1) {
+        goToStep(stepNum - 1, true);
+      } else {
+        goToInfoOverview();
+      }
     }
 
     function goToStep(targetStep) {

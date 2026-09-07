@@ -2,6 +2,28 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.4.84] - 2026-09-07
+
+### 🔀 Mesin Percabangan Alur Kondisional & Validasi Respons Tingkat Lanjut (Fase 2)
+- **🔀 Logika Percabangan Lompat Bagian Otentik (*Conditional Skip Logic*):**
+  - Menyediakan sakelar *"Buka bagian berdasarkan jawaban"* pada menu titik-tiga pertanyaan Pilihan Ganda (`RADIO`) dan Menu Tarik-Turun (`DROPDOWN`).
+  - Menghadirkan selektor alur lompatan di samping setiap opsi jawaban: *"Lanjut ke bagian berikutnya"*, *"Buka Bagian N"*, atau *"Kirim formulir"*.
+- **🧭 Kendali Alur Bawaan Antar-Bagian (*Section Flow Routing*):**
+  - Menambahkan panel kendali *"Setelah Bagian N"* di bawah setiap kartu bagian untuk mengonfigurasi tindakan default setelah bagian selesai diisi responden.
+- **🛡️ Mesin Validasi Respons Lanjutan (*Advanced Response Validation Engine*):**
+  - Fitur *"Validasi respons"* pada Jawaban Singkat (`SHORT_TEXT`), Ulasan/Paragraf (`TEXTAREA`), dan Kotak Centang (`CHECKBOX`).
+  - Mendukung validasi Angka (Lebih besar, Lebih besar/sama dengan, Lebih kecil, Rentang/Antara, Bilangan bulat), Teks (Email, URL, Berisi, Tidak berisi), Panjang Karakter (Minimal/Maksimal), Format Nomor WhatsApp Indonesia aktif (`08xx / 628xx / +628xx`), Ekspresi Reguler (Regex), serta Batasan Kotak Centang (Pilih setidaknya, Pilih paling banyak, Pilih tepat N opsi).
+  - Dilengkapi kolom input teks pesan kesalahan kustom yang informatif saat responden memasukkan data yang tidak sesuai.
+- **🔄 Router Navigasi Cerdas dengan Tumpukan Riwayat (*History-Stack Stage Router*):**
+  - Menerapkan tumpukan riwayat penelusuran (`studentStepHistory`) di sisi responden, memastikan tombol *"Sebelumnya"* selalu membawa responden kembali ke bagian asal secara akurat meskipun melompati beberapa bagian secara kondisional.
+- **🧪 Pengujian Terisolasi Sandbox QA Form `DEBUG`:**
+  - Seluruh skenario percabangan kondisional, validasi nomor WhatsApp, validasi rentang angka, limit opsi centang, navigasi riwayat mundur, dan transaksi pengiriman respon diverifikasi 100% sukses pada sandbox form `DEBUG`.
+  - Teruji zero regression pada formulir perkuliahan nyata `BK5E`.
+- **⚡ Pembaruan Versi Cache & Service Worker:**
+  - Meningkatkan versi Service Worker, aset CSS, dan skrip aplikasi ke `v2.4.84`.
+
+---
+
 ## [2.4.83] - 2026-09-07
 
 ### 🌟 Transformasi Arsitektur Universal Multi-Guna: Netralisasi Skema & Mode Survei Umum (Fase 1)

@@ -5,7 +5,7 @@
  *   - Assets (images, fonts): Stale-while-revalidate
  * ============================================================ */
 
-const CACHE_VERSION = 'v2.4.83';
+const CACHE_VERSION = 'v2.4.84';
 const CACHE_NAME = `pgsd-peer-assessment-${CACHE_VERSION}`;
 const OFFLINE_URL = '/index.html';
 const STATIC_CACHE  = `pgsd-static-${CACHE_VERSION}`;

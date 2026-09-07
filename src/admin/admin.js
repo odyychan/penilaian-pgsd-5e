@@ -5824,6 +5824,233 @@
       markSchemaAsDirty();
     }
 
+    function getFieldValidationConfigHtml(f, sIdx, fIdx) {
+      if (!f || !f.hasValidation) return '';
+
+      if (f.type === 'SHORT_TEXT') {
+        const vType = f.validationType || 'NUMBER';
+        const vSub = f.validationSubtype || 'GTE';
+        const p1 = f.validationParam1 !== undefined ? f.validationParam1 : '';
+        const p2 = f.validationParam2 !== undefined ? f.validationParam2 : '';
+        const err = f.validationErrorMsg || '';
+
+        let subOptions = '';
+        if (vType === 'NUMBER') {
+          subOptions = `
+            <option value="GT" ${vSub === 'GT' ? 'selected' : ''}>Lebih besar dari</option>
+            <option value="GTE" ${vSub === 'GTE' ? 'selected' : ''}>Lebih besar atau sama dengan</option>
+            <option value="LT" ${vSub === 'LT' ? 'selected' : ''}>Lebih kecil dari</option>
+            <option value="LTE" ${vSub === 'LTE' ? 'selected' : ''}>Lebih kecil atau sama dengan</option>
+            <option value="EQ" ${vSub === 'EQ' ? 'selected' : ''}>Sama dengan</option>
+            <option value="NEQ" ${vSub === 'NEQ' ? 'selected' : ''}>Tidak sama dengan</option>
+            <option value="BETWEEN" ${vSub === 'BETWEEN' ? 'selected' : ''}>Antara</option>
+            <option value="IS_NUMBER" ${vSub === 'IS_NUMBER' ? 'selected' : ''}>Adalah angka</option>
+            <option value="WHOLE_NUMBER" ${vSub === 'WHOLE_NUMBER' ? 'selected' : ''}>Bilangan bulat</option>
+          `;
+        } else if (vType === 'TEXT') {
+          subOptions = `
+            <option value="EMAIL" ${vSub === 'EMAIL' ? 'selected' : ''}>Alamat email</option>
+            <option value="URL" ${vSub === 'URL' ? 'selected' : ''}>Tautan / URL</option>
+            <option value="CONTAINS" ${vSub === 'CONTAINS' ? 'selected' : ''}>Berisi</option>
+            <option value="NOT_CONTAINS" ${vSub === 'NOT_CONTAINS' ? 'selected' : ''}>Tidak berisi</option>
+          `;
+        } else if (vType === 'LENGTH') {
+          subOptions = `
+            <option value="MAX_CHARS" ${vSub === 'MAX_CHARS' ? 'selected' : ''}>Jumlah karakter maksimum</option>
+            <option value="MIN_CHARS" ${vSub === 'MIN_CHARS' ? 'selected' : ''}>Jumlah karakter minimum</option>
+          `;
+        } else if (vType === 'WHATSAPP') {
+          subOptions = `
+            <option value="VALID_WA" selected>Format HP / WhatsApp Indonesia (+62/08)</option>
+          `;
+        } else if (vType === 'REGEX') {
+          subOptions = `
+            <option value="MATCHES" ${vSub === 'MATCHES' ? 'selected' : ''}>Cocok dengan pola</option>
+            <option value="NOT_MATCHES" ${vSub === 'NOT_MATCHES' ? 'selected' : ''}>Tidak cocok dengan pola</option>
+          `;
+        }
+
+        const showParam1 = (vType === 'NUMBER' && vSub !== 'IS_NUMBER' && vSub !== 'WHOLE_NUMBER') ||
+                           (vType === 'TEXT' && (vSub === 'CONTAINS' || vSub === 'NOT_CONTAINS')) ||
+                           (vType === 'LENGTH') ||
+                           (vType === 'REGEX');
+
+        const showParam2 = (vType === 'NUMBER' && vSub === 'BETWEEN');
+
+        return `
+          <div class="mt-3 p-3.5 rounded-xl bg-indigo-50/70 border border-indigo-200 text-xs space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-indigo-900 flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Validasi Respons
+              </span>
+              <button type="button" onclick="removeFieldValidation(${sIdx}, ${fIdx})" class="w-5 h-5 rounded-full hover:bg-rose-100 text-zinc-400 hover:text-rose-600 flex items-center justify-center cursor-pointer transition font-bold" title="Hapus Validasi">✕</button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+              <div>
+                <label class="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Tipe</label>
+                <select onchange="handleValidationTypeChange(${sIdx}, ${fIdx}, this.value)" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-semibold text-zinc-800 outline-none">
+                  <option value="NUMBER" ${vType === 'NUMBER' ? 'selected' : ''}>Angka</option>
+                  <option value="TEXT" ${vType === 'TEXT' ? 'selected' : ''}>Teks</option>
+                  <option value="LENGTH" ${vType === 'LENGTH' ? 'selected' : ''}>Panjang Karakter</option>
+                  <option value="WHATSAPP" ${vType === 'WHATSAPP' ? 'selected' : ''}>Nomor WhatsApp</option>
+                  <option value="REGEX" ${vType === 'REGEX' ? 'selected' : ''}>Ekspresi Reguler</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Aturan</label>
+                <select onchange="handleValidationSubtypeChange(${sIdx}, ${fIdx}, this.value)" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-semibold text-zinc-800 outline-none">
+                  ${subOptions}
+                </select>
+              </div>
+
+              ${showParam1 ? `
+                <div>
+                  <label class="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Nilai / Pola</label>
+                  <input 
+                    type="${vType === 'NUMBER' || vType === 'LENGTH' ? 'number' : 'text'}" 
+                    value="${escapeHtml(p1)}" 
+                    placeholder="${vType === 'NUMBER' ? 'Contoh: 100' : (vType === 'LENGTH' ? 'Contoh: 10' : 'Nilai rujukan...')}"
+                    oninput="handleValidationParamChange(${sIdx}, ${fIdx}, 'validationParam1', this.value)"
+                    class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs text-zinc-800 outline-none"
+                  >
+                </div>
+              ` : (vType === 'WHATSAPP' ? `
+                <div class="flex items-center text-[11px] text-emerald-700 bg-emerald-50 px-2.5 py-1.5 rounded-lg border border-emerald-200">
+                  <span>Format: 08xx / 628xx</span>
+                </div>
+              ` : '<div></div>')}
+
+              ${showParam2 ? `
+                <div>
+                  <label class="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Sampai Dengan</label>
+                  <input 
+                    type="number" 
+                    value="${escapeHtml(p2)}" 
+                    placeholder="Maksimal..."
+                    oninput="handleValidationParamChange(${sIdx}, ${fIdx}, 'validationParam2', this.value)"
+                    class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs text-zinc-800 outline-none"
+                  >
+                </div>
+              ` : ''}
+
+              <div class="${showParam2 ? 'col-span-full' : ''}">
+                <label class="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Pesan Kesalahan Kustom (Opsional)</label>
+                <input 
+                  type="text" 
+                  value="${escapeHtml(err)}" 
+                  placeholder="Pesan jika input tidak sesuai..."
+                  oninput="handleValidationParamChange(${sIdx}, ${fIdx}, 'validationErrorMsg', this.value)"
+                  class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs text-zinc-800 outline-none"
+                >
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      if (f.type === 'TEXTAREA' || f.type === 'PARAGRAPH') {
+        const vSub = f.validationSubtype || 'MIN_CHARS';
+        const p1 = f.validationParam1 !== undefined ? f.validationParam1 : '10';
+        const err = f.validationErrorMsg || '';
+
+        return `
+          <div class="mt-3 p-3.5 rounded-xl bg-indigo-50/70 border border-indigo-200 text-xs space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-indigo-900 flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Validasi Panjang Ulasan
+              </span>
+              <button type="button" onclick="removeFieldValidation(${sIdx}, ${fIdx})" class="w-5 h-5 rounded-full hover:bg-rose-100 text-zinc-400 hover:text-rose-600 flex items-center justify-center cursor-pointer transition font-bold" title="Hapus Validasi">✕</button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div>
+                <label class="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Aturan</label>
+                <select onchange="handleValidationSubtypeChange(${sIdx}, ${fIdx}, this.value)" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-semibold text-zinc-800 outline-none">
+                  <option value="MIN_CHARS" ${vSub === 'MIN_CHARS' ? 'selected' : ''}>Jumlah karakter minimum</option>
+                  <option value="MAX_CHARS" ${vSub === 'MAX_CHARS' ? 'selected' : ''}>Jumlah karakter maksimum</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Jumlah Karakter</label>
+                <input 
+                  type="number" 
+                  value="${escapeHtml(p1)}" 
+                  placeholder="10"
+                  oninput="handleValidationParamChange(${sIdx}, ${fIdx}, 'validationParam1', this.value)"
+                  class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs text-zinc-800 outline-none"
+                >
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Pesan Kesalahan Kustom</label>
+                <input 
+                  type="text" 
+                  value="${escapeHtml(err)}" 
+                  placeholder="Ulasan terlalu pendek..."
+                  oninput="handleValidationParamChange(${sIdx}, ${fIdx}, 'validationErrorMsg', this.value)"
+                  class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs text-zinc-800 outline-none"
+                >
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      if (f.type === 'CHECKBOX') {
+        const vType = f.validationType || 'SELECT_AT_LEAST';
+        const p1 = f.validationParam1 !== undefined ? f.validationParam1 : '1';
+        const err = f.validationErrorMsg || '';
+
+        return `
+          <div class="mt-3 p-3.5 rounded-xl bg-indigo-50/70 border border-indigo-200 text-xs space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-indigo-900 flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Validasi Jumlah Centang
+              </span>
+              <button type="button" onclick="removeFieldValidation(${sIdx}, ${fIdx})" class="w-5 h-5 rounded-full hover:bg-rose-100 text-zinc-400 hover:text-rose-600 flex items-center justify-center cursor-pointer transition font-bold" title="Hapus Validasi">✕</button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div>
+                <label class="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Batasan Pilihan</label>
+                <select onchange="handleValidationTypeChange(${sIdx}, ${fIdx}, this.value)" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-semibold text-zinc-800 outline-none">
+                  <option value="SELECT_AT_LEAST" ${vType === 'SELECT_AT_LEAST' ? 'selected' : ''}>Pilih setidaknya</option>
+                  <option value="SELECT_AT_MOST" ${vType === 'SELECT_AT_MOST' ? 'selected' : ''}>Pilih paling banyak</option>
+                  <option value="SELECT_EXACT" ${vType === 'SELECT_EXACT' ? 'selected' : ''}>Pilih tepat</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Jumlah</label>
+                <input 
+                  type="number" 
+                  value="${escapeHtml(p1)}" 
+                  placeholder="Contoh: 2"
+                  oninput="handleValidationParamChange(${sIdx}, ${fIdx}, 'validationParam1', this.value)"
+                  class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs text-zinc-800 outline-none"
+                >
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Pesan Kesalahan Kustom</label>
+                <input 
+                  type="text" 
+                  value="${escapeHtml(err)}" 
+                  placeholder="Pilih tepat 2 opsi..."
+                  oninput="handleValidationParamChange(${sIdx}, ${fIdx}, 'validationErrorMsg', this.value)"
+                  class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs text-zinc-800 outline-none"
+                >
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      return '';
+    }
+
     function getGoogleFormsVisualBodyHtml(f, sIdx, fIdx) {
       // 0. TITLE_DESC / BLOK INFORMASI TEKS SAJA
       if (f.type === 'TITLE_DESC') {
@@ -5847,9 +6074,11 @@
       // 1. RADIO / PILIHAN GANDA
       if (f.type === 'RADIO') {
         const options = (f.options && f.options.length > 0) ? f.options : ['Opsi 1', 'Opsi 2'];
-        const optsHtml = options.map((o, optIdx) => `
+        const optsHtml = options.map((o, optIdx) => {
+          const currentRoute = (f.optionRoutes && (f.optionRoutes[o] || f.optionRoutes[optIdx])) || 'continue';
+          return `
           <div class="space-y-1 group">
-            <div class="flex items-center gap-2.5 text-xs">
+            <div class="flex items-center gap-2.5 text-xs flex-wrap sm:flex-nowrap">
               <span class="w-4 h-4 rounded-full border-2 border-zinc-400 shrink-0"></span>
               <textarea 
                 rows="1" 
@@ -5857,17 +6086,36 @@
                 oninput="autoResizeTextarea(this); handleInlineOptionUpdate(${sIdx}, ${fIdx}, ${optIdx}, this.value)"
                 class="flex-1 px-2.5 py-1.5 rounded-md border-b border-transparent hover:border-zinc-300 focus:border-indigo-600 text-xs text-zinc-800 bg-transparent focus:bg-white outline-none transition resize-none overflow-hidden block whitespace-pre-wrap break-words leading-snug"
               >${escapeHtml(o)}</textarea>
+
+              ${f.hasSkipLogic ? `
+                <div class="shrink-0 flex items-center gap-1">
+                  <select 
+                    onchange="handleOptionRouteChange(${sIdx}, ${fIdx}, ${optIdx}, '${escapeHtml(o)}', this.value)" 
+                    class="text-[11px] px-2 py-1 rounded-lg border border-indigo-200 bg-indigo-50/70 hover:bg-white text-indigo-950 font-medium outline-none cursor-pointer max-w-[180px] truncate shadow-2xs transition"
+                    title="Alur lompatan bagian jika responden memilih opsi ini"
+                  >
+                    <option value="continue" ${currentRoute === 'continue' ? 'selected' : ''}>Lanjut ke bag. berikutnya</option>
+                    ${(adminFormSchema.tahapan || []).map((stg, stgIdx) => `
+                      <option value="section_${stgIdx}" ${currentRoute === `section_${stgIdx}` ? 'selected' : ''}>
+                        Buka Bagian ${stgIdx + 1} (${escapeHtml((stg.title || '').substring(0, 16))})
+                      </option>
+                    `).join('')}
+                    <option value="submit" ${currentRoute === 'submit' ? 'selected' : ''}>Kirim formulir</option>
+                  </select>
+                </div>
+              ` : ''}
+
               <button 
                 type="button" 
                 onclick="handleInlineDeleteOption(${sIdx}, ${fIdx}, ${optIdx})" 
                 ${options.length <= 1 ? 'disabled' : ''}
-                class="w-6 h-6 rounded-full hover:bg-rose-100 text-zinc-400 hover:text-rose-600 disabled:opacity-20 flex items-center justify-center cursor-pointer transition" 
+                class="w-6 h-6 rounded-full hover:bg-rose-100 text-zinc-400 hover:text-rose-600 disabled:opacity-20 flex items-center justify-center cursor-pointer transition shrink-0" 
                 title="Hapus Opsi"
               >✕</button>
             </div>
             ${getLiveMathBadgeHtml(o, `liveMathOpt_${sIdx}_${fIdx}_${optIdx}`)}
           </div>
-        `).join('');
+        `}).join('');
 
         return `
           <div class="space-y-2 pt-1">
@@ -5901,6 +6149,13 @@
                 </button>
               ` : ''}
             </div>
+
+            ${f.hasSkipLogic ? `
+              <div class="p-2.5 rounded-xl bg-indigo-50/70 border border-indigo-200/80 text-[11px] text-indigo-950 flex items-center gap-2">
+                <svg class="w-3.5 h-3.5 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span><strong>Alur Cabang Aktif:</strong> Responden akan diarahkan ke bagian tertentu berdasarkan pilihan jawabannya.</span>
+              </div>
+            ` : ''}
           </div>
         `;
       }
@@ -5962,6 +6217,8 @@
                 </button>
               ` : ''}
             </div>
+
+            ${getFieldValidationConfigHtml(f, sIdx, fIdx)}
           </div>
         `;
       }
@@ -5969,9 +6226,11 @@
       // 3. DROPDOWN
       if (f.type === 'DROPDOWN') {
         const options = (f.options && f.options.length > 0) ? f.options : ['Pilihan 1', 'Pilihan 2'];
-        const optsHtml = options.map((o, optIdx) => `
+        const optsHtml = options.map((o, optIdx) => {
+          const currentRoute = (f.optionRoutes && (f.optionRoutes[o] || f.optionRoutes[optIdx])) || 'continue';
+          return `
           <div class="space-y-1 group">
-            <div class="flex items-center gap-2.5 text-xs">
+            <div class="flex items-center gap-2.5 text-xs flex-wrap sm:flex-nowrap">
               <span class="w-4 font-mono text-zinc-400 font-bold text-xs shrink-0 text-center">${optIdx + 1}.</span>
               <textarea 
                 rows="1" 
@@ -5979,17 +6238,36 @@
                 oninput="autoResizeTextarea(this); handleInlineOptionUpdate(${sIdx}, ${fIdx}, ${optIdx}, this.value)"
                 class="flex-1 px-2.5 py-1.5 rounded-md border-b border-transparent hover:border-zinc-300 focus:border-indigo-600 text-xs text-zinc-800 bg-transparent focus:bg-white outline-none transition resize-none overflow-hidden block whitespace-pre-wrap break-words leading-snug"
               >${escapeHtml(o)}</textarea>
+
+              ${f.hasSkipLogic ? `
+                <div class="shrink-0 flex items-center gap-1">
+                  <select 
+                    onchange="handleOptionRouteChange(${sIdx}, ${fIdx}, ${optIdx}, '${escapeHtml(o)}', this.value)" 
+                    class="text-[11px] px-2 py-1 rounded-lg border border-indigo-200 bg-indigo-50/70 hover:bg-white text-indigo-950 font-medium outline-none cursor-pointer max-w-[180px] truncate shadow-2xs transition"
+                    title="Alur lompatan bagian jika responden memilih opsi ini"
+                  >
+                    <option value="continue" ${currentRoute === 'continue' ? 'selected' : ''}>Lanjut ke bag. berikutnya</option>
+                    ${(adminFormSchema.tahapan || []).map((stg, stgIdx) => `
+                      <option value="section_${stgIdx}" ${currentRoute === `section_${stgIdx}` ? 'selected' : ''}>
+                        Buka Bagian ${stgIdx + 1} (${escapeHtml((stg.title || '').substring(0, 16))})
+                      </option>
+                    `).join('')}
+                    <option value="submit" ${currentRoute === 'submit' ? 'selected' : ''}>Kirim formulir</option>
+                  </select>
+                </div>
+              ` : ''}
+
               <button 
                 type="button" 
                 onclick="handleInlineDeleteOption(${sIdx}, ${fIdx}, ${optIdx})" 
                 ${options.length <= 1 ? 'disabled' : ''}
-                class="w-6 h-6 rounded-full hover:bg-rose-100 text-zinc-400 hover:text-rose-600 disabled:opacity-20 flex items-center justify-center cursor-pointer transition" 
+                class="w-6 h-6 rounded-full hover:bg-rose-100 text-zinc-400 hover:text-rose-600 disabled:opacity-20 flex items-center justify-center cursor-pointer transition shrink-0" 
                 title="Hapus Opsi"
               >✕</button>
             </div>
             ${getLiveMathBadgeHtml(o, `liveMathOpt_${sIdx}_${fIdx}_${optIdx}`)}
           </div>
-        `).join('');
+        `}).join('');
 
         return `
           <div class="space-y-2 pt-1">
@@ -6004,6 +6282,13 @@
                 + Tambahkan opsi pilihan
               </button>
             </div>
+
+            ${f.hasSkipLogic ? `
+              <div class="p-2.5 rounded-xl bg-indigo-50/70 border border-indigo-200/80 text-[11px] text-indigo-950 flex items-center gap-2">
+                <svg class="w-3.5 h-3.5 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span><strong>Alur Cabang Aktif:</strong> Responden akan diarahkan ke bagian tertentu berdasarkan pilihan jawabannya.</span>
+              </div>
+            ` : ''}
           </div>
         `;
       }
@@ -6022,6 +6307,7 @@
             <div class="w-full sm:w-3/4 pb-1 border-b-2 border-dotted border-zinc-300 text-zinc-400 text-xs italic">
               Teks jawaban singkat (akan diisi oleh responden)
             </div>
+            ${getFieldValidationConfigHtml(f, sIdx, fIdx)}
           </div>
         `;
       }
@@ -6040,6 +6326,7 @@
             <div class="w-full pb-4 border-b-2 border-dotted border-zinc-300 text-zinc-400 text-xs italic">
               Teks jawaban panjang / paragraf (akan diisi oleh responden)
             </div>
+            ${getFieldValidationConfigHtml(f, sIdx, fIdx)}
           </div>
         `;
       }
@@ -6989,9 +7276,37 @@
                     <!-- Dropdown Floating Menu -->
                     <div 
                       id="fieldMoreMenu_${sIdx}_${fIdx}" 
-                      class="hidden absolute right-0 bottom-full mb-1.5 w-48 rounded-xl bg-white border border-zinc-200 shadow-xl p-1 z-50 text-xs animate-in fade-in zoom-in-95 duration-150"
+                      class="hidden absolute right-0 bottom-full mb-1.5 w-56 rounded-xl bg-white border border-zinc-200 shadow-xl p-1.5 z-50 text-xs animate-in fade-in zoom-in-95 duration-150"
                       onclick="event.stopPropagation()"
                     >
+                      ${(f.type === 'RADIO' || f.type === 'DROPDOWN') ? `
+                        <button 
+                          type="button" 
+                          onclick="toggleFieldSkipLogic(${sIdx}, ${fIdx}); closeAllFieldMoreMenus();" 
+                          class="w-full text-left px-2.5 py-2 rounded-lg hover:bg-indigo-50 text-zinc-700 hover:text-indigo-900 font-medium flex items-center justify-between gap-2 transition cursor-pointer"
+                        >
+                          <span class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                            <span>Buka bag. berdasar jawaban</span>
+                          </span>
+                          ${f.hasSkipLogic ? '<span class="text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded font-bold">Aktif</span>' : ''}
+                        </button>
+                      ` : ''}
+
+                      ${(f.type === 'SHORT_TEXT' || f.type === 'TEXTAREA' || f.type === 'PARAGRAPH' || f.type === 'CHECKBOX') ? `
+                        <button 
+                          type="button" 
+                          onclick="toggleFieldValidation(${sIdx}, ${fIdx}); closeAllFieldMoreMenus();" 
+                          class="w-full text-left px-2.5 py-2 rounded-lg hover:bg-indigo-50 text-zinc-700 hover:text-indigo-900 font-medium flex items-center justify-between gap-2 transition cursor-pointer"
+                        >
+                          <span class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <span>Validasi respons</span>
+                          </span>
+                          ${f.hasValidation ? '<span class="text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded font-bold">Aktif</span>' : ''}
+                        </button>
+                      ` : ''}
+
                       <button 
                         type="button" 
                         onclick="openMoveFieldModal(${sIdx}, ${fIdx}); closeAllFieldMoreMenus();" 
@@ -7124,6 +7439,28 @@
                 <span>Tambah Pertanyaan ke Bagian ${sIdx + 1}</span>
               </button>
             </div>
+
+            <!-- Section Flow Routing (Setelah Bagian N) -->
+            <div class="mt-4 pt-3 border-t border-zinc-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs text-zinc-700 bg-white p-3.5 rounded-xl border border-zinc-200 shadow-2xs">
+              <div class="flex items-center gap-2 font-semibold text-zinc-800">
+                <svg class="w-4 h-4 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                <span>Setelah Bagian ${sIdx + 1}:</span>
+              </div>
+              <select 
+                onchange="handleStageNextActionChange(${sIdx}, this.value)" 
+                class="px-3 py-1.5 rounded-lg border border-zinc-300 bg-zinc-50 hover:bg-white text-xs font-semibold text-zinc-800 hover:border-indigo-500 focus:border-indigo-600 outline-none cursor-pointer max-w-full sm:max-w-xs transition"
+              >
+                <option value="continue" ${(!stage.nextAction || stage.nextAction === 'continue') ? 'selected' : ''}>
+                  ${sIdx < tahapan.length - 1 ? `Lanjutkan ke bagian berikutnya (Bagian ${sIdx + 2})` : 'Kirim formulir (Akhir Formulir)'}
+                </option>
+                ${tahapan.map((otherStg, otherIdx) => `
+                  <option value="section_${otherIdx}" ${stage.nextAction === `section_${otherIdx}` ? 'selected' : ''}>
+                    Buka Bagian ${otherIdx + 1}: ${escapeHtml((otherStg.title || '').substring(0, 24))}${otherStg.title?.length > 24 ? '...' : ''}
+                  </option>
+                `).join('')}
+                <option value="submit" ${stage.nextAction === 'submit' ? 'selected' : ''}>Kirim formulir (Selesai)</option>
+              </select>
+            </div>
           </div>
         `;
 
@@ -7211,6 +7548,112 @@
       
       const fullUrl = getRespondentFormUrl(formKey, { preview: "draft", t: Date.now() });
       window.open(fullUrl, '_blank');
+    }
+
+    // ADVANCED CONDITIONAL SKIP LOGIC & STAGE FLOW ROUTING
+    function toggleFieldSkipLogic(sIdx, fIdx) {
+      const f = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
+      if (!f) return;
+      pushUndoSnapshot('Ubah Logika Cabang Pertanyaan');
+      f.hasSkipLogic = !f.hasSkipLogic;
+      if (f.hasSkipLogic && (!f.optionRoutes || typeof f.optionRoutes !== 'object')) {
+        f.optionRoutes = {};
+      }
+      renderDynamicStagesCanvas();
+      markSchemaAsDirty();
+      showAdminToast(f.hasSkipLogic ? "Logika lompat bagian berdasarkan jawaban DIAKTIFKAN." : "Logika lompat bagian dinonaktifkan.", "info");
+    }
+
+    function handleOptionRouteChange(sIdx, fIdx, optIdx, optValue, targetRoute) {
+      const f = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
+      if (!f) return;
+      if (!f.optionRoutes || typeof f.optionRoutes !== 'object') f.optionRoutes = {};
+      f.optionRoutes[optValue] = targetRoute;
+      f.optionRoutes[optIdx] = targetRoute;
+      markSchemaAsDirty();
+    }
+
+    function handleStageNextActionChange(sIdx, targetAction) {
+      const stage = adminFormSchema.tahapan[sIdx];
+      if (!stage) return;
+      stage.nextAction = targetAction;
+      markSchemaAsDirty();
+      showAdminToast(`Alur bawaan setelah Bagian ${sIdx + 1} diperbarui.`, "info");
+    }
+
+    // ADVANCED RESPONSE VALIDATION HANDLERS
+    function toggleFieldValidation(sIdx, fIdx) {
+      const f = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
+      if (!f) return;
+      pushUndoSnapshot('Ubah Validasi Respons');
+      f.hasValidation = !f.hasValidation;
+      if (f.hasValidation) {
+        if (f.type === 'SHORT_TEXT') {
+          f.validationType = f.validationType || 'NUMBER';
+          f.validationSubtype = f.validationSubtype || 'GTE';
+          f.validationParam1 = f.validationParam1 !== undefined ? f.validationParam1 : '';
+        } else if (f.type === 'TEXTAREA' || f.type === 'PARAGRAPH') {
+          f.validationType = 'LENGTH';
+          f.validationSubtype = f.validationSubtype || 'MIN_CHARS';
+          f.validationParam1 = f.validationParam1 !== undefined ? f.validationParam1 : '10';
+        } else if (f.type === 'CHECKBOX') {
+          f.validationType = f.validationType || 'SELECT_AT_LEAST';
+          f.validationParam1 = f.validationParam1 !== undefined ? f.validationParam1 : '1';
+        }
+        f.validationErrorMsg = f.validationErrorMsg || '';
+      }
+      renderDynamicStagesCanvas();
+      markSchemaAsDirty();
+      showAdminToast(f.hasValidation ? "Validasi respons DIAKTIFKAN." : "Validasi respons dinonaktifkan.", "info");
+    }
+
+    function removeFieldValidation(sIdx, fIdx) {
+      const f = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
+      if (!f) return;
+      pushUndoSnapshot('Hapus Validasi Respons');
+      f.hasValidation = false;
+      renderDynamicStagesCanvas();
+      markSchemaAsDirty();
+      showAdminToast("Validasi respons berhasil dihapus.", "info");
+    }
+
+    function handleValidationTypeChange(sIdx, fIdx, newType) {
+      const f = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
+      if (!f) return;
+      f.validationType = newType;
+      if (newType === 'NUMBER') {
+        f.validationSubtype = 'GTE';
+        f.validationParam1 = '0';
+      } else if (newType === 'TEXT') {
+        f.validationSubtype = 'EMAIL';
+        f.validationParam1 = '';
+      } else if (newType === 'LENGTH') {
+        f.validationSubtype = 'MIN_CHARS';
+        f.validationParam1 = '5';
+      } else if (newType === 'WHATSAPP') {
+        f.validationSubtype = 'VALID_WA';
+        f.validationParam1 = '';
+      } else if (newType === 'REGEX') {
+        f.validationSubtype = 'MATCHES';
+        f.validationParam1 = '';
+      }
+      renderDynamicStagesCanvas();
+      markSchemaAsDirty();
+    }
+
+    function handleValidationSubtypeChange(sIdx, fIdx, newSubtype) {
+      const f = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
+      if (!f) return;
+      f.validationSubtype = newSubtype;
+      renderDynamicStagesCanvas();
+      markSchemaAsDirty();
+    }
+
+    function handleValidationParamChange(sIdx, fIdx, paramKey, val) {
+      const f = adminFormSchema.tahapan[sIdx]?.fields[fIdx];
+      if (!f) return;
+      f[paramKey] = val;
+      markSchemaAsDirty();
     }
 
     function toggleFieldRequired(sIdx, fIdx) {
