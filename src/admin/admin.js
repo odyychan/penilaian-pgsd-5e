@@ -14,9 +14,14 @@
 
     let supabaseClient = null;
     function getSupabaseClient() {
+      const adminToken = sessionStorage.getItem("PGSD_ADMIN_SESSION_TOKEN") || "";
       if (!supabaseClient && window.supabase && typeof window.supabase.createClient === "function") {
         try {
-          supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+          const clientOptions = { auth: { persistSession: false } };
+          if (adminToken) {
+            clientOptions.global = { headers: { 'x-admin-token': adminToken } };
+          }
+          supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey, clientOptions);
         } catch(e) {
           console.warn("Supabase admin client init error:", e);
         }
@@ -25,17 +30,45 @@
     }
 
     async function ensureSupabaseClient(maxRetries = 25, intervalMs = 40) {
-      if (supabaseClient) return supabaseClient;
+      const currentToken = sessionStorage.getItem("PGSD_ADMIN_SESSION_TOKEN") || "";
+      if (supabaseClient && supabaseClient.__adminToken === currentToken) return supabaseClient;
       if (window.supabase && typeof window.supabase.createClient === "function") {
-        return getSupabaseClient();
+        supabaseClient = null;
+        const c = getSupabaseClient();
+        if (c) c.__adminToken = currentToken;
+        return c;
       }
       for (let i = 0; i < maxRetries; i++) {
         await new Promise(r => setTimeout(r, intervalMs));
         if (window.supabase && typeof window.supabase.createClient === "function") {
-          return getSupabaseClient();
+          supabaseClient = null;
+          const c = getSupabaseClient();
+          if (c) c.__adminToken = currentToken;
+          return c;
         }
       }
       return getSupabaseClient();
+    }
+
+    async function fetchGoogleSync(payload, opts = {}) {
+      if (typeof GOOGLE_SYNC_EDGE_URL === 'undefined' || !GOOGLE_SYNC_EDGE_URL) return null;
+      const adminToken = sessionStorage.getItem("PGSD_ADMIN_SESSION_TOKEN") || "";
+      const headers = {
+        "Content-Type": "application/json",
+        "x-admin-token": adminToken,
+        "Authorization": `Bearer ${adminToken}`
+      };
+      const enrichedPayload = {
+        ...payload,
+        token: adminToken,
+        adminToken: adminToken
+      };
+      return fetch(GOOGLE_SYNC_EDGE_URL, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(enrichedPayload),
+        ...opts
+      });
     }
 
     // Application State
@@ -77,6 +110,16 @@
       return hasMath || hasMarkdown || hasList;
     }
 
+    function escapeHtmlText(str) {
+      if (!str || typeof str !== 'string') return "";
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
     function smartMathFormat(text) {
       if (!text || typeof text !== 'string') return "";
 
@@ -84,11 +127,13 @@
       let processedLines = [];
 
       for (let i = 0; i < rawLines.length; i++) {
-        const line = rawLines[i];
-        if (!line.trim()) {
+        const rawLine = rawLines[i];
+        if (!rawLine.trim()) {
           processedLines.push('<div class="h-2"></div>');
           continue;
         }
+
+        const line = escapeHtmlText(rawLine);
 
         // 1. Bullets (•, ◦, ▪, ▫, -, *)
         const bulletMatch = line.match(/^(\s*)([•◦▪▫\-\*])\s+(.*)$/);
@@ -141,12 +186,12 @@
 
       let res = processedLines.join('');
 
-      // Convert Markdown formatting (Bold, Italic, Underline, Link)
+      // Convert Whitelisted Markdown formatting (Bold, Italic, Underline, Link)
       res = res
         .replace(/\*\*([^\*]+)\*\*/g, '<strong>$1</strong>')
         .replace(/(^|[^\*])\*([^\*]+)\*([^\*]|$)/g, '$1<em>$2</em>$3')
-        .replace(/<u>([^<]+)<\/u>/gi, '<u>$1</u>')
-        .replace(/\[([^\]]+)\]\(((?:https?:\/\/|\/)[^\s\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-800 underline font-semibold">$1</a>');
+        .replace(/&lt;u&gt;([\s\S]+?)&lt;\/u&gt;/gi, '<u>$1</u>')
+        .replace(/\[([^\]]+)\]\(((?:https?:\/\/|\/)[^\s\)"'<>]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-800 underline font-semibold">$1</a>');
 
       // Auto-wrap unwrapped LaTeX math symbols so they always render beautifully
       res = res.replace(/(?<!\$|\\|\w)(\\(?:rightarrow|leftarrow|Rightarrow|Leftarrow|Leftrightarrow|pm|approx|neq|le|ge|times|div|cdot|infty|deg|alpha|beta|gamma|theta|pi|Sigma|mu|sigma)(?![a-zA-Z]))(?!\$)/g, '$$1$');
@@ -168,7 +213,7 @@
             ],
             ignoredTags: ["script", "noscript", "style", "textarea", "pre", "code", "option"],
             throwOnError: false,
-            trust: true
+            trust: false
           });
         } catch(e) {
           console.warn("KaTeX render error:", e);
@@ -2039,17 +2084,13 @@
       }
 
       // 1. Supabase Cloud Edge Function (Service Account)
-      if (fileId && typeof GOOGLE_SYNC_EDGE_URL !== 'undefined' && GOOGLE_SYNC_EDGE_URL) {
-        fetch(GOOGLE_SYNC_EDGE_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "adminDeleteMedia",
-            formId: currentFormId || DEFAULT_PRIMARY_FORM_ID,
-            fileId: fileId,
-            fileUrl: fileUrl,
-            driveFolderId: DEFAULT_DRIVE_FOLDER_ID
-          })
+      if (fileId) {
+        fetchGoogleSync({
+          action: "adminDeleteMedia",
+          formId: currentFormId || DEFAULT_PRIMARY_FORM_ID,
+          fileId: fileId,
+          fileUrl: fileUrl,
+          driveFolderId: DEFAULT_DRIVE_FOLDER_ID
         }).catch(e => console.warn("Cloud Edge media delete notice:", e));
       }
 
@@ -2105,19 +2146,14 @@
         });
       });
 
-      if (typeof GOOGLE_SYNC_EDGE_URL !== 'undefined' && GOOGLE_SYNC_EDGE_URL) {
-        try {
-          const res = await fetch(GOOGLE_SYNC_EDGE_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              action: "adminCleanupOrphanedMedia",
-              formId: currentFormId,
-              activeUrls: activeUrls,
-              activeFileIds: activeFileIds,
-              driveFolderId: DEFAULT_DRIVE_FOLDER_ID
-            })
-          });
+      try {
+        const res = await fetchGoogleSync({
+          action: "adminCleanupOrphanedMedia",
+          formId: currentFormId,
+          activeUrls: activeUrls,
+          activeFileIds: activeFileIds,
+          driveFolderId: DEFAULT_DRIVE_FOLDER_ID
+        });
           const data = await res.json();
           if (isManual) {
             showAdminToast(data.message || "Pembersihan berkas sampah di Google Drive berhasil!", "success");
@@ -3239,18 +3275,14 @@
 
         // 1. Sinkronisasi via Supabase Cloud Edge Function (Google Service Account)
         let edgeSuccess = false;
-        if (typeof GOOGLE_SYNC_EDGE_URL !== 'undefined' && GOOGLE_SYNC_EDGE_URL) {
-          try {
-            const edgeResp = await fetch(GOOGLE_SYNC_EDGE_URL, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(payload)
-            });
+        try {
+          const edgeResp = await fetchGoogleSync(payload);
+          if (edgeResp) {
             const edgeJson = await edgeResp.json();
             if (edgeJson && edgeJson.success) edgeSuccess = true;
-          } catch(e) {
-            console.warn("Cloud Edge sync notice:", e);
           }
+        } catch(e) {
+          console.warn("Cloud Edge sync notice:", e);
         }
 
         // 2. Sinkronisasi via Google Apps Script Webhook
@@ -10177,10 +10209,9 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
             if (resJson && resJson.success) {
               successCount++;
               if (sb) {
-                await sb.from('pgsd_responses').update({
-                  synced_to_sheets: true,
-                  synced_at: new Date().toISOString()
-                }).eq('id', r.id);
+                await sb.rpc('pgsd_fn_mark_response_synced', {
+                  p_id_respons: String(r.id_respons || r.id)
+                });
               }
             }
           } catch(e) {}
@@ -10207,6 +10238,13 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       const apiUrl = getApiUrl();
 
       try {
+        const sb = await ensureSupabaseClient();
+        if (sb) {
+          await sb.rpc('pgsd_fn_admin_delete_response', {
+            p_id_respons: String(idRespons)
+          });
+        }
+
         const response = await fetch(apiUrl, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -10476,15 +10514,12 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
           driveFolderId: DEFAULT_DRIVE_FOLDER_ID
         };
 
-        if (typeof GOOGLE_SYNC_EDGE_URL !== 'undefined' && GOOGLE_SYNC_EDGE_URL) {
-          fetch(GOOGLE_SYNC_EDGE_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(createPayload)
-          }).then(r => r.json()).then(res => {
-            console.log("Cloud Edge form create success:", res);
-          }).catch(e => console.warn("Cloud Edge form create notice:", e));
-        }
+        fetchGoogleSync(createPayload)
+          .then(r => r ? r.json() : null)
+          .then(res => {
+            if (res) console.log("Cloud Edge form create success:", res);
+          })
+          .catch(e => console.warn("Cloud Edge form create notice:", e));
 
         const apiUrl = getApiUrl();
         if (apiUrl) {
@@ -10573,15 +10608,12 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
         };
 
         // 1. Background forward ke Supabase Edge Function (Google Service Account)
-        if (typeof GOOGLE_SYNC_EDGE_URL !== 'undefined' && GOOGLE_SYNC_EDGE_URL) {
-          fetch(GOOGLE_SYNC_EDGE_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(deletePayload)
-          }).then(r => r.json()).then(res => {
-            console.log("Cloud Edge form delete success:", res);
-          }).catch(e => console.warn("Cloud Edge Function delete notice:", e));
-        }
+        fetchGoogleSync(deletePayload)
+          .then(r => r ? r.json() : null)
+          .then(res => {
+            if (res) console.log("Cloud Edge form delete success:", res);
+          })
+          .catch(e => console.warn("Cloud Edge Function delete notice:", e));
 
         // 2. Background forward ke Google Apps Script Primary & Custom Webhook jika ada
         if (defaultSheetUrl) {
@@ -11026,15 +11058,12 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
           driveFolderId: DEFAULT_DRIVE_FOLDER_ID
         };
 
-        if (typeof GOOGLE_SYNC_EDGE_URL !== 'undefined' && GOOGLE_SYNC_EDGE_URL) {
-          fetch(GOOGLE_SYNC_EDGE_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(clonePayload)
-          }).then(r => r.json()).then(res => {
-            console.log("Cloud Edge form clone success:", res);
-          }).catch(e => console.warn("Cloud Edge form clone notice:", e));
-        }
+        fetchGoogleSync(clonePayload)
+          .then(r => r ? r.json() : null)
+          .then(res => {
+            if (res) console.log("Cloud Edge form clone success:", res);
+          })
+          .catch(e => console.warn("Cloud Edge form clone notice:", e));
 
         const apiUrl = getApiUrl();
         if (apiUrl) {
@@ -11678,7 +11707,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
         // 1. Kosongkan respons di basis data utama Supabase
         const sb = await ensureSupabaseClient();
         if (sb) {
-          await sb.from('pgsd_responses').delete().eq('form_id', targetForm);
+          await sb.rpc('pgsd_fn_admin_reset_responses', { p_form_id: targetForm });
         }
 
         // 2. Bersihkan berkas lampiran mahasiswa di Supabase Storage

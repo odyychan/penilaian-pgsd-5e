@@ -7,11 +7,58 @@ import crypto from "node:crypto";
 const DEFAULT_SPREADSHEET_ID = "1MAZqzRyau1mECqamnU9Bj3TALRJYDrA1WLQFesJ4wG4";
 const DEFAULT_DRIVE_FOLDER_ID = "1ZYnP40AaCoaqu6-H2ZNfYuS-RshCWURK";
 
+const DEFAULT_SALT = "pgsd_5e_secret_salt_2026";
+const SIGNING_SECRET_KEY = "c78912e54f0a4593bc82136e7a2b9041d8e57390f12a3b4c5d6e7f8091a2b3c4";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-admin-token",
 };
+
+// Helper: Verify Admin Session Token (HMAC-SHA256)
+async function verifyAdminAuth(req: Request, payload: any): Promise<boolean> {
+  try {
+    let token = payload.token || payload.adminToken || payload.admin_token || "";
+    if (!token) {
+      const authHeader = req.headers.get("x-admin-token") || req.headers.get("authorization") || "";
+      if (authHeader.startsWith("Bearer ")) {
+        token = authHeader.slice(7).trim();
+      } else if (authHeader) {
+        token = authHeader.trim();
+      }
+    }
+
+    if (!token) return false;
+    const parts = token.split(".");
+    if (parts.length !== 2) return false;
+
+    const [b64Payload, sigHex] = parts;
+    const payloadStr = atob(b64Payload);
+    const parsed = JSON.parse(payloadStr);
+
+    if (!parsed.exp || Date.now() > parsed.exp) return false;
+    if (parsed.role !== "admin") return false;
+
+    const encoder = new TextEncoder();
+    const keyData = encoder.encode(SIGNING_SECRET_KEY + "_" + DEFAULT_SALT);
+    const cryptoKey = await crypto.subtle.importKey(
+      "raw",
+      keyData,
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["verify"]
+    );
+
+    const sigBytes = new Uint8Array(
+      sigHex.match(/.{1,2}/g)?.map((byte: string) => parseInt(byte, 16)) || []
+    );
+
+    return await crypto.subtle.verify("HMAC", cryptoKey, sigBytes, encoder.encode(payloadStr));
+  } catch {
+    return false;
+  }
+}
 
 function getServiceAccount(): any {
   const b64 = Deno.env.get("GOOGLE_SERVICE_ACCOUNT_B64");
@@ -252,6 +299,32 @@ serve(async (req: Request) => {
     }
 
     const action = payload.action || "status";
+
+    // 🛡️ Admin Authorization Guard: Protected Destructive / Administrative Actions
+    const adminActions = [
+      "adminDeleteMedia",
+      "deleteDriveFile",
+      "adminCleanupOrphanedMedia",
+      "adminDeleteForm",
+      "adminCreateForm",
+      "adminCloneForm",
+      "adminCleanupOrphanedFolders",
+      "adminSyncAllForms"
+    ];
+
+    if (adminActions.includes(action)) {
+      const isAuthorized = await verifyAdminAuth(req, payload);
+      if (!isAuthorized) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: "Akses ditolak: Operasi administratif memerlukan sesi token admin yang sah dan terverifikasi."
+          }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
     const token = await getGoogleOAuthToken();
     const sa = getServiceAccount();
     const spreadsheetId = payload.spreadsheetId || DEFAULT_SPREADSHEET_ID;

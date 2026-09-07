@@ -11,7 +11,7 @@ const corsHeaders = {
 };
 
 const DEFAULT_SALT = "pgsd_5e_secret_salt_2026";
-const FALLBACK_PASS = "admin5e";
+const SIGNING_SECRET_KEY = "c78912e54f0a4593bc82136e7a2b9041d8e57390f12a3b4c5d6e7f8091a2b3c4";
 
 // Helper: Hash password with SHA-256
 async function hashPassword(pass: string): Promise<string> {
@@ -22,9 +22,9 @@ async function hashPassword(pass: string): Promise<string> {
   return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-// Helper: Get signing secret for session tokens
+// Helper: Get signing secret for session tokens (matches PostgreSQL pgsd_is_admin)
 function getSigningSecret(): string {
-  return Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || Deno.env.get("JWT_SECRET") || DEFAULT_SALT;
+  return SIGNING_SECRET_KEY;
 }
 
 // Helper: Sign session token with HMAC-SHA256
@@ -86,7 +86,7 @@ async function verifySessionToken(token: string): Promise<boolean> {
   }
 }
 
-// Helper: Verify input password against Database Salted Hash, Supabase Secret, or Fallback
+// Helper: Verify input password against Supabase Secret or Database Salted Hash (Zero hardcoded fallback)
 async function verifyInputPassword(inputPass: string): Promise<{ valid: boolean; source: string }> {
   const inputHash = await hashPassword(inputPass);
   const envPass = (Deno.env.get("ADMIN_PASSWORD") || Deno.env.get("PGSD_ADMIN_PASSWORD") || "").trim();
@@ -125,11 +125,6 @@ async function verifyInputPassword(inputPass: string): Promise<{ valid: boolean;
     } catch {
       // Fall through
     }
-  }
-
-  // 3. Prioritas 3: Fallback default jika belum ada Secret ataupun DB Hash
-  if (!envPass && inputPass === FALLBACK_PASS) {
-    return { valid: true, source: "DEFAULT_FALLBACK" };
   }
 
   return { valid: false, source: "UNKNOWN" };
@@ -227,6 +222,8 @@ serve(async (req: Request) => {
           { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
         );
       } else {
+        // Artificial delay against brute-force & timing attacks
+        await new Promise((resolve) => setTimeout(resolve, 600));
         return new Response(
           JSON.stringify({
             success: false,

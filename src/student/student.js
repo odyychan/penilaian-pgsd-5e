@@ -89,6 +89,16 @@
       return hasMath || hasMarkdown || hasList;
     }
 
+    function escapeHtmlText(str) {
+      if (!str || typeof str !== 'string') return "";
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
     function smartMathFormat(text) {
       if (!text || typeof text !== 'string') return "";
 
@@ -96,11 +106,13 @@
       let processedLines = [];
 
       for (let i = 0; i < rawLines.length; i++) {
-        const line = rawLines[i];
-        if (!line.trim()) {
+        const rawLine = rawLines[i];
+        if (!rawLine.trim()) {
           processedLines.push('<div class="h-2"></div>');
           continue;
         }
+
+        const line = escapeHtmlText(rawLine);
 
         // 1. Bullets (•, ◦, ▪, ▫, -, *)
         const bulletMatch = line.match(/^(\s*)([•◦▪▫\-\*])\s+(.*)$/);
@@ -153,12 +165,12 @@
 
       let res = processedLines.join('');
 
-      // Convert Markdown formatting (Bold, Italic, Underline, Link)
+      // Convert Whitelisted Markdown formatting (Bold, Italic, Underline, Link)
       res = res
         .replace(/\*\*([^\*]+)\*\*/g, '<strong>$1</strong>')
         .replace(/(^|[^\*])\*([^\*]+)\*([^\*]|$)/g, '$1<em>$2</em>$3')
-        .replace(/<u>([^<]+)<\/u>/gi, '<u>$1</u>')
-        .replace(/\[([^\]]+)\]\(((?:https?:\/\/|\/)[^\s\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-800 underline font-semibold">$1</a>');
+        .replace(/&lt;u&gt;([\s\S]+?)&lt;\/u&gt;/gi, '<u>$1</u>')
+        .replace(/\[([^\]]+)\]\(((?:https?:\/\/|\/)[^\s\)"'<>]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-800 underline font-semibold">$1</a>');
 
       // Auto-wrap unwrapped LaTeX math symbols so they always render beautifully
       res = res.replace(/(?<!\$|\\|\w)(\\(?:rightarrow|leftarrow|Rightarrow|Leftarrow|Leftrightarrow|pm|approx|neq|le|ge|times|div|cdot|infty|deg|alpha|beta|gamma|theta|pi|Sigma|mu|sigma)(?![a-zA-Z]))(?!\$)/g, '$$1$');
@@ -185,7 +197,7 @@
                 ],
                 ignoredTags: ["script", "noscript", "style", "textarea", "pre", "code", "option", "input", "select"],
                 throwOnError: false,
-                trust: true
+                trust: false
               });
             } catch(e) {}
           });
@@ -201,7 +213,7 @@
           ],
           ignoredTags: ["script", "noscript", "style", "textarea", "pre", "code", "option", "input", "select"],
           throwOnError: false,
-          trust: true
+          trust: false
         });
       } catch(e) {
         console.warn("KaTeX render notice:", e);
@@ -7332,16 +7344,12 @@ function normalizeMediaList(fieldOrMedia) {
                   }
                   return;
                 }
-              } else {
-                const { error: sbErr } = await sb.from('pgsd_responses').insert([respRow]);
-                if (!sbErr) sbSuccess = true;
               }
             } catch (rpcEx) {
-              const { error: sbErr } = await sb.from('pgsd_responses').insert([respRow]);
-              if (!sbErr) sbSuccess = true;
+              console.warn("Supabase RPC submit notice:", rpcEx);
             }
           } catch (err) {
-            console.warn("Supabase fast-path fallback notice:", err);
+            console.warn("Supabase fast-path notice:", err);
           }
         }
 
@@ -7376,10 +7384,7 @@ function normalizeMediaList(fieldOrMedia) {
               body: JSON.stringify(payload)
             }).then(r => r.json()).then(res => {
               if (res && res.success && sb) {
-                sb.from('pgsd_responses').update({ 
-                  synced_to_sheets: true, 
-                  synced_at: new Date().toISOString() 
-                }).eq('id_respons', idRespons);
+                sb.rpc('pgsd_fn_mark_response_synced', { p_id_respons: idRespons });
               }
             }).catch(e => console.warn("Primary sheet sync notice:", e));
           }
@@ -7391,10 +7396,7 @@ function normalizeMediaList(fieldOrMedia) {
               body: JSON.stringify(payload)
             }).then(r => r.json()).then(res => {
               if (res && res.success && sb) {
-                sb.from('pgsd_responses').update({ 
-                  synced_to_sheets: true, 
-                  synced_at: new Date().toISOString() 
-                }).eq('id_respons', idRespons);
+                sb.rpc('pgsd_fn_mark_response_synced', { p_id_respons: idRespons });
               }
             }).catch(e => console.warn("Custom sheet sync notice:", e));
           }
@@ -7505,8 +7507,23 @@ function normalizeMediaList(fieldOrMedia) {
               custom_answers: item.payload.customAnswers || {},
               synced_to_sheets: false
             };
-            const { error: insErr } = await sb.from('pgsd_responses').upsert([respRow], { onConflict: 'id_respons' });
-            if (!insErr) {
+            const { data: rpcRes, error: insErr } = await sb.rpc('pgsd_fn_submit_response_with_quota', {
+              p_id_respons: idRespons,
+              p_form_id: respRow.form_id,
+              p_sesi: respRow.sesi,
+              p_email: respRow.email,
+              p_nama_penilai: respRow.nama_penilai,
+              p_nim_penilai: respRow.nim_penilai,
+              p_peran_penilai: respRow.peran_penilai,
+              p_kelompok_dinilai: respRow.kelompok_dinilai,
+              p_nilai_kelompok: respRow.nilai_kelompok,
+              p_best_presenter_1: respRow.best_presenter_1,
+              p_best_presenter_2: respRow.best_presenter_2,
+              p_evaluasi_detail: respRow.evaluasi_detail,
+              p_custom_answers: respRow.custom_answers,
+              p_synced_to_sheets: false
+            });
+            if (!insErr && rpcRes && rpcRes.success) {
               sent = true;
             }
           } catch(e) {}
@@ -7524,7 +7541,7 @@ function normalizeMediaList(fieldOrMedia) {
             if (data && data.success) {
               sent = true;
               if (sb) {
-                sb.from('pgsd_responses').update({ synced_to_sheets: true, synced_at: new Date().toISOString() }).eq('id_respons', idRespons);
+                sb.rpc('pgsd_fn_mark_response_synced', { p_id_respons: idRespons });
               }
             }
           } catch(e) {}

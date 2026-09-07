@@ -33,5 +33,7 @@ test_*.py
 *credentials*.json
 *service_account*.json
 google-key.json
-service-account.json
+# Supabase CLI temp files
+.temp/
+supabase/.temp/
 

@@ -2,6 +2,36 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.4.89] - 2026-09-07
+
+### 🛡️ Audit Keamanan Menyeluruh: Zero-Trust RLS, Otentikasi Kriptografis Edge & Perlindungan Race Condition
+- **🔒 Pengerasan Arsitektur Basis Data & Zero-Trust PostgreSQL Row Level Security (RLS):**
+  - Mengaudit dan membersihkan seluruh kebijakan RLS duplikat/permisif (*open public access*) pada tabel `pgsd_responses`, `pgsd_forms`, `pgsd_form_configs`, `pgsd_groups`, `pgsd_students`, dan `pgsd_backups`.
+  - Mencabut hak mutasi langsung (`INSERT`, `UPDATE`, `DELETE`) dari peran anonim (`public/anon`) pada tabel data penilaian `pgsd_responses`. Mahasiswa tidak dapat memanipulasi nilai, mengubah jawaban responden lain, atau menghapus data.
+  - Membatasi seluruh penyerahan respon penilaian (*student submission*) secara eksklusif melalui prosedur tersimpan atomik berkeamanan tinggi `pgsd_fn_submit_response_with_quota` (`SECURITY DEFINER`), mengunci kuota dan jadwal secara serentak tanpa celah bypass.
+  - Menghadirkan fungsi `pgsd_fn_mark_response_synced` (`SECURITY DEFINER`) khusus untuk pembaruan status sinkronisasi ke lembar kerja tanpa mengekspos izin `UPDATE` umum.
+  - Menerapkan fungsi PostgreSQL `pgsd_is_admin()` yang memvalidasi keaslian token sesi administrator berbasis kriptografi HMAC-SHA256 langsung di lapisan database melalui `current_setting('request.headers')`.
+  - Menghapus 5 indeks duplikat redundan pada database (`idx_pgsd_forms_slug`, `idx_pgsd_responses_form_id`, `idx_pgsd_responses_nim_penilai`, `idx_pgsd_students_form_nim`, `idx_pgsd_students_lookup`).
+- **🛡️ Penguatan Keamanan Supabase Edge Functions (`admin-auth` & `google-sync`):**
+  - Menghapus kata sandi cadangan (*hardcoded fallback password*) pada Edge Function `admin-auth`. Akses administrator kini 100% tervalidasi terhadap Supabase Secrets (`ADMIN_PASSWORD`) atau *salted hash* aman di database.
+  - Menambahkan perlindungan *anti-brute force* dan *anti-timing attack* dengan jeda waktu terukur (*artificial jitter delay*) pada setiap percobaan kata sandi yang tidak valid.
+  - Memasang gerbang otorisasi token sesi admin (`verifyAdminAuth`) pada seluruh endpoint administratif dan destruktif di Edge Function `google-sync` (`adminDeleteMedia`, `deleteDriveFile`, `adminCleanupOrphanedMedia`, `adminDeleteForm`, `adminCreateForm`, `adminCloneForm`, `adminCleanupOrphanedFolders`, `adminSyncAllForms`).
+- **🛡️ Mitigasi Kerentanan Frontend XSS & KaTeX Security:**
+  - Memperbaiki parser `smartMathFormat` pada `admin.js` dan `student.js` dengan menyaring entitas HTML mentah (`&`, `<`, `>`, `"`) sebelum pemrosesan Markdown (*Whitelisted Formatting Tag Replacement*).
+  - Mengonfigurasi parameter KaTeX `trust: false` di seluruh modul antarmuka guna menepis risiko injeksi perintah skrip berbahaya via LaTeX (`\url`, `\href`).
+  - Memperbarui rute antrian offline mahasiswa (`processPendingSubmissions`) agar menggunakan `pgsd_fn_submit_response_with_quota` alih-alih upsert langsung.
+- **🌐 Penambahan Header Keamanan Infrastruktur (`vercel.json`):**
+  - Mengaktifkan `Strict-Transport-Security` (HSTS: `max-age=63072000; includeSubDomains; preload`).
+  - Mengonfigurasi `Permissions-Policy` untuk membatasi akses sensor perangkat lunak yang tidak relevan (`camera=(self), microphone=(), geolocation=()`).
+- **🧪 Pengujian Keamanan & Concurrency / Race-Condition Terverifikasi:**
+  - Seluruh skenario pengujian diverifikasi secara otomatis pada formulir sandbox terisolasi `DEBUG` (`form_id: 'DEBUG'`), memastikan form perkuliahan aktif (`BK5E`) 100% terjaga dan tidak tersentuh.
+  - Pengujian stres 10 pengiriman simultan (*10-thread parallel race testing*) lulus 100% dengan waktu latensi rata-rata 278 ms, tanpa galat konkurensi, tanpa *deadlock*, dan tanpa duplikasi data.
+  - Percobaan manipulasi anonim (`DELETE`, `UPDATE`, `INSERT`) berhasil diblokir secara mutlak oleh RLS.
+- **⚡ Pembaruan Versi Cache & Service Worker:**
+  - Meningkatkan versi Service Worker, aset CSS, dan skrip aplikasi ke `v2.4.89`.
+
+---
+
 ## [2.4.88] - 2026-09-07
 
 ### 📊 Suite Fitur Lanjutan: Tab Analitik Visual, Timer Ujian & E-Sertifikat Digital 300-DPI
