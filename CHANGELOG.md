@@ -2,6 +2,22 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.4.74] - 2026-09-07
+
+### 🎨 Desain Ulang Modal Sukses & Tanda Terima: Minimalis, Humanis, dan Bersih dari AI-Slop
+- **✨ Penyederhanaan Visual Modal Konfirmasi Pengiriman:**
+  - Mengeliminasi struktur *box-in-a-box* bertumpuk dan warna-warna kontras berlebih yang membuat antarmuka tampak kaku dan ramai (*AI-slop*).
+  - Merancang ulang kartu ringkasan penilaian dengan tipografi bersih, lencana skor halus (`bg-emerald-50`), dan perataan data kunci yang nyaman dibaca (*scannable*).
+- **🗣️ Penyempurnaan Bahasa yang Alami & Akademik:**
+  - Mengganti teks teknis database robotik dengan kalimat apresiasi perkuliahan yang hangat (*"Terima kasih, evaluasi Anda untuk [Kelompok] telah berhasil tercatat"*).
+  - Merapikan ID Bukti dengan aksi cepat ikonik (*Unduh* & *Cetak*) yang rapi tanpa memakan ruang.
+- **🎯 Tombol Aksi Terfokus & Ergonomis:**
+  - Menyederhanakan 4 tombol gado-gado menjadi 2 aksi utama: Tombol Utama (*Nilai Kelompok Lain →*) dan Tombol Sekunder (*Lihat Rekapitulasi Hasil*).
+- **⚡ Pembaruan Versi Cache & Aset:**
+  - Meningkatkan versi cache Service Worker dan query tag aset ke `v2.4.74`.
+
+---
+
 ## [2.4.73] - 2026-09-07
 
 ### 🧭 Integrasi Halaman "Info Formulir" ke dalam Hierarki Navigasi Back Gesture Bertahap

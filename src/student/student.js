@@ -7064,10 +7064,10 @@ function normalizeMediaList(fieldOrMedia) {
         if (isOfflineQueued) {
           msgEl.innerHTML = `
             <span class="text-amber-700 font-bold block mb-1">Tersimpan di Browser (Mode Offline)</span>
-            Penilaian untuk <strong>${kelompokName}</strong> telah tersimpan aman di browser dan akan otomatis terkirim saat online.
+            Evaluasi untuk <strong>${escapeHtml(kelompokName)}</strong> telah tersimpan dan akan otomatis dikirim saat online.
           `;
         } else {
-          msgEl.textContent = `Penilaian Anda telah tersimpan secara resmi di server database Supabase.`;
+          msgEl.textContent = `Terima kasih, evaluasi Anda untuk ${kelompokName || 'kelompok'} telah berhasil tercatat.`;
         }
       }
 
@@ -7199,11 +7199,11 @@ function normalizeMediaList(fieldOrMedia) {
       ctx.fillStyle = "#0f172a";
       ctx.font = "bold 15px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("Bukti tanda terima ini sah dan tercatat permanen di basis data server Supabase FKIP ULM.", canvas.width / 2, footerBoxY + 45);
+      ctx.fillText("Bukti tanda terima ini sah dan tercatat resmi pada sistem evaluasi perkuliahan FKIP ULM.", canvas.width / 2, footerBoxY + 45);
       ctx.fillStyle = "#64748b";
       ctx.font = "italic 13.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
       ctx.fillText("Simpan bukti ini sebagai konfirmasi resmi keikutsertaan penilaian perkuliahan.", canvas.width / 2, footerBoxY + 75);
-      ctx.fillText(`Timestamp Keamanan: ${new Date().toISOString()}`, canvas.width / 2, footerBoxY + 98);
+      ctx.fillText(`Timestamp Keabsahan: ${new Date().toISOString()}`, canvas.width / 2, footerBoxY + 98);
       ctx.textAlign = "left";
 
       // 7. Trigger Download
