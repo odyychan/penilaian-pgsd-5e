@@ -32,7 +32,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="src/student/index.css?v=2.4.74">
+  <link rel="stylesheet" href="src/student/index.css?v=2.4.75">
   
   <!-- Instant Zero-FOUC View Resolver (Runs synchronously before HTML paint) -->
   <script>
@@ -1264,19 +1264,23 @@
               type="button" 
               onclick="downloadDigitalReceiptImage()" 
               title="Unduh Gambar Bukti"
-              class="px-2.5 py-1.5 rounded-lg bg-white border border-zinc-200 hover:bg-zinc-100 text-zinc-700 text-[11px] font-semibold transition active:scale-95 cursor-pointer flex items-center gap-1 shadow-2xs"
+              class="px-2.5 py-1.5 rounded-lg bg-white border border-zinc-200 hover:bg-zinc-100 text-zinc-700 text-[11px] font-semibold transition active:scale-95 cursor-pointer flex items-center gap-1.5 shadow-2xs group"
             >
-              <span>📥</span>
-              <span class="hidden xs:inline">Unduh</span>
+              <svg class="w-3.5 h-3.5 text-zinc-500 group-hover:text-zinc-900 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+              </svg>
+              <span>Unduh</span>
             </button>
             <button 
               type="button" 
               onclick="printDigitalReceipt()" 
               title="Cetak Bukti"
-              class="px-2.5 py-1.5 rounded-lg bg-white border border-zinc-200 hover:bg-zinc-100 text-zinc-700 text-[11px] font-semibold transition active:scale-95 cursor-pointer flex items-center gap-1 shadow-2xs"
+              class="px-2.5 py-1.5 rounded-lg bg-white border border-zinc-200 hover:bg-zinc-100 text-zinc-700 text-[11px] font-semibold transition active:scale-95 cursor-pointer flex items-center gap-1.5 shadow-2xs group"
             >
-              <span>🖨️</span>
-              <span class="hidden xs:inline">Cetak</span>
+              <svg class="w-3.5 h-3.5 text-zinc-500 group-hover:text-zinc-900 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+              </svg>
+              <span>Cetak</span>
             </button>
           </div>
         </div>
@@ -1292,17 +1296,22 @@
         <button 
           type="button"
           onclick="resetFormAndCloseModal()" 
-          class="w-full min-h-[46px] py-3 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-xs sm:text-sm transition active:scale-[0.99] cursor-pointer shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+          class="w-full min-h-[46px] py-3 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-xs sm:text-sm transition active:scale-[0.99] cursor-pointer shadow-md hover:shadow-lg flex items-center justify-center gap-2 group"
         >
           <span>Nilai Kelompok Lain</span>
-          <span class="text-base font-bold">→</span>
+          <svg class="w-4 h-4 text-zinc-400 group-hover:text-white transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+          </svg>
         </button>
         <button 
           type="button"
           onclick="closeModalAndGoToRekap()" 
-          class="w-full min-h-[42px] py-2.5 px-4 rounded-xl border border-zinc-200 hover:bg-zinc-50 text-zinc-700 font-semibold text-xs transition active:scale-[0.99] cursor-pointer"
+          class="w-full min-h-[42px] py-2.5 px-4 rounded-xl border border-zinc-200 hover:bg-zinc-50 text-zinc-700 font-semibold text-xs transition active:scale-[0.99] cursor-pointer flex items-center justify-center gap-2 group"
         >
-          Lihat Rekapitulasi Hasil
+          <svg class="w-4 h-4 text-zinc-500 group-hover:text-zinc-800 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+          </svg>
+          <span>Lihat Rekapitulasi Hasil</span>
         </button>
       </div>
 
@@ -1408,13 +1417,13 @@
   <!-- ========================================================================= -->
   <!-- SCRIPT LOGIC -->
   <!-- ========================================================================= -->
-  <script src="src/student/student.js?v=2.4.74"></script>
+  <script src="src/student/student.js?v=2.4.75"></script>
 
   <!-- Progressive Web App (PWA) & Instant Auto-Updater Engine -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js?v=2.4.74').then(function(reg) {
+        navigator.serviceWorker.register('/sw.js?v=2.4.75').then(function(reg) {
           reg.update();
           reg.addEventListener('updatefound', function() {
             var newWorker = reg.installing;

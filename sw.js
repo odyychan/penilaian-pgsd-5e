@@ -5,7 +5,7 @@
  *   - Assets (images, fonts): Stale-while-revalidate
  * ============================================================ */
 
-const CACHE_VERSION = 'v2.4.74';
+const CACHE_VERSION = 'v2.4.75';
 const STATIC_CACHE  = `pgsd-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `pgsd-runtime-${CACHE_VERSION}`;
 

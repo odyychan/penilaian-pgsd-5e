@@ -2,6 +2,17 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.4.75] - 2026-09-07
+
+### 💎 Penerapan Ikon Vektor SVG Profesional pada Modal Tanda Terima
+- **🎯 Penggantian Emoji Sistem dengan Ikon Vektor Presisi Tinggi:**
+  - Mengganti seluruh emoji sistem (`📥`, `🖨️`, `🔄`, `📊`) pada tombol aksi dengan ikon vektor SVG modern (*Lucide / Heroicons style*) yang tajam di seluruh resolusi layar (Retina & 4K).
+  - Menambahkan efek transisi interaktif (*hover color change & micro-translation*) pada tombol Unduh, Cetak, Nilai Kelompok Lain, dan Lihat Rekapitulasi Hasil.
+- **⚡ Pembaruan Versi Cache & Aset:**
+  - Meningkatkan versi cache Service Worker dan query tag aset ke `v2.4.75`.
+
+---
+
 ## [2.4.74] - 2026-09-07
 
 ### 🎨 Desain Ulang Modal Sukses & Tanda Terima: Minimalis, Humanis, dan Bersih dari AI-Slop
