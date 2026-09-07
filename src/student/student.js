@@ -742,28 +742,249 @@ function normalizeMediaList(fieldOrMedia) {
       document.querySelectorAll(".pgsd-dropdown-wrapper button").forEach(b => b.classList.remove("ring-2", "ring-indigo-500/20", "border-indigo-500"));
     });
 
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        document.querySelectorAll(".pgsd-dropdown-menu").forEach(m => m.classList.add("hidden"));
+    // =========================================================================
+    // UNIVERSAL BACK GESTURE ENGINE (TOUCH MOBILE, MOUSE, KEYBOARD)
+    // =========================================================================
+    function handleStudentUniversalBack() {
+      // 1. Prioritas 1: Tutup dropdown menu kustom yang aktif
+      const openDropdowns = document.querySelectorAll(".pgsd-dropdown-menu:not(.hidden)");
+      if (openDropdowns.length > 0) {
+        openDropdowns.forEach(m => m.classList.add("hidden"));
         document.querySelectorAll(".pgsd-dropdown-wrapper svg.rotate-180").forEach(s => s.classList.remove("rotate-180"));
-        
-        const switchModal = document.getElementById("modalSwitchForm");
-        if (switchModal && !switchModal.classList.contains("hidden")) {
-          closeSwitchFormModal();
-        }
-        const zoomModal = document.getElementById("modalClientImageZoom");
-        if (zoomModal && !zoomModal.classList.contains("hidden")) {
-          closeClientImageZoom();
-        }
-        const successModal = document.getElementById("modalSuccess");
-        if (successModal && !successModal.classList.contains("hidden")) {
-          closeSuccessModal();
-        }
+        document.querySelectorAll(".pgsd-dropdown-wrapper button").forEach(b => b.classList.remove("ring-2", "ring-indigo-500/20", "border-indigo-500"));
+        return true;
       }
-    });
+
+      // 2. Prioritas 2: Tutup modal / popup / lightbox yang sedang terbuka
+      const switchModal = document.getElementById("modalSwitchForm");
+      if (switchModal && !switchModal.classList.contains("hidden")) {
+        closeSwitchFormModal();
+        return true;
+      }
+
+      const zoomModal = document.getElementById("modalClientImageZoom");
+      if (zoomModal && !zoomModal.classList.contains("hidden")) {
+        closeClientImageZoom();
+        return true;
+      }
+
+      const preSubmit = document.getElementById("modalPreSubmitReview");
+      if (preSubmit && !preSubmit.classList.contains("hidden")) {
+        closePreSubmitReviewModal();
+        return true;
+      }
+
+      const succModal = document.getElementById("successModal") || document.getElementById("modalSuccess");
+      if (succModal && !succModal.classList.contains("hidden")) {
+        resetFormAndCloseModal();
+        return true;
+      }
+
+      const printModal = document.getElementById("printRekapModal");
+      if (printModal && !printModal.classList.contains("hidden")) {
+        closePrintModal();
+        return true;
+      }
+
+      const groupInfoModal = document.getElementById("modalGroupInfo");
+      if (groupInfoModal && !groupInfoModal.classList.contains("hidden")) {
+        closeGroupInfoModal();
+        return true;
+      }
+
+      const studRevModal = document.getElementById("modalStudentReview");
+      if (studRevModal && !studRevModal.classList.contains("hidden")) {
+        closeStudentReviewModal();
+        return true;
+      }
+
+      const confirmModal = document.getElementById("customConfirmModal");
+      if (confirmModal && !confirmModal.classList.contains("hidden")) {
+        confirmModal.classList.add("hidden");
+        confirmModal.classList.remove("flex");
+        return true;
+      }
+
+      const anyOpenModal = document.querySelector(".modal-backdrop:not(.hidden), .modal-overlay:not(.hidden), [role='dialog']:not(.hidden)");
+      if (anyOpenModal && anyOpenModal.id !== "viewPortal" && anyOpenModal.id !== "viewForm") {
+        anyOpenModal.classList.add("hidden");
+        anyOpenModal.classList.remove("flex");
+        return true;
+      }
+
+      // 3. Prioritas 3: Navigasi Antar-View / Tab
+      // Jika berada di Tab Rekapitulasi -> Kembali ke Tab Formulir Penilaian
+      const viewRekap = document.getElementById("viewRekap");
+      if (viewRekap && !viewRekap.classList.contains("hidden")) {
+        switchTab('form');
+        return true;
+      }
+
+      // Jika berada di Formulir Penilaian dan masuk dari Portal Hub -> Kembali ke Portal Hub
+      const viewPortal = document.getElementById("viewPortal");
+      const viewForm = document.getElementById("viewForm") || document.getElementById("mainAppRoot");
+      if (viewPortal && viewForm && !viewForm.classList.contains("hidden") && (typeof isPortalMode !== 'undefined' && isPortalMode)) {
+        showPortalView();
+        return true;
+      }
+
+      // 4. Prioritas 4: History Browser Fallback
+      if (window.history.length > 1) {
+        window.history.back();
+        return true;
+      }
+
+      return false;
+    }
+
+    function initBackGestureEngine() {
+      // Injeksi indikator visual gestur jika belum ada di DOM
+      let indicator = document.getElementById("pgsdBackGestureIndicator");
+      if (!indicator) {
+        indicator = document.createElement("div");
+        indicator.id = "pgsdBackGestureIndicator";
+        indicator.className = "pgsd-back-gesture-pill";
+        indicator.innerHTML = `
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        `;
+        document.body.appendChild(indicator);
+      }
+
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let isEdgeGestureActive = false;
+      let thresholdTriggered = false;
+      const EDGE_SWIPE_ZONE = 35; // Jarak usapan dari tepi kiri layar (px)
+      const SWIPE_THRESHOLD = 75; // Jarak tarikan untuk aktivasi (px)
+
+      // 📱 1. TOUCH MOBILE EDGE-SWIPE LISTENER
+      window.addEventListener("touchstart", (e) => {
+        if (e.touches.length !== 1) return;
+        const touch = e.touches[0];
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+
+        if (touchStartX <= EDGE_SWIPE_ZONE) {
+          isEdgeGestureActive = true;
+          thresholdTriggered = false;
+          indicator.style.top = `${Math.min(Math.max(touchStartY, 60), window.innerHeight - 60)}px`;
+          indicator.style.transform = `translateY(-50%) translateX(-120%) scale(0.6)`;
+          indicator.style.opacity = "0";
+          indicator.classList.remove("active-threshold");
+        } else {
+          isEdgeGestureActive = false;
+        }
+      }, { passive: true });
+
+      window.addEventListener("touchmove", (e) => {
+        if (!isEdgeGestureActive || e.touches.length !== 1) return;
+        const touch = e.touches[0];
+        const deltaX = touch.clientX - touchStartX;
+        const deltaY = touch.clientY - touchStartY;
+
+        // Horizontally dominant check (tidak mengganggu scroll vertikal)
+        if (deltaX > 0 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+          const progress = Math.min(1.0, deltaX / SWIPE_THRESHOLD);
+          const currentX = Math.min(24, -40 + (progress * 56));
+          indicator.style.opacity = `${Math.min(1.0, progress * 1.3)}`;
+          indicator.style.top = `${Math.min(Math.max(touch.clientY, 60), window.innerHeight - 60)}px`;
+          indicator.style.transform = `translateY(-50%) translateX(${currentX}px) scale(${0.7 + (progress * 0.4)})`;
+
+          if (deltaX >= SWIPE_THRESHOLD) {
+            if (!thresholdTriggered) {
+              thresholdTriggered = true;
+              indicator.classList.add("active-threshold");
+              if (navigator.vibrate) navigator.vibrate(12);
+            }
+          } else {
+            if (thresholdTriggered) {
+              thresholdTriggered = false;
+              indicator.classList.remove("active-threshold");
+            }
+          }
+        } else if (Math.abs(deltaY) > Math.abs(deltaX) * 1.5) {
+          isEdgeGestureActive = false;
+          indicator.style.opacity = "0";
+          indicator.style.transform = `translateY(-50%) translateX(-120%) scale(0.6)`;
+          indicator.classList.remove("active-threshold");
+        }
+      }, { passive: true });
+
+      const finishGesture = () => {
+        if (!isEdgeGestureActive) return;
+        isEdgeGestureActive = false;
+
+        if (thresholdTriggered) {
+          indicator.style.transform = `translateY(-50%) translateX(28px) scale(1.25)`;
+          indicator.style.opacity = "1";
+          setTimeout(() => {
+            handleStudentUniversalBack();
+            indicator.style.opacity = "0";
+            indicator.style.transform = `translateY(-50%) translateX(-120%) scale(0.6)`;
+            indicator.classList.remove("active-threshold");
+          }, 100);
+        } else {
+          indicator.style.opacity = "0";
+          indicator.style.transform = `translateY(-50%) translateX(-120%) scale(0.6)`;
+          indicator.classList.remove("active-threshold");
+        }
+      };
+
+      window.addEventListener("touchend", finishGesture, { passive: true });
+      window.addEventListener("touchcancel", finishGesture, { passive: true });
+
+      // 🖱️ 2. MOUSE BACK BUTTON LISTENER (Button 3 & 4)
+      window.addEventListener("mouseup", (e) => {
+        if (e.button === 3 || e.button === 4) {
+          e.preventDefault();
+          e.stopPropagation();
+          handleStudentUniversalBack();
+        }
+      });
+
+      window.addEventListener("auxclick", (e) => {
+        if (e.button === 3 || e.button === 4) {
+          e.preventDefault();
+          e.stopPropagation();
+          handleStudentUniversalBack();
+        }
+      });
+
+      // ⌨️ 3. KEYBOARD BACK SHORTCUTS (Escape, Alt + ArrowLeft, Backspace)
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          handleStudentUniversalBack();
+          return;
+        }
+
+        if (e.altKey && e.key === "ArrowLeft") {
+          e.preventDefault();
+          handleStudentUniversalBack();
+          return;
+        }
+
+        if (e.key === "Backspace") {
+          const activeEl = document.activeElement;
+          const isEditable = activeEl && (
+            activeEl.tagName === 'INPUT' ||
+            activeEl.tagName === 'TEXTAREA' ||
+            activeEl.tagName === 'SELECT' ||
+            activeEl.isContentEditable ||
+            activeEl.classList.contains('katex-editor')
+          );
+          if (!isEditable) {
+            e.preventDefault();
+            handleStudentUniversalBack();
+          }
+        }
+      });
+    }
 
     document.addEventListener("DOMContentLoaded", async function() {
       initAllModernDropdowns();
+      initBackGestureEngine();
 
       if (isPortalMode) {
         showPortalView();

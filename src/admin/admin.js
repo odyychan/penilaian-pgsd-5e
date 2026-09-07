@@ -2772,32 +2772,274 @@
       document.querySelectorAll(".pgsd-dropdown-wrapper button").forEach(b => b.classList.remove("ring-2", "ring-indigo-500/20", "border-indigo-500"));
     });
 
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        document.querySelectorAll(".pgsd-dropdown-menu").forEach(m => m.classList.add("hidden"));
+    // =========================================================================
+    // UNIVERSAL BACK GESTURE ENGINE (TOUCH MOBILE, MOUSE, KEYBOARD) - ADMIN PORTAL
+    // =========================================================================
+    function handleAdminUniversalBack() {
+      // 1. Prioritas 1: Tutup dropdown menu kustom yang aktif
+      const openDropdowns = document.querySelectorAll(".pgsd-dropdown-menu:not(.hidden)");
+      if (openDropdowns.length > 0) {
+        openDropdowns.forEach(m => m.classList.add("hidden"));
         document.querySelectorAll(".pgsd-dropdown-wrapper svg.rotate-180").forEach(s => s.classList.remove("rotate-180"));
-        
-        const attachModal = document.getElementById("modalAttachQuestionMedia");
-        if (attachModal && !attachModal.classList.contains("hidden")) {
-          closeAttachMediaModal(false);
-        }
-        const createModal = document.getElementById("modalCreateNewForm");
-        if (createModal && !createModal.classList.contains("hidden")) {
-          closeCreateFormModal();
-        }
-        const resetModal = document.getElementById("modalResetConfirm");
-        if (resetModal && !resetModal.classList.contains("hidden")) {
-          closeResetConfirmModal();
-        }
-        const settingsModal = document.getElementById("modalGlobalSettings");
-        if (settingsModal && !settingsModal.classList.contains("hidden")) {
-          closeGlobalSettingsModal();
-        }
+        document.querySelectorAll(".pgsd-dropdown-wrapper button").forEach(b => b.classList.remove("ring-2", "ring-indigo-500/20", "border-indigo-500"));
+        return true;
       }
-    });
+
+      // 2. Prioritas 2: Tutup modal / popup / simulator yang sedang terbuka
+      const simModal = document.getElementById("liveFormSimulatorModal");
+      if (simModal && !simModal.classList.contains("hidden")) {
+        closeLiveFormSimulator();
+        return true;
+      }
+
+      const printModal = document.getElementById("printRekapModal");
+      if (printModal && !printModal.classList.contains("hidden")) {
+        closeAdminPrintModal();
+        return true;
+      }
+
+      const attachModal = document.getElementById("modalAttachQuestionMedia");
+      if (attachModal && !attachModal.classList.contains("hidden")) {
+        closeAttachMediaModal(false);
+        return true;
+      }
+
+      const createModal = document.getElementById("modalCreateNewForm");
+      if (createModal && !createModal.classList.contains("hidden")) {
+        closeCreateFormModal();
+        return true;
+      }
+
+      const resetModal = document.getElementById("modalResetConfirm");
+      if (resetModal && !resetModal.classList.contains("hidden")) {
+        closeResetConfirmModal();
+        return true;
+      }
+
+      const deleteModal = document.getElementById("modalDeleteForm");
+      if (deleteModal && !deleteModal.classList.contains("hidden")) {
+        closeDeleteFormModal();
+        return true;
+      }
+
+      const settingsModal = document.getElementById("modalGlobalSettings");
+      if (settingsModal && !settingsModal.classList.contains("hidden")) {
+        closeGlobalSettingsModal();
+        return true;
+      }
+
+      const insertLinkModal = document.getElementById("modalInsertLink");
+      if (insertLinkModal && !insertLinkModal.classList.contains("hidden")) {
+        closeInsertLinkModal();
+        return true;
+      }
+
+      const importGroupsModal = document.getElementById("modalImportGroups");
+      if (importGroupsModal && !importGroupsModal.classList.contains("hidden")) {
+        closeImportGroupsModal();
+        return true;
+      }
+
+      const editMemberModal = document.getElementById("modalEditMember");
+      if (editMemberModal && !editMemberModal.classList.contains("hidden")) {
+        closeEditMemberModal();
+        return true;
+      }
+
+      const editGroupModal = document.getElementById("modalEditGroup");
+      if (editGroupModal && !editGroupModal.classList.contains("hidden")) {
+        closeEditGroupModal();
+        return true;
+      }
+
+      const shareModal = document.getElementById("modalShareForm");
+      if (shareModal && !shareModal.classList.contains("hidden")) {
+        closeShareModal();
+        return true;
+      }
+
+      const versionHistoryModal = document.getElementById("versionHistoryModal");
+      if (versionHistoryModal && !versionHistoryModal.classList.contains("hidden")) {
+        closeVersionHistoryModal();
+        return true;
+      }
+
+      const anyOpenModal = document.querySelector("#adminDashboard .modal-backdrop:not(.hidden), #adminDashboard .modal-overlay:not(.hidden), #adminDashboard [role='dialog']:not(.hidden)");
+      if (anyOpenModal && anyOpenModal.id !== "adminDashboard") {
+        anyOpenModal.classList.add("hidden");
+        anyOpenModal.classList.remove("flex");
+        return true;
+      }
+
+      // 3. Prioritas 3: Navigasi Antar-Tab Workspace & Master Hub
+      const wsContainer = document.getElementById("adminSingleWorkspaceContainer");
+      if (wsContainer && !wsContainer.classList.contains("hidden")) {
+        // Jika sedang di tab sekunder (respons, pengaturan, cetak, sistem, data) -> kembali ke tab 'config' (pertanyaan)
+        if (typeof currentAdminTab !== 'undefined' && currentAdminTab !== 'config') {
+          switchAdminTab('config');
+          return true;
+        }
+        // Jika sedang di tab 'config' (pertanyaan) -> kembali ke Pusat Formulir (Master Hub)
+        returnToMasterHub(true);
+        return true;
+      }
+
+      // 4. Prioritas 4: History Browser Fallback
+      if (window.history.length > 1) {
+        window.history.back();
+        return true;
+      }
+
+      return false;
+    }
+
+    function initBackGestureEngine() {
+      // Injeksi indikator visual gestur jika belum ada di DOM
+      let indicator = document.getElementById("pgsdBackGestureIndicator");
+      if (!indicator) {
+        indicator = document.createElement("div");
+        indicator.id = "pgsdBackGestureIndicator";
+        indicator.className = "pgsd-back-gesture-pill";
+        indicator.innerHTML = `
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        `;
+        document.body.appendChild(indicator);
+      }
+
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let isEdgeGestureActive = false;
+      let thresholdTriggered = false;
+      const EDGE_SWIPE_ZONE = 35;
+      const SWIPE_THRESHOLD = 75;
+
+      // 📱 1. TOUCH MOBILE EDGE-SWIPE LISTENER
+      window.addEventListener("touchstart", (e) => {
+        if (e.touches.length !== 1) return;
+        const touch = e.touches[0];
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+
+        if (touchStartX <= EDGE_SWIPE_ZONE) {
+          isEdgeGestureActive = true;
+          thresholdTriggered = false;
+          indicator.style.top = `${Math.min(Math.max(touchStartY, 60), window.innerHeight - 60)}px`;
+          indicator.style.transform = `translateY(-50%) translateX(-120%) scale(0.6)`;
+          indicator.style.opacity = "0";
+          indicator.classList.remove("active-threshold");
+        } else {
+          isEdgeGestureActive = false;
+        }
+      }, { passive: true });
+
+      window.addEventListener("touchmove", (e) => {
+        if (!isEdgeGestureActive || e.touches.length !== 1) return;
+        const touch = e.touches[0];
+        const deltaX = touch.clientX - touchStartX;
+        const deltaY = touch.clientY - touchStartY;
+
+        if (deltaX > 0 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+          const progress = Math.min(1.0, deltaX / SWIPE_THRESHOLD);
+          const currentX = Math.min(24, -40 + (progress * 56));
+          indicator.style.opacity = `${Math.min(1.0, progress * 1.3)}`;
+          indicator.style.top = `${Math.min(Math.max(touch.clientY, 60), window.innerHeight - 60)}px`;
+          indicator.style.transform = `translateY(-50%) translateX(${currentX}px) scale(${0.7 + (progress * 0.4)})`;
+
+          if (deltaX >= SWIPE_THRESHOLD) {
+            if (!thresholdTriggered) {
+              thresholdTriggered = true;
+              indicator.classList.add("active-threshold");
+              if (navigator.vibrate) navigator.vibrate(12);
+            }
+          } else {
+            if (thresholdTriggered) {
+              thresholdTriggered = false;
+              indicator.classList.remove("active-threshold");
+            }
+          }
+        } else if (Math.abs(deltaY) > Math.abs(deltaX) * 1.5) {
+          isEdgeGestureActive = false;
+          indicator.style.opacity = "0";
+          indicator.style.transform = `translateY(-50%) translateX(-120%) scale(0.6)`;
+          indicator.classList.remove("active-threshold");
+        }
+      }, { passive: true });
+
+      const finishGesture = () => {
+        if (!isEdgeGestureActive) return;
+        isEdgeGestureActive = false;
+
+        if (thresholdTriggered) {
+          indicator.style.transform = `translateY(-50%) translateX(28px) scale(1.25)`;
+          indicator.style.opacity = "1";
+          setTimeout(() => {
+            handleAdminUniversalBack();
+            indicator.style.opacity = "0";
+            indicator.style.transform = `translateY(-50%) translateX(-120%) scale(0.6)`;
+            indicator.classList.remove("active-threshold");
+          }, 100);
+        } else {
+          indicator.style.opacity = "0";
+          indicator.style.transform = `translateY(-50%) translateX(-120%) scale(0.6)`;
+          indicator.classList.remove("active-threshold");
+        }
+      };
+
+      window.addEventListener("touchend", finishGesture, { passive: true });
+      window.addEventListener("touchcancel", finishGesture, { passive: true });
+
+      // 🖱️ 2. MOUSE BACK BUTTON LISTENER (Button 3 & 4)
+      window.addEventListener("mouseup", (e) => {
+        if (e.button === 3 || e.button === 4) {
+          e.preventDefault();
+          e.stopPropagation();
+          handleAdminUniversalBack();
+        }
+      });
+
+      window.addEventListener("auxclick", (e) => {
+        if (e.button === 3 || e.button === 4) {
+          e.preventDefault();
+          e.stopPropagation();
+          handleAdminUniversalBack();
+        }
+      });
+
+      // ⌨️ 3. KEYBOARD BACK SHORTCUTS (Escape, Alt + ArrowLeft, Backspace)
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          handleAdminUniversalBack();
+          return;
+        }
+
+        if (e.altKey && e.key === "ArrowLeft") {
+          e.preventDefault();
+          handleAdminUniversalBack();
+          return;
+        }
+
+        if (e.key === "Backspace") {
+          const activeEl = document.activeElement;
+          const isEditable = activeEl && (
+            activeEl.tagName === 'INPUT' ||
+            activeEl.tagName === 'TEXTAREA' ||
+            activeEl.tagName === 'SELECT' ||
+            activeEl.isContentEditable ||
+            activeEl.classList.contains('katex-editor')
+          );
+          if (!isEditable) {
+            e.preventDefault();
+            handleAdminUniversalBack();
+          }
+        }
+      });
+    }
 
     document.addEventListener("DOMContentLoaded", async function() {
       initAllModernDropdowns();
+      initBackGestureEngine();
       const token = sessionStorage.getItem("PGSD_ADMIN_SESSION_TOKEN");
       if (token) {
         // 🔒 Server-Side Token Verification via Supabase Edge Function

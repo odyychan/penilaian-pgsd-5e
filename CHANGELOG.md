@@ -4,6 +4,27 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.69] - 2026-09-07
+
+### 📱 Universal Back Gesture Engine: Touch Mobile Edge-Swipe, Mouse Back Buttons & Keyboard Shortcuts
+- **👆 Touch Mobile Left-Edge Swipe Gesture (iOS & Modern Android Native Feel):**
+  - Mengimplementasikan sistem usapan tepi kiri layar (*left edge swipe*) dengan physics gesture yang halus dan responsif di seluruh perangkat mobile & tablet.
+  - Dilengkapi indikator visual mengambang (*glassmorphic pill indicator* dengan ikon panah animasi) yang bergerak dinamis mengikuti posisi vertikal dan jarak tarikan jari.
+  - Memberikan respon haptic (*vibration feedback*) seketika saat ambang batas tarikan tercapai.
+- **🖱️ Mouse Back Button Navigation (Button 3 & 4):**
+  - Mengintegrasikan penanganan *auxiliary click* dan *mouseup* untuk mouse dengan tombol samping (*Back Navigation*), mencegah *hard reload* peramban dan mengalihkan navigasi secara mulus.
+- **⌨️ Keyboard Back Navigation Shortcuts (`Escape`, `Alt + ArrowLeft`, `Backspace`):**
+  - Tombol `Escape` otomatis menutup dropdown, modal, lightbox gambar, atau simulator yang sedang terbuka.
+  - Tombol `Alt + ArrowLeft` dan `Backspace` (di luar input isian formulir) menjalankan navigasi mundur secara cerdas.
+- **🧠 Smart Hierarchical Priority Resolver:**
+  - **Prioritas 1**: Menutup modal aktif, lightbox zoom gambar, formulir simulator, atau menu dropdown terlebih dahulu tanpa mengubah halaman.
+  - **Prioritas 2**: Berpindah antar-view/tab (dari Rekapitulasi ke Form, dari Tab Admin sekunder ke Tab Pertanyaan, atau dari Workspace ke Master Hub Formulir).
+  - **Prioritas 3**: *Fallback* aman ke riwayat peramban (`window.history.back()`).
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.69`.
+
+---
+
 ## [2.4.68] - 2026-08-29
 
 ### 🖨️ Tab "Format Cetak": Customizable Visual Report Builder & Live Side-by-Side Preview
