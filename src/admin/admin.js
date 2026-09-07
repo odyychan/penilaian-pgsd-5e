@@ -2409,7 +2409,7 @@
               await sb.from('pgsd_form_configs').upsert({
                 form_id: task.formId,
                 config_data: task.payload || adminAppConfig,
-                schema_data: adminFormSchema,
+                schema_data: adminFormSchema || (typeof getBlankFormSchema === 'function' ? getBlankFormSchema() : { tahapan: [] }),
                 updated_at: new Date().toISOString()
               });
             } else if (task.type === 'groups' && Array.isArray(task.payload)) {

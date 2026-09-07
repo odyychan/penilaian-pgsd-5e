@@ -4180,15 +4180,16 @@ function normalizeMediaList(fieldOrMedia) {
       const container = document.getElementById("groupsContainer");
       const empty = document.getElementById("groupsEmpty");
 
-      loading.classList.add("hidden");
+      if (loading) loading.classList.add("hidden");
 
       if (!groupsData || groupsData.length === 0) {
-        empty.classList.remove("hidden");
-        container.classList.add("hidden");
+        if (empty) empty.classList.remove("hidden");
+        if (container) container.classList.add("hidden");
         return;
       }
 
-      empty.classList.add("hidden");
+      if (empty) empty.classList.add("hidden");
+      if (!container) return;
       container.classList.remove("hidden");
       container.innerHTML = "";
 
