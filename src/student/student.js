@@ -1867,8 +1867,8 @@ function normalizeMediaList(fieldOrMedia) {
                 </button>
 
                 ${stepNum < totalSteps 
-                  ? `<button type="button" onclick="goToStep(${stepNum + 1})" class="flex-1 sm:flex-none min-h-[44px] px-6 py-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 flex items-center justify-center gap-2 cursor-pointer shadow-xs"><span>Lanjut ke Bagian ${stepNum + 1}</span><span>→</span></button>`
-                  : `<button type="submit" class="flex-1 sm:flex-none min-h-[44px] px-7 py-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition active:scale-98 flex items-center justify-center gap-2 cursor-pointer shadow-md"><span>Kirim Penilaian Sekarang</span><span>✓</span></button>`
+                  ? `<button type="button" onclick="goToStep(${stepNum + 1})" class="flex-1 sm:flex-none min-h-[44px] px-6 py-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition active:scale-98 flex items-center justify-center gap-2 cursor-pointer shadow-xs"><span>Lanjut ke Bagian ${stepNum + 1}</span><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></button>`
+                  : `<button type="submit" class="flex-1 sm:flex-none min-h-[44px] px-7 py-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition active:scale-98 flex items-center justify-center gap-2 cursor-pointer shadow-md"><span>Kirim Penilaian Sekarang</span><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></button>`
                 }
               </div>
             </div>
@@ -2478,8 +2478,9 @@ function normalizeMediaList(fieldOrMedia) {
                   class="w-full h-36 touch-none cursor-crosshair block bg-transparent"
                   style="touch-action: none;"
                 ></canvas>
-                <div id="sigPlaceholder_${f.id}" class="absolute pointer-events-none text-zinc-300 font-medium text-xs sm:text-sm flex items-center gap-1.5 ${hasSignature ? 'hidden' : ''}">
-                  <span>✍️ Bubuhkan tanda tangan di sini</span>
+                <div id="sigPlaceholder_${f.id}" class="absolute pointer-events-none text-zinc-400 font-medium text-xs sm:text-sm flex items-center gap-1.5 ${hasSignature ? 'hidden' : ''}">
+                  <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                  <span>Bubuhkan tanda tangan di sini</span>
                 </div>
               </div>
               <div class="flex items-center justify-between text-xs">
@@ -2514,7 +2515,7 @@ function normalizeMediaList(fieldOrMedia) {
             ${mediaBelow}
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               <div class="relative flex-1">
-                <span class="absolute left-3.5 top-3 text-zinc-400 text-xs font-mono">🔗</span>
+                <svg class="w-3.5 h-3.5 text-zinc-400 absolute left-3.5 top-3.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
                 <input 
                   type="url" 
                   value="${escapeHtml(strVal)}" 
@@ -3902,7 +3903,8 @@ function normalizeMediaList(fieldOrMedia) {
                 warningBadge.classList.add("inline-flex");
                 warningBadge.innerHTML = `
                   <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
-                  <span>⏱️ Batas Pengisian: <strong>${diffHours} jam ${diffMinutes} menit lagi</strong></span>
+                  <svg class="w-3.5 h-3.5 text-amber-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  <span>Batas Pengisian: <strong>${diffHours} jam ${diffMinutes} menit lagi</strong></span>
                 `;
               }
             } else if (warningBadge) {
@@ -3932,7 +3934,10 @@ function normalizeMediaList(fieldOrMedia) {
         if (startBtn) {
           startBtn.disabled = true;
           startBtn.classList.add("opacity-50", "cursor-not-allowed");
-          startBtn.innerHTML = `<span>🔒 Formulir Ditutup</span>`;
+          startBtn.innerHTML = `
+            <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            <span>Formulir Ditutup</span>
+          `;
         }
         // Apply frosted glass spoiler blur when form is closed or not yet open
         if (spoilerContent && spoilerOverlay) {
@@ -3952,44 +3957,12 @@ function normalizeMediaList(fieldOrMedia) {
           startBtn.classList.remove("opacity-50", "cursor-not-allowed");
           startBtn.innerHTML = `
             <span>Mulai Pengisian Penilaian</span>
-            <span class="text-base">→</span>
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
           `;
         }
       }
-    }
-
-    let eyeTrackRafId = null;
-    function initSpoilerEyeTracking() {
-      if (window._spoilerEyeTrackingInitialized) return;
-      window._spoilerEyeTrackingInitialized = true;
-
-      window.addEventListener('mousemove', (e) => {
-        const pupilGroup = document.getElementById("spoilerPupilGroup");
-        const overlay = document.getElementById("overviewSpoilerOverlay");
-        if (!pupilGroup || !overlay || overlay.classList.contains("hidden")) return;
-
-        if (eyeTrackRafId) cancelAnimationFrame(eyeTrackRafId);
-        eyeTrackRafId = requestAnimationFrame(() => {
-          const rect = pupilGroup.getBoundingClientRect();
-          const eyeCenterX = rect.left + rect.width / 2;
-          const eyeCenterY = rect.top + rect.height / 2;
-
-          const deltaX = e.clientX - eyeCenterX;
-          const deltaY = e.clientY - eyeCenterY;
-          const angle = Math.atan2(deltaY, deltaX);
-
-          // Calculate natural clamped movement within eye socket
-          const distance = Math.hypot(deltaX, deltaY);
-          const maxDistanceX = 3.2;
-          const maxDistanceY = 2.0;
-          const clampedRatio = Math.min(1, distance / 120);
-
-          const moveX = Math.cos(angle) * (maxDistanceX * clampedRatio);
-          const moveY = Math.sin(angle) * (maxDistanceY * clampedRatio);
-
-          pupilGroup.style.transform = `translate(${moveX.toFixed(2)}px, ${moveY.toFixed(2)}px)`;
-        });
-      }, { passive: true });
     }
 
     function applySpoilerBlur(isBlurred) {
@@ -4001,7 +3974,6 @@ function normalizeMediaList(fieldOrMedia) {
         spoilerContent.classList.add("filter", "blur-[3.5px]", "select-none", "pointer-events-none", "opacity-75");
         spoilerOverlay.classList.remove("hidden");
         spoilerOverlay.classList.add("flex");
-        initSpoilerEyeTracking();
       } else {
         spoilerContent.classList.remove("filter", "blur-[3.5px]", "select-none", "pointer-events-none", "opacity-75");
         spoilerOverlay.classList.add("hidden");
@@ -6429,8 +6401,11 @@ function normalizeMediaList(fieldOrMedia) {
           if (textVal) {
             evalListHtml += `
               <div class="p-2.5 rounded-lg bg-zinc-50 border border-zinc-200/70 text-xs">
-                <span class="font-bold text-zinc-900 block mb-0.5">👤 ${member}:</span>
-                <p class="text-zinc-600 text-[11px] leading-relaxed italic whitespace-pre-wrap">"${textVal}"</p>
+                <span class="font-bold text-zinc-900 mb-0.5 flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5 text-zinc-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                  <span>${escapeHtml(member)}:</span>
+                </span>
+                <p class="text-zinc-600 text-[11px] leading-relaxed italic whitespace-pre-wrap pl-5">"${textVal}"</p>
               </div>
             `;
           }
@@ -6556,7 +6531,7 @@ function normalizeMediaList(fieldOrMedia) {
       }
 
       if (isPreviewMode) {
-        showToast("🎉 Simulasi Pengisian Berhasil! Seluruh isian telah divalidasi dengan sukses (Mode Draf / Simulator — data tidak disimpan ke database).", "success", 5000);
+        showToast("Simulasi pengisian berhasil. Seluruh isian telah tervalidasi dengan sukses.", "success", 5000);
         return;
       }
 

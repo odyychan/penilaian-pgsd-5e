@@ -2,6 +2,24 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.4.76] - 2026-09-07
+
+### 🧹 Audit Komprehensif Seluruh Platform: Pembersihan Total Elemen AI-Slop, Emoji, & Gimmick
+- **🎭 Penghapusan Modul Gimmick Visual (*Eliminated Gimmick Code*):**
+  - Menghapus sepenuhnya modul animasi bola mata pelacak mouse (`spoilerEyeTracking` & `spoilerPupilGroup`) pada banner penguncian formulir.
+  - Menggantinya dengan kartu pembuka rincian form akademik yang bersih, elegan, dan fungsional.
+- **💎 Penggantian Menyeluruh Emoji Sistem dengan Ikon Vektor SVG Presisi Tinggi:**
+  - Mengganti seluruh emoji pada tombol portal (`Ganti PIN`, `Mulai Pengisian`, `Riwayat Formulir`, `Lanjut Bagian`, `Kirim Penilaian`, `Edit Kembali`).
+  - Mengganti emoji pada tab setelan admin (`Jadwal & Batas Waktu`, `Otentikasi Email`, `Aturan Integritas`, `Pelacak Partisipasi`, `Integrasi Spreadsheet & Drive`, `Instrumen Rubrik`).
+  - Mengganti emoji pada modul masukan mahasiswa (`Tanda Tangan Digital`, `Input Tautan Berkas`, `Roster Terdaftar`, `Google Verified`).
+- **📝 Standardisasi Pesan & Notifikasi Humanis (*Humanized Copywriting*):**
+  - Menghilangkan frasa teknis robotik pada seluruh notifikasi toast, dialog konfirmasi, dan lencana status.
+  - Memastikan seluruh antarmuka mencerminkan standar editorial akademik resmi FKIP Universitas Lambung Mangkurat.
+- **⚡ Pembaruan Versi Cache & Service Worker:**
+  - Meningkatkan versi Service Worker dan seluruh aset statis ke `v2.4.76`.
+
+---
+
 ## [2.4.75] - 2026-09-07
 
 ### 💎 Penerapan Ikon Vektor SVG Profesional pada Modal Tanda Terima

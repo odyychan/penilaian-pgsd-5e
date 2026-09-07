@@ -228,7 +228,7 @@
 
       if (displayEl) {
         if (hasRichFormat && !isFocused && val !== '') {
-          const editBadgeHtml = '<span class="opacity-0 group-hover/richDisplay:opacity-100 transition-opacity absolute top-1 right-1 px-1.5 py-0.5 rounded-md bg-zinc-900/90 text-white text-[9.5px] font-mono font-bold flex items-center gap-1 shadow-xs pointer-events-none select-none z-10">✏️ Klik untuk edit</span>';
+          const editBadgeHtml = '<span class="opacity-0 group-hover/richDisplay:opacity-100 transition-opacity absolute top-1 right-1 px-1.5 py-0.5 rounded-md bg-zinc-900/90 text-white text-[9.5px] font-mono font-bold flex items-center gap-1 shadow-xs pointer-events-none select-none z-10"><svg class="w-3 h-3 text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg><span>Klik untuk edit</span></span>';
           displayEl.innerHTML = smartMathFormat(val) + editBadgeHtml;
           renderAllMathInElement(displayEl);
           displayEl.classList.remove('hidden');
@@ -1867,7 +1867,7 @@
         }
       }
 
-      setMediaUploadProgress(100, `✅ Berhasil mengunggah ${totalFiles} berkas!`, true);
+      setMediaUploadProgress(100, `Berhasil mengunggah ${totalFiles} berkas.`, true);
       renderMediaModalList();
       showAdminToast(`${totalFiles} berkas media berhasil dilampirkan!`, "success");
     }
@@ -3543,7 +3543,7 @@
       const next = !current;
       localStorage.setItem("PGSD_DEBUG_MODE", next ? "true" : "false");
       if (typeof showToast === "function") {
-        showToast(next ? "🛠️ Mode Debug Aktif: Form Sandbox DEBUG ditampilkan." : "Mode Debug Dinonaktifkan.", "info");
+        showToast(next ? "Mode Debug Aktif: Form Sandbox DEBUG ditampilkan." : "Mode Debug Dinonaktifkan.", "info");
       }
       renderHubFormsGrid();
       updateDebugModeUI();
@@ -3627,7 +3627,7 @@
                 <span class="px-2.5 py-1 rounded-lg ${isDebugForm ? 'bg-amber-100 text-amber-900 border border-amber-300 font-mono font-extrabold text-xs tracking-wider' : 'bg-indigo-50 text-indigo-700 border border-indigo-200/80 font-mono font-bold text-xs tracking-wider'}">
                   PIN: ${fId}
                 </span>
-                ${isDebugForm ? '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">🛠️ Sandbox QA</span>' : ''}
+                ${isDebugForm ? '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1"><svg class="w-3 h-3 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg><span>Sandbox QA</span></span>' : ''}
               </div>
               <div class="flex items-center gap-1.5">
                 ${statusBadge}
@@ -5323,7 +5323,7 @@
           { type: "SHORT_TEXT", label: "Jawaban Singkat", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h10M4 18h6"></path></svg>` },
           { type: "TEXTAREA", label: "Paragraf / Ulasan", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h10"></path></svg>` },
           { type: "RATING_SCALE", label: "Skala Linier", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>` },
-          { type: "STAR_RATING", label: "Rating Bintang ⭐", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>` },
+          { type: "STAR_RATING", label: "Skala Bintang", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>` },
           { type: "MATRIX_GRID", label: "Matriks Rubrik Kisi", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16M10 6v12M16 6v12"></path></svg>` },
           { type: "RANKING", label: "Peringkat Prioritas", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path></svg>` },
           { type: "SIGNATURE", label: "Tanda Tangan Digital", icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>` },
@@ -5968,7 +5968,7 @@
                 onchange="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'maxStars', parseInt(this.value))"
                 class="px-3 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-mono font-bold cursor-pointer"
               >
-                <option value="5" ${maxStars === 5 ? 'selected' : ''}>5 Bintang (⭐⭐⭐⭐⭐)</option>
+                <option value="5" ${maxStars === 5 ? 'selected' : ''}>5 Bintang</option>
                 <option value="7" ${maxStars === 7 ? 'selected' : ''}>7 Bintang</option>
                 <option value="10" ${maxStars === 10 ? 'selected' : ''}>10 Bintang</option>
               </select>
@@ -6109,7 +6109,7 @@
           <div class="pt-2 pb-1 space-y-1.5 text-xs">
             <div class="flex items-center gap-2">
               <div class="relative flex-1">
-                <span class="absolute left-3 top-2.5 text-zinc-400">🔗</span>
+                <svg class="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
                 <input 
                   type="text" 
                   value="${f.placeholder || ''}" 
@@ -8146,8 +8146,8 @@
       const pillSub = document.getElementById("countPill_SUBMITTED");
 
       if (elPercent) elPercent.textContent = `${percent}%`;
-      if (elCountSub) elCountSub.textContent = `🟢 Sudah: ${submittedCount}`;
-      if (elCountMis) elCountMis.textContent = `🔴 Belum: ${missingCount}`;
+      if (elCountSub) elCountSub.textContent = `Sudah: ${submittedCount}`;
+      if (elCountMis) elCountMis.textContent = `Belum: ${missingCount}`;
       if (elBar) elBar.style.width = `${percent}%`;
 
       if (pillAll) pillAll.textContent = totalStudents;
@@ -8311,8 +8311,8 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
         card.className = "bg-white rounded-xl border border-zinc-200 p-4 shadow-xs space-y-3 flex flex-col justify-between";
 
         const sheetsBadge = r.syncedToSheets 
-          ? `<span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">✓ Sheets</span>`
-          : `<span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-medium">⏳ Belum Sinkron</span>`;
+          ? `<span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">Sheets</span>`
+          : `<span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-medium">Pending Sinkron</span>`;
 
         card.innerHTML = `
           <div class="space-y-2">
@@ -8346,9 +8346,10 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
             <button 
               type="button" 
               onclick="openAdminResponseDetailModal('${escapeHtml(r.idRespons)}')" 
-              class="px-2.5 py-1 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-semibold text-[11px] flex items-center gap-1 transition cursor-pointer"
+              class="px-2.5 py-1 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-semibold text-[11px] flex items-center gap-1.5 transition cursor-pointer"
             >
-              <span>🔍 Detail</span>
+              <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+              <span>Detail</span>
             </button>
             <div class="flex items-center gap-1">
               <span class="text-[10px] text-zinc-400 font-mono">ID: ${r.idRespons}</span>
@@ -8442,8 +8443,11 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
           const ulasan = evalDetailObj[mNim];
           evalHtml += `
             <div class="p-3 rounded-xl bg-white border border-zinc-200/70 space-y-1 text-xs">
-              <span class="font-semibold text-zinc-800">👤 Mahasiswa / NIM: <span class="font-mono text-zinc-600">${escapeHtml(mNim)}</span></span>
-              <p class="text-zinc-700 italic bg-zinc-50 p-2.5 rounded-lg border border-zinc-100 whitespace-pre-wrap">"${escapeHtml(ulasan)}"</p>
+              <span class="font-semibold text-zinc-800 flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-zinc-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                <span>Mahasiswa / NIM: <span class="font-mono text-zinc-600">${escapeHtml(mNim)}</span></span>
+              </span>
+              <p class="text-zinc-700 italic bg-zinc-50 p-2.5 rounded-lg border border-zinc-100 whitespace-pre-wrap pl-6">"${escapeHtml(ulasan)}"</p>
             </div>
           `;
         }
