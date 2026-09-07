@@ -3537,8 +3537,14 @@ function normalizeMediaList(fieldOrMedia) {
 
         // Exact In-Memory / Local Draft Schema & Config for Preview Mode
         if (isPreviewMode) {
-          const draftSchemaStr = sessionStorage.getItem("PGSD_DRAFT_SCHEMA_" + activeFormId) || localStorage.getItem("PGSD_DRAFT_SCHEMA_" + activeFormId);
-          const draftConfigStr = sessionStorage.getItem("PGSD_DRAFT_CONFIG_" + activeFormId) || localStorage.getItem("PGSD_DRAFT_CONFIG_" + activeFormId);
+          let draftSchemaStr = sessionStorage.getItem("PGSD_DRAFT_SCHEMA_" + activeFormId) || localStorage.getItem("PGSD_DRAFT_SCHEMA_" + activeFormId);
+          let draftConfigStr = sessionStorage.getItem("PGSD_DRAFT_CONFIG_" + activeFormId) || localStorage.getItem("PGSD_DRAFT_CONFIG_" + activeFormId);
+          if (!draftSchemaStr && window.parent && window.parent !== window) {
+            try {
+              draftSchemaStr = window.parent.sessionStorage?.getItem("PGSD_DRAFT_SCHEMA_" + activeFormId) || window.parent.localStorage?.getItem("PGSD_DRAFT_SCHEMA_" + activeFormId);
+              draftConfigStr = window.parent.sessionStorage?.getItem("PGSD_DRAFT_CONFIG_" + activeFormId) || window.parent.localStorage?.getItem("PGSD_DRAFT_CONFIG_" + activeFormId);
+            } catch(e) {}
+          }
           if (draftSchemaStr) {
             try { currentFormSchema = JSON.parse(draftSchemaStr); } catch(e) {}
           }
@@ -3715,8 +3721,14 @@ function normalizeMediaList(fieldOrMedia) {
           currentFormMeta = result.formMeta || null;
 
           if (isPreviewMode) {
-            const draftSchemaStr = sessionStorage.getItem("PGSD_DRAFT_SCHEMA_" + activeFormId) || localStorage.getItem("PGSD_DRAFT_SCHEMA_" + activeFormId);
-            const draftConfigStr = sessionStorage.getItem("PGSD_DRAFT_CONFIG_" + activeFormId) || localStorage.getItem("PGSD_DRAFT_CONFIG_" + activeFormId);
+            let draftSchemaStr = sessionStorage.getItem("PGSD_DRAFT_SCHEMA_" + activeFormId) || localStorage.getItem("PGSD_DRAFT_SCHEMA_" + activeFormId);
+            let draftConfigStr = sessionStorage.getItem("PGSD_DRAFT_CONFIG_" + activeFormId) || localStorage.getItem("PGSD_DRAFT_CONFIG_" + activeFormId);
+            if (!draftSchemaStr && window.parent && window.parent !== window) {
+              try {
+                draftSchemaStr = window.parent.sessionStorage?.getItem("PGSD_DRAFT_SCHEMA_" + activeFormId) || window.parent.localStorage?.getItem("PGSD_DRAFT_SCHEMA_" + activeFormId);
+                draftConfigStr = window.parent.sessionStorage?.getItem("PGSD_DRAFT_CONFIG_" + activeFormId) || window.parent.localStorage?.getItem("PGSD_DRAFT_CONFIG_" + activeFormId);
+              } catch(e) {}
+            }
             if (draftSchemaStr) {
               try { currentFormSchema = JSON.parse(draftSchemaStr); } catch(e) {}
             } else {
@@ -6910,7 +6922,7 @@ function normalizeMediaList(fieldOrMedia) {
     async function handleFinalSubmit(e) {
       if (e) e.preventDefault();
 
-      const isPreviewMode = new URLSearchParams(window.location.search).get('preview') === 'draft';
+      const isPreviewMode = new URLSearchParams(window.location.search).get('preview') === 'draft' || new URLSearchParams(window.location.search).get('preview') === 'true';
       
       // Run complete stages validation
       const totalSteps = Object.keys(stepMetadata).length || 4;

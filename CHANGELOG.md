@@ -2,6 +2,21 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.4.87] - 2026-09-07
+
+### 🛠️ Perbaikan Konfigurasi Header Keamanan & Mesin Simulasi Formulir Interaktif
+- **🔒 Optimalisasi Header Keamanan Iframe Same-Origin (`SAMEORIGIN` & `frame-ancestors 'self'`):**
+  - Mengoreksi kebijakan `X-Frame-Options` dari `DENY` menjadi `SAMEORIGIN` pada `vercel.json` untuk seluruh berkas HTML dan rute aplikasi.
+  - Menerapkan header modern Content Security Policy `frame-ancestors 'self'`, mengizinkan simulasi formulir draf (*Live Form Simulator*) di dalam panel admin tanpa kendala *"menolak untuk terhubung"*, dengan tetap memproteksi sistem dari serangan *clickjacking* pihak ketiga.
+- **📱 Peningkatan UX Modal Simulasi Draf Formulir Mahasiswa:**
+  - Menambahkan *loading state overlay* halus (`simulatorLoadingOverlay`) dengan indikator animasi putar saat modul formulir mahasiswa dimuat di dalam iframe simulator.
+  - Memperbaiki penanganan klik backdrop modal simulator (`closeLiveFormSimulator`) dan mendaftarkan alias global pada jendela `window`.
+  - Menghubungkan pembacaan draf skema dan konfigurasi secara tangguh (*resilient draft resolver*) dari penyimpanan jendela induk (`window.parent.sessionStorage` / `localStorage`).
+- **⚡ Pembaruan Versi Cache & Service Worker:**
+  - Meningkatkan versi Service Worker, aset CSS, dan skrip aplikasi ke `v2.4.87`.
+
+---
+
 ## [2.4.86] - 2026-09-07
 
 ### ⏱️ Penjadwalan Otomatis, Pembatasan Kuota & Pengaman Konkurensi Atomik (Fase 4)

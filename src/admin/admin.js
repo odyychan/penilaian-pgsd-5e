@@ -7624,8 +7624,13 @@
 
       const modal = document.getElementById("modalLiveFormSimulator");
       const iframe = document.getElementById("simulatorIframe");
+      const loadingOverlay = document.getElementById("simulatorLoadingOverlay");
       if (!modal) return;
       modal.classList.remove("hidden");
+
+      if (loadingOverlay) {
+        loadingOverlay.classList.remove("opacity-0", "pointer-events-none");
+      }
 
       if (iframe) {
         iframe.src = getRespondentFormUrl(formKey, { preview: "draft", t: Date.now() });
@@ -7635,9 +7640,15 @@
     function closeLiveFormSimulator() {
       const modal = document.getElementById("modalLiveFormSimulator");
       const iframe = document.getElementById("simulatorIframe");
+      const loadingOverlay = document.getElementById("simulatorLoadingOverlay");
       if (modal) modal.classList.add("hidden");
+      if (loadingOverlay) loadingOverlay.classList.add("opacity-0", "pointer-events-none");
       if (iframe) iframe.src = "about:blank";
     }
+
+    window.closeLiveSimulatorModal = closeLiveFormSimulator;
+    window.closeLiveFormSimulator = closeLiveFormSimulator;
+    window.openLiveFormSimulator = openLiveFormSimulator;
 
     function openLivePreviewInNewTab() {
       handleConfigInputAutoSave(true);
