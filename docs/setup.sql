@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS pgsd_forms (
     sesi_aktif VARCHAR(50) DEFAULT 'Minggu 1',
     status VARCHAR(20) DEFAULT 'AKTIF', -- 'AKTIF', 'NONAKTIF', 'SELESAI'
     is_primary BOOLEAN DEFAULT FALSE,
+    form_mode VARCHAR(50) DEFAULT 'PEER_ASSESSMENT', -- 'PEER_ASSESSMENT', 'GENERAL_SURVEY', 'QUIZ', 'EVENT_REGISTRATION'
     google_drive_folder TEXT DEFAULT 'https://drive.google.com/drive/folders/1ZYnP40AaCoaqu6-H2ZNfYuS-RshCWURK',
     spreadsheet_url TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -78,13 +79,13 @@ CREATE TABLE IF NOT EXISTS pgsd_responses (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     id_respons VARCHAR(50) UNIQUE NOT NULL,
     form_id VARCHAR(50) NOT NULL REFERENCES pgsd_forms(form_id) ON DELETE CASCADE ON UPDATE CASCADE,
-    sesi VARCHAR(50) NOT NULL,
-    email TEXT NOT NULL,
-    nama_penilai TEXT NOT NULL,
-    nim_penilai VARCHAR(50) NOT NULL,
+    sesi VARCHAR(50),
+    email TEXT,
+    nama_penilai TEXT,
+    nim_penilai VARCHAR(50),
     peran_penilai VARCHAR(50) DEFAULT 'Mahasiswa',
-    kelompok_dinilai TEXT NOT NULL,
-    nilai_kelompok NUMERIC(5,2) NOT NULL,
+    kelompok_dinilai TEXT,
+    nilai_kelompok NUMERIC(5,2),
     best_presenter_1 TEXT,
     best_presenter_2 TEXT,
     evaluasi_detail JSONB DEFAULT '{}'::jsonb, -- Mendukung partisi { _partition: { evaluasiRekan: {...}, refleksiMandiri: {...} } }
@@ -152,6 +153,7 @@ SELECT
     f.sesi_aktif,
     f.status,
     f.is_primary,
+    COALESCE(f.form_mode, 'PEER_ASSESSMENT') AS form_mode,
     COALESCE(f.google_drive_folder, 'https://drive.google.com/drive/folders/1ZYnP40AaCoaqu6-H2ZNfYuS-RshCWURK') AS google_drive_folder,
     f.spreadsheet_url,
     COUNT(DISTINCT g.id) AS total_kelompok,
@@ -164,7 +166,7 @@ FROM pgsd_forms f
 LEFT JOIN pgsd_groups g ON g.form_id = f.form_id
 LEFT JOIN pgsd_students s ON s.form_id = f.form_id
 LEFT JOIN pgsd_responses r ON r.form_id = f.form_id
-GROUP BY f.id, f.form_id, f.form_slug, f.judul_form, f.mata_kuliah, f.dosen, f.kelas, f.jurusan, f.sesi_aktif, f.status, f.is_primary, f.google_drive_folder, f.spreadsheet_url, f.created_at, f.updated_at;
+GROUP BY f.id, f.form_id, f.form_slug, f.judul_form, f.mata_kuliah, f.dosen, f.kelas, f.jurusan, f.sesi_aktif, f.status, f.is_primary, f.form_mode, f.google_drive_folder, f.spreadsheet_url, f.created_at, f.updated_at;
 
 CREATE OR REPLACE VIEW pgsd_v_rekap_nilai AS
 SELECT 

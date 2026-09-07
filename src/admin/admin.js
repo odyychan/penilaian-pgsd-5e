@@ -3486,6 +3486,7 @@
               sesiAktif: f.sesi_aktif || "Minggu 1",
               status: (f.status || "AKTIF").toUpperCase(),
               isPrimary: !!f.is_primary,
+              formMode: f.form_mode || 'PEER_ASSESSMENT',
               totalKelompok: f.total_kelompok || 0,
               totalMahasiswa: f.total_mahasiswa || 0,
               totalResponses: f.total_respons !== undefined ? f.total_respons : (f.total_responses || 0),
@@ -3637,13 +3638,26 @@
         const card = document.createElement("div");
         card.className = `bg-white rounded-2xl border ${isDebugForm ? 'border-amber-400/90 ring-2 ring-amber-400/20 bg-amber-500/[0.02]' : 'border-zinc-200/90'} p-5 shadow-xs flex flex-col justify-between space-y-4 hover:shadow-md hover:border-zinc-300 transition-all duration-200 group`;
 
+        const fMode = form.formMode || 'PEER_ASSESSMENT';
+        let modeBadge = '';
+        if (fMode === 'GENERAL_SURVEY') {
+          modeBadge = '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/90 flex items-center gap-1 shadow-2xs"><svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg><span>Survei</span></span>';
+        } else if (fMode === 'QUIZ') {
+          modeBadge = '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200/90 flex items-center gap-1 shadow-2xs"><svg class="w-3 h-3 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span>Kuis</span></span>';
+        } else if (fMode === 'EVENT_REGISTRATION') {
+          modeBadge = '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200/90 flex items-center gap-1 shadow-2xs"><svg class="w-3 h-3 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg><span>Acara</span></span>';
+        } else {
+          modeBadge = '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/90 flex items-center gap-1 shadow-2xs"><svg class="w-3 h-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg><span>Penilaian</span></span>';
+        }
+
         card.innerHTML = `
           <div class="space-y-3">
             <div class="flex items-center justify-between gap-2">
-              <div class="flex items-center gap-1.5">
+              <div class="flex items-center gap-1.5 flex-wrap">
                 <span class="px-2.5 py-1 rounded-lg ${isDebugForm ? 'bg-amber-100 text-amber-900 border border-amber-300 font-mono font-extrabold text-xs tracking-wider' : 'bg-indigo-50 text-indigo-700 border border-indigo-200/80 font-mono font-bold text-xs tracking-wider'}">
                   PIN: ${fId}
                 </span>
+                ${modeBadge}
                 ${isDebugForm ? '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1"><svg class="w-3 h-3 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg><span>Sandbox QA</span></span>' : ''}
               </div>
               <div class="flex items-center gap-1.5">
@@ -3938,11 +3952,13 @@
               kelas: formRow.kelas,
               jurusan: formRow.jurusan,
               sesiAktif: formRow.sesi_aktif,
-              status: formRow.status
+              status: formRow.status,
+              formMode: formRow.form_mode || 'PEER_ASSESSMENT'
             };
 
-            adminAppConfig = (configRow && configRow.config_data) || {};
-            adminFormSchema = (configRow && configRow.schema_data) || (targetForm === DEFAULT_PRIMARY_FORM_ID ? getDefaultFormSchema(adminAppConfig) : getBlankFormSchema());
+            adminAppConfig = (configRow && (configRow.app_config || configRow.config_data)) || {};
+            if (!adminAppConfig.form_mode && formRow.form_mode) adminAppConfig.form_mode = formRow.form_mode;
+            adminFormSchema = (configRow && (configRow.form_schema || configRow.schema_data)) || (targetForm === DEFAULT_PRIMARY_FORM_ID ? getDefaultFormSchema(adminAppConfig) : getBlankFormSchema());
 
             adminMasterGroups = groupsRows.map(g => ({
               id: g.id,
@@ -4308,6 +4324,87 @@
       });
     }
 
+    function updateFormModeCardsUI(activeMode) {
+      if (!activeMode) activeMode = "PEER_ASSESSMENT";
+      document.querySelectorAll(".form-mode-card").forEach(card => {
+        const input = card.querySelector('input[name="cfg_Form_Mode"]');
+        if (input) {
+          const isSelected = (input.value === activeMode);
+          input.checked = isSelected;
+          if (isSelected) {
+            if (activeMode === 'GENERAL_SURVEY') {
+              card.className = "form-mode-card relative p-3.5 rounded-xl border-2 border-emerald-500 bg-emerald-50/60 flex flex-col justify-between gap-2.5 cursor-pointer transition select-none group shadow-xs ring-2 ring-emerald-500/20";
+            } else if (activeMode === 'QUIZ') {
+              card.className = "form-mode-card relative p-3.5 rounded-xl border-2 border-amber-500 bg-amber-50/60 flex flex-col justify-between gap-2.5 cursor-pointer transition select-none group shadow-xs ring-2 ring-amber-500/20";
+            } else if (activeMode === 'EVENT_REGISTRATION') {
+              card.className = "form-mode-card relative p-3.5 rounded-xl border-2 border-purple-500 bg-purple-50/60 flex flex-col justify-between gap-2.5 cursor-pointer transition select-none group shadow-xs ring-2 ring-purple-500/20";
+            } else {
+              card.className = "form-mode-card relative p-3.5 rounded-xl border-2 border-indigo-500 bg-indigo-50/60 flex flex-col justify-between gap-2.5 cursor-pointer transition select-none group shadow-xs ring-2 ring-indigo-500/20";
+            }
+          } else {
+            card.className = "form-mode-card relative p-3.5 rounded-xl border border-zinc-200 bg-zinc-50 hover:bg-zinc-100/80 flex flex-col justify-between gap-2.5 cursor-pointer transition select-none group shadow-2xs";
+          }
+        }
+      });
+
+      const badge = document.getElementById("badgeCurrentFormMode");
+      if (badge) {
+        if (activeMode === 'GENERAL_SURVEY') {
+          badge.className = "text-[10.5px] font-mono font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 self-start sm:self-auto flex items-center gap-1.5 shadow-2xs";
+          badge.innerHTML = '<span>📋 Survei & Kuesioner</span>';
+        } else if (activeMode === 'QUIZ') {
+          badge.className = "text-[10.5px] font-mono font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-300 self-start sm:self-auto flex items-center gap-1.5 shadow-2xs";
+          badge.innerHTML = '<span>🎯 Kuis & Ujian Mandiri</span>';
+        } else if (activeMode === 'EVENT_REGISTRATION') {
+          badge.className = "text-[10.5px] font-mono font-bold px-2.5 py-1 rounded-full bg-purple-50 text-purple-900 border border-purple-300 self-start sm:self-auto flex items-center gap-1.5 shadow-2xs";
+          badge.innerHTML = '<span>🎟️ Pendaftaran Acara</span>';
+        } else {
+          badge.className = "text-[10.5px] font-mono font-bold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-800 border border-indigo-300 self-start sm:self-auto flex items-center gap-1.5 shadow-2xs";
+          badge.innerHTML = '<span>👥 Peer Assessment</span>';
+        }
+      }
+
+      // Toggle info banner in Tab Kelompok
+      const grpBanner = document.getElementById("groupModeGeneralSurveyBanner");
+      if (grpBanner) {
+        if (activeMode === 'GENERAL_SURVEY' || activeMode === 'EVENT_REGISTRATION') {
+          grpBanner.classList.remove("hidden");
+        } else {
+          grpBanner.classList.add("hidden");
+        }
+      }
+    }
+
+    function handleFormModeChange(mode) {
+      adminAppConfig["form_mode"] = mode;
+      adminAppConfig["Form_Mode"] = mode;
+      if (currentFormMeta) currentFormMeta.formMode = mode;
+      updateFormModeCardsUI(mode);
+      const modeLabels = {
+        'PEER_ASSESSMENT': 'Penilaian Perkuliahan',
+        'GENERAL_SURVEY': 'Survei & Kuesioner',
+        'QUIZ': 'Kuis & Ujian Mandiri',
+        'EVENT_REGISTRATION': 'Pendaftaran Acara'
+      };
+      showAdminToast(`Mode formulir dialihkan ke: ${modeLabels[mode] || mode}`, "info");
+
+      // Auto-save metadata and config
+      ensureSupabaseClient().then(sb => {
+        if (sb && currentFormId) {
+          sb.from('pgsd_forms').update({ 
+            form_mode: mode, 
+            updated_at: new Date().toISOString() 
+          }).eq('form_id', currentFormId).then(() => {
+            if (Array.isArray(formsRegistryList)) {
+              const item = formsRegistryList.find(f => f.formId === currentFormId);
+              if (item) item.formMode = mode;
+              try { localStorage.setItem("PGSD_CACHE_REGISTRY_FORMS", JSON.stringify(formsRegistryList)); } catch(e){}
+            }
+          });
+        }
+      });
+    }
+
     function updateEmailModeCardsUI(activeMode) {
       document.querySelectorAll(".email-mode-card").forEach(card => {
         const input = card.querySelector('input[name="cfg_Mode_Pengumpulan_Email"]');
@@ -4375,6 +4472,10 @@
       });
 
       updateAntiSelfHintUI();
+
+      // Sync Mode Formulir (Universal Form Engine)
+      const currentFormMode = adminAppConfig["form_mode"] || adminAppConfig["Form_Mode"] || (currentFormMeta && currentFormMeta.formMode) || "PEER_ASSESSMENT";
+      updateFormModeCardsUI(currentFormMode);
 
       // Sync Mode Pengumpulan Email (Google Forms Style)
       const currentEmailMode = adminAppConfig["Mode_Pengumpulan_Email"] || "ULM_ONLY";
@@ -4462,6 +4563,14 @@
       });
 
       updateAntiSelfHintUI();
+
+      const selFormMode = document.querySelector('input[name="cfg_Form_Mode"]:checked');
+      if (selFormMode) {
+        adminAppConfig["form_mode"] = selFormMode.value;
+        adminAppConfig["Form_Mode"] = selFormMode.value;
+        if (currentFormMeta) currentFormMeta.formMode = selFormMode.value;
+        updateFormModeCardsUI(selFormMode.value);
+      }
 
       const selEmailMode = document.querySelector('input[name="cfg_Mode_Pengumpulan_Email"]:checked');
       if (selEmailMode) {
@@ -5273,6 +5382,8 @@
             form_id: formKey,
             config_data: adminAppConfig,
             schema_data: adminFormSchema,
+            app_config: adminAppConfig,
+            form_schema: adminFormSchema,
             updated_at: new Date().toISOString()
           });
 
@@ -5284,6 +5395,7 @@
             kelas: adminAppConfig["Kelas"] || (currentFormMeta && currentFormMeta.kelas) || "5E",
             jurusan: adminAppConfig["Jurusan"] || (currentFormMeta && currentFormMeta.jurusan) || "PGSD",
             sesi_aktif: adminAppConfig["Sesi_Minggu_Aktif"] || (currentFormMeta && currentFormMeta.sesiAktif) || "Minggu 1",
+            form_mode: adminAppConfig["form_mode"] || adminAppConfig["Form_Mode"] || (currentFormMeta && currentFormMeta.formMode) || "PEER_ASSESSMENT",
             updated_at: new Date().toISOString()
           }).eq('form_id', formKey);
 

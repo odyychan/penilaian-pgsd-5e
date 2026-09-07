@@ -2,6 +2,32 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.4.83] - 2026-09-07
+
+### 🌟 Transformasi Arsitektur Universal Multi-Guna: Netralisasi Skema & Mode Survei Umum (Fase 1)
+- **🏛️ Netralisasi Skema Basis Data PostgreSQL Supabase:**
+  - Menurunkan batasan kolom akademik (`sesi`, `email`, `nama_penilai`, `nim_penilai`, `kelompok_dinilai`, `nilai_kelompok`) pada tabel `pgsd_responses` menjadi berstatus `NULLABLE`.
+  - Menambahkan kolom `form_mode` pada `pgsd_forms` (dengan nilai baku `'PEER_ASSESSMENT'`) serta meregenerasi agregasi `pgsd_v_forms_summary` secara mulus tanpa *breaking changes*.
+  - Menjamin integritas seluruh formulir perkuliahan aktif nyata (seperti `BK5E`) tetap beroperasi 100% tanpa regresi (*backward-compatible*).
+- **📋 Pemilih Mode Formulir Universal pada Panel Setelan Admin:**
+  - Menyediakan kartu kendali **"Tipe & Mode Operasional Formulir"** di Tab Setelan Admin dengan 4 tipe formulir:
+    1. 👥 **Penilaian Perkuliahan & Peer-Assessment** (`PEER_ASSESSMENT`)
+    2. 📋 **Survei & Kuesioner Umum** (`GENERAL_SURVEY`)
+    3. 🎯 **Kuis & Ujian Mandiri** (`QUIZ`)
+    4. 🎟️ **Pendaftaran Acara & Registrasi Berkuota** (`EVENT_REGISTRATION`)
+  - Sinkronisasi instan dua arah antara pilihan mode kartu, konfigurasi `adminAppConfig`, dan metadata basis data.
+- **🛡️ Adaptasi Tab Kelompok untuk Mode Mandiri:**
+  - Menambahkan banner informatif cerdas di Tab Kelompok saat formulir diset ke mode umum/survei, menjelaskan bahwa data kelompok bersifat opsional dan tidak memblokir responden umum.
+- **🚀 Portal Responden Mandiri & Ringan:**
+  - Responden pada formulir berstatus survei umum dapat langsung mengisi kuesioner tanpa kewajiban memilih kelompok presentasi atau memvalidasi NIM akademik.
+  - Payload respon menyimpan data kuesioner pada kolom terstruktur `custom_answers` dan mengirimkan entri database bersih.
+- **🧪 Pengujian Terisolasi Sandbox QA Form `DEBUG`:**
+  - Berhasil diuji coba dan diverifikasi 100% menggunakan script pengujian otomatis `test_phase1_survey.py` pada formulir sandbox `DEBUG`.
+- **⚡ Pembaruan Versi Cache & Service Worker:**
+  - Meningkatkan versi Service Worker dan seluruh modul ke `v2.4.83`.
+
+---
+
 ## [2.4.82] - 2026-09-07
 
 ### 💊 Standardisasi Estetika Pil Kapsul Terpadu (*Unified Capsule Design*) Header Bilah Atas

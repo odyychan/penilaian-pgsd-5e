@@ -3627,11 +3627,13 @@ function normalizeMediaList(fieldOrMedia) {
               kelas: formRow.kelas,
               jurusan: formRow.jurusan,
               sesiAktif: formRow.sesi_aktif,
-              status: formRow.status
+              status: formRow.status,
+              formMode: formRow.form_mode || 'PEER_ASSESSMENT'
             };
 
-            appConfig = (configRow && configRow.config_data) || {};
-            currentFormSchema = (configRow && configRow.schema_data) || { tahapan: [] };
+            appConfig = (configRow && (configRow.app_config || configRow.config_data)) || {};
+            if (!appConfig.form_mode && formRow.form_mode) appConfig.form_mode = formRow.form_mode;
+            currentFormSchema = (configRow && (configRow.form_schema || configRow.schema_data)) || { tahapan: [] };
 
             // Susun data kelompok & anggota
             groupsData = groupsRows.map(g => ({
@@ -4586,13 +4588,16 @@ function normalizeMediaList(fieldOrMedia) {
       const currentStageSec = document.getElementById(`stepSection_${stageIndex}`);
       if (!currentStageSec) return true;
 
+      const isGenMode = (appConfig && (appConfig.form_mode === 'GENERAL_SURVEY' || appConfig.Form_Mode === 'GENERAL_SURVEY' || appConfig.formMode === 'GENERAL_SURVEY')) || (currentFormMeta && (currentFormMeta.formMode === 'GENERAL_SURVEY' || currentFormMeta.form_mode === 'GENERAL_SURVEY'));
+      const hasCoreIdentity = !!findFieldInSchema(f => f.type === 'CORE_IDENTITY' || f.type === 'CORE_IDENTITAS');
+
       // 1. Validasi Khusus Tahap 1 (Identitas Penilai)
-      if (stageIndex === 1) {
+      if (stageIndex === 1 && hasCoreIdentity) {
         const roleSelect = document.getElementById("selectPeranPenilai");
         const role = currentEvaluatorRole || (roleSelect ? roleSelect.value : 'Mahasiswa') || 'Mahasiswa';
 
-        // Validasi NIM untuk Mahasiswa
-        if (role === 'Mahasiswa') {
+        // Validasi NIM untuk Mahasiswa (khusus penilaian perkuliahan)
+        if (role === 'Mahasiswa' && !isGenMode) {
           const inputNim = document.getElementById("inputNim");
           const nimVal = (inputNim ? inputNim.value : '').replace(/\s+/g, '').trim();
           if (!nimVal) {
@@ -4609,12 +4614,10 @@ function normalizeMediaList(fieldOrMedia) {
         // Validasi Nama Lengkap Penilai
         const inputNama = document.getElementById("inputNama");
         const namaVal = (inputNama ? inputNama.value : '').trim();
-        if (!namaVal) {
-          if (inputNama) {
-            inputNama.focus();
-            inputNama.classList.add("ring-2", "ring-rose-500", "border-rose-500");
-            setTimeout(() => inputNama.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
-          }
+        if (!namaVal && inputNama) {
+          inputNama.focus();
+          inputNama.classList.add("ring-2", "ring-rose-500", "border-rose-500");
+          setTimeout(() => inputNama.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
           showToast("Nama Lengkap Penilai wajib diisi sebelum melanjutkan!", "warning");
           return false;
         }
@@ -4623,18 +4626,20 @@ function normalizeMediaList(fieldOrMedia) {
         const isNoEmail = appConfig && appConfig["Mode_Pengumpulan_Email"] === "NO_EMAIL";
         if (!isNoEmail) {
           const inputEmail = document.getElementById("inputEmail");
-          const emailVal = (inputEmail ? inputEmail.value : '').trim();
-          const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-          if (!emailVal || !emailRegex.test(emailVal)) {
-            if (inputEmail) inputEmail.focus();
-            showToast("Email Penilai terverifikasi wajib terisi sebelum melanjutkan!", "warning");
-            return false;
+          if (inputEmail) {
+            const emailVal = inputEmail.value.trim();
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (!emailVal || !emailRegex.test(emailVal)) {
+              inputEmail.focus();
+              showToast("Email Penilai terverifikasi wajib terisi sebelum melanjutkan!", "warning");
+              return false;
+            }
           }
         }
       }
 
       // 2. Validasi Khusus Tahap 2 (Kelompok & Rubrik Dasar)
-      if (stageIndex === 2) {
+      if (stageIndex === 2 && !isGenMode) {
         if (currentStageSec.querySelector('#groupsGrid') && !selectedGroupObj) {
           showToast("Pilih salah satu kelompok presentator sebelum melanjutkan!", "warning");
           const grpBox = document.getElementById("groupsGrid");
@@ -6713,10 +6718,16 @@ function normalizeMediaList(fieldOrMedia) {
         updateStepUI(1);
         return;
       }
-      if (document.getElementById("stepSection_2")?.querySelector('#groupsGrid') && !selectedGroupObj) {
+      const isGenMode = (appConfig && (appConfig.form_mode === 'GENERAL_SURVEY' || appConfig.Form_Mode === 'GENERAL_SURVEY' || appConfig.formMode === 'GENERAL_SURVEY')) || (currentFormMeta && (currentFormMeta.formMode === 'GENERAL_SURVEY' || currentFormMeta.form_mode === 'GENERAL_SURVEY'));
+      
+      if (!isGenMode && document.getElementById("stepSection_2")?.querySelector('#groupsGrid') && !selectedGroupObj) {
         showToast("Pilih kelompok yang dinilai!", "warning");
         updateStepUI(2);
         return;
+      }
+
+      if (isGenMode && !selectedGroupObj) {
+        selectedGroupObj = { name: "Umum" };
       }
 
       // 🛡️ INTEGRITY GUARD 1: Cegah Penilaian Kelompok Sendiri (Self-Evaluation Guard)
@@ -6725,14 +6736,14 @@ function normalizeMediaList(fieldOrMedia) {
       const feedbackField = findFieldInSchema(f => f.type === 'CORE_MEMBER_FEEDBACK');
       const memberScopeMode = feedbackField?.memberScopeMode || 'INHERIT_GLOBAL';
 
-      let antiSelfEval = appConfig && appConfig["Cegah_Penilaian_Diri"] !== false && appConfig["Cegah_Penilaian_Diri"] !== "false";
+      let antiSelfEval = !isGenMode && appConfig && appConfig["Cegah_Penilaian_Diri"] !== false && appConfig["Cegah_Penilaian_Diri"] !== "false";
       if (groupAccessMode === 'ALLOW_SELF' || memberScopeMode === 'PEER_AND_SELF') {
         antiSelfEval = false; // Exception active: allow self evaluation / reflection
       } else if (groupAccessMode === 'LOCK_SELF') {
         antiSelfEval = true; // Forcibly lock
       }
 
-      const isMhsAccount = (currentEvaluatorRole === 'Mahasiswa' || (email && email.endsWith('@mhs.ulm.ac.id')) || (activeUserAccountEmail && activeUserAccountEmail.endsWith('@mhs.ulm.ac.id')));
+      const isMhsAccount = !isGenMode && (currentEvaluatorRole === 'Mahasiswa' || (email && email.endsWith('@mhs.ulm.ac.id')) || (activeUserAccountEmail && activeUserAccountEmail.endsWith('@mhs.ulm.ac.id')));
       if (antiSelfEval && isMhsAccount) {
         const studentNimClean = (nim || "").replace(/\s+/g, "").trim().toLowerCase();
         const googleNimClean = extractCandidateNim(activeUserAccountEmail || email || "");
@@ -6846,13 +6857,13 @@ function normalizeMediaList(fieldOrMedia) {
       const payload = {
         action: "submitAssessment",
         formId: activeFormId,
-        peranPenilai: currentEvaluatorRole || "Mahasiswa",
-        nimPenilai: currentEvaluatorRole === 'Mahasiswa' ? nim : "-",
-        email: email,
-        namaPenilai: nama,
-        kelompok: selectedGroupObj ? selectedGroupObj.name : "Kelompok",
-        sesi: appConfig["Sesi_Minggu_Aktif"] || "Minggu 1",
-        nilaiKelompok: nilai,
+        peranPenilai: currentEvaluatorRole || (isGenMode ? "Responden" : "Mahasiswa"),
+        nimPenilai: currentEvaluatorRole === 'Mahasiswa' && nim ? nim : (nim && nim !== '-' ? nim : (isGenMode ? null : "-")),
+        email: email || null,
+        namaPenilai: nama || (isGenMode ? "Responden" : "-"),
+        kelompok: selectedGroupObj ? selectedGroupObj.name : (isGenMode ? null : "Kelompok"),
+        sesi: appConfig["Sesi_Minggu_Aktif"] || (isGenMode ? null : "Minggu 1"),
+        nilaiKelompok: (nilai !== null && nilai !== undefined && !isNaN(nilai)) ? parseFloat(nilai) : (isGenMode ? null : 0),
         presentatorTerbaik: selectedBestPresenters,
         evaluasiDetail: evaluasiDetail,
         evaluasiRekan: evaluasiRekan,
@@ -6923,18 +6934,20 @@ function normalizeMediaList(fieldOrMedia) {
               }
             }
 
+            const isGenMode = (appConfig && (appConfig.form_mode === 'GENERAL_SURVEY' || appConfig.Form_Mode === 'GENERAL_SURVEY' || appConfig.formMode === 'GENERAL_SURVEY')) || (currentFormMeta && (currentFormMeta.formMode === 'GENERAL_SURVEY' || currentFormMeta.form_mode === 'GENERAL_SURVEY'));
+
             const respRow = {
               id_respons: idRespons,
               form_id: activeFormId,
-              sesi: payload.sesi,
-              email: payload.email,
-              nama_penilai: payload.namaPenilai,
-              nim_penilai: payload.nimPenilai || "-",
-              peran_penilai: payload.peranPenilai || "Mahasiswa",
-              kelompok_dinilai: payload.kelompok,
-              nilai_kelompok: parseFloat(payload.nilaiKelompok) || 0,
-              best_presenter_1: (payload.presentatorTerbaik && payload.presentatorTerbaik[0]) || "-",
-              best_presenter_2: (payload.presentatorTerbaik && payload.presentatorTerbaik[1]) || "-",
+              sesi: payload.sesi || (isGenMode ? null : "Minggu 1"),
+              email: payload.email || (isGenMode ? null : "-"),
+              nama_penilai: payload.namaPenilai || (isGenMode ? "Responden" : "-"),
+              nim_penilai: payload.nimPenilai || (isGenMode ? null : "-"),
+              peran_penilai: payload.peranPenilai || (isGenMode ? "Responden" : "Mahasiswa"),
+              kelompok_dinilai: payload.kelompok || (isGenMode ? null : "-"),
+              nilai_kelompok: (payload.nilaiKelompok !== null && payload.nilaiKelompok !== undefined && !isNaN(payload.nilaiKelompok)) ? parseFloat(payload.nilaiKelompok) : (isGenMode ? null : 0),
+              best_presenter_1: (payload.presentatorTerbaik && payload.presentatorTerbaik[0]) || (isGenMode ? null : "-"),
+              best_presenter_2: (payload.presentatorTerbaik && payload.presentatorTerbaik[1]) || (isGenMode ? null : "-"),
               evaluasi_detail: {
                 ...(payload.evaluasiDetail || {}),
                 _partition: {
@@ -7092,18 +7105,20 @@ function normalizeMediaList(fieldOrMedia) {
         // 1. Coba kirim ke Supabase
         if (sb) {
           try {
+            const isGenMode = (appConfig && (appConfig.form_mode === 'GENERAL_SURVEY' || appConfig.Form_Mode === 'GENERAL_SURVEY' || appConfig.formMode === 'GENERAL_SURVEY')) || (currentFormMeta && (currentFormMeta.formMode === 'GENERAL_SURVEY' || currentFormMeta.form_mode === 'GENERAL_SURVEY'));
+
             const respRow = {
               id_respons: idRespons,
               form_id: item.payload.formId || activeFormId,
-              sesi: item.payload.sesi,
-              email: item.payload.email,
-              nama_penilai: item.payload.namaPenilai,
-              nim_penilai: item.payload.nimPenilai || "-",
-              peran_penilai: item.payload.peranPenilai || "Mahasiswa",
-              kelompok_dinilai: item.payload.kelompok,
-              nilai_kelompok: parseFloat(item.payload.nilaiKelompok) || 0,
-              best_presenter_1: (item.payload.presentatorTerbaik && item.payload.presentatorTerbaik[0]) || "-",
-              best_presenter_2: (item.payload.presentatorTerbaik && item.payload.presentatorTerbaik[1]) || "-",
+              sesi: item.payload.sesi || (isGenMode ? null : "Minggu 1"),
+              email: item.payload.email || (isGenMode ? null : "-"),
+              nama_penilai: item.payload.namaPenilai || (isGenMode ? "Responden" : "-"),
+              nim_penilai: item.payload.nimPenilai || (isGenMode ? null : "-"),
+              peran_penilai: item.payload.peranPenilai || (isGenMode ? "Responden" : "Mahasiswa"),
+              kelompok_dinilai: item.payload.kelompok || (isGenMode ? null : "-"),
+              nilai_kelompok: (item.payload.nilaiKelompok !== null && item.payload.nilaiKelompok !== undefined && !isNaN(item.payload.nilaiKelompok)) ? parseFloat(item.payload.nilaiKelompok) : (isGenMode ? null : 0),
+              best_presenter_1: (item.payload.presentatorTerbaik && item.payload.presentatorTerbaik[0]) || (isGenMode ? null : "-"),
+              best_presenter_2: (item.payload.presentatorTerbaik && item.payload.presentatorTerbaik[1]) || (isGenMode ? null : "-"),
               evaluasi_detail: item.payload.evaluasiDetail || {},
               custom_answers: item.payload.customAnswers || {},
               synced_to_sheets: false
