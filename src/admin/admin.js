@@ -3174,6 +3174,24 @@
       initAdminRealtimeSync();
     }
 
+    window.addEventListener('popstate', function(e) {
+      // 1. Tutup modal admin jika ada yang terbuka
+      const openModal = document.querySelector("#adminDashboard .modal-backdrop:not(.hidden), #adminDashboard .modal-overlay:not(.hidden), #adminDashboard [role='dialog']:not(.hidden)");
+      if (openModal && openModal.id !== "adminDashboard") {
+        openModal.classList.add("hidden");
+        openModal.classList.remove("flex");
+        return;
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const formId = (params.get('id') || params.get('form') || '').trim();
+      if (!formId) {
+        returnToMasterHub(false);
+      } else if (formId !== currentFormId) {
+        openFormWorkspace(formId, false);
+      }
+    });
+
     // =========================================================================
     // MASTER FORM HUB CONTROLLERS
     // =========================================================================

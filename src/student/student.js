@@ -825,7 +825,12 @@ function normalizeMediaList(fieldOrMedia) {
       if (viewForm && !viewForm.classList.contains("hidden")) {
         // Jika sedang berada di Tahap 2, 3, 4, dst -> Mundur ke tahap sebelumnya
         if (typeof currentStep !== 'undefined' && currentStep > 1) {
-          updateStepUI(currentStep - 1);
+          const historyState = window.history.state;
+          if (historyState && historyState.step === currentStep && window.history.length > 1) {
+            window.history.back();
+          } else {
+            updateStepUI(currentStep - 1, false, false);
+          }
           return true;
         }
 
@@ -1039,15 +1044,69 @@ function normalizeMediaList(fieldOrMedia) {
       // Inisialisasi Sinkronisasi Real-Time 2 Arah
       initRealtimeSyncEngine();
       setTimeout(() => renderAllMathInElement(document.getElementById("mainAppRoot") || document.body), 200);
+
+      try {
+        window.history.replaceState({ formId: activeFormId, step: 1, tab: savedTab || 'form', view: 'wizard' }, '', window.location.href);
+      } catch(e) {}
     });
 
-    window.addEventListener('popstate', function() {
+    window.addEventListener('popstate', function(e) {
+      // 1. Tutup modal/popup/dropdown yang sedang terbuka terlebih dahulu
+      const openDropdowns = document.querySelectorAll(".pgsd-dropdown-menu:not(.hidden)");
+      if (openDropdowns.length > 0) {
+        openDropdowns.forEach(m => m.classList.add("hidden"));
+        document.querySelectorAll(".pgsd-dropdown-wrapper svg.rotate-180").forEach(s => s.classList.remove("rotate-180"));
+        document.querySelectorAll(".pgsd-dropdown-wrapper button").forEach(b => b.classList.remove("ring-2", "ring-indigo-500/20", "border-indigo-500"));
+        return;
+      }
+
+      const anyOpenModal = document.querySelector(".modal-backdrop:not(.hidden), .modal-overlay:not(.hidden), [role='dialog']:not(.hidden)");
+      if (anyOpenModal && anyOpenModal.id !== "viewPortal" && anyOpenModal.id !== "viewForm") {
+        anyOpenModal.classList.add("hidden");
+        anyOpenModal.classList.remove("flex");
+        return;
+      }
+
+      // 2. Jika sedang di Tab Rekapitulasi dan popstate kembali -> kembalikan ke Tab Form
+      const viewRekap = document.getElementById("viewRekap");
+      if (viewRekap && !viewRekap.classList.contains("hidden")) {
+        switchTab('form', false);
+        return;
+      }
+
+      // 3. Tangani Navigasi Langkah Form Wizard Bertahap (Step-by-Step Back Navigation)
+      const viewForm = document.getElementById("viewForm") || document.getElementById("mainAppRoot");
+      const isFormVisible = viewForm && !viewForm.classList.contains("hidden");
+
+      if (isFormVisible) {
+        // Jika history state memiliki info step untuk form aktif
+        if (e.state && typeof e.state.step !== 'undefined' && e.state.formId === activeFormId) {
+          const targetStep = parseInt(e.state.step) || 1;
+          if (targetStep !== currentStep) {
+            updateStepUI(targetStep, false, false);
+            return;
+          }
+        }
+
+        // Jika user berada di Step > 1 dan popped back ke step sebelumnya
+        if (typeof currentStep !== 'undefined' && currentStep > 1) {
+          updateStepUI(currentStep - 1, false, false);
+          return;
+        }
+      }
+
+      // 4. Jika berada di Step 1 atau Portal Mode
       const params = new URLSearchParams(window.location.search);
       const pin = (params.get('id') || params.get('form') || '').trim();
-      if (!pin) {
+
+      if (e.state && e.state.portal) {
+        showPortalView();
+      } else if (!pin) {
         showPortalView();
       } else if (pin !== activeFormId) {
         activateFormViewByPin(pin);
+      } else if (typeof hasEnteredFromPortal !== 'undefined' && hasEnteredFromPortal && (!e.state || !e.state.formId)) {
+        showPortalView();
       }
     });
 
@@ -1240,7 +1299,7 @@ function normalizeMediaList(fieldOrMedia) {
       url.searchParams.set('id', pin);
       url.searchParams.delete('form');
       try {
-        window.history.pushState({ formId: pin }, '', url.toString());
+        window.history.pushState({ formId: pin, step: 1, tab: 'form', view: 'wizard' }, '', url.toString());
       } catch(e) {}
 
       // Instant SPA Form Activation (< 15ms)
@@ -4311,7 +4370,7 @@ function normalizeMediaList(fieldOrMedia) {
     }
 
     // Navigation Step
-    function updateStepUI(step, skipSave = false) {
+    function updateStepUI(step, skipSave = false, pushHistoryState = false) {
       if (!document.getElementById("stepSection_1")) {
         renderDynamicClientStages();
       }
@@ -4354,6 +4413,15 @@ function normalizeMediaList(fieldOrMedia) {
             tabBtn.className = "py-1.5 px-1 rounded text-[10px] sm:text-[11px] font-medium transition text-zinc-400 bg-zinc-50 border border-transparent truncate";
           }
         }
+      }
+
+      if (pushHistoryState) {
+        try {
+          const currentState = window.history.state || {};
+          if (currentState.step !== step || currentState.formId !== activeFormId) {
+            window.history.pushState({ formId: activeFormId, step: step, tab: 'form', view: 'wizard' }, '', window.location.href);
+          }
+        } catch(e) {}
       }
 
       if (!skipSave) {
@@ -4660,7 +4728,16 @@ function normalizeMediaList(fieldOrMedia) {
         renderGroupOptions();
       }
 
-      updateStepUI(targetStep);
+      // If user is navigating backwards via previous button
+      if (targetStep < currentStep) {
+        const historyState = window.history.state;
+        if (historyState && historyState.step === currentStep && window.history.length > 1) {
+          window.history.back();
+          return;
+        }
+      }
+
+      updateStepUI(targetStep, false, targetStep > currentStep);
     }
 
     // =========================================================================

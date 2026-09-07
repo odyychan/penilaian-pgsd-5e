@@ -4,6 +4,23 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.71] - 2026-09-07
+
+### 🧭 Sinkronisasi Riwayat Browser & Navigasi Back Gesture Bertahap (Step-by-Step Navigation)
+- **🔗 Sinkronisasi Status Riwayat Per-Tahap (`window.history.pushState`):**
+  - Mengintegrasikan setiap perpindahan tahap formulir (`goToStep`) dengan *Browser History Stack* (`{ formId, step, tab, view }`).
+  - Memperbarui `updateStepUI` dengan parameter `pushHistoryState` sehingga navigasi maju ke tahap berikutnya mencatat status riwayat tanpa memicu reload.
+- **🔄 Penanganan Event `popstate` Presisi & Terisolasi:**
+  - Menyempurnakan pendengar `window.onpopstate` untuk mendeteksi gestur mundur sistem OS bawaan (Android/iOS Edge Swipe, tombol back browser, tombol hardware).
+  - Ketika gestur mundur dieksekusi pada Bagian/Tahap 3, sistem secara mulus mundur ke Bagian/Tahap 2. Pada Bagian 2 mundur ke Bagian 1, dan pada Bagian 1 baru kembali ke Portal Akses Utama.
+  - Memastikan modal, popup, dan dropdown terbuka tertutup lebih dahulu sebelum berpindah tahap ketika gestur mundur dilakukan.
+- **🛡️ Sinkronisasi Back Gesture Panel Admin:**
+  - Menambahkan dukungan event `popstate` pada panel admin untuk navigasi mundur mulus antara lembar kerja formulir tunggal dan Pusat Formulir Master Hub.
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.71`.
+
+---
+
 ## [2.4.70] - 2026-09-07
 
 ### 🔄 Optimalisasi Hierarki Navigasi Back Gesture: Multi-Step Form Wizard & Proteksi Portal
