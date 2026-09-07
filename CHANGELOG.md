@@ -2,6 +2,31 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.4.79] - 2026-09-07
+
+### 🛡️ Pengecualian Integritas Per-Instrumen, Modal Edukasi Akademik, & Evaluasi Refleksi Mandiri 360°
+- **⚙️ Pengaturan Pengecualian Integritas Khusus Per-Instrumen (*Per-Instrument Exception Overrides*):**
+  - Menambahkan kontrol pengecualian lokal pada instrumen Form Builder tanpa redundansi:
+    - `CORE_GROUP_SELECT`: Pengaturan `groupAccessMode` (`Ikuti Kebijakan Global Tab Setelan`, `Selalu Kunci Kelompok Sendiri`, `Selalu Buka Kelompok Sendiri`).
+    - `CORE_MEMBER_FEEDBACK`: Pengaturan `memberScopeMode` (`Ikuti Kebijakan Global`, `Khusus Rekan Saja [Saring Nama Diri]`, `Sertakan Refleksi Diri Sendiri [Mode 360° Holistik]`).
+    - `CORE_BEST_PRESENTER`: Pengaturan `blockSelfVote` (`Blokir Voting Diri Sendiri [Bawaan Akademik]`, `Izinkan Vote Semua Anggota Termasuk Diri Sendiri`).
+    - Pertanyaan Kustom: Opsi panduan pengecualian pada menu titik tiga setiap kartu pertanyaan.
+- **💡 Modal Panduan Integritas & Hierarki Evaluasi Akademik (`#modalIntegrityExceptionHelp`):**
+  - Menghadirkan modal edukatif modern responsif dengan tombol pemicu informatif `(i)` pada kartu *Integritas & Aturan Penilaian* serta setiap instrumen terkait di Form Builder.
+  - Memuat 4 tab interaktif:
+    1. **4 Level Hierarki Evaluasi**: Level 1 (Inter-Group Assessment), Level 2 (Intra-Group Peer Review), Level 3 (Self-Assessment Mandiri), dan Level 4 (360° Holistic Assessment).
+    2. **Penyaji vs Audiens**: Menjelaskan pencocokan otomatis identitas berbasis NIM dan perilaku pembekuan kartu kelompok.
+    3. **Pengecualian Instrumen**: Panduan konfigurasi khusus pada masing-masing komponen pembangun formulir.
+    4. **Partisi Rekap Data**: Skema pemisahan data nilai objektif audiens (`Skor_Peer_Review`), ulasan rekan sekelompok (`Ulasan_Rekan_Sejawat`), dan refleksi mandiri (`Refleksi_Mandiri`).
+- **👤 Dukungan Evaluasi Refleksi Mandiri Mahasiswa (Level 4):**
+  - Ketika formulir mengizinkan atau mewajibkan refleksi mandiri, kartu evaluasi untuk penilai aktif ditampilkan dengan visual ungu khas, lencana `[👤 Refleksi Diri Sendiri]`, dan petunjuk pengisian refleksi capaian tugas.
+  - Validasi formulir secara cerdas mencegah deadlock navigasi sehingga mahasiswa tetap dapat membuka kelompoknya ketika instrumen lanjutan membutuhkan evaluasi refleksi diri.
+  - Data evaluasi kualitatif dipartisi secara rapi ke dalam `_partition.evaluasiRekan` dan `_partition.refleksiMandiri` tanpa mengubah integritas skema data utama.
+- **⚡ Pembaruan Versi Cache & Service Worker:**
+  - Meningkatkan versi Service Worker dan seluruh modul ke `v2.4.79`.
+
+---
+
 ## [2.4.78] - 2026-09-07
 
 ### 🧹 Audit Komprehensif & Penyempurnaan Salinan Teks (Human Academic Phrasing)

@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS pgsd_responses (
     nilai_kelompok NUMERIC(5,2) NOT NULL,
     best_presenter_1 TEXT,
     best_presenter_2 TEXT,
-    evaluasi_detail JSONB DEFAULT '{}'::jsonb,
+    evaluasi_detail JSONB DEFAULT '{}'::jsonb, -- Mendukung partisi { _partition: { evaluasiRekan: {...}, refleksiMandiri: {...} } }
     custom_answers JSONB DEFAULT '{}'::jsonb,
     status VARCHAR(50) DEFAULT 'VALID',
     synced_to_sheets BOOLEAN DEFAULT FALSE,

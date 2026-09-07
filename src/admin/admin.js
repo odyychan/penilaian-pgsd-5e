@@ -4290,6 +4290,19 @@
     // =========================================================================
     // TAB 2: CONFIG & FORM BUILDER
     // =========================================================================
+    function updateAntiSelfHintUI() {
+      const hint = document.getElementById("hint_cfg_Cegah_Penilaian_Diri");
+      if (!hint) return;
+      const isProtected = adminAppConfig["Cegah_Penilaian_Diri"] === true || adminAppConfig["Cegah_Penilaian_Diri"] === 'true' || adminAppConfig["Cegah_Penilaian_Diri"] === undefined;
+      if (isProtected) {
+        hint.className = "pt-1.5 border-t border-zinc-200/60 text-[10.5px] text-emerald-700 font-medium flex items-center gap-1.5";
+        hint.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 animate-pulse"></span><span>Proteksi Aktif: Mahasiswa otomatis diblokir dari menilai kelompok atau dirinya sendiri.</span>';
+      } else {
+        hint.className = "pt-1.5 border-t border-zinc-200/60 text-[10.5px] text-amber-700 font-medium flex items-center gap-1.5";
+        hint.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 animate-pulse"></span><span>Pengecualian Aktif: Mahasiswa diizinkan mengevaluasi kelompok atau dirinya sendiri (Mode Refleksi / Mandiri).</span>';
+      }
+    }
+
     function populateConfigFormValues() {
       // Synchronize config fallback with currentFormMeta
       if (currentFormMeta) {
@@ -4321,6 +4334,8 @@
           }
         }
       });
+
+      updateAntiSelfHintUI();
 
       // Sync Mode Pengumpulan Email (Google Forms Style)
       const currentEmailMode = adminAppConfig["Mode_Pengumpulan_Email"] || "ULM_ONLY";
@@ -4406,6 +4421,8 @@
           }
         }
       });
+
+      updateAntiSelfHintUI();
 
       const selEmailMode = document.querySelector('input[name="cfg_Mode_Pengumpulan_Email"]:checked');
       if (selEmailMode) {
@@ -6224,17 +6241,45 @@
       // 9. CORE GROUP SELECT
       if (f.type === 'CORE_GROUP_SELECT') {
         const groupLabel = adminAppConfig["Pilih_Kelompok_Label"] || "Pilih Kelompok Presentator yang Tampil Hari Ini...";
+        const groupAccessMode = f.groupAccessMode || 'INHERIT_GLOBAL';
         return `
-          <div class="space-y-2 pt-1">
+          <div class="space-y-3 pt-1">
             <div class="p-3.5 rounded-xl border border-zinc-200 bg-zinc-50 space-y-1.5">
               <span class="text-[10px] text-zinc-500 font-mono font-semibold block">Teks Petunjuk Pilihan Kelompok:</span>
               <input 
                 type="text" 
-                value="${groupLabel}" 
+                value="${escapeHtml(groupLabel)}" 
                 oninput="handleInlineConfigUpdate('Pilih_Kelompok_Label', this.value)"
                 class="w-full text-xs font-semibold text-zinc-900 bg-white border border-zinc-200 hover:border-indigo-400 focus:border-indigo-600 px-3 py-2 rounded-lg outline-none transition shadow-2xs"
               >
               <p class="text-[11px] text-zinc-400">Daftar kelompok otomatis bersumber dari Tab Kelompok &amp; Mahasiswa.</p>
+            </div>
+
+            <!-- Pengecualian Akses Kelompok Sendiri -->
+            <div class="p-3.5 rounded-xl border border-indigo-100 bg-indigo-50/40 space-y-2 text-xs">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5">
+                  <span class="font-bold text-indigo-950">Akses Kelompok Sendiri:</span>
+                  <button 
+                    type="button" 
+                    onclick="openIntegrityHelpModal('instruments')" 
+                    class="w-4 h-4 rounded-full bg-indigo-100 text-indigo-700 hover:bg-indigo-200 font-bold text-[10px] flex items-center justify-center transition cursor-pointer" 
+                    title="Pelajari Panduan Pengecualian Akses Kelompok"
+                  >i</button>
+                </div>
+                <span class="text-[10px] font-mono text-indigo-700 bg-indigo-100/70 px-2 py-0.5 rounded font-semibold">Pengecualian Khusus</span>
+              </div>
+              <select 
+                onchange="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'groupAccessMode', this.value)" 
+                class="w-full text-xs font-medium text-zinc-800 bg-white border border-indigo-200 hover:border-indigo-400 focus:border-indigo-600 px-3 py-2 rounded-lg outline-none cursor-pointer transition shadow-2xs"
+              >
+                <option value="INHERIT_GLOBAL" ${groupAccessMode === 'INHERIT_GLOBAL' ? 'selected' : ''}>Ikuti Kebijakan Global Tab Setelan (Bawaan)</option>
+                <option value="LOCK_SELF" ${groupAccessMode === 'LOCK_SELF' ? 'selected' : ''}>Selalu Kunci Kelompok Sendiri (Penilaian Antar-Kelompok)</option>
+                <option value="ALLOW_SELF" ${groupAccessMode === 'ALLOW_SELF' ? 'selected' : ''}>Selalu Buka Kelompok Sendiri (Evaluasi Tim Internal / Refleksi)</option>
+              </select>
+              <p class="text-[11px] text-indigo-800/80 leading-relaxed">
+                Pilih apakah mahasiswa penyaji dapat membuka kartu kelompoknya sendiri untuk penilaian rekan satu tim atau evaluasi mandiri.
+              </p>
             </div>
           </div>
         `;
@@ -6283,8 +6328,9 @@
 
       // 11. CORE BEST PRESENTER
       if (f.type === 'CORE_BEST_PRESENTER') {
+        const blockSelfVote = f.blockSelfVote !== undefined ? f.blockSelfVote : 'BLOCK_SELF';
         return `
-          <div class="space-y-2 pt-1">
+          <div class="space-y-3 pt-1">
             <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50 space-y-2">
               <div class="flex items-center justify-between flex-wrap gap-2 text-xs">
                 <span class="text-zinc-700 font-bold">Batas Maksimal Pilihan Suara:</span>
@@ -6301,6 +6347,32 @@
                 </div>
               </div>
             </div>
+
+            <!-- Pengecualian Hak Pilih Diri Sendiri -->
+            <div class="p-3.5 rounded-xl border border-indigo-100 bg-indigo-50/40 space-y-2 text-xs">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5">
+                  <span class="font-bold text-indigo-950">Aturan Voting Diri Sendiri:</span>
+                  <button 
+                    type="button" 
+                    onclick="openIntegrityHelpModal('instruments')" 
+                    class="w-4 h-4 rounded-full bg-indigo-100 text-indigo-700 hover:bg-indigo-200 font-bold text-[10px] flex items-center justify-center transition cursor-pointer" 
+                    title="Pelajari Aturan Voting Presentator"
+                  >i</button>
+                </div>
+                <span class="text-[10px] font-mono text-indigo-700 bg-indigo-100/70 px-2 py-0.5 rounded font-semibold">Objektivitas Suara</span>
+              </div>
+              <select 
+                onchange="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'blockSelfVote', this.value)" 
+                class="w-full text-xs font-medium text-zinc-800 bg-white border border-indigo-200 hover:border-indigo-400 focus:border-indigo-600 px-3 py-2 rounded-lg outline-none cursor-pointer transition shadow-2xs"
+              >
+                <option value="BLOCK_SELF" ${blockSelfVote === 'BLOCK_SELF' ? 'selected' : ''}>Blokir Voting Diri Sendiri (Bawaan Akademik)</option>
+                <option value="ALLOW_SELF" ${blockSelfVote === 'ALLOW_SELF' ? 'selected' : ''}>Izinkan Vote Semua Anggota Termasuk Diri Sendiri</option>
+              </select>
+              <p class="text-[11px] text-indigo-800/80 leading-relaxed">
+                Secara akademik direkomendasikan memblokir pemilih dari memilih dirinya sendiri untuk menjaga kejujuran hasil voting.
+              </p>
+            </div>
           </div>
         `;
       }
@@ -6309,9 +6381,10 @@
       if (f.type === 'CORE_MEMBER_FEEDBACK') {
         const reviewPublic = adminAppConfig["Tampilkan_Ulasan_Publik"] || "AKTIF";
         const penyajiRule = adminAppConfig["Kewajiban_Menilai_Penyaji"] || "BEBAS_PENUH_DI_SESINYA";
+        const memberScopeMode = f.memberScopeMode || 'INHERIT_GLOBAL';
 
         return `
-          <div class="space-y-2 pt-1">
+          <div class="space-y-3 pt-1">
             <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50 space-y-3 text-xs">
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                 
@@ -6350,6 +6423,33 @@
                 </div>
 
               </div>
+            </div>
+
+            <!-- Cakupan Anggota yang Dievaluasi & Refleksi Mandiri -->
+            <div class="p-3.5 rounded-xl border border-purple-200 bg-purple-50/40 space-y-2 text-xs">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5">
+                  <span class="font-bold text-purple-950">Cakupan Evaluasi &amp; Refleksi:</span>
+                  <button 
+                    type="button" 
+                    onclick="openIntegrityHelpModal('instruments')" 
+                    class="w-4 h-4 rounded-full bg-purple-200 text-purple-800 hover:bg-purple-300 font-bold text-[10px] flex items-center justify-center transition cursor-pointer" 
+                    title="Pelajari Mode Evaluasi Rekan vs Refleksi Mandiri"
+                  >i</button>
+                </div>
+                <span class="text-[10px] font-mono text-purple-700 bg-purple-100 px-2 py-0.5 rounded font-semibold">Level 2 &amp; Level 4</span>
+              </div>
+              <select 
+                onchange="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'memberScopeMode', this.value)" 
+                class="w-full text-xs font-medium text-zinc-800 bg-white border border-purple-200 hover:border-purple-400 focus:border-purple-600 px-3 py-2 rounded-lg outline-none cursor-pointer transition shadow-2xs"
+              >
+                <option value="INHERIT_GLOBAL" ${memberScopeMode === 'INHERIT_GLOBAL' ? 'selected' : ''}>Ikuti Kebijakan Global (Bawaan)</option>
+                <option value="PEER_ONLY" ${memberScopeMode === 'PEER_ONLY' ? 'selected' : ''}>Khusus Rekan Saja (Saring Nama Diri Sendiri - Level 2)</option>
+                <option value="PEER_AND_SELF" ${memberScopeMode === 'PEER_AND_SELF' ? 'selected' : ''}>Sertakan Refleksi Diri Sendiri (Mode 360° Holistik - Level 4)</option>
+              </select>
+              <p class="text-[11px] text-purple-800/80 leading-relaxed">
+                Jika diatur ke <em>Sertakan Refleksi Diri</em>, kolom penilaian untuk nama mahasiswa penilai akan ditandai dengan badge khusus refleksi mandiri.
+              </p>
             </div>
           </div>
         `;
@@ -6750,6 +6850,16 @@
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
                         </svg>
                         <span>Pindah Bagian</span>
+                      </button>
+                      <button 
+                        type="button" 
+                        onclick="openIntegrityHelpModal('instruments'); closeAllFieldMoreMenus();" 
+                        class="w-full text-left px-2.5 py-2 rounded-lg hover:bg-amber-50 text-zinc-700 hover:text-amber-900 font-medium flex items-center gap-2 transition cursor-pointer"
+                      >
+                        <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>Panduan Pengecualian</span>
                       </button>
                     </div>
                   </div>
@@ -9180,6 +9290,42 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
     function closeShareModal() {
       document.getElementById("modalShareForm").classList.add("hidden");
     }
+
+    // MODAL: INTEGRITY & INSTRUMENT EXCEPTION HELP MODAL
+    function openIntegrityHelpModal(initialTab = 'hierarchy') {
+      const modal = document.getElementById("modalIntegrityExceptionHelp");
+      if (!modal) return;
+      modal.classList.remove("hidden");
+      switchIntegrityHelpTab(initialTab);
+    }
+
+    function closeIntegrityHelpModal() {
+      const modal = document.getElementById("modalIntegrityExceptionHelp");
+      if (modal) modal.classList.add("hidden");
+    }
+
+    function switchIntegrityHelpTab(tabKey) {
+      const tabs = ['hierarchy', 'presenter', 'instruments', 'data'];
+      tabs.forEach(t => {
+        const pane = document.getElementById(`integrityTab_${t}`);
+        const btn = document.getElementById(`tabBtn_integrity_${t}`);
+        if (pane) {
+          if (t === tabKey) pane.classList.remove("hidden");
+          else pane.classList.add("hidden");
+        }
+        if (btn) {
+          if (t === tabKey) {
+            btn.className = "px-3 py-1.5 rounded-lg transition-all cursor-pointer bg-white text-zinc-900 shadow-2xs font-bold";
+          } else {
+            btn.className = "px-3 py-1.5 rounded-lg transition-all cursor-pointer text-zinc-500 hover:text-zinc-900 font-semibold";
+          }
+        }
+      });
+    }
+
+    window.openIntegrityHelpModal = openIntegrityHelpModal;
+    window.closeIntegrityHelpModal = closeIntegrityHelpModal;
+    window.switchIntegrityHelpTab = switchIntegrityHelpTab;
 
     function copySharePin() {
       const pin = document.getElementById("sharePinText").textContent;

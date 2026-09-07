@@ -4111,6 +4111,18 @@ function normalizeMediaList(fieldOrMedia) {
       }
     }
 
+    function findFieldInSchema(predicate) {
+      if (!currentFormSchema || !Array.isArray(currentFormSchema.tahapan)) return null;
+      for (const st of currentFormSchema.tahapan) {
+        if (st.fields && Array.isArray(st.fields)) {
+          for (const f of st.fields) {
+            if (predicate(f)) return f;
+          }
+        }
+      }
+      return null;
+    }
+
     function renderGroupOptions() {
       const loading = document.getElementById("groupsLoading");
       const container = document.getElementById("groupsContainer");
@@ -4185,11 +4197,25 @@ function normalizeMediaList(fieldOrMedia) {
         }
       }
 
-      const isAntiSelfEvalActive = appConfig ? (appConfig["Cegah_Penilaian_Diri"] === true || appConfig["Cegah_Penilaian_Diri"] === "true" || appConfig["Cegah_Penilaian_Diri"] === undefined) : true;
+      // Per-instrument exception override vs Global Fallback
+      const groupSelectField = findFieldInSchema(f => f.type === 'CORE_GROUP_SELECT');
+      const groupAccessMode = groupSelectField?.groupAccessMode || 'INHERIT_GLOBAL';
+      const feedbackField = findFieldInSchema(f => f.type === 'CORE_MEMBER_FEEDBACK');
+      const memberScopeMode = feedbackField?.memberScopeMode || 'INHERIT_GLOBAL';
+
+      let isAntiSelfEvalActive = true;
+      if (groupAccessMode === 'LOCK_SELF') {
+        isAntiSelfEvalActive = true;
+      } else if (groupAccessMode === 'ALLOW_SELF' || memberScopeMode === 'PEER_AND_SELF') {
+        isAntiSelfEvalActive = false;
+      } else {
+        isAntiSelfEvalActive = appConfig ? (appConfig["Cegah_Penilaian_Diri"] === true || appConfig["Cegah_Penilaian_Diri"] === "true" || appConfig["Cegah_Penilaian_Diri"] === undefined) : true;
+      }
       const isSingleLockActive = appConfig ? (appConfig["Kunci_Respons_Ganda"] === true || appConfig["Kunci_Respons_Ganda"] === "true" || appConfig["Kunci_Respons_Ganda"] === undefined) : true;
 
       groupsData.forEach((grp, idx) => {
-        const isSelfGroup = isAntiSelfEvalActive && currentEvaluatorRole === 'Mahasiswa' && evaluatorStudentGroup && evaluatorStudentGroup.toLowerCase() === grp.name.toLowerCase();
+        const isOwnGroup = currentEvaluatorRole === 'Mahasiswa' && evaluatorStudentGroup && evaluatorStudentGroup.toLowerCase() === grp.name.toLowerCase();
+        const isSelfGroup = isAntiSelfEvalActive && isOwnGroup;
         const isAlreadyFilled = isSingleLockActive && filledGroups.some(fg => fg.toLowerCase() === grp.name.toLowerCase());
         const isCurrentlySelected = selectedGroupObj && selectedGroupObj.name === grp.name;
         
@@ -4227,13 +4253,21 @@ function normalizeMediaList(fieldOrMedia) {
           `;
         } else if (isCurrentlySelected) {
           cardBgBorder = "border-zinc-900 bg-zinc-50 shadow-xs cursor-pointer";
-          statusBadge = `
+          statusBadge = isOwnGroup ? `
+            <span class="text-[10px] font-semibold text-purple-800 bg-purple-100 px-2 py-0.5 rounded border border-purple-200">
+              Kelompok Anda • ${grp.members.length} Pemateri
+            </span>
+          ` : `
             <span class="text-[10px] font-mono text-zinc-500 bg-zinc-100 px-1.5 py-0.5 rounded">
               ${grp.members.length} Pemateri
             </span>
           `;
         } else {
-          statusBadge = `
+          statusBadge = isOwnGroup ? `
+            <span class="text-[10px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+              Kelompok Anda
+            </span>
+          ` : `
             <span class="text-[10px] font-mono text-zinc-500 bg-zinc-100 px-1.5 py-0.5 rounded">
               ${grp.members.length} Pemateri
             </span>
@@ -4312,15 +4346,43 @@ function normalizeMediaList(fieldOrMedia) {
       const bestList = document.getElementById("bestPresenterList");
       if (bestList) {
         bestList.innerHTML = "";
+
+        // Per-instrument exception for CORE_BEST_PRESENTER
+        const bestPresField = findFieldInSchema(f => f.type === 'CORE_BEST_PRESENTER');
+        const blockSelfVote = bestPresField?.blockSelfVote !== undefined ? bestPresField.blockSelfVote : 'BLOCK_SELF';
+
+        // Penilai aktif data
+        const currentNim = (
+          document.getElementById("inputNim")?.value || 
+          clientCustomFormAnswers["fld_core_identity_nim"] || 
+          activeUserAccountNim || 
+          ""
+        ).replace(/\s+/g, "").trim().toLowerCase();
+        const currentName = (
+          document.getElementById("inputNama")?.value || 
+          clientCustomFormAnswers["fld_core_identity_nama"] || 
+          activeUserAccountName || 
+          ""
+        ).trim().toLowerCase();
+
         selectedGroupObj.members.forEach((member, mIdx) => {
+          const mNim = String(member.nim || "").replace(/\s+/g, "").trim().toLowerCase();
+          const mName = String(member.name || "").trim().toLowerCase();
+          const isSelf = (currentNim && mNim === currentNim) || (currentName && mName === currentName);
+
+          // Jika blockSelfVote aktif, sembunyikan diri sendiri dari pilihan voting
+          if (isSelf && (blockSelfVote === 'BLOCK_SELF' || blockSelfVote === true || blockSelfVote === 'true')) {
+            return;
+          }
+
           const item = document.createElement("label");
           item.id = `bestPresCard_${mIdx}`;
           item.className = "flex items-center p-3 rounded-lg border border-zinc-200 hover:border-zinc-400 bg-white cursor-pointer transition text-xs";
           item.innerHTML = `
-            <input type="checkbox" value="${member.name}" class="accent-zinc-900 h-4 w-4 rounded flex-shrink-0" onchange="handleBestPresenterChange(this, ${mIdx})">
+            <input type="checkbox" value="${escapeHtml(member.name)}" class="accent-zinc-900 h-4 w-4 rounded flex-shrink-0" onchange="handleBestPresenterChange(this, ${mIdx})">
             <div class="ml-2.5 min-w-0 flex-1 flex items-center justify-between gap-2">
-              <span class="font-medium text-zinc-900 truncate">${member.name}</span>
-              <span class="text-[10px] text-zinc-400 font-mono">${member.nim || 'NIM -'}</span>
+              <span class="font-medium text-zinc-900 truncate">${escapeHtml(member.name)}</span>
+              <span class="text-[10px] text-zinc-400 font-mono">${escapeHtml(member.nim || 'NIM -')}</span>
             </div>
           `;
           bestList.appendChild(item);
@@ -4333,29 +4395,115 @@ function normalizeMediaList(fieldOrMedia) {
         evalContainer.innerHTML = "";
         const maxChars = parseInt(appConfig["Maksimal_Karakter_Evaluasi"] || 500);
 
-        selectedGroupObj.members.forEach((member, eIdx) => {
-          const box = document.createElement("div");
-          box.className = "p-3.5 sm:p-4 rounded-lg bg-zinc-50 border border-zinc-200 space-y-2";
-          box.innerHTML = `
-            <div class="flex items-center justify-between gap-2">
-              <span class="font-semibold text-zinc-800 text-xs sm:text-sm truncate">
-                ${eIdx + 1}. ${member.name} <span class="text-[10px] font-normal text-zinc-500 font-mono">(${member.nim || 'NIM -'})</span>
-              </span>
-              <span id="charCount_${eIdx}" class="text-[10px] text-zinc-400 font-mono">0/${maxChars}</span>
-            </div>
-            <textarea 
-              id="evalText_${eIdx}" 
-              data-member="${member.name}" 
-              required 
-              rows="2" 
-              maxlength="${maxChars}" 
-              placeholder="Tuliskan masukan evaluasi untuk ${member.name}..." 
-              class="w-full p-2.5 rounded-lg border border-zinc-300 text-xs sm:text-sm focus:border-zinc-900 outline-none bg-white transition leading-relaxed placeholder-zinc-400"
-              oninput="updateCharCounter(this, 'charCount_${eIdx}', ${maxChars}); saveFormDraft();"
-            ></textarea>
-          `;
-          evalContainer.appendChild(box);
+        // Per-instrument exception for CORE_MEMBER_FEEDBACK
+        const feedbackField = findFieldInSchema(f => f.type === 'CORE_MEMBER_FEEDBACK');
+        const memberScopeMode = feedbackField?.memberScopeMode || 'INHERIT_GLOBAL';
+        const isGlobalAntiSelfActive = appConfig ? (appConfig["Cegah_Penilaian_Diri"] === true || appConfig["Cegah_Penilaian_Diri"] === "true" || appConfig["Cegah_Penilaian_Diri"] === undefined) : true;
+
+        const currentNim = (
+          document.getElementById("inputNim")?.value || 
+          clientCustomFormAnswers["fld_core_identity_nim"] || 
+          activeUserAccountNim || 
+          ""
+        ).replace(/\s+/g, "").trim().toLowerCase();
+        const currentName = (
+          document.getElementById("inputNama")?.value || 
+          clientCustomFormAnswers["fld_core_identity_nama"] || 
+          activeUserAccountName || 
+          ""
+        ).trim().toLowerCase();
+
+        let visibleMembers = [];
+        selectedGroupObj.members.forEach((member) => {
+          const mNim = String(member.nim || "").replace(/\s+/g, "").trim().toLowerCase();
+          const mName = String(member.name || "").trim().toLowerCase();
+          const isSelf = (currentNim && mNim === currentNim) || (currentName && mName === currentName);
+
+          let includeMember = true;
+          let isSelfReflection = false;
+
+          if (memberScopeMode === 'PEER_ONLY') {
+            if (isSelf) includeMember = false;
+          } else if (memberScopeMode === 'PEER_AND_SELF') {
+            if (isSelf) isSelfReflection = true;
+          } else {
+            // INHERIT_GLOBAL:
+            if (isGlobalAntiSelfActive) {
+              if (isSelf) includeMember = false;
+            } else {
+              if (isSelf) isSelfReflection = true;
+            }
+          }
+
+          if (includeMember) {
+            visibleMembers.push({ member, isSelfReflection });
+          }
         });
+
+        if (visibleMembers.length === 0) {
+          evalContainer.innerHTML = `
+            <div class="p-4 rounded-xl bg-zinc-100 border border-zinc-200 text-zinc-600 text-xs text-center">
+              Tidak ada anggota lain dalam kelompok ini yang memerlukan evaluasi rekan.
+            </div>
+          `;
+        } else {
+          visibleMembers.forEach(({ member, isSelfReflection }, eIdx) => {
+            const box = document.createElement("div");
+            if (isSelfReflection) {
+              box.className = "p-3.5 sm:p-4 rounded-xl bg-purple-50/70 border-2 border-purple-300 shadow-2xs space-y-2";
+              box.innerHTML = `
+                <div class="flex items-center justify-between gap-2 flex-wrap">
+                  <div class="flex items-center gap-2 min-w-0">
+                    <span class="w-5 h-5 rounded-full bg-purple-600 text-white font-mono text-[10px] font-bold flex items-center justify-center shrink-0">👤</span>
+                    <span class="font-bold text-purple-950 text-xs sm:text-sm truncate">
+                      ${escapeHtml(member.name)} <span class="text-[10px] font-normal text-purple-600 font-mono">(${escapeHtml(member.nim || 'NIM -')})</span>
+                    </span>
+                    <span class="px-2 py-0.5 rounded-md bg-purple-200 text-purple-900 font-bold text-[10px] tracking-wide shrink-0">
+                      Refleksi Diri Sendiri
+                    </span>
+                  </div>
+                  <span id="charCount_${eIdx}" class="text-[10px] text-purple-500 font-mono">0/${maxChars}</span>
+                </div>
+                <p class="text-[11px] text-purple-800 leading-relaxed">
+                  Tuliskan refleksi mandiri, capaian tugas, dan evaluasi diri Anda di kelompok ini:
+                </p>
+                <textarea 
+                  id="evalText_${eIdx}" 
+                  data-member="${escapeHtml(member.name)}" 
+                  data-is-self="true"
+                  required 
+                  rows="3" 
+                  maxlength="${maxChars}" 
+                  placeholder="Ceritakan kontribusi, kendala, dan evaluasi diri Anda secara objektif..." 
+                  class="w-full p-2.5 rounded-lg border border-purple-200 focus:border-purple-600 focus:ring-1 focus:ring-purple-200 outline-none bg-white text-xs sm:text-sm transition leading-relaxed placeholder-purple-300 text-zinc-900"
+                  oninput="updateCharCounter(this, 'charCount_${eIdx}', ${maxChars}); saveFormDraft();"
+                ></textarea>
+              `;
+            } else {
+              box.className = "p-3.5 sm:p-4 rounded-xl bg-zinc-50 border border-zinc-200 space-y-2";
+              box.innerHTML = `
+                <div class="flex items-center justify-between gap-2">
+                  <span class="font-semibold text-zinc-800 text-xs sm:text-sm truncate">
+                    ${eIdx + 1}. ${escapeHtml(member.name)} <span class="text-[10px] font-normal text-zinc-500 font-mono">(${escapeHtml(member.nim || 'NIM -')})</span>
+                  </span>
+                  <span id="charCount_${eIdx}" class="text-[10px] text-zinc-400 font-mono">0/${maxChars}</span>
+                </div>
+                <textarea 
+                  id="evalText_${eIdx}" 
+                  data-member="${escapeHtml(member.name)}" 
+                  data-is-self="false"
+                  required 
+                  rows="2" 
+                  maxlength="${maxChars}" 
+                  placeholder="Tuliskan masukan evaluasi untuk ${escapeHtml(member.name)}..." 
+                  class="w-full p-2.5 rounded-lg border border-zinc-300 focus:border-zinc-900 outline-none bg-white text-xs sm:text-sm transition leading-relaxed placeholder-zinc-400 text-zinc-900"
+                  oninput="updateCharCounter(this, 'charCount_${eIdx}', ${maxChars}); saveFormDraft();"
+                ></textarea>
+              `;
+            }
+            evalContainer.appendChild(box);
+          });
+        }
       }
 
       saveFormDraft();
@@ -6399,13 +6547,17 @@ function normalizeMediaList(fieldOrMedia) {
           if (member === 'uploadedFiles') continue;
           const textVal = payload.evaluasiDetail[member];
           if (textVal) {
+            const isSelf = payload.refleksiMandiri && payload.refleksiMandiri[member];
             evalListHtml += `
-              <div class="p-2.5 rounded-lg bg-zinc-50 border border-zinc-200/70 text-xs">
-                <span class="font-bold text-zinc-900 mb-0.5 flex items-center gap-1.5">
-                  <svg class="w-3.5 h-3.5 text-zinc-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                  <span>${escapeHtml(member)}:</span>
+              <div class="p-2.5 rounded-lg ${isSelf ? 'bg-purple-50/70 border border-purple-200' : 'bg-zinc-50 border border-zinc-200/70'} text-xs">
+                <span class="font-bold ${isSelf ? 'text-purple-950' : 'text-zinc-900'} mb-0.5 flex items-center justify-between gap-1.5">
+                  <span class="flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 ${isSelf ? 'text-purple-600' : 'text-zinc-500'} shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    <span>${escapeHtml(member)}:</span>
+                  </span>
+                  ${isSelf ? '<span class="px-1.5 py-0.5 rounded bg-purple-200 text-purple-900 text-[9.5px] font-bold">Refleksi Diri</span>' : ''}
                 </span>
-                <p class="text-zinc-600 text-[11px] leading-relaxed italic whitespace-pre-wrap pl-5">"${textVal}"</p>
+                <p class="${isSelf ? 'text-purple-900' : 'text-zinc-600'} text-[11px] leading-relaxed italic whitespace-pre-wrap pl-5">"${escapeHtml(textVal)}"</p>
               </div>
             `;
           }
@@ -6566,7 +6718,18 @@ function normalizeMediaList(fieldOrMedia) {
       }
 
       // 🛡️ INTEGRITY GUARD 1: Cegah Penilaian Kelompok Sendiri (Self-Evaluation Guard)
-      const antiSelfEval = appConfig && appConfig["Cegah_Penilaian_Diri"] !== false && appConfig["Cegah_Penilaian_Diri"] !== "false";
+      const groupSelectField = findFieldInSchema(f => f.type === 'CORE_GROUP_SELECT');
+      const groupAccessMode = groupSelectField?.groupAccessMode || 'INHERIT_GLOBAL';
+      const feedbackField = findFieldInSchema(f => f.type === 'CORE_MEMBER_FEEDBACK');
+      const memberScopeMode = feedbackField?.memberScopeMode || 'INHERIT_GLOBAL';
+
+      let antiSelfEval = appConfig && appConfig["Cegah_Penilaian_Diri"] !== false && appConfig["Cegah_Penilaian_Diri"] !== "false";
+      if (groupAccessMode === 'ALLOW_SELF' || memberScopeMode === 'PEER_AND_SELF') {
+        antiSelfEval = false; // Exception active: allow self evaluation / reflection
+      } else if (groupAccessMode === 'LOCK_SELF') {
+        antiSelfEval = true; // Forcibly lock
+      }
+
       const isMhsAccount = (currentEvaluatorRole === 'Mahasiswa' || (email && email.endsWith('@mhs.ulm.ac.id')) || (activeUserAccountEmail && activeUserAccountEmail.endsWith('@mhs.ulm.ac.id')));
       if (antiSelfEval && isMhsAccount) {
         const studentNimClean = (nim || "").replace(/\s+/g, "").trim().toLowerCase();
@@ -6636,14 +6799,22 @@ function normalizeMediaList(fieldOrMedia) {
       }
 
       const evaluasiDetail = {};
+      const evaluasiRekan = {};
+      const refleksiMandiri = {};
       const evalTextareas = document.querySelectorAll("#evaluationInputsContainer textarea");
       let isAllEvalFilled = true;
 
       evalTextareas.forEach(ta => {
         const member = ta.getAttribute("data-member");
+        const isSelf = ta.getAttribute("data-is-self") === "true";
         const val = ta.value.trim();
         if (!val) isAllEvalFilled = false;
         evaluasiDetail[member] = val;
+        if (isSelf) {
+          refleksiMandiri[member] = val;
+        } else {
+          evaluasiRekan[member] = val;
+        }
       });
 
       if (evalTextareas.length > 0 && !isAllEvalFilled) {
@@ -6682,6 +6853,8 @@ function normalizeMediaList(fieldOrMedia) {
         nilaiKelompok: nilai,
         presentatorTerbaik: selectedBestPresenters,
         evaluasiDetail: evaluasiDetail,
+        evaluasiRekan: evaluasiRekan,
+        refleksiMandiri: refleksiMandiri,
         customAnswers: customAnswers,
         uploadedFiles: mergedUploadedFiles,
         driveFolderName: (appConfig && appConfig["Google_Drive_Folder_Name"]) || localStorage.getItem("PGSD_GLOBAL_DRIVE_FOLDER") || localStorage.getItem("PGSD_DRIVE_FOLDER_NAME") || "https://drive.google.com/drive/folders/1ZYnP40AaCoaqu6-H2ZNfYuS-RshCWURK"
@@ -6760,7 +6933,13 @@ function normalizeMediaList(fieldOrMedia) {
               nilai_kelompok: parseFloat(payload.nilaiKelompok) || 0,
               best_presenter_1: (payload.presentatorTerbaik && payload.presentatorTerbaik[0]) || "-",
               best_presenter_2: (payload.presentatorTerbaik && payload.presentatorTerbaik[1]) || "-",
-              evaluasi_detail: payload.evaluasiDetail || {},
+              evaluasi_detail: {
+                ...(payload.evaluasiDetail || {}),
+                _partition: {
+                  evaluasiRekan: payload.evaluasiRekan || {},
+                  refleksiMandiri: payload.refleksiMandiri || {}
+                }
+              },
               custom_answers: payload.customAnswers || {},
               synced_to_sheets: false
             };

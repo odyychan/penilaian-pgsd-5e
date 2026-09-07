@@ -32,7 +32,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="src/admin/admin.css?v=2.4.78">
+  <link rel="stylesheet" href="src/admin/admin.css?v=2.4.79">
   <!-- KaTeX CSS & JS for Universal Math / LaTeX / AI & Word Formula Rendering -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -1098,8 +1098,18 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                 </svg>
               </div>
-              <div>
-                <h3 class="text-xs sm:text-base font-bold text-zinc-900">Integritas &amp; Aturan Penilaian</h3>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                  <h3 class="text-xs sm:text-base font-bold text-zinc-900">Integritas &amp; Aturan Penilaian</h3>
+                  <button 
+                    type="button" 
+                    onclick="openIntegrityHelpModal('hierarchy')" 
+                    class="w-5 h-5 rounded-full bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 flex items-center justify-center text-[10.5px] font-bold font-serif transition active:scale-95 cursor-pointer shrink-0 shadow-2xs" 
+                    title="Pelajari Panduan Hierarki &amp; Aturan Integritas"
+                  >
+                    i
+                  </button>
+                </div>
                 <p class="text-[10.5px] sm:text-xs text-zinc-500 mt-0.5">Cegah bias penilaian dan amankan integritas peer-assessment antar kelompok.</p>
               </div>
             </div>
@@ -1107,19 +1117,33 @@
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs">
             <!-- Rule 1: Anti-Self Evaluation -->
-            <label for="cfg_Cegah_Penilaian_Diri" class="p-3.5 rounded-xl bg-zinc-50 hover:bg-zinc-100/80 border border-zinc-200 flex items-start justify-between gap-3 cursor-pointer transition select-none group">
-              <div class="space-y-1">
-                <h4 class="font-bold text-zinc-900 text-xs flex items-center gap-1.5">
-                  <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
-                  <span>Cegah Penilaian Diri Sendiri</span>
-                </h4>
-                <p class="text-[11px] text-zinc-500 leading-relaxed">
-                  Mahasiswa otomatis tidak dapat memilih atau menilai kelompoknya sendiri saat mengisi evaluasi.
-                </p>
+            <label for="cfg_Cegah_Penilaian_Diri" class="p-3.5 rounded-xl bg-zinc-50 hover:bg-zinc-100/80 border border-zinc-200 flex flex-col justify-between gap-2.5 cursor-pointer transition select-none group">
+              <div class="flex items-start justify-between gap-3 w-full">
+                <div class="space-y-1">
+                  <h4 class="font-bold text-zinc-900 text-xs flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+                    <span>Cegah Penilaian Diri Sendiri</span>
+                    <button 
+                      type="button" 
+                      onclick="event.preventDefault(); event.stopPropagation(); openIntegrityHelpModal('presenter');" 
+                      class="w-4 h-4 rounded-full bg-white hover:bg-zinc-200 text-zinc-500 hover:text-indigo-600 border border-zinc-300 flex items-center justify-center text-[9.5px] font-serif font-bold transition shadow-2xs cursor-pointer ml-0.5" 
+                      title="Pelajari Perilaku Penyaji &amp; Pengecualian"
+                    >
+                      i
+                    </button>
+                  </h4>
+                  <p class="text-[11px] text-zinc-500 leading-relaxed">
+                    Mahasiswa otomatis tidak dapat memilih atau menilai kelompoknya sendiri saat mengisi evaluasi.
+                  </p>
+                </div>
+                <div class="relative inline-flex items-center shrink-0 mt-0.5 pointer-events-none">
+                  <input type="checkbox" id="cfg_Cegah_Penilaian_Diri" onchange="handleConfigInputAutoSave()" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-zinc-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600 shadow-inner"></div>
+                </div>
               </div>
-              <div class="relative inline-flex items-center shrink-0 mt-0.5 pointer-events-none">
-                <input type="checkbox" id="cfg_Cegah_Penilaian_Diri" onchange="handleConfigInputAutoSave()" class="sr-only peer" checked>
-                <div class="w-11 h-6 bg-zinc-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600 shadow-inner"></div>
+              <div id="hint_cfg_Cegah_Penilaian_Diri" class="pt-1.5 border-t border-zinc-200/60 text-[10.5px] text-emerald-700 font-medium flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 animate-pulse"></span>
+                <span>Proteksi Aktif: Mahasiswa otomatis diblokir dari menilai kelompok atau dirinya sendiri.</span>
               </div>
             </label>
 
@@ -3078,15 +3102,210 @@ function getOrCreateFolder(folderName) {
       
 
   <!-- ========================================================================= -->
+  <!-- MODAL: EDUKASI INTEGRITAS & PENGECUALIAN INSTRUMEN PENILAIAN (i) -->
+  <!-- ========================================================================= -->
+  <div id="modalIntegrityExceptionHelp" class="hidden fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4" onclick="if(event.target === this) closeIntegrityHelpModal()">
+    <div class="bg-white rounded-2xl sm:rounded-3xl max-w-2xl sm:max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-zinc-200 overflow-hidden fade-enter" onclick="event.stopPropagation()">
+      
+      <!-- Modal Header -->
+      <div class="px-5 sm:px-6 py-4 border-b border-zinc-100 flex items-center justify-between gap-3 bg-zinc-50/50 shrink-0">
+        <div class="flex items-center gap-2.5 sm:gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-200 flex items-center justify-center shrink-0 shadow-2xs">
+            <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-bold text-sm sm:text-base text-zinc-900">Panduan Integritas &amp; Pengecualian Instrumen</h3>
+            <p class="text-xs text-zinc-500 mt-0.5">Hierarki evaluasi akademik, aturan penyaji, dan perlakuan khusus instrumen.</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeIntegrityHelpModal()" class="w-8 h-8 rounded-xl hover:bg-zinc-200 text-zinc-400 hover:text-zinc-700 flex items-center justify-center cursor-pointer transition">
+          ✕
+        </button>
+      </div>
+
+      <!-- Navigation Tabs Strip (Scrollable on Mobile) -->
+      <div class="px-5 sm:px-6 pt-3 pb-2 border-b border-zinc-100 bg-white shrink-0 overflow-x-auto no-scrollbar">
+        <div class="flex items-center gap-1.5 p-1 bg-zinc-100 rounded-xl text-xs font-semibold w-max sm:w-full">
+          <button type="button" onclick="switchIntegrityHelpTab('hierarchy')" id="tabBtn_integrity_hierarchy" class="px-3 py-1.5 rounded-lg transition-all cursor-pointer bg-white text-zinc-900 shadow-2xs">
+            📌 4 Level Hierarki
+          </button>
+          <button type="button" onclick="switchIntegrityHelpTab('presenter')" id="tabBtn_integrity_presenter" class="px-3 py-1.5 rounded-lg transition-all cursor-pointer text-zinc-500 hover:text-zinc-900">
+            👥 Penyaji vs Audiens
+          </button>
+          <button type="button" onclick="switchIntegrityHelpTab('instruments')" id="tabBtn_integrity_instruments" class="px-3 py-1.5 rounded-lg transition-all cursor-pointer text-zinc-500 hover:text-zinc-900">
+            ⚙️ Pengecualian Instrumen
+          </button>
+          <button type="button" onclick="switchIntegrityHelpTab('data')" id="tabBtn_integrity_data" class="px-3 py-1.5 rounded-lg transition-all cursor-pointer text-zinc-500 hover:text-zinc-900">
+            📊 Partisi Rekap Data
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Body (Scrollable with rich educational cards) -->
+      <div class="p-5 sm:p-6 overflow-y-auto space-y-4 text-xs flex-1">
+        
+        <!-- TAB 1: 4 LEVEL HIERARKI -->
+        <div id="integrityTab_hierarchy" class="space-y-3">
+          <div class="p-3 bg-indigo-50/70 border border-indigo-200/80 rounded-xl text-indigo-900 leading-relaxed">
+            Sistem evaluasi akademik ini mendukung <strong>4 Tingkatan Evaluasi Pembelajaran Kolaboratif</strong>, mulai dari penilaian antar-kelompok umum hingga refleksi 360° holistik:
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1.5">
+              <div class="flex items-center gap-1.5 text-indigo-700 font-bold">
+                <span class="px-1.5 py-0.5 rounded bg-indigo-100 text-[10px]">Level 1</span>
+                <span>Inter-Group Assessment</span>
+              </div>
+              <p class="text-[11.5px] text-zinc-600 leading-relaxed">
+                Penilaian antar-kelompok standar di mana audiens menilai kelompok yang tampil. Anggota penyaji otomatis diblokir dari menilai kelompoknya sendiri.
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1.5">
+              <div class="flex items-center gap-1.5 text-purple-700 font-bold">
+                <span class="px-1.5 py-0.5 rounded bg-purple-100 text-[10px]">Level 2</span>
+                <span>Intra-Group Peer Review</span>
+              </div>
+              <p class="text-[11.5px] text-zinc-600 leading-relaxed">
+                Penilaian internal rekan 1 tim. Mahasiswa mengevaluasi kontribusi teman sekelompoknya tanpa menilai diri sendiri (nama diri disaring keluar).
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1.5">
+              <div class="flex items-center gap-1.5 text-amber-700 font-bold">
+                <span class="px-1.5 py-0.5 rounded bg-amber-100 text-[10px]">Level 3</span>
+                <span>Self-Assessment Mandiri</span>
+              </div>
+              <p class="text-[11.5px] text-zinc-600 leading-relaxed">
+                Instrumen evaluasi diri untuk mengukur pemahaman, peran, dan refleksi mahasiswa terhadap tugas atau perkuliahan mandiri.
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1.5">
+              <div class="flex items-center gap-1.5 text-emerald-700 font-bold">
+                <span class="px-1.5 py-0.5 rounded bg-emerald-100 text-[10px]">Level 4</span>
+                <span>360° Holistic Assessment</span>
+              </div>
+              <p class="text-[11.5px] text-zinc-600 leading-relaxed">
+                Kombinasi lengkap: mahasiswa menilai teman sekelompoknya sekaligus mengisi instrumen refleksi kinerjanya sendiri dalam satu formulir.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: PENYAJI VS AUDIENS -->
+        <div id="integrityTab_presenter" class="hidden space-y-3">
+          <div class="p-3 bg-zinc-100 rounded-xl text-zinc-700 leading-relaxed">
+            Sistem mengenali identitas penilai secara instan melalui <strong>NIM mahasiswa terverifikasi</strong> dan mencocokkannya dengan basis data anggota kelompok.
+          </div>
+
+          <div class="space-y-2">
+            <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
+              <div class="font-bold text-zinc-900 flex items-center gap-1.5">
+                <span class="text-emerald-600 font-bold">✓</span>
+                <span>Saat "Cegah Penilaian Diri Sendiri" AKTIF (Standar)</span>
+              </div>
+              <p class="text-[11.5px] text-zinc-600 leading-relaxed pl-4">
+                Kartu kelompok sendiri di antarmuka mahasiswa otomatis dibekukan dengan label <span class="font-mono text-[10.5px] bg-purple-100 text-purple-800 px-1 py-0.2 rounded font-bold">[Kelompok Anda (Penyaji)]</span>. Mahasiswa hanya dapat memilih dan menilai kelompok lain.
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
+              <div class="font-bold text-zinc-900 flex items-center gap-1.5">
+                <span class="text-amber-600 font-bold">⚙️</span>
+                <span>Saat "Cegah Penilaian Diri Sendiri" DINONAKTIFKAN (Pengecualian)</span>
+              </div>
+              <p class="text-[11.5px] text-zinc-600 leading-relaxed pl-4">
+                Mahasiswa diizinkan membuka kelompoknya sendiri. Digunakan khusus saat dosen menyelenggarakan penilaian internal kelompok atau tugas refleksi mandiri.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: PENGECUALIAN PER-INSTRUMEN -->
+        <div id="integrityTab_instruments" class="hidden space-y-3">
+          <div class="p-3 bg-amber-50/70 border border-amber-200/80 rounded-xl text-amber-900 leading-relaxed">
+            Dosen dapat mengatur perlakuan khusus pada masing-masing instrumen di <strong>Tab Pertanyaan (Form Builder)</strong>:
+          </div>
+
+          <div class="space-y-2.5">
+            <div class="p-3 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
+              <span class="font-bold text-zinc-900 block">1. Pemilihan Kelompok (CORE_GROUP_SELECT):</span>
+              <ul class="list-disc list-inside text-[11px] text-zinc-600 space-y-0.5">
+                <li><strong class="text-zinc-800">Ikuti Kebijakan Global (Bawaan):</strong> Mengikuti sakelar di Tab Setelan.</li>
+                <li><strong class="text-zinc-800">Selalu Kunci Kelompok Sendiri:</strong> Memaksa kunci kelompok untuk penilaian antar-kelompok.</li>
+                <li><strong class="text-zinc-800">Selalu Buka Kelompok Sendiri:</strong> Mengizinkan evaluasi tim internal.</li>
+              </ul>
+            </div>
+
+            <div class="p-3 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
+              <span class="font-bold text-zinc-900 block">2. Evaluasi Masukan Pemateri (CORE_MEMBER_FEEDBACK):</span>
+              <ul class="list-disc list-inside text-[11px] text-zinc-600 space-y-0.5">
+                <li><strong class="text-zinc-800">Khusus Rekan Saja:</strong> Nama penilai disaring keluar sehingga bebas bias.</li>
+                <li><strong class="text-zinc-800">Sertakan Refleksi Diri:</strong> Nama penilai tampil dengan badge refleksi mandiri.</li>
+              </ul>
+            </div>
+
+            <div class="p-3 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
+              <span class="font-bold text-zinc-900 block">3. Pemilihan Pemateri Terbaik (CORE_BEST_PRESENTER):</span>
+              <ul class="list-disc list-inside text-[11px] text-zinc-600 space-y-0.5">
+                <li><strong class="text-zinc-800">Blokir Voting Diri Sendiri (Aktif):</strong> Nama penilai disembunyikan agar tidak bisa mem-vote diri sendiri.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: PARTISI REKAP DATA -->
+        <div id="integrityTab_data" class="hidden space-y-3">
+          <div class="p-3 bg-emerald-50/70 border border-emerald-200/80 rounded-xl text-emerald-900 leading-relaxed">
+            Data penilaian disimpan dalam skema terisolasi agar <strong>skor objektif audiens tidak pernah tercemar</strong> oleh skor evaluasi diri sendiri:
+          </div>
+
+          <div class="space-y-2">
+            <div class="flex items-center justify-between p-2.5 rounded-lg bg-zinc-50 border border-zinc-200">
+              <span class="font-mono text-zinc-800 font-semibold">Skor_Peer_Review</span>
+              <span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-medium">Nilai Murni Audiens</span>
+            </div>
+            <div class="flex items-center justify-between p-2.5 rounded-lg bg-zinc-50 border border-zinc-200">
+              <span class="font-mono text-zinc-800 font-semibold">Ulasan_Rekan_Sejawat</span>
+              <span class="text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200 font-medium">Masukan Antar-Anggota Tim</span>
+            </div>
+            <div class="flex items-center justify-between p-2.5 rounded-lg bg-zinc-50 border border-zinc-200">
+              <span class="font-mono text-zinc-800 font-semibold">Refleksi_Mandiri</span>
+              <span class="text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200 font-medium">Catatan Evaluasi Diri Sendiri</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-5 sm:px-6 py-3.5 border-t border-zinc-100 bg-zinc-50/50 flex items-center justify-between gap-3 shrink-0">
+        <span class="text-[11px] text-zinc-400">Pengaturan tersimpan otomatis saat diubah.</span>
+        <button 
+          type="button" 
+          onclick="closeIntegrityHelpModal()" 
+          class="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-xs shadow-xs transition active:scale-98 cursor-pointer"
+        >
+          Mengerti &amp; Tutup
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
   <!-- JAVASCRIPT APP LOGIC: MULTI-FORM & ISOLATED SANDBOX ENGINE -->
   <!-- ========================================================================= -->
-  <script src="src/admin/admin.js?v=2.4.78"></script>
+  <script src="src/admin/admin.js?v=2.4.79"></script>
 
   <!-- Progressive Web App (PWA) & Instant Auto-Updater Engine -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js?v=2.4.78').then(function(reg) {
+        navigator.serviceWorker.register('/sw.js?v=2.4.79').then(function(reg) {
           reg.update();
           reg.addEventListener('updatefound', function() {
             var newWorker = reg.installing;
