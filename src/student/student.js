@@ -4454,18 +4454,20 @@ function normalizeMediaList(fieldOrMedia) {
               box.innerHTML = `
                 <div class="flex items-center justify-between gap-2 flex-wrap">
                   <div class="flex items-center gap-2 min-w-0">
-                    <span class="w-5 h-5 rounded-full bg-purple-600 text-white font-mono text-[10px] font-bold flex items-center justify-center shrink-0">👤</span>
+                    <span class="w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center shrink-0">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    </span>
                     <span class="font-bold text-purple-950 text-xs sm:text-sm truncate">
                       ${escapeHtml(member.name)} <span class="text-[10px] font-normal text-purple-600 font-mono">(${escapeHtml(member.nim || 'NIM -')})</span>
                     </span>
                     <span class="px-2 py-0.5 rounded-md bg-purple-200 text-purple-900 font-bold text-[10px] tracking-wide shrink-0">
-                      Refleksi Diri Sendiri
+                      Refleksi Diri
                     </span>
                   </div>
                   <span id="charCount_${eIdx}" class="text-[10px] text-purple-500 font-mono">0/${maxChars}</span>
                 </div>
                 <p class="text-[11px] text-purple-800 leading-relaxed">
-                  Tuliskan refleksi mandiri, capaian tugas, dan evaluasi diri Anda di kelompok ini:
+                  Tuliskan refleksi capaian tugas, peran, dan evaluasi diri Anda di kelompok ini:
                 </p>
                 <textarea 
                   id="evalText_${eIdx}" 

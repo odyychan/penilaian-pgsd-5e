@@ -2166,7 +2166,7 @@
 
       if (mediaListToDelete.length > 0) {
         mediaListToDelete.forEach(m => cleanupDriveMediaFile(m));
-        showAdminToast(`${mediaListToDelete.length} media dihapus dan dibersihkan dari cloud.`, "info");
+        showAdminToast(`${mediaListToDelete.length} berkas media berhasil dihapus.`, "info");
       } else {
         showAdminToast("Media pertanyaan dihapus.", "info");
       }
@@ -4296,10 +4296,10 @@
       const isProtected = adminAppConfig["Cegah_Penilaian_Diri"] === true || adminAppConfig["Cegah_Penilaian_Diri"] === 'true' || adminAppConfig["Cegah_Penilaian_Diri"] === undefined;
       if (isProtected) {
         hint.className = "pt-1.5 border-t border-zinc-200/60 text-[10.5px] text-emerald-700 font-medium flex items-center gap-1.5";
-        hint.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 animate-pulse"></span><span>Proteksi Aktif: Mahasiswa otomatis diblokir dari menilai kelompok atau dirinya sendiri.</span>';
+        hint.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 animate-pulse"></span><span>Pencegahan Aktif: Mahasiswa diarahkan untuk hanya menilai kelompok lain.</span>';
       } else {
         hint.className = "pt-1.5 border-t border-zinc-200/60 text-[10.5px] text-amber-700 font-medium flex items-center gap-1.5";
-        hint.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 animate-pulse"></span><span>Pengecualian Aktif: Mahasiswa diizinkan mengevaluasi kelompok atau dirinya sendiri (Mode Refleksi / Mandiri).</span>';
+        hint.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 animate-pulse"></span><span>Pengecualian Aktif: Mahasiswa dapat memilih kelompoknya sendiri untuk evaluasi tim atau refleksi mandiri.</span>';
       }
     }
 
@@ -6267,18 +6267,18 @@
                     title="Pelajari Panduan Pengecualian Akses Kelompok"
                   >i</button>
                 </div>
-                <span class="text-[10px] font-mono text-indigo-700 bg-indigo-100/70 px-2 py-0.5 rounded font-semibold">Pengecualian Khusus</span>
+                <span class="text-[10px] font-mono text-indigo-700 bg-indigo-100/70 px-2 py-0.5 rounded font-semibold">Aturan Khusus</span>
               </div>
               <select 
                 onchange="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'groupAccessMode', this.value)" 
                 class="w-full text-xs font-medium text-zinc-800 bg-white border border-indigo-200 hover:border-indigo-400 focus:border-indigo-600 px-3 py-2 rounded-lg outline-none cursor-pointer transition shadow-2xs"
               >
-                <option value="INHERIT_GLOBAL" ${groupAccessMode === 'INHERIT_GLOBAL' ? 'selected' : ''}>Ikuti Kebijakan Global Tab Setelan (Bawaan)</option>
-                <option value="LOCK_SELF" ${groupAccessMode === 'LOCK_SELF' ? 'selected' : ''}>Selalu Kunci Kelompok Sendiri (Penilaian Antar-Kelompok)</option>
-                <option value="ALLOW_SELF" ${groupAccessMode === 'ALLOW_SELF' ? 'selected' : ''}>Selalu Buka Kelompok Sendiri (Evaluasi Tim Internal / Refleksi)</option>
+                <option value="INHERIT_GLOBAL" ${groupAccessMode === 'INHERIT_GLOBAL' ? 'selected' : ''}>Ikuti Pengaturan Utama (Bawaan)</option>
+                <option value="LOCK_SELF" ${groupAccessMode === 'LOCK_SELF' ? 'selected' : ''}>Kunci Kelompok Sendiri (Hanya Nilai Kelompok Lain)</option>
+                <option value="ALLOW_SELF" ${groupAccessMode === 'ALLOW_SELF' ? 'selected' : ''}>Bolehkan Kelompok Sendiri (Untuk Evaluasi Tim/Refleksi)</option>
               </select>
               <p class="text-[11px] text-indigo-800/80 leading-relaxed">
-                Pilih apakah mahasiswa penyaji dapat membuka kartu kelompoknya sendiri untuk penilaian rekan satu tim atau evaluasi mandiri.
+                Tentukan apakah mahasiswa dapat memilih kartu kelompoknya sendiri untuk penilaian internal tim atau refleksi mandiri.
               </p>
             </div>
           </div>
@@ -6352,25 +6352,25 @@
             <div class="p-3.5 rounded-xl border border-indigo-100 bg-indigo-50/40 space-y-2 text-xs">
               <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center gap-1.5">
-                  <span class="font-bold text-indigo-950">Aturan Voting Diri Sendiri:</span>
+                  <span class="font-bold text-indigo-950">Hak Pilih Diri Sendiri:</span>
                   <button 
                     type="button" 
                     onclick="openIntegrityHelpModal('instruments')" 
                     class="w-4 h-4 rounded-full bg-indigo-100 text-indigo-700 hover:bg-indigo-200 font-bold text-[10px] flex items-center justify-center transition cursor-pointer" 
-                    title="Pelajari Aturan Voting Presentator"
+                    title="Pelajari Aturan Pemilihan Penyaji"
                   >i</button>
                 </div>
-                <span class="text-[10px] font-mono text-indigo-700 bg-indigo-100/70 px-2 py-0.5 rounded font-semibold">Objektivitas Suara</span>
+                <span class="text-[10px] font-mono text-indigo-700 bg-indigo-100/70 px-2 py-0.5 rounded font-semibold">Aturan Pemilihan</span>
               </div>
               <select 
                 onchange="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'blockSelfVote', this.value)" 
                 class="w-full text-xs font-medium text-zinc-800 bg-white border border-indigo-200 hover:border-indigo-400 focus:border-indigo-600 px-3 py-2 rounded-lg outline-none cursor-pointer transition shadow-2xs"
               >
-                <option value="BLOCK_SELF" ${blockSelfVote === 'BLOCK_SELF' ? 'selected' : ''}>Blokir Voting Diri Sendiri (Bawaan Akademik)</option>
-                <option value="ALLOW_SELF" ${blockSelfVote === 'ALLOW_SELF' ? 'selected' : ''}>Izinkan Vote Semua Anggota Termasuk Diri Sendiri</option>
+                <option value="BLOCK_SELF" ${blockSelfVote === 'BLOCK_SELF' ? 'selected' : ''}>Larang Memilih Diri Sendiri (Dianjurkan)</option>
+                <option value="ALLOW_SELF" ${blockSelfVote === 'ALLOW_SELF' ? 'selected' : ''}>Bolehkan Memilih Diri Sendiri</option>
               </select>
               <p class="text-[11px] text-indigo-800/80 leading-relaxed">
-                Secara akademik direkomendasikan memblokir pemilih dari memilih dirinya sendiri untuk menjaga kejujuran hasil voting.
+                Mencegah mahasiswa memilih dirinya sendiri agar hasil pemilihan tetap objektif.
               </p>
             </div>
           </div>
@@ -6429,26 +6429,26 @@
             <div class="p-3.5 rounded-xl border border-purple-200 bg-purple-50/40 space-y-2 text-xs">
               <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center gap-1.5">
-                  <span class="font-bold text-purple-950">Cakupan Evaluasi &amp; Refleksi:</span>
+                  <span class="font-bold text-purple-950">Daftar Anggota yang Dinilai:</span>
                   <button 
                     type="button" 
                     onclick="openIntegrityHelpModal('instruments')" 
                     class="w-4 h-4 rounded-full bg-purple-200 text-purple-800 hover:bg-purple-300 font-bold text-[10px] flex items-center justify-center transition cursor-pointer" 
-                    title="Pelajari Mode Evaluasi Rekan vs Refleksi Mandiri"
+                    title="Pelajari Pilihan Anggota yang Dinilai"
                   >i</button>
                 </div>
-                <span class="text-[10px] font-mono text-purple-700 bg-purple-100 px-2 py-0.5 rounded font-semibold">Level 2 &amp; Level 4</span>
+                <span class="text-[10px] font-mono text-purple-700 bg-purple-100 px-2 py-0.5 rounded font-semibold">Pilihan Anggota</span>
               </div>
               <select 
                 onchange="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'memberScopeMode', this.value)" 
                 class="w-full text-xs font-medium text-zinc-800 bg-white border border-purple-200 hover:border-purple-400 focus:border-purple-600 px-3 py-2 rounded-lg outline-none cursor-pointer transition shadow-2xs"
               >
-                <option value="INHERIT_GLOBAL" ${memberScopeMode === 'INHERIT_GLOBAL' ? 'selected' : ''}>Ikuti Kebijakan Global (Bawaan)</option>
-                <option value="PEER_ONLY" ${memberScopeMode === 'PEER_ONLY' ? 'selected' : ''}>Khusus Rekan Saja (Saring Nama Diri Sendiri - Level 2)</option>
-                <option value="PEER_AND_SELF" ${memberScopeMode === 'PEER_AND_SELF' ? 'selected' : ''}>Sertakan Refleksi Diri Sendiri (Mode 360° Holistik - Level 4)</option>
+                <option value="INHERIT_GLOBAL" ${memberScopeMode === 'INHERIT_GLOBAL' ? 'selected' : ''}>Ikuti Pengaturan Utama (Bawaan)</option>
+                <option value="PEER_ONLY" ${memberScopeMode === 'PEER_ONLY' ? 'selected' : ''}>Hanya Teman Sekelompok (Tanpa Diri Sendiri)</option>
+                <option value="PEER_AND_SELF" ${memberScopeMode === 'PEER_AND_SELF' ? 'selected' : ''}>Teman Sekelompok + Refleksi Diri Sendiri</option>
               </select>
               <p class="text-[11px] text-purple-800/80 leading-relaxed">
-                Jika diatur ke <em>Sertakan Refleksi Diri</em>, kolom penilaian untuk nama mahasiswa penilai akan ditandai dengan badge khusus refleksi mandiri.
+                Jika opsi refleksi dipilih, lembar masukan untuk nama sendiri akan ditandai khusus sebagai lembar refleksi mandiri.
               </p>
             </div>
           </div>

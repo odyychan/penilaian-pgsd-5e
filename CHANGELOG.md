@@ -2,6 +2,23 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.4.80] - 2026-09-07
+
+### 🧹 Eliminasi AI Slop, Istilah Backend, Ikon Berlebihan & Bahasa Lebih Sederhana
+- **🎨 Pembersihan Ikon & Emoji:**
+  - Mengganti seluruh emoji pada tab panduan integritas (`📌`, `👥`, `⚙️`, `📊`) dengan tipografi yang bersih, rapi, dan mudah dibaca.
+  - Mengganti emoji avatar (`👤`) pada lembar refleksi mandiri mahasiswa dengan ikon SVG vektor yang tajam dan selaras dengan standar antarmuka.
+  - Mengganti simbol teknis dan dekorasi berlebihan pada modal panduan dengan indikator SVG minimalis.
+- **💬 Bahasa yang Lebih Sederhana & Bebas Istilah Backend:**
+  - Menghilangkan kode internal (`CORE_GROUP_SELECT`, `CORE_MEMBER_FEEDBACK`, `CORE_BEST_PRESENTER`) dari tampilan modal panduan dan menggantinya dengan istilah baku akademik: *Pemilihan Kelompok*, *Umpan Balik untuk Anggota*, dan *Pemilihan Penyaji Terbaik*.
+  - Menghapus penulisan variabel basis data bergaya *snake_case* (`Skor_Peer_Review`, `Ulasan_Rekan_Sejawat`, `Refleksi_Mandiri`) dan menggantinya dengan istilah yang komunikatif (*Nilai Presentasi Kelompok*, *Umpan Balik Rekan Sejawat*, *Refleksi Diri Sendiri*).
+  - Menyederhanakan kalimat kaku dan jargon bertele-tele pada form builder, petunjuk bantuan, dan notifikasi sistem.
+  - Memperjelas opsi pilihan pada konfigurasi instrumen agar ringkas, intuitif, dan nyaman dipahami oleh dosen pengampu.
+- **⚡ Pembaruan Versi Cache & Service Worker:**
+  - Meningkatkan versi Service Worker dan seluruh modul ke `v2.4.80`.
+
+---
+
 ## [2.4.79] - 2026-09-07
 
 ### 🛡️ Pengecualian Integritas Per-Instrumen, Modal Edukasi Akademik, & Evaluasi Refleksi Mandiri 360°

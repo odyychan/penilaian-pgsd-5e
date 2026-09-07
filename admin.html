@@ -32,7 +32,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="src/admin/admin.css?v=2.4.79">
+  <link rel="stylesheet" href="src/admin/admin.css?v=2.4.80">
   <!-- KaTeX CSS & JS for Universal Math / LaTeX / AI & Word Formula Rendering -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -3129,16 +3129,16 @@ function getOrCreateFolder(folderName) {
       <div class="px-5 sm:px-6 pt-3 pb-2 border-b border-zinc-100 bg-white shrink-0 overflow-x-auto no-scrollbar">
         <div class="flex items-center gap-1.5 p-1 bg-zinc-100 rounded-xl text-xs font-semibold w-max sm:w-full">
           <button type="button" onclick="switchIntegrityHelpTab('hierarchy')" id="tabBtn_integrity_hierarchy" class="px-3 py-1.5 rounded-lg transition-all cursor-pointer bg-white text-zinc-900 shadow-2xs">
-            📌 4 Level Hierarki
+            Tingkat Penilaian
           </button>
           <button type="button" onclick="switchIntegrityHelpTab('presenter')" id="tabBtn_integrity_presenter" class="px-3 py-1.5 rounded-lg transition-all cursor-pointer text-zinc-500 hover:text-zinc-900">
-            👥 Penyaji vs Audiens
+            Penyaji &amp; Audiens
           </button>
           <button type="button" onclick="switchIntegrityHelpTab('instruments')" id="tabBtn_integrity_instruments" class="px-3 py-1.5 rounded-lg transition-all cursor-pointer text-zinc-500 hover:text-zinc-900">
-            ⚙️ Pengecualian Instrumen
+            Aturan Khusus Instrumen
           </button>
           <button type="button" onclick="switchIntegrityHelpTab('data')" id="tabBtn_integrity_data" class="px-3 py-1.5 rounded-lg transition-all cursor-pointer text-zinc-500 hover:text-zinc-900">
-            📊 Partisi Rekap Data
+            Pemisahan Data Rekap
           </button>
         </div>
       </div>
@@ -3146,50 +3146,50 @@ function getOrCreateFolder(folderName) {
       <!-- Modal Body (Scrollable with rich educational cards) -->
       <div class="p-5 sm:p-6 overflow-y-auto space-y-4 text-xs flex-1">
         
-        <!-- TAB 1: 4 LEVEL HIERARKI -->
+        <!-- TAB 1: 4 TINGKAT PENILAIAN -->
         <div id="integrityTab_hierarchy" class="space-y-3">
           <div class="p-3 bg-indigo-50/70 border border-indigo-200/80 rounded-xl text-indigo-900 leading-relaxed">
-            Sistem evaluasi akademik ini mendukung <strong>4 Tingkatan Evaluasi Pembelajaran Kolaboratif</strong>, mulai dari penilaian antar-kelompok umum hingga refleksi 360° holistik:
+            Sistem menyediakan <strong>4 tingkat skenario evaluasi</strong> yang dapat disesuaikan dengan metode pembelajaran perkuliahan:
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1.5">
               <div class="flex items-center gap-1.5 text-indigo-700 font-bold">
-                <span class="px-1.5 py-0.5 rounded bg-indigo-100 text-[10px]">Level 1</span>
-                <span>Inter-Group Assessment</span>
+                <span class="px-1.5 py-0.5 rounded bg-indigo-100 text-[10px]">Tingkat 1</span>
+                <span>Penilaian Antar-Kelompok</span>
               </div>
               <p class="text-[11.5px] text-zinc-600 leading-relaxed">
-                Penilaian antar-kelompok standar di mana audiens menilai kelompok yang tampil. Anggota penyaji otomatis diblokir dari menilai kelompoknya sendiri.
+                Audiens menilai kelompok yang sedang tampil. Anggota kelompok penyaji otomatis dibatasi agar tidak menilai kelompoknya sendiri.
               </p>
             </div>
 
             <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1.5">
               <div class="flex items-center gap-1.5 text-purple-700 font-bold">
-                <span class="px-1.5 py-0.5 rounded bg-purple-100 text-[10px]">Level 2</span>
-                <span>Intra-Group Peer Review</span>
+                <span class="px-1.5 py-0.5 rounded bg-purple-100 text-[10px]">Tingkat 2</span>
+                <span>Penilaian Rekan Sekelompok</span>
               </div>
               <p class="text-[11.5px] text-zinc-600 leading-relaxed">
-                Penilaian internal rekan 1 tim. Mahasiswa mengevaluasi kontribusi teman sekelompoknya tanpa menilai diri sendiri (nama diri disaring keluar).
+                Evaluasi internal antar-anggota dalam kelompok yang sama tanpa menilai diri sendiri.
               </p>
             </div>
 
             <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1.5">
               <div class="flex items-center gap-1.5 text-amber-700 font-bold">
-                <span class="px-1.5 py-0.5 rounded bg-amber-100 text-[10px]">Level 3</span>
-                <span>Self-Assessment Mandiri</span>
+                <span class="px-1.5 py-0.5 rounded bg-amber-100 text-[10px]">Tingkat 3</span>
+                <span>Penilaian Diri Sendiri</span>
               </div>
               <p class="text-[11.5px] text-zinc-600 leading-relaxed">
-                Instrumen evaluasi diri untuk mengukur pemahaman, peran, dan refleksi mahasiswa terhadap tugas atau perkuliahan mandiri.
+                Instrumen evaluasi mandiri bagi mahasiswa untuk merefleksikan peran, pemahaman materi, atau hasil tugas perorangan.
               </p>
             </div>
 
             <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1.5">
               <div class="flex items-center gap-1.5 text-emerald-700 font-bold">
-                <span class="px-1.5 py-0.5 rounded bg-emerald-100 text-[10px]">Level 4</span>
-                <span>360° Holistic Assessment</span>
+                <span class="px-1.5 py-0.5 rounded bg-emerald-100 text-[10px]">Tingkat 4</span>
+                <span>Evaluasi 360° (Rekan &amp; Diri)</span>
               </div>
               <p class="text-[11.5px] text-zinc-600 leading-relaxed">
-                Kombinasi lengkap: mahasiswa menilai teman sekelompoknya sekaligus mengisi instrumen refleksi kinerjanya sendiri dalam satu formulir.
+                Kombinasi terpadu: mahasiswa menilai seluruh rekan sekelompoknya sekaligus mengisi lembar refleksi kinerjanya sendiri.
               </p>
             </div>
           </div>
@@ -3198,27 +3198,27 @@ function getOrCreateFolder(folderName) {
         <!-- TAB 2: PENYAJI VS AUDIENS -->
         <div id="integrityTab_presenter" class="hidden space-y-3">
           <div class="p-3 bg-zinc-100 rounded-xl text-zinc-700 leading-relaxed">
-            Sistem mengenali identitas penilai secara instan melalui <strong>NIM mahasiswa terverifikasi</strong> dan mencocokkannya dengan basis data anggota kelompok.
+            Sistem secara otomatis mengenali kelompok asal mahasiswa berdasarkan <strong>NIM akun yang terverifikasi</strong>.
           </div>
 
           <div class="space-y-2">
             <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
               <div class="font-bold text-zinc-900 flex items-center gap-1.5">
-                <span class="text-emerald-600 font-bold">✓</span>
-                <span>Saat "Cegah Penilaian Diri Sendiri" AKTIF (Standar)</span>
+                <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                <span>Saat "Cegah Penilaian Diri Sendiri" Aktif (Standar)</span>
               </div>
-              <p class="text-[11.5px] text-zinc-600 leading-relaxed pl-4">
-                Kartu kelompok sendiri di antarmuka mahasiswa otomatis dibekukan dengan label <span class="font-mono text-[10.5px] bg-purple-100 text-purple-800 px-1 py-0.2 rounded font-bold">[Kelompok Anda (Penyaji)]</span>. Mahasiswa hanya dapat memilih dan menilai kelompok lain.
+              <p class="text-[11.5px] text-zinc-600 leading-relaxed pl-5">
+                Pilihan kelompok sendiri di formulir mahasiswa otomatis dikunci dengan tanda <span class="font-mono text-[10.5px] bg-purple-100 text-purple-800 px-1 py-0.2 rounded font-bold">[Kelompok Anda]</span> agar mahasiswa fokus menilai kelompok lain.
               </p>
             </div>
 
             <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
               <div class="font-bold text-zinc-900 flex items-center gap-1.5">
-                <span class="text-amber-600 font-bold">⚙️</span>
-                <span>Saat "Cegah Penilaian Diri Sendiri" DINONAKTIFKAN (Pengecualian)</span>
+                <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span>Saat "Cegah Penilaian Diri Sendiri" Dinonaktifkan</span>
               </div>
-              <p class="text-[11.5px] text-zinc-600 leading-relaxed pl-4">
-                Mahasiswa diizinkan membuka kelompoknya sendiri. Digunakan khusus saat dosen menyelenggarakan penilaian internal kelompok atau tugas refleksi mandiri.
+              <p class="text-[11.5px] text-zinc-600 leading-relaxed pl-5">
+                Mahasiswa diizinkan memilih kelompoknya sendiri. Pengaturan ini tepat saat Anda mengadakan evaluasi internal tim atau tugas mandiri.
               </p>
             </div>
           </div>
@@ -3227,31 +3227,32 @@ function getOrCreateFolder(folderName) {
         <!-- TAB 3: PENGECUALIAN PER-INSTRUMEN -->
         <div id="integrityTab_instruments" class="hidden space-y-3">
           <div class="p-3 bg-amber-50/70 border border-amber-200/80 rounded-xl text-amber-900 leading-relaxed">
-            Dosen dapat mengatur perlakuan khusus pada masing-masing instrumen di <strong>Tab Pertanyaan (Form Builder)</strong>:
+            Anda dapat menyesuaikan aturan khusus pada setiap instrumen melalui menu <strong>Pertanyaan</strong>:
           </div>
 
           <div class="space-y-2.5">
             <div class="p-3 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
-              <span class="font-bold text-zinc-900 block">1. Pemilihan Kelompok (CORE_GROUP_SELECT):</span>
+              <span class="font-bold text-zinc-900 block">1. Pemilihan Kelompok:</span>
               <ul class="list-disc list-inside text-[11px] text-zinc-600 space-y-0.5">
-                <li><strong class="text-zinc-800">Ikuti Kebijakan Global (Bawaan):</strong> Mengikuti sakelar di Tab Setelan.</li>
-                <li><strong class="text-zinc-800">Selalu Kunci Kelompok Sendiri:</strong> Memaksa kunci kelompok untuk penilaian antar-kelompok.</li>
-                <li><strong class="text-zinc-800">Selalu Buka Kelompok Sendiri:</strong> Mengizinkan evaluasi tim internal.</li>
+                <li><strong class="text-zinc-800">Ikuti Pengaturan Utama (Bawaan):</strong> Mengikuti status sakelar di menu Setelan.</li>
+                <li><strong class="text-zinc-800">Larang Kelompok Sendiri:</strong> Mahasiswa hanya dapat memilih dan menilai kelompok lain.</li>
+                <li><strong class="text-zinc-800">Bolehkan Kelompok Sendiri:</strong> Mahasiswa dapat memilih kelompoknya sendiri untuk penilaian internal atau mandiri.</li>
               </ul>
             </div>
 
             <div class="p-3 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
-              <span class="font-bold text-zinc-900 block">2. Evaluasi Masukan Pemateri (CORE_MEMBER_FEEDBACK):</span>
+              <span class="font-bold text-zinc-900 block">2. Umpan Balik untuk Anggota:</span>
               <ul class="list-disc list-inside text-[11px] text-zinc-600 space-y-0.5">
-                <li><strong class="text-zinc-800">Khusus Rekan Saja:</strong> Nama penilai disaring keluar sehingga bebas bias.</li>
-                <li><strong class="text-zinc-800">Sertakan Refleksi Diri:</strong> Nama penilai tampil dengan badge refleksi mandiri.</li>
+                <li><strong class="text-zinc-800">Hanya Rekan Sekelompok:</strong> Kolom penilaian untuk nama sendiri otomatis disembunyikan.</li>
+                <li><strong class="text-zinc-800">Sertakan Refleksi Diri:</strong> Kolom nama sendiri tetap ditampilkan khusus sebagai lembar refleksi diri.</li>
               </ul>
             </div>
 
             <div class="p-3 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
-              <span class="font-bold text-zinc-900 block">3. Pemilihan Pemateri Terbaik (CORE_BEST_PRESENTER):</span>
+              <span class="font-bold text-zinc-900 block">3. Pemilihan Penyaji Terbaik:</span>
               <ul class="list-disc list-inside text-[11px] text-zinc-600 space-y-0.5">
-                <li><strong class="text-zinc-800">Blokir Voting Diri Sendiri (Aktif):</strong> Nama penilai disembunyikan agar tidak bisa mem-vote diri sendiri.</li>
+                <li><strong class="text-zinc-800">Blokir Nama Sendiri (Dianjurkan):</strong> Nama mahasiswa tidak ditampilkan di opsi pilihan agar hasil voting tetap objektif.</li>
+                <li><strong class="text-zinc-800">Bolehkan Semua Nama:</strong> Seluruh nama anggota dapat dipilih.</li>
               </ul>
             </div>
           </div>
@@ -3260,21 +3261,21 @@ function getOrCreateFolder(folderName) {
         <!-- TAB 4: PARTISI REKAP DATA -->
         <div id="integrityTab_data" class="hidden space-y-3">
           <div class="p-3 bg-emerald-50/70 border border-emerald-200/80 rounded-xl text-emerald-900 leading-relaxed">
-            Data penilaian disimpan dalam skema terisolasi agar <strong>skor objektif audiens tidak pernah tercemar</strong> oleh skor evaluasi diri sendiri:
+            Hasil evaluasi rekan dan refleksi mandiri dikelompokkan secara terpisah agar rekapitulasi penilaian tetap rapi dan terstruktur:
           </div>
 
           <div class="space-y-2">
             <div class="flex items-center justify-between p-2.5 rounded-lg bg-zinc-50 border border-zinc-200">
-              <span class="font-mono text-zinc-800 font-semibold">Skor_Peer_Review</span>
-              <span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-medium">Nilai Murni Audiens</span>
+              <span class="text-zinc-800 font-semibold">Nilai Presentasi Kelompok</span>
+              <span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-medium">Nilai dari Audiens</span>
             </div>
             <div class="flex items-center justify-between p-2.5 rounded-lg bg-zinc-50 border border-zinc-200">
-              <span class="font-mono text-zinc-800 font-semibold">Ulasan_Rekan_Sejawat</span>
-              <span class="text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200 font-medium">Masukan Antar-Anggota Tim</span>
+              <span class="text-zinc-800 font-semibold">Umpan Balik Rekan Sejawat</span>
+              <span class="text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200 font-medium">Evaluasi Antar-Anggota</span>
             </div>
             <div class="flex items-center justify-between p-2.5 rounded-lg bg-zinc-50 border border-zinc-200">
-              <span class="font-mono text-zinc-800 font-semibold">Refleksi_Mandiri</span>
-              <span class="text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200 font-medium">Catatan Evaluasi Diri Sendiri</span>
+              <span class="text-zinc-800 font-semibold">Refleksi Diri Sendiri</span>
+              <span class="text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200 font-medium">Catatan Refleksi Pribadi</span>
             </div>
           </div>
         </div>
@@ -3299,13 +3300,13 @@ function getOrCreateFolder(folderName) {
   <!-- ========================================================================= -->
   <!-- JAVASCRIPT APP LOGIC: MULTI-FORM & ISOLATED SANDBOX ENGINE -->
   <!-- ========================================================================= -->
-  <script src="src/admin/admin.js?v=2.4.79"></script>
+  <script src="src/admin/admin.js?v=2.4.80"></script>
 
   <!-- Progressive Web App (PWA) & Instant Auto-Updater Engine -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js?v=2.4.79').then(function(reg) {
+        navigator.serviceWorker.register('/sw.js?v=2.4.80').then(function(reg) {
           reg.update();
           reg.addEventListener('updatefound', function() {
             var newWorker = reg.installing;
