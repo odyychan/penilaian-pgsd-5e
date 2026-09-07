@@ -2,6 +2,25 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.4.77] - 2026-09-07
+
+### 🎯 Fitur Baru: Filter Cakupan Sesi (Session Scope) & Rekapitulasi Penilaian Fleksibel
+- **📊 Filter Cakupan Sesi Terpadu (*Unified Session Scope Filter*):**
+  - Menghadirkan opsi filter cakupan sesi pada tabel matriks penilaian mahasiswa dan pelacak kepatuhan admin (*Attendance & Participation Tracker*).
+  - Pilihan cakupan dikelompokkan secara terstruktur dalam dua kategori:
+    1. **Mode Akumulasi**: `Hingga Sesi Aktif Saat Ini (Minggu 1 s/d X)` (menghitung kepatuhan kumulatif dari awal semester hingga minggu yang sedang berjalan) dan `Semua Sesi (Penuh 1 Semester)` (mengevaluasi seluruh kelompok dari minggu 1 hingga akhir).
+    2. **Sesi Khusus**: `Sesi Aktif Saja (Minggu X)` (hanya mengevaluasi kelompok presentasi pada minggu berjalan) dan `Khusus Minggu Y` (audit riwayat penilaian pada pertemuan tertentu).
+- **🧮 Logika Evaluasi Status Kepatuhan (*Dual Evaluation Matrix*):**
+  - Pada **Mode Akumulasi**, kelompok dalam rentang target sesi yang belum dinilai ditandai dengan silang merah (`✕` / *Belum Mengisi*), sedangkan sesi di masa depan tetap berstatus netral (`-` / *Belum Waktunya*).
+  - Pada **Sesi Khusus**, hanya kelompok pada sesi tersebut yang dihitung sebagai target kewajiban penilaian, sementara sesi lainnya diberi tanda netral (`-`).
+  - Total kepatuhan mahasiswa dihitung secara dinamis sesuai jumlah target kelompok yang wajib dinilai pada cakupan yang dipilih (bebas dari kewajiban menilai kelompok sendiri).
+- **💬 Pesan Peringatan WhatsApp Otomatis Sesuai Cakupan (*Scope-Aware WhatsApp Reminder*):**
+  - Generator pesan pengingat ke grup WhatsApp di panel admin otomatis menyesuaikan daftar mahasiswa yang belum mengisi berdasarkan cakupan sesi yang aktif (`🎯 Cakupan Sesi: ...`).
+- **⚡ Pembaruan Versi Cache & Service Worker:**
+  - Meningkatkan versi Service Worker dan seluruh aset statis ke `v2.4.77`.
+
+---
+
 ## [2.4.76] - 2026-09-07
 
 ### 🧹 Audit Komprehensif Seluruh Platform: Pembersihan Total Elemen AI-Slop, Emoji, & Gimmick

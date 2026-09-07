@@ -32,7 +32,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="src/student/index.css?v=2.4.76">
+  <link rel="stylesheet" href="src/student/index.css?v=2.4.77">
   
   <!-- Instant Zero-FOUC View Resolver (Runs synchronously before HTML paint) -->
   <script>
@@ -924,7 +924,15 @@
 
           <!-- Filter Controls Bar for Presensi -->
           <div id="presensiControlBox" class="space-y-2.5 p-3 bg-zinc-50/80 rounded-xl border border-zinc-200/80 text-xs">
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+              <div>
+                <label for="presensiScopeFilter" class="block font-medium text-zinc-500 mb-1 text-[11px]">Cakupan Sesi</label>
+                <select id="presensiScopeFilter" onchange="onPresensiScopeFilterChange()" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-semibold text-zinc-800 focus:border-zinc-900 outline-none cursor-pointer transition">
+                  <option value="UP_TO_ACTIVE" selected>Hingga Sesi Aktif</option>
+                  <option value="ALL">Semua Sesi (Penuh)</option>
+                  <option value="ACTIVE_ONLY">Sesi Aktif Saja</option>
+                </select>
+              </div>
               <div>
                 <label for="presensiPresenterFilter" class="block font-medium text-zinc-500 mb-1 text-[11px]">Kelompok Penyaji</label>
                 <select id="presensiPresenterFilter" onchange="onPresensiPresenterFilterChange()" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-medium text-zinc-800 focus:border-zinc-900 outline-none cursor-pointer transition">
@@ -938,7 +946,7 @@
                 </select>
               </div>
               <div>
-                <label for="presensiStatusFilter" class="block font-medium text-zinc-500 mb-1 text-[11px]">Status</label>
+                <label for="presensiStatusFilter" class="block font-medium text-zinc-500 mb-1 text-[11px]">Status Kepatuhan</label>
                 <select id="presensiStatusFilter" onchange="filterPresensiDisplay()" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-medium text-zinc-800 focus:border-zinc-900 outline-none cursor-pointer transition">
                   <option value="ALL">Semua Status</option>
                 </select>
@@ -1429,13 +1437,13 @@
   <!-- ========================================================================= -->
   <!-- SCRIPT LOGIC -->
   <!-- ========================================================================= -->
-  <script src="src/student/student.js?v=2.4.76"></script>
+  <script src="src/student/student.js?v=2.4.77"></script>
 
   <!-- Progressive Web App (PWA) & Instant Auto-Updater Engine -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js?v=2.4.76').then(function(reg) {
+        navigator.serviceWorker.register('/sw.js?v=2.4.77').then(function(reg) {
           reg.update();
           reg.addEventListener('updatefound', function() {
             var newWorker = reg.installing;

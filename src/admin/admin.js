@@ -8098,13 +8098,72 @@
       return students;
     }
 
+    function extractAdminSesiNumber(sesiStr) {
+      if (!sesiStr || typeof sesiStr !== 'string') return 999;
+      const match = sesiStr.match(/\d+/);
+      return match ? parseInt(match[0], 10) : 999;
+    }
+
     function renderAdminAttendanceTracker() {
       const listContainer = document.getElementById("attendanceTrackerListContainer");
+      const scopeSelect = document.getElementById("trackerScopeFilter");
       if (!listContainer) return;
       listContainer.innerHTML = "";
 
+      const activeSesi = (adminAppConfig["Sesi_Minggu_Aktif"] || adminAppConfig["Sesi_Aktif"] || currentFormMeta?.sesiAktif || "Minggu 1").trim();
+      const isAllSession = (activeSesi.toUpperCase() === "SEMUA" || activeSesi.toUpperCase() === "ALL");
+      const activeSesiNum = extractAdminSesiNumber(activeSesi);
+
+      // Populate trackerScopeFilter dynamically if not already populated
+      if (scopeSelect && (!scopeSelect.options || scopeSelect.options.length <= 3)) {
+        const currentScopeVal = scopeSelect.value || "UP_TO_ACTIVE";
+        const uniqueSessions = new Set();
+        (adminMasterGroups || []).forEach(g => { if (g.sesi) uniqueSessions.add(g.sesi.trim()); });
+        const sortedSessions = Array.from(uniqueSessions).sort((a, b) => {
+          const na = extractAdminSesiNumber(a);
+          const nb = extractAdminSesiNumber(b);
+          return na !== nb ? na - nb : a.localeCompare(b, undefined, { numeric: true });
+        });
+
+        const activeSesiLabel = isAllSession ? "Semua Sesi" : activeSesi;
+        let scopeHtml = `
+          <optgroup label="── Mode Akumulasi ──">
+            <option value="UP_TO_ACTIVE">Hingga Sesi Aktif (${activeSesiLabel})</option>
+            <option value="ALL">Semua Sesi (Penuh Semester)</option>
+          </optgroup>
+          <optgroup label="── Sesi Khusus ──">
+            <option value="ACTIVE_ONLY">Sesi Aktif Saja (${activeSesiLabel})</option>
+        `;
+        sortedSessions.forEach(s => {
+          scopeHtml += `<option value="SESI_${s}">Khusus ${s}</option>`;
+        });
+        scopeHtml += `</optgroup>`;
+        scopeSelect.innerHTML = scopeHtml;
+        scopeSelect.value = currentScopeVal;
+        if (!scopeSelect.value) scopeSelect.value = "UP_TO_ACTIVE";
+      }
+
+      const scopeFilter = scopeSelect?.value || "UP_TO_ACTIVE";
       const allStudents = getAllRosterStudents();
       const searchQuery = (document.getElementById("trackerSearchInput")?.value || "").trim().toLowerCase();
+
+      // Determine in-scope target groups
+      let inScopeGroups = [];
+      if (scopeFilter === "ALL" || isAllSession) {
+        inScopeGroups = (adminMasterGroups || []).map(g => g.name);
+      } else if (scopeFilter === "ACTIVE_ONLY") {
+        inScopeGroups = (adminMasterGroups || []).filter(g => g.sesi && g.sesi.toLowerCase() === activeSesi.toLowerCase()).map(g => g.name);
+      } else if (scopeFilter.startsWith("SESI_")) {
+        const specificSesi = scopeFilter.replace("SESI_", "").trim().toLowerCase();
+        inScopeGroups = (adminMasterGroups || []).filter(g => g.sesi && g.sesi.trim().toLowerCase() === specificSesi).map(g => g.name);
+      } else {
+        // UP_TO_ACTIVE
+        inScopeGroups = (adminMasterGroups || []).filter(g => {
+          if (!g.sesi) return true;
+          return extractAdminSesiNumber(g.sesi) <= activeSesiNum;
+        }).map(g => g.name);
+      }
+      if (inScopeGroups.length === 0) inScopeGroups = (adminMasterGroups || []).map(g => g.name);
 
       let submittedCount = 0;
       let missingCount = 0;
@@ -8112,6 +8171,10 @@
       const studentStatuses = allStudents.map(student => {
         const studentNimClean = student.nim.toLowerCase();
         const studentNamaClean = student.nama.toLowerCase();
+        const studentGrpClean = (student.kelompok || "").trim().toLowerCase();
+
+        // Target groups for this student (excluding own group)
+        const studentTargetGroups = inScopeGroups.filter(gName => gName.toLowerCase() !== studentGrpClean);
 
         // Find responses sent by this student
         const matchedResponses = (adminResponsesList || []).filter(r => {
@@ -8120,14 +8183,26 @@
           return (rNim && studentNimClean && rNim === studentNimClean) || (rNama && studentNamaClean && rNama === studentNamaClean);
         });
 
-        const isSubmitted = matchedResponses.length > 0;
+        // Filter responses that match in-scope target groups
+        const validScopeResponses = matchedResponses.filter(r => {
+          const ratedGrp = (r.kelompok || "").trim().toLowerCase();
+          return studentTargetGroups.some(tg => tg.toLowerCase() === ratedGrp);
+        });
+
+        const isFullySubmitted = studentTargetGroups.length === 0 
+          ? true 
+          : studentTargetGroups.every(tg => validScopeResponses.some(r => (r.kelompok || "").trim().toLowerCase() === tg.toLowerCase()));
+
+        const isSubmitted = isFullySubmitted || validScopeResponses.length > 0;
         if (isSubmitted) submittedCount++;
         else missingCount++;
 
         return {
           ...student,
           isSubmitted,
-          submittedCount: matchedResponses.length,
+          isFullySubmitted,
+          submittedCount: validScopeResponses.length,
+          totalTargets: studentTargetGroups.length,
           ratedGroups: matchedResponses.map(r => r.kelompok)
         };
       });
@@ -8196,7 +8271,7 @@
           <div class="shrink-0 text-right">
             ${st.isSubmitted 
               ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-emerald-100 text-emerald-800 border border-emerald-200/80 block">
-                  ${st.submittedCount} Nilai
+                  ${st.submittedCount}${st.totalTargets > 0 ? '/' + st.totalTargets : ''} Nilai
                  </span>`
               : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-rose-100 text-rose-800 border border-rose-200/80 block">
                   Belum
@@ -8210,16 +8285,52 @@
     }
 
     function copyWhatsAppAttendanceReminder() {
+      const scopeSelect = document.getElementById("trackerScopeFilter");
+      const scopeFilter = scopeSelect?.value || "UP_TO_ACTIVE";
+      const activeSesi = (adminAppConfig["Sesi_Minggu_Aktif"] || adminAppConfig["Sesi_Aktif"] || currentFormMeta?.sesiAktif || "Minggu 1").trim();
+      const isAllSession = (activeSesi.toUpperCase() === "SEMUA" || activeSesi.toUpperCase() === "ALL");
+      const activeSesiNum = extractAdminSesiNumber(activeSesi);
+
+      // Determine in-scope target groups
+      let inScopeGroups = [];
+      let scopeDescription = `Hingga Sesi Aktif (${activeSesi})`;
+      if (scopeFilter === "ALL" || isAllSession) {
+        inScopeGroups = (adminMasterGroups || []).map(g => g.name);
+        scopeDescription = "Seluruh Sesi (Penuh Semester)";
+      } else if (scopeFilter === "ACTIVE_ONLY") {
+        inScopeGroups = (adminMasterGroups || []).filter(g => g.sesi && g.sesi.toLowerCase() === activeSesi.toLowerCase()).map(g => g.name);
+        scopeDescription = `Khusus Sesi Aktif (${activeSesi})`;
+      } else if (scopeFilter.startsWith("SESI_")) {
+        const specificSesi = scopeFilter.replace("SESI_", "").trim();
+        inScopeGroups = (adminMasterGroups || []).filter(g => g.sesi && g.sesi.trim().toLowerCase() === specificSesi.toLowerCase()).map(g => g.name);
+        scopeDescription = `Khusus ${specificSesi}`;
+      } else {
+        inScopeGroups = (adminMasterGroups || []).filter(g => {
+          if (!g.sesi) return true;
+          return extractAdminSesiNumber(g.sesi) <= activeSesiNum;
+        }).map(g => g.name);
+      }
+      if (inScopeGroups.length === 0) inScopeGroups = (adminMasterGroups || []).map(g => g.name);
+
       const allStudents = getAllRosterStudents();
       const missingStudents = allStudents.filter(student => {
         const studentNimClean = student.nim.toLowerCase();
         const studentNamaClean = student.nama.toLowerCase();
-        const hasSubmitted = (adminResponsesList || []).some(r => {
+        const studentGrpClean = (student.kelompok || "").trim().toLowerCase();
+        const studentTargetGroups = inScopeGroups.filter(gName => gName.toLowerCase() !== studentGrpClean);
+
+        const matchedResponses = (adminResponsesList || []).filter(r => {
           const rNim = (r.nim || "").trim().toLowerCase();
           const rNama = (r.namaPenilai || "").trim().toLowerCase();
           return (rNim && studentNimClean && rNim === studentNimClean) || (rNama && studentNamaClean && rNama === studentNamaClean);
         });
-        return !hasSubmitted;
+
+        const validScopeResponses = matchedResponses.filter(r => {
+          const ratedGrp = (r.kelompok || "").trim().toLowerCase();
+          return studentTargetGroups.some(tg => tg.toLowerCase() === ratedGrp);
+        });
+
+        return validScopeResponses.length === 0;
       });
 
       const judulForm = adminAppConfig["Judul_Form"] || currentFormMeta?.judulForm || "Penilaian Peer-Assessment";
@@ -8246,6 +8357,8 @@
 `;
       message += `📝 *Formulir:* ${judulForm}
 `;
+      message += `🎯 *Cakupan Sesi:* ${scopeDescription}
+`;
       message += `⏱️ *Batas Waktu:* ${deadline}
 `;
       message += `----------------------------------------
@@ -8253,9 +8366,9 @@
 `;
 
       if (missingStudents.length === 0) {
-        message += `🎉 *Luar biasa!* Seluruh mahasiswa (${allStudents.length} orang) telah menyelesaikan pengisian penilaian peer-assessment. Terima kasih!`;
+        message += `🎉 *Luar biasa!* Seluruh mahasiswa (${allStudents.length} orang) telah menyelesaikan pengisian penilaian untuk ${scopeDescription}. Terima kasih!`;
       } else {
-        message += `Berikut daftar *${missingStudents.length} mahasiswa* yang *belum mengisi* formulir penilaian:
+        message += `Berikut daftar *${missingStudents.length} mahasiswa* yang *belum mengisi* penilaian (${scopeDescription}):
 
 `;
         missingStudents.forEach((st, idx) => {
@@ -8272,7 +8385,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       }
 
       navigator.clipboard.writeText(message).then(() => {
-        showAdminToast(`Draf pesan WhatsApp (${missingStudents.length} mahasiswa belum mengisi) berhasil disalin!`, "success");
+        showAdminToast(`Draf pesan WhatsApp (${missingStudents.length} mahasiswa belum mengisi [${scopeDescription}]) berhasil disalin!`, "success");
       }).catch(err => {
         const textarea = document.createElement("textarea");
         textarea.value = message;

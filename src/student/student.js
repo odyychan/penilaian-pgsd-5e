@@ -7804,18 +7804,28 @@ function normalizeMediaList(fieldOrMedia) {
     }
 
     // =========================================================================
-    // KONTROL & FILTER TAB STATUS PENGISIAN PRESENSI MAHASISWA
-    // =========================================================================
-    // =========================================================================
     // KONTROL & FILTER TAB STATUS PENGISIAN PRESENSI MAHASISWA (PRESENTATOR & MATRIKS)
     // =========================================================================
+    function extractSesiNumber(sesiStr) {
+      if (!sesiStr || typeof sesiStr !== 'string') return 999;
+      const match = sesiStr.match(/\d+/);
+      return match ? parseInt(match[0], 10) : 999;
+    }
+    window.extractSesiNumber = extractSesiNumber;
+
     function populatePresensiFilters() {
+      const scopeSelect = document.getElementById("presensiScopeFilter");
       const presenterSelect = document.getElementById("presensiPresenterFilter");
       const grpSelect = document.getElementById("presensiGroupFilter");
       const statusSelect = document.getElementById("presensiStatusFilter");
 
       if (!presenterSelect || !grpSelect) return;
 
+      const activeSesi = (typeof appConfig !== 'undefined' && (appConfig["Sesi_Minggu_Aktif"] || appConfig["Sesi_Aktif"])) 
+        ? (appConfig["Sesi_Minggu_Aktif"] || appConfig["Sesi_Aktif"]).trim() 
+        : (currentRekapData?.activeSession || "Minggu 1");
+
+      const currentScope = scopeSelect ? (scopeSelect.value || "UP_TO_ACTIVE") : "UP_TO_ACTIVE";
       const currentPresenter = presenterSelect.value || "ALL";
       const currentGrp = grpSelect.value || "ALL";
       const currentStatus = statusSelect?.value || "ALL";
@@ -7831,6 +7841,39 @@ function normalizeMediaList(fieldOrMedia) {
         allPresenterGroups.push({ name: gName, sesi: sVal });
       });
       allPresenterGroups.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+
+      // Populate Cakupan Sesi Dropdown (Dynamic optgroups)
+      if (scopeSelect) {
+        const uniqueSessions = new Set();
+        allPresenterGroups.forEach(g => { if (g.sesi) uniqueSessions.add(g.sesi.trim()); });
+        const sortedSessions = Array.from(uniqueSessions).sort((a, b) => {
+          const na = extractSesiNumber(a);
+          const nb = extractSesiNumber(b);
+          return na !== nb ? na - nb : a.localeCompare(b, undefined, { numeric: true });
+        });
+
+        const activeSesiLabel = (activeSesi.toUpperCase() === "SEMUA" || activeSesi.toUpperCase() === "ALL") ? "Semua Sesi" : activeSesi;
+
+        let scopeHtml = `
+          <optgroup label="── Mode Akumulasi ──">
+            <option value="UP_TO_ACTIVE">Hingga Sesi Aktif (${activeSesiLabel})</option>
+            <option value="ALL">Semua Sesi (Penuh Semester)</option>
+          </optgroup>
+          <optgroup label="── Sesi Khusus ──">
+            <option value="ACTIVE_ONLY">Sesi Aktif Saja (${activeSesiLabel})</option>
+        `;
+
+        sortedSessions.forEach(s => {
+          scopeHtml += `<option value="SESI_${s}">Khusus ${s}</option>`;
+        });
+        scopeHtml += `</optgroup>`;
+
+        scopeSelect.innerHTML = scopeHtml;
+        if (currentScope) {
+          scopeSelect.value = currentScope;
+          if (!scopeSelect.value) scopeSelect.value = "UP_TO_ACTIVE";
+        }
+      }
 
       // Populate Presentator Dropdown (Sleek & Concise)
       presenterSelect.innerHTML = '<option value="ALL">Semua</option>';
@@ -7888,6 +7931,11 @@ function normalizeMediaList(fieldOrMedia) {
       }
     }
 
+    function onPresensiScopeFilterChange() {
+      renderRekapPresensi();
+    }
+    window.onPresensiScopeFilterChange = onPresensiScopeFilterChange;
+
     function onPresensiPresenterFilterChange() {
       const presenterSelect = document.getElementById("presensiPresenterFilter");
       const selectedPresenter = presenterSelect ? presenterSelect.value : "ALL";
@@ -7923,6 +7971,7 @@ function normalizeMediaList(fieldOrMedia) {
         ? (appConfig["Sesi_Minggu_Aktif"] || appConfig["Sesi_Aktif"]).trim() 
         : (currentRekapData?.activeSession || "Minggu 1");
 
+      const scopeFilter = document.getElementById("presensiScopeFilter")?.value || "UP_TO_ACTIVE";
       const presenterFilter = document.getElementById("presensiPresenterFilter")?.value || "ALL";
       const grpFilter = document.getElementById("presensiGroupFilter")?.value || "ALL";
       const statusFilter = document.getElementById("presensiStatusFilter")?.value || "ALL";
@@ -7966,13 +8015,32 @@ function normalizeMediaList(fieldOrMedia) {
       });
       allPresenterGroups.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
 
-      // Kelompok target yang tampil pada sesi aktif
+      // Kelompok target yang dihitung berdasarkan Cakupan Sesi (presensiScopeFilter)
       const isAllSession = (activeSesi.toUpperCase() === "SEMUA" || activeSesi.toUpperCase() === "ALL");
-      const targetSessionGroupNames = isAllSession
-        ? allPresenterGroups.map(g => g.name)
-        : allPresenterGroups
-            .filter(g => g.sesi && g.sesi.toLowerCase() === activeSesi.toLowerCase())
-            .map(g => g.name);
+      const activeSesiNum = extractSesiNumber(activeSesi);
+
+      let targetSessionGroupNames = [];
+      if (scopeFilter === "ALL" || isAllSession) {
+        targetSessionGroupNames = allPresenterGroups.map(g => g.name);
+      } else if (scopeFilter === "ACTIVE_ONLY") {
+        targetSessionGroupNames = allPresenterGroups
+          .filter(g => g.sesi && g.sesi.toLowerCase() === activeSesi.toLowerCase())
+          .map(g => g.name);
+      } else if (scopeFilter.startsWith("SESI_")) {
+        const specificSesi = scopeFilter.replace("SESI_", "").trim().toLowerCase();
+        targetSessionGroupNames = allPresenterGroups
+          .filter(g => g.sesi && g.sesi.trim().toLowerCase() === specificSesi)
+          .map(g => g.name);
+      } else {
+        // Default: UP_TO_ACTIVE (Hingga Sesi Aktif)
+        targetSessionGroupNames = allPresenterGroups
+          .filter(g => {
+            if (!g.sesi) return true;
+            const gNum = extractSesiNumber(g.sesi);
+            return gNum <= activeSesiNum;
+          })
+          .map(g => g.name);
+      }
 
       const activeEvaluationGroups = targetSessionGroupNames.length > 0 
         ? targetSessionGroupNames 
@@ -8017,7 +8085,15 @@ function normalizeMediaList(fieldOrMedia) {
       if (tableTitleEl && tableSubtitleEl) {
         if (!isSinglePresenterMode) {
           tableTitleEl.textContent = "Matriks Keterisian Penilaian";
-          tableSubtitleEl.textContent = "Rekapitulasi keterisian form evaluasi mahasiswa per kelompok.";
+          if (scopeFilter === "ALL" || isAllSession) {
+            tableSubtitleEl.textContent = "Rekapitulasi keterisian seluruh sesi semester (Semua Kelompok).";
+          } else if (scopeFilter === "ACTIVE_ONLY") {
+            tableSubtitleEl.textContent = `Rekapitulasi keterisian khusus Sesi Aktif (${activeSesi}).`;
+          } else if (scopeFilter.startsWith("SESI_")) {
+            tableSubtitleEl.textContent = `Rekapitulasi keterisian khusus ${scopeFilter.replace("SESI_", "")}.`;
+          } else {
+            tableSubtitleEl.textContent = `Rekapitulasi keterisian kumulatif hingga Sesi Aktif (${activeSesi}).`;
+          }
         } else {
           tableTitleEl.textContent = `Status Penilaian • ${singleTargetPresenter}`;
           tableSubtitleEl.textContent = `Status evaluasi mahasiswa untuk ${singleTargetPresenter}${singlePresenterSesi ? ' (' + singlePresenterSesi + ')' : ''}.`;
@@ -8041,12 +8117,12 @@ function normalizeMediaList(fieldOrMedia) {
           filledKelompok = activeEvaluationGroups.length > 0 ? [activeEvaluationGroups[0]] : ["Kelompok 1"];
         }
 
-        // Apakah mahasiswa ini adalah anggota kelompok yang sedang tampil pada sesi aktif?
+        // Apakah mahasiswa ini adalah anggota kelompok yang sedang tampil pada sesi target evaluasi?
         let isPresenterInActiveSession = false;
-        if (activeSesi === "SEMUA" || activeSesi === "ALL") {
+        if (scopeFilter === "ALL" || isAllSession) {
           isPresenterInActiveSession = allPresenterGroups.some(g => g.name.toLowerCase() === studentGroup.toLowerCase());
         } else {
-          isPresenterInActiveSession = (studentSesi && studentSesi.toLowerCase() === activeSesi.toLowerCase());
+          isPresenterInActiveSession = activeEvaluationGroups.some(ag => ag.toLowerCase() === studentGroup.toLowerCase());
         }
 
         // Tentukan daftar kelompok yang WAJIB dievaluasi oleh mahasiswa ini:
@@ -8206,8 +8282,10 @@ function normalizeMediaList(fieldOrMedia) {
           `;
 
           allPresenterGroups.forEach(g => {
-            const isHighlighted = g.sesi && g.sesi.toLowerCase() === activeSesi.toLowerCase();
-            if (isHighlighted) {
+            const isTargetInScope = activeEvaluationGroups.some(ag => ag.toLowerCase() === g.name.toLowerCase());
+            const isCurrentActive = g.sesi && g.sesi.toLowerCase() === activeSesi.toLowerCase();
+
+            if (isCurrentActive) {
               headersHtml += `
                 <th class="sticky top-0 z-30 px-1.5 sm:px-2 py-1.5 text-center min-w-[65px] sm:min-w-[85px] border-r border-zinc-200 bg-emerald-50/80 border-b-2 border-b-emerald-500 whitespace-nowrap shadow-2xs">
                   <div class="flex flex-col items-center">
@@ -8216,6 +8294,15 @@ function normalizeMediaList(fieldOrMedia) {
                       <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                       ${g.sesi || 'Sesi Aktif'} • Tampil
                     </span>
+                  </div>
+                </th>
+              `;
+            } else if (isTargetInScope) {
+              headersHtml += `
+                <th class="sticky top-0 z-30 px-1.5 sm:px-2 py-1.5 text-center min-w-[60px] sm:min-w-[75px] border-r border-zinc-200 bg-indigo-50/40 border-b-2 border-b-indigo-400 text-indigo-950 font-semibold whitespace-nowrap">
+                  <div class="flex flex-col items-center">
+                    <span class="text-[10px] sm:text-xs tracking-tight">${g.name}</span>
+                    <span class="text-[8px] sm:text-[9px] text-indigo-600 font-mono leading-none mt-0.5">${g.sesi || '-'}</span>
                   </div>
                 </th>
               `;
