@@ -2,6 +2,23 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.4.82] - 2026-09-07
+
+### 💊 Standardisasi Estetika Pil Kapsul Terpadu (*Unified Capsule Design*) Header Bilah Atas
+- **✨ Harmonisasi Geometri Kapsul Penuh (`rounded-full`) Lintas Perangkat:**
+  - Menyatukan seluruh elemen bilah atas header (Tombol Kembali Hub, Badge PIN ID, Indikator Status Formulir, Tombol Bagikan QR, Tombol Buka Formulir, dan Tombol Keluar) ke dalam satu sistem desain kapsul (`rounded-full`) yang elegan dan konsisten.
+  - Menghilangkan inkonsistensi sudut lengkung visual sebelumnya yang mencampurkan `rounded-lg`, `rounded-xl`, dan `rounded-full` secara acak.
+- **📱 Peningkatan Tampilan Tombol Status di Layar Mobile:**
+  - Mengeliminasi tampilan kotak sempit dengan titik kosong pada layar sempit ($< 380\text{ px}$).
+  - Tombol status kini secara konsisten menampilkan teks ringkas `"Aktif"` (atau `"Tutup"`) bersanding dengan lampu denyut beranimasi pada perangkat mobile, dan otomatis menampilkan teks lengkap `"Form Aktif"` pada layar desktop.
+- **📐 Ketinggian & Proporsi Sentuh yang Presisi:**
+  - Menetapkan ketinggian seragam $34\text{ px}$ (`h-8.5`) di perangkat mobile dan $36\text{ px}$ (`h-9`) di layar tablet hingga Ultra-Wide.
+  - Tombol ikon aksi di layar mobile bertransformasi menjadi kapsul lingkaran sempurna ($34\times 34\text{ px}$) dengan aksen perbatasan tipis dan bayangan lembut `shadow-2xs`.
+- **⚡ Pembaruan Versi Cache & Service Worker:**
+  - Meningkatkan versi Service Worker dan seluruh modul ke `v2.4.82`.
+
+---
+
 ## [2.4.81] - 2026-09-07
 
 ### 📱 Rekayasa Responsivitas Mobile-First: Eliminasi Kolisi Header & Navigasi Fleksibel Mobile-S/M/L/Wide

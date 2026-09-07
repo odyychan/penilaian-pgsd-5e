@@ -3354,16 +3354,16 @@
 
       if (headerBtn && headerDot && headerText) {
         if (isActive) {
-          headerBtn.className = "h-8 px-2 sm:h-9 sm:px-3 rounded-lg sm:rounded-xl border text-xs font-bold transition flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-xs active:scale-95 shrink-0 bg-emerald-950/70 border-emerald-500/50 text-emerald-300 hover:bg-emerald-900/90";
+          headerBtn.className = "h-8.5 px-2.5 sm:h-9 sm:px-3.5 rounded-full border border-emerald-500/50 text-xs font-bold transition flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-2xs active:scale-95 shrink-0 bg-emerald-950/70 text-emerald-300 hover:bg-emerald-900/90";
           headerDot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0 shadow-xs";
-          headerText.className = "font-semibold text-[11px] sm:text-xs hidden min-[380px]:inline";
-          headerText.textContent = "Form Aktif";
+          headerText.className = "font-semibold text-[11px] sm:text-xs";
+          headerText.innerHTML = '<span class="sm:hidden">Aktif</span><span class="hidden sm:inline">Form Aktif</span>';
           headerBtn.title = "Status Formulir: AKTIF — Menerima respons mahasiswa (Klik untuk mengubah status)";
         } else {
-          headerBtn.className = "h-8 px-2 sm:h-9 sm:px-3 rounded-lg sm:rounded-xl border text-xs font-bold transition flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-xs active:scale-95 shrink-0 bg-zinc-800/90 border-zinc-700 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200";
+          headerBtn.className = "h-8.5 px-2.5 sm:h-9 sm:px-3.5 rounded-full border border-zinc-700 text-xs font-bold transition flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-2xs active:scale-95 shrink-0 bg-zinc-800/90 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200";
           headerDot.className = "w-2 h-2 rounded-full bg-zinc-500 shrink-0";
-          headerText.className = "font-semibold text-[11px] sm:text-xs hidden min-[380px]:inline";
-          headerText.textContent = "Form Ditutup";
+          headerText.className = "font-semibold text-[11px] sm:text-xs";
+          headerText.innerHTML = '<span class="sm:hidden">Tutup</span><span class="hidden sm:inline">Form Ditutup</span>';
           headerBtn.title = "Status Formulir: DITUTUP — Mahasiswa tidak dapat mengisi (Klik untuk mengaktifkan)";
         }
       }
