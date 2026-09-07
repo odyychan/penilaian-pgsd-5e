@@ -2775,7 +2775,16 @@
     // =========================================================================
     // UNIVERSAL BACK GESTURE ENGINE (TOUCH MOBILE, MOUSE, KEYBOARD) - ADMIN PORTAL
     // =========================================================================
+    let lastAdminBackActionTime = 0;
+    let lastAdminPopstateTime = 0;
+
     function handleAdminUniversalBack() {
+      const now = Date.now();
+      if (now - lastAdminPopstateTime < 280 || now - lastAdminBackActionTime < 280) {
+        return false;
+      }
+      lastAdminBackActionTime = now;
+
       // 1. Prioritas 1: Tutup dropdown menu kustom yang aktif
       const openDropdowns = document.querySelectorAll(".pgsd-dropdown-menu:not(.hidden)");
       if (openDropdowns.length > 0) {
@@ -3175,6 +3184,9 @@
     }
 
     window.addEventListener('popstate', function(e) {
+      lastAdminPopstateTime = Date.now();
+      lastAdminBackActionTime = Date.now();
+
       // 1. Tutup modal admin jika ada yang terbuka
       const openModal = document.querySelector("#adminDashboard .modal-backdrop:not(.hidden), #adminDashboard .modal-overlay:not(.hidden), #adminDashboard [role='dialog']:not(.hidden)");
       if (openModal && openModal.id !== "adminDashboard") {

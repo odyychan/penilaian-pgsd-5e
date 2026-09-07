@@ -746,7 +746,17 @@ function normalizeMediaList(fieldOrMedia) {
     // =========================================================================
     // UNIVERSAL BACK GESTURE ENGINE (TOUCH MOBILE, MOUSE, KEYBOARD)
     // =========================================================================
+    let lastBackActionTime = 0;
+    let lastPopstateTime = 0;
+
     function handleStudentUniversalBack() {
+      const now = Date.now();
+      // Cegah eksekusi ganda jika native popstate baru saja berjalan dalam 280ms
+      if (now - lastPopstateTime < 280 || now - lastBackActionTime < 280) {
+        return false;
+      }
+      lastBackActionTime = now;
+
       // 1. Prioritas 1: Tutup dropdown menu kustom yang aktif
       const openDropdowns = document.querySelectorAll(".pgsd-dropdown-menu:not(.hidden)");
       if (openDropdowns.length > 0) {
@@ -757,59 +767,15 @@ function normalizeMediaList(fieldOrMedia) {
       }
 
       // 2. Prioritas 2: Tutup modal / popup / lightbox yang sedang terbuka
-      const switchModal = document.getElementById("modalSwitchForm");
-      if (switchModal && !switchModal.classList.contains("hidden")) {
-        closeSwitchFormModal();
-        return true;
-      }
-
-      const zoomModal = document.getElementById("modalClientImageZoom");
-      if (zoomModal && !zoomModal.classList.contains("hidden")) {
-        closeClientImageZoom();
-        return true;
-      }
-
-      const preSubmit = document.getElementById("modalPreSubmitReview");
-      if (preSubmit && !preSubmit.classList.contains("hidden")) {
-        closePreSubmitReviewModal();
-        return true;
-      }
-
-      const succModal = document.getElementById("successModal") || document.getElementById("modalSuccess");
-      if (succModal && !succModal.classList.contains("hidden")) {
-        resetFormAndCloseModal();
-        return true;
-      }
-
-      const printModal = document.getElementById("printRekapModal");
-      if (printModal && !printModal.classList.contains("hidden")) {
-        closePrintModal();
-        return true;
-      }
-
-      const groupInfoModal = document.getElementById("modalGroupInfo");
-      if (groupInfoModal && !groupInfoModal.classList.contains("hidden")) {
-        closeGroupInfoModal();
-        return true;
-      }
-
-      const studRevModal = document.getElementById("modalStudentReview");
-      if (studRevModal && !studRevModal.classList.contains("hidden")) {
-        closeStudentReviewModal();
-        return true;
-      }
-
-      const confirmModal = document.getElementById("customConfirmModal");
-      if (confirmModal && !confirmModal.classList.contains("hidden")) {
-        confirmModal.classList.add("hidden");
-        confirmModal.classList.remove("flex");
-        return true;
-      }
-
-      const anyOpenModal = document.querySelector(".modal-backdrop:not(.hidden), .modal-overlay:not(.hidden), [role='dialog']:not(.hidden)");
-      if (anyOpenModal && anyOpenModal.id !== "viewPortal" && anyOpenModal.id !== "viewForm") {
-        anyOpenModal.classList.add("hidden");
-        anyOpenModal.classList.remove("flex");
+      const openModal = document.querySelector(".modal-backdrop:not(.hidden), .modal-overlay:not(.hidden), [role='dialog']:not(.hidden), #modalSwitchForm:not(.hidden), #modalClientImageZoom:not(.hidden), #modalPreSubmitReview:not(.hidden), #modalAppConfirm:not(.hidden), #printRekapModal:not(.hidden)");
+      if (openModal && openModal.id !== "viewPortal" && openModal.id !== "viewForm") {
+        if (typeof closeSwitchFormModal === 'function' && openModal.id === 'modalSwitchForm') closeSwitchFormModal();
+        else if (typeof closeClientImageZoom === 'function' && openModal.id === 'modalClientImageZoom') closeClientImageZoom();
+        else if (typeof closePreSubmitReviewModal === 'function' && openModal.id === 'modalPreSubmitReview') closePreSubmitReviewModal();
+        else {
+          openModal.classList.add("hidden");
+          openModal.classList.remove("flex");
+        }
         return true;
       }
 
@@ -822,11 +788,12 @@ function normalizeMediaList(fieldOrMedia) {
 
       // 4. Prioritas 4: Navigasi Antar-Tahapan Formulir (Multi-Step Form Wizard)
       const viewForm = document.getElementById("viewForm") || document.getElementById("mainAppRoot");
-      if (viewForm && !viewForm.classList.contains("hidden")) {
+      const isFormVisible = viewForm && !viewForm.classList.contains("hidden");
+
+      if (isFormVisible) {
         // Jika sedang berada di Tahap 2, 3, 4, dst -> Mundur ke tahap sebelumnya
         if (typeof currentStep !== 'undefined' && currentStep > 1) {
-          const historyState = window.history.state;
-          if (historyState && historyState.step === currentStep && window.history.length > 1) {
+          if (window.history.length > 1) {
             window.history.back();
           } else {
             updateStepUI(currentStep - 1, false, false);
@@ -837,7 +804,11 @@ function normalizeMediaList(fieldOrMedia) {
         // Jika berada di Tahap 1:
         // Jika form dibuka dari Portal Hub, kembali ke Portal Hub
         if (typeof hasEnteredFromPortal !== 'undefined' && hasEnteredFromPortal) {
-          goToPortalHub();
+          if (window.history.length > 1) {
+            window.history.back();
+          } else {
+            goToPortalHub();
+          }
           return true;
         }
 
@@ -1051,19 +1022,26 @@ function normalizeMediaList(fieldOrMedia) {
     });
 
     window.addEventListener('popstate', function(e) {
+      lastPopstateTime = Date.now();
+      lastBackActionTime = Date.now(); // Sinkronkan debounce dengan gesture in-app
+
       // 1. Tutup modal/popup/dropdown yang sedang terbuka terlebih dahulu
       const openDropdowns = document.querySelectorAll(".pgsd-dropdown-menu:not(.hidden)");
       if (openDropdowns.length > 0) {
         openDropdowns.forEach(m => m.classList.add("hidden"));
         document.querySelectorAll(".pgsd-dropdown-wrapper svg.rotate-180").forEach(s => s.classList.remove("rotate-180"));
         document.querySelectorAll(".pgsd-dropdown-wrapper button").forEach(b => b.classList.remove("ring-2", "ring-indigo-500/20", "border-indigo-500"));
-        return;
       }
 
-      const anyOpenModal = document.querySelector(".modal-backdrop:not(.hidden), .modal-overlay:not(.hidden), [role='dialog']:not(.hidden)");
+      const anyOpenModal = document.querySelector(".modal-backdrop:not(.hidden), .modal-overlay:not(.hidden), [role='dialog']:not(.hidden), #modalSwitchForm:not(.hidden), #modalClientImageZoom:not(.hidden), #modalPreSubmitReview:not(.hidden), #modalAppConfirm:not(.hidden), #printRekapModal:not(.hidden)");
       if (anyOpenModal && anyOpenModal.id !== "viewPortal" && anyOpenModal.id !== "viewForm") {
-        anyOpenModal.classList.add("hidden");
-        anyOpenModal.classList.remove("flex");
+        if (typeof closeSwitchFormModal === 'function' && anyOpenModal.id === 'modalSwitchForm') closeSwitchFormModal();
+        else if (typeof closeClientImageZoom === 'function' && anyOpenModal.id === 'modalClientImageZoom') closeClientImageZoom();
+        else if (typeof closePreSubmitReviewModal === 'function' && anyOpenModal.id === 'modalPreSubmitReview') closePreSubmitReviewModal();
+        else {
+          anyOpenModal.classList.add("hidden");
+          anyOpenModal.classList.remove("flex");
+        }
         return;
       }
 
@@ -1075,38 +1053,52 @@ function normalizeMediaList(fieldOrMedia) {
       }
 
       // 3. Tangani Navigasi Langkah Form Wizard Bertahap (Step-by-Step Back Navigation)
+      const params = new URLSearchParams(window.location.search);
+      const pin = (params.get('id') || params.get('form') || '').trim().toUpperCase();
+      const currentPinUpper = (activeFormId || '').trim().toUpperCase();
+
+      // Jika state menyatakan portal atau tidak ada PIN di URL -> tampilkan Portal
+      if (e.state && e.state.portal) {
+        showPortalView();
+        return;
+      }
+
+      if (!pin) {
+        showPortalView();
+        return;
+      }
+
+      // Jika PIN di URL berbeda dari form aktif -> aktifkan form baru
+      if (pin && pin !== currentPinUpper) {
+        activateFormViewByPin(pin);
+        return;
+      }
+
+      // Jika berada di form penilaian aktif
       const viewForm = document.getElementById("viewForm") || document.getElementById("mainAppRoot");
       const isFormVisible = viewForm && !viewForm.classList.contains("hidden");
 
       if (isFormVisible) {
-        // Jika history state memiliki info step untuk form aktif
-        if (e.state && typeof e.state.step !== 'undefined' && e.state.formId === activeFormId) {
+        // Jika history state memiliki info nomor langkah (step)
+        if (e.state && typeof e.state.step !== 'undefined') {
           const targetStep = parseInt(e.state.step) || 1;
-          if (targetStep !== currentStep) {
+          if (targetStep >= 1 && targetStep !== currentStep) {
             updateStepUI(targetStep, false, false);
             return;
           }
         }
 
-        // Jika user berada di Step > 1 dan popped back ke step sebelumnya
+        // Jika user berada di Step > 1 dan popped back tanpa info step khusus
         if (typeof currentStep !== 'undefined' && currentStep > 1) {
           updateStepUI(currentStep - 1, false, false);
           return;
         }
-      }
 
-      // 4. Jika berada di Step 1 atau Portal Mode
-      const params = new URLSearchParams(window.location.search);
-      const pin = (params.get('id') || params.get('form') || '').trim();
-
-      if (e.state && e.state.portal) {
-        showPortalView();
-      } else if (!pin) {
-        showPortalView();
-      } else if (pin !== activeFormId) {
-        activateFormViewByPin(pin);
-      } else if (typeof hasEnteredFromPortal !== 'undefined' && hasEnteredFromPortal && (!e.state || !e.state.formId)) {
-        showPortalView();
+        // Jika berada di Step 1 dan user masuk dari portal -> kembali ke portal
+        if (currentStep === 1 && typeof hasEnteredFromPortal !== 'undefined' && hasEnteredFromPortal && (!e.state || !e.state.formId || e.state.portal)) {
+          showPortalView();
+          return;
+        }
       }
     });
 
@@ -4418,8 +4410,10 @@ function normalizeMediaList(fieldOrMedia) {
       if (pushHistoryState) {
         try {
           const currentState = window.history.state || {};
-          if (currentState.step !== step || currentState.formId !== activeFormId) {
-            window.history.pushState({ formId: activeFormId, step: step, tab: 'form', view: 'wizard' }, '', window.location.href);
+          if (currentState.step !== step || String(currentState.formId || '').toUpperCase() !== String(activeFormId || '').toUpperCase()) {
+            const currentUrl = new URL(window.location.href);
+            if (activeFormId) currentUrl.searchParams.set('id', activeFormId);
+            window.history.pushState({ formId: activeFormId, step: step, tab: 'form', view: 'wizard' }, '', currentUrl.toString());
           }
         } catch(e) {}
       }
@@ -6047,7 +6041,12 @@ function normalizeMediaList(fieldOrMedia) {
       if (!document.getElementById("stepSection_1")) {
         renderDynamicClientStages(false);
       }
-      updateStepUI(currentStep || 1);
+      updateStepUI(currentStep || 1, false, false);
+      try {
+        const currentUrl = new URL(window.location.href);
+        if (activeFormId) currentUrl.searchParams.set('id', activeFormId);
+        window.history.replaceState({ formId: activeFormId, step: currentStep || 1, tab: 'form', view: 'wizard' }, '', currentUrl.toString());
+      } catch(e) {}
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
 

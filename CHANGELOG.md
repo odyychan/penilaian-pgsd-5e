@@ -2,6 +2,20 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.4.72] - 2026-09-07
+
+### ⚡ Eliminasi Double-Trigger & Debouncing Presisi Tinggi Navigasi Back Gesture Step-by-Step
+- **🛡️ Anti-Double Triggering pada Mobile Edge Swipe & OS Navigation:**
+  - Menerapkan mekanisme sinkronisasi *timestamp debouncing* (280ms) antara event gestur sentuh buatan (`touchend`), pintasan mouse/keyboard, dan event native `window.onpopstate` bawaan OS (Android Navigation Gesture & iOS Back Swipe).
+  - Mengeliminasi *race condition* di mana satu usapan edge-swipe memicu `popstate` dan `handleStudentUniversalBack()` secara beruntun dalam `< 100ms`, yang sebelumnya menyebabkan lompatan mundur ganda langsung ke beranda portal.
+- **📍 Preservasi Parameter URL & Status Riwayat Kuat (`?id=PIN`):**
+  - Memastikan pencatatan `history.pushState` pada setiap tahap formulir selalu menyertakan `?id={formId}` secara mutlak sehingga parameter query PIN formulir tidak hilang selama navigasi riwayat browser.
+  - Memperbaiki pencocokan identifikasi formulir pada event `popstate` menjadi *case-insensitive* untuk konsistensi di seluruh perangkat.
+- **🧪 Verifikasi Komprehensif Automated Sandbox (`DEBUG`):**
+  - Menguji alur mundur bertahap (Tahap 3 $\to$ Tahap 2 $\to$ Tahap 1 $\to$ Portal Hub) dan pencegahan double-trigger dengan tingkat kelulusan 100% pada pengujian Playwright.
+- **⚡ Pembaruan Versi Cache & Aset:**
+  - Meningkatkan versi cache Service Worker dan query tag aset ke `v2.4.72`.
+
 ---
 
 ## [2.4.71] - 2026-09-07
