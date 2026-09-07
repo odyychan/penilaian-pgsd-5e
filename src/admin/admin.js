@@ -4380,6 +4380,7 @@
       adminAppConfig["Form_Mode"] = mode;
       if (currentFormMeta) currentFormMeta.formMode = mode;
       updateFormModeCardsUI(mode);
+      renderDynamicStagesCanvas();
       const modeLabels = {
         'PEER_ASSESSMENT': 'Penilaian Perkuliahan',
         'GENERAL_SURVEY': 'Survei & Kuesioner',
@@ -4457,7 +4458,9 @@
         "Tampilkan_Ulasan_Publik", "Kewajiban_Menilai_Penyaji",
         "Jadwal_Aktif", "Jadwal_Mulai", "Jadwal_Selesai", "Batas_Maksimal_Respons",
         "Pesan_Form_Belum_Buka", "Pesan_Form_Ditutup",
-        "Cegah_Penilaian_Diri", "Kunci_Respons_Ganda"
+        "Cegah_Penilaian_Diri", "Kunci_Respons_Ganda",
+        "KKM_Nilai_Kuis", "Mode_Rilis_Nilai_Kuis",
+        "Tampilkan_Kunci_Jawaban_Kuis", "Tampilkan_Poin_Kuis", "Tampilkan_Pembahasan_Kuis"
       ];
 
       keys.forEach(k => {
@@ -6105,6 +6108,13 @@
                 </div>
               ` : ''}
 
+              ${(adminAppConfig.form_mode === 'QUIZ' && Array.isArray(f.correctAnswers) && f.correctAnswers.includes(o)) ? `
+                <span class="text-[10.5px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1 shrink-0 shadow-2xs">
+                  <span>✓</span>
+                  <span>Kunci Benar</span>
+                </span>
+              ` : ''}
+
               <button 
                 type="button" 
                 onclick="handleInlineDeleteOption(${sIdx}, ${fIdx}, ${optIdx})" 
@@ -6120,6 +6130,13 @@
         return `
           <div class="space-y-2 pt-1">
             <div class="space-y-1.5">${optsHtml}</div>
+
+            ${(adminAppConfig.form_mode === 'QUIZ' && f.answerFeedback) ? `
+              <div class="mt-2 p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-start gap-2 shadow-2xs">
+                <span class="font-bold shrink-0">💡 Pembahasan:</span>
+                <span class="italic leading-relaxed">${escapeHtml(f.answerFeedback)}</span>
+              </div>
+            ` : ''}
             
             ${f.hasOtherOption ? `
               <div class="flex items-center gap-2.5 text-xs">
@@ -6173,6 +6190,12 @@
                 oninput="autoResizeTextarea(this); handleInlineOptionUpdate(${sIdx}, ${fIdx}, ${optIdx}, this.value)"
                 class="flex-1 px-2.5 py-1.5 rounded-md border-b border-transparent hover:border-zinc-300 focus:border-indigo-600 text-xs text-zinc-800 bg-transparent focus:bg-white outline-none transition resize-none overflow-hidden block whitespace-pre-wrap break-words leading-snug"
               >${escapeHtml(o)}</textarea>
+              ${(adminAppConfig.form_mode === 'QUIZ' && Array.isArray(f.correctAnswers) && f.correctAnswers.includes(o)) ? `
+                <span class="text-[10.5px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1 shrink-0 shadow-2xs">
+                  <span>✓</span>
+                  <span>Kunci Benar</span>
+                </span>
+              ` : ''}
               <button 
                 type="button" 
                 onclick="handleInlineDeleteOption(${sIdx}, ${fIdx}, ${optIdx})" 
@@ -6188,6 +6211,13 @@
         return `
           <div class="space-y-2 pt-1">
             <div class="space-y-1.5">${optsHtml}</div>
+
+            ${(adminAppConfig.form_mode === 'QUIZ' && f.answerFeedback) ? `
+              <div class="mt-2 p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-start gap-2 shadow-2xs">
+                <span class="font-bold shrink-0">💡 Pembahasan:</span>
+                <span class="italic leading-relaxed">${escapeHtml(f.answerFeedback)}</span>
+              </div>
+            ` : ''}
 
             ${f.hasOtherOption ? `
               <div class="flex items-center gap-2.5 text-xs">
@@ -6257,6 +6287,13 @@
                 </div>
               ` : ''}
 
+              ${(adminAppConfig.form_mode === 'QUIZ' && Array.isArray(f.correctAnswers) && f.correctAnswers.includes(o)) ? `
+                <span class="text-[10.5px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1 shrink-0 shadow-2xs">
+                  <span>✓</span>
+                  <span>Kunci Benar</span>
+                </span>
+              ` : ''}
+
               <button 
                 type="button" 
                 onclick="handleInlineDeleteOption(${sIdx}, ${fIdx}, ${optIdx})" 
@@ -6272,6 +6309,13 @@
         return `
           <div class="space-y-2 pt-1">
             <div class="space-y-1.5">${optsHtml}</div>
+
+            ${(adminAppConfig.form_mode === 'QUIZ' && f.answerFeedback) ? `
+              <div class="mt-2 p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-start gap-2 shadow-2xs">
+                <span class="font-bold shrink-0">💡 Pembahasan:</span>
+                <span class="italic leading-relaxed">${escapeHtml(f.answerFeedback)}</span>
+              </div>
+            ` : ''}
             <div class="flex items-center gap-2 pt-1">
               <span class="w-4 font-mono text-zinc-300 font-bold text-xs shrink-0 text-center">•</span>
               <button 
@@ -6308,6 +6352,26 @@
               Teks jawaban singkat (akan diisi oleh responden)
             </div>
             ${getFieldValidationConfigHtml(f, sIdx, fIdx)}
+
+            ${(adminAppConfig.form_mode === 'QUIZ' && Array.isArray(f.correctAnswers) && f.correctAnswers.length > 0) ? `
+              <div class="mt-2 p-2.5 rounded-xl bg-emerald-50/90 border border-emerald-300 text-xs text-emerald-900 flex items-center justify-between gap-2 shadow-2xs">
+                <div class="flex items-center gap-2 min-w-0">
+                  <span class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shrink-0">✓</span>
+                  <div class="min-w-0">
+                    <span class="font-bold block text-[11px] uppercase tracking-wider text-emerald-800">Kunci Jawaban Benar:</span>
+                    <span class="font-mono text-emerald-950 font-bold break-words">${escapeHtml(f.correctAnswers.join(' / '))}</span>
+                  </div>
+                </div>
+                <span class="text-[10.5px] font-mono font-bold bg-emerald-200/80 text-emerald-900 px-2 py-0.5 rounded-md shrink-0">${f.points !== undefined ? f.points : 10} Poin</span>
+              </div>
+            ` : ''}
+
+            ${(adminAppConfig.form_mode === 'QUIZ' && f.answerFeedback) ? `
+              <div class="mt-1.5 p-2 rounded-lg bg-amber-50/70 border border-amber-200 text-[11px] text-amber-900 flex items-start gap-1.5 shadow-2xs">
+                <span class="shrink-0 font-bold">💡 Pembahasan:</span>
+                <span class="italic leading-relaxed">${escapeHtml(f.answerFeedback)}</span>
+              </div>
+            ` : ''}
           </div>
         `;
       }
@@ -7107,6 +7171,33 @@
 
       updatePublishStatusBadge();
 
+      if (adminAppConfig.form_mode === 'QUIZ') {
+        const totalPts = calculateTotalQuizPoints();
+        const kkmVal = adminAppConfig["KKM_Nilai_Kuis"] || 75;
+        const banner = document.createElement("div");
+        banner.className = "p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4";
+        banner.innerHTML = `
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold text-base shadow-xs shrink-0">
+              🎯
+            </div>
+            <div>
+              <h4 class="text-xs sm:text-sm font-bold text-amber-950">Mode Kuis &amp; Penilaian Otomatis Aktif</h4>
+              <p class="text-[11px] text-amber-800">Gunakan tombol 'Kunci jawaban' di setiap kartu soal untuk menentukan jawaban benar dan skor.</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <div class="px-3 py-1.5 rounded-xl bg-white border border-amber-300 text-amber-950 font-mono text-xs font-semibold shadow-2xs">
+              Total Poin: <span class="font-extrabold text-amber-700 text-sm">${totalPts}</span>
+            </div>
+            <div class="px-3 py-1.5 rounded-xl bg-amber-100/90 border border-amber-300 text-amber-900 font-mono text-xs font-semibold shadow-2xs">
+              KKM: <span class="font-bold text-amber-950">${kkmVal}</span>
+            </div>
+          </div>
+        `;
+        container.appendChild(banner);
+      }
+
       tahapan.forEach((stage, sIdx) => {
         const stageCard = document.createElement("div");
         stageCard.id = `stageCard_${sIdx}`;
@@ -7237,6 +7328,17 @@
               <!-- Bottom Row: Google Forms Action Toolbar -->
               <div class="flex items-center justify-between gap-3 pt-3.5 border-t border-zinc-200/80 text-xs">
                 <div class="flex items-center gap-1.5 flex-wrap">
+                  ${(adminAppConfig.form_mode === 'QUIZ' && ['RADIO', 'CHECKBOX', 'DROPDOWN', 'SHORT_TEXT'].includes(f.type)) ? `
+                    <button 
+                      type="button" 
+                      onclick="openAnswerKeyModal(${sIdx}, ${fIdx})" 
+                      class="px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-2xs mr-1 select-none" 
+                      title="Atur Kunci Jawaban & Bobot Poin Soal Ini"
+                    >
+                      <span class="text-amber-600">🎯</span>
+                      <span>Kunci jawaban (${f.points !== undefined ? f.points : 10} poin)</span>
+                    </button>
+                  ` : ''}
                   <button type="button" onclick="moveField(${sIdx}, ${fIdx}, -1)" ${fIdx === 0 ? 'disabled' : ''} class="p-1.5 rounded-lg border border-zinc-200 hover:bg-indigo-50 hover:text-indigo-600 disabled:opacity-25 text-zinc-600 cursor-pointer transition shadow-2xs" title="Geser Pertanyaan Naik (▲)">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
                   </button>
@@ -8569,6 +8671,197 @@
     function closeCustomQuestionModal() {
       document.getElementById("modalCustomQuestion").classList.add("hidden");
     }
+
+    // =========================================================================
+    // QUIZ MODE & AUTO-GRADING BUILDER ENGINE
+    // =========================================================================
+    let currentAnswerKeyStageIdx = -1;
+    let currentAnswerKeyFieldIdx = -1;
+    let currentAnswerKeySelectedAnswers = [];
+
+    function calculateTotalQuizPoints() {
+      initOrNormalizeFormSchema();
+      let total = 0;
+      (adminFormSchema.tahapan || []).forEach(t => {
+        (t.fields || []).forEach(f => {
+          if (['RADIO', 'CHECKBOX', 'DROPDOWN', 'SHORT_TEXT'].includes(f.type)) {
+            total += Number(f.points !== undefined ? f.points : 10);
+          }
+        });
+      });
+      return total;
+    }
+
+    function openAnswerKeyModal(sIdx, fIdx) {
+      initOrNormalizeFormSchema();
+      const stage = adminFormSchema.tahapan?.[sIdx];
+      const field = stage?.fields?.[fIdx];
+      if (!field) {
+        showAdminToast("Pertanyaan tidak ditemukan.", "error");
+        return;
+      }
+
+      currentAnswerKeyStageIdx = sIdx;
+      currentAnswerKeyFieldIdx = fIdx;
+      currentAnswerKeySelectedAnswers = Array.isArray(field.correctAnswers) ? [...field.correctAnswers] : [];
+
+      const modal = document.getElementById("modalAnswerKey");
+      const preview = document.getElementById("ak_question_preview");
+      const pointsInput = document.getElementById("ak_points");
+      const feedbackInput = document.getElementById("ak_feedback");
+      const container = document.getElementById("ak_options_container");
+      const label = document.getElementById("ak_selection_label");
+      const hint = document.getElementById("ak_selection_hint");
+
+      if (preview) preview.textContent = field.label || "Pertanyaan tanpa judul";
+      if (pointsInput) pointsInput.value = field.points !== undefined ? field.points : 10;
+      if (feedbackInput) feedbackInput.value = field.answerFeedback || "";
+
+      if (container) {
+        container.innerHTML = "";
+        const fType = field.type;
+
+        if (fType === 'RADIO' || fType === 'DROPDOWN') {
+          if (label) label.textContent = "Pilih Kunci Jawaban Benar (Pilihan Tunggal):";
+          if (hint) hint.textContent = "Klik salah satu opsi untuk menandai sebagai kunci benar";
+          const options = (field.options && field.options.length > 0) ? field.options : ['Opsi 1', 'Opsi 2'];
+          
+          options.forEach((opt) => {
+            const isSelected = currentAnswerKeySelectedAnswers.includes(opt);
+            const row = document.createElement("div");
+            row.className = `p-3 rounded-xl border flex items-center justify-between gap-2.5 cursor-pointer transition select-none ${
+              isSelected 
+                ? 'bg-emerald-50/80 border-emerald-500 text-emerald-950 font-bold shadow-2xs' 
+                : 'bg-zinc-50 hover:bg-zinc-100/80 border-zinc-200 text-zinc-700 font-medium'
+            }`;
+            row.onclick = () => {
+              if (currentAnswerKeySelectedAnswers.includes(opt)) {
+                currentAnswerKeySelectedAnswers = [];
+              } else {
+                currentAnswerKeySelectedAnswers = [opt];
+              }
+              openAnswerKeyModal(sIdx, fIdx);
+            };
+            row.innerHTML = `
+              <div class="flex items-center gap-2.5 min-w-0">
+                <span class="w-5 h-5 rounded-full border-2 ${isSelected ? 'border-emerald-600 bg-emerald-600 text-white flex items-center justify-center text-xs' : 'border-zinc-400'} shrink-0">
+                  ${isSelected ? '✓' : ''}
+                </span>
+                <span class="text-xs break-words">${escapeHtml(opt)}</span>
+              </div>
+              ${isSelected ? '<span class="text-[10.5px] font-mono font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full shrink-0">Benar</span>' : ''}
+            `;
+            container.appendChild(row);
+          });
+
+        } else if (fType === 'CHECKBOX') {
+          if (label) label.textContent = "Pilih Kunci Jawaban Benar (Bisa Banyak):";
+          if (hint) hint.textContent = "Centang semua opsi yang merupakan jawaban benar";
+          const options = (field.options && field.options.length > 0) ? field.options : ['Opsi 1', 'Opsi 2'];
+
+          options.forEach((opt) => {
+            const isSelected = currentAnswerKeySelectedAnswers.includes(opt);
+            const row = document.createElement("div");
+            row.className = `p-3 rounded-xl border flex items-center justify-between gap-2.5 cursor-pointer transition select-none ${
+              isSelected 
+                ? 'bg-emerald-50/80 border-emerald-500 text-emerald-950 font-bold shadow-2xs' 
+                : 'bg-zinc-50 hover:bg-zinc-100/80 border-zinc-200 text-zinc-700 font-medium'
+            }`;
+            row.onclick = () => {
+              if (currentAnswerKeySelectedAnswers.includes(opt)) {
+                currentAnswerKeySelectedAnswers = currentAnswerKeySelectedAnswers.filter(x => x !== opt);
+              } else {
+                currentAnswerKeySelectedAnswers.push(opt);
+              }
+              openAnswerKeyModal(sIdx, fIdx);
+            };
+            row.innerHTML = `
+              <div class="flex items-center gap-2.5 min-w-0">
+                <span class="w-5 h-5 rounded-md border-2 ${isSelected ? 'border-emerald-600 bg-emerald-600 text-white flex items-center justify-center text-xs font-bold' : 'border-zinc-400'} shrink-0">
+                  ${isSelected ? '✓' : ''}
+                </span>
+                <span class="text-xs break-words">${escapeHtml(opt)}</span>
+              </div>
+              ${isSelected ? '<span class="text-[10.5px] font-mono font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full shrink-0">Benar</span>' : ''}
+            `;
+            container.appendChild(row);
+          });
+
+        } else if (fType === 'SHORT_TEXT') {
+          if (label) label.textContent = "Kunci Jawaban Isian Singkat (1 Baris per Variasi Benar):";
+          if (hint) hint.textContent = "Huruf besar/kecil tidak dibedakan (case-insensitive)";
+          
+          const textVal = currentAnswerKeySelectedAnswers.join('\n');
+          container.innerHTML = `
+            <div class="space-y-2">
+              <textarea 
+                id="ak_short_text_answers" 
+                rows="3" 
+                placeholder="Tuliskan kunci jawaban yang diterima (pisahkan dengan baris baru untuk sinonim)..." 
+                class="w-full p-3 rounded-xl border border-zinc-300 text-xs bg-white focus:border-amber-600 outline-none leading-relaxed"
+              >${escapeHtml(textVal)}</textarea>
+              <div class="p-2.5 rounded-lg bg-zinc-50 border border-zinc-200 text-[11px] text-zinc-500 space-y-1">
+                <p>💡 <span class="font-semibold text-zinc-700">Contoh:</span> Masukkan variasi jawaban seperti <span class="font-mono bg-zinc-200/70 px-1 rounded">Jakarta</span> dan <span class="font-mono bg-zinc-200/70 px-1 rounded">DKI Jakarta</span> pada baris terpisah.</p>
+                <p>Responden yang mengetik salah satu variasi tersebut akan mendapatkan nilai penuh.</p>
+              </div>
+            </div>
+          `;
+        } else {
+          container.innerHTML = `<p class="text-xs text-zinc-500 italic p-3 bg-zinc-50 rounded-xl">Tipe pertanyaan ini belum mendukung auto-grading otomatis.</p>`;
+        }
+      }
+
+      if (modal) modal.classList.remove("hidden");
+    }
+
+    function closeAnswerKeyModal() {
+      const modal = document.getElementById("modalAnswerKey");
+      if (modal) modal.classList.add("hidden");
+      currentAnswerKeyStageIdx = -1;
+      currentAnswerKeyFieldIdx = -1;
+      currentAnswerKeySelectedAnswers = [];
+    }
+
+    function saveAnswerKeyModal() {
+      if (currentAnswerKeyStageIdx < 0 || currentAnswerKeyFieldIdx < 0) {
+        closeAnswerKeyModal();
+        return;
+      }
+
+      const stage = adminFormSchema.tahapan?.[currentAnswerKeyStageIdx];
+      const field = stage?.fields?.[currentAnswerKeyFieldIdx];
+      if (!field) {
+        closeAnswerKeyModal();
+        return;
+      }
+
+      const pointsInput = document.getElementById("ak_points");
+      const feedbackInput = document.getElementById("ak_feedback");
+      const shortTextInput = document.getElementById("ak_short_text_answers");
+
+      const pts = pointsInput ? Math.max(0, parseInt(pointsInput.value, 10) || 0) : 10;
+      const fdbk = feedbackInput ? feedbackInput.value.trim() : "";
+
+      if (field.type === 'SHORT_TEXT' && shortTextInput) {
+        currentAnswerKeySelectedAnswers = shortTextInput.value
+          .split('\n')
+          .map(x => x.trim())
+          .filter(Boolean);
+      }
+
+      field.points = pts;
+      field.correctAnswers = currentAnswerKeySelectedAnswers;
+      field.answerFeedback = fdbk;
+
+      showAdminToast(`Kunci jawaban disimpan (${pts} poin)`, "success");
+      closeAnswerKeyModal();
+      renderDynamicStagesCanvas();
+      handleConfigInputAutoSave();
+    }
+
+    window.openAnswerKeyModal = openAnswerKeyModal;
+    window.closeAnswerKeyModal = closeAnswerKeyModal;
+    window.saveAnswerKeyModal = saveAnswerKeyModal;
 
     function handleQuestionTypeChange() {
       const t = document.getElementById("q_type").value;

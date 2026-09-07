@@ -1899,7 +1899,14 @@ function normalizeMediaList(fieldOrMedia) {
 
     function renderSingleClientFieldHtml(f) {
       if (!f) return '';
-      const reqBadge = f.required ? '<span class="text-rose-500 font-bold ml-0.5">*</span>' : '';
+      const isQuizMode = (appConfig && (appConfig.form_mode === 'QUIZ' || appConfig.Form_Mode === 'QUIZ' || appConfig.formMode === 'QUIZ')) || (currentFormMeta && (currentFormMeta.formMode === 'QUIZ' || currentFormMeta.form_mode === 'QUIZ'));
+      const showPoints = isQuizMode && (appConfig.Tampilkan_Poin_Kuis !== false && appConfig.Tampilkan_Poin_Kuis !== 'false');
+      const pointBadge = (showPoints && f.points !== undefined && f.points !== null) ? `
+        <span class="inline-flex items-center text-[10.5px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-300 ml-1.5 shadow-2xs align-middle">
+          ${f.points} Poin
+        </span>
+      ` : '';
+      const reqBadge = (f.required ? '<span class="text-rose-500 font-bold ml-0.5">*</span>' : '') + pointBadge;
       const savedVal = clientCustomFormAnswers[f.id] !== undefined ? clientCustomFormAnswers[f.id] : '';
 
       const hasMedia = (f.mediaList?.length > 0 || f.media?.url); 
@@ -7129,19 +7136,100 @@ function normalizeMediaList(fieldOrMedia) {
             }
 
             const isGenMode = (appConfig && (appConfig.form_mode === 'GENERAL_SURVEY' || appConfig.Form_Mode === 'GENERAL_SURVEY' || appConfig.formMode === 'GENERAL_SURVEY')) || (currentFormMeta && (currentFormMeta.formMode === 'GENERAL_SURVEY' || currentFormMeta.form_mode === 'GENERAL_SURVEY'));
+            const isQuizMode = (appConfig && (appConfig.form_mode === 'QUIZ' || appConfig.Form_Mode === 'QUIZ' || appConfig.formMode === 'QUIZ')) || (currentFormMeta && (currentFormMeta.formMode === 'QUIZ' || currentFormMeta.form_mode === 'QUIZ'));
+
+            if (isQuizMode) {
+              let totalScore = 0;
+              let maxScore = 0;
+              const questionResults = [];
+              const tahapan = (formSchema && formSchema.tahapan) ? formSchema.tahapan : [];
+
+              tahapan.forEach((stage) => {
+                (stage.fields || []).forEach((field) => {
+                  if (['RADIO', 'CHECKBOX', 'DROPDOWN', 'SHORT_TEXT'].includes(field.type)) {
+                    const questionPts = Number(field.points !== undefined ? field.points : 10);
+                    maxScore += questionPts;
+
+                    const correctKeys = Array.isArray(field.correctAnswers) ? field.correctAnswers : [];
+                    const studentAns = payload.customAnswers?.[field.id];
+                    let isCorrect = false;
+                    let earnedPoints = 0;
+
+                    if (correctKeys.length > 0) {
+                      if (field.type === 'RADIO' || field.type === 'DROPDOWN') {
+                        if (studentAns && correctKeys.some(ck => ck.trim().toLowerCase() === String(studentAns).trim().toLowerCase())) {
+                          isCorrect = true;
+                          earnedPoints = questionPts;
+                        }
+                      } else if (field.type === 'CHECKBOX') {
+                        let ansArr = [];
+                        if (Array.isArray(studentAns)) {
+                          ansArr = studentAns.map(x => String(x).trim().toLowerCase());
+                        } else if (typeof studentAns === 'string' && studentAns.trim()) {
+                          ansArr = studentAns.split(',').map(x => x.trim().toLowerCase());
+                        }
+                        const normCorrect = correctKeys.map(x => String(x).trim().toLowerCase());
+                        if (ansArr.length === normCorrect.length && normCorrect.every(k => ansArr.includes(k))) {
+                          isCorrect = true;
+                          earnedPoints = questionPts;
+                        }
+                      } else if (field.type === 'SHORT_TEXT') {
+                        const rawAns = typeof studentAns === 'string' ? studentAns.trim().toLowerCase() : '';
+                        if (rawAns && correctKeys.some(ck => ck.trim().toLowerCase() === rawAns)) {
+                          isCorrect = true;
+                          earnedPoints = questionPts;
+                        }
+                      }
+                    }
+
+                    totalScore += earnedPoints;
+                    questionResults.push({
+                      fieldId: field.id,
+                      label: field.label,
+                      type: field.type,
+                      points: questionPts,
+                      earnedPoints: earnedPoints,
+                      isCorrect: isCorrect,
+                      studentAnswer: studentAns || '',
+                      correctAnswers: correctKeys,
+                      feedback: field.answerFeedback || ''
+                    });
+                  }
+                });
+              });
+
+              const percentage = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 100;
+              const kkm = Number(appConfig["KKM_Nilai_Kuis"] || 75);
+              const isPassed = percentage >= kkm;
+
+              const quizResult = {
+                totalScore,
+                maxScore,
+                percentage,
+                passingScore: kkm,
+                isPassed,
+                details: questionResults
+              };
+
+              if (!payload.evaluasiDetail) payload.evaluasiDetail = {};
+              payload.evaluasiDetail.quizResult = quizResult;
+              payload.nilaiKelompok = percentage;
+            }
+
+            const isGenOrQuiz = isGenMode || isQuizMode;
 
             const respRow = {
               id_respons: idRespons,
               form_id: activeFormId,
-              sesi: payload.sesi || (isGenMode ? null : "Minggu 1"),
-              email: payload.email || (isGenMode ? null : "-"),
-              nama_penilai: payload.namaPenilai || (isGenMode ? "Responden" : "-"),
-              nim_penilai: payload.nimPenilai || (isGenMode ? null : "-"),
-              peran_penilai: payload.peranPenilai || (isGenMode ? "Responden" : "Mahasiswa"),
-              kelompok_dinilai: payload.kelompok || (isGenMode ? null : "-"),
-              nilai_kelompok: (payload.nilaiKelompok !== null && payload.nilaiKelompok !== undefined && !isNaN(payload.nilaiKelompok)) ? parseFloat(payload.nilaiKelompok) : (isGenMode ? null : 0),
-              best_presenter_1: (payload.presentatorTerbaik && payload.presentatorTerbaik[0]) || (isGenMode ? null : "-"),
-              best_presenter_2: (payload.presentatorTerbaik && payload.presentatorTerbaik[1]) || (isGenMode ? null : "-"),
+              sesi: payload.sesi || (isGenOrQuiz ? null : "Minggu 1"),
+              email: payload.email || (isGenOrQuiz ? null : "-"),
+              nama_penilai: payload.namaPenilai || (isQuizMode ? (payload.namaPenilai || "Peserta Kuis") : (isGenMode ? "Responden" : "-")),
+              nim_penilai: payload.nimPenilai || (isGenOrQuiz ? null : "-"),
+              peran_penilai: payload.peranPenilai || (isQuizMode ? "Peserta" : (isGenMode ? "Responden" : "Mahasiswa")),
+              kelompok_dinilai: payload.kelompok || (isGenOrQuiz ? null : "-"),
+              nilai_kelompok: (payload.nilaiKelompok !== null && payload.nilaiKelompok !== undefined && !isNaN(payload.nilaiKelompok)) ? parseFloat(payload.nilaiKelompok) : (isGenOrQuiz ? null : 0),
+              best_presenter_1: (payload.presentatorTerbaik && payload.presentatorTerbaik[0]) || (isGenOrQuiz ? null : "-"),
+              best_presenter_2: (payload.presentatorTerbaik && payload.presentatorTerbaik[1]) || (isGenOrQuiz ? null : "-"),
               evaluasi_detail: {
                 ...(payload.evaluasiDetail || {}),
                 _partition: {
@@ -7424,15 +7512,125 @@ function normalizeMediaList(fieldOrMedia) {
         generateReceiptQRCode(finalId, payload);
       }
 
-      const msgEl = document.getElementById("successModalMsg");
-      if (msgEl) {
-        if (isOfflineQueued) {
-          msgEl.innerHTML = `
-            <span class="text-amber-700 font-bold block mb-1">Tersimpan di Browser (Mode Offline)</span>
-            Evaluasi untuk <strong>${escapeHtml(kelompokName)}</strong> telah tersimpan dan akan otomatis dikirim saat online.
-          `;
+      const quizCard = document.getElementById("quizResultDisplayCard");
+      const normalReceipt = document.getElementById("digitalReceiptPrintArea");
+      const quizResult = payload?.evaluasiDetail?.quizResult;
+
+      if (quizResult && quizCard) {
+        if (normalReceipt) normalReceipt.classList.add("hidden");
+        quizCard.classList.remove("hidden");
+
+        const statusBadge = document.getElementById("quizStatusBadge");
+        const scoreEl = document.getElementById("quizScoreNumber");
+        const kkmEl = document.getElementById("quizKkmNumber");
+        const ptsEl = document.getElementById("quizPointsEarned");
+        const reviewSection = document.getElementById("quizReviewSection");
+        const reviewContainer = document.getElementById("quizReviewContainer");
+        const reviewCount = document.getElementById("quizReviewCount");
+
+        if (scoreEl) scoreEl.textContent = quizResult.percentage;
+        if (kkmEl) kkmEl.textContent = `${quizResult.passingScore} Poin`;
+        if (ptsEl) ptsEl.textContent = `${quizResult.totalScore} / ${quizResult.maxScore} Poin`;
+
+        if (statusBadge) {
+          if (quizResult.isPassed) {
+            statusBadge.className = "text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs";
+            statusBadge.textContent = "✓ LULUS";
+          } else {
+            statusBadge.className = "text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-rose-100 text-rose-800 border border-rose-300 shadow-2xs";
+            statusBadge.textContent = "✕ REMEDIAL";
+          }
+        }
+
+        const isManualRelease = (appConfig.Mode_Rilis_Nilai_Kuis === 'MANUAL');
+        if (isManualRelease) {
+          if (scoreEl) scoreEl.textContent = "—";
+          if (ptsEl) ptsEl.textContent = "Menunggu Rilis";
+          if (statusBadge) {
+            statusBadge.className = "text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300 shadow-2xs";
+            statusBadge.textContent = "DITINJAU";
+          }
+          if (reviewSection) reviewSection.classList.add("hidden");
         } else {
-          msgEl.textContent = `Terima kasih, evaluasi Anda untuk ${kelompokName || 'kelompok'} telah berhasil tercatat.`;
+          const showReview = (appConfig.Tampilkan_Kunci_Jawaban_Kuis !== false && appConfig.Tampilkan_Kunci_Jawaban_Kuis !== 'false');
+          const showFeedback = (appConfig.Tampilkan_Pembahasan_Kuis !== false && appConfig.Tampilkan_Pembahasan_Kuis !== 'false');
+
+          if (reviewSection) {
+            if (showReview && Array.isArray(quizResult.details) && quizResult.details.length > 0) {
+              reviewSection.classList.remove("hidden");
+              if (reviewCount) {
+                const correctCount = quizResult.details.filter(d => d.isCorrect).length;
+                reviewCount.textContent = `${correctCount} dari ${quizResult.details.length} Soal Benar`;
+              }
+
+              if (reviewContainer) {
+                reviewContainer.innerHTML = quizResult.details.map((item, idx) => {
+                  const ansText = Array.isArray(item.studentAnswer) ? item.studentAnswer.join(', ') : (item.studentAnswer || '(Kosong)');
+                  const keyText = Array.isArray(item.correctAnswers) ? item.correctAnswers.join(', ') : (item.correctAnswers || '-');
+
+                  return `
+                    <div class="p-3 rounded-xl border text-xs space-y-1.5 ${item.isCorrect ? 'bg-emerald-50/50 border-emerald-200' : 'bg-rose-50/50 border-rose-200'}">
+                      <div class="flex items-start justify-between gap-2">
+                        <span class="font-bold text-zinc-900 leading-snug">${idx + 1}. ${escapeHtml(item.label || 'Pertanyaan')}</span>
+                        <span class="text-[10.5px] font-mono font-bold px-2 py-0.5 rounded-full shrink-0 ${item.isCorrect ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+                          ${item.isCorrect ? `+${item.earnedPoints} Poin` : `0 / ${item.points} Poin`}
+                        </span>
+                      </div>
+
+                      <div class="space-y-0.5 text-[11.5px]">
+                        <div class="flex items-center gap-1.5">
+                          <span class="text-zinc-500">Jawaban Anda:</span>
+                          <span class="font-semibold ${item.isCorrect ? 'text-emerald-700' : 'text-rose-700'}">${escapeHtml(ansText)}</span>
+                        </div>
+                        ${!item.isCorrect ? `
+                          <div class="flex items-center gap-1.5">
+                            <span class="text-zinc-500">Kunci Benar:</span>
+                            <span class="font-semibold text-emerald-700">${escapeHtml(keyText)}</span>
+                          </div>
+                        ` : ''}
+                      </div>
+
+                      ${(showFeedback && item.feedback) ? `
+                        <div class="p-2 rounded-lg bg-amber-50/80 border border-amber-200/70 text-[11px] text-amber-900 space-y-0.5">
+                          <span class="font-bold">💡 Pembahasan:</span>
+                          <p class="italic leading-relaxed">${escapeHtml(item.feedback)}</p>
+                        </div>
+                      ` : ''}
+                    </div>
+                  `;
+                }).join('');
+              }
+            } else {
+              reviewSection.classList.add("hidden");
+            }
+          }
+        }
+
+        const msgEl = document.getElementById("successModalMsg");
+        if (msgEl) {
+          if (isManualRelease) {
+            msgEl.textContent = "Jawaban kuis Anda telah tersimpan. Nilai dan pembahasan akan dirilis setelah ditinjau oleh dosen pengampu.";
+          } else {
+            msgEl.innerHTML = quizResult.isPassed
+              ? `Selamat! Anda berhasil menyelesaikan kuis dan mencapai nilai KKM.`
+              : `Kuis telah selesai. Nilai Anda belum memenuhi batas ambang KKM (${quizResult.passingScore} Poin).`;
+          }
+        }
+
+      } else {
+        if (quizCard) quizCard.classList.add("hidden");
+        if (normalReceipt) normalReceipt.classList.remove("hidden");
+
+        const msgEl = document.getElementById("successModalMsg");
+        if (msgEl) {
+          if (isOfflineQueued) {
+            msgEl.innerHTML = `
+              <span class="text-amber-700 font-bold block mb-1">Tersimpan di Browser (Mode Offline)</span>
+              Evaluasi untuk <strong>${escapeHtml(kelompokName)}</strong> telah tersimpan dan akan otomatis dikirim saat online.
+            `;
+          } else {
+            msgEl.textContent = `Terima kasih, evaluasi Anda untuk ${kelompokName || 'kelompok'} telah berhasil tercatat.`;
+          }
         }
       }
 

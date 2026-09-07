@@ -2,6 +2,37 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.4.85] - 2026-09-07
+
+### 🎯 Mode Kuis Mandiri & Mesin Penilaian Otomatis Berbobot Poin (Fase 3)
+- **🎯 Editor Kunci Jawaban & Bobot Poin Otentik (*Answer Key & Points Builder*):**
+  - Menambahkan modal terdedikasi *"Kunci Jawaban & Poin"* (`modalAnswerKey`) bergaya Google Forms Quiz Builder.
+  - Memungkinkan admin/dosen menetapkan bobot poin kustom per pertanyaan untuk Pilihan Ganda (`RADIO`), Menu Tarik-Turun (`DROPDOWN`), Kotak Centang (`CHECKBOX`), dan Jawaban Singkat (`SHORT_TEXT`).
+  - Mendukung penandaan kunci jawaban tunggal, ganda (multi-kunci), maupun variasi sinonim isian singkat tanpa membedakan huruf besar/kecil (*case-insensitive*).
+  - Menyediakan input masukan dan pembahasan penjelasan soal (*answer feedback & explanation*) untuk setiap butir pertanyaan.
+- **🎨 Visual Feedback Interaktif pada Kanvas Pembangun Formulir:**
+  - Menampilkan lencana hijau *"✓ Kunci Benar"* pada opsi jawaban yang ditetapkan sebagai kunci penilaian.
+  - Menampilkan pratinjau kunci isian singkat dan catatan pembahasan langsung di dalam kartu soal pembangun.
+  - Menghadirkan tombol *"Kunci jawaban (X poin)"* pada bilah kendali bawah setiap pertanyaan yang mendukung penilaian.
+  - Menyajikan banner ringkasan Kuis di bagian atas kanvas pembangun yang menampilkan akumulasi Total Poin formulir dan batas Ambang Kelulusan (KKM).
+- **⚙️ Konfigurasi Kebijakan Kuis pada Panel Setelan:**
+  - Pengaturan Ambang Batas Kelulusan (*Passing Grade* / KKM).
+  - Mode Rilis Nilai Kuis: Rilis seketika setelah submit (*Immediate*) atau nanti setelah peninjauan dosen (*Manual Review*).
+  - Sakelar kendali visibilitas pasca-submit: Tampilkan Kunci Jawaban Benar, Tampilkan Bobot Poin, dan Tampilkan Pembahasan Soal.
+- **📱 Pengalaman Pengisian Responden & Indikator Poin Soal:**
+  - Menampilkan lencana bobot poin (`X Poin`) secara proporsional dan rapi pada setiap label pertanyaan kuis di sisi responden.
+- **📊 Mesin Evaluasi Skor Otomatis & Lembar Hasil Kuis (*Scorecard*):**
+  - Komputasi skor otomatis instan di sisi klien dengan presisi tinggi, mengevaluasi ketepatan jawaban responden terhadap seluruh kunci jawaban.
+  - Menyimpan skor persentase akhir secara transparan ke kolom `nilai_kelompok` di Supabase PostgreSQL, serta rincian lengkap evaluasi butir soal ke `evaluasi_detail.quizResult`.
+  - Menampilkan lembar hasil kuis interaktif (`quizResultDisplayCard`) pada modal sukses pasca-submit lengkap dengan skor akhir, status kelulusan (`LULUS` / `REMEDIAL`), perolehan poin per soal, kunci jawaban yang benar, serta pembahasan materi edukatif.
+- **🧪 Pengujian Terisolasi QA Sandbox Form `DEBUG`:**
+  - Verifikasi otomatis skenario jawaban 100% tepat (*LULUS*) dan jawaban parsial di bawah ambang KKM (*REMEDIAL*) teruji 100% akurat pada form `DEBUG`.
+  - Zero regression terjamin pada formulir perkuliahan nyata `BK5E`.
+- **⚡ Pembaruan Versi Cache & Service Worker:**
+  - Meningkatkan versi Service Worker, aset CSS, dan skrip aplikasi ke `v2.4.85`.
+
+---
+
 ## [2.4.84] - 2026-09-07
 
 ### 🔀 Mesin Percabangan Alur Kondisional & Validasi Respons Tingkat Lanjut (Fase 2)
