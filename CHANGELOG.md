@@ -2,6 +2,28 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.4.81] - 2026-09-07
+
+### 📱 Rekayasa Responsivitas Mobile-First: Eliminasi Kolisi Header & Navigasi Fleksibel Mobile-S/M/L/Wide
+- **🎯 Eliminasi Tumpang Tindih (*Zero Header Collision*) pada Mode Workspace:**
+  - Mengatasi tabrakan elemen antara lencana PIN formulir (`activeFormIdBadge`) dan tombol sakelar status (`btnHeaderFormStatusToggle`) pada layar sempit ($320\text{ px} - 390\text{ px}$).
+  - Pada layar *smartphone* ($< 640\text{ px}$), judul redundan (`headerMainTitle` "Panel Admin Form") otomatis disembunyikan secara cerdas saat berada di dalam workspace formulir, memberikan ruang bebas bagi lencana PIN ID yang dapat diklik.
+  - Mengonversi tombol aksi *Bagikan QR* (`openShareModal`) dan *Buka Formulir* (`btnBukaFormActive`) menjadi tombol ikon kubus presisi ($32\times 32\text{ px}$ di mobile, $36\times 36\text{ px}$ di tablet/desktop) dengan area sentuh ergonomis ($44\times 44\text{ px}$).
+  - Menyesuaikan tombol status formulir (`btnHeaderFormStatusToggle`) dengan indikator denyut warna cerdas di layar mikro dan memunculkan label teks lengkap secara progresif mulai lebar $\ge 380\text{ px}$.
+- **🌐 Proteksi Isolasi Bilah Sinkronisasi Cloud (`#cloudSyncBadge`):**
+  - Menerapkan aturan CSS ketat `@media (max-width: 767px) { #cloudSyncBadge { display: none !important; } }` untuk menjamin bilah sinkronisasi tidak pernah memadati header mobile sekalipun dipicu panggilan JavaScript.
+- **🧭 Auto-Scroll Centering & Navigasi Tab Ergonomis:**
+  - Menambahkan *smooth auto-scroll centering* (`scrollIntoView({ behavior: 'smooth', inline: 'center' })`) saat berpindah tab workspace admin pada perangkat bergerak.
+  - Mengaktifkan akselerasi sentuh perangkat (`-webkit-overflow-scrolling: touch`) untuk bilah tab horizontal tanpa scrollbar yang mengganggu visual.
+- **🧩 Pembungkusan Responsif Sub-Grid Informasi Perkuliahan:**
+  - Menambahkan pembungkusan fleksibel (`flex-wrap gap-2`) pada header baris identitas formulir (*Informasi Perkuliahan*) agar tombol *Reset Info* dan *Tambah Info* tidak terpotong pada resolusi $320\text{ px}$.
+- **📐 Definisi Breakpoint `xs` di Tailwind CSS:**
+  - Mendaftarkan *custom screen breakpoint* `'xs': '420px'` pada konfigurasi Tailwind `admin.html` dan `index.html` untuk memulihkan fungsi utilitas responsif mikro secara tepat.
+- **⚡ Pembaruan Versi Cache & Service Worker:**
+  - Meningkatkan versi Service Worker dan seluruh modul ke `v2.4.81`.
+
+---
+
 ## [2.4.80] - 2026-09-07
 
 ### 🧹 Eliminasi AI Slop, Istilah Backend, Ikon Berlebihan & Bahasa Lebih Sederhana

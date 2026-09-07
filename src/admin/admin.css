@@ -174,3 +174,17 @@
     .pgsd-back-gesture-pill.active-threshold svg {
       transform: translateX(-2px) scale(1.15);
     }
+
+    /* =========================================================================
+       RESPONSIVE MOBILE & TABLET HEADER CONTROLS
+       ========================================================================= */
+    @media (max-width: 1023px) {
+      #cloudSyncBadge {
+        display: none !important;
+      }
+    }
+
+    #headerWorkspaceTabs .overflow-x-auto {
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+    }

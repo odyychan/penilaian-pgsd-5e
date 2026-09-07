@@ -3354,13 +3354,15 @@
 
       if (headerBtn && headerDot && headerText) {
         if (isActive) {
-          headerBtn.className = "h-9 px-3 rounded-xl border text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-xs active:scale-95 shrink-0 bg-emerald-950/70 border-emerald-500/50 text-emerald-300 hover:bg-emerald-900/90";
-          headerDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0 shadow-xs";
+          headerBtn.className = "h-8 px-2 sm:h-9 sm:px-3 rounded-lg sm:rounded-xl border text-xs font-bold transition flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-xs active:scale-95 shrink-0 bg-emerald-950/70 border-emerald-500/50 text-emerald-300 hover:bg-emerald-900/90";
+          headerDot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0 shadow-xs";
+          headerText.className = "font-semibold text-[11px] sm:text-xs hidden min-[380px]:inline";
           headerText.textContent = "Form Aktif";
           headerBtn.title = "Status Formulir: AKTIF — Menerima respons mahasiswa (Klik untuk mengubah status)";
         } else {
-          headerBtn.className = "h-9 px-3 rounded-xl border text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-xs active:scale-95 shrink-0 bg-zinc-800/90 border-zinc-700 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200";
-          headerDot.className = "w-2.5 h-2.5 rounded-full bg-zinc-500 shrink-0";
+          headerBtn.className = "h-8 px-2 sm:h-9 sm:px-3 rounded-lg sm:rounded-xl border text-xs font-bold transition flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-xs active:scale-95 shrink-0 bg-zinc-800/90 border-zinc-700 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200";
+          headerDot.className = "w-2 h-2 rounded-full bg-zinc-500 shrink-0";
+          headerText.className = "font-semibold text-[11px] sm:text-xs hidden min-[380px]:inline";
           headerText.textContent = "Form Ditutup";
           headerBtn.title = "Status Formulir: DITUTUP — Mahasiswa tidak dapat mengisi (Klik untuk mengaktifkan)";
         }
@@ -3416,9 +3418,24 @@
       document.getElementById("headerBtnReturnToHub")?.classList.add("hidden");
       document.getElementById("headerBtnReturnToHub")?.classList.remove("flex");
       document.getElementById("activeFormIdBadge")?.classList.add("hidden");
+      document.getElementById("activeFormIdBadge")?.classList.remove("flex");
 
-      if (document.getElementById("headerMainTitle")) document.getElementById("headerMainTitle").textContent = "Pusat Pengelolaan Seluruh Formulir Penilaian";
-      if (document.getElementById("headerSubTitle")) document.getElementById("headerSubTitle").textContent = "FKIP Universitas Lambung Mangkurat";
+      const headerLogo = document.getElementById("headerLogoContainer");
+      if (headerLogo) {
+        headerLogo.classList.remove("hidden");
+        headerLogo.classList.add("flex");
+      }
+
+      const headerTitle = document.getElementById("headerMainTitle");
+      if (headerTitle) {
+        headerTitle.textContent = "Pusat Pengelolaan Seluruh Formulir Penilaian";
+        headerTitle.classList.remove("hidden", "sm:block");
+      }
+      const headerSub = document.getElementById("headerSubTitle");
+      if (headerSub) {
+        headerSub.textContent = "FKIP Universitas Lambung Mangkurat";
+        headerSub.classList.remove("hidden", "lg:block");
+      }
       
       const btnBukaForm = document.getElementById("btnBukaFormActive");
       if (btnBukaForm) btnBukaForm.href = getRespondentFormUrl();
@@ -3747,11 +3764,25 @@
 
       document.getElementById("headerBtnReturnToHub")?.classList.remove("hidden");
       document.getElementById("headerBtnReturnToHub")?.classList.add("flex");
-      document.getElementById("activeFormIdBadge")?.classList.remove("hidden");
 
-      // Update Form Title & Headers
-      if (document.getElementById("headerMainTitle")) document.getElementById("headerMainTitle").textContent = "Panel Admin Form";
-      if (document.getElementById("headerSubTitle")) document.getElementById("headerSubTitle").textContent = `Mengelola Form PIN: ${currentFormId}`;
+      // Mobile UX: Sembunyikan logo ULM pada layar kecil di dalam workspace agar tombol Hub (<-) dan badge PIN ID memiliki ruang lapang
+      const headerLogo = document.getElementById("headerLogoContainer");
+      if (headerLogo) {
+        headerLogo.classList.add("hidden", "sm:flex");
+        headerLogo.classList.remove("flex");
+      }
+
+      // Update Form Title & Headers (Compact on Mobile: hide redundant long title so PIN badge is prominent)
+      const headerTitle = document.getElementById("headerMainTitle");
+      if (headerTitle) {
+        headerTitle.textContent = "Panel Admin Form";
+        headerTitle.classList.add("hidden", "sm:block");
+      }
+      const headerSub = document.getElementById("headerSubTitle");
+      if (headerSub) {
+        headerSub.textContent = `Mengelola Form PIN: ${currentFormId}`;
+        headerSub.classList.add("hidden", "lg:block");
+      }
       if (document.getElementById("activeFormIdBadge")) {
         document.getElementById("activeFormIdBadge").classList.remove("hidden");
         document.getElementById("activeFormIdBadge").classList.add("flex");
@@ -3840,6 +3871,14 @@
       if (tabKey === 'print') {
         initAndRenderPrintBuilder();
       }
+
+      // Auto-scroll active tab button into center view on mobile / touch devices
+      try {
+        const activeTabBtn = document.getElementById(`adminTabBtn_${tabKey}`);
+        if (activeTabBtn) {
+          activeTabBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+      } catch(e) {}
     }
 
     // =========================================================================
