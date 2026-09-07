@@ -2,6 +2,20 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.4.73] - 2026-09-07
+
+### 🧭 Integrasi Halaman "Info Formulir" ke dalam Hierarki Navigasi Back Gesture Bertahap
+- **📋 Navigasi Mundur Sempurna Melalui Info Formulir (`formOverviewSection`):**
+  - Menyempurnakan alur navigasi mundur formulir: saat pengguna berada di **Bagian 1 (Identitas Penilai)** dan melakukan *back gesture*, sistem kini secara mulus kembali ke **Info Formulir & Panduan Sistem** (`goToInfoOverview()`), alih-alih melompat langsung ke Portal Hub.
+  - Melengkapi hierarki navigasi mundur lengkap: **Bagian 4 $\to$ Bagian 3 $\to$ Bagian 2 $\to$ Bagian 1 $\to$ Info Formulir $\to$ Portal Hub Input PIN**.
+- **🔗 Sinkronisasi Status View `overview` & `wizard` pada Browser History:**
+  - Mengintegrasikan fungsi `startAssessmentForm()` / `openAssessmentForm(true)` dan `goToInfoOverview()` dengan `window.history.pushState` (`view: 'overview'` vs `view: 'wizard'`).
+  - Memperbarui penanganan event `popstate` untuk berpindah secara mulus antara tampilan Panduan/Info Formulir dan Tahapan Formulir Penilaian tanpa *reload*.
+- **⚡ Pembaruan Versi Cache & Aset:**
+  - Meningkatkan versi cache Service Worker dan query tag aset ke `v2.4.73`.
+
+---
+
 ## [2.4.72] - 2026-09-07
 
 ### ⚡ Eliminasi Double-Trigger & Debouncing Presisi Tinggi Navigasi Back Gesture Step-by-Step

@@ -786,13 +786,18 @@ function normalizeMediaList(fieldOrMedia) {
         return true;
       }
 
-      // 4. Prioritas 4: Navigasi Antar-Tahapan Formulir (Multi-Step Form Wizard)
+      // 4. Prioritas 4: Navigasi Antar-Tahapan Formulir (Multi-Step Form Wizard & Info Formulir)
       const viewForm = document.getElementById("viewForm") || document.getElementById("mainAppRoot");
       const isFormVisible = viewForm && !viewForm.classList.contains("hidden");
 
       if (isFormVisible) {
+        const wizard = document.getElementById("formWizardContainer");
+        const overview = document.getElementById("formOverviewSection");
+        const isWizardVisible = wizard && !wizard.classList.contains("hidden");
+        const isOverviewVisible = overview && !overview.classList.contains("hidden");
+
         // Jika sedang berada di Tahap 2, 3, 4, dst -> Mundur ke tahap sebelumnya
-        if (typeof currentStep !== 'undefined' && currentStep > 1) {
+        if (isWizardVisible && typeof currentStep !== 'undefined' && currentStep > 1) {
           if (window.history.length > 1) {
             window.history.back();
           } else {
@@ -801,22 +806,23 @@ function normalizeMediaList(fieldOrMedia) {
           return true;
         }
 
-        // Jika berada di Tahap 1:
-        // Jika form dibuka dari Portal Hub, kembali ke Portal Hub
-        if (typeof hasEnteredFromPortal !== 'undefined' && hasEnteredFromPortal) {
+        // Jika berada di Tahap 1 -> Mundur ke Info Formulir (Overview)
+        if (isWizardVisible && currentStep === 1) {
+          if (window.history.length > 1) {
+            window.history.back();
+          } else {
+            goToInfoOverview();
+          }
+          return true;
+        }
+
+        // Jika berada di Info Formulir (Overview) -> Kembali ke Portal Hub
+        if (isOverviewVisible) {
           if (window.history.length > 1) {
             window.history.back();
           } else {
             goToPortalHub();
           }
-          return true;
-        }
-
-        // Jika form dibuka langsung via URL parameter (?id=...), cegah keluar tidak sengaja jika ada isian aktif
-        const inputNim = (document.getElementById("inputNim")?.value || "").trim();
-        const inputNama = (document.getElementById("inputNama")?.value || "").trim();
-        if (inputNim || inputNama || (typeof selectedGroupObj !== 'undefined' && selectedGroupObj)) {
-          showToast("Anda berada di tahap pertama formulir penilaian.", "info");
           return true;
         }
       }
@@ -1017,7 +1023,7 @@ function normalizeMediaList(fieldOrMedia) {
       setTimeout(() => renderAllMathInElement(document.getElementById("mainAppRoot") || document.body), 200);
 
       try {
-        window.history.replaceState({ formId: activeFormId, step: 1, tab: savedTab || 'form', view: 'wizard' }, '', window.location.href);
+        window.history.replaceState({ formId: activeFormId, tab: savedTab || 'form', view: 'overview' }, '', window.location.href);
       } catch(e) {}
     });
 
@@ -1052,7 +1058,7 @@ function normalizeMediaList(fieldOrMedia) {
         return;
       }
 
-      // 3. Tangani Navigasi Langkah Form Wizard Bertahap (Step-by-Step Back Navigation)
+      // 3. Tangani Navigasi Langkah Form Wizard & Info Formulir Bertahap
       const params = new URLSearchParams(window.location.search);
       const pin = (params.get('id') || params.get('form') || '').trim().toUpperCase();
       const currentPinUpper = (activeFormId || '').trim().toUpperCase();
@@ -1079,23 +1085,45 @@ function normalizeMediaList(fieldOrMedia) {
       const isFormVisible = viewForm && !viewForm.classList.contains("hidden");
 
       if (isFormVisible) {
-        // Jika history state memiliki info nomor langkah (step)
-        if (e.state && typeof e.state.step !== 'undefined') {
+        const wizard = document.getElementById("formWizardContainer");
+        const overview = document.getElementById("formOverviewSection");
+        const isWizardVisible = wizard && !wizard.classList.contains("hidden");
+        const isOverviewVisible = overview && !overview.classList.contains("hidden");
+
+        // A. Jika state secara eksplisit adalah Info Formulir (overview)
+        if (e.state && e.state.view === 'overview') {
+          goToInfoOverview();
+          return;
+        }
+
+        // B. Jika state memiliki info nomor langkah (step) dalam wizard
+        if (e.state && typeof e.state.step !== 'undefined' && e.state.view !== 'overview') {
           const targetStep = parseInt(e.state.step) || 1;
-          if (targetStep >= 1 && targetStep !== currentStep) {
-            updateStepUI(targetStep, false, false);
+          if (targetStep >= 1) {
+            if (!isWizardVisible) {
+              openAssessmentForm(false);
+            }
+            if (targetStep !== currentStep) {
+              updateStepUI(targetStep, false, false);
+            }
             return;
           }
         }
 
-        // Jika user berada di Step > 1 dan popped back tanpa info step khusus
-        if (typeof currentStep !== 'undefined' && currentStep > 1) {
+        // C. Fallback: Jika user berada di Step > 1 dalam wizard -> mundur ke step sebelumnya
+        if (isWizardVisible && typeof currentStep !== 'undefined' && currentStep > 1) {
           updateStepUI(currentStep - 1, false, false);
           return;
         }
 
-        // Jika berada di Step 1 dan user masuk dari portal -> kembali ke portal
-        if (currentStep === 1 && typeof hasEnteredFromPortal !== 'undefined' && hasEnteredFromPortal && (!e.state || !e.state.formId || e.state.portal)) {
+        // D. Fallback: Jika user berada di Step 1 wizard -> mundur ke Info Formulir
+        if (isWizardVisible && currentStep === 1) {
+          goToInfoOverview();
+          return;
+        }
+
+        // E. Fallback: Jika berada di Info Formulir -> kembali ke Portal Hub
+        if (isOverviewVisible || !isWizardVisible) {
           showPortalView();
           return;
         }
@@ -1291,7 +1319,7 @@ function normalizeMediaList(fieldOrMedia) {
       url.searchParams.set('id', pin);
       url.searchParams.delete('form');
       try {
-        window.history.pushState({ formId: pin, step: 1, tab: 'form', view: 'wizard' }, '', url.toString());
+        window.history.pushState({ formId: pin, tab: 'form', view: 'overview' }, '', url.toString());
       } catch(e) {}
 
       // Instant SPA Form Activation (< 15ms)
@@ -6031,7 +6059,7 @@ function normalizeMediaList(fieldOrMedia) {
       restoreFormDraft();
     }
 
-    function openAssessmentForm() {
+    function openAssessmentForm(pushState = false) {
       const authGate = document.getElementById("formAuthGateSection");
       const overview = document.getElementById("formOverviewSection");
       const wizard = document.getElementById("formWizardContainer");
@@ -6045,20 +6073,40 @@ function normalizeMediaList(fieldOrMedia) {
       try {
         const currentUrl = new URL(window.location.href);
         if (activeFormId) currentUrl.searchParams.set('id', activeFormId);
-        window.history.replaceState({ formId: activeFormId, step: currentStep || 1, tab: 'form', view: 'wizard' }, '', currentUrl.toString());
+        if (pushState) {
+          window.history.pushState({ formId: activeFormId, step: currentStep || 1, tab: 'form', view: 'wizard' }, '', currentUrl.toString());
+        } else {
+          window.history.replaceState({ formId: activeFormId, step: currentStep || 1, tab: 'form', view: 'wizard' }, '', currentUrl.toString());
+        }
       } catch(e) {}
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
 
-    function goToInfoOverview() {
+    function startAssessmentForm() {
+      openAssessmentForm(true);
+    }
+    window.startAssessmentForm = startAssessmentForm;
+    window.openAssessmentForm = openAssessmentForm;
+
+    function goToInfoOverview(pushState = false) {
       const authGate = document.getElementById("formAuthGateSection");
       const overview = document.getElementById("formOverviewSection");
       const wizard = document.getElementById("formWizardContainer");
       if (authGate) authGate.classList.add("hidden");
       if (overview) overview.classList.remove("hidden");
       if (wizard) wizard.classList.add("hidden");
+      try {
+        const currentUrl = new URL(window.location.href);
+        if (activeFormId) currentUrl.searchParams.set('id', activeFormId);
+        if (pushState) {
+          window.history.pushState({ formId: activeFormId, tab: 'form', view: 'overview' }, '', currentUrl.toString());
+        } else {
+          window.history.replaceState({ formId: activeFormId, tab: 'form', view: 'overview' }, '', currentUrl.toString());
+        }
+      } catch(e) {}
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+    window.goToInfoOverview = goToInfoOverview;
 
     function resetInMemoryClientFormState() {
       clientCustomFormAnswers = {};
