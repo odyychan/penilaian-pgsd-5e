@@ -237,3 +237,208 @@ BEGIN
 END
 $$;
 
+-- ============================================================================
+-- 8. ATOMIC STORED PROCEDURE: CONCURRENCY, QUOTA CAP & SCHEDULE GUARD
+-- ============================================================================
+CREATE OR REPLACE FUNCTION pgsd_fn_submit_response_with_quota(
+  p_id_respons TEXT,
+  p_form_id TEXT,
+  p_sesi TEXT DEFAULT NULL,
+  p_email TEXT DEFAULT NULL,
+  p_nama_penilai TEXT DEFAULT NULL,
+  p_nim_penilai TEXT DEFAULT NULL,
+  p_peran_penilai TEXT DEFAULT NULL,
+  p_kelompok_dinilai TEXT DEFAULT NULL,
+  p_nilai_kelompok NUMERIC DEFAULT NULL,
+  p_best_presenter_1 TEXT DEFAULT NULL,
+  p_best_presenter_2 TEXT DEFAULT NULL,
+  p_evaluasi_detail JSONB DEFAULT '{}'::jsonb,
+  p_custom_answers JSONB DEFAULT '{}'::jsonb,
+  p_synced_to_sheets BOOLEAN DEFAULT FALSE
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_form RECORD;
+  v_cfg RECORD;
+  v_current_count INT;
+  v_max_responses INT := 0;
+  v_schedule_active BOOLEAN := FALSE;
+  v_start_time TIMESTAMPTZ := NULL;
+  v_end_time TIMESTAMPTZ := NULL;
+  v_limit_one BOOLEAN := FALSE;
+  v_existing_id TEXT := NULL;
+  v_now TIMESTAMPTZ := clock_timestamp();
+BEGIN
+  -- 1. Acquire exclusive row lock on the form to serialize concurrent submissions
+  SELECT * INTO v_form
+  FROM pgsd_forms
+  WHERE form_id = p_form_id
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object(
+      'success', false,
+      'error_code', 'FORM_NOT_FOUND',
+      'message', 'Formulir tidak ditemukan.'
+    );
+  END IF;
+
+  -- 2. Check if form is inactive
+  IF v_form.status = 'INACTIVE' THEN
+    RETURN jsonb_build_object(
+      'success', false,
+      'error_code', 'FORM_INACTIVE',
+      'message', 'Formulir sedang dinonaktifkan oleh administrator.'
+    );
+  END IF;
+
+  -- 3. Read config_data from pgsd_form_configs
+  SELECT config_data INTO v_cfg
+  FROM pgsd_form_configs
+  WHERE form_id = p_form_id;
+
+  IF v_cfg.config_data IS NOT NULL THEN
+    v_schedule_active := COALESCE((v_cfg.config_data->>'Jadwal_Aktif')::boolean, FALSE);
+    
+    IF v_schedule_active THEN
+      -- Parse start time if present
+      IF (v_cfg.config_data->>'Jadwal_Mulai') IS NOT NULL AND (v_cfg.config_data->>'Jadwal_Mulai') <> '' THEN
+        BEGIN
+          v_start_time := (v_cfg.config_data->>'Jadwal_Mulai')::timestamptz;
+        EXCEPTION WHEN OTHERS THEN
+          v_start_time := NULL;
+        END;
+      END IF;
+
+      -- Parse end time if present
+      IF (v_cfg.config_data->>'Jadwal_Selesai') IS NOT NULL AND (v_cfg.config_data->>'Jadwal_Selesai') <> '' THEN
+        BEGIN
+          v_end_time := (v_cfg.config_data->>'Jadwal_Selesai')::timestamptz;
+        EXCEPTION WHEN OTHERS THEN
+          v_end_time := NULL;
+        END;
+      END IF;
+
+      -- Check schedule window
+      IF v_start_time IS NOT NULL AND v_now < v_start_time THEN
+        RETURN jsonb_build_object(
+          'success', false,
+          'error_code', 'FORM_NOT_OPEN_YET',
+          'message', COALESCE(v_cfg.config_data->>'Pesan_Form_Belum_Buka', 'Formulir belum dibuka.'),
+          'start_time', v_start_time
+        );
+      END IF;
+
+      IF v_end_time IS NOT NULL AND v_now > v_end_time THEN
+        RETURN jsonb_build_object(
+          'success', false,
+          'error_code', 'FORM_CLOSED',
+          'message', COALESCE(v_cfg.config_data->>'Pesan_Form_Ditutup', 'Batas waktu pengisian telah berakhir.'),
+          'end_time', v_end_time
+        );
+      END IF;
+
+      -- Max quota
+      IF (v_cfg.config_data->>'Batas_Maksimal_Respons') IS NOT NULL THEN
+        BEGIN
+          v_max_responses := COALESCE((v_cfg.config_data->>'Batas_Maksimal_Respons')::int, 0);
+        EXCEPTION WHEN OTHERS THEN
+          v_max_responses := 0;
+        END;
+      END IF;
+    END IF;
+
+    -- Single response limit check
+    v_limit_one := COALESCE((v_cfg.config_data->>'Kunci_Respons_Ganda')::boolean, FALSE);
+    IF v_limit_one THEN
+      IF p_email IS NOT NULL AND p_email <> '' AND p_email <> '-' THEN
+        SELECT id_respons INTO v_existing_id
+        FROM pgsd_responses
+        WHERE form_id = p_form_id AND LOWER(TRIM(email)) = LOWER(TRIM(p_email))
+        LIMIT 1;
+      ELSIF p_nim_penilai IS NOT NULL AND p_nim_penilai <> '' AND p_nim_penilai <> '-' THEN
+        SELECT id_respons INTO v_existing_id
+        FROM pgsd_responses
+        WHERE form_id = p_form_id AND TRIM(nim_penilai) = TRIM(p_nim_penilai)
+        LIMIT 1;
+      END IF;
+
+      IF v_existing_id IS NOT NULL THEN
+        RETURN jsonb_build_object(
+          'success', false,
+          'error_code', 'ALREADY_SUBMITTED',
+          'message', 'Anda sudah pernah mengirimkan respons untuk formulir ini.'
+        );
+      END IF;
+    END IF;
+  END IF;
+
+  -- 4. Check quota cap with row lock held
+  IF v_max_responses > 0 THEN
+    SELECT COUNT(*) INTO v_current_count
+    FROM pgsd_responses
+    WHERE form_id = p_form_id;
+
+    IF v_current_count >= v_max_responses THEN
+      RETURN jsonb_build_object(
+        'success', false,
+        'error_code', 'QUOTA_EXCEEDED',
+        'message', COALESCE(v_cfg.config_data->>'Pesan_Form_Ditutup', 'Mohon maaf, kuota pengisian formulir telah penuh.'),
+        'current_count', v_current_count,
+        'max_quota', v_max_responses
+      );
+    END IF;
+  END IF;
+
+  -- 5. Insert atomically
+  INSERT INTO pgsd_responses (
+    id_respons,
+    form_id,
+    sesi,
+    email,
+    nama_penilai,
+    nim_penilai,
+    peran_penilai,
+    kelompok_dinilai,
+    nilai_kelompok,
+    best_presenter_1,
+    best_presenter_2,
+    evaluasi_detail,
+    custom_answers,
+    synced_to_sheets
+  ) VALUES (
+    p_id_respons,
+    p_form_id,
+    p_sesi,
+    p_email,
+    p_nama_penilai,
+    p_nim_penilai,
+    p_peran_penilai,
+    p_kelompok_dinilai,
+    p_nilai_kelompok,
+    p_best_presenter_1,
+    p_best_presenter_2,
+    p_evaluasi_detail,
+    p_custom_answers,
+    p_synced_to_sheets
+  );
+
+  -- Get updated count
+  SELECT COUNT(*) INTO v_current_count
+  FROM pgsd_responses
+  WHERE form_id = p_form_id;
+
+  RETURN jsonb_build_object(
+    'success', true,
+    'id_respons', p_id_respons,
+    'current_count', v_current_count,
+    'max_quota', v_max_responses
+  );
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION pgsd_fn_submit_response_with_quota TO anon, authenticated, service_role;
+

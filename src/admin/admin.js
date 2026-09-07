@@ -4551,7 +4551,9 @@
         "Tampilkan_Ulasan_Publik", "Kewajiban_Menilai_Penyaji",
         "Jadwal_Aktif", "Jadwal_Mulai", "Jadwal_Selesai", "Batas_Maksimal_Respons",
         "Pesan_Form_Belum_Buka", "Pesan_Form_Ditutup",
-        "Cegah_Penilaian_Diri", "Kunci_Respons_Ganda"
+        "Cegah_Penilaian_Diri", "Kunci_Respons_Ganda",
+        "KKM_Nilai_Kuis", "Mode_Rilis_Nilai_Kuis",
+        "Tampilkan_Kunci_Jawaban_Kuis", "Tampilkan_Poin_Kuis", "Tampilkan_Pembahasan_Kuis"
       ];
 
       keys.forEach(k => {

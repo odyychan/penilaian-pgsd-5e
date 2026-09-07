@@ -67,6 +67,7 @@
     let currentRekapSubView = "kelompok";
     let currentRekapRoleFilter = "mhs"; // 'mhs' | 'other' | 'all'
     let isEmailValidState = false;
+    let currentFormResponseCount = 0;
 
 
     let stepMetadata = {
@@ -3612,12 +3613,14 @@ function normalizeMediaList(fieldOrMedia) {
       const sb = getSupabaseClient();
       if (sb) {
         try {
-          const [formRes, configRes, groupsRes, studentsRes] = await Promise.all([
+          const [formRes, configRes, groupsRes, studentsRes, countRes] = await Promise.all([
             sb.from('pgsd_forms').select('*').eq('form_id', activeFormId).single(),
             sb.from('pgsd_form_configs').select('*').eq('form_id', activeFormId).single(),
             sb.from('pgsd_groups').select('*').eq('form_id', activeFormId).order('display_order', { ascending: true }),
-            sb.from('pgsd_students').select('*').eq('form_id', activeFormId)
+            sb.from('pgsd_students').select('*').eq('form_id', activeFormId),
+            sb.from('pgsd_responses').select('*', { count: 'exact', head: true }).eq('form_id', activeFormId)
           ]);
+          currentFormResponseCount = (countRes && countRes.count !== null && countRes.count !== undefined) ? countRes.count : 0;
 
           if (!formRes.error && formRes.data) {
             const formRow = formRes.data;
@@ -3921,6 +3924,34 @@ function normalizeMediaList(fieldOrMedia) {
               warningBadge.classList.remove("inline-flex");
             }
           }
+        }
+
+        // Check response quota limit
+        if (!isBlocked && maxResponses > 0 && currentFormResponseCount >= maxResponses) {
+          isBlocked = true;
+          blockReason = "QUOTA_FULL";
+          blockTitle = "Batas Kuota Respons Telah Terpenuhi";
+          blockDesc = (appConfig["Pesan_Form_Ditutup"] || "Mohon maaf, kuota pengisian formulir ini telah penuh.") + `<br><span class="inline-block mt-2 font-mono font-bold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200">Kuota: ${currentFormResponseCount} / ${maxResponses} Terisi</span>`;
+        } else if (!isBlocked && maxResponses > 0) {
+          const remaining = Math.max(0, maxResponses - currentFormResponseCount);
+          if (remaining <= 5 && warningBadge) {
+            warningBadge.classList.remove("hidden");
+            warningBadge.classList.add("inline-flex");
+            warningBadge.innerHTML = `
+              <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+              <span>Sisa Kuota: <strong>${remaining} responden lagi!</strong></span>
+            `;
+          }
+        }
+      }
+
+      // Check single response restriction (Kunci Respons Ganda)
+      if (!isBlocked && (appConfig["Kunci_Respons_Ganda"] === true || appConfig["Kunci_Respons_Ganda"] === 'true')) {
+        if (localStorage.getItem("PGSD_SUBMITTED_" + activeFormId) === "true") {
+          isBlocked = true;
+          blockReason = "ALREADY_SUBMITTED";
+          blockTitle = "Respons Telah Terkirim";
+          blockDesc = "Anda sudah pernah mengirimkan tanggapan untuk formulir ini. Sesuai pengaturan pembatasan, formulir ini hanya menerima 1 kali respons.";
         }
       }
 
@@ -7240,9 +7271,49 @@ function normalizeMediaList(fieldOrMedia) {
               custom_answers: payload.customAnswers || {},
               synced_to_sheets: false
             };
-            const { error: sbErr } = await sb.from('pgsd_responses').insert([respRow]);
-            if (!sbErr) {
-              sbSuccess = true;
+            // 🔒 ATOMIC STORED PROCEDURE CALL: CONCURRENCY, QUOTA CAP & SCHEDULE GUARD
+            try {
+              const { data: rpcRes, error: rpcErr } = await sb.rpc('pgsd_fn_submit_response_with_quota', {
+                p_id_respons: idRespons,
+                p_form_id: activeFormId,
+                p_sesi: respRow.sesi,
+                p_email: respRow.email,
+                p_nama_penilai: respRow.nama_penilai,
+                p_nim_penilai: respRow.nim_penilai,
+                p_peran_penilai: respRow.peran_penilai,
+                p_kelompok_dinilai: respRow.kelompok_dinilai,
+                p_nilai_kelompok: respRow.nilai_kelompok,
+                p_best_presenter_1: respRow.best_presenter_1,
+                p_best_presenter_2: respRow.best_presenter_2,
+                p_evaluasi_detail: respRow.evaluasi_detail,
+                p_custom_answers: respRow.custom_answers,
+                p_synced_to_sheets: false
+              });
+
+              if (!rpcErr && rpcRes) {
+                if (rpcRes.success) {
+                  sbSuccess = true;
+                } else {
+                  // Atomic rejection from database
+                  if (confirmBtn) confirmBtn.disabled = false;
+                  if (confirmSpinner) confirmSpinner.classList.add("hidden");
+                  if (submitBtn) submitBtn.disabled = false;
+                  if (spinner) spinner.classList.add("hidden");
+                  isSubmittingFinalAssessment = false;
+                  closePreSubmitReviewModal();
+                  showToast(rpcRes.message || "Gagal mengirimkan formulir.", "error");
+                  if (rpcRes.error_code === 'QUOTA_EXCEEDED' || rpcRes.error_code === 'FORM_CLOSED' || rpcRes.error_code === 'FORM_NOT_OPEN_YET') {
+                    if (typeof applyScheduleAndLockUI === 'function') applyScheduleAndLockUI();
+                  }
+                  return;
+                }
+              } else {
+                const { error: sbErr } = await sb.from('pgsd_responses').insert([respRow]);
+                if (!sbErr) sbSuccess = true;
+              }
+            } catch (rpcEx) {
+              const { error: sbErr } = await sb.from('pgsd_responses').insert([respRow]);
+              if (!sbErr) sbSuccess = true;
             }
           } catch (err) {
             console.warn("Supabase fast-path fallback notice:", err);
@@ -7259,8 +7330,12 @@ function normalizeMediaList(fieldOrMedia) {
           clearStudentFormDraft(false);
 
           clientCustomFormAnswers = {};
-          localStorage.removeItem("PGSD_CACHE_REKAP_" + activeFormId);
-          localStorage.setItem("PGSD_LAST_SUBMISSION_EVENT", Date.now().toString());
+          currentFormResponseCount++;
+          try {
+            localStorage.setItem("PGSD_SUBMITTED_" + activeFormId, "true");
+            localStorage.removeItem("PGSD_CACHE_REKAP_" + activeFormId);
+            localStorage.setItem("PGSD_LAST_SUBMISSION_EVENT", Date.now().toString());
+          } catch(e) {}
 
           loadRekapData(true);
           showSuccessModal(payload.kelompok, false, payload, idRespons);

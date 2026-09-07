@@ -2,6 +2,31 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.4.86] - 2026-09-07
+
+### ⏱️ Penjadwalan Otomatis, Pembatasan Kuota & Pengaman Konkurensi Atomik (Fase 4)
+- **🔒 Pengaman Konkurensi Atomik Berbasis PostgreSQL Stored Procedure (`pgsd_fn_submit_response_with_quota`):**
+  - Mengimplementasikan fungsi transaksi stored procedure PostgreSQL atomik dengan row-level lock (`FOR UPDATE`) pada baris formulir master `pgsd_forms`.
+  - Menjamin serialisasi penuh (*zero race condition*) pada lonjakan submisi bersamaan (*burst high-concurrency submission*), mencegah *oversell* kuota melebihi kapasitas maksimum yang ditentukan secara mutlak.
+  - Memverifikasi jendela waktu buka/tutup formulir dan batasan respons tunggal per identitas secara atomik di sisi basis data Supabase.
+- **⏱️ Otomasi Penjadwalan & Jendela Waktu Akses Formulir (*Scheduler Windows*):**
+  - Penguncian otomatis saat formulir belum dibuka (`FORM_NOT_OPEN_YET`) disertai banner hitung mundur (*countdown timer*) dan informasi tanggal/jam pembukaan resmi.
+  - Penguncian otomatis saat tenggat waktu telah berakhir (`FORM_CLOSED`) disertai pesan penutupan formal dan instruksi kontak pengajar/panitia.
+- **👥 Batas Maksimum Kuota Respons & Peringatan Ambang Batas (*Quota Cap & Warnings*):**
+  - Penghentian penerimaan respons seketika saat kuota terpenuhi (`QUOTA_EXCEEDED` / `Kuota Penuh`), mengubah tampilan menjadi ramah pengguna dengan lencana status kuota penuh.
+  - Menampilkan lencana peringatan dinamis (*Low Quota Alert*) saat sisa kuota menipis untuk memberikan urgensi waktu nyata (*real-time*) kepada responden.
+- **🚫 Pembatasan Satu Respons Per Responden (*Single Response Restriction*):**
+  - Mendukung pembatasan satu respons per responden (`Kunci_Respons_Ganda`) berdasarkan NIM/Identitas atau peramban lokal (`localStorage`).
+  - Mengembalikan penolakan terisolasi (`ALREADY_SUBMITTED`) jika responden telah mengirimkan penilaian/pendaftaran sebelumnya.
+- **🧪 Pengujian Stres Konkurensi Tinggi Terisolasi QA Sandbox Form `DEBUG`:**
+  - Menguji simulasi 10 thread paralel simultan pada milidetik yang sama terhadap kuota sisa 3: tepat 3 diterima dan tepat 7 ditolak (*0% oversell, 100% data integrity*).
+  - Menguji validasi identitas ganda dan jendela waktu secara komprehensif tanpa anomali.
+  - Menjamin integritas data formulir produksi nyata `BK5E` tetap 100% aman dan nol regresi (*zero regression*).
+- **⚡ Pembaruan Versi Cache & Service Worker:**
+  - Meningkatkan versi Service Worker, aset CSS, dan skrip aplikasi ke `v2.4.86`.
+
+---
+
 ## [2.4.85] - 2026-09-07
 
 ### 🎯 Mode Kuis Mandiri & Mesin Penilaian Otomatis Berbobot Poin (Fase 3)
