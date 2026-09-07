@@ -2,6 +2,31 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.4.90] - 2026-09-07
+
+### 🧹 UI/UX Deslop & Mobile Viewport Optimization: Eradikasi AI Slop, Touch Target $\ge 44\text{ px}$, Modal Pre-Submit 1-Layar & Segmentasi Setelan Admin
+- **🧹 Eradikasi AI Slop & Efek Visual Gimmick:**
+  - Menghapus efek visual gimmick "Spoiler Blur" (`#overviewSpoilerOverlay` dan filter `blur-md`) pada petunjuk formulir mahasiswa di `index.html` dan `src/student/student.js`. Seluruh panduan kini langsung terbaca jelas tanpa memerlukan klik ekstra.
+  - Menghapus badge dekoratif berlebih seperti "PORTAL PENILAIAN AKADEMIK" dan badge "PANDUAN" redundan pada header form.
+  - Menyederhanakan gaya penulisan (*copywriting*) pada portal admin dan mahasiswa agar to-the-point dan bebas kata-kata klise robotik.
+- **📱 Optimasi Viewport Mobile-First & Standar Touch Target ($\ge 44\times 44\text{ px}$):**
+  - Menghemat ~160px ruang vertikal pada layar smartphone: merampingkan sticky header mobile dan kartu info akun mahasiswa.
+  - Mengganti kotak timer ujian 60px yang masif dengan kapsul waktu melayang (*floating pill timer*) yang ergonomis.
+  - Menstandarkan seluruh target sentuh interaktif (tombol navigasi PIN, tombol tab Formulir & Rekap, tombol akun, tombol aksi, dan filter pills) memenuhi standar wajib $\ge 44\times 44\text{ px}$.
+  - Memperbarui fungsi `switchTab()` agar selalu mempertahankan batas tinggi target sentuh (`min-h-[44px]`).
+- **🎯 Penyempurnaan Alur & Pengalaman Pengguna (UX Refactoring):**
+  - **Redesain Modal Konfirmasi Pre-Submit (Single-Screen Review):** Mengganti modal review panjang bertingkat dengan kartu ringkasan 1-layar (*quick summary card*) yang menampilkan identitas penilai, kelompok dinilai, status kelengkapan, dan akordeon `<details>` ringkas untuk verifikasi cepat tanpa *endless scrolling*.
+  - **Smart Smooth Scroll pada Validasi Input:** Menambahkan navigasi fokus otomatis (`scrollIntoView({ behavior: 'smooth', block: 'center' })`) saat pengguna melewatkan pertanyaan wajib, mengarahkan mata langsung ke elemen yang belum terisi.
+  - **Segmentasi Filter Kategori Pengaturan Admin:** Menambahkan segmented filter pills (*Semua Setelan*, *Mode & Kuis*, *Waktu & Akses*, *Integritas & Sistem*) pada 8 kartu pengaturan formulir di Admin Hub untuk mengeliminasi *scroll fatigue*.
+- **🧪 Pengujian Responsivitas Lintas Perangkat & Zero Overflow:**
+  - Terverifikasi otomatis menggunakan Playwright pada 12 resolusi viewport mahasiswa (360×640 hingga 4K 3840×2160 portrait & landscape) dan 7 resolusi admin.
+  - 100% Lulus: `hasOverflow: false` di semua viewport (`scrollWidth <= innerWidth`), seluruh target sentuh $\ge 44\text{ px}$.
+  - Pengujian terisolasi 100% pada formulir sandbox `DEBUG`, menjaga formulir perkuliahan aktif (`BK5E`) tetap aman.
+- **⚡ Pembaruan Versi Cache & Service Worker:**
+  - Meningkatkan versi Service Worker, aset CSS, dan skrip aplikasi ke `v2.4.90`.
+
+---
+
 ## [2.4.89] - 2026-09-07
 
 ### 🛡️ Audit Keamanan Menyeluruh: Zero-Trust RLS, Otentikasi Kriptografis Edge & Perlindungan Race Condition

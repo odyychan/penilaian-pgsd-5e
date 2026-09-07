@@ -35,7 +35,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="src/admin/admin.css?v=2.4.89">
+  <link rel="stylesheet" href="src/admin/admin.css?v=2.4.90">
   <!-- KaTeX CSS & JS for Universal Math / LaTeX / AI & Word Formula Rendering -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -152,7 +152,7 @@
 
           <div class="min-w-0">
             <div class="flex items-center gap-1.5">
-              <h1 id="headerMainTitle" class="font-bold text-xs sm:text-sm text-zinc-100 truncate">Pusat Pengelolaan Seluruh Formulir Penilaian</h1>
+              <h1 id="headerMainTitle" class="font-bold text-xs sm:text-sm text-zinc-100 truncate">Kelola Formulir Penilaian</h1>
               <button
                 type="button"
                 id="activeFormIdBadge"
@@ -488,11 +488,11 @@
             </div>
             <div class="min-w-0 flex-1">
               <h4 class="font-bold text-xs sm:text-sm text-emerald-950 flex items-center gap-2">
-                <span>Mode Formulir Terpilih: Survei / Kuesioner Mandiri</span>
-                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-200/80 text-emerald-800">Mandiri</span>
+                <span>Mode Survei Mandiri Aktif</span>
+                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-200/80 text-emerald-800">Tanpa Kelompok</span>
               </h4>
               <p class="text-[11px] sm:text-xs text-emerald-800 mt-0.5 leading-relaxed">
-                Formulir ini saat ini diatur dalam mode mandiri yang tidak memerlukan pembagian kelompok perkuliahan. Responden umum dapat langsung mengisi formulir tanpa pemilihan kelompok. Data kelompok di bawah dapat diabaikan atau disesuaikan jika ingin beralih kembali ke mode Penilaian Perkuliahan.
+                Formulir ini beroperasi tanpa kelompok. Responden mengisi formulir secara langsung.
               </p>
             </div>
           </div>
@@ -550,7 +550,7 @@
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-zinc-100 pb-3">
             <div>
               <h2 class="text-sm sm:text-base font-bold text-zinc-900">Daftar Kelompok &amp; Mahasiswa</h2>
-              <p class="text-[10.5px] sm:text-xs text-zinc-500 mt-0.5">Tambah, ubah, atau atur anggota tiap kelompok presentasi. <em>Tersimpan otomatis seketika.</em></p>
+              <p class="text-[10.5px] sm:text-xs text-zinc-500 mt-0.5">Atur kelompok presentasi dan anggota mahasiswa perkuliahan.</p>
             </div>
             
             <div class="flex items-center gap-2 flex-wrap">
@@ -721,13 +721,10 @@
         <!-- KARTU UTAMA IDENTITAS PERKULIAHAN (GOOGLE FORMS HEADER CARD) -->
         <div id="headerFormCard" onclick="setActiveFormCard('header', 0, null, this)" onfocusin="setActiveFormCard('header', 0, null, this)" class="bg-white rounded-xl sm:rounded-2xl border-2 border-zinc-200 border-t-8 border-t-indigo-600 shadow-sm p-3.5 sm:p-7 space-y-4 sm:space-y-5 transition hover:shadow-md relative">
           
-          <!-- Top Badge Bar (Identik dengan Tampilan Panduan Mahasiswa) -->
-          <div class="flex flex-col xs:flex-row xs:items-center justify-between gap-1.5 border-b border-zinc-100 pb-2.5">
-            <div class="flex items-center gap-1.5 flex-wrap">
-              <span class="px-1.5 py-0.5 rounded text-[9.5px] font-mono font-bold bg-zinc-900 text-white shrink-0">PANDUAN</span>
-              <span class="text-[11px] sm:text-xs text-zinc-400 font-medium">Sistem Penilaian Peer-Assessment</span>
-            </div>
-            <span class="flex items-center gap-1 text-[10.5px] sm:text-[11px] text-emerald-600 font-medium shrink-0">
+          <!-- Top Status Bar -->
+          <div class="flex items-center justify-between border-b border-zinc-100 pb-2.5 text-xs text-zinc-500 font-medium">
+            <span class="text-zinc-600 font-semibold text-[11px] sm:text-xs">Konfigurasi Formulir</span>
+            <span class="flex items-center gap-1.5 text-emerald-600 font-medium text-[11px]">
               <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
               <span>Tersimpan otomatis</span>
             </span>
@@ -926,8 +923,24 @@
       <!-- ===================================================================== -->
       <div id="adminView_settings" class="flex flex-col gap-3 sm:gap-6 hidden">
 
+        <!-- SETTINGS QUICK CATEGORY FILTER BAR -->
+        <div class="bg-white rounded-xl border border-zinc-200/90 p-1.5 sm:p-2 shadow-2xs flex items-center gap-1.5 overflow-x-auto no-scrollbar sticky top-[53px] z-20 backdrop-blur-md bg-white/95" style="scrollbar-width: none;">
+          <button type="button" onclick="filterAdminSettingsCategory('ALL')" id="settingsCatBtn_ALL" class="settings-cat-btn min-h-[38px] px-3.5 py-1.5 rounded-lg bg-zinc-900 text-white font-bold text-xs transition cursor-pointer shrink-0 shadow-xs">
+            Semua Setelan
+          </button>
+          <button type="button" onclick="filterAdminSettingsCategory('MODE')" id="settingsCatBtn_MODE" class="settings-cat-btn min-h-[38px] px-3.5 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-semibold text-xs transition cursor-pointer shrink-0">
+            Mode &amp; Kuis
+          </button>
+          <button type="button" onclick="filterAdminSettingsCategory('ACCESS')" id="settingsCatBtn_ACCESS" class="settings-cat-btn min-h-[38px] px-3.5 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-semibold text-xs transition cursor-pointer shrink-0">
+            Waktu &amp; Akses
+          </button>
+          <button type="button" onclick="filterAdminSettingsCategory('INTEGRITY')" id="settingsCatBtn_INTEGRITY" class="settings-cat-btn min-h-[38px] px-3.5 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-semibold text-xs transition cursor-pointer shrink-0">
+            Integritas &amp; Sistem
+          </button>
+        </div>
+
         <!-- TIPE & MODE OPERASIONAL FORMULIR (UNIVERSAL FORM ENGINE) -->
-        <div class="bg-white rounded-xl sm:rounded-2xl border border-zinc-200/90 p-3.5 sm:p-6 shadow-xs space-y-4">
+        <div data-settings-cat="MODE" class="bg-white rounded-xl sm:rounded-2xl border border-zinc-200/90 p-3.5 sm:p-6 shadow-xs space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 pb-3.5">
             <div class="flex items-center gap-2.5">
               <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-200 flex items-center justify-center shrink-0 shadow-2xs">
@@ -1005,7 +1018,7 @@
         </div>
 
         <!-- KONFIGURASI KUIS & PENILAIAN OTOMATIS (QUIZ MODE ENGINE) -->
-        <div id="quizSettingsCard" class="bg-white rounded-xl sm:rounded-2xl border border-amber-200/90 p-3.5 sm:p-6 shadow-xs space-y-4">
+        <div id="quizSettingsCard" data-settings-cat="MODE" class="bg-white rounded-xl sm:rounded-2xl border border-amber-200/90 p-3.5 sm:p-6 shadow-xs space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 pb-3.5">
             <div class="flex items-center gap-2.5">
               <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center shrink-0 shadow-2xs">
@@ -1136,7 +1149,7 @@
         </div>
 
         <!-- E-SERTIFIKAT DIGITAL OTOMATIS (AUTO-CERTIFICATE ENGINE) -->
-        <div id="certificateSettingsCard" class="bg-white rounded-xl sm:rounded-2xl border border-indigo-200/90 p-3.5 sm:p-6 shadow-xs space-y-4">
+        <div id="certificateSettingsCard" data-settings-cat="MODE" class="bg-white rounded-xl sm:rounded-2xl border border-indigo-200/90 p-3.5 sm:p-6 shadow-xs space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 pb-3.5">
             <div class="flex items-center gap-2.5">
               <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-200 flex items-center justify-center shrink-0 shadow-2xs">
@@ -1224,7 +1237,7 @@
         </div>
         
         <!-- JADWAL & BATAS WAKTU AKSES FORMULIR (SCHEDULE & DEADLINE) -->
-        <div class="bg-white rounded-xl sm:rounded-2xl border border-zinc-200/90 p-3.5 sm:p-6 shadow-xs space-y-4">
+        <div id="scheduleSettingsCard" data-settings-cat="ACCESS" class="bg-white rounded-xl sm:rounded-2xl border border-zinc-200/90 p-3.5 sm:p-6 shadow-xs space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 pb-3.5">
             <div class="flex items-center gap-2.5">
               <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center shrink-0 shadow-2xs">
@@ -1321,7 +1334,7 @@
         </div>
 
         <!-- MODE PENGUMPULAN & OTENTIKASI EMAIL (GOOGLE FORMS STYLE) -->
-        <div class="bg-white rounded-xl sm:rounded-2xl border border-zinc-200/90 p-3.5 sm:p-6 shadow-xs space-y-4">
+        <div id="authSettingsCard" data-settings-cat="ACCESS" class="bg-white rounded-xl sm:rounded-2xl border border-zinc-200/90 p-3.5 sm:p-6 shadow-xs space-y-4">
           <div class="border-b border-zinc-100 pb-3 flex items-center justify-between gap-2">
             <div class="flex items-center gap-2.5">
               <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center shrink-0 shadow-2xs">
@@ -1408,7 +1421,7 @@
         </div>
 
         <!-- INTEGRITAS & ATURAN PENILAIAN (ANTI-FRAUD & INTEGRITY RULES) -->
-        <div class="bg-white rounded-xl sm:rounded-2xl border border-zinc-200/90 p-3.5 sm:p-6 shadow-xs space-y-4">
+        <div id="integritySettingsCard" data-settings-cat="INTEGRITY" class="bg-white rounded-xl sm:rounded-2xl border border-zinc-200/90 p-3.5 sm:p-6 shadow-xs space-y-4">
           <div class="border-b border-zinc-100 pb-3">
             <div class="flex items-center gap-2.5">
               <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-200 flex items-center justify-center shrink-0 shadow-2xs">
@@ -1485,7 +1498,7 @@
         </div>
 
         <!-- Nama Pembuat Web / Footer Settings Card -->
-        <div class="bg-white rounded-xl sm:rounded-2xl border border-zinc-200/90 p-3.5 sm:p-6 shadow-xs space-y-3 sm:space-y-4">
+        <div data-settings-cat="INTEGRITY" class="bg-white rounded-xl sm:rounded-2xl border border-zinc-200/90 p-3.5 sm:p-6 shadow-xs space-y-3 sm:space-y-4">
           <div>
             <h3 class="text-xs sm:text-base font-bold text-zinc-900">Kredit &amp; Identitas Footer</h3>
             <p class="text-[10.5px] sm:text-xs text-zinc-500 mt-0.5">Atur teks nama pembuat atau pengembang yang tampil di bagian bawah formulir.</p>
@@ -1549,7 +1562,7 @@
         </div>
 
         <!-- Reset & Pemulihan Skema Standar Card -->
-        <div class="bg-white rounded-xl sm:rounded-2xl border border-zinc-200/90 p-3.5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+        <div data-settings-cat="INTEGRITY" class="bg-white rounded-xl sm:rounded-2xl border border-zinc-200/90 p-3.5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
           <div>
             <h3 class="text-xs sm:text-sm font-bold text-zinc-900">Kembalikan ke Struktur Bawaan</h3>
             <p class="text-[10.5px] sm:text-xs text-zinc-500 mt-0.5">Kembalikan susunan pertanyaan ke template bawaan penilaian perkuliahan.</p>
@@ -3785,13 +3798,13 @@ function getOrCreateFolder(folderName) {
   <!-- ========================================================================= -->
   <!-- JAVASCRIPT APP LOGIC: MULTI-FORM & ISOLATED SANDBOX ENGINE -->
   <!-- ========================================================================= -->
-  <script src="src/admin/admin.js?v=2.4.89"></script>
+  <script src="src/admin/admin.js?v=2.4.90"></script>
 
   <!-- Progressive Web App (PWA) & Instant Auto-Updater Engine -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js?v=2.4.89').then(function(reg) {
+        navigator.serviceWorker.register('/sw.js?v=2.4.90').then(function(reg) {
           reg.update();
           reg.addEventListener('updatefound', function() {
             var newWorker = reg.installing;

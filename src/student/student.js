@@ -4003,19 +4003,12 @@ function normalizeMediaList(fieldOrMedia) {
             <span>Formulir Ditutup</span>
           `;
         }
-        // Apply frosted glass spoiler blur when form is closed or not yet open
-        if (spoilerContent && spoilerOverlay) {
-          if (!spoilerContent.hasAttribute('data-revealed')) {
-            applySpoilerBlur(true);
-          }
-        }
       } else {
         if (lockBanner) lockBanner.classList.add("hidden");
         if (!scheduleActive && warningBadge) {
           warningBadge.classList.add("hidden");
           warningBadge.classList.remove("inline-flex");
         }
-        applySpoilerBlur(false);
         if (startBtn) {
           startBtn.disabled = false;
           startBtn.classList.remove("opacity-50", "cursor-not-allowed");
@@ -4030,26 +4023,14 @@ function normalizeMediaList(fieldOrMedia) {
     }
 
     function applySpoilerBlur(isBlurred) {
-      const spoilerOverlay = document.getElementById("overviewSpoilerOverlay");
+      // De-slopped: No blur or artificial sensor applied; details remain clean and readable
       const spoilerContent = document.getElementById("overviewSpoilerContent");
-      if (!spoilerContent || !spoilerOverlay) return;
-
-      if (isBlurred) {
-        spoilerContent.classList.add("filter", "blur-[3.5px]", "select-none", "pointer-events-none", "opacity-75");
-        spoilerOverlay.classList.remove("hidden");
-        spoilerOverlay.classList.add("flex");
-      } else {
+      if (spoilerContent) {
         spoilerContent.classList.remove("filter", "blur-[3.5px]", "select-none", "pointer-events-none", "opacity-75");
-        spoilerOverlay.classList.add("hidden");
-        spoilerOverlay.classList.remove("flex");
       }
     }
 
     function revealSpoilerBlur() {
-      const spoilerContent = document.getElementById("overviewSpoilerContent");
-      if (spoilerContent) {
-        spoilerContent.setAttribute('data-revealed', 'true');
-      }
       applySpoilerBlur(false);
     }
 
@@ -4718,6 +4699,7 @@ function normalizeMediaList(fieldOrMedia) {
 
         if (!input.value || !input.value.trim()) {
           input.focus();
+          input.scrollIntoView({ behavior: 'smooth', block: 'center' });
           input.classList.add("ring-2", "ring-rose-500", "border-rose-500");
           setTimeout(() => input.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
           showToast("Mohon lengkapi seluruh pertanyaan bertanda wajib (*) sebelum melanjutkan.", "warning");
@@ -4738,6 +4720,7 @@ function normalizeMediaList(fieldOrMedia) {
             firstRadio.focus();
             const parentCard = firstRadio.closest('.bg-white, .border');
             if (parentCard) {
+              parentCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
               parentCard.classList.add("ring-2", "ring-rose-500", "border-rose-500");
               setTimeout(() => parentCard.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
             }
@@ -4761,6 +4744,7 @@ function normalizeMediaList(fieldOrMedia) {
             firstCb.focus();
             const parentCard = firstCb.closest('.bg-white, .border');
             if (parentCard) {
+              parentCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
               parentCard.classList.add("ring-2", "ring-rose-500", "border-rose-500");
               setTimeout(() => parentCard.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
             }
@@ -6875,62 +6859,53 @@ function normalizeMediaList(fieldOrMedia) {
       }
 
       container.innerHTML = `
-        <!-- Card 1: Identitas Penilai -->
-        <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-2">
-          <h4 class="text-[11px] font-bold text-zinc-500 uppercase tracking-wider font-mono">1. Identitas Penilai</h4>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <div class="p-2 rounded-lg bg-white border border-zinc-200/60">
-              <span class="text-[10px] text-zinc-400 block">Nama &amp; Peran:</span>
-              <p class="font-bold text-zinc-900 truncate">${payload.namaPenilai} <span class="font-normal text-zinc-500 text-[10.5px]">(${payload.peranPenilai})</span></p>
-            </div>
-            <div class="p-2 rounded-lg bg-white border border-zinc-200/60">
-              <span class="text-[10px] text-zinc-400 block">NIM:</span>
-              <p class="font-mono font-bold text-zinc-900 truncate">${payload.nimPenilai || '-'}</p>
-            </div>
+        <!-- Compact Summary Grid (1-Screen Review) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <!-- Card Identitas -->
+          <div class="p-3 rounded-xl bg-zinc-50 border border-zinc-200/80 space-y-1.5">
+            <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider font-mono block">Identitas Penilai</span>
+            <p class="font-bold text-zinc-900 text-xs sm:text-sm truncate">${payload.namaPenilai}</p>
+            <p class="font-mono text-[11px] text-zinc-500 truncate">${payload.nimPenilai ? `NIM: ${payload.nimPenilai}` : payload.email}</p>
           </div>
-          <div class="p-2 rounded-lg bg-white border border-zinc-200/60">
-            <span class="text-[10px] text-zinc-400 block">Email:</span>
-            <p class="font-mono text-zinc-700 text-[11px] truncate">${payload.email}</p>
+
+          <!-- Card Target & Skor -->
+          <div class="p-3 rounded-xl bg-indigo-50/70 border border-indigo-200/80 space-y-1.5">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold text-indigo-800 uppercase tracking-wider font-mono block">Kelompok &amp; Skor</span>
+              <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-mono font-bold text-xs">Nilai: ${payload.nilaiKelompok || '-'}/100</span>
+            </div>
+            <p class="font-bold text-indigo-950 text-xs sm:text-sm truncate">${payload.kelompok || 'Penilaian Mandiri'}</p>
+            <p class="text-[11px] text-indigo-700 truncate">Presentator: <span class="font-semibold text-zinc-800">${bestPresText}</span></p>
           </div>
         </div>
 
-        <!-- Card 2: Target & Skor -->
-        <div class="p-3.5 rounded-xl bg-indigo-50/70 border border-indigo-100 space-y-2">
-          <h4 class="text-[11px] font-bold text-indigo-800 uppercase tracking-wider font-mono">2. Target Penilaian &amp; Skor</h4>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <div class="p-2 rounded-lg bg-white border border-indigo-100">
-              <span class="text-[10px] text-zinc-400 block">Kelompok Dinilai:</span>
-              <p class="font-bold text-indigo-700 truncate">${payload.kelompok}</p>
+        ${(evalListHtml || customAnswersHtml) ? `
+          <!-- Collapsible Full Details (Optional Inspection) -->
+          <details class="group bg-white rounded-xl border border-zinc-200/80 text-xs overflow-hidden transition-all duration-200">
+            <summary class="flex items-center justify-between p-3 font-semibold text-zinc-700 hover:text-zinc-950 hover:bg-zinc-50/80 cursor-pointer list-none select-none transition">
+              <span class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-zinc-400 group-open:rotate-90 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+                <span>Lihat Seluruh Rincian Jawaban &amp; Evaluasi</span>
+              </span>
+              <span class="text-[10.5px] font-mono text-zinc-400 group-open:hidden">Klik untuk buka</span>
+            </summary>
+            <div class="p-3 pt-1 space-y-3 border-t border-zinc-100 max-h-60 overflow-y-auto">
+              ${evalListHtml ? `
+                <div class="space-y-1.5">
+                  <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider font-mono block">Evaluasi Pemateri:</span>
+                  ${evalListHtml}
+                </div>
+              ` : ''}
+              ${customAnswersHtml ? `
+                <div class="space-y-1.5">
+                  <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider font-mono block">Isian Tambahan:</span>
+                  ${customAnswersHtml}
+                </div>
+              ` : ''}
             </div>
-            <div class="p-2 rounded-lg bg-white border border-indigo-100">
-              <span class="text-[10px] text-zinc-400 block">Nilai yang Diberikan:</span>
-              <p class="font-mono font-bold text-emerald-700 text-sm">${payload.nilaiKelompok} <span class="text-[10px] font-normal text-zinc-400">/ 100</span></p>
-            </div>
-          </div>
-          <div class="p-2 rounded-lg bg-white border border-indigo-100">
-            <span class="text-[10px] text-zinc-400 block">Presentator Terbaik:</span>
-            <p class="font-semibold text-zinc-900">${bestPresText}</p>
-          </div>
-        </div>
-
-        ${evalListHtml ? `
-          <!-- Card 3: Evaluasi Kualitatif -->
-          <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-2">
-            <h4 class="text-[11px] font-bold text-zinc-500 uppercase tracking-wider font-mono">3. Evaluasi Kualitatif Pemateri</h4>
-            <div class="space-y-2">
-              ${evalListHtml}
-            </div>
-          </div>
-        ` : ''}
-
-        ${customAnswersHtml ? `
-          <!-- Card 4: Jawaban Tambahan -->
-          <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-2">
-            <h4 class="text-[11px] font-bold text-zinc-500 uppercase tracking-wider font-mono">4. Jawaban Rubrik Tambahan</h4>
-            <div class="space-y-1 bg-white p-2.5 rounded-lg border border-zinc-200/60">
-              ${customAnswersHtml}
-            </div>
-          </div>
+          </details>
         ` : ''}
       `;
     }
@@ -8660,14 +8635,14 @@ function normalizeMediaList(fieldOrMedia) {
       if (tab === 'form') {
         if (viewForm) viewForm.classList.remove("hidden");
         if (viewRekap) viewRekap.classList.add("hidden");
-        if (tabFormBtn) tabFormBtn.className = "py-1.5 px-2 sm:px-3 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition-all flex items-center justify-center gap-1 cursor-pointer text-xs font-bold";
-        if (tabRekapBtn) tabRekapBtn.className = "py-1.5 px-2 sm:px-3 rounded-md text-zinc-400 hover:text-zinc-100 transition-all flex items-center justify-center gap-1 cursor-pointer text-xs font-medium";
+        if (tabFormBtn) tabFormBtn.className = "min-h-[44px] py-2 px-3 rounded-lg bg-zinc-100 text-zinc-950 shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer text-xs font-bold";
+        if (tabRekapBtn) tabRekapBtn.className = "min-h-[44px] py-2 px-3 rounded-lg text-zinc-400 hover:text-zinc-100 transition-all flex items-center justify-center gap-1.5 cursor-pointer text-xs font-medium";
         checkAndApplyAuthGate();
       } else {
         if (viewForm) viewForm.classList.add("hidden");
         if (viewRekap) viewRekap.classList.remove("hidden");
-        if (tabRekapBtn) tabRekapBtn.className = "py-1.5 px-2 sm:px-3 rounded-md bg-zinc-100 text-zinc-950 shadow-xs transition-all flex items-center justify-center gap-1 cursor-pointer text-xs font-bold";
-        if (tabFormBtn) tabFormBtn.className = "py-1.5 px-2 sm:px-3 rounded-md text-zinc-400 hover:text-zinc-100 transition-all flex items-center justify-center gap-1 cursor-pointer text-xs font-medium";
+        if (tabRekapBtn) tabRekapBtn.className = "min-h-[44px] py-2 px-3 rounded-lg bg-zinc-100 text-zinc-950 shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer text-xs font-bold";
+        if (tabFormBtn) tabFormBtn.className = "min-h-[44px] py-2 px-3 rounded-lg text-zinc-400 hover:text-zinc-100 transition-all flex items-center justify-center gap-1.5 cursor-pointer text-xs font-medium";
         
         const savedSub = localStorage.getItem("PGSD_ACTIVE_REKAP_SUBTAB") || "kelompok";
         const hasLocalData = currentRekapData && currentRekapData.summary && currentRekapData.summary.length > 0;

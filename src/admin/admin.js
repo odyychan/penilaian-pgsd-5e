@@ -2162,7 +2162,6 @@
           if (isManual) showAdminToast("Gagal membersihkan media: " + e.message, "error");
         }
       }
-    }
 
     function handleSaveModalMedia() {
       const { sIdx, fIdx } = currentMediaEditing;
@@ -3460,7 +3459,7 @@
 
       const headerTitle = document.getElementById("headerMainTitle");
       if (headerTitle) {
-        headerTitle.textContent = "Pusat Pengelolaan Seluruh Formulir Penilaian";
+        headerTitle.textContent = "Kelola Formulir Penilaian";
         headerTitle.classList.remove("hidden", "sm:block");
       }
       const headerSub = document.getElementById("headerSubTitle");
@@ -4406,6 +4405,26 @@
         }
       }
     }
+
+    function filterAdminSettingsCategory(cat) {
+      if (!cat) cat = 'ALL';
+      const cards = document.querySelectorAll('#adminView_settings [data-settings-cat]');
+      cards.forEach(c => {
+        if (cat === 'ALL' || c.getAttribute('data-settings-cat') === cat) {
+          c.classList.remove('hidden');
+        } else {
+          c.classList.add('hidden');
+        }
+      });
+      document.querySelectorAll('.settings-cat-btn').forEach(btn => {
+        btn.className = 'settings-cat-btn min-h-[38px] px-3.5 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-semibold text-xs transition cursor-pointer shrink-0';
+      });
+      const activeBtn = document.getElementById(`settingsCatBtn_${cat}`);
+      if (activeBtn) {
+        activeBtn.className = 'settings-cat-btn min-h-[38px] px-3.5 py-1.5 rounded-lg bg-zinc-900 text-white font-bold text-xs transition cursor-pointer shrink-0 shadow-xs';
+      }
+    }
+    window.filterAdminSettingsCategory = filterAdminSettingsCategory;
 
     function handleFormModeChange(mode) {
       adminAppConfig["form_mode"] = mode;
