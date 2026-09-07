@@ -4,6 +4,20 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
 
 ---
 
+## [2.4.70] - 2026-09-07
+
+### 🔄 Optimalisasi Hierarki Navigasi Back Gesture: Multi-Step Form Wizard & Proteksi Portal
+- **🚶‍♂️ Dukungan Navigasi Multi-Step Form Wizard:**
+  - Mengintegrasikan navigasi mundur antar-tahap pengisian formulir (`updateStepUI(currentStep - 1)`).
+  - Ketika penilai sedang berada pada Tahap 2 (pemilihan kelompok) atau Tahap 3 (rubrik penilaian dinamis) dan melakukan *back gesture*, sistem dengan mulus kembali ke tahap sebelumnya alih-alih me-refresh atau langsung keluar ke halaman utama.
+- **🛡️ Proteksi Keluar Formulir Tidak Sengaja (Anti-Accidental Form Exit):**
+  - Ketika berada pada Tahap 1 formulir penilaian dan terdapat draf isian aktif (*NIM, Nama, atau Kelompok*), gestur mundur memberikan notifikasi informatif dan mencegah pengguna keluar ke portal utama tanpa sengaja.
+  - Jika formulir dibuka dari Pusat Akses (*Portal Hub*), gestur mundur pada Tahap 1 secara aman mengembalikan pengguna ke Portal Hub (`goToPortalHub()`).
+- **⚡ Pembaruan Cache Service Worker:**
+  - Meningkatkan cache version service worker dan query tag ke `v2.4.70`.
+
+---
+
 ## [2.4.69] - 2026-09-07
 
 ### 📱 Universal Back Gesture Engine: Touch Mobile Edge-Swipe, Mouse Back Buttons & Keyboard Shortcuts

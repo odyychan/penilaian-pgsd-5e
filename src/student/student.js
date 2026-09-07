@@ -44,6 +44,7 @@
     const explicitPinParam = (urlParams.get('id') || urlParams.get('form') || '').toUpperCase().trim();
     let activeFormId = explicitPinParam;
     let isPortalMode = !explicitPinParam;
+    let hasEnteredFromPortal = !explicitPinParam;
     let currentFormMeta = null;
     let currentFormSchema = null;
     let customFieldsData = [];
@@ -812,23 +813,39 @@ function normalizeMediaList(fieldOrMedia) {
         return true;
       }
 
-      // 3. Prioritas 3: Navigasi Antar-View / Tab
-      // Jika berada di Tab Rekapitulasi -> Kembali ke Tab Formulir Penilaian
+      // 3. Prioritas 3: Jika sedang berada di Tab Rekapitulasi -> Kembali ke Tab Formulir Penilaian
       const viewRekap = document.getElementById("viewRekap");
       if (viewRekap && !viewRekap.classList.contains("hidden")) {
         switchTab('form');
         return true;
       }
 
-      // Jika berada di Formulir Penilaian dan masuk dari Portal Hub -> Kembali ke Portal Hub
-      const viewPortal = document.getElementById("viewPortal");
+      // 4. Prioritas 4: Navigasi Antar-Tahapan Formulir (Multi-Step Form Wizard)
       const viewForm = document.getElementById("viewForm") || document.getElementById("mainAppRoot");
-      if (viewPortal && viewForm && !viewForm.classList.contains("hidden") && (typeof isPortalMode !== 'undefined' && isPortalMode)) {
-        showPortalView();
-        return true;
+      if (viewForm && !viewForm.classList.contains("hidden")) {
+        // Jika sedang berada di Tahap 2, 3, 4, dst -> Mundur ke tahap sebelumnya
+        if (typeof currentStep !== 'undefined' && currentStep > 1) {
+          updateStepUI(currentStep - 1);
+          return true;
+        }
+
+        // Jika berada di Tahap 1:
+        // Jika form dibuka dari Portal Hub, kembali ke Portal Hub
+        if (typeof hasEnteredFromPortal !== 'undefined' && hasEnteredFromPortal) {
+          goToPortalHub();
+          return true;
+        }
+
+        // Jika form dibuka langsung via URL parameter (?id=...), cegah keluar tidak sengaja jika ada isian aktif
+        const inputNim = (document.getElementById("inputNim")?.value || "").trim();
+        const inputNama = (document.getElementById("inputNama")?.value || "").trim();
+        if (inputNim || inputNama || (typeof selectedGroupObj !== 'undefined' && selectedGroupObj)) {
+          showToast("Anda berada di tahap pertama formulir penilaian.", "info");
+          return true;
+        }
       }
 
-      // 4. Prioritas 4: History Browser Fallback
+      // 5. Prioritas 5: History Browser Fallback
       if (window.history.length > 1) {
         window.history.back();
         return true;
@@ -1233,6 +1250,7 @@ function normalizeMediaList(fieldOrMedia) {
     function activateFormViewByPin(pin) {
       activeFormId = pin;
       isPortalMode = false;
+      hasEnteredFromPortal = true;
 
       // 1. Instantly switch CSS mode
       document.documentElement.classList.add('form-mode-active');
