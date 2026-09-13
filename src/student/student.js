@@ -1808,11 +1808,11 @@ function normalizeMediaList(fieldOrMedia) {
       }
 
       const session = getCurrentAuthSession();
-      const user = authState.user || (session?.email ? session : null);
+      const user = (session?.email ? session : authState.user);
       const profile = user ? extractGoogleProfile(user) : null;
-      const email = (profile?.email || session?.email || '').trim().toLowerCase();
-      const name = profile?.name || session?.nama || '';
-      const avatar = profile?.avatar || session?.avatarUrl || '';
+      const email = (session?.email || profile?.email || '').trim().toLowerCase();
+      const name = session?.nama || profile?.name || '';
+      const avatar = session?.avatarUrl || profile?.avatar || '';
       const isUlm = isUlmEmail(email);
 
       // 1. Logged in and domain matches (or ALL_EMAIL)
@@ -5875,12 +5875,13 @@ function normalizeMediaList(fieldOrMedia) {
     }
 
     function extractGoogleProfile(user) {
+      if (!user) return null;
       const metadata = user?.user_metadata || {};
       return {
         id: user?.id || null,
         email: (user?.email || metadata.email || '').trim().toLowerCase(),
-        name: metadata.full_name || metadata.name || '',
-        avatar: metadata.avatar_url || metadata.picture || ''
+        name: user?.nama || user?.name || metadata.full_name || metadata.name || '',
+        avatar: user?.avatarUrl || metadata.avatar_url || metadata.picture || ''
       };
     }
 
@@ -6411,6 +6412,16 @@ function normalizeMediaList(fieldOrMedia) {
       activeUserAccountNim = payload.nim;
       activeUserAccountAvatarUrl = payload.avatarUrl || "";
       if (payload.peran) currentEvaluatorRole = payload.peran;
+      authState.user = {
+        id: user.id || authState.user?.id || 'usr_' + Date.now(),
+        email: payload.email,
+        user_metadata: {
+          full_name: payload.nama,
+          name: payload.nama,
+          avatar_url: payload.avatarUrl,
+          picture: payload.avatarUrl
+        }
+      };
     }
 
     function clearAuthSession() {

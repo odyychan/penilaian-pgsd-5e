@@ -2,6 +2,24 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.4.93] - 2026-09-13
+
+### 🌐 Pengujian Menyeluruh & Penyelarasan Akun Google Umum (@gmail.com / Bebas Domain)
+- **🌍 Dukungan Penuh Akun Google Bebas Domain pada Mode `ALL_EMAIL`:**
+  - Memverifikasi alur penuh penilai menggunakan Akun Google umum (`@gmail.com`, Yahoo, atau institusi eksternal) ketika formulir disetel ke mode **Email Umum Bebas** (`ALL_EMAIL`).
+  - Kartu Tinjauan Beranda (`#overviewGoogleAuthCard`) berhasil menampilkan profil lengkap dengan tanda *"Google Terverifikasi"* tanpa terhalang proteksi domain.
+  - Memperbarui fungsi `extractGoogleProfile()` agar mengekstrak nama dan avatar secara fleksibel dari objek sesi lokal maupun metadata Supabase Auth (`user?.nama || user?.name || metadata.full_name`).
+  - Memperbarui `setAuthSession()` agar secara otomatis merefleksikan status ke `authState.user`, mencegah ketidaksinkronan memori (*stale user state*).
+- **🛡️ Penanganan Khusus Peran Non-Mahasiswa (Dosen & Penilai Tamu):**
+  - Mengonfirmasi bahwa pengguna dengan akun Google umum dapat memilih peran `Dosen` atau `Lainnya / Penilai Tamu`, di mana kolom NIM disembunyikan secara otomatis (`hidden`) dan validasi Tahap 1 tetap valid 100%.
+  - Untuk peran `Mahasiswa` dengan akun Google umum (misal akun Gmail pribadi), kolom NIM tetap dapat diisi manual dan sistem pencocokan nama live (`validateNimLive`) berjalan instan mencari data dari daftar kelas.
+- **🚫 Pengujian Ketat Penolakan pada Mode `ULM_ONLY`:**
+  - Menguji skenario saat formulir disetel **Khusus Akun ULM** (`ULM_ONLY`): Akun Google umum (`@gmail.com`) secara tepat terblokir oleh kartu peringatan *Domain Akun Tidak Sesuai* dan tombol CTA utama mengarahkan ke *Pilih Akun ULM untuk Mulai*.
+- **⚡ Pembaruan Versi Cache & Service Worker:**
+  - Meningkatkan versi token cache Service Worker, antarmuka `index.html`, dan `admin.html` ke `v2.4.93`.
+
+---
+
 ## [2.4.92] - 2026-09-13
 
 ### 🔐 Penyempurnaan Tampilan & Alur Autentikasi Akun Google Penilai (Google Auth Gate & Status UI)
