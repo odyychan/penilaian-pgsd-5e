@@ -2209,6 +2209,7 @@ function normalizeMediaList(fieldOrMedia) {
         renderAllMathInElement(container);
         updateDraftResetButtonVisibility();
         initClientSignaturePads();
+        updateGroupTopicBanners();
       }, 50);
     }
 
@@ -5267,6 +5268,31 @@ function normalizeMediaList(fieldOrMedia) {
       }
 
       saveFormDraft();
+      updateGroupTopicBanners();
+    }
+
+    function updateGroupTopicBanners() {
+      const banners = document.querySelectorAll('.group-topic-banner');
+      banners.forEach(b => {
+        if (selectedGroupObj) {
+          b.classList.remove('hidden');
+          const nameEls = b.querySelectorAll('.group-banner-name');
+          nameEls.forEach(el => { el.textContent = selectedGroupObj.name; });
+          const topicEls = b.querySelectorAll('.group-banner-topic');
+          topicEls.forEach(el => {
+            if (selectedGroupObj.topic) {
+              el.innerHTML = smartMathFormat(selectedGroupObj.topic);
+              if (typeof renderAllMathInElement === 'function') {
+                try { renderAllMathInElement(el); } catch(e) {}
+              }
+            } else {
+              el.innerHTML = '<span class="text-zinc-400 italic">Topik belum diatur</span>';
+            }
+          });
+        } else {
+          b.classList.add('hidden');
+        }
+      });
     }
 
     // Navigation Step

@@ -2556,6 +2556,7 @@
                 const { data: insertedG, error: gErr } = await sb.from('pgsd_groups').insert([{
                   form_id: task.formId,
                   name: g.name,
+                  topic: g.topic || null,
                   sesi: g.sesi || "Minggu 1",
                   status: g.status || "AKTIF",
                   display_order: gIdx + 1
@@ -2568,6 +2569,7 @@
                     group_name: g.name,
                     nim: m.nim || "-",
                     name: m.name || `Mahasiswa ${mIdx + 1}`,
+                    no_presensi: m.no_presensi !== undefined ? m.no_presensi : null,
                     status: m.status || "AKTIF"
                   }));
                   await sb.from('pgsd_students').insert(studentsToInsert);
@@ -4104,6 +4106,7 @@
             adminMasterGroups = groupsRows.map(g => ({
               id: g.id,
               name: g.name,
+              topic: g.topic || "",
               sesi: g.sesi,
               status: g.status,
               members: studentsRows.filter(s => s.group_id === g.id).map(s => ({
@@ -4252,7 +4255,7 @@
 
         let isMatch = true;
         if (query) {
-          if (!gName.toLowerCase().includes(query) && !gSesi.toLowerCase().includes(query)) {
+          if (!gName.toLowerCase().includes(query) && !gSesi.toLowerCase().includes(query) && !(grp.topic || "").toLowerCase().includes(query)) {
             const hasMember = members.some(m => (m.name || "").toLowerCase().includes(query) || (m.nim || "").toLowerCase().includes(query));
             if (!hasMember) isMatch = false;
           }
@@ -4301,6 +4304,16 @@
                 </button>
               </div>
             </div>
+
+            ${grp.topic ? `
+              <div class="p-2.5 rounded-lg bg-indigo-50/60 border border-indigo-100 text-[11px] text-zinc-700 leading-snug flex items-start gap-1.5">
+                <svg class="w-3.5 h-3.5 text-indigo-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                <div class="min-w-0">
+                  <span class="font-semibold text-indigo-950">Topik:</span>
+                  <span class="text-zinc-700 ml-0.5 math-renderable">${smartMathFormat(grp.topic)}</span>
+                </div>
+              </div>
+            ` : ''}
 
             <div class="space-y-1.5 pt-1">
               ${members.length > 0 ? memberRows : '<p class="text-[11px] text-zinc-400 italic">Belum ada anggota mahasiswa.</p>'}
@@ -11318,6 +11331,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       document.getElementById("modalGroupTitle").textContent = "Tambah Kelompok Baru";
       document.getElementById("editGroupIndex").value = "-1";
       document.getElementById("inputGroupName").value = `Kelompok ${adminMasterGroups.length + 1}`;
+      if (document.getElementById("inputGroupTopic")) document.getElementById("inputGroupTopic").value = "";
       document.getElementById("selectGroupSesi").value = adminAppConfig["Sesi_Minggu_Aktif"] || "Minggu 1";
       document.getElementById("selectGroupStatus").value = "AKTIF";
       document.getElementById("modalEditGroup").classList.remove("hidden");
@@ -11329,6 +11343,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       document.getElementById("modalGroupTitle").textContent = "Ubah Kelompok";
       document.getElementById("editGroupIndex").value = gIdx;
       document.getElementById("inputGroupName").value = g.name;
+      if (document.getElementById("inputGroupTopic")) document.getElementById("inputGroupTopic").value = g.topic || "";
       document.getElementById("selectGroupSesi").value = g.sesi;
       document.getElementById("selectGroupStatus").value = g.status || "AKTIF";
       document.getElementById("modalEditGroup").classList.remove("hidden");
@@ -11342,15 +11357,17 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       e.preventDefault();
       const gIdx = parseInt(document.getElementById("editGroupIndex").value);
       const name = document.getElementById("inputGroupName").value.trim();
+      const topic = document.getElementById("inputGroupTopic") ? document.getElementById("inputGroupTopic").value.trim() : "";
       const sesi = document.getElementById("selectGroupSesi").value;
       const status = document.getElementById("selectGroupStatus").value;
 
       if (gIdx >= 0) {
         adminMasterGroups[gIdx].name = name;
+        adminMasterGroups[gIdx].topic = topic;
         adminMasterGroups[gIdx].sesi = sesi;
         adminMasterGroups[gIdx].status = status;
       } else {
-        adminMasterGroups.push({ name: name, sesi: sesi, status: status, members: [] });
+        adminMasterGroups.push({ name: name, topic: topic, sesi: sesi, status: status, members: [] });
       }
 
       closeGroupModal();

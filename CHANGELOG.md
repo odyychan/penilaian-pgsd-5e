@@ -2,6 +2,24 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.3] - 2026-09-14
+
+### 🎓 Sinkronisasi Total Roster Mahasiswa & Tampilan Dinamis Topik Materi Presentasi Kelompok
+- **🧹 Pembersihan & Impor Basis Data Roster Mahasiswa Kelas 5E:**
+  - Membersihkan seluruh data mahasiswa awal pada formulir `BK5E` secara menyeluruh dan mengimpor ulang data resmi 10 kelompok presentasi dengan total 58 mahasiswa lengkap beserta Nomor Presensi dan NIM.
+  - Memastikan integritas relasi antar kelompok dan mahasiswa tersambung presisi dengan nomor urut tampilan dan status aktif.
+- **🏷️ Tampilan Dinamis Topik Materi Kelompok pada Kartu Pilihan & Tahap Penilaian:**
+  - Menampilkan topik materi presentasi secara jelas dan elegan di setiap kartu pemilihan kelompok (`CORE_GROUP_SELECT`) lengkap dengan dukungan rendering rumus matematika / KaTeX.
+  - Menyematkan spanduk informasi kelompok dan topik materi (*dynamic group-topic banner*) di atas kontrol input skor kelompok (`CORE_SCORE_RUBRIC`) serta pemungutan suara pemateri terbaik (`CORE_BEST_PRESENTER`).
+  - Menjamin topik materi dan nama kelompok terpilih tersinkronisasi secara otomatis saat pengguna berpindah pilihan kelompok maupun saat memulihkan draf pengisian (*auto-draft restore*).
+- **⚙️ Peningkatan Panel Kelola Master Kelompok Admin:**
+  - Menambahkan kolom input topik presentasi pada modal tambah/ubah kelompok dan menampilkan lencana topik pada daftar kelompok master di panel admin.
+  - Memperbarui pencarian master kelompok agar mendukung penyaringan berbasis kata kunci topik materi.
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.3` di seluruh berkas (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
+---
+
 ## [2.5.2] - 2026-09-14
 
 ### 💎 Perapian & Penyelarasan Visual Kartu Profil Akun Terverifikasi (*Modern-Elegant Account Bar*)

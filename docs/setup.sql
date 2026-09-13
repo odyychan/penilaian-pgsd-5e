@@ -48,13 +48,13 @@ CREATE TABLE IF NOT EXISTS pgsd_form_configs (
 CREATE TABLE IF NOT EXISTS pgsd_groups (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     form_id VARCHAR(50) NOT NULL REFERENCES pgsd_forms(form_id) ON DELETE CASCADE ON UPDATE CASCADE,
-    group_number INT NOT NULL,
-    group_name TEXT NOT NULL,
+    name TEXT NOT NULL,
     topic TEXT,
-    drive_link TEXT,
+    sesi VARCHAR(50) DEFAULT 'Minggu 1',
+    status VARCHAR(20) DEFAULT 'AKTIF',
+    display_order INT DEFAULT 1,
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW(),
-    CONSTRAINT uq_form_group UNIQUE(form_id, group_number)
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- =========================================================================
@@ -64,12 +64,13 @@ CREATE TABLE IF NOT EXISTS pgsd_students (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     form_id VARCHAR(50) NOT NULL REFERENCES pgsd_forms(form_id) ON DELETE CASCADE ON UPDATE CASCADE,
     group_id UUID NOT NULL REFERENCES pgsd_groups(id) ON DELETE CASCADE,
+    group_name TEXT,
     nim VARCHAR(50) NOT NULL,
-    nama TEXT NOT NULL,
-    role VARCHAR(50) DEFAULT 'Anggota', -- 'Ketua', 'Anggota'
+    name TEXT NOT NULL,
+    no_presensi INT,
+    status VARCHAR(50) DEFAULT 'AKTIF',
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW(),
-    CONSTRAINT uq_form_student_nim UNIQUE(form_id, nim)
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- =========================================================================

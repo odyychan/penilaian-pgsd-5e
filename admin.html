@@ -35,7 +35,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="src/admin/admin.css?v=2.5.2">
+  <link rel="stylesheet" href="src/admin/admin.css?v=2.5.3">
   <!-- KaTeX CSS & JS for Universal Math / LaTeX / AI & Word Formula Rendering -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -2850,6 +2850,10 @@
           <input type="text" id="inputGroupName" required placeholder="contoh: Kelompok 1" class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none">
         </div>
         <div class="space-y-1">
+          <label class="block font-semibold text-zinc-700">Topik Presentasi / Materi</label>
+          <input type="text" id="inputGroupTopic" placeholder="contoh: Pembelajaran mendalam menuju Pendidikan bermutu" class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none">
+        </div>
+        <div class="space-y-1">
           <label class="block font-semibold text-zinc-700">Sesi Pertemuan / Minggu <span class="text-rose-500">*</span></label>
           <select id="selectGroupSesi" required class="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 text-xs font-medium bg-white focus:border-zinc-900 outline-none cursor-pointer">
             <option value="Minggu 1">Minggu 1</option>
@@ -3798,13 +3802,13 @@ function getOrCreateFolder(folderName) {
   <!-- ========================================================================= -->
   <!-- JAVASCRIPT APP LOGIC: MULTI-FORM & ISOLATED SANDBOX ENGINE -->
   <!-- ========================================================================= -->
-  <script src="src/admin/admin.js?v=2.5.2"></script>
+  <script src="src/admin/admin.js?v=2.5.3"></script>
 
   <!-- Progressive Web App (PWA) & Instant Auto-Updater Engine -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js?v=2.5.2').then(function(reg) {
+        navigator.serviceWorker.register('/sw.js?v=2.5.3').then(function(reg) {
           reg.update();
           reg.addEventListener('updatefound', function() {
             var newWorker = reg.installing;
