@@ -2,6 +2,22 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.2] - 2026-09-14
+
+### 💎 Perapian & Penyelarasan Visual Kartu Profil Akun Terverifikasi (*Modern-Elegant Account Bar*)
+- **📱 Penyelarasan Hierarki Visual Teks & Identitas Akun:**
+  - Memisahkan tampilan nama pengguna dan alamat email ke dalam baris bertingkat yang rapi (*vertical hierarchy*), mengatasi tampilan nama dan email yang sebelumnya menyatu rapat secara horizontal pada layar smartphone sempit.
+  - Memformat email dengan tipografi monospace subtil dan nama pengguna dengan tipografi tebal kontras tinggi untuk keterbacaan optimal.
+  - Menghubungkan lencana status mahasiswa (*badge roster*) dengan nomor induk mahasiswa (`NIM: ...`) secara dinamis.
+- **⚖️ Tombol Aksi Simetris & Responsif (*Matching Action Pills*):**
+  - Mendesain ulang tombol aksi *[Ganti Akun]* dan *[Keluar]* dengan gaya pil terpadu yang seimbang, sudut membulat modern (`rounded-xl`), border halus, dan micro-shadow.
+  - Menghilangkan perataan canggung (`self-end`) pada perangkat seluler, menggantinya dengan pembagian ruang yang proporsional (*flex row/col with border separator*) sehingga kartu tampak kokoh dan elegan di semua resolusi (Mobile, Tablet, Desktop).
+  - Menyelaraskan tampilan kartu identitas di halaman ringkasan form (`#overviewGoogleAuthCard`) maupun kartu baris di lembar penilaian (`#formAccountHeaderCard`).
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.2` di seluruh berkas (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
+---
+
 ## [2.5.1] - 2026-09-13
 
 ### 🔑 Perbaikan Retensi Formulir Pasca-Login Google OAuth (*Zero-Bounce to Portal Hub*)

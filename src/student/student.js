@@ -1976,11 +1976,11 @@ function normalizeMediaList(fieldOrMedia) {
         const candidateNim = session?.nim || extractCandidateNim(email) || '';
         card.classList.remove("hidden");
         card.innerHTML = `
-          <div class="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-zinc-50/90 border border-zinc-200/80 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div class="flex items-center gap-3 min-w-0">
+          <div class="p-3 sm:p-3.5 rounded-2xl bg-white border border-zinc-200/90 shadow-xs flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3 transition-all duration-200">
+            <div class="flex items-center gap-3 min-w-0 flex-1">
               <div class="relative shrink-0 w-10 h-10">
                 <div class="w-full h-full rounded-full bg-gradient-to-tr from-zinc-800 to-zinc-700 text-white font-bold text-sm flex items-center justify-center shadow-2xs overflow-hidden ring-2 ring-white">
-                  ${avatar ? `<img src="${escapeHtml(avatar)}" alt="${escapeHtml(name)}" class="w-full h-full object-cover" onerror="this.outerHTML='<span class=\\'font-bold text-white text-sm\\'>${escapeHtml(initial)}</span>'">` : `<span class="font-bold text-white text-sm">${escapeHtml(initial)}</span>`}
+                  ${avatar ? `<img src="${escapeHtml(avatar)}" alt="${escapeHtml(name)}" class="w-full h-full object-cover rounded-full" onerror="this.outerHTML='<span class=\\'font-bold text-white text-sm\\'>${escapeHtml(initial)}</span>'">` : `<span class="font-bold text-white text-sm">${escapeHtml(initial)}</span>`}
                 </div>
                 <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-white rounded-full flex items-center justify-center shadow-xs border border-zinc-200 z-10 pointer-events-none">
                   <svg class="w-2.5 h-2.5" viewBox="0 0 24 24">
@@ -1991,30 +1991,35 @@ function normalizeMediaList(fieldOrMedia) {
                   </svg>
                 </div>
               </div>
-              <div class="min-w-0 space-y-0.5">
-                <div class="flex items-center gap-1.5 flex-wrap">
-                  <span class="font-bold text-zinc-900 truncate text-xs sm:text-sm">${escapeHtml(name || 'Mahasiswa Terverifikasi')}</span>
-                  <span class="text-zinc-300 hidden sm:inline">•</span>
-                  <span class="font-mono text-zinc-500 truncate text-[11px]">${escapeHtml(email)}</span>
+              <div class="min-w-0 flex-1 space-y-0.5">
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <span class="font-bold text-zinc-900 truncate text-xs sm:text-sm tracking-tight">${escapeHtml(name || 'Pengguna Terverifikasi')}</span>
                 </div>
-                <div class="flex items-center gap-1.5 flex-wrap">
-                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-semibold">
+                <div class="flex items-center gap-1 text-[11px] font-mono text-zinc-500 truncate">
+                  <span class="truncate">${escapeHtml(email)}</span>
+                </div>
+                <div class="flex items-center gap-1.5 flex-wrap pt-0.5">
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 text-[10px] font-semibold">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span>Google Terverifikasi</span>
                   </span>
                   ${candidateNim ? `
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-700 border border-zinc-200 text-[10px] font-mono font-bold">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/80 text-[10px] font-semibold">
+                      <svg class="w-2.5 h-2.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path>
+                      </svg>
                       <span>NIM: ${escapeHtml(candidateNim)}</span>
                     </span>
                   ` : ''}
                 </div>
               </div>
             </div>
-            <div class="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
+            <div class="flex items-center gap-1.5 shrink-0 self-stretch xs:self-center justify-end pt-2 xs:pt-0 border-t xs:border-t-0 border-zinc-100">
               <button 
                 type="button" 
                 onclick="handleSwitchGoogleAccount()" 
-                class="min-h-[44px] px-3.5 py-2 rounded-xl bg-white hover:bg-zinc-100 active:scale-95 text-zinc-700 border border-zinc-200/80 font-semibold text-xs transition cursor-pointer shadow-2xs flex items-center gap-1.5"
+                class="min-h-[38px] px-3 py-1.5 rounded-xl bg-zinc-100/90 hover:bg-zinc-200/90 active:scale-95 text-zinc-700 border border-zinc-200/80 font-semibold text-xs transition cursor-pointer shadow-2xs flex items-center justify-center gap-1.5"
                 title="Ganti akun Google"
               >
                 <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
@@ -2023,10 +2028,10 @@ function normalizeMediaList(fieldOrMedia) {
               <button 
                 type="button" 
                 onclick="handleAuthLogout()" 
-                class="min-h-[44px] px-3.5 py-2 rounded-xl hover:bg-rose-50 active:scale-95 text-zinc-500 hover:text-rose-600 border border-transparent hover:border-rose-200/80 font-semibold text-xs transition cursor-pointer flex items-center gap-1.5"
+                class="min-h-[38px] px-3 py-1.5 rounded-xl bg-zinc-100/90 hover:bg-rose-50 active:scale-95 text-zinc-600 hover:text-rose-600 border border-zinc-200/80 hover:border-rose-200/80 font-semibold text-xs transition cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
                 title="Keluar dari akun ini"
               >
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                <svg class="w-3.5 h-3.5 text-zinc-500 hover:text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                 <span>Keluar</span>
               </button>
             </div>
@@ -3177,6 +3182,25 @@ function normalizeMediaList(fieldOrMedia) {
               </div>
             `}
 
+            <!-- Dynamic Group & Topic Banner for Scoring -->
+            <div class="group-topic-banner ${selectedGroupObj ? '' : 'hidden'} p-3.5 rounded-xl bg-gradient-to-r from-indigo-50/90 via-blue-50/60 to-indigo-50/90 border border-indigo-200/80 text-xs space-y-1.5 shadow-2xs transition-all">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5 font-bold text-indigo-950">
+                  <span class="w-5 h-5 rounded-md bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0 shadow-xs">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                  </span>
+                  <span class="group-banner-name text-xs sm:text-sm font-bold text-zinc-900">${selectedGroupObj ? escapeHtml(selectedGroupObj.name) : 'Kelompok Terpilih'}</span>
+                </div>
+                <span class="text-[10px] font-semibold text-indigo-700 bg-indigo-100/90 px-2 py-0.5 rounded-md border border-indigo-200/80 shrink-0">
+                  Kelompok yang Dinilai
+                </span>
+              </div>
+              <div class="text-[11.5px] sm:text-xs text-zinc-700 leading-snug pt-0.5">
+                <span class="font-semibold text-indigo-950">Topik Presentasi:</span>
+                <span class="group-banner-topic font-medium text-zinc-800 ml-1 math-renderable">${selectedGroupObj && selectedGroupObj.topic ? smartMathFormat(selectedGroupObj.topic) : '<span class="text-zinc-400 italic">Topik belum diatur</span>'}</span>
+              </div>
+            </div>
+
             <div class="p-4 rounded-xl bg-zinc-50/70 border border-zinc-200/80 space-y-4 shadow-2xs">
               <div class="flex flex-wrap items-center gap-1.5">
                 <span class="text-[11px] font-semibold text-zinc-400 mr-1 font-mono">Preset:</span>
@@ -3255,6 +3279,26 @@ function normalizeMediaList(fieldOrMedia) {
                 </span>
               </div>
             `}
+
+            <!-- Dynamic Group & Topic Banner for Voting -->
+            <div class="group-topic-banner ${selectedGroupObj ? '' : 'hidden'} p-3 rounded-xl bg-gradient-to-r from-amber-50/90 via-yellow-50/60 to-amber-50/90 border border-amber-200/80 text-xs space-y-1 shadow-2xs transition-all">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5 font-bold text-amber-950">
+                  <span class="w-5 h-5 rounded-md bg-amber-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0 shadow-xs">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+                  </span>
+                  <span class="group-banner-name text-xs sm:text-sm font-bold text-zinc-900">${selectedGroupObj ? escapeHtml(selectedGroupObj.name) : 'Kelompok Terpilih'}</span>
+                </div>
+                <span class="text-[10px] font-semibold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md border border-amber-200 shrink-0">
+                  Pemilihan Presentator Terbaik
+                </span>
+              </div>
+              <div class="text-[11.5px] sm:text-xs text-zinc-700 leading-snug pt-0.5">
+                <span class="font-semibold text-amber-950">Topik:</span>
+                <span class="group-banner-topic font-medium text-zinc-800 ml-1 math-renderable">${selectedGroupObj && selectedGroupObj.topic ? smartMathFormat(selectedGroupObj.topic) : '<span class="text-zinc-400 italic">Topik belum diatur</span>'}</span>
+              </div>
+            </div>
+
             <div id="bestPresenterList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5"></div>
           </div>
         `;
@@ -4294,6 +4338,7 @@ function normalizeMediaList(fieldOrMedia) {
             groupsData = groupsRows.map(g => ({
               id: g.id,
               name: g.name,
+              topic: g.topic || "",
               sesi: g.sesi,
               status: g.status,
               members: studentsRows.filter(s => s.group_id === g.id).map(s => ({
@@ -4972,6 +5017,15 @@ function normalizeMediaList(fieldOrMedia) {
             </div>
             ${statusBadge}
           </div>
+          ${grp.topic ? `
+            <div class="mt-2 text-[11px] text-zinc-700 bg-zinc-50 rounded-lg p-2.5 border border-zinc-200/70 flex items-start gap-1.5 leading-snug">
+              <svg class="w-3.5 h-3.5 text-indigo-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+              <div class="min-w-0">
+                <span class="font-semibold text-zinc-900">Topik:</span>
+                <span class="text-zinc-700 ml-0.5 font-medium math-renderable">${smartMathFormat(grp.topic)}</span>
+              </div>
+            </div>
+          ` : ''}
           <div class="flex flex-wrap gap-1 mt-2.5 pt-2 border-t border-zinc-100">
             ${memberPills}
           </div>
@@ -6641,6 +6695,7 @@ function normalizeMediaList(fieldOrMedia) {
 
       if (emailChips) emailChips.classList.add("hidden");
       if (btnFillNimEmail) btnFillNimEmail.classList.add("hidden");
+      renderAccountBar(identity);
     }
 
     function renderAccountBar(identity) {
@@ -6652,9 +6707,11 @@ function normalizeMediaList(fieldOrMedia) {
       const avatarBox = document.getElementById("accountAvatarBox");
       const badgeGoogle = document.getElementById("badgeGoogleVerified");
       const badgeRoster = document.getElementById("badgeRosterVerified");
+      const badgeRosterText = document.getElementById("badgeRosterText");
 
       const email = (identity.profile && identity.profile.email) || identity.email || "";
-      const name = identity.name || (identity.profile && identity.profile.name) || (email ? email.split('@')[0] : "Penilai");
+      const rawName = identity.name || (identity.profile && identity.profile.name) || "";
+      const name = rawName.trim() || (email ? email.split('@')[0] : "Penilai");
       const avatar = (identity.profile && identity.profile.avatar) || identity.avatarUrl || "";
 
       if (emailEl) emailEl.textContent = email;
@@ -6680,6 +6737,10 @@ function normalizeMediaList(fieldOrMedia) {
       if (badgeRoster) {
         if (identity.isRosterVerified) {
           badgeRoster.classList.remove("hidden");
+          if (badgeRosterText) {
+            const nim = identity.nim || (getCurrentAuthSession() && getCurrentAuthSession().nim) || "";
+            badgeRosterText.textContent = nim ? `Mahasiswa (NIM: ${nim})` : "Mahasiswa Terdaftar";
+          }
         } else {
           badgeRoster.classList.add("hidden");
         }
@@ -7084,6 +7145,7 @@ function normalizeMediaList(fieldOrMedia) {
         },
         name: session.nama,
         email: session.email,
+        nim: session.nim,
         avatarUrl: session.avatarUrl,
         isRosterVerified: session.isRosterVerified
       });
@@ -7334,6 +7396,7 @@ function normalizeMediaList(fieldOrMedia) {
       if (!document.getElementById("stepSection_1")) {
         renderDynamicClientStages(false);
       }
+      updateAccountHeaderUI();
       updateStepUI(currentStep || 1, false, false);
       initExamTimerEngine();
       try {
