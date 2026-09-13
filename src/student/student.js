@@ -2082,56 +2082,52 @@ function normalizeMediaList(fieldOrMedia) {
         let stageHeaderHtml = '';
         if (hasStageTitle) {
           stageHeaderHtml = `
-            <div class="border-b border-zinc-100 pb-3.5 flex items-center justify-between gap-2">
+            <div class="flex items-start justify-between gap-3">
               <div>
                 <h2 class="text-base sm:text-lg font-bold text-zinc-900 math-renderable">${smartMathFormat(stage.title)}</h2>
-                ${hasStageDesc ? `<p class="text-xs text-zinc-500 mt-0.5 math-renderable">${smartMathFormat(stage.description)}</p>` : ''}
+                ${hasStageDesc ? `<p class="text-xs sm:text-sm text-zinc-500 mt-1 leading-relaxed math-renderable">${smartMathFormat(stage.description)}</p>` : ''}
               </div>
               ${totalSteps > 1 ? `
-                <div class="flex items-center gap-2">
-                  <span class="text-[10px] font-mono text-zinc-400 bg-zinc-100 px-2 py-0.5 rounded border border-zinc-200">
-                    Bagian ${stepNum} dari ${totalSteps}
-                  </span>
-                </div>
+                <span class="text-[10.5px] font-mono font-semibold text-zinc-500 bg-zinc-100 px-2.5 py-1 rounded-lg border border-zinc-200 shrink-0">
+                  Bagian ${stepNum} dari ${totalSteps}
+                </span>
               ` : ''}
             </div>
           `;
         } else if (hasStageDesc) {
           stageHeaderHtml = `
-            <div class="border-b border-zinc-100 pb-3.5 flex items-center justify-between gap-2">
+            <div class="flex items-start justify-between gap-3">
               <div>
                 <p class="text-xs sm:text-sm text-zinc-700 font-medium leading-relaxed math-renderable">${smartMathFormat(stage.description)}</p>
               </div>
               ${totalSteps > 1 ? `
-                <div class="flex items-center gap-2">
-                  <span class="text-[10px] font-mono text-zinc-400 bg-zinc-100 px-2 py-0.5 rounded border border-zinc-200">
-                    Bagian ${stepNum} dari ${totalSteps}
-                  </span>
-                </div>
+                <span class="text-[10.5px] font-mono font-semibold text-zinc-500 bg-zinc-100 px-2.5 py-1 rounded-lg border border-zinc-200 shrink-0">
+                  Bagian ${stepNum} dari ${totalSteps}
+                </span>
               ` : ''}
-            </div>
-          `;
-        } else if (totalSteps > 1) {
-          stageHeaderHtml = `
-            <div class="flex items-center justify-end pb-2.5 border-b border-zinc-100">
-              <span class="text-[10px] font-mono text-zinc-400 bg-zinc-100 px-2 py-0.5 rounded border border-zinc-200">
-                Bagian ${stepNum} dari ${totalSteps}
-              </span>
             </div>
           `;
         }
 
+        const hasStageHeader = !!stageHeaderHtml;
+
         stagesHtml += `
           <div id="stepSection_${stepNum}" class="step-fade space-y-4 ${stepNum === 1 ? '' : 'hidden'}">
-            <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5">
-              
-              ${stageHeaderHtml}
-
-              <!-- Fields Container -->
-              <div class="space-y-4">
-                ${fieldsHtml || '<p class="text-xs text-zinc-400 italic py-4 text-center">Belum ada pertanyaan pada bagian ini.</p>'}
+            ${hasStageHeader ? `
+              <div id="stageHeaderCard_${stepNum}" class="bg-white rounded-2xl border border-zinc-200 p-5 sm:p-6 shadow-xs border-t-4 border-t-zinc-900">
+                ${stageHeaderHtml}
               </div>
+            ` : (totalSteps > 1 ? `
+              <div class="flex items-center justify-end px-1 pb-0.5">
+                <span class="text-[10.5px] font-mono font-semibold text-zinc-500 bg-zinc-100/90 px-2.5 py-1 rounded-lg border border-zinc-200 shadow-2xs">
+                  Bagian ${stepNum} dari ${totalSteps}
+                </span>
+              </div>
+            ` : '')}
 
+            <!-- Fields Container (Clean independent cards, zero redundant nesting) -->
+            <div class="space-y-4">
+              ${fieldsHtml || '<div class="p-8 text-center bg-white rounded-2xl border border-zinc-200 text-xs text-zinc-400 italic shadow-xs">Belum ada pertanyaan pada bagian ini.</div>'}
             </div>
 
             <!-- Stage Navigation Actions -->
@@ -2193,10 +2189,16 @@ function normalizeMediaList(fieldOrMedia) {
       const hasDesc = rawDesc !== '';
 
       if (isUntitled && !hasDesc) {
-        if (!reqBadge && !hintHtml) return '';
+        if (!f.required && !hintHtml) return '';
         return `
-          <div class="flex items-center justify-between gap-2 mb-1">
-            <div>${reqBadge}</div>
+          <div class="flex items-center justify-between gap-2 mb-1.5">
+            <div class="flex items-center gap-1.5">
+              ${f.required ? `
+                <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-600 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-md">
+                  <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Wajib diisi
+                </span>
+              ` : ''}
+            </div>
             ${hintHtml || ''}
           </div>
         `;
@@ -2289,7 +2291,7 @@ function normalizeMediaList(fieldOrMedia) {
       if (f.type === 'SHORT_TEXT') {
         const strVal = typeof savedVal === 'string' ? savedVal : '';
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
+          <div class="bg-white p-5 sm:p-6 rounded-2xl border border-zinc-200 shadow-xs space-y-2.5" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${mediaAbove}
             ${renderClientFieldHeaderHtml(f, reqBadge, hintHtml)}
             ${mediaBelow}
@@ -2322,7 +2324,7 @@ function normalizeMediaList(fieldOrMedia) {
       if (f.type === 'PARAGRAPH' || f.type === 'TEXTAREA') {
         const strVal = typeof savedVal === 'string' ? savedVal : '';
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
+          <div class="bg-white p-5 sm:p-6 rounded-2xl border border-zinc-200 shadow-xs space-y-2.5" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${mediaAbove}
             ${renderClientFieldHeaderHtml(f, reqBadge, hintHtml)}
             ${mediaBelow}
@@ -2415,7 +2417,7 @@ function normalizeMediaList(fieldOrMedia) {
         }
 
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
+          <div class="bg-white p-5 sm:p-6 rounded-2xl border border-zinc-200 shadow-xs space-y-2.5" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${mediaAbove}
             ${renderClientFieldHeaderHtml(f, reqBadge, hintHtml)}
             ${mediaBelow}
@@ -2455,7 +2457,7 @@ function normalizeMediaList(fieldOrMedia) {
         });
 
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
+          <div class="bg-white p-5 sm:p-6 rounded-2xl border border-zinc-200 shadow-xs space-y-2.5" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${mediaAbove}
             ${renderClientFieldHeaderHtml(f, reqBadge, hintHtml)}
             ${mediaBelow}
@@ -2480,7 +2482,7 @@ function normalizeMediaList(fieldOrMedia) {
           optsHtml += `<option value="${escapeHtml(opt)}" ${savedVal === opt ? 'selected' : ''}>${opt}</option>`;
         });
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
+          <div class="bg-white p-5 sm:p-6 rounded-2xl border border-zinc-200 shadow-xs space-y-2.5" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${mediaAbove}
             ${renderClientFieldHeaderHtml(f, reqBadge, hintHtml)}
             ${mediaBelow}
@@ -2524,7 +2526,7 @@ function normalizeMediaList(fieldOrMedia) {
         }
 
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
+          <div class="bg-white p-5 sm:p-6 rounded-2xl border border-zinc-200 shadow-xs space-y-2.5" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${mediaAbove}
             ${renderClientFieldHeaderHtml(f, reqBadge, hintHtml)}
             ${mediaBelow}
@@ -2557,7 +2559,7 @@ function normalizeMediaList(fieldOrMedia) {
           `;
         }
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-3" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
+          <div class="bg-white p-5 sm:p-6 rounded-2xl border border-zinc-200 shadow-xs space-y-3" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${mediaAbove}
             ${renderClientFieldHeaderHtml(f, reqBadge, hintHtml)}
             ${mediaBelow}
@@ -2665,7 +2667,7 @@ function normalizeMediaList(fieldOrMedia) {
         });
 
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-3" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
+          <div class="bg-white p-5 sm:p-6 rounded-2xl border border-zinc-200 shadow-xs space-y-3" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${mediaAbove}
             ${renderClientFieldHeaderHtml(f, reqBadge, hintHtml)}
             ${mediaBelow}
@@ -2727,7 +2729,7 @@ function normalizeMediaList(fieldOrMedia) {
         });
 
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-3" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
+          <div class="bg-white p-5 sm:p-6 rounded-2xl border border-zinc-200 shadow-xs space-y-3" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${mediaAbove}
             ${renderClientFieldHeaderHtml(f, reqBadge, hintHtml)}
             ${mediaBelow}
@@ -2742,7 +2744,7 @@ function normalizeMediaList(fieldOrMedia) {
       if (f.type === 'SIGNATURE') {
         const hasSignature = !!savedVal;
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-3" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
+          <div class="bg-white p-5 sm:p-6 rounded-2xl border border-zinc-200 shadow-xs space-y-3" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${mediaAbove}
             ${renderClientFieldHeaderHtml(f, reqBadge, hintHtml)}
             ${mediaBelow}
@@ -2778,7 +2780,7 @@ function normalizeMediaList(fieldOrMedia) {
       if (f.type === 'URL_LINK') {
         const strVal = typeof savedVal === 'string' ? savedVal : '';
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
+          <div class="bg-white p-5 sm:p-6 rounded-2xl border border-zinc-200 shadow-xs space-y-2.5" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${mediaAbove}
             ${renderClientFieldHeaderHtml(f, reqBadge, hintHtml)}
             ${mediaBelow}
@@ -2814,7 +2816,7 @@ function normalizeMediaList(fieldOrMedia) {
       if (f.type === 'FILE_UPLOAD') {
         const fileObj = (savedVal && typeof savedVal === 'object' && savedVal.name) ? savedVal : (customUploadedFilesMap[f.id] || null);
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-3" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
+          <div class="bg-white p-5 sm:p-6 rounded-2xl border border-zinc-200 shadow-xs space-y-3" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${renderClientFieldHeaderHtml(f, reqBadge, '')}
             <div class="p-4 bg-white rounded-xl border border-dashed border-zinc-300 hover:border-zinc-400 flex flex-col sm:flex-row items-center justify-between gap-3 transition">
               <div class="flex items-center gap-3 min-w-0">
@@ -2855,7 +2857,7 @@ function normalizeMediaList(fieldOrMedia) {
       // 8. DATE
       if (f.type === 'DATE') {
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
+          <div class="bg-white p-5 sm:p-6 rounded-2xl border border-zinc-200 shadow-xs space-y-2" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${renderClientFieldHeaderHtml(f, reqBadge, '')}
             <input 
               type="date" 
@@ -2871,7 +2873,7 @@ function normalizeMediaList(fieldOrMedia) {
       // 9. TIME
       if (f.type === 'TIME') {
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
+          <div class="bg-white p-5 sm:p-6 rounded-2xl border border-zinc-200 shadow-xs space-y-2" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${renderClientFieldHeaderHtml(f, reqBadge, '')}
             <input 
               type="time" 
@@ -3071,22 +3073,32 @@ function normalizeMediaList(fieldOrMedia) {
 
       // 11. CORE_GROUP_SELECT (Pemilihan Kelompok)
       if (f.type === 'CORE_GROUP_SELECT') {
+        const hasCustomHeader = !!(f.label?.trim() || f.description?.trim());
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-6 rounded-2xl border border-zinc-200/80 space-y-4">
-            ${(f.label?.trim() || f.description?.trim() || appConfig['Pilih_Kelompok_Label']) ? `
-              <div class="flex items-center justify-between border-b border-zinc-200 pb-3">
-                <div>
+          <div data-field-type="CORE_GROUP_SELECT" class="bg-white p-5 sm:p-6 rounded-2xl border border-zinc-200 shadow-xs space-y-4">
+            ${hasCustomHeader ? `
+              <div class="flex items-center justify-between gap-3 border-b border-zinc-100 pb-3">
+                <div class="min-w-0">
                   ${f.label?.trim() ? `<h3 class="text-sm sm:text-base font-bold text-zinc-900 math-renderable">${smartMathFormat(f.label)}${reqBadge}</h3>` : ''}
-                  ${(f.description?.trim() || appConfig['Pilih_Kelompok_Label']) ? `<p class="text-xs text-zinc-500 mt-0.5 math-renderable">${smartMathFormat(f.description || appConfig['Pilih_Kelompok_Label'])}</p>` : ''}
+                  ${f.description?.trim() ? `<p class="text-xs text-zinc-500 mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
                 </div>
-                <button type="button" onclick="fetchInitialFormData(true)" class="p-1.5 rounded-lg border border-zinc-200 hover:bg-white text-zinc-600 text-xs transition cursor-pointer" title="Perbarui daftar">
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                <button type="button" onclick="fetchInitialFormData(true)" class="shrink-0 inline-flex items-center gap-1.5 text-xs font-medium text-zinc-600 hover:text-zinc-900 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 px-2.5 py-1.5 rounded-lg transition cursor-pointer shadow-2xs" title="Perbarui daftar kelompok">
+                  <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                  <span>Segarkan</span>
                 </button>
               </div>
             ` : `
-              <div class="flex items-center justify-end pb-1">
-                <button type="button" onclick="fetchInitialFormData(true)" class="p-1.5 rounded-lg border border-zinc-200 hover:bg-white text-zinc-600 text-xs transition cursor-pointer" title="Perbarui daftar">
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+              <div class="flex items-center justify-between gap-2 border-b border-zinc-100 pb-3">
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-700 bg-zinc-100/90 px-2.5 py-1 rounded-lg border border-zinc-200">
+                    <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    <span>Pilih Kelompok</span>
+                    ${f.required ? '<span class="text-rose-500 font-bold ml-0.5">*</span>' : ''}
+                  </span>
+                </div>
+                <button type="button" onclick="fetchInitialFormData(true)" class="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-600 hover:text-zinc-900 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 px-2.5 py-1.5 rounded-lg transition cursor-pointer shadow-2xs" title="Perbarui daftar kelompok">
+                  <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                  <span>Segarkan</span>
                 </button>
               </div>
             `}
@@ -3113,36 +3125,42 @@ function normalizeMediaList(fieldOrMedia) {
       if (f.type === 'CORE_SCORE_RUBRIC') {
         const minVal = parseInt(appConfig["Nilai_Kelompok_Min"] || 50);
         const maxVal = parseInt(appConfig["Nilai_Kelompok_Max"] || 100);
+        const hasCustomHeader = (f.label?.trim() || f.description?.trim());
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-6 rounded-2xl border border-zinc-200/80 space-y-4">
-            ${(f.label?.trim() || f.description?.trim()) ? `
-              <div class="flex items-center justify-between border-b border-zinc-200 pb-3">
+          <div class="bg-white p-5 sm:p-6 rounded-2xl border border-zinc-200 shadow-xs space-y-4">
+            ${hasCustomHeader ? `
+              <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
                 <div>
                   ${f.label?.trim() ? `<h3 class="text-sm sm:text-base font-bold text-zinc-900 math-renderable">${smartMathFormat(f.label)}${reqBadge}</h3>` : ''}
                   ${f.description?.trim() ? `<p class="text-xs text-zinc-500 mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
                 </div>
-                <span id="scoreGradeBadge" class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-zinc-100 text-zinc-800 border border-zinc-200">
+                <span id="scoreGradeBadge" class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-zinc-100 text-zinc-800 border border-zinc-200 shadow-2xs">
                   Nilai A (4,00)
                 </span>
               </div>
             ` : `
-              <div class="flex items-center justify-end pb-1">
-                <span id="scoreGradeBadge" class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-zinc-100 text-zinc-800 border border-zinc-200">
+              <div class="flex items-center justify-between gap-2 border-b border-zinc-100 pb-3">
+                <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-700 bg-zinc-100/90 px-2.5 py-1 rounded-lg border border-zinc-200">
+                  <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                  <span>Nilai Presentasi</span>
+                  ${f.required ? '<span class="text-rose-500 font-bold ml-0.5">*</span>' : ''}
+                </span>
+                <span id="scoreGradeBadge" class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-zinc-100 text-zinc-800 border border-zinc-200 shadow-2xs">
                   Nilai A (4,00)
                 </span>
               </div>
             `}
 
-            <div class="p-4 rounded-xl bg-white border border-zinc-200 space-y-4 shadow-2xs">
+            <div class="p-4 rounded-xl bg-zinc-50/70 border border-zinc-200/80 space-y-4 shadow-2xs">
               <div class="flex flex-wrap items-center gap-1.5">
                 <span class="text-[11px] font-semibold text-zinc-400 mr-1 font-mono">Preset:</span>
-                <button type="button" onclick="setScoreValue(70)" class="px-2.5 py-1 rounded-lg bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-xs font-semibold text-zinc-700 transition cursor-pointer">70</button>
-                <button type="button" onclick="setScoreValue(75)" class="px-2.5 py-1 rounded-lg bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-xs font-semibold text-zinc-700 transition cursor-pointer">75</button>
-                <button type="button" onclick="setScoreValue(80)" class="px-2.5 py-1 rounded-lg bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-xs font-semibold text-zinc-700 transition cursor-pointer">80</button>
-                <button type="button" onclick="setScoreValue(85)" class="px-2.5 py-1 rounded-lg bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-xs font-semibold text-zinc-700 transition cursor-pointer">85</button>
-                <button type="button" onclick="setScoreValue(90)" class="px-2.5 py-1 rounded-lg bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-xs font-semibold text-zinc-700 transition cursor-pointer">90</button>
-                <button type="button" onclick="setScoreValue(95)" class="px-2.5 py-1 rounded-lg bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-xs font-semibold text-zinc-700 transition cursor-pointer">95</button>
-                <button type="button" onclick="setScoreValue(100)" class="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white font-semibold text-xs transition cursor-pointer">100</button>
+                <button type="button" onclick="setScoreValue(70)" class="px-2.5 py-1 rounded-lg bg-white hover:bg-zinc-100 border border-zinc-200 text-xs font-semibold text-zinc-700 transition cursor-pointer shadow-2xs">70</button>
+                <button type="button" onclick="setScoreValue(75)" class="px-2.5 py-1 rounded-lg bg-white hover:bg-zinc-100 border border-zinc-200 text-xs font-semibold text-zinc-700 transition cursor-pointer shadow-2xs">75</button>
+                <button type="button" onclick="setScoreValue(80)" class="px-2.5 py-1 rounded-lg bg-white hover:bg-zinc-100 border border-zinc-200 text-xs font-semibold text-zinc-700 transition cursor-pointer shadow-2xs">80</button>
+                <button type="button" onclick="setScoreValue(85)" class="px-2.5 py-1 rounded-lg bg-white hover:bg-zinc-100 border border-zinc-200 text-xs font-semibold text-zinc-700 transition cursor-pointer shadow-2xs">85</button>
+                <button type="button" onclick="setScoreValue(90)" class="px-2.5 py-1 rounded-lg bg-white hover:bg-zinc-100 border border-zinc-200 text-xs font-semibold text-zinc-700 transition cursor-pointer shadow-2xs">90</button>
+                <button type="button" onclick="setScoreValue(95)" class="px-2.5 py-1 rounded-lg bg-white hover:bg-zinc-100 border border-zinc-200 text-xs font-semibold text-zinc-700 transition cursor-pointer shadow-2xs">95</button>
+                <button type="button" onclick="setScoreValue(100)" class="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white font-semibold text-xs transition cursor-pointer shadow-2xs">100</button>
               </div>
 
               <div class="flex flex-col sm:flex-row items-center gap-4 pt-1">
@@ -3163,8 +3181,8 @@ function normalizeMediaList(fieldOrMedia) {
                   >
                 </div>
 
-                <div class="flex items-center gap-1 bg-zinc-50 border border-zinc-300 p-1 rounded-xl shrink-0">
-                  <button type="button" onclick="adjustScore(-1)" class="w-8 h-8 rounded-lg hover:bg-zinc-200 text-zinc-700 font-bold text-sm flex items-center justify-center transition cursor-pointer">−</button>
+                <div class="flex items-center gap-1 bg-white border border-zinc-300 p-1 rounded-xl shrink-0 shadow-2xs">
+                  <button type="button" onclick="adjustScore(-1)" class="w-8 h-8 rounded-lg hover:bg-zinc-100 text-zinc-700 font-bold text-sm flex items-center justify-center transition cursor-pointer">−</button>
                   <input 
                     type="number" 
                     id="inputNilaiNumber" 
@@ -3175,7 +3193,7 @@ function normalizeMediaList(fieldOrMedia) {
                     class="w-14 text-center font-bold text-base text-zinc-900 outline-none bg-transparent"
                     oninput="syncScore(this.value, 'number')"
                   >
-                  <button type="button" onclick="adjustScore(1)" class="w-8 h-8 rounded-lg hover:bg-zinc-200 text-zinc-700 font-bold text-sm flex items-center justify-center transition cursor-pointer">+</button>
+                  <button type="button" onclick="adjustScore(1)" class="w-8 h-8 rounded-lg hover:bg-zinc-100 text-zinc-700 font-bold text-sm flex items-center justify-center transition cursor-pointer">+</button>
                 </div>
               </div>
             </div>
@@ -3186,21 +3204,27 @@ function normalizeMediaList(fieldOrMedia) {
       // 13. CORE_BEST_PRESENTER (Voting Presentator)
       if (f.type === 'CORE_BEST_PRESENTER') {
         const maxVote = parseInt(appConfig["Maksimal_Pilihan_Presentator_Terbaik"] || 2);
+        const hasCustomHeader = (f.label?.trim() || f.description?.trim());
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-6 rounded-2xl border border-zinc-200/80 space-y-4">
-            ${(f.label?.trim() || f.description?.trim()) ? `
-              <div class="flex items-center justify-between border-b border-zinc-200 pb-3">
+          <div class="bg-white p-5 sm:p-6 rounded-2xl border border-zinc-200 shadow-xs space-y-4">
+            ${hasCustomHeader ? `
+              <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
                 <div>
                   ${f.label?.trim() ? `<h3 class="text-sm sm:text-base font-bold text-zinc-900 math-renderable">${smartMathFormat(f.label)}${reqBadge}</h3>` : ''}
                   ${f.description?.trim() ? `<p class="text-xs text-zinc-500 mt-0.5 math-renderable">${smartMathFormat(f.description || `Pilih maksimal ${maxVote} pemateri terbaik.`)}</p>` : ''}
                 </div>
-                <span id="bestPresenterCountBadge" class="text-xs font-mono font-semibold bg-zinc-100 text-zinc-700 border border-zinc-200 px-2.5 py-1 rounded-lg">
+                <span id="bestPresenterCountBadge" class="text-xs font-mono font-semibold bg-zinc-100 text-zinc-700 border border-zinc-200 px-2.5 py-1 rounded-lg shadow-2xs">
                   0/${maxVote} Terpilih
                 </span>
               </div>
             ` : `
-              <div class="flex items-center justify-end border-b border-zinc-200 pb-2">
-                <span id="bestPresenterCountBadge" class="text-xs font-mono font-semibold bg-zinc-100 text-zinc-700 border border-zinc-200 px-2.5 py-1 rounded-lg">
+              <div class="flex items-center justify-between gap-2 border-b border-zinc-100 pb-3">
+                <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-700 bg-zinc-100/90 px-2.5 py-1 rounded-lg border border-zinc-200">
+                  <svg class="w-3.5 h-3.5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+                  <span>Presentator Terbaik</span>
+                  ${f.required ? '<span class="text-rose-500 font-bold ml-0.5">*</span>' : ''}
+                </span>
+                <span id="bestPresenterCountBadge" class="text-xs font-mono font-semibold bg-zinc-100 text-zinc-700 border border-zinc-200 px-2.5 py-1 rounded-lg shadow-2xs">
                   0/${maxVote} Terpilih
                 </span>
               </div>
@@ -3212,14 +3236,23 @@ function normalizeMediaList(fieldOrMedia) {
 
       // 14. CORE_MEMBER_FEEDBACK (Evaluasi Kualitatif)
       if (f.type === 'CORE_MEMBER_FEEDBACK') {
+        const hasCustomHeader = (f.label?.trim() || f.description?.trim());
         return `
-          <div class="bg-zinc-50/60 p-4 sm:p-6 rounded-2xl border border-zinc-200/80 space-y-4">
-            ${(f.label?.trim() || f.description?.trim()) ? `
-              <div class="border-b border-zinc-200 pb-3">
+          <div class="bg-white p-5 sm:p-6 rounded-2xl border border-zinc-200 shadow-xs space-y-4">
+            ${hasCustomHeader ? `
+              <div class="border-b border-zinc-100 pb-3">
                 ${f.label?.trim() ? `<h3 class="text-sm sm:text-base font-bold text-zinc-900 math-renderable">${smartMathFormat(f.label)}${reqBadge}</h3>` : ''}
                 ${f.description?.trim() ? `<p class="text-xs text-zinc-500 mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
               </div>
-            ` : ''}
+            ` : `
+              <div class="flex items-center justify-between gap-2 border-b border-zinc-100 pb-3">
+                <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-700 bg-zinc-100/90 px-2.5 py-1 rounded-lg border border-zinc-200">
+                  <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path></svg>
+                  <span>Evaluasi Pemateri</span>
+                  ${f.required ? '<span class="text-rose-500 font-bold ml-0.5">*</span>' : ''}
+                </span>
+              </div>
+            `}
             <div id="evaluationInputsContainer" class="space-y-4">
               <div id="evaluationEmptyNotice" class="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs text-center">
                 Silakan pilih kelompok yang dinilai terlebih dahulu pada bagian sebelumnya untuk menampilkan formulir ulasan pemateri.

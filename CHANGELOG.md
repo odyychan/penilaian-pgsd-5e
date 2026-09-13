@@ -2,6 +2,24 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.4.97] - 2026-09-13
+
+### 💎 Eliminasi Redundansi Kontainer Ganda & Tata Letak Rapi Elegan Pertanyaan Tanpa Judul
+- **📦 Arsitektur Kartu Mandiri & Penghapusan Box-in-a-Box:**
+  - Mengeliminasi pembungkusan kartu bersarang (*double borders & double padding*) antara bagian tahapan (`#stepSection`) dan kartu pertanyaan.
+  - Apabila judul dan deskripsi tahapan dikosongkan, kontainer luar tidak lagi menambahkan border dan padding ganda yang membingungkan. Setiap pertanyaan berdiri sebagai kartu mandiri (*first-class white card*: `bg-white rounded-2xl border border-zinc-200 shadow-xs p-5 sm:p-6`).
+  - Apabila judul tahapan diisi, judul tahapan dirender sebagai kartu header mandiri terpisah (`#stageHeaderCard_${stepNum}`) dengan aksen modern.
+- **✨ Eliminasi Baris Hampa pada Pertanyaan Inti Tanpa Judul:**
+  - **Pilih Kelompok (`CORE_GROUP_SELECT`):** Menghilangkan baris kosong di mana tombol refresh mengambang sendirian di sebelah kanan tanpa konteks. Menggantikannya dengan micro-toolbar ringkas yang seimbang: indikator `[👥 Pilih Kelompok *]` di sisi kiri dan tombol `[🔄 Segarkan]` di sisi kanan yang dipisahkan garis batas halus (*hairline divider*).
+  - **Rubrik Penilaian (`CORE_SCORE_RUBRIC`):** Menampilkan toolbar header elegan `[📊 Nilai Presentasi *]` berdampingan dengan indikator perolehan `[Nilai A (4,00)]` saat judul pertanyaan dikosongkan.
+  - **Presentator Terbaik (`CORE_BEST_PRESENTER`):** Menampilkan toolbar terstruktur `[⭐ Presentator Terbaik *]` berdampingan dengan badge hitungan `[0/N Terpilih]` saat judul pertanyaan dikosongkan.
+  - **Evaluasi Anggota (`CORE_MEMBER_FEEDBACK`):** Menampilkan toolbar `[💬 Evaluasi Pemateri *]` saat judul pertanyaan dikosongkan.
+  - **14 Tipe Pertanyaan Custom:** Saat pertanyaan tanpa judul dan tanpa deskripsi berstatus wajib isi (`required`), tanda bintang mengambang liar digantikan dengan pill badge estetik `Wajib diisi` di pojok atas kartu.
+- **⚡ Pembaruan Versi Cache & Service Worker:**
+  - Meningkatkan versi token cache Service Worker, `index.html`, dan `admin.html` ke `v2.4.97`.
+
+---
+
 ## [2.4.96] - 2026-09-13
 
 ### 🧩 Fleksibilitas Penuh: Dukungan Pertanyaan & Bagian (Section) Tanpa Judul
