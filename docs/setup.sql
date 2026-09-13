@@ -531,24 +531,52 @@ BEGIN
     -- Single response limit check
     v_limit_one := COALESCE((v_cfg.config_data->>'Kunci_Respons_Ganda')::boolean, FALSE);
     IF v_limit_one THEN
-      IF p_email IS NOT NULL AND p_email <> '' AND p_email <> '-' THEN
-        SELECT id_respons INTO v_existing_id
-        FROM pgsd_responses
-        WHERE form_id = p_form_id AND LOWER(TRIM(email)) = LOWER(TRIM(p_email))
-        LIMIT 1;
-      ELSIF p_nim_penilai IS NOT NULL AND p_nim_penilai <> '' AND p_nim_penilai <> '-' THEN
-        SELECT id_respons INTO v_existing_id
-        FROM pgsd_responses
-        WHERE form_id = p_form_id AND TRIM(nim_penilai) = TRIM(p_nim_penilai)
-        LIMIT 1;
-      END IF;
+      IF p_kelompok_dinilai IS NOT NULL AND p_kelompok_dinilai <> '' AND p_kelompok_dinilai <> '-' THEN
+        -- Peer assessment: check if evaluator has already submitted for THIS specific group
+        IF p_email IS NOT NULL AND p_email <> '' AND p_email <> '-' THEN
+          SELECT id_respons INTO v_existing_id
+          FROM pgsd_responses
+          WHERE form_id = p_form_id 
+            AND TRIM(kelompok_dinilai) = TRIM(p_kelompok_dinilai)
+            AND LOWER(TRIM(email)) = LOWER(TRIM(p_email))
+          LIMIT 1;
+        ELSIF p_nim_penilai IS NOT NULL AND p_nim_penilai <> '' AND p_nim_penilai <> '-' THEN
+          SELECT id_respons INTO v_existing_id
+          FROM pgsd_responses
+          WHERE form_id = p_form_id 
+            AND TRIM(kelompok_dinilai) = TRIM(p_kelompok_dinilai)
+            AND TRIM(nim_penilai) = TRIM(p_nim_penilai)
+          LIMIT 1;
+        END IF;
 
-      IF v_existing_id IS NOT NULL THEN
-        RETURN jsonb_build_object(
-          'success', false,
-          'error_code', 'ALREADY_SUBMITTED',
-          'message', 'Anda sudah pernah mengirimkan respons untuk formulir ini.'
-        );
+        IF v_existing_id IS NOT NULL THEN
+          RETURN jsonb_build_object(
+            'success', false,
+            'error_code', 'ALREADY_SUBMITTED',
+            'message', 'Anda sudah pernah mengirimkan penilaian untuk kelompok ' || p_kelompok_dinilai || '.'
+          );
+        END IF;
+      ELSE
+        -- General survey or quiz: check if evaluator has already submitted for this form
+        IF p_email IS NOT NULL AND p_email <> '' AND p_email <> '-' THEN
+          SELECT id_respons INTO v_existing_id
+          FROM pgsd_responses
+          WHERE form_id = p_form_id AND LOWER(TRIM(email)) = LOWER(TRIM(p_email))
+          LIMIT 1;
+        ELSIF p_nim_penilai IS NOT NULL AND p_nim_penilai <> '' AND p_nim_penilai <> '-' THEN
+          SELECT id_respons INTO v_existing_id
+          FROM pgsd_responses
+          WHERE form_id = p_form_id AND TRIM(nim_penilai) = TRIM(p_nim_penilai)
+          LIMIT 1;
+        END IF;
+
+        IF v_existing_id IS NOT NULL THEN
+          RETURN jsonb_build_object(
+            'success', false,
+            'error_code', 'ALREADY_SUBMITTED',
+            'message', 'Anda sudah pernah mengirimkan respons untuk formulir ini.'
+          );
+        END IF;
       END IF;
     END IF;
   END IF;

@@ -2,6 +2,31 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.4.91] - 2026-09-13
+
+### 🔄 Restorasi Standar Rubrik Formulir BK5E & Perbaikan Tombol Pengiriman Jawaban
+- **🔄 Restorasi Skema & Teks Default Formulir BK5E (Supabase PostgreSQL):**
+  - Memulihkan konfigurasi formulir `BK5E` di tabel `pgsd_forms` dan `pgsd_form_configs` ke struktur standar 4 tahap rubrik penilaian peer-assessment akademik:
+    - **Tahap 1:** Identitas Penilai & Verifikasi Akses Mahasiswa.
+    - **Tahap 2:** Pemilihan Kelompok yang Dinilai (Daftar Kelompok Presentasi 1 s.d. 6).
+    - **Tahap 3:** Rubrik Penilaian Kriteria Presentasi (Skala Likert 1–5) & Voting Presentator Terbaik.
+    - **Tahap 4:** Evaluasi Kualitatif Anggota Kelompok & Masukan Konstruktif.
+  - Memulihkan seluruh teks deskripsi panduan, instruksi penilaian, opsi rubrik, dan format penulisan matematika/Markdown.
+  - Menjaga 100% integritas data respons asli mahasiswa yang telah masuk (`PGSD-REC-BK5E-MTQVRJWO`, NIM `2210118210013`) tanpa terdampak.
+- **🛠️ Perbaikan Tombol Pengiriman Jawaban (Submission Button Remediation):**
+  - **Resolusi ReferenceError:** Memperbaiki galat JavaScript fatal `ReferenceError: submitAssessment is not defined` pada alur navigasi akhir `navigateStageForward()` di `src/student/student.js` dengan menyambungkan eksekusi ke `handleFinalSubmit(null)` dan menyediakan fungsi wrapper `submitAssessment()`.
+  - **Atribut Elemen Tombol:** Menambahkan atribut `id="submitBtn"` dan indikator `#submitSpinner` pada tombol penyerahan agar status loading dan pencegahan *double-click* berjalan responsif.
+  - **Editable Email Input:** Menghapus atribut `readonly` statis pada field email Tahap 1 (`renderSingleClientFieldHtml`) agar mahasiswa yang mengisi tanpa akun Google tertaut tetap dapat mengetikkan email secara manual tanpa terhalang validasi form.
+  - **Sinkronisasi Kolom Duplikasi Klien:** Mengoreksi query pengecekan respon ganda pada sisi klien dari nama kolom tidak valid `.eq('email_penilai', cleanEmail)` menjadi `.eq('email', cleanEmail)` sesuai skema riil tabel `pgsd_responses`.
+  - **Optimasi Prosedur Tersimpan Basis Data (`pgsd_fn_submit_response_with_quota`):** Memperbarui fungsi PostgreSQL Supabase agar pengecekan `v_limit_one` pada formulir bertipe peer-assessment membatasi duplikasi per `(form_id, kelompok_dinilai, nim_penilai)`, sehingga penilai dapat menilai kelompok presentasi lain tanpa terblokir secara keliru.
+- **🧪 Verifikasi E2E & Validasi Database:**
+  - Pengujian alur pengiriman formulir BK5E secara menyeluruh menggunakan Playwright headless browser berhasil 100% hingga menghasilkan tanda terima resmi dan tersimpan valid ke PostgreSQL Supabase.
+  - Pembersihan respon uji coba dilakukan secara otomatis untuk mempertahankan basis data produksi tetap bersih.
+- **⚡ Pembaruan Versi Cache & Service Worker:**
+  - Meningkatkan versi Service Worker, aset CSS, dan skrip aplikasi ke `v2.4.91`.
+
+---
+
 ## [2.4.90] - 2026-09-07
 
 ### 🧹 UI/UX Deslop & Mobile Viewport Optimization: Eradikasi AI Slop, Touch Target $\ge 44\text{ px}$, Modal Pre-Submit 1-Layar & Segmentasi Setelan Admin
