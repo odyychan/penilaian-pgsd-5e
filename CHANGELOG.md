@@ -2,6 +2,22 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.1] - 2026-09-13
+
+### 🔑 Perbaikan Retensi Formulir Pasca-Login Google OAuth (*Zero-Bounce to Portal Hub*)
+- **🛡️ Auto-Recovery Form PIN dari Redirect OAuth:**
+  - Mengatasi kendala di mana setelah pengguna berhasil login via Google OAuth, peramban dialihkan kembali ke URL utama (`/`) tanpa parameter query `?id={PIN}` sehingga sebelumnya secara keliru memicu tampilan portal masuk awal (`#viewPortal`).
+  - Menambahkan mesin resolusi PIN instan pada level `<head>` (`index.html`) dan inisialisasi awal `src/student/student.js` yang membaca niat login (*auth intent*) dari `sessionStorage` dan `localStorage` (`PGSD_AUTH_INTENT` & `PGSD_ACTIVE_CLIENT_FORM_ID`).
+  - Secara otomatis merestorasi parameter `?id={PIN}` ke bilah URL peramban via `history.replaceState()` tanpa reload tambahan.
+- **🎯 Isolasi Tampilan Tegas (*View Isolation & Auto-Resume*):**
+  - Memperbaiki `openAssessmentForm()`, `goToInfoOverview()`, dan `showGoogleAuthGate()` untuk secara eksplisit menonaktifkan mode portal (`isPortalMode = false`, menghapus kelas CSS `portal-mode-active`, menambahkan `form-mode-active`, dan menyembunyikan `#viewPortal`).
+  - Memperbarui `handleAuthSessionEstablished()` untuk segera membuka instrumen penilaian (*wizard*) sesuai formulir yang dituju saat otentikasi Google berhasil dikonfirmasi.
+  - Memasang pengaman pada event listener `popstate` agar tidak melempar pengguna ke portal jika `activeFormId` masih aktif di memori/cache.
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.1` di seluruh berkas (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
+---
+
 ## [2.5.0] - 2026-09-13
 
 ### 🛡️ Jaminan Draf Anti-Hilang Multi-Tier (*Accidental Refresh Resilience*) & Audit Estetika Modern-Elegan

@@ -35,7 +35,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="src/student/index.css?v=2.5.0">
+  <link rel="stylesheet" href="src/student/index.css?v=2.5.1">
   
   <!-- Instant Zero-FOUC View Resolver (Runs synchronously before HTML paint) -->
   <script>
@@ -43,6 +43,24 @@
       try {
         var params = new URLSearchParams(window.location.search);
         var pin = (params.get('id') || params.get('form') || '').trim();
+        
+        // Auto-recover PIN if returning from Google OAuth redirect or active auth intent
+        if (!pin) {
+          try {
+            var rawIntent = sessionStorage.getItem('PGSD_AUTH_INTENT') || localStorage.getItem('PGSD_AUTH_INTENT');
+            if (rawIntent) {
+              var intent = JSON.parse(rawIntent);
+              if (intent && intent.formId && (Date.now() - (intent.createdAt || 0)) < (30 * 60 * 1000)) {
+                pin = intent.formId;
+              }
+            }
+          } catch(e) {}
+        }
+        
+        if (!pin && (window.location.search.indexOf('code=') !== -1 || window.location.hash.indexOf('access_token=') !== -1)) {
+          pin = localStorage.getItem('PGSD_ACTIVE_CLIENT_FORM_ID') || '';
+        }
+
         if (!pin) {
           document.documentElement.classList.add('portal-mode-active');
         } else {
@@ -1602,13 +1620,13 @@
   <!-- ========================================================================= -->
   <!-- SCRIPT LOGIC -->
   <!-- ========================================================================= -->
-  <script src="src/student/student.js?v=2.5.0"></script>
+  <script src="src/student/student.js?v=2.5.1"></script>
 
   <!-- Progressive Web App (PWA) & Instant Auto-Updater Engine -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js?v=2.5.0').then(function(reg) {
+        navigator.serviceWorker.register('/sw.js?v=2.5.1').then(function(reg) {
           reg.update();
           reg.addEventListener('updatefound', function() {
             var newWorker = reg.installing;

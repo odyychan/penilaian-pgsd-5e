@@ -55,10 +55,36 @@
     // Multi-Form & Dynamic Questions State
     const urlParams = new URLSearchParams(window.location.search);
     const isPreviewMode = urlParams.get('preview') === 'draft' || urlParams.get('preview') === 'true';
-    const explicitPinParam = (urlParams.get('id') || urlParams.get('form') || '').toUpperCase().trim();
+    let explicitPinParam = (urlParams.get('id') || urlParams.get('form') || '').toUpperCase().trim();
+
+    // 🔑 Auto-Recover Form PIN (Kritis saat Redirect OAuth Google tanpa query param ?id=)
+    if (!explicitPinParam) {
+      try {
+        const rawIntent = sessionStorage.getItem('PGSD_AUTH_INTENT') || localStorage.getItem('PGSD_AUTH_INTENT');
+        if (rawIntent) {
+          const intent = JSON.parse(rawIntent);
+          if (intent && intent.formId && (Date.now() - (intent.createdAt || 0)) < (30 * 60 * 1000)) {
+            explicitPinParam = String(intent.formId).toUpperCase().trim();
+          }
+        }
+      } catch(e) {}
+    }
+
+    if (!explicitPinParam && (window.location.search.includes('code=') || window.location.hash.includes('access_token='))) {
+      explicitPinParam = (localStorage.getItem('PGSD_ACTIVE_CLIENT_FORM_ID') || '').toUpperCase().trim();
+    }
+
     let activeFormId = explicitPinParam;
     let isPortalMode = !explicitPinParam;
     let hasEnteredFromPortal = !explicitPinParam;
+
+    if (explicitPinParam && !urlParams.get('id')) {
+      try {
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set('id', explicitPinParam);
+        window.history.replaceState(null, null, currentUrl.toString());
+      } catch(e) {}
+    }
     let currentFormMeta = null;
     let currentFormSchema = null;
     let customFieldsData = [];
@@ -1021,6 +1047,32 @@ function normalizeMediaList(fieldOrMedia) {
       initAllModernDropdowns();
       initBackGestureEngine();
 
+      // Double check if returning from OAuth before entering portal mode
+      if (isPortalMode) {
+        let recoveredFormId = null;
+        try {
+          const rawIntent = sessionStorage.getItem('PGSD_AUTH_INTENT') || localStorage.getItem('PGSD_AUTH_INTENT');
+          if (rawIntent) {
+            const intent = JSON.parse(rawIntent);
+            if (intent && intent.formId && (Date.now() - (intent.createdAt || 0)) < (30 * 60 * 1000)) {
+              recoveredFormId = String(intent.formId).toUpperCase().trim();
+            }
+          }
+        } catch(e) {}
+        if (!recoveredFormId && (window.location.search.includes('code=') || window.location.hash.includes('access_token='))) {
+          recoveredFormId = (localStorage.getItem('PGSD_ACTIVE_CLIENT_FORM_ID') || '').toUpperCase().trim();
+        }
+        if (recoveredFormId) {
+          activeFormId = recoveredFormId;
+          isPortalMode = false;
+          try {
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('id', activeFormId);
+            window.history.replaceState(null, null, currentUrl.toString());
+          } catch(e) {}
+        }
+      }
+
       if (isPortalMode) {
         showPortalView();
         return;
@@ -1037,6 +1089,7 @@ function normalizeMediaList(fieldOrMedia) {
       if (badgeSesiTop) badgeSesiTop.classList.remove("hidden");
 
       saveVisitedFormHistory(activeFormId);
+      localStorage.setItem("PGSD_ACTIVE_CLIENT_FORM_ID", activeFormId);
       loadLocalCache();
       
       const hash = (window.location.hash || "").replace("#", "").toLowerCase();
@@ -1159,9 +1212,17 @@ function normalizeMediaList(fieldOrMedia) {
         return;
       }
 
-      if (!pin) {
+      if (!pin && !currentPinUpper) {
         showPortalView();
         return;
+      }
+
+      if (!pin && currentPinUpper) {
+        try {
+          const u = new URL(window.location.href);
+          u.searchParams.set('id', currentPinUpper);
+          window.history.replaceState(e.state || null, null, u.toString());
+        } catch(err) {}
       }
 
       // Jika PIN di URL berbeda dari form aktif -> aktifkan form baru
@@ -6628,6 +6689,15 @@ function normalizeMediaList(fieldOrMedia) {
     }
 
     function showGoogleAuthGate() {
+      isPortalMode = false;
+      document.documentElement.classList.add('form-mode-active');
+      document.documentElement.classList.remove('portal-mode-active');
+
+      const viewPortal = document.getElementById("viewPortal");
+      const viewForm = document.getElementById("viewForm");
+      if (viewPortal) viewPortal.classList.add("hidden");
+      if (viewForm) viewForm.classList.remove("hidden");
+
       const authGate = document.getElementById("formAuthGateSection");
       const overview = document.getElementById("formOverviewSection");
       const wizard = document.getElementById("formWizardContainer");
@@ -6695,12 +6765,16 @@ function normalizeMediaList(fieldOrMedia) {
     }
 
     function saveAuthIntent(formId) {
+      const targetPin = formId || activeFormId || localStorage.getItem('PGSD_ACTIVE_CLIENT_FORM_ID') || 'BK5E';
+      const payload = JSON.stringify({
+        action: 'START_ASSESSMENT',
+        formId: targetPin,
+        createdAt: Date.now()
+      });
       try {
-        sessionStorage.setItem('PGSD_AUTH_INTENT', JSON.stringify({
-          action: 'START_ASSESSMENT',
-          formId: formId || activeFormId || 'BK5E',
-          createdAt: Date.now()
-        }));
+        sessionStorage.setItem('PGSD_AUTH_INTENT', payload);
+        localStorage.setItem('PGSD_AUTH_INTENT', payload);
+        localStorage.setItem('PGSD_ACTIVE_CLIENT_FORM_ID', targetPin);
       } catch(e) {}
     }
 
@@ -7122,18 +7196,33 @@ function normalizeMediaList(fieldOrMedia) {
       const mode = getCurrentEmailCollectionMode();
 
       // Check intent
-      const rawIntent = sessionStorage.getItem('PGSD_AUTH_INTENT');
+      const rawIntent = sessionStorage.getItem('PGSD_AUTH_INTENT') || localStorage.getItem('PGSD_AUTH_INTENT');
       let shouldAutoOpenForm = false;
+      let targetFormId = activeFormId;
       if (rawIntent) {
         try {
           const intent = JSON.parse(rawIntent);
-          const isFresh = (Date.now() - (intent.createdAt || 0)) < (15 * 60 * 1000);
-          const isTargetForm = (intent.formId || '').toUpperCase() === (activeFormId || 'BK5E').toUpperCase();
-          if (isFresh && isTargetForm && intent.action === 'START_ASSESSMENT') {
+          const isFresh = (Date.now() - (intent.createdAt || 0)) < (30 * 60 * 1000);
+          if (intent.formId) {
+            targetFormId = String(intent.formId).toUpperCase().trim();
+          }
+          if (isFresh && intent.action === 'START_ASSESSMENT') {
             shouldAutoOpenForm = true;
           }
         } catch(e) {}
-        sessionStorage.removeItem('PGSD_AUTH_INTENT');
+        try {
+          sessionStorage.removeItem('PGSD_AUTH_INTENT');
+          localStorage.removeItem('PGSD_AUTH_INTENT');
+        } catch(e) {}
+      }
+
+      if (targetFormId && (!activeFormId || activeFormId !== targetFormId)) {
+        activeFormId = targetFormId;
+        try {
+          const currentUrl = new URL(window.location.href);
+          currentUrl.searchParams.set('id', activeFormId);
+          window.history.replaceState(null, null, currentUrl.toString());
+        } catch(e) {}
       }
 
       const authGate = document.getElementById("formAuthGateSection");
@@ -7220,6 +7309,22 @@ function normalizeMediaList(fieldOrMedia) {
     }
 
     function openAssessmentForm(pushState = false) {
+      isPortalMode = false;
+      document.documentElement.classList.add('form-mode-active');
+      document.documentElement.classList.remove('portal-mode-active');
+
+      const viewPortal = document.getElementById("viewPortal");
+      const viewForm = document.getElementById("viewForm");
+      const viewRekap = document.getElementById("viewRekap");
+      const navTabContainer = document.getElementById("navTabContainer");
+      const badgeSesiTop = document.getElementById("badgeSesiTop");
+
+      if (viewPortal) viewPortal.classList.add("hidden");
+      if (viewForm) viewForm.classList.remove("hidden");
+      if (viewRekap) viewRekap.classList.add("hidden");
+      if (navTabContainer) navTabContainer.classList.remove("hidden");
+      if (badgeSesiTop) badgeSesiTop.classList.remove("hidden");
+
       const authGate = document.getElementById("formAuthGateSection");
       const overview = document.getElementById("formOverviewSection");
       const wizard = document.getElementById("formWizardContainer");
@@ -7247,6 +7352,22 @@ function normalizeMediaList(fieldOrMedia) {
     window.openAssessmentForm = openAssessmentForm;
 
     function goToInfoOverview(pushState = false) {
+      isPortalMode = false;
+      document.documentElement.classList.add('form-mode-active');
+      document.documentElement.classList.remove('portal-mode-active');
+
+      const viewPortal = document.getElementById("viewPortal");
+      const viewForm = document.getElementById("viewForm");
+      const viewRekap = document.getElementById("viewRekap");
+      const navTabContainer = document.getElementById("navTabContainer");
+      const badgeSesiTop = document.getElementById("badgeSesiTop");
+
+      if (viewPortal) viewPortal.classList.add("hidden");
+      if (viewForm) viewForm.classList.remove("hidden");
+      if (viewRekap) viewRekap.classList.add("hidden");
+      if (navTabContainer) navTabContainer.classList.remove("hidden");
+      if (badgeSesiTop) badgeSesiTop.classList.remove("hidden");
+
       const authGate = document.getElementById("formAuthGateSection");
       const overview = document.getElementById("formOverviewSection");
       const wizard = document.getElementById("formWizardContainer");
@@ -7265,7 +7386,7 @@ function normalizeMediaList(fieldOrMedia) {
           window.history.replaceState({ formId: activeFormId, tab: 'form', view: 'overview' }, '', currentUrl.toString());
         }
       } catch(e) {}
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'instant' });
     }
     window.goToInfoOverview = goToInfoOverview;
 
