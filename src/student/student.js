@@ -1006,6 +1006,15 @@ function normalizeMediaList(fieldOrMedia) {
           }
         }
       });
+
+      // 💾 Penyelamat Refresh: Simpan draf seketika sebelum halaman ditutup atau di-refresh
+      window.addEventListener("beforeunload", function() {
+        try {
+          if (typeof saveFormDraft === 'function') {
+            saveFormDraft();
+          }
+        } catch(e) {}
+      });
     }
 
     document.addEventListener("DOMContentLoaded", async function() {
@@ -1039,7 +1048,24 @@ function normalizeMediaList(fieldOrMedia) {
       await ensureAuthInitialized();
 
       checkAndApplyAuthGate();
-      restoreFormDraft();
+
+      // Deteksi Pemulihan Draf saat Ter-refresh Tidak Sengaja
+      const formKey = (activeFormId || DEFAULT_PRIMARY_FORM_ID || 'BK5E').toUpperCase();
+      const lastActiveView = (sessionStorage.getItem('PGSD_ACTIVE_VIEW_' + formKey) ||
+                             (window.history.state && window.history.state.view) || '').toLowerCase();
+      const savedDraft = findSavedFormDraft();
+      const emailMode = getCurrentEmailCollectionMode();
+      const session = getCurrentAuthSession();
+      const isAuthenticated = (emailMode === 'NO_EMAIL') || (session && session.email);
+
+      if (lastActiveView === 'wizard' && savedDraft && isAuthenticated) {
+        // Pengguna ter-refresh saat sedang aktif mengisi formulir: langsung buka wizard dan pulihkan draf seketika
+        openAssessmentForm();
+        restoreFormDraft(true, false);
+      } else {
+        restoreFormDraft(false, true);
+      }
+
       await fetchInitialFormData(false);
 
       // Pre-fetch rekap data secara diam-diam di background agar instan saat dibuka
@@ -1857,12 +1883,20 @@ function normalizeMediaList(fieldOrMedia) {
       const startBtn = document.getElementById("startAssessmentBtn");
       if (!card) return;
 
+      const savedDraft = typeof findSavedFormDraft === 'function' ? findSavedFormDraft() : null;
+      const hasSavedDraft = savedDraft && (savedDraft.nim || savedDraft.nama || savedDraft.email || savedDraft.groupName || (savedDraft.customAnswers && Object.keys(savedDraft.customAnswers).length > 0));
+      const stepText = (hasSavedDraft && savedDraft.step && savedDraft.step > 1) ? ` (Bagian ${savedDraft.step})` : '';
+
       const mode = getCurrentEmailCollectionMode();
       if (mode === 'NO_EMAIL') {
         card.classList.add("hidden");
         card.innerHTML = "";
         if (startBtn) {
-          startBtn.innerHTML = `<span>Mulai Pengisian Penilaian</span><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>`;
+          if (hasSavedDraft) {
+            startBtn.innerHTML = `<span>Lanjutkan Pengisian Penilaian${stepText}</span><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>`;
+          } else {
+            startBtn.innerHTML = `<span>Mulai Pengisian Penilaian</span><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>`;
+          }
         }
         return;
       }
@@ -1938,7 +1972,11 @@ function normalizeMediaList(fieldOrMedia) {
           </div>
         `;
         if (startBtn) {
-          startBtn.innerHTML = `<span>Lanjut Pengisian Penilaian</span><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>`;
+          if (hasSavedDraft) {
+            startBtn.innerHTML = `<span>Lanjutkan Pengisian Penilaian${stepText}</span><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>`;
+          } else {
+            startBtn.innerHTML = `<span>Lanjut Pengisian Penilaian</span><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>`;
+          }
         }
         return;
       }
@@ -4226,7 +4264,7 @@ function normalizeMediaList(fieldOrMedia) {
             renderConfigHeader();
             renderGroupOptions();
             renderDynamicClientStages(false);
-            restoreFormDraft();
+            restoreFormDraft(true, true);
             updateStepUI(currentStep || 1);
             updateAccountHeaderUI();
             checkAndApplyAuthGate();
@@ -5985,14 +6023,17 @@ function normalizeMediaList(fieldOrMedia) {
 
     // Score & Presenter Logic
     function setScoreValue(val) {
-      document.getElementById("inputNilaiSlider").value = val;
-      document.getElementById("inputNilaiNumber").value = val;
+      const sli = document.getElementById("inputNilaiSlider");
+      const num = document.getElementById("inputNilaiNumber");
+      if (sli) sli.value = val;
+      if (num) num.value = val;
       updateScoreBadge(val);
       saveFormDraft();
     }
 
     function adjustScore(delta) {
       const numInput = document.getElementById("inputNilaiNumber");
+      if (!numInput) return;
       let val = parseInt(numInput.value || 85) + delta;
       const min = parseInt(numInput.min || 50);
       const max = parseInt(numInput.max || 100);
@@ -6002,10 +6043,12 @@ function normalizeMediaList(fieldOrMedia) {
     }
 
     function syncScore(val, source) {
+      const num = document.getElementById("inputNilaiNumber");
+      const sli = document.getElementById("inputNilaiSlider");
       if (source === 'slider') {
-        document.getElementById("inputNilaiNumber").value = val;
+        if (num) num.value = val;
       } else {
-        document.getElementById("inputNilaiSlider").value = val;
+        if (sli) sli.value = val;
       }
       updateScoreBadge(val);
       saveFormDraft();
@@ -6145,10 +6188,74 @@ function normalizeMediaList(fieldOrMedia) {
     function getFormDraftKey(specificEmail = null) {
       const currentEmail = specificEmail || activeUserAccountEmail || (document.getElementById("inputEmail")?.value || "").trim();
       const cleanEmail = currentEmail.toLowerCase().replace(/[^a-z0-9]/g, '_');
+      const formKey = (activeFormId || DEFAULT_PRIMARY_FORM_ID || 'BK5E').toUpperCase();
       if (cleanEmail) {
-        return "PGSD_DRAFT_" + (activeFormId || 'BK5E').toUpperCase() + "_" + cleanEmail;
+        return "PGSD_DRAFT_" + formKey + "_" + cleanEmail;
       }
-      return "PGSD_DRAFT_" + (activeFormId || 'BK5E').toUpperCase() + "_DEFAULT";
+      return "PGSD_DRAFT_" + formKey + "_DEFAULT";
+    }
+
+    function findSavedFormDraft(targetEmail = null) {
+      try {
+        const formKey = (activeFormId || DEFAULT_PRIMARY_FORM_ID || 'BK5E').toUpperCase();
+        const email = targetEmail || activeUserAccountEmail || (document.getElementById("inputEmail")?.value || "").trim();
+        
+        // 1. Cek draf spesifik akun aktif
+        if (email) {
+          const cleanEmail = email.toLowerCase().replace(/[^a-z0-9]/g, '_');
+          const rawAccount = localStorage.getItem(`PGSD_DRAFT_${formKey}_${cleanEmail}`);
+          if (rawAccount) {
+            try { return JSON.parse(rawAccount); } catch(e) {}
+          }
+        }
+
+        // 2. Cek sessionStorage draf terkini (paling segar saat reload/refresh browser)
+        try {
+          const rawSession = sessionStorage.getItem(`PGSD_DRAFT_${formKey}_LATEST`);
+          if (rawSession) {
+            try { return JSON.parse(rawSession); } catch(e) {}
+          }
+        } catch(e) {}
+
+        // 3. Cek localStorage draf terkini untuk form ini
+        const rawLatest = localStorage.getItem(`PGSD_DRAFT_${formKey}_LATEST`);
+        if (rawLatest) {
+          try { return JSON.parse(rawLatest); } catch(e) {}
+        }
+
+        // 4. Cek draf default lokal form
+        const rawDefault = localStorage.getItem(`PGSD_DRAFT_${formKey}_DEFAULT`);
+        if (rawDefault) {
+          try { return JSON.parse(rawDefault); } catch(e) {}
+        }
+
+        // 5. Pindai seluruh draf lokal terkait form ini dan pilih yang paling baru berdasarkan timestamp
+        let newestDraft = null;
+        let newestTs = 0;
+        const prefix = `PGSD_DRAFT_${formKey}_`;
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith(prefix)) {
+            try {
+              const d = JSON.parse(localStorage.getItem(k));
+              if (d && d.timestamp && d.timestamp > newestTs) {
+                newestTs = d.timestamp;
+                newestDraft = d;
+              }
+            } catch(e) {}
+          }
+        }
+        if (newestDraft) return newestDraft;
+
+        // 6. Fallback legacy draf
+        const rawLegacy = localStorage.getItem(`PGSD_FORM_DRAFT_${formKey}`);
+        if (rawLegacy) {
+          try { return JSON.parse(rawLegacy); } catch(e) {}
+        }
+      } catch (e) {
+        console.warn("Notice finding form draft:", e);
+      }
+      return null;
     }
 
     function hasAnyFormInputFilled() {
@@ -6168,12 +6275,9 @@ function normalizeMediaList(fieldOrMedia) {
         });
         if (hasEval) return true;
 
-        const raw = localStorage.getItem(getFormDraftKey());
-        if (raw) {
-          const d = JSON.parse(raw);
-          if (d && (d.nim || d.nama || d.email || d.groupName || (d.bestPresenters && d.bestPresenters.length > 0) || (d.evaluasi && Object.keys(d.evaluasi).length > 0) || (d.customAnswers && Object.keys(d.customAnswers).length > 0))) {
-            return true;
-          }
+        const draft = findSavedFormDraft();
+        if (draft && (draft.nim || draft.nama || draft.email || draft.groupName || (draft.bestPresenters && draft.bestPresenters.length > 0) || (draft.evaluasi && Object.keys(draft.evaluasi).length > 0) || (draft.customAnswers && Object.keys(draft.customAnswers).length > 0))) {
+          return true;
         }
       } catch (e) {}
       return false;
@@ -6211,14 +6315,18 @@ function normalizeMediaList(fieldOrMedia) {
           }
         });
 
+        const hasCustomAns = clientCustomFormAnswers && Object.keys(clientCustomFormAnswers).length > 0;
+        const hasCustomFiles = customUploadedFilesMap && Object.keys(customUploadedFilesMap).length > 0;
+
         // Hanya simpan jika ada isian yang diinputkan pengguna
-        if (!email && !nama && !nim && !groupName && selectedBestPresenters.length === 0 && Object.keys(evaluasi).length === 0) {
+        if (!email && !nama && !nim && !groupName && selectedBestPresenters.length === 0 && Object.keys(evaluasi).length === 0 && !hasCustomAns && !hasCustomFiles) {
           updateDraftResetButtonVisibility();
           return;
         }
 
+        const formKey = (activeFormId || DEFAULT_PRIMARY_FORM_ID || 'BK5E').toUpperCase();
         const draft = {
-          formId: activeFormId,
+          formId: formKey,
           peran: peran,
           nim: nim,
           email: email,
@@ -6229,25 +6337,49 @@ function normalizeMediaList(fieldOrMedia) {
           evaluasi: evaluasi,
           customAnswers: clientCustomFormAnswers || {},
           uploadedFiles: customUploadedFilesMap || {},
-          step: currentStep,
+          step: currentStep || 1,
+          view: 'wizard',
           timestamp: Date.now()
         };
 
-        const draftKey = getFormDraftKey(email);
-        localStorage.setItem(draftKey, JSON.stringify(draft));
+        const draftJson = JSON.stringify(draft);
 
+        // 1. Simpan spesifik sesuai Akun / Email Penilai (jika ada)
         if (email) {
+          const cleanEmail = email.toLowerCase().replace(/[^a-z0-9]/g, '_');
+          localStorage.setItem(`PGSD_DRAFT_${formKey}_${cleanEmail}`, draftJson);
           saveAccountProfile(email, nama, nim, peran);
           activeUserAccountEmail = email;
           activeUserAccountName = nama;
           updateAccountHeaderUI();
         }
 
+        // 2. Simpan juga ke Kunci Lokal Form (Jaminan tidak hilang saat refresh atau offline)
+        localStorage.setItem(`PGSD_DRAFT_${formKey}_LATEST`, draftJson);
+        localStorage.setItem(`PGSD_DRAFT_${formKey}_DEFAULT`, draftJson);
+
+        // 3. Simpan ke sessionStorage untuk pemulihan instan saat reload halaman
+        try {
+          sessionStorage.setItem(`PGSD_DRAFT_${formKey}_LATEST`, draftJson);
+          sessionStorage.setItem(`PGSD_ACTIVE_VIEW_${formKey}`, 'wizard');
+        } catch(e) {}
+
         const indicator = document.getElementById("autoSaveIndicator");
         if (indicator) indicator.classList.remove("hidden");
-      } catch (e) {}
+      } catch (e) {
+        console.warn("Notice saving draft:", e);
+      }
       updateDraftResetButtonVisibility();
     }
+    window.saveFormDraft = saveFormDraft;
+    window.findSavedFormDraft = findSavedFormDraft;
+    try {
+      Object.defineProperty(window, 'clientCustomFormAnswers', {
+        get: () => clientCustomFormAnswers,
+        set: (v) => { clientCustomFormAnswers = v; },
+        configurable: true
+      });
+    } catch(e) {}
 
     // ============================================================
     // GOOGLE CLOUD OAUTH & SUPABASE AUTHENTICATION SUBSYSTEM
@@ -7169,18 +7301,7 @@ function normalizeMediaList(fieldOrMedia) {
     function restoreFormDraft(force = false, silent = false) {
       if (isDraftAlreadyRestored && !force) return;
       try {
-        const draftKey = getFormDraftKey();
-        let raw = localStorage.getItem(draftKey);
-        if (!raw) {
-          // Fallback check legacy default draft key
-          const legacyKey = "PGSD_FORM_DRAFT_" + (activeFormId || 'BK5E').toUpperCase();
-          raw = localStorage.getItem(legacyKey);
-        }
-        if (!raw) {
-          updateDraftResetButtonVisibility();
-          return;
-        }
-        const draft = JSON.parse(raw);
+        const draft = findSavedFormDraft();
         if (!draft) {
           updateDraftResetButtonVisibility();
           return;
@@ -7189,7 +7310,7 @@ function normalizeMediaList(fieldOrMedia) {
         // Batas Waktu Draf (TTL: 7 Hari). Jika draf sudah usang, bersihkan otomatis
         const DRAFT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
         if (draft.timestamp && (Date.now() - draft.timestamp > DRAFT_MAX_AGE_MS)) {
-          localStorage.removeItem(draftKey);
+          clearStudentFormDraft(false);
           updateDraftResetButtonVisibility();
           return;
         }
@@ -7202,8 +7323,8 @@ function normalizeMediaList(fieldOrMedia) {
           customUploadedFilesMap = Object.assign({}, draft.uploadedFiles);
         }
 
-        // Render struktur tahapan dinamis ke DOM
-        renderDynamicClientStages();
+        // Render struktur tahapan dinamis ke DOM & populate nilai custom fields
+        renderDynamicClientStages(true);
 
         // 2. Pulihkan Step 1 (Identitas & Peran)
         if (draft.peran) {
@@ -7232,7 +7353,17 @@ function normalizeMediaList(fieldOrMedia) {
 
         updateAccountHeaderUI();
 
-        // 3. Pulihkan Pemilihan Kelompok & Sub-komponennya
+        // 3. Pulihkan Skor (bisa untuk form kelompok maupun mandiri)
+        if (draft.nilai) {
+          const numEl = document.getElementById("inputNilaiNumber");
+          const sliEl = document.getElementById("inputNilaiSlider");
+          if (numEl) numEl.value = draft.nilai;
+          if (sliEl) sliEl.value = draft.nilai;
+          updateScoreBadge(draft.nilai);
+        }
+
+        // 4. Pulihkan Pemilihan Kelompok & Sub-komponennya
+        let isGroupRestored = false;
         if (draft.groupName && groupsData && groupsData.length > 0) {
           const grpIdx = groupsData.findIndex(g => g.name === draft.groupName);
           if (grpIdx !== -1) {
@@ -7241,7 +7372,7 @@ function normalizeMediaList(fieldOrMedia) {
             
             onSelectGroup(draft.groupName, grpIdx);
 
-            // 4. Pulihkan Skor
+            // Re-apply Skor setelah onSelectGroup
             if (draft.nilai) {
               const numEl = document.getElementById("inputNilaiNumber");
               const sliEl = document.getElementById("inputNilaiSlider");
@@ -7250,14 +7381,14 @@ function normalizeMediaList(fieldOrMedia) {
               updateScoreBadge(draft.nilai);
             }
 
-            // 5. Pulihkan Presentator Terbaik
+            // Pulihkan Presentator Terbaik
             if (draft.bestPresenters && Array.isArray(draft.bestPresenters)) {
               selectedBestPresenters = [...draft.bestPresenters];
               updateBestPresenterBadge();
               refreshAllBestPresenterCards();
             }
 
-            // 6. Pulihkan Evaluasi Kualitatif per Mahasiswa
+            // Pulihkan Evaluasi Kualitatif per Mahasiswa
             if (draft.evaluasi && typeof draft.evaluasi === 'object') {
               const maxChars = parseInt(appConfig["Maksimal_Karakter_Evaluasi"] || 500);
               document.querySelectorAll("#evaluationInputsContainer textarea").forEach((ta, eIdx) => {
@@ -7271,35 +7402,34 @@ function normalizeMediaList(fieldOrMedia) {
                 }
               });
             }
+            isGroupRestored = true;
           }
         }
 
-        // 7. Tentukan Navigasi & Posisi Langkah (Hanya buka wizard jika sudah login atau mode NO_EMAIL)
-        const emailMode = appConfig["Mode_Pengumpulan_Email"] || "ULM_ONLY";
-        const currentSession = getCurrentAuthSession();
-        const isAuthenticated = (emailMode === 'NO_EMAIL') || (currentSession && currentSession.email);
-
-        if (draft.email || draft.nama || draft.nim || draft.groupName) {
+        // 5. Update Status Draf Restored
+        // Hanya tandai isDraftAlreadyRestored = true jika kelompok sudah dipulihkan (atau draf tidak memiliki kelompok)
+        if (!draft.groupName || isGroupRestored) {
           isDraftAlreadyRestored = true;
+        }
 
-          const targetStep = (draft.step && draft.step >= 1 && draft.step <= (Object.keys(stepMetadata).length || 4))
-            ? draft.step
-            : (currentStep || 1);
-          
-          const wizard = document.getElementById("formWizardContainer");
-          if (wizard && !wizard.classList.contains("hidden")) {
-            updateStepUI(targetStep, true);
-          }
+        // 6. Update posisi langkah wizard jika wizard sedang aktif
+        const targetStep = (draft.step && draft.step >= 1 && draft.step <= (Object.keys(stepMetadata).length || 4))
+          ? draft.step
+          : (currentStep || 1);
+        
+        const wizard = document.getElementById("formWizardContainer");
+        if (wizard && !wizard.classList.contains("hidden")) {
+          updateStepUI(targetStep, true);
+        }
 
-          const indicator = document.getElementById("autoSaveIndicator");
-          if (indicator) indicator.classList.remove("hidden");
+        const indicator = document.getElementById("autoSaveIndicator");
+        if (indicator) indicator.classList.remove("hidden");
 
-          if (!silent) {
-            showToast("Draf isian sebelumnya berhasil dipulihkan.", "info");
-          }
+        if (!silent) {
+          showToast("Draf isian sebelumnya berhasil dipulihkan.", "info", 1800);
         }
       } catch (e) {
-        console.warn("Restore draft error notice:", e);
+        console.warn("Restore draft notice:", e);
       }
       updateDraftResetButtonVisibility();
     }
@@ -7317,13 +7447,24 @@ function normalizeMediaList(fieldOrMedia) {
       }
       if (!ok) return;
 
+      const formKey = (activeFormId || DEFAULT_PRIMARY_FORM_ID || 'BK5E').toUpperCase();
       try {
-        localStorage.removeItem(getFormDraftKey());
+        const email = activeUserAccountEmail || (document.getElementById("inputEmail")?.value || "").trim();
+        if (email) {
+          const cleanEmail = email.toLowerCase().replace(/[^a-z0-9]/g, '_');
+          localStorage.removeItem(`PGSD_DRAFT_${formKey}_${cleanEmail}`);
+        }
+        localStorage.removeItem(`PGSD_DRAFT_${formKey}_LATEST`);
+        localStorage.removeItem(`PGSD_DRAFT_${formKey}_DEFAULT`);
+        localStorage.removeItem(`PGSD_FORM_DRAFT_${formKey}`);
         localStorage.removeItem("PGSD_FORM_DRAFT");
+        sessionStorage.removeItem(`PGSD_DRAFT_${formKey}_LATEST`);
+        sessionStorage.removeItem(`PGSD_ACTIVE_VIEW_${formKey}`);
       } catch (e) {}
 
       clientCustomFormAnswers = {};
       customUploadedFilesMap = {};
+      isDraftAlreadyRestored = false;
 
       const indicator = document.getElementById("autoSaveIndicator");
       if (indicator) indicator.classList.add("hidden");
@@ -7336,6 +7477,8 @@ function normalizeMediaList(fieldOrMedia) {
         updateDraftResetButtonVisibility();
       }
     }
+    window.restoreFormDraft = restoreFormDraft;
+    window.clearStudentFormDraft = clearStudentFormDraft;
 
     function validateEmailLive(emailVal) {
       const msgEl = document.getElementById("emailValidationMsg");

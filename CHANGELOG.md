@@ -2,6 +2,27 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.0] - 2026-09-13
+
+### 🛡️ Jaminan Draf Anti-Hilang Multi-Tier (*Accidental Refresh Resilience*) & Audit Estetika Modern-Elegan
+- **💾 Arsitektur Penyimpanan Draf Ganda (*Account-Isolated + Local Resilience*):**
+  - Mengimplementasikan penyimpanan multi-tier di `saveFormDraft()`: tersimpan spesifik per-akun Google (`PGSD_DRAFT_{formId}_{cleanEmail}`), kunci draf lokal form terkini (`PGSD_DRAFT_{formId}_LATEST` dan `DEFAULT`), serta `sessionStorage` untuk pemulihan instan saat reload halaman.
+  - Menambahkan event listener `beforeunload` pada browser untuk menjamin setiap input teks atau evaluasi yang sedang diketik langsung di-commit ke penyimpanan lokal sebelum halaman ter-refresh atau tertutup.
+  - Memperluas deteksi data terisi pada draf agar mencakup seluruh instrumen kustom (`clientCustomFormAnswers`) dan berkas lampiran (`customUploadedFilesMap`).
+- **🔄 Pemulihan Draf Otomatis saat Halaman Ter-Refresh (*Smart Auto-Resume*):**
+  - Mengimplementasikan `findSavedFormDraft()` dengan algoritma pencarian bertingkat (Akun -> Session -> Local Latest -> Default -> Timestamp Scan) yang memastikan draf tidak pernah gagal ditemukan meskipun inisialisasi token auth memerlukan jeda beberapa milidetik.
+  - Saat pengguna tidak sengaja me-refresh halaman ketika berada di dalam lembar pengisian kuesioner (*wizard*), sistem secara otomatis mendeteksi sesi aktif dan langsung membuka kembali layar penilaian pada tahapan (*step*) terakhir lengkap dengan isian yang telah diisi tanpa memaksa pengguna kembali ke petunjuk awal.
+  - Menjamin pemulihan kelompok, skor rubrik, dan evaluasi kualitatif tetap tersinkronisasi sempurna setelah data master kelompok selesai diunduh dari Supabase.
+  - Tombol aksi pada halaman ringkasan secara cerdas menampilkan teks dinamis: *"Lanjutkan Pengisian Penilaian (Bagian X)"* ketika mendeteksi adanya draf aktif.
+- **💎 Audit Estetika & Penyempurnaan Gerbang Login (*Modern-Elegan Clean Audit*):**
+  - Menambahkan lencana kepercayaan subtil di bagian bawah kartu login: *"Otentikasi Resmi • Data Terenkripsi Aman"* untuk kenyamanan psikologis responden.
+  - Menghaluskan interaksi hover panah navigasi kembali ke formulir (`group-hover:-translate-x-0.5`).
+  - Mempertegas rasio kontras visual dan proporsi kartu login terpusat.
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.0` di seluruh berkas (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
+---
+
 ## [2.4.99] - 2026-09-13
 
 ### 🧼 Redesain Halaman Login Minimalis & Bebas Teks Bertele-Tele (*Ultra-Clean Auth Gate*)
