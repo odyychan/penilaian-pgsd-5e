@@ -2,6 +2,32 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.4.92] - 2026-09-13
+
+### 🔐 Penyempurnaan Tampilan & Alur Autentikasi Akun Google Penilai (Google Auth Gate & Status UI)
+- **🌟 Kartu Status Akun Google Terintegrasi pada Beranda Formulir (`#overviewGoogleAuthCard`):**
+  - Menambahkan kartu status interaktif pada halaman tinjauan formulir (`formOverviewSection`) sebelum tombol mulai:
+    - **Mode Belum Masuk (*Unauthenticated*):** Menampilkan kartu edukatif dengan logo resmi Google, badge status *"Autentikasi Akun Google Diperlukan"*, ringkasan keunggulan (identitas otomatis terverifikasi, draf cloud tersimpan aman, bukti tanda terima resmi), serta tombol cepat *"Masuk dengan Google"*. Tombol mulai otomatis berganti menjadi *"Mulai dengan Akun Google →"*.
+    - **Mode Terautentikasi (*Authenticated*):** Menampilkan profil pengguna aktif (avatar/inisial, nama lengkap, alamat email resmi, badge berdenyut *"Google Terverifikasi"*, NIM terdaftar), tombol *"Ganti Akun"*, dan *"Keluar"*. Tombol mulai otomatis berganti menjadi *"Lanjut Pengisian Penilaian →"*.
+    - **Mode Peringatan Domain (*Domain Mismatch*):** Menampilkan kartu peringatan jika email yang digunakan bukan domain resmi ULM pada mode `ULM_ONLY`.
+    - **Mode Tanpa Email (`NO_EMAIL`):** Kartu disembunyikan secara otomatis agar tidak mengganggu formulir anonim.
+- **🛡️ Redesain Layar Google Auth Gate (`#formAuthGateSection`):**
+  - Menambahkan konteks akademik di bagian atas: nama mata kuliah, kelas, dan judul formulir aktif.
+  - Menghadirkan kotak penjelas domain dinamis (`#authGateDomainNoticeBox`) yang membedakan ketentuan `ULM_ONLY` (wajib `@mhs.ulm.ac.id` / `@ulm.ac.id`) vs `ALL_EMAIL` (seluruh akun Google aktif).
+  - Menyediakan drawer bantuan akordeon interaktif untuk pertanyaan umum mahasiswa seputar keamanan dan privasi data Google.
+  - Memperbaiki kartu ketidaksesuaian domain (`#authGateDomainMismatchCard`) dengan visual email aktif dan 3 tombol aksi ergonomis ($\ge 44\text{ px}$).
+- **🆔 Penyelarasan Bidang Identitas Tahap 1 (Stage 1 Core Identity):**
+  - Field email di Tahap 1 kini mendeteksi sesi Google aktif (`effectiveAuthEmail` dari `getCurrentAuthSession()`) secara sinkron.
+  - Menampilkan badge *"Google Terverifikasi"* berwarna zamrud dengan tombol *"Ganti"* jika pengguna sudah login, dan badge *"Akun Google Diperlukan"* dengan tombol *"Masuk Google"* jika belum login.
+  - Menambahkan validasi domain ketat pada tahap 1 saat formulir dikonfigurasi dalam mode `ULM_ONLY`.
+- **📱 Responsivitas Mobile-First & Aksesibilitas Touch Target:**
+  - Terverifikasi pada viewport 360×640 (Android M) dan 390×844 (iPhone 12/13/14) dengan `hasHorizontalOverflow: false` (lebar konten $\le$ lebar layar).
+  - Seluruh tombol aksi interaktif memenuhi standar $\ge 44\times 44\text{ px}$.
+- **⚡ Pembaruan Versi Cache & Service Worker:**
+  - Meningkatkan versi token cache Service Worker, antarmuka `index.html`, dan `admin.html` ke `v2.4.92`.
+
+---
+
 ## [2.4.91] - 2026-09-13
 
 ### 🔄 Restorasi Standar Rubrik Formulir BK5E & Perbaikan Tombol Pengiriman Jawaban
