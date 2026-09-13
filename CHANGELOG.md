@@ -2,6 +2,23 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.4.99] - 2026-09-13
+
+### 🧼 Redesain Halaman Login Minimalis & Bebas Teks Bertele-Tele (*Ultra-Clean Auth Gate*)
+- **🧹 Eliminasi Konten Berlebih & Panduan yang Tidak Diperlukan:**
+  - Mengeliminasi akordeon panduan login yang tidak diperlukan (*"Panduan & Bantuan Masuk Google"*).
+  - Mengeliminasi 3 kartu benefit bertumpuk (*"1. Identitas"*, *"2. Keamanan"*, *"3. Verifikasi"*) yang sebelumnya memakan ruang vertikal dan mengharuskan *scrolling* di perangkat seluler.
+  - Menghilangkan kotak peringatan (*alert box callout*) berwarna kuning/hijau yang berkesan mencolok dan bertele-tele.
+- **💎 Tata Letak Kartu Ringkas, Modern, & Elegan (*Fits on Any Screen*):**
+  - Desain kartu terpusat minimalis dengan ikon Google resmi, judul jelas *"Masuk dengan Akun Google"*, dan satu baris instruksi ringkas ramah pengguna.
+  - Tombol aksi utama `"Lanjutkan dengan Google"` berukuran target sentuh 48px yang responsif dan elegan.
+  - Tautan navigasi `"← Kembali ke Petunjuk Formulir"` yang rapi dan halus.
+  - Kartu penyesuaian domain kampus (*Domain Mismatch*) dirampingkan dengan pesan to-the-point dan tombol aksi cepat.
+- **⚡ Pembaruan Versi Cache & Service Worker:**
+  - Meningkatkan versi token cache Service Worker, `index.html`, dan `admin.html` ke `v2.4.99`.
+
+---
+
 ## [2.4.98] - 2026-09-13
 
 ### 🚪 Alur Autentikasi Rapi: Halaman Info Formulir Bersih & Login Terisolasi Saat Mulai

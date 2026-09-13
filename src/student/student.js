@@ -6505,14 +6505,13 @@ function normalizeMediaList(fieldOrMedia) {
       const courseCodeEl = document.getElementById("authGateCourseCode");
       const formTitleEl = document.getElementById("authGateFormTitle");
       const noticeBox = document.getElementById("authGateDomainNoticeBox");
-      const noticeTitle = document.getElementById("authGateDomainNoticeTitle");
-      const noticeDesc = document.getElementById("authGateDomainNoticeDesc");
 
       if (overview) overview.classList.add("hidden");
       if (wizard) wizard.classList.add("hidden");
       if (authGate) authGate.classList.remove("hidden");
       if (promptCard) promptCard.classList.remove("hidden");
       if (mismatchCard) mismatchCard.classList.add("hidden");
+      if (noticeBox) noticeBox.classList.add("hidden");
 
       if (courseCodeEl) {
         const matkul = (currentFormMeta && currentFormMeta.mataKuliah) || appConfig["Mata_Kuliah"] || "FKIP ULM";
@@ -6525,19 +6524,9 @@ function normalizeMediaList(fieldOrMedia) {
 
       const mode = getCurrentEmailCollectionMode();
       if (mode === 'ULM_ONLY') {
-        if (reqDesc) reqDesc.textContent = "Gunakan akun Google resmi kampus (@mhs.ulm.ac.id) untuk melanjutkan pengisian.";
-        if (noticeBox) {
-          noticeBox.className = "p-3 rounded-xl bg-amber-50/90 border border-amber-200/90 text-left flex items-start gap-2.5 text-xs text-amber-950";
-        }
-        if (noticeTitle) noticeTitle.textContent = "Wajib Akun Google Kampus ULM";
-        if (noticeDesc) noticeDesc.innerHTML = 'Gunakan email resmi berakhiran <strong class="font-mono font-bold text-amber-950">@mhs.ulm.ac.id</strong> (Mahasiswa) atau <strong class="font-mono font-bold text-amber-950">@ulm.ac.id</strong> (Dosen).';
+        if (reqDesc) reqDesc.innerHTML = 'Wajib menggunakan email resmi kampus (<strong class="font-mono text-zinc-900">@mhs.ulm.ac.id</strong>) untuk melanjutkan.';
       } else {
-        if (reqDesc) reqDesc.textContent = "Masuk untuk verifikasi identitas dan penyimpanan draf otomatis.";
-        if (noticeBox) {
-          noticeBox.className = "p-3 rounded-xl bg-emerald-50/90 border border-emerald-200/90 text-left flex items-start gap-2.5 text-xs text-emerald-950";
-        }
-        if (noticeTitle) noticeTitle.textContent = "Autentikasi Akun Google Aktif";
-        if (noticeDesc) noticeDesc.innerHTML = 'Menerima semua akun Google aktif (<strong class="font-mono font-bold text-emerald-950">@gmail.com</strong> atau domain institusi).';
+        if (reqDesc) reqDesc.textContent = "Silakan pilih akun Google Anda untuk verifikasi identitas dan melanjutkan.";
       }
 
       renderGoogleSignInButtonDefault();
