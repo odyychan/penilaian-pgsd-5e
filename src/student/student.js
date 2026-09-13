@@ -1049,6 +1049,43 @@ function normalizeMediaList(fieldOrMedia) {
       initRealtimeSyncEngine();
       setTimeout(() => renderAllMathInElement(document.getElementById("mainAppRoot") || document.body), 200);
 
+      // Live Draft Synchronization for Preview Mode / Simulator (Zero-Latency WYSIWYG)
+      if (isPreviewMode) {
+        window.addEventListener('message', (event) => {
+          if (!event.data || event.data.type !== 'PGSD_DRAFT_UPDATE') return;
+          if (event.data.formId && String(event.data.formId).toUpperCase() !== String(activeFormId).toUpperCase()) return;
+          
+          if (event.data.schema) {
+            currentFormSchema = event.data.schema;
+          }
+          if (event.data.config) {
+            appConfig = Object.assign({}, appConfig, event.data.config);
+          }
+          
+          renderConfigHeader();
+          renderDynamicCustomFields();
+          renderDynamicClientStages(true);
+          updateStepUI(currentStep || 1);
+        });
+
+        window.addEventListener('storage', (event) => {
+          if (event.key === 'PGSD_DRAFT_SCHEMA_' + activeFormId || event.key === 'PGSD_DRAFT_CONFIG_' + activeFormId) {
+            const draftSchemaStr = localStorage.getItem('PGSD_DRAFT_SCHEMA_' + activeFormId);
+            const draftConfigStr = localStorage.getItem('PGSD_DRAFT_CONFIG_' + activeFormId);
+            if (draftSchemaStr) {
+              try { currentFormSchema = JSON.parse(draftSchemaStr); } catch(e){}
+            }
+            if (draftConfigStr) {
+              try { appConfig = Object.assign({}, appConfig, JSON.parse(draftConfigStr)); } catch(e){}
+            }
+            renderConfigHeader();
+            renderDynamicCustomFields();
+            renderDynamicClientStages(true);
+            updateStepUI(currentStep || 1);
+          }
+        });
+      }
+
       try {
         window.history.replaceState({ formId: activeFormId, tab: savedTab || 'form', view: 'overview' }, '', window.location.href);
       } catch(e) {}
@@ -4139,6 +4176,27 @@ function normalizeMediaList(fieldOrMedia) {
             if (!appConfig.form_mode && formRow.form_mode) appConfig.form_mode = formRow.form_mode;
             currentFormSchema = (configRow && (configRow.form_schema || configRow.schema_data)) || { tahapan: [] };
 
+            // Prioritaskan Skema & Konfigurasi Draf untuk Mode Pratinjau (Preview / Simulator WYSIWYG)
+            if (isPreviewMode) {
+              let draftSchemaStr = sessionStorage.getItem("PGSD_DRAFT_SCHEMA_" + activeFormId) || localStorage.getItem("PGSD_DRAFT_SCHEMA_" + activeFormId);
+              let draftConfigStr = sessionStorage.getItem("PGSD_DRAFT_CONFIG_" + activeFormId) || localStorage.getItem("PGSD_DRAFT_CONFIG_" + activeFormId);
+              if (!draftSchemaStr && window.parent && window.parent !== window) {
+                try {
+                  draftSchemaStr = window.parent.sessionStorage?.getItem("PGSD_DRAFT_SCHEMA_" + activeFormId) || window.parent.localStorage?.getItem("PGSD_DRAFT_SCHEMA_" + activeFormId);
+                  draftConfigStr = window.parent.sessionStorage?.getItem("PGSD_DRAFT_CONFIG_" + activeFormId) || window.parent.localStorage?.getItem("PGSD_DRAFT_CONFIG_" + activeFormId);
+                } catch(e) {}
+              }
+              if (draftSchemaStr) {
+                try { currentFormSchema = JSON.parse(draftSchemaStr); } catch(e) {}
+              }
+              if (draftConfigStr) {
+                try { 
+                  const dCfg = JSON.parse(draftConfigStr);
+                  appConfig = Object.assign({}, appConfig, dCfg);
+                } catch(e) {}
+              }
+            }
+
             // Susun data kelompok & anggota
             groupsData = groupsRows.map(g => ({
               id: g.id,
@@ -4163,11 +4221,13 @@ function normalizeMediaList(fieldOrMedia) {
             if (pinEl) pinEl.textContent = `PIN: ${activeFormId}`;
             renderDynamicCustomFields();
 
-            localStorage.setItem("PGSD_CACHE_GROUPS_" + activeFormId, JSON.stringify(groupsData));
-            localStorage.setItem("PGSD_CACHE_CONFIG_" + activeFormId, JSON.stringify(appConfig));
-            localStorage.setItem("PGSD_CACHE_META_" + activeFormId, JSON.stringify(currentFormMeta));
-            localStorage.setItem("PGSD_CACHE_FORM_SCHEMA_" + activeFormId, JSON.stringify(currentFormSchema));
-            saveVisitedFormHistory(activeFormId, currentFormMeta, appConfig);
+            if (!isPreviewMode) {
+              localStorage.setItem("PGSD_CACHE_GROUPS_" + activeFormId, JSON.stringify(groupsData));
+              localStorage.setItem("PGSD_CACHE_CONFIG_" + activeFormId, JSON.stringify(appConfig));
+              localStorage.setItem("PGSD_CACHE_META_" + activeFormId, JSON.stringify(currentFormMeta));
+              localStorage.setItem("PGSD_CACHE_FORM_SCHEMA_" + activeFormId, JSON.stringify(currentFormSchema));
+              saveVisitedFormHistory(activeFormId, currentFormMeta, appConfig);
+            }
 
             renderConfigHeader();
             renderGroupOptions();
@@ -4899,14 +4959,41 @@ function normalizeMediaList(fieldOrMedia) {
             return;
           }
 
-          const item = document.createElement("label");
+          const rank = selectedBestPresenters.indexOf(member.name) + 1;
+          const isSelected = rank > 0;
+
+          const item = document.createElement("div");
           item.id = `bestPresCard_${mIdx}`;
-          item.className = "flex items-center p-3 rounded-lg border border-zinc-200 hover:border-zinc-400 bg-white cursor-pointer transition text-xs";
+          item.setAttribute("data-member-name", member.name);
+          item.setAttribute("data-member-idx", mIdx);
+          item.className = isSelected 
+            ? "flex items-center p-3 sm:p-3.5 rounded-xl border-2 border-amber-500 bg-amber-50/70 shadow-xs ring-2 ring-amber-400/20 cursor-pointer transition select-none group min-h-[44px]"
+            : "flex items-center p-3 sm:p-3.5 rounded-xl border border-zinc-200 hover:border-amber-300 bg-white hover:bg-zinc-50/60 cursor-pointer transition select-none group min-h-[44px]";
+          item.onclick = () => toggleBestPresenterSelection(member.name, mIdx);
+
           item.innerHTML = `
-            <input type="checkbox" value="${escapeHtml(member.name)}" class="accent-zinc-900 h-4 w-4 rounded flex-shrink-0" onchange="handleBestPresenterChange(this, ${mIdx})">
-            <div class="ml-2.5 min-w-0 flex-1 flex items-center justify-between gap-2">
-              <span class="font-medium text-zinc-900 truncate">${escapeHtml(member.name)}</span>
-              <span class="text-[10px] text-zinc-400 font-mono">${escapeHtml(member.nim || 'NIM -')}</span>
+            <!-- Numbered Rank Indicator Slot -->
+            <div id="bestPresRankSlot_${mIdx}" class="shrink-0 flex items-center justify-center">
+              ${isSelected ? `
+                <span class="w-7 h-7 rounded-full bg-amber-500 text-white font-mono font-bold text-xs flex items-center justify-center shadow-xs ring-2 ring-amber-300">
+                  #${rank}
+                </span>
+              ` : `
+                <span class="w-7 h-7 rounded-full border-2 border-zinc-300 group-hover:border-amber-400 flex items-center justify-center text-zinc-300 group-hover:text-amber-400 font-bold text-xs transition">
+                  ○
+                </span>
+              `}
+            </div>
+
+            <!-- Presenter Info -->
+            <div class="ml-3 min-w-0 flex-1">
+              <div class="flex items-center justify-between gap-1.5">
+                <span class="font-bold text-xs sm:text-sm text-zinc-900 truncate">${escapeHtml(member.name)}</span>
+                <span id="bestPresChoiceTag_${mIdx}" class="${isSelected ? 'inline-block' : 'hidden'} text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-amber-200 text-amber-900 shrink-0">
+                  Pilihan #${rank}
+                </span>
+              </div>
+              <span class="text-[10.5px] text-zinc-500 font-mono block mt-0.5">${escapeHtml(member.nim || 'NIM -')}</span>
             </div>
           `;
           bestList.appendChild(item);
@@ -5962,31 +6049,82 @@ function normalizeMediaList(fieldOrMedia) {
       }
     }
 
-    function handleBestPresenterChange(checkbox, mIdx) {
+    function toggleBestPresenterSelection(name, mIdx) {
       const maxAllowed = parseInt(appConfig["Maksimal_Pilihan_Presentator_Terbaik"] || 2);
-      const val = checkbox.value;
-      const card = document.getElementById(`bestPresCard_${mIdx}`);
+      const existingIdx = selectedBestPresenters.indexOf(name);
 
-      if (checkbox.checked) {
+      if (existingIdx !== -1) {
+        // Deselect -> Remove and re-number remaining presenters
+        selectedBestPresenters.splice(existingIdx, 1);
+      } else {
+        // Select -> Check max limit
         if (selectedBestPresenters.length >= maxAllowed) {
-          checkbox.checked = false;
-          showToast(`Maksimal hanya boleh memilih ${maxAllowed} orang!`, "warning");
+          showToast(`Maksimal hanya boleh memilih ${maxAllowed} orang pemateri terbaik! Batalkan salah satu pilihan terlebih dahulu.`, "warning");
           return;
         }
-        selectedBestPresenters.push(val);
-        if (card) card.className = "flex items-center p-3 rounded-lg border border-zinc-900 bg-zinc-50 cursor-pointer transition text-xs shadow-2xs";
-      } else {
-        selectedBestPresenters = selectedBestPresenters.filter(name => name !== val);
-        if (card) card.className = "flex items-center p-3 rounded-lg border border-zinc-200 hover:border-zinc-400 bg-white cursor-pointer transition text-xs";
+        selectedBestPresenters.push(name);
       }
+
+      refreshAllBestPresenterCards();
       updateBestPresenterBadge();
       saveFormDraft();
+    }
+    window.toggleBestPresenterSelection = toggleBestPresenterSelection;
+
+    function refreshAllBestPresenterCards() {
+      const cards = document.querySelectorAll("#bestPresenterList [data-member-name]");
+      cards.forEach((card) => {
+        const name = card.getAttribute("data-member-name");
+        const rank = selectedBestPresenters.indexOf(name) + 1;
+        const isSelected = rank > 0;
+
+        card.className = isSelected 
+          ? "flex items-center p-3 sm:p-3.5 rounded-xl border-2 border-amber-500 bg-amber-50/70 shadow-xs ring-2 ring-amber-400/20 cursor-pointer transition select-none group min-h-[44px]"
+          : "flex items-center p-3 sm:p-3.5 rounded-xl border border-zinc-200 hover:border-amber-300 bg-white hover:bg-zinc-50/60 cursor-pointer transition select-none group min-h-[44px]";
+
+        const slot = card.querySelector('[id^="bestPresRankSlot_"]');
+        if (slot) {
+          slot.innerHTML = isSelected ? `
+            <span class="w-7 h-7 rounded-full bg-amber-500 text-white font-mono font-bold text-xs flex items-center justify-center shadow-xs ring-2 ring-amber-300">
+              #${rank}
+            </span>
+          ` : `
+            <span class="w-7 h-7 rounded-full border-2 border-zinc-300 group-hover:border-amber-400 flex items-center justify-center text-zinc-300 group-hover:text-amber-400 font-bold text-xs transition">
+              ○
+            </span>
+          `;
+        }
+
+        const tag = card.querySelector('[id^="bestPresChoiceTag_"]');
+        if (tag) {
+          if (isSelected) {
+            tag.className = "inline-block text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-amber-200 text-amber-900 shrink-0";
+            tag.textContent = `Pilihan #${rank}`;
+          } else {
+            tag.className = "hidden";
+          }
+        }
+      });
+    }
+    window.refreshAllBestPresenterCards = refreshAllBestPresenterCards;
+
+    function handleBestPresenterChange(checkbox, mIdx) {
+      if (checkbox && checkbox.value) {
+        toggleBestPresenterSelection(checkbox.value, mIdx);
+      }
     }
 
     function updateBestPresenterBadge() {
       const maxAllowed = parseInt(appConfig["Maksimal_Pilihan_Presentator_Terbaik"] || 2);
       const badge = document.getElementById("bestPresenterCountBadge");
-      badge.textContent = `${selectedBestPresenters.length}/${maxAllowed} Terpilih`;
+      if (badge) {
+        badge.textContent = `${selectedBestPresenters.length}/${maxAllowed} Terpilih`;
+        if (selectedBestPresenters.length > 0) {
+          badge.className = "text-xs font-mono font-bold bg-amber-100 text-amber-900 border border-amber-300 px-2.5 py-1 rounded-lg shadow-2xs";
+        } else {
+          badge.className = "text-xs font-mono font-semibold bg-zinc-100 text-zinc-700 border border-zinc-200 px-2.5 py-1 rounded-lg";
+        }
+      }
     }
 
     function updateCharCounter(textarea, counterId, maxChars) {
@@ -7128,14 +7266,7 @@ function normalizeMediaList(fieldOrMedia) {
             if (draft.bestPresenters && Array.isArray(draft.bestPresenters)) {
               selectedBestPresenters = [...draft.bestPresenters];
               updateBestPresenterBadge();
-              selectedBestPresenters.forEach(bName => {
-                const cb = document.querySelector(`#bestPresenterList input[value="${bName}"]`);
-                if (cb) {
-                  cb.checked = true;
-                  const lbl = cb.closest("label");
-                  if (lbl) lbl.className = "flex items-center p-3 rounded-lg border border-zinc-900 bg-zinc-50 shadow-xs cursor-pointer transition text-xs";
-                }
-              });
+              refreshAllBestPresenterCards();
             }
 
             // 6. Pulihkan Evaluasi Kualitatif per Mahasiswa
@@ -7323,7 +7454,12 @@ function normalizeMediaList(fieldOrMedia) {
 
       let bestPresText = "-";
       if (Array.isArray(payload.presentatorTerbaik) && payload.presentatorTerbaik.length > 0) {
-        bestPresText = payload.presentatorTerbaik.join(", ");
+        bestPresText = payload.presentatorTerbaik.map((name, pIdx) => `
+          <span class="inline-flex items-center gap-1 bg-amber-100 text-amber-950 font-semibold px-2 py-0.5 rounded-md border border-amber-300 text-[10.5px]">
+            <span class="w-4 h-4 rounded-full bg-amber-500 text-white font-mono font-bold text-[9px] flex items-center justify-center">#${pIdx + 1}</span>
+            <span>${escapeHtml(name)}</span>
+          </span>
+        `).join(" ");
       }
 
       let evalListHtml = "";
@@ -7409,7 +7545,7 @@ function normalizeMediaList(fieldOrMedia) {
               <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-mono font-bold text-xs">Nilai: ${payload.nilaiKelompok || '-'}/100</span>
             </div>
             <p class="font-bold text-indigo-950 text-xs sm:text-sm truncate">${payload.kelompok || 'Penilaian Mandiri'}</p>
-            <p class="text-[11px] text-indigo-700 truncate">Presentator: <span class="font-semibold text-zinc-800">${bestPresText}</span></p>
+            <div class="text-[11px] text-indigo-700 flex flex-wrap items-center gap-1 pt-0.5"><span>Presentator:</span> <span class="font-semibold text-zinc-800 flex flex-wrap items-center gap-1">${bestPresText}</span></div>
           </div>
         </div>
 

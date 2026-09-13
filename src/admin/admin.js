@@ -4654,6 +4654,8 @@
       updateEmailModeCardsUI(currentEmailMode);
 
       handleScheduleToggle(document.getElementById('cfg_Jadwal_Aktif')?.checked || false);
+      handleExamTimerToggle(document.getElementById('cfg_Timer_Ujian_Aktif')?.checked || false);
+      handleCertificateToggle(document.getElementById('cfg_Sertifikat_Aktif')?.checked || false);
 
       const settingsBadge = document.getElementById("settingsFormIdBadge");
       if (settingsBadge) settingsBadge.textContent = currentFormId || DEFAULT_PRIMARY_FORM_ID;
@@ -4921,8 +4923,8 @@
               {
                 id: "fld_core_identity",
                 type: "CORE_IDENTITY",
-                label: "Identitas Penilai (Peran, NIM, Nama Lengkap, Email Kampus)",
-                description: "Data identitas penilai (peran, NIM, nama, dan email resmi).",
+                label: "Identitas & Peran Penilai (NIM, Nama, Email)",
+                description: "",
                 required: true,
                 scope: "GLOBAL",
                 config: {
@@ -4939,8 +4941,8 @@
               {
                 id: "fld_core_group",
                 type: "CORE_GROUP_SELECT",
-                label: "Pemilihan Kelompok Presentator Tampil",
-                description: "Pilihan kelompok presentator yang tampil pada sesi aktif.",
+                label: "Pemilihan Kelompok Presentator",
+                description: "",
                 required: true,
                 scope: "GLOBAL",
                 config: {}
@@ -5536,8 +5538,23 @@
       try {
         localStorage.setItem(`PGSD_DRAFT_SCHEMA_${formKey}`, JSON.stringify(adminFormSchema));
         localStorage.setItem(`PGSD_DRAFT_CONFIG_${formKey}`, JSON.stringify(adminAppConfig));
+        sessionStorage.setItem(`PGSD_DRAFT_SCHEMA_${formKey}`, JSON.stringify(adminFormSchema));
+        sessionStorage.setItem(`PGSD_DRAFT_CONFIG_${formKey}`, JSON.stringify(adminAppConfig));
       } catch (e) {
         console.warn("Could not save draft locally:", e);
+      }
+
+      // Live dispatch to simulator iframe if active
+      const iframe = document.getElementById("simulatorIframe");
+      if (iframe && iframe.contentWindow) {
+        try {
+          iframe.contentWindow.postMessage({
+            type: 'PGSD_DRAFT_UPDATE',
+            formId: formKey,
+            schema: adminFormSchema,
+            config: adminAppConfig
+          }, '*');
+        } catch(e) {}
       }
     }
 
@@ -5660,6 +5677,30 @@
       if (prop === 'label') updateLiveMathBadge(val, `liveMathQuestionLabel_${sIdx}_${fIdx}`);
       else if (prop === 'description') updateLiveMathBadge(val, `liveMathQuestionDesc_${sIdx}_${fIdx}`);
     }
+
+    function toggleQuestionDescField(sIdx, fIdx) {
+      const container = document.getElementById(`fieldDescContainer_${sIdx}_${fIdx}`);
+      const btnWrapper = document.getElementById(`btnToggleDescWrapper_${sIdx}_${fIdx}`);
+      const textarea = document.getElementById(`fieldDescInput_${sIdx}_${fIdx}`);
+      if (!container) return;
+
+      if (container.classList.contains('hidden')) {
+        container.classList.remove('hidden');
+        if (btnWrapper) btnWrapper.classList.add('hidden');
+        if (textarea) {
+          textarea.focus();
+          autoResizeTextarea(textarea);
+        }
+      } else {
+        container.classList.add('hidden');
+        if (btnWrapper) btnWrapper.classList.remove('hidden');
+        if (textarea) {
+          textarea.value = '';
+        }
+        handleInlineFieldUpdate(sIdx, fIdx, 'description', '');
+      }
+    }
+    window.toggleQuestionDescField = toggleQuestionDescField;
 
     function handleInlineConfigUpdate(key, val) {
       adminAppConfig[key] = val;
@@ -7398,6 +7439,10 @@
 
         const fieldCardsHtml = fields.map((f, fIdx) => {
           const isCore = String(f.type || "").startsWith("CORE_");
+          const stageDescClean = (stage.description || '').trim();
+          const fieldDescClean = (f.description || '').trim();
+          const isRedundantDesc = fieldDescClean && (fieldDescClean === stageDescClean);
+          const hasCustomDesc = !!(fieldDescClean && !isRedundantDesc);
           const visualBody = getGoogleFormsVisualBodyHtml(f, sIdx, fIdx);
 
           return `
@@ -7461,10 +7506,13 @@
                     ${getLiveMathBadgeHtml(f.label, `liveMathQuestionLabel_${sIdx}_${fIdx}`)}
                   </div>
 
-                  <!-- Question Description Field Block -->
-                  <div class="group/fieldBlock space-y-1 pt-1">
+                  <!-- Question Description Field Block (Collapsible Google Forms Style) -->
+                  <div id="fieldDescContainer_${sIdx}_${fIdx}" class="group/fieldBlock space-y-1 pt-1 ${hasCustomDesc ? '' : 'hidden'}">
                     <div class="flex items-center justify-between flex-wrap gap-1">
-                      <span class="text-[10.5px] font-medium text-zinc-400 font-mono">Deskripsi Pertanyaan (Opsional):</span>
+                      <div class="flex items-center gap-1.5">
+                        <span class="text-[10.5px] font-medium text-zinc-400 font-mono">Deskripsi Pertanyaan:</span>
+                        <button type="button" onclick="toggleQuestionDescField(${sIdx}, ${fIdx})" class="text-[10.5px] text-rose-500 hover:text-rose-700 hover:underline cursor-pointer font-medium" title="Hapus Deskripsi">✕ Hapus</button>
+                      </div>
                       ${getRichTextToolbarHtml(`fieldDescInput_${sIdx}_${fIdx}`)}
                     </div>
                     <textarea 
@@ -7473,8 +7521,22 @@
                       placeholder="Teks deskripsi / panduan pengisian pertanyaan (opsional)..." 
                       oninput="autoResizeTextarea(this); handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'description', this.value)"
                       class="w-full text-xs text-zinc-600 bg-transparent border-b border-dashed border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 px-1 py-1 outline-none transition resize-none overflow-hidden block whitespace-pre-wrap break-words leading-relaxed"
-                    >${escapeHtml(f.description || '')}</textarea>
-                    ${getLiveMathBadgeHtml(f.description, `liveMathQuestionDesc_${sIdx}_${fIdx}`)}
+                    >${hasCustomDesc ? escapeHtml(f.description) : ''}</textarea>
+                    ${getLiveMathBadgeHtml(hasCustomDesc ? f.description : '', `liveMathQuestionDesc_${sIdx}_${fIdx}`)}
+                  </div>
+
+                  <!-- Add Description Trigger Button (shown when no description) -->
+                  <div id="btnToggleDescWrapper_${sIdx}_${fIdx}" class="${hasCustomDesc ? 'hidden' : 'block'} pt-0.5">
+                    <button 
+                      type="button" 
+                      id="btnToggleDesc_${sIdx}_${fIdx}" 
+                      onclick="toggleQuestionDescField(${sIdx}, ${fIdx})" 
+                      class="text-[11px] text-zinc-400 hover:text-indigo-600 flex items-center gap-1 font-medium transition cursor-pointer"
+                      title="Tambahkan teks deskripsi / petunjuk pengisian di bawah judul pertanyaan"
+                    >
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                      <span>Tambah Deskripsi</span>
+                    </button>
                   </div>
                 </div>
 
@@ -9256,11 +9318,34 @@
       const container = document.getElementById('scheduleFieldsContainer');
       if (!container) return;
       if (enabled) {
-        container.classList.remove('opacity-40', 'pointer-events-none');
+        container.classList.remove('hidden');
       } else {
-        container.classList.add('opacity-40', 'pointer-events-none');
+        container.classList.add('hidden');
       }
     }
+    window.handleScheduleToggle = handleScheduleToggle;
+
+    function handleExamTimerToggle(enabled) {
+      const row = document.getElementById('quizTimerDetailsRow');
+      if (!row) return;
+      if (enabled) {
+        row.classList.remove('hidden');
+      } else {
+        row.classList.add('hidden');
+      }
+    }
+    window.handleExamTimerToggle = handleExamTimerToggle;
+
+    function handleCertificateToggle(enabled) {
+      const container = document.getElementById('certificateDetailsContainer');
+      if (!container) return;
+      if (enabled) {
+        container.classList.remove('hidden');
+      } else {
+        container.classList.add('hidden');
+      }
+    }
+    window.handleCertificateToggle = handleCertificateToggle;
 
     function setAttendanceTrackerFilter(filter) {
       currentAttendanceFilter = filter;

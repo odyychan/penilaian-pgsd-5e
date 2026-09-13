@@ -35,7 +35,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="src/admin/admin.css?v=2.4.94">
+  <link rel="stylesheet" href="src/admin/admin.css?v=2.4.95">
   <!-- KaTeX CSS & JS for Universal Math / LaTeX / AI & Word Formula Rendering -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -1097,12 +1097,12 @@
                 <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-semibold">CBT Mode</span>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" id="cfg_Timer_Ujian_Aktif" onchange="handleConfigInputChange('Timer_Ujian_Aktif', this.checked); handleConfigInputAutoSave();" class="sr-only peer">
+                <input type="checkbox" id="cfg_Timer_Ujian_Aktif" onchange="handleExamTimerToggle(this.checked); handleConfigInputChange('Timer_Ujian_Aktif', this.checked); handleConfigInputAutoSave();" class="sr-only peer">
                 <div class="w-9 h-5 bg-zinc-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-600"></div>
               </label>
             </div>
 
-            <div id="quizTimerDetailsRow" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs pt-1">
+            <div id="quizTimerDetailsRow" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs pt-1 transition-all duration-200">
               <!-- Durasi Menit -->
               <div class="p-3 rounded-xl bg-amber-50/60 border border-amber-200/80 space-y-2">
                 <label class="block font-bold text-zinc-800 text-xs">Durasi Waktu Pengerjaan:</label>
@@ -1166,13 +1166,13 @@
             <div class="flex items-center gap-2 self-end sm:self-auto shrink-0">
               <span class="text-[11px] font-semibold text-zinc-600">Sertifikat Aktif:</span>
               <label class="relative inline-flex items-center cursor-pointer select-none">
-                <input type="checkbox" id="cfg_Sertifikat_Aktif" onchange="handleConfigInputChange('Sertifikat_Aktif', this.checked); handleConfigInputAutoSave();" class="sr-only peer">
+                <input type="checkbox" id="cfg_Sertifikat_Aktif" onchange="handleCertificateToggle(this.checked); handleConfigInputChange('Sertifikat_Aktif', this.checked); handleConfigInputAutoSave();" class="sr-only peer">
                 <div class="w-11 h-6 bg-zinc-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
               </label>
             </div>
           </div>
 
-          <div id="certificateDetailsContainer" class="space-y-3.5 text-xs">
+          <div id="certificateDetailsContainer" class="hidden space-y-3.5 text-xs transition-all duration-200">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div class="space-y-1">
                 <label class="block font-bold text-zinc-700 text-xs">Judul / Keterangan Sertifikat:</label>
@@ -1262,7 +1262,7 @@
           </div>
 
           <!-- Schedule Fields Container (Visible when toggle active) -->
-          <div id="scheduleFieldsContainer" class="space-y-3.5 text-xs pt-1 transition-all duration-200">
+          <div id="scheduleFieldsContainer" class="hidden space-y-3.5 text-xs pt-1 transition-all duration-200">
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
               <div class="space-y-1">
                 <label for="cfg_Jadwal_Mulai" class="flex items-center justify-between font-semibold text-zinc-700">
@@ -3798,13 +3798,13 @@ function getOrCreateFolder(folderName) {
   <!-- ========================================================================= -->
   <!-- JAVASCRIPT APP LOGIC: MULTI-FORM & ISOLATED SANDBOX ENGINE -->
   <!-- ========================================================================= -->
-  <script src="src/admin/admin.js?v=2.4.94"></script>
+  <script src="src/admin/admin.js?v=2.4.95"></script>
 
   <!-- Progressive Web App (PWA) & Instant Auto-Updater Engine -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js?v=2.4.94').then(function(reg) {
+        navigator.serviceWorker.register('/sw.js?v=2.4.95').then(function(reg) {
           reg.update();
           reg.addEventListener('updatefound', function() {
             var newWorker = reg.installing;

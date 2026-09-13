@@ -2,6 +2,35 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.4.95] - 2026-09-13
+
+### 🎨 Pembersihan Redundansi Form Builder, Peringkat Presentator Berurutan, Panel Setelan Bersih, & Live Preview Sync
+- **🧹 Pembersihan Redundansi Teks & Desain Minimalis Form Builder (Feedback Gambar 1):**
+  - Mengeliminasi duplikasi teks antara Judul/Deskripsi Bagian (*Stage*) dan Judul/Deskripsi Pertanyaan (*Field*) di Admin Form Builder.
+  - Bidang deskripsi pertanyaan kini disembunyikan secara bawaan (*collapsible*) dan dapat dimunculkan melalui tombol cerdas `+ Tambah Deskripsi` (ala Google Forms), menjaga kanvas builder tetap bersih dan ringkas.
+  - Memperbarui skema bawaan agar teks label field inti (`fld_core_identity`, `fld_core_group`) tidak mengulang deskripsi tahapan.
+- **🏆 Sistem Pemilihan Presentator Terbaik Berperingkat Dinamis (#1, #2, dst.) (Feedback Gambar 2):**
+  - Mengembangkan sistem pemilihan Presentator Terbaik interaktif dengan nomor urutan peringkat dinamis (*Numbered Priority Ranking*):
+    - Pilihan pertama otomatis memperoleh slot peringkat `#1` dan tag status `Pilihan #1`.
+    - Pilihan kedua memperoleh slot `#2` dan tag status `Pilihan #2`.
+    - Pilihan berikutnya menyesuaikan hingga batas konfigurasi `Maksimal_Pilihan_Presentator_Terbaik`.
+  - **Algoritma Auto-Reindexing Cerdas:** Jika pengguna membatalkan centang pada pilihan urutan sebelumnya (misal membatalkan `#1`), nomor urutan pilihan lainnya secara otomatis bergeser maju (pilihan `#2` menjadi `#1`, `#3` menjadi `#2`) secara mulus dan instan.
+  - Modal Tinjauan Pra-Kirim (*Pre-Submit Review*) dan draf otomatis terintegrasi menampilkan badge nomor urutan pemateri terbaik yang dipilih.
+- **✨ Panel Setelan Bersih & Tampilan Kondisional (Feedback Gambar 3, 4, 5):**
+  - Panel konfigurasi lanjutan pada Pengaturan Admin kini sepenuhnya disembunyikan (`hidden`) saat tidak aktif:
+    - **Timer Ujian & Batas Pengerjaan:** Baris durasi timer hanya tampil jika sakelar *Aktifkan Timer Ujian* dinyalakan.
+    - **Penerbitan e-Sertifikat Otomatis:** Panel kustomisasi template sertifikat dan penandatangan hanya tampil jika sakelar *Terbitkan e-Sertifikat* diaktifkan.
+    - **Jadwal & Batas Akses:** Input tanggal/jam buka dan tutup formulir hanya tampil jika sakelar *Aktifkan Jadwal Akses* diaktifkan.
+  - Mengurangi beban kognitif pengguna (*cognitive load*) dan menghadirkan antarmuka panel admin yang sangat bersih, teratur, dan modern.
+- **🔄 Sinkronisasi Pratinjau Real-Time (WYSIWYG Live Preview Sync):**
+  - Menghubungkan kanvas penyuntingan Admin Form Builder langsung dengan Simulator Pratinjau (*Live Simulator Iframe*) via kanal `window.postMessage({ type: 'PGSD_DRAFT_UPDATE' })` dan penyimpanan sesi ganda (`sessionStorage` + `localStorage`).
+  - Menambahkan proteksi pada `student.js` saat `isPreviewMode` aktif agar skema draf lokal tidak tertimpa data basis data sebelum dipublikasikan (*zero-overwrite draft safeguard*).
+  - Setiap perubahan teks pertanyaan, judul form, opsi jawaban, atau urutan pertanyaan langsung terlihat di simulator secara seketika (*zero latency*).
+- **⚡ Pembaruan Versi Cache & Service Worker:**
+  - Meningkatkan versi token cache Service Worker, antarmuka `index.html`, dan `admin.html` ke `v2.4.95`.
+
+---
+
 ## [2.4.94] - 2026-09-13
 
 ### ⚡ Arsitektur Dual-Engine Sinkronisasi Real-Time Instan (< 50ms) & Keamanan Draf Mahasiswa
