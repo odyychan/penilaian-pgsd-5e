@@ -1186,8 +1186,16 @@ function normalizeMediaList(fieldOrMedia) {
           return;
         }
 
+        // D1. Fallback: Jika user berada di Halaman Login Auth Gate -> kembali ke Info Formulir
+        const authGate = document.getElementById("formAuthGateSection");
+        const isAuthGateVisible = authGate && !authGate.classList.contains("hidden");
+        if (isAuthGateVisible) {
+          goToInfoOverview();
+          return;
+        }
+
         // E. Fallback: Jika berada di Info Formulir -> kembali ke Portal Hub
-        if (isOverviewVisible || !isWizardVisible) {
+        if (isOverviewVisible) {
           showPortalView();
           return;
         }
@@ -1935,97 +1943,16 @@ function normalizeMediaList(fieldOrMedia) {
         return;
       }
 
-      // 2. Logged in but Domain Mismatch (ULM_ONLY and not ULM email)
-      if (email && mode === 'ULM_ONLY' && !isUlm) {
-        card.classList.remove("hidden");
-        card.innerHTML = `
-          <div class="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-rose-50/90 border border-rose-200/90 text-left flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div class="flex items-start gap-3 min-w-0">
-              <div class="w-9 h-9 rounded-xl bg-rose-100 border border-rose-200 text-rose-600 flex items-center justify-center shrink-0 mt-0.5">
-                <svg class="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-              </div>
-              <div class="space-y-1">
-                <div class="flex items-center gap-2 flex-wrap">
-                  <span class="text-xs font-bold text-rose-950">Domain Akun Tidak Sesuai</span>
-                  <span class="text-[10.5px] font-mono px-2 py-0.5 rounded-full bg-white text-rose-800 border border-rose-200">${escapeHtml(email)}</span>
-                </div>
-                <p class="text-xs text-rose-800 leading-relaxed">Formulir ini mewajibkan akun resmi kampus ULM (<strong class="font-mono text-rose-950">@mhs.ulm.ac.id</strong>).</p>
-              </div>
-            </div>
-            <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
-              <button type="button" onclick="handleDirectSwitchGoogle()" class="min-h-[44px] px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-semibold text-xs transition cursor-pointer shadow-xs">
-                Pilih Akun ULM
-              </button>
-              <button type="button" onclick="handleAuthLogout()" class="min-h-[44px] px-3 py-2 rounded-xl border border-rose-200 text-rose-700 hover:bg-rose-100 font-semibold text-xs transition cursor-pointer">
-                Keluar
-              </button>
-            </div>
-          </div>
-        `;
-        if (startBtn) {
-          startBtn.innerHTML = `<span>Pilih Akun ULM untuk Mulai</span><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>`;
-        }
-        return;
-      }
-
-      // 3. NOT logged in & Google is required
-      const isUlmMode = mode === 'ULM_ONLY';
-      card.classList.remove("hidden");
-      card.innerHTML = `
-        <div class="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-zinc-50/90 border border-zinc-200/80 shadow-2xs space-y-3">
-          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div class="flex items-start gap-3 min-w-0">
-              <div class="w-10 h-10 rounded-xl bg-white border border-zinc-200 flex items-center justify-center shrink-0 shadow-2xs">
-                <svg class="w-5 h-5" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
-                  <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.15C3.26 21.36 7.33 24 12 24z"/>
-                  <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.24C.45 8.15 0 9.99 0 12s.45 3.85 1.24 5.42l4.04-3.15z"/>
-                  <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.24 6.58l4.04 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-                </svg>
-              </div>
-              <div class="space-y-0.5">
-                <div class="flex items-center gap-1.5 flex-wrap">
-                  <span class="text-xs sm:text-sm font-bold text-zinc-900">Autentikasi Akun Google Diperlukan</span>
-                  <span class="px-2 py-0.5 rounded-full text-[9.5px] font-mono font-bold ${isUlmMode ? 'bg-amber-100 text-amber-900 border border-amber-200' : 'bg-emerald-100 text-emerald-900 border border-emerald-200'}">
-                    ${isUlmMode ? 'Wajib @mhs.ulm.ac.id' : 'Akun Google'}
-                  </span>
-                </div>
-                <p class="text-xs text-zinc-500 leading-relaxed">
-                  ${isUlmMode 
-                    ? 'Formulir ini mewajibkan masuk dengan email kampus (<code class="bg-white px-1 py-0.5 rounded border border-zinc-200 font-mono text-[11px] text-zinc-800 font-bold">@mhs.ulm.ac.id</code>) untuk verifikasi identitas dan draf otomatis.' 
-                    : 'Formulir ini mewajibkan masuk dengan Akun Google untuk verifikasi identitas penilai dan penyimpanan draf otomatis.'}
-                </p>
-              </div>
-            </div>
-            <button 
-              type="button" 
-              onclick="handleGoogleSignIn()" 
-              class="min-h-[44px] px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 active:scale-95 text-white font-semibold text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-xs shrink-0 self-stretch sm:self-auto"
-            >
-              <div class="w-4 h-4 rounded-full bg-white p-0.5 flex items-center justify-center shrink-0 shadow-2xs">
-                <svg class="w-full h-full" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
-                  <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.15C3.26 21.36 7.33 24 12 24z"/>
-                  <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.24C.45 8.15 0 9.99 0 12s.45 3.85 1.24 5.42l4.04-3.15z"/>
-                  <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.24 6.58l4.04 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-                </svg>
-              </div>
-              <span>Masuk dengan Google</span>
-            </button>
-          </div>
-
-          <!-- Micro benefit tags -->
-          <div class="flex items-center gap-1.5 flex-wrap pt-1 border-t border-zinc-200/60 text-[10.5px] text-zinc-500">
-            <span class="inline-flex items-center gap-1"><svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Auto-fill Nama &amp; NIM</span>
-            <span class="text-zinc-300">•</span>
-            <span class="inline-flex items-center gap-1"><svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Draf Cloud Otomatis</span>
-            <span class="text-zinc-300">•</span>
-            <span class="inline-flex items-center gap-1"><svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Tanda Terima Sah</span>
-          </div>
-        </div>
-      `;
+      // 2. Domain Mismatch (ULM_ONLY and not ULM email) or NOT logged in:
+      // USER REQUEST:
+      // "tak perlu ada ini, ketika lanjut mulai saja baru masuk ke halaman login (jika memang setting form nya mewajibkan)"
+      // Do NOT show the auth requirement banner on the overview landing screen!
+      // Keep overview clean, elegant, and pristine.
+      // When the student clicks "Mulai Pengisian Penilaian", startAssessmentForm() will check auth and route to showGoogleAuthGate() or showDomainMismatch().
+      card.classList.add("hidden");
+      card.innerHTML = "";
       if (startBtn) {
-        startBtn.innerHTML = `<span>Mulai dengan Akun Google</span><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>`;
+        startBtn.innerHTML = `<span>Mulai Pengisian Penilaian</span><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>`;
       }
     }
     window.renderOverviewGoogleStatus = renderOverviewGoogleStatus;
@@ -6342,7 +6269,7 @@ function normalizeMediaList(fieldOrMedia) {
     }
 
     function getCurrentEmailCollectionMode() {
-      return appConfig["Mode_Pengumpulan_Email"] || "ULM_ONLY";
+      return window.__OVERRIDE_EMAIL_MODE__ || appConfig["Mode_Pengumpulan_Email"] || "ULM_ONLY";
     }
 
     function extractGoogleProfile(user) {

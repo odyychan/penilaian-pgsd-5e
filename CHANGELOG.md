@@ -2,6 +2,25 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.4.98] - 2026-09-13
+
+### 🚪 Alur Autentikasi Rapi: Halaman Info Formulir Bersih & Login Terisolasi Saat Mulai
+- **✨ Pembersihan Total Halaman Awal (*Zero Banner Clutter on Overview*):**
+  - Mengeliminasi tampilan kartu banner *"Autentikasi Akun Google Diperlukan"* (`#overviewGoogleAuthCard`) pada halaman awal informasi formulir.
+  - Pengguna/mahasiswa kini dapat membaca petunjuk, mata kuliah, deskripsi form, dan rincian alur tahapan secara nyaman dan fokus tanpa terdistraksi kotak login sebelum memulai.
+  - Tombol aksi utama tetap konsisten dan lugas: `"Mulai Pengisian Penilaian"` (atau `"Lanjut Pengisian Penilaian"` bagi yang telah aktif masuk).
+- **🚀 Gerbang Login Mandiri Saat Klik Mulai (*On-Demand Dedicated Auth Gate*):**
+  - Pemeriksaan kewajiban autentikasi dijalankan secara dinamis saat tombol `"Mulai Pengisian Penilaian"` diklik (`startAssessmentForm()`):
+    - **Formulir Terbuka / Tanpa Email (`NO_EMAIL`):** Langsung membuka form penilaian tanpa rintangan login sama sekali.
+    - **Formulir Wajib Akun Google (`ULM_ONLY` / `ALL_EMAIL`):** Jika responden belum masuk, sistem mengarahkan ke halaman login dedikasi (`formAuthGateSection`) yang elegan lengkap dengan instruksi domain kampus, keuntungan auto-fill NIM, dan tombol navigasi kembali `"← Kembali ke Petunjuk Formulir"`.
+    - **Domain Mismatch:** Jika akun aktif tidak sesuai domain kampus ULM, diarahkan ke layar instruksi ganti akun khusus.
+- **📱 Navigasi Sejarah Browser (Popstate Navigation):**
+  - Menambahkan dukungan tombol kembali (*browser hardware/software back button*) pada halaman gerbang login agar kembali ke halaman info formulir secara mulus tanpa keluar aplikasi.
+- **⚡ Pembaruan Versi Cache & Service Worker:**
+  - Meningkatkan versi token cache Service Worker, `index.html`, dan `admin.html` ke `v2.4.98`.
+
+---
+
 ## [2.4.97] - 2026-09-13
 
 ### 💎 Eliminasi Redundansi Kontainer Ganda & Tata Letak Rapi Elegan Pertanyaan Tanpa Judul
