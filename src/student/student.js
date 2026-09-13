@@ -2074,21 +2074,58 @@ function normalizeMediaList(fieldOrMedia) {
           fieldsHtml += renderSingleClientFieldHtml(f);
         });
 
-        stagesHtml += `
-          <div id="stepSection_${stepNum}" class="step-fade space-y-4 ${stepNum === 1 ? '' : 'hidden'}">
-            <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5">
-              
-              <div class="border-b border-zinc-100 pb-3.5 flex items-center justify-between gap-2">
-                <div>
-                  <h2 class="text-base sm:text-lg font-bold text-zinc-900 math-renderable">${smartMathFormat(stage.title || `Bagian ${stepNum}`)}</h2>
-                  ${stage.description ? `<p class="text-xs text-zinc-500 mt-0.5 math-renderable">${smartMathFormat(stage.description)}</p>` : ''}
-                </div>
+        const rawStageTitle = (stage.title || '').trim();
+        const rawStageDesc = (stage.description || '').trim();
+        const hasStageTitle = rawStageTitle !== '' && rawStageTitle.toLowerCase() !== `bagian ${stepNum} tanpa judul`;
+        const hasStageDesc = rawStageDesc !== '';
+
+        let stageHeaderHtml = '';
+        if (hasStageTitle) {
+          stageHeaderHtml = `
+            <div class="border-b border-zinc-100 pb-3.5 flex items-center justify-between gap-2">
+              <div>
+                <h2 class="text-base sm:text-lg font-bold text-zinc-900 math-renderable">${smartMathFormat(stage.title)}</h2>
+                ${hasStageDesc ? `<p class="text-xs text-zinc-500 mt-0.5 math-renderable">${smartMathFormat(stage.description)}</p>` : ''}
+              </div>
+              ${totalSteps > 1 ? `
                 <div class="flex items-center gap-2">
                   <span class="text-[10px] font-mono text-zinc-400 bg-zinc-100 px-2 py-0.5 rounded border border-zinc-200">
                     Bagian ${stepNum} dari ${totalSteps}
                   </span>
                 </div>
+              ` : ''}
+            </div>
+          `;
+        } else if (hasStageDesc) {
+          stageHeaderHtml = `
+            <div class="border-b border-zinc-100 pb-3.5 flex items-center justify-between gap-2">
+              <div>
+                <p class="text-xs sm:text-sm text-zinc-700 font-medium leading-relaxed math-renderable">${smartMathFormat(stage.description)}</p>
               </div>
+              ${totalSteps > 1 ? `
+                <div class="flex items-center gap-2">
+                  <span class="text-[10px] font-mono text-zinc-400 bg-zinc-100 px-2 py-0.5 rounded border border-zinc-200">
+                    Bagian ${stepNum} dari ${totalSteps}
+                  </span>
+                </div>
+              ` : ''}
+            </div>
+          `;
+        } else if (totalSteps > 1) {
+          stageHeaderHtml = `
+            <div class="flex items-center justify-end pb-2.5 border-b border-zinc-100">
+              <span class="text-[10px] font-mono text-zinc-400 bg-zinc-100 px-2 py-0.5 rounded border border-zinc-200">
+                Bagian ${stepNum} dari ${totalSteps}
+              </span>
+            </div>
+          `;
+        }
+
+        stagesHtml += `
+          <div id="stepSection_${stepNum}" class="step-fade space-y-4 ${stepNum === 1 ? '' : 'hidden'}">
+            <div class="bg-white rounded-xl border border-zinc-200 p-5 sm:p-7 shadow-xs space-y-5">
+              
+              ${stageHeaderHtml}
 
               <!-- Fields Container -->
               <div class="space-y-4">
@@ -2146,6 +2183,46 @@ function normalizeMediaList(fieldOrMedia) {
         updateDraftResetButtonVisibility();
         initClientSignaturePads();
       }, 50);
+    }
+
+    function renderClientFieldHeaderHtml(f, reqBadge = '', hintHtml = '') {
+      if (!f) return '';
+      const rawLabel = (f.label || '').trim();
+      const rawDesc = (f.description || '').trim();
+      const isUntitled = !rawLabel || rawLabel.toLowerCase() === 'pertanyaan tanpa judul';
+      const hasDesc = rawDesc !== '';
+
+      if (isUntitled && !hasDesc) {
+        if (!reqBadge && !hintHtml) return '';
+        return `
+          <div class="flex items-center justify-between gap-2 mb-1">
+            <div>${reqBadge}</div>
+            ${hintHtml || ''}
+          </div>
+        `;
+      }
+
+      if (!isUntitled) {
+        return `
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label)}${reqBadge}</label>
+              ${hasDesc ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
+            </div>
+            ${hintHtml || ''}
+          </div>
+        `;
+      }
+
+      // isUntitled && hasDesc -> Description acts as the primary question prompt!
+      return `
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <p class="text-xs sm:text-sm text-zinc-800 font-medium leading-relaxed math-renderable">${smartMathFormat(f.description)}${reqBadge}</p>
+          </div>
+          ${hintHtml || ''}
+        </div>
+      `;
     }
 
     function renderSingleClientFieldHtml(f) {
@@ -2214,13 +2291,7 @@ function normalizeMediaList(fieldOrMedia) {
         return `
           <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${mediaAbove}
-            <div class="flex items-start justify-between gap-2">
-              <div>
-                <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Pertanyaan')}${reqBadge}</label>
-                ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
-              </div>
-              ${hintHtml}
-            </div>
+            ${renderClientFieldHeaderHtml(f, reqBadge, hintHtml)}
             ${mediaBelow}
             <div class="space-y-1">
               <input 
@@ -2253,13 +2324,7 @@ function normalizeMediaList(fieldOrMedia) {
         return `
           <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${mediaAbove}
-            <div class="flex items-start justify-between gap-2">
-              <div>
-                <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Pertanyaan')}${reqBadge}</label>
-                ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
-              </div>
-              ${hintHtml}
-            </div>
+            ${renderClientFieldHeaderHtml(f, reqBadge, hintHtml)}
             ${mediaBelow}
             <div class="space-y-1">
               <textarea 
@@ -2352,13 +2417,7 @@ function normalizeMediaList(fieldOrMedia) {
         return `
           <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${mediaAbove}
-            <div class="flex items-start justify-between gap-2">
-              <div>
-                <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Pilihan')}${reqBadge}</label>
-                ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
-              </div>
-              ${hintHtml}
-            </div>
+            ${renderClientFieldHeaderHtml(f, reqBadge, hintHtml)}
             ${mediaBelow}
             <div class="space-y-2">
               ${optsHtml}
@@ -2398,13 +2457,7 @@ function normalizeMediaList(fieldOrMedia) {
         return `
           <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${mediaAbove}
-            <div class="flex items-start justify-between gap-2">
-              <div>
-                <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Pilihan Kotak Centang')}${reqBadge}</label>
-                ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
-              </div>
-              ${hintHtml}
-            </div>
+            ${renderClientFieldHeaderHtml(f, reqBadge, hintHtml)}
             ${mediaBelow}
             <div class="space-y-2">
               ${optsHtml}
@@ -2429,13 +2482,7 @@ function normalizeMediaList(fieldOrMedia) {
         return `
           <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${mediaAbove}
-            <div class="flex items-start justify-between gap-2">
-              <div>
-                <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Pilih Menu Dropdown')}${reqBadge}</label>
-                ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
-              </div>
-              ${hintHtml}
-            </div>
+            ${renderClientFieldHeaderHtml(f, reqBadge, hintHtml)}
             ${mediaBelow}
             <select 
               ${f.required ? 'required' : ''} 
@@ -2479,13 +2526,7 @@ function normalizeMediaList(fieldOrMedia) {
         return `
           <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${mediaAbove}
-            <div class="flex items-start justify-between gap-2">
-              <div>
-                <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Skala Penilaian')}${reqBadge}</label>
-                ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
-              </div>
-              ${hintHtml}
-            </div>
+            ${renderClientFieldHeaderHtml(f, reqBadge, hintHtml)}
             ${mediaBelow}
             <div class="space-y-2 pt-1">
               <div class="flex items-start justify-between gap-1 overflow-x-auto pb-2 pt-1">
@@ -2518,13 +2559,7 @@ function normalizeMediaList(fieldOrMedia) {
         return `
           <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-3" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${mediaAbove}
-            <div class="flex items-start justify-between gap-2">
-              <div>
-                <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Rating Bintang')}${reqBadge}</label>
-                ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
-              </div>
-              ${hintHtml}
-            </div>
+            ${renderClientFieldHeaderHtml(f, reqBadge, hintHtml)}
             ${mediaBelow}
             <div class="space-y-2 pt-1">
               <div class="flex items-center gap-1.5 flex-wrap">
@@ -2632,13 +2667,7 @@ function normalizeMediaList(fieldOrMedia) {
         return `
           <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-3" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${mediaAbove}
-            <div class="flex items-start justify-between gap-2">
-              <div>
-                <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Matriks Rubrik Penilaian')}${reqBadge}</label>
-                ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
-              </div>
-              ${hintHtml}
-            </div>
+            ${renderClientFieldHeaderHtml(f, reqBadge, hintHtml)}
             ${mediaBelow}
 
             <!-- Desktop / Tablet Table View -->
@@ -2700,13 +2729,7 @@ function normalizeMediaList(fieldOrMedia) {
         return `
           <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-3" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${mediaAbove}
-            <div class="flex items-start justify-between gap-2">
-              <div>
-                <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Urutan Prioritas / Peringkat')}${reqBadge}</label>
-                <p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description || 'Gunakan tombol panah ▲ / ▼ untuk menyusun urutan dari paling prioritas (1) ke bawah.')}</p>
-              </div>
-              ${hintHtml}
-            </div>
+            ${renderClientFieldHeaderHtml(f, reqBadge, hintHtml)}
             ${mediaBelow}
             <div id="rankingListContainer_${f.id}" class="space-y-1.5 pt-1">
               ${itemsHtml}
@@ -2721,13 +2744,7 @@ function normalizeMediaList(fieldOrMedia) {
         return `
           <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-3" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${mediaAbove}
-            <div class="flex items-start justify-between gap-2">
-              <div>
-                <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Tanda Tangan Digital Pengesahan')}${reqBadge}</label>
-                <p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description || 'Bubuhkan tanda tangan Anda di dalam kotak di bawah ini menggunakan jari sentuh atau kursor mouse.')}</p>
-              </div>
-              ${hintHtml}
-            </div>
+            ${renderClientFieldHeaderHtml(f, reqBadge, hintHtml)}
             ${mediaBelow}
             <div class="space-y-2 pt-1">
               <div class="relative bg-white rounded-2xl border-2 border-dashed border-zinc-300 hover:border-zinc-400 overflow-hidden shadow-inner flex flex-col items-center justify-center">
@@ -2763,13 +2780,7 @@ function normalizeMediaList(fieldOrMedia) {
         return `
           <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2.5" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
             ${mediaAbove}
-            <div class="flex items-start justify-between gap-2">
-              <div>
-                <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Tautan / Link Berkas')}${reqBadge}</label>
-                ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
-              </div>
-              ${hintHtml}
-            </div>
+            ${renderClientFieldHeaderHtml(f, reqBadge, hintHtml)}
             ${mediaBelow}
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               <div class="relative flex-1">
@@ -2804,10 +2815,7 @@ function normalizeMediaList(fieldOrMedia) {
         const fileObj = (savedVal && typeof savedVal === 'object' && savedVal.name) ? savedVal : (customUploadedFilesMap[f.id] || null);
         return `
           <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-3" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
-            <div>
-              <label class="block text-xs sm:text-sm font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Unggah Berkas / Dokumen')}${reqBadge}</label>
-              <p class="text-[11.5px] text-zinc-500 leading-relaxed mt-0.5 math-renderable">${smartMathFormat(f.description || 'Mendukung berkas PDF, PPTX, DOCX, Foto JPG/PNG (Maks 10 MB).')}</p>
-            </div>
+            ${renderClientFieldHeaderHtml(f, reqBadge, '')}
             <div class="p-4 bg-white rounded-xl border border-dashed border-zinc-300 hover:border-zinc-400 flex flex-col sm:flex-row items-center justify-between gap-3 transition">
               <div class="flex items-center gap-3 min-w-0">
                 <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-200 flex items-center justify-center shrink-0">
@@ -2848,8 +2856,7 @@ function normalizeMediaList(fieldOrMedia) {
       if (f.type === 'DATE') {
         return `
           <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
-            <label class="block text-xs font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Tanggal')}${reqBadge}</label>
-            ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed math-renderable">${smartMathFormat(f.description)}</p>` : ''}
+            ${renderClientFieldHeaderHtml(f, reqBadge, '')}
             <input 
               type="date" 
               value="${savedVal}" 
@@ -2865,8 +2872,7 @@ function normalizeMediaList(fieldOrMedia) {
       if (f.type === 'TIME') {
         return `
           <div class="bg-zinc-50/60 p-4 sm:p-5 rounded-2xl border border-zinc-200/80 space-y-2" data-custom-required="${f.required ? 'true' : 'false'}" data-field-id="${f.id}">
-            <label class="block text-xs font-bold text-zinc-900 leading-snug math-renderable">${smartMathFormat(f.label || 'Waktu')}${reqBadge}</label>
-            ${f.description ? `<p class="text-[11.5px] text-zinc-500 leading-relaxed math-renderable">${smartMathFormat(f.description)}</p>` : ''}
+            ${renderClientFieldHeaderHtml(f, reqBadge, '')}
             <input 
               type="time" 
               value="${savedVal}" 
@@ -2912,12 +2918,14 @@ function normalizeMediaList(fieldOrMedia) {
 
         return `
           <div class="bg-white p-4 sm:p-6 rounded-2xl border border-zinc-200/80 space-y-4 shadow-xs">
-            <div class="border-b border-zinc-100 pb-3 flex items-center justify-between gap-2">
-              <div>
-                <h3 class="text-sm sm:text-base font-bold text-zinc-900 math-renderable">${smartMathFormat(f.label || 'Identitas Penilai')}${reqBadge}</h3>
-                <p class="text-xs text-zinc-500 mt-0.5 math-renderable">${smartMathFormat(f.description || 'Silakan lengkapi identitas Anda sebelum memulai penilaian.')}</p>
+            ${(f.label?.trim() || f.description?.trim()) ? `
+              <div class="border-b border-zinc-100 pb-3 flex items-center justify-between gap-2">
+                <div>
+                  ${f.label?.trim() ? `<h3 class="text-sm sm:text-base font-bold text-zinc-900 math-renderable">${smartMathFormat(f.label)}${reqBadge}</h3>` : ''}
+                  ${f.description?.trim() ? `<p class="text-xs text-zinc-500 mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
+                </div>
               </div>
-            </div>
+            ` : ''}
 
             <!-- 1. Peran Penilai Dropdown -->
             <div class="space-y-1.5">
@@ -3065,15 +3073,23 @@ function normalizeMediaList(fieldOrMedia) {
       if (f.type === 'CORE_GROUP_SELECT') {
         return `
           <div class="bg-zinc-50/60 p-4 sm:p-6 rounded-2xl border border-zinc-200/80 space-y-4">
-            <div class="flex items-center justify-between border-b border-zinc-200 pb-3">
-              <div>
-                <h3 class="text-sm sm:text-base font-bold text-zinc-900 math-renderable">${smartMathFormat(f.label || 'Kelompok yang Dinilai')}${reqBadge}</h3>
-                <p class="text-xs text-zinc-500 mt-0.5 math-renderable">${smartMathFormat(f.description || appConfig['Pilih_Kelompok_Label'] || 'Pilih salah satu kelompok yang sedang presentasi.')}</p>
+            ${(f.label?.trim() || f.description?.trim() || appConfig['Pilih_Kelompok_Label']) ? `
+              <div class="flex items-center justify-between border-b border-zinc-200 pb-3">
+                <div>
+                  ${f.label?.trim() ? `<h3 class="text-sm sm:text-base font-bold text-zinc-900 math-renderable">${smartMathFormat(f.label)}${reqBadge}</h3>` : ''}
+                  ${(f.description?.trim() || appConfig['Pilih_Kelompok_Label']) ? `<p class="text-xs text-zinc-500 mt-0.5 math-renderable">${smartMathFormat(f.description || appConfig['Pilih_Kelompok_Label'])}</p>` : ''}
+                </div>
+                <button type="button" onclick="fetchInitialFormData(true)" class="p-1.5 rounded-lg border border-zinc-200 hover:bg-white text-zinc-600 text-xs transition cursor-pointer" title="Perbarui daftar">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                </button>
               </div>
-              <button type="button" onclick="fetchInitialFormData(true)" class="p-1.5 rounded-lg border border-zinc-200 hover:bg-white text-zinc-600 text-xs transition cursor-pointer" title="Perbarui daftar">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-              </button>
-            </div>
+            ` : `
+              <div class="flex items-center justify-end pb-1">
+                <button type="button" onclick="fetchInitialFormData(true)" class="p-1.5 rounded-lg border border-zinc-200 hover:bg-white text-zinc-600 text-xs transition cursor-pointer" title="Perbarui daftar">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                </button>
+              </div>
+            `}
 
             <!-- Loading State -->
             <div id="groupsLoading" class="py-6 text-center text-xs text-zinc-500 flex flex-col items-center justify-center gap-2">
@@ -3099,15 +3115,23 @@ function normalizeMediaList(fieldOrMedia) {
         const maxVal = parseInt(appConfig["Nilai_Kelompok_Max"] || 100);
         return `
           <div class="bg-zinc-50/60 p-4 sm:p-6 rounded-2xl border border-zinc-200/80 space-y-4">
-            <div class="flex items-center justify-between border-b border-zinc-200 pb-3">
-              <div>
-                <h3 class="text-sm sm:text-base font-bold text-zinc-900 math-renderable">${smartMathFormat(f.label || 'Nilai Presentasi Kelompok')}${reqBadge}</h3>
-                <p class="text-xs text-zinc-500 mt-0.5 math-renderable">${smartMathFormat(f.description || 'Penilaian keseluruhan penguasaan materi dan performa.')}</p>
+            ${(f.label?.trim() || f.description?.trim()) ? `
+              <div class="flex items-center justify-between border-b border-zinc-200 pb-3">
+                <div>
+                  ${f.label?.trim() ? `<h3 class="text-sm sm:text-base font-bold text-zinc-900 math-renderable">${smartMathFormat(f.label)}${reqBadge}</h3>` : ''}
+                  ${f.description?.trim() ? `<p class="text-xs text-zinc-500 mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
+                </div>
+                <span id="scoreGradeBadge" class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-zinc-100 text-zinc-800 border border-zinc-200">
+                  Nilai A (4,00)
+                </span>
               </div>
-              <span id="scoreGradeBadge" class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-zinc-100 text-zinc-800 border border-zinc-200">
-                Nilai A (4,00)
-              </span>
-            </div>
+            ` : `
+              <div class="flex items-center justify-end pb-1">
+                <span id="scoreGradeBadge" class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-zinc-100 text-zinc-800 border border-zinc-200">
+                  Nilai A (4,00)
+                </span>
+              </div>
+            `}
 
             <div class="p-4 rounded-xl bg-white border border-zinc-200 space-y-4 shadow-2xs">
               <div class="flex flex-wrap items-center gap-1.5">
@@ -3164,15 +3188,23 @@ function normalizeMediaList(fieldOrMedia) {
         const maxVote = parseInt(appConfig["Maksimal_Pilihan_Presentator_Terbaik"] || 2);
         return `
           <div class="bg-zinc-50/60 p-4 sm:p-6 rounded-2xl border border-zinc-200/80 space-y-4">
-            <div class="flex items-center justify-between border-b border-zinc-200 pb-3">
-              <div>
-                <h3 class="text-sm sm:text-base font-bold text-zinc-900 math-renderable">${smartMathFormat(f.label || 'Presentator Terbaik')}${reqBadge}</h3>
-                <p class="text-xs text-zinc-500 mt-0.5 math-renderable">${smartMathFormat(f.description || `Pilih maksimal ${maxVote} pemateri terbaik.`)}</p>
+            ${(f.label?.trim() || f.description?.trim()) ? `
+              <div class="flex items-center justify-between border-b border-zinc-200 pb-3">
+                <div>
+                  ${f.label?.trim() ? `<h3 class="text-sm sm:text-base font-bold text-zinc-900 math-renderable">${smartMathFormat(f.label)}${reqBadge}</h3>` : ''}
+                  ${f.description?.trim() ? `<p class="text-xs text-zinc-500 mt-0.5 math-renderable">${smartMathFormat(f.description || `Pilih maksimal ${maxVote} pemateri terbaik.`)}</p>` : ''}
+                </div>
+                <span id="bestPresenterCountBadge" class="text-xs font-mono font-semibold bg-zinc-100 text-zinc-700 border border-zinc-200 px-2.5 py-1 rounded-lg">
+                  0/${maxVote} Terpilih
+                </span>
               </div>
-              <span id="bestPresenterCountBadge" class="text-xs font-mono font-semibold bg-zinc-100 text-zinc-700 border border-zinc-200 px-2.5 py-1 rounded-lg">
-                0/${maxVote} Terpilih
-              </span>
-            </div>
+            ` : `
+              <div class="flex items-center justify-end border-b border-zinc-200 pb-2">
+                <span id="bestPresenterCountBadge" class="text-xs font-mono font-semibold bg-zinc-100 text-zinc-700 border border-zinc-200 px-2.5 py-1 rounded-lg">
+                  0/${maxVote} Terpilih
+                </span>
+              </div>
+            `}
             <div id="bestPresenterList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5"></div>
           </div>
         `;
@@ -3182,10 +3214,12 @@ function normalizeMediaList(fieldOrMedia) {
       if (f.type === 'CORE_MEMBER_FEEDBACK') {
         return `
           <div class="bg-zinc-50/60 p-4 sm:p-6 rounded-2xl border border-zinc-200/80 space-y-4">
-            <div class="border-b border-zinc-200 pb-3">
-              <h3 class="text-sm sm:text-base font-bold text-zinc-900 math-renderable">${smartMathFormat(f.label || 'Evaluasi Masukan Tiap Pemateri')}${reqBadge}</h3>
-              <p class="text-xs text-zinc-500 mt-0.5 math-renderable">${smartMathFormat(f.description || 'Berikan masukan apresiasi konstruktif untuk setiap anggota pemateri.')}</p>
-            </div>
+            ${(f.label?.trim() || f.description?.trim()) ? `
+              <div class="border-b border-zinc-200 pb-3">
+                ${f.label?.trim() ? `<h3 class="text-sm sm:text-base font-bold text-zinc-900 math-renderable">${smartMathFormat(f.label)}${reqBadge}</h3>` : ''}
+                ${f.description?.trim() ? `<p class="text-xs text-zinc-500 mt-0.5 math-renderable">${smartMathFormat(f.description)}</p>` : ''}
+              </div>
+            ` : ''}
             <div id="evaluationInputsContainer" class="space-y-4">
               <div id="evaluationEmptyNotice" class="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs text-center">
                 Silakan pilih kelompok yang dinilai terlebih dahulu pada bagian sebelumnya untuk menampilkan formulir ulasan pemateri.
@@ -5326,7 +5360,8 @@ function normalizeMediaList(fieldOrMedia) {
 
       // 6. Validasi Kustom Pertanyaan Dinamis & Batasan Lanjutan
       const customContainers = currentStageSec.querySelectorAll('[data-field-id]');
-      for (let container of customContainers) {
+      for (let i = 0; i < customContainers.length; i++) {
+        const container = customContainers[i];
         const fieldId = container.getAttribute('data-field-id');
         const isRequired = container.getAttribute('data-custom-required') === 'true';
         if (!fieldId) continue;
@@ -5340,6 +5375,10 @@ function normalizeMediaList(fieldOrMedia) {
           }
         }
 
+        const qName = (fDef?.label && fDef.label.trim() && fDef.label.trim().toLowerCase() !== 'pertanyaan tanpa judul') 
+          ? fDef.label.trim() 
+          : ((fDef?.description && fDef.description.trim()) || ('Pertanyaan #' + (i + 1)));
+
         const ans = clientCustomFormAnswers[fieldId];
         const hasFile = customUploadedFilesMap && customUploadedFilesMap[fieldId];
 
@@ -5350,7 +5389,7 @@ function normalizeMediaList(fieldOrMedia) {
               container.scrollIntoView({ behavior: 'smooth', block: 'center' });
               container.classList.add("ring-2", "ring-rose-500", "border-rose-500");
               setTimeout(() => container.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
-              showToast(`Mohon berikan rating bintang pada '${fDef.label || 'Pertanyaan'}' sebelum melanjutkan.`, "warning");
+              showToast(`Mohon berikan rating bintang pada '${qName}' sebelum melanjutkan.`, "warning");
               return false;
             }
           } else if (fDef?.type === 'MATRIX_GRID') {
@@ -5361,7 +5400,7 @@ function normalizeMediaList(fieldOrMedia) {
               container.scrollIntoView({ behavior: 'smooth', block: 'center' });
               container.classList.add("ring-2", "ring-rose-500", "border-rose-500");
               setTimeout(() => container.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
-              showToast(`Mohon lengkapi seluruh baris matriks (${answeredCount}/${rows.length}) pada '${fDef.label || 'Rubrik'}' sebelum melanjutkan.`, "warning");
+              showToast(`Mohon lengkapi seluruh baris matriks (${answeredCount}/${rows.length}) pada '${qName}' sebelum melanjutkan.`, "warning");
               return false;
             }
           } else if (fDef?.type === 'SIGNATURE') {
@@ -5378,14 +5417,14 @@ function normalizeMediaList(fieldOrMedia) {
               container.scrollIntoView({ behavior: 'smooth', block: 'center' });
               container.classList.add("ring-2", "ring-rose-500", "border-rose-500");
               setTimeout(() => container.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
-              showToast(`Mohon pilih opsi pada '${fDef.label || 'Pertanyaan'}' sebelum melanjutkan.`, "warning");
+              showToast(`Mohon pilih opsi pada '${qName}' sebelum melanjutkan.`, "warning");
               return false;
             }
           } else if ((ans === undefined || ans === null || String(ans).trim() === '') && !hasFile) {
             container.scrollIntoView({ behavior: 'smooth', block: 'center' });
             container.classList.add("ring-2", "ring-rose-500", "border-rose-500");
             setTimeout(() => container.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
-            showToast(`Pertanyaan '${fDef?.label || 'ini'}' wajib diisi sebelum melanjutkan.`, "warning");
+            showToast(`Pertanyaan '${qName}' wajib diisi sebelum melanjutkan.`, "warning");
             return false;
           }
         }
@@ -5398,14 +5437,14 @@ function normalizeMediaList(fieldOrMedia) {
               container.scrollIntoView({ behavior: 'smooth', block: 'center' });
               container.classList.add("ring-2", "ring-rose-500", "border-rose-500");
               setTimeout(() => container.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
-              showToast(`Jawaban '${fDef.label || 'ini'}' minimal ${fDef.minChars} karakter (saat ini ${textLen} karakter).`, "warning");
+              showToast(`Jawaban '${qName}' minimal ${fDef.minChars} karakter (saat ini ${textLen} karakter).`, "warning");
               return false;
             }
             if (fDef.maxChars && textLen > fDef.maxChars) {
               container.scrollIntoView({ behavior: 'smooth', block: 'center' });
               container.classList.add("ring-2", "ring-rose-500", "border-rose-500");
               setTimeout(() => container.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
-              showToast(`Jawaban '${fDef.label || 'ini'}' melebihi batas maksimal ${fDef.maxChars} karakter.`, "warning");
+              showToast(`Jawaban '${qName}' melebihi batas maksimal ${fDef.maxChars} karakter.`, "warning");
               return false;
             }
           }
@@ -7491,11 +7530,15 @@ function normalizeMediaList(fieldOrMedia) {
           const ans = payload.customAnswers[fldId];
           if (ans) {
             let fldDef = null;
-            let fldLabel = fldId;
             if (currentFormSchema && Array.isArray(currentFormSchema.tahapan)) {
               for (let stg of currentFormSchema.tahapan) {
                 fldDef = (stg.fields || []).find(f => f.id === fldId);
-                if (fldDef) { fldLabel = fldDef.label || fldId; break; }
+                if (fldDef) { 
+                  fldLabel = (fldDef.label && fldDef.label.trim() && fldDef.label.trim().toLowerCase() !== 'pertanyaan tanpa judul') 
+                    ? fldDef.label.trim() 
+                    : (fldDef.description?.trim() || fldId); 
+                  break; 
+                }
               }
             }
 

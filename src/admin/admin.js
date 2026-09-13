@@ -5399,7 +5399,7 @@
       }
     }
 
-    function insertQuestionDirectBelow(sIdx, fIdx, type = "RADIO", label = "Pertanyaan tanpa judul") {
+    function insertQuestionDirectBelow(sIdx, fIdx, type = "RADIO", label = "") {
       pushUndoSnapshot('Tambah Pertanyaan');
       initOrNormalizeFormSchema();
       if (sIdx === undefined || sIdx === null || sIdx < 0) sIdx = 0;
@@ -5448,13 +5448,15 @@
 
       const newStage = {
         id: newStageId,
-        nama: `Bagian ${insertAt + 1} Tanpa Judul`,
-        petunjuk: "Ketik petunjuk khusus untuk bagian evaluasi ini...",
+        title: "",
+        nama: "",
+        description: "",
+        petunjuk: "",
         fields: [
           {
             id: newFieldId,
             type: "RADIO",
-            label: "Pertanyaan tanpa judul",
+            label: "",
             description: "",
             required: false,
             scope: "GLOBAL",
@@ -7490,6 +7492,7 @@
                           ${fIdx + 1}
                         </span>
                         <span class="text-[11px] font-bold text-zinc-500 uppercase tracking-wider font-mono">Pertanyaan</span>
+                        ${(!f.label || !f.label.trim() || f.label.trim().toLowerCase() === 'pertanyaan tanpa judul') ? '<span class="text-[10px] text-zinc-400 font-normal italic lowercase">(tanpa judul)</span>' : ''}
                       </div>
                       ${getRichTextToolbarHtml(`fieldLabelInput_${sIdx}_${fIdx}`)}
                     </div>
@@ -7498,7 +7501,7 @@
                         rows="1" 
                         id="fieldLabelInput_${sIdx}_${fIdx}"
                         data-field-id="${f.id}"
-                        placeholder="Pertanyaan tanpa judul"
+                        placeholder="Pertanyaan tanpa judul (opsional)"
                         oninput="autoResizeTextarea(this); handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'label', this.value)"
                         class="w-full text-sm sm:text-base font-semibold text-zinc-900 bg-zinc-100/90 hover:bg-zinc-100 focus:bg-zinc-100 border-b-2 border-zinc-300 hover:border-zinc-500 focus:border-indigo-600 px-3 py-2.5 rounded-t-lg outline-none transition resize-none overflow-hidden block whitespace-pre-wrap break-words leading-relaxed"
                       >${escapeHtml(f.label)}</textarea>
@@ -7736,14 +7739,14 @@
               <!-- Stage Title Field Block -->
               <div class="group/fieldBlock space-y-1.5">
                 <div class="flex items-center justify-between flex-wrap gap-1">
-                  <label class="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider font-mono">Judul Bagian</label>
+                  <label class="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider font-mono">Judul Bagian (Opsional)</label>
                   ${getRichTextToolbarHtml(`stageTitleInput_${sIdx}`)}
                 </div>
                 <textarea 
                   rows="1" 
                   id="stageTitleInput_${sIdx}"
                   data-stage-id="${stage.id || ('tahap_' + (sIdx+1))}"
-                  placeholder="Judul Bagian (contoh: Evaluasi Presentasi, dll)..."
+                  placeholder="Judul Bagian (opsional, contoh: Evaluasi Presentasi, dll)..."
                   oninput="autoResizeTextarea(this); handleInlineStageUpdate(${sIdx}, 'title', this.value)"
                   class="w-full text-base sm:text-xl font-bold text-zinc-900 bg-transparent border-b-2 border-zinc-200 hover:border-zinc-400 focus:border-indigo-600 px-1 py-1.5 outline-none transition resize-none overflow-hidden block whitespace-pre-wrap break-words leading-snug"
                 >${escapeHtml(stage.title)}</textarea>

@@ -2,6 +2,26 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.4.96] - 2026-09-13
+
+### 🧩 Fleksibilitas Penuh: Dukungan Pertanyaan & Bagian (Section) Tanpa Judul
+- **🎯 Dukungan 100% Pertanyaan Tanpa Judul (Untitled Questions):**
+  - Mengizinkan pembuatan pertanyaan sepenuhnya tanpa judul/label (`f.label` kosong) di Form Builder maupun form aktif tanpa memaksakan teks tiruan seperti `"Pertanyaan tanpa judul"` atau `"Pertanyaan"`.
+  - **Penyajian Cerdas di Sisi Mahasiswa/Responden (`renderClientFieldHeaderHtml`):**
+    - Jika pertanyaan memiliki deskripsi namun tanpa judul, deskripsi bertindak sebagai teks instruksi utama dengan tanda wajib isi `*` terintegrasi.
+    - Jika pertanyaan tidak memiliki judul maupun deskripsi, kontainer label dan header dieliminasi total (*zero DOM bloat*), sehingga bidang input (radio, checkbox, dropdown, rating, teks, dsb.) langsung tampil rapi dan elegan.
+- **📑 Judul Bagian/Tahapan Opsional (Optional Section/Stage Title):**
+  - Judul tahapan/bagian form builder kini berlabel *Judul Bagian (Opsional)*.
+  - **Eliminasi Kartu Header Berlebih (*Zero Wasted Vertical Space*):** Pada formulir 1-bagian tanpa judul dan tanpa deskripsi, kartu header bagian (`#stageHeaderCard_1`) dihilangkan seluruhnya sehingga pertanyaan langsung berada di posisi atas kanvas responden.
+  - **Navigasi Multi-Tahap Adaptif:** Pada formulir multi-tahap tanpa judul bagian, wizard tahapan tetap navigatif dengan indikator badge ringkas `Bagian N dari Total`.
+- **🛡️ Penanganan Validasi & Tinjauan Pra-Kirim Komunikatif:**
+  - Validasi wajib isi pada pertanyaan tanpa judul menampilkan notifikasi ramah pengguna: `"Pertanyaan #N wajib diisi!"` (berbasis nomor urut atau cuplikan deskripsi), mencegah galat kosong atau ambiguitas.
+  - Modal Tinjauan Pra-Kirim (*Pre-Submit Review*) dan penyimpanan draf lokal mengenali pertanyaan tanpa judul secara akurat.
+- **⚡ Pembaruan Versi Cache & Service Worker:**
+  - Meningkatkan versi token cache Service Worker, antarmuka `index.html`, dan `admin.html` ke `v2.4.96`.
+
+---
+
 ## [2.4.95] - 2026-09-13
 
 ### 🎨 Pembersihan Redundansi Form Builder, Peringkat Presentator Berurutan, Panel Setelan Bersih, & Live Preview Sync
