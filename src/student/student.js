@@ -2141,6 +2141,29 @@ function normalizeMediaList(fieldOrMedia) {
         }
 
         const hasStageHeader = !!stageHeaderHtml;
+        const hasScoringOrVoting = (stage.fields || []).some(f => f.type === 'CORE_SCORE_RUBRIC' || f.type === 'CORE_BEST_PRESENTER');
+        let stageGroupTopicBannerHtml = '';
+        if (hasScoringOrVoting) {
+          stageGroupTopicBannerHtml = `
+            <div class="group-topic-banner ${selectedGroupObj ? '' : 'hidden'} p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-indigo-50/90 via-blue-50/60 to-indigo-50/90 border border-indigo-200/80 text-xs space-y-1.5 shadow-2xs transition-all">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5 font-bold text-indigo-950">
+                  <span class="w-5 h-5 rounded-md bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0 shadow-xs">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                  </span>
+                  <span class="group-banner-name text-xs sm:text-sm font-bold text-zinc-900">${selectedGroupObj ? escapeHtml(selectedGroupObj.name) : 'Kelompok Terpilih'}</span>
+                </div>
+                <span class="text-[10px] font-semibold text-indigo-700 bg-indigo-100/90 px-2 py-0.5 rounded-md border border-indigo-200/80 shrink-0">
+                  Kelompok yang Dinilai
+                </span>
+              </div>
+              <div class="text-[11.5px] sm:text-xs text-zinc-700 leading-snug pt-0.5">
+                <span class="font-semibold text-indigo-950">Topik Presentasi:</span>
+                <span class="group-banner-topic font-medium text-zinc-800 ml-1 math-renderable">${selectedGroupObj && selectedGroupObj.topic ? smartMathFormat(selectedGroupObj.topic) : '<span class="text-zinc-400 italic">Topik belum diatur</span>'}</span>
+              </div>
+            </div>
+          `;
+        }
 
         stagesHtml += `
           <div id="stepSection_${stepNum}" class="step-fade space-y-4 ${stepNum === 1 ? '' : 'hidden'}">
@@ -2155,6 +2178,8 @@ function normalizeMediaList(fieldOrMedia) {
                 </span>
               </div>
             ` : '')}
+
+            ${stageGroupTopicBannerHtml}
 
             <!-- Fields Container (Clean independent cards, zero redundant nesting) -->
             <div class="space-y-4">
@@ -3183,25 +3208,6 @@ function normalizeMediaList(fieldOrMedia) {
               </div>
             `}
 
-            <!-- Dynamic Group & Topic Banner for Scoring -->
-            <div class="group-topic-banner ${selectedGroupObj ? '' : 'hidden'} p-3.5 rounded-xl bg-gradient-to-r from-indigo-50/90 via-blue-50/60 to-indigo-50/90 border border-indigo-200/80 text-xs space-y-1.5 shadow-2xs transition-all">
-              <div class="flex items-center justify-between gap-2">
-                <div class="flex items-center gap-1.5 font-bold text-indigo-950">
-                  <span class="w-5 h-5 rounded-md bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0 shadow-xs">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                  </span>
-                  <span class="group-banner-name text-xs sm:text-sm font-bold text-zinc-900">${selectedGroupObj ? escapeHtml(selectedGroupObj.name) : 'Kelompok Terpilih'}</span>
-                </div>
-                <span class="text-[10px] font-semibold text-indigo-700 bg-indigo-100/90 px-2 py-0.5 rounded-md border border-indigo-200/80 shrink-0">
-                  Kelompok yang Dinilai
-                </span>
-              </div>
-              <div class="text-[11.5px] sm:text-xs text-zinc-700 leading-snug pt-0.5">
-                <span class="font-semibold text-indigo-950">Topik Presentasi:</span>
-                <span class="group-banner-topic font-medium text-zinc-800 ml-1 math-renderable">${selectedGroupObj && selectedGroupObj.topic ? smartMathFormat(selectedGroupObj.topic) : '<span class="text-zinc-400 italic">Topik belum diatur</span>'}</span>
-              </div>
-            </div>
-
             <div class="p-4 rounded-xl bg-zinc-50/70 border border-zinc-200/80 space-y-4 shadow-2xs">
               <div class="flex flex-wrap items-center gap-1.5">
                 <span class="text-[11px] font-semibold text-zinc-400 mr-1 font-mono">Preset:</span>
@@ -3280,25 +3286,6 @@ function normalizeMediaList(fieldOrMedia) {
                 </span>
               </div>
             `}
-
-            <!-- Dynamic Group & Topic Banner for Voting -->
-            <div class="group-topic-banner ${selectedGroupObj ? '' : 'hidden'} p-3 rounded-xl bg-gradient-to-r from-amber-50/90 via-yellow-50/60 to-amber-50/90 border border-amber-200/80 text-xs space-y-1 shadow-2xs transition-all">
-              <div class="flex items-center justify-between gap-2">
-                <div class="flex items-center gap-1.5 font-bold text-amber-950">
-                  <span class="w-5 h-5 rounded-md bg-amber-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0 shadow-xs">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-                  </span>
-                  <span class="group-banner-name text-xs sm:text-sm font-bold text-zinc-900">${selectedGroupObj ? escapeHtml(selectedGroupObj.name) : 'Kelompok Terpilih'}</span>
-                </div>
-                <span class="text-[10px] font-semibold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md border border-amber-200 shrink-0">
-                  Pemilihan Presentator Terbaik
-                </span>
-              </div>
-              <div class="text-[11.5px] sm:text-xs text-zinc-700 leading-snug pt-0.5">
-                <span class="font-semibold text-amber-950">Topik:</span>
-                <span class="group-banner-topic font-medium text-zinc-800 ml-1 math-renderable">${selectedGroupObj && selectedGroupObj.topic ? smartMathFormat(selectedGroupObj.topic) : '<span class="text-zinc-400 italic">Topik belum diatur</span>'}</span>
-              </div>
-            </div>
 
             <div id="bestPresenterList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5"></div>
           </div>
@@ -4906,7 +4893,28 @@ function normalizeMediaList(fieldOrMedia) {
 
       // Check single response restriction (Kunci Respons Ganda)
       if (!isBlocked && (appConfig["Kunci_Respons_Ganda"] === true || appConfig["Kunci_Respons_Ganda"] === 'true')) {
-        if (localStorage.getItem("PGSD_SUBMITTED_" + activeFormId) === "true") {
+        let isSubmittedInStorage = localStorage.getItem("PGSD_SUBMITTED_" + activeFormId) === "true";
+        
+        // Verifikasi dinamis terhadap data riil di Supabase/Rekap
+        const activeNim = (document.getElementById("inputNim")?.value || activeUserAccountNim || "").replace(/\s+/g, "").trim().toLowerCase();
+        const activeEmail = (activeUserAccountEmail || "").trim().toLowerCase();
+        
+        if (currentRekapData && (activeNim || activeEmail)) {
+          const hasInNim = !!(activeNim && currentRekapData.nimToKelompokMap && currentRekapData.nimToKelompokMap[activeNim] && currentRekapData.nimToKelompokMap[activeNim].length > 0);
+          const hasInEmail = !!(activeEmail && currentRekapData.emailToKelompokMap && currentRekapData.emailToKelompokMap[activeEmail] && currentRekapData.emailToKelompokMap[activeEmail].length > 0);
+          
+          if (!hasInNim && !hasInEmail) {
+            // Data di Supabase/Rekap sudah tidak ada (dihapus admin). Buka kunci lokal seketika!
+            if (isSubmittedInStorage) {
+              localStorage.removeItem("PGSD_SUBMITTED_" + activeFormId);
+              isSubmittedInStorage = false;
+            }
+          } else {
+            isSubmittedInStorage = true;
+          }
+        }
+
+        if (isSubmittedInStorage) {
           isBlocked = true;
           blockReason = "ALREADY_SUBMITTED";
           blockTitle = "Respons Telah Terkirim";
@@ -5199,9 +5207,42 @@ function normalizeMediaList(fieldOrMedia) {
       } else {
         isAntiSelfEvalActive = appConfig ? (appConfig["Cegah_Penilaian_Diri"] === true || appConfig["Cegah_Penilaian_Diri"] === "true" || appConfig["Cegah_Penilaian_Diri"] === undefined) : true;
       }
-      const isSingleLockActive = appConfig ? (appConfig["Kunci_Respons_Ganda"] === true || appConfig["Kunci_Respons_Ganda"] === "true" || appConfig["Kunci_Respons_Ganda"] === undefined) : true;
+      // Filter kelompok berdasarkan Sesi Minggu Aktif
+      const activeSesi = (typeof appConfig !== 'undefined' && (appConfig["Sesi_Minggu_Aktif"] || appConfig["Sesi_Aktif"])) 
+        ? (appConfig["Sesi_Minggu_Aktif"] || appConfig["Sesi_Aktif"]).trim() 
+        : (currentFormMeta?.sesiAktif || "Minggu 1");
 
-      groupsData.forEach((grp, idx) => {
+      const isFilterAll = !activeSesi || /^(semua|all|semua sesi|semua minggu)$/i.test(activeSesi);
+      
+      let filteredGroups = groupsData;
+      if (!isFilterAll) {
+        const matches = groupsData.filter(grp => {
+          if (!grp.sesi) return false;
+          return grp.sesi.trim().toLowerCase() === activeSesi.toLowerCase();
+        });
+        if (matches.length > 0) {
+          filteredGroups = matches;
+        }
+      }
+
+      if (!filteredGroups || filteredGroups.length === 0) {
+        if (empty) {
+          empty.innerHTML = `
+            <p class="text-zinc-600">Tidak ada kelompok terdaftar untuk sesi <strong>${escapeHtml(activeSesi)}</strong>.</p>
+            <button type="button" onclick="fetchInitialFormData(true)" class="px-3 py-1.5 rounded-lg bg-zinc-900 text-white font-medium text-xs">Perbarui Data</button>
+          `;
+          empty.classList.remove("hidden");
+        }
+        if (container) container.classList.add("hidden");
+        return;
+      }
+
+      // Jika kelompok terpilih sebelumnya tidak ada di sesi aktif, batalkan pilihan
+      if (selectedGroupObj && !filteredGroups.some(g => g.name === selectedGroupObj.name)) {
+        selectedGroupObj = null;
+      }
+
+      filteredGroups.forEach((grp, idx) => {
         const isOwnGroup = currentEvaluatorRole === 'Mahasiswa' && evaluatorStudentGroup && evaluatorStudentGroup.toLowerCase() === grp.name.toLowerCase();
         const isSelfGroup = isAntiSelfEvalActive && isOwnGroup;
         const isAlreadyFilled = isSingleLockActive && filledGroups.some(fg => fg.toLowerCase() === grp.name.toLowerCase());
@@ -5583,6 +5624,17 @@ function normalizeMediaList(fieldOrMedia) {
       if (percentEl) percentEl.textContent = `${meta.percent}%`;
       if (barEl) barEl.style.width = `${meta.percent}%`;
 
+      // Sync Compact Header Progress Indicator
+      const cBadgeEl = document.getElementById("compactStepBadge");
+      const cTitleEl = document.getElementById("compactStepTitle");
+      const cPercentEl = document.getElementById("compactStepPercent");
+      const cBarEl = document.getElementById("compactProgressBarFill");
+
+      if (cBadgeEl) cBadgeEl.textContent = meta.badge;
+      if (cTitleEl) cTitleEl.textContent = meta.title;
+      if (cPercentEl) cPercentEl.textContent = `${meta.percent}%`;
+      if (cBarEl) cBarEl.style.width = `${meta.percent}%`;
+
       for (let i = 1; i <= totalSteps; i++) {
         const sec = document.getElementById(`stepSection_${i}`);
         const tabBtn = document.getElementById(`stepTab_${i}`);
@@ -5628,7 +5680,20 @@ function normalizeMediaList(fieldOrMedia) {
         if (stageSec) renderAllMathInElement(stageSec);
       }, 40);
 
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (step > 1) {
+        const targetEl = document.getElementById(`stepSection_${step}`) || document.getElementById("assessmentForm");
+        if (targetEl) {
+          const headerEl = document.querySelector("header");
+          const headerHeight = headerEl ? headerEl.offsetHeight : 70;
+          const rect = targetEl.getBoundingClientRect();
+          const targetTop = window.scrollY + rect.top - headerHeight - 14;
+          window.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+        } else {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
 
     function validateStageRequirements(stageIndex) {
@@ -7670,13 +7735,15 @@ function normalizeMediaList(fieldOrMedia) {
       const viewForm = document.getElementById("viewForm");
       const viewRekap = document.getElementById("viewRekap");
       const navTabContainer = document.getElementById("navTabContainer");
+      const compactHeaderProgressBar = document.getElementById("compactHeaderProgressBar");
       const badgeSesiTop = document.getElementById("badgeSesiTop");
 
       if (viewPortal) viewPortal.classList.add("hidden");
       if (viewForm) viewForm.classList.remove("hidden");
       if (viewRekap) viewRekap.classList.add("hidden");
-      if (navTabContainer) navTabContainer.classList.remove("hidden");
-      if (badgeSesiTop) badgeSesiTop.classList.remove("hidden");
+      if (navTabContainer) navTabContainer.classList.add("hidden");
+      if (compactHeaderProgressBar) compactHeaderProgressBar.classList.remove("hidden");
+      if (badgeSesiTop) badgeSesiTop.classList.add("hidden");
 
       const authGate = document.getElementById("formAuthGateSection");
       const overview = document.getElementById("formOverviewSection");
@@ -7714,12 +7781,14 @@ function normalizeMediaList(fieldOrMedia) {
       const viewForm = document.getElementById("viewForm");
       const viewRekap = document.getElementById("viewRekap");
       const navTabContainer = document.getElementById("navTabContainer");
+      const compactHeaderProgressBar = document.getElementById("compactHeaderProgressBar");
       const badgeSesiTop = document.getElementById("badgeSesiTop");
 
       if (viewPortal) viewPortal.classList.add("hidden");
       if (viewForm) viewForm.classList.remove("hidden");
       if (viewRekap) viewRekap.classList.add("hidden");
       if (navTabContainer) navTabContainer.classList.remove("hidden");
+      if (compactHeaderProgressBar) compactHeaderProgressBar.classList.add("hidden");
       if (badgeSesiTop) badgeSesiTop.classList.remove("hidden");
 
       const authGate = document.getElementById("formAuthGateSection");
@@ -9034,62 +9103,74 @@ function normalizeMediaList(fieldOrMedia) {
       const ctx = canvas.getContext("2d");
 
       // 1. Background
-      ctx.fillStyle = "#f1f5f9";
+      ctx.fillStyle = "#f8fafc";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // 2. White Card Container
       ctx.beginPath();
-      if (ctx.roundRect) ctx.roundRect(40, 40, 920, 1270, 24);
+      if (ctx.roundRect) ctx.roundRect(40, 40, 920, 1270, 20);
       else ctx.rect(40, 40, 920, 1270);
       ctx.fillStyle = "#ffffff";
       ctx.fill();
-      ctx.strokeStyle = "#cbd5e1";
-      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = "#e2e8f0";
+      ctx.lineWidth = 1.5;
       ctx.stroke();
 
-      // 3. Header Banner (Green)
+      // 3. Top Subtle Accent Line (ULM Emerald)
       ctx.beginPath();
-      if (ctx.roundRect) ctx.roundRect(40, 40, 920, 130, [24, 24, 0, 0]);
-      else ctx.rect(40, 40, 920, 130);
+      if (ctx.roundRect) ctx.roundRect(40, 40, 920, 6, [20, 20, 0, 0]);
+      else ctx.rect(40, 40, 920, 6);
       ctx.fillStyle = "#059669";
       ctx.fill();
 
-      // Header Text
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 26px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-      ctx.fillText("UNIVERSITAS LAMBUNG MANGKURAT", 75, 92);
-      ctx.font = "600 16px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-      ctx.fillStyle = "#d1fae5";
-      const rawJurusanReceipt = (appConfig["Jurusan"] || (currentFormMeta && currentFormMeta.jurusan) || "PGSD").trim();
-      let prodiReceiptCanvas = "FKIP • Program Studi Pendidikan Guru Sekolah Dasar (PGSD)";
-      if (rawJurusanReceipt && rawJurusanReceipt.toUpperCase() !== "PGSD") {
-        prodiReceiptCanvas = `FKIP • ${rawJurusanReceipt.toUpperCase().startsWith("PROGRAM STUDI") ? rawJurusanReceipt : `Program Studi ${rawJurusanReceipt}`}`;
-      }
-      ctx.fillText(prodiReceiptCanvas, 75, 128);
-
-      // 4. Receipt Title & Badge
+      // Header Instansi Text
       ctx.fillStyle = "#0f172a";
-      ctx.font = "bold 26px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-      ctx.fillText("TANDA TERIMA PENILAIAN PEER-ASSESSMENT", 75, 220);
+      ctx.font = "bold 22px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      ctx.fillText("UNIVERSITAS LAMBUNG MANGKURAT", 75, 88);
 
-      // Badge "TERVERIFIKASI"
-      ctx.beginPath();
-      if (ctx.roundRect) ctx.roundRect(75, 242, 230, 36, 18);
-      else ctx.rect(75, 242, 230, 36);
-      ctx.fillStyle = "#10b981";
-      ctx.fill();
-
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 14px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-      ctx.fillText("✓ TERVERIFIKASI SISTEM", 95, 266);
-
-      // Ticket ID
+      ctx.font = "600 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
       ctx.fillStyle = "#64748b";
-      ctx.font = "bold 16px monospace";
-      ctx.fillText(`ID TIKET: ${data.idRespons || '-'}`, 325, 266);
+      const rawJurusanReceipt = (appConfig["Jurusan"] || (currentFormMeta && currentFormMeta.jurusan) || "PGSD").trim();
+      let prodiReceiptCanvas = "FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN • PROGRAM STUDI PGSD";
+      if (rawJurusanReceipt && rawJurusanReceipt.toUpperCase() !== "PGSD") {
+        prodiReceiptCanvas = `FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN • ${rawJurusanReceipt.toUpperCase().startsWith("PROGRAM STUDI") ? rawJurusanReceipt.toUpperCase() : `PROGRAM STUDI ${rawJurusanReceipt.toUpperCase()}`}`;
+      }
+      ctx.fillText(prodiReceiptCanvas, 75, 114);
+
+      // Thin divider
+      ctx.strokeStyle = "#f1f5f9";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(75, 136);
+      ctx.lineTo(925, 136);
+      ctx.stroke();
+
+      // 4. Receipt Title & Status Badge
+      ctx.fillStyle = "#0f172a";
+      ctx.font = "bold 24px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      ctx.fillText("BUKTI PENILAIAN PRESENTASI MAHASISWA", 75, 185);
+
+      // Status Badge: "Status: Tercatat Resmi"
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(75, 205, 180, 32, 8);
+      else ctx.rect(75, 205, 180, 32);
+      ctx.fillStyle = "#ecfdf5";
+      ctx.fill();
+      ctx.strokeStyle = "#a7f3d0";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.fillStyle = "#065f46";
+      ctx.font = "bold 12.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      ctx.fillText("Status: Tercatat Resmi", 92, 226);
+
+      // Proof Number
+      ctx.fillStyle = "#64748b";
+      ctx.font = "600 13.5px monospace";
+      ctx.fillText(`No. Bukti: ${data.idRespons || '-'}`, 275, 226);
 
       // 5. Details Table Rows
-      const startY = 305;
+      const startY = 265;
       const rowHeight = 72;
       const nowStr = (data.timestamp ? new Date(data.timestamp) : new Date()).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'medium' }) + " WITA";
       const details = [
@@ -9107,48 +9188,49 @@ function normalizeMediaList(fieldOrMedia) {
       details.forEach((row, i) => {
         const curY = startY + (i * rowHeight);
         ctx.beginPath();
-        if (ctx.roundRect) ctx.roundRect(75, curY, 850, rowHeight - 8, 12);
+        if (ctx.roundRect) ctx.roundRect(75, curY, 850, rowHeight - 8, 10);
         else ctx.rect(75, curY, 850, rowHeight - 8);
         ctx.fillStyle = (i % 2 === 0) ? "#f8fafc" : "#ffffff";
         ctx.fill();
-        ctx.strokeStyle = "#e2e8f0";
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = "#f1f5f9";
+        ctx.lineWidth = 1;
         ctx.stroke();
 
         // Label
         ctx.fillStyle = "#64748b";
-        ctx.font = "600 17px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+        ctx.font = "600 15px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
         ctx.fillText(row[0] + ":", 95, curY + 39);
 
         // Value
         const isHighlight = row[0].includes("Nilai") || row[0].includes("Kelompok yang");
-        ctx.fillStyle = isHighlight ? "#4338ca" : "#0f172a";
-        ctx.font = isHighlight ? "bold 19px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" : "bold 17px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+        ctx.fillStyle = isHighlight ? "#059669" : "#0f172a";
+        ctx.font = isHighlight ? "bold 18px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" : "bold 16px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
         
         const rawVal = String(row[1] || "-");
-        const valText = rawVal.length > 44 ? rawVal.substring(0, 42) + "..." : rawVal;
+        const valText = rawVal.length > 46 ? rawVal.substring(0, 44) + "..." : rawVal;
         ctx.fillText(valText, 340, curY + 39);
       });
 
-      // 6. Verification Footer Box
+      // 6. Clean Academic Footer Box
       const footerBoxY = startY + (details.length * rowHeight) + 15;
       ctx.beginPath();
-      if (ctx.roundRect) ctx.roundRect(75, footerBoxY, 850, 120, 14);
-      else ctx.rect(75, footerBoxY, 850, 120);
+      if (ctx.roundRect) ctx.roundRect(75, footerBoxY, 850, 100, 12);
+      else ctx.rect(75, footerBoxY, 850, 100);
       ctx.fillStyle = "#f8fafc";
       ctx.fill();
-      ctx.strokeStyle = "#cbd5e1";
-      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = "#e2e8f0";
+      ctx.lineWidth = 1;
       ctx.stroke();
 
       ctx.fillStyle = "#0f172a";
-      ctx.font = "bold 15px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      ctx.font = "bold 14px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("Bukti tanda terima ini sah dan tercatat resmi pada sistem evaluasi perkuliahan FKIP ULM.", canvas.width / 2, footerBoxY + 45);
+      ctx.fillText("Diterbitkan oleh Portal Akademik FKIP Universitas Lambung Mangkurat", canvas.width / 2, footerBoxY + 38);
       ctx.fillStyle = "#64748b";
-      ctx.font = "italic 13.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-      ctx.fillText("Simpan bukti ini sebagai konfirmasi resmi keikutsertaan penilaian perkuliahan.", canvas.width / 2, footerBoxY + 75);
-      ctx.fillText(`Timestamp Keabsahan: ${new Date().toISOString()}`, canvas.width / 2, footerBoxY + 98);
+      ctx.font = "12px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      ctx.fillText("Dokumen ini merupakan konfirmasi resmi keikutsertaan penilaian perkuliahan.", canvas.width / 2, footerBoxY + 62);
+      ctx.font = "11.5px monospace";
+      ctx.fillText(`Waktu Perekaman: ${nowStr}`, canvas.width / 2, footerBoxY + 82);
       ctx.textAlign = "left";
 
       // 7. Trigger Download
@@ -9193,28 +9275,25 @@ function normalizeMediaList(fieldOrMedia) {
         <div class="print-page-wrapper" style="padding: 24px 32px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #0f172a; max-width: 720px; margin: 0 auto; background: #ffffff;">
           
           <!-- Header Instansi -->
-          <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #059669; padding-bottom: 14px; margin-bottom: 20px;">
-            <div style="display: flex; align-items: center; gap: 14px;">
-              <div style="width: 44px; height: 44px; border-radius: 10px; background: #059669; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact;">✓</div>
-              <div>
-                <h1 style="font-size: 16px; font-weight: 800; color: #065f46; margin: 0; line-height: 1.2;">UNIVERSITAS LAMBUNG MANGKURAT</h1>
-                <p style="font-size: 11px; font-weight: 600; color: #475569; margin: 3px 0 0 0;">${prodiReceiptPrint}</p>
-              </div>
+          <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #059669; padding-bottom: 14px; margin-bottom: 20px;">
+            <div>
+              <h1 style="font-size: 16px; font-weight: 800; color: #0f172a; margin: 0; line-height: 1.2;">UNIVERSITAS LAMBUNG MANGKURAT</h1>
+              <p style="font-size: 11px; font-weight: 600; color: #64748b; margin: 3px 0 0 0;">${prodiReceiptPrint}</p>
             </div>
             <div style="text-align: right;">
-              <span style="display: inline-block; font-size: 10px; font-weight: 800; background: #d1fae5; color: #065f46; padding: 4px 10px; border-radius: 9999px; border: 1px solid #6ee7b7; letter-spacing: 0.5px; -webkit-print-color-adjust: exact; print-color-adjust: exact;">✓ TERVERIFIKASI SISTEM</span>
-              <p style="font-family: monospace; font-size: 11px; font-weight: 700; color: #64748b; margin: 4px 0 0 0;">${finalId}</p>
+              <span style="display: inline-block; font-size: 10.5px; font-weight: 700; background: #ecfdf5; color: #065f46; padding: 4px 10px; border-radius: 6px; border: 1px solid #a7f3d0; letter-spacing: 0.3px; -webkit-print-color-adjust: exact; print-color-adjust: exact;">Status: Tercatat Resmi</span>
+              <p style="font-family: monospace; font-size: 11px; font-weight: 700; color: #64748b; margin: 4px 0 0 0;">No. Bukti: ${finalId}</p>
             </div>
           </div>
 
           <!-- Title -->
-          <div style="text-align: center; margin-bottom: 22px;">
-            <h2 style="font-size: 15px; font-weight: 800; text-transform: uppercase; color: #0f172a; margin: 0; letter-spacing: 0.4px;">BUKTI TANDA TERIMA PENILAIAN PEER-ASSESSMENT</h2>
-            <p style="font-size: 11px; color: #64748b; margin: 4px 0 0 0;">Dokumen ini adalah bukti sah perekaman penilaian perkuliahan digital.</p>
+          <div style="text-align: center; margin-bottom: 20px;">
+            <h2 style="font-size: 15px; font-weight: 800; text-transform: uppercase; color: #0f172a; margin: 0; letter-spacing: 0.4px;">BUKTI PENILAIAN PRESENTASI MAHASISWA</h2>
+            <p style="font-size: 11px; color: #64748b; margin: 4px 0 0 0;">Konfirmasi keikutsertaan evaluasi perkuliahan resmi mahasiswa.</p>
           </div>
 
           <!-- Data Table -->
-          <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #cbd5e1; border-radius: 10px; overflow: hidden; margin-bottom: 22px; font-size: 12.5px;">
+          <table style="width: 100%; border-collapse: collapse; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; margin-bottom: 20px; font-size: 12px;">
             <tbody>
               <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                 <td style="padding: 10px 14px; color: #64748b; font-weight: 600; width: 34%; border-bottom: 1px solid #e2e8f0;">NIM Penilai</td>
@@ -9230,11 +9309,11 @@ function normalizeMediaList(fieldOrMedia) {
               </tr>
               <tr style="background: #ffffff; border-bottom: 1px solid #e2e8f0;">
                 <td style="padding: 10px 14px; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0;">Kelompok yang Dinilai</td>
-                <td style="padding: 10px 14px; font-weight: 800; color: #4338ca; border-bottom: 1px solid #e2e8f0;">${payload.kelompok || '-'}</td>
+                <td style="padding: 10px 14px; font-weight: 800; color: #059669; border-bottom: 1px solid #e2e8f0;">${payload.kelompok || '-'}</td>
               </tr>
               <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                 <td style="padding: 10px 14px; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0;">Nilai / Skor Kelompok</td>
-                <td style="padding: 10px 14px; font-weight: 800; font-size: 14.5px; color: #059669; border-bottom: 1px solid #e2e8f0;">${payload.nilaiKelompok !== undefined ? payload.nilaiKelompok : 0} / 100</td>
+                <td style="padding: 10px 14px; font-weight: 800; font-size: 14px; color: #059669; border-bottom: 1px solid #e2e8f0;">${payload.nilaiKelompok !== undefined ? payload.nilaiKelompok : 0} / 100</td>
               </tr>
               <tr style="background: #ffffff; border-bottom: 1px solid #e2e8f0;">
                 <td style="padding: 10px 14px; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0;">Presentator Terbaik</td>
@@ -9249,21 +9328,20 @@ function normalizeMediaList(fieldOrMedia) {
                 <td style="padding: 10px 14px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #e2e8f0;">${appConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || '-'}</td>
               </tr>
               <tr style="background: #f8fafc; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
-                <td style="padding: 10px 14px; color: #64748b; font-weight: 600;">Waktu Pengiriman Resmi</td>
+                <td style="padding: 10px 14px; color: #64748b; font-weight: 600;">Waktu Pengiriman</td>
                 <td style="padding: 10px 14px; font-family: monospace; font-weight: 700; color: #0f172a;">${nowStr}</td>
               </tr>
             </tbody>
           </table>
 
           <!-- Footer Verification Box -->
-          <div style="border: 1px dashed #94a3b8; border-radius: 10px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px; background: #f8fafc; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+          <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; background: #f8fafc; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
             <div style="font-size: 11px; color: #475569; line-height: 1.45;">
-              <strong style="color: #0f172a; display: block; margin-bottom: 2px; font-size: 11.5px;">Verifikasi Digital Sistem FKIP ULM</strong>
-              Tanda terima ini diterbitkan otomatis oleh sistem dan memiliki kekuatan verifikasi akademik internal yang sah.
+              <strong style="color: #0f172a; display: block; margin-bottom: 2px;">Portal Akademik FKIP Universitas Lambung Mangkurat</strong>
+              Dokumen ini diterbitkan resmi sebagai bukti keikutsertaan penilaian perkuliahan.
             </div>
-            <div style="font-family: monospace; font-size: 10px; font-weight: 700; color: #64748b; text-align: right; white-space: nowrap;">
-              STATUS: TERVERIFIKASI<br>
-              SISTEM: PORTAL EVALUASI AKADEMIK
+            <div style="font-family: monospace; font-size: 10px; font-weight: 700; color: #065f46; text-align: right; white-space: nowrap;">
+              STATUS: TERCATAT RESMI
             </div>
           </div>
 
@@ -9902,10 +9980,12 @@ function normalizeMediaList(fieldOrMedia) {
       const viewRekap = document.getElementById("viewRekap");
       const tabFormBtn = document.getElementById("tabFormBtn");
       const tabRekapBtn = document.getElementById("tabRekapBtn");
-      const navTabContainer = document.getElementById("navTabContainer");
-
       if (viewPortal) viewPortal.classList.add("hidden");
       if (navTabContainer) navTabContainer.classList.remove("hidden");
+      const compactHeaderProgressBar = document.getElementById("compactHeaderProgressBar");
+      if (compactHeaderProgressBar) compactHeaderProgressBar.classList.add("hidden");
+      const badgeSesiTop = document.getElementById("badgeSesiTop");
+      if (badgeSesiTop) badgeSesiTop.classList.remove("hidden");
 
       localStorage.setItem("PGSD_ACTIVE_MAIN_TAB", tab);
       if (updateHash) {

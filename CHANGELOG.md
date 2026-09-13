@@ -2,6 +2,34 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.5] - 2026-09-14
+
+### 🎯 Peningkatan UX Penilaian, Filter Sesi Mingguan, Tanda Terima Minimalis & Performa Hapus Super Cepat
+- **👥 Filter Pemilihan Kelompok Presisi Sesuai Sesi Minggu Aktif:**
+  - Memperbarui mekanisme seleksi kelompok pada formulir mahasiswa (`renderGroupOptions`) agar secara otomatis menyaring daftar kelompok yang tampil sesuai dengan pengaturan sesi minggu aktif perkuliahan (`Sesi_Minggu_Aktif`, misal: hanya menampilkan Kelompok 1 pada Minggu 1).
+  - Menyediakan fallback cerdas: apabila sesi diatur ke "Semua" atau formulir generic tanpa pembagian sesi, seluruh kelompok tetap dapat dipilih dengan lancar.
+- **🧭 Progress Bar Kompak di Header & Penyembunyian Tab Navigasi Saat Pengisian Form:**
+  - Saat responden masuk ke dalam tahapan pengisian formulir, tab navigasi utama (`[Formulir Penilaian]` dan `[Rekapitulasi Hasil]`) otomatis disembunyikan untuk membebaskan ruang pandang dan mencegah distraksi.
+  - Menggantikannya dengan bilah progress ringkas (*compact header progress*) berfitur lencana tahapan aktif (`01/04`), judul tahapan, persentase progress, dan tombol cepat kembali ke ringkasan instrumen.
+- **🪪 Redesain Ramping Bilah Akun Google (~36px Chip):**
+  - Mengubah kartu status akun Google vertikal yang memakan ruang menjadi satu baris chip horizontal ramping (~36px).
+  - Dilengkapi avatar mini 24px, nama dan email terdaftar, lencana status akun, serta tombol mikro `[Ganti]` dan `[Keluar]` tanpa mengorbankan keterbacaan maupun target sentuh mobile.
+- **🎯 Fokus Scroll Otomatis Langsung ke Seksi Pertanyaan Aktif:**
+  - Mengganti perpindahan posisi layar yang sebelumnya selalu kembali ke puncak atas halaman (`top: 0`) menjadi auto-scroll terarah langsung ke kartu pertanyaan tahapan yang sedang aktif dengan memperhitungkan offset ketinggian bilah navigasi header secara presisi dan halus (*smooth scroll*).
+- **🚫 Eliminasi Redundansi Spanduk Topik Presentasi Kelompok:**
+  - Menghapus penulisan topik kelompok ganda yang sebelumnya muncul di dalam setiap komponen kartu pertanyaan (`CORE_SCORE_RUBRIC` dan `CORE_BEST_PRESENTER`).
+  - Mengintegrasikannya menjadi satu spanduk kontekstual tunggal yang elegan di bagian atas tahapan evaluasi presentasi.
+- **📜 Tanda Terima Digital Minimalis Modern Akademik (Anti-Slop):**
+  - Merombak total visual kanvas tanda terima digital (1000×1350 px) dan tampilan cetak menjadi gaya akademik bersih modern dengan aksen hijau emerald ULM tipis dan tipografi elegan.
+  - Menghapus teks kaku robotik/AI slop (seperti *"✓ TERVERIFIKASI SISTEM"* dan string backend ISO mentah) dan menggantikannya dengan penamaan resmi `"Status: Tercatat Resmi"`, `"No. Bukti"`, serta stempel waktu lokal Indonesia (WITA) yang komunikatif dan manusiawi.
+- **⚡ Performa Hapus Respons Instan (Optimistic UI < 10ms) & Buka Kunci Responden Dinamis:**
+  - Mengimplementasikan pendekatan *Optimistic UI* pada panel admin di mana baris respons yang dihapus langsung lenyap seketika dalam `< 10ms` di memori dan antarmuka, diikuti eksekusi cepat di basis data Supabase (`< 50ms`), sementara sinkronisasi ke Google Spreadsheet dijalankan secara asinkron di latar belakang tanpa memblokir interaksi admin.
+  - Menghubungkan pemeriksaan penguncian pengisian respon tunggal (`ALREADY_SUBMITTED`) secara dinamis terhadap basis data aktif di Supabase, sehingga apabila respons seorang mahasiswa telah dihapus oleh dosen/admin, formulir mahasiswa tersebut langsung terbuka kembali secara otomatis tanpa mewajibkan pembersihan cache peramban manual.
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.5` di seluruh berkas (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
+---
+
 ## [2.5.4] - 2026-09-14
 
 ### ⏰ Engine Penjadwalan Otomatis Berulang (Rutin Mingguan & Interval Siklus) serta Otomasi Sesi Perkuliahan

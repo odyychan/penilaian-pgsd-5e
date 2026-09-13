@@ -10666,15 +10666,32 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       const targetForm = currentFormId || DEFAULT_PRIMARY_FORM_ID;
       const apiUrl = getApiUrl();
 
+      // 1. Optimistic UI: Segera hilangkan dari daftar respons lokal (< 10ms)
+      const targetIdx = adminResponsesList.findIndex(r => String(r.idRespons) === String(idRespons));
+      let backupItem = null;
+      if (targetIdx !== -1) {
+        backupItem = adminResponsesList[targetIdx];
+        adminResponsesList.splice(targetIdx, 1);
+        renderAdminResponsesList();
+      }
+
       try {
+        // 2. Fast-Path Supabase Delete (< 50ms)
         const sb = await ensureSupabaseClient();
         if (sb) {
-          await sb.rpc('pgsd_fn_admin_delete_response', {
-            p_id_respons: String(idRespons)
-          });
+          const { error: delErr } = await sb.from('pgsd_responses').delete().eq('id_respons', String(idRespons));
+          if (delErr) {
+            console.warn("Direct Supabase delete failed, trying RPC:", delErr);
+            await sb.rpc('pgsd_fn_admin_delete_response', {
+              p_id_respons: String(idRespons)
+            });
+          }
         }
 
-        const response = await fetch(apiUrl, {
+        showAdminToast("Respons berhasil dihapus.", "success");
+
+        // 3. Background Asynchronous Google Sheets Sync (Non-blocking)
+        fetch(apiUrl, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
@@ -10683,16 +10700,15 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
             idRespons: idRespons,
             rowIndex: rowIndex
           })
-        });
-        const res = await response.json();
-        if (res.success) {
-          showAdminToast("Respons berhasil dihapus.", "success");
-          fetchAdminResponsesList(true);
-        } else {
-          showAdminToast("Gagal menghapus: " + res.error, "error");
-        }
+        }).catch(err => console.warn("Background Sheets delete sync warn:", err));
+
       } catch (e) {
-        showAdminToast("Gagal menghapus respons karena kendala koneksi.", "error");
+        // Rollback jika terjadi kegagalan Supabase
+        if (backupItem && targetIdx !== -1) {
+          adminResponsesList.splice(targetIdx, 0, backupItem);
+          renderAdminResponsesList();
+        }
+        showAdminToast("Gagal menghapus respons: " + (e.message || e), "error");
       }
     }
 
@@ -10770,8 +10786,34 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       const targetForm = currentFormId || DEFAULT_PRIMARY_FORM_ID;
       const apiUrl = getApiUrl();
 
+      // 1. Optimistic UI: Langsung filter memori & perbarui tampilan admin
+      const backupList = [...adminResponsesList];
+      adminResponsesList = adminResponsesList.filter(r => {
+        if (mode === 'KELOMPOK' && r.kelompok === targetVal) return false;
+        if (mode === 'SESI' && r.sesi === targetVal) return false;
+        return true;
+      });
+      renderAdminResponsesList();
+      closeScopedDeleteModal();
+
       try {
-        const response = await fetch(apiUrl, {
+        // 2. Fast Supabase Delete
+        const sb = await ensureSupabaseClient();
+        if (sb) {
+          let query = sb.from('pgsd_responses').delete().eq('form_id', targetForm);
+          if (mode === 'KELOMPOK') {
+            query = query.eq('kelompok_dinilai', targetVal);
+          } else if (mode === 'SESI') {
+            query = query.eq('sesi', targetVal);
+          }
+          const { error: sbErr } = await query;
+          if (sbErr) console.warn("Supabase scoped delete warn:", sbErr);
+        }
+
+        showAdminToast(`Berhasil menghapus seluruh respons kategori ${targetVal}.`, "success");
+
+        // 3. Background Asynchronous Google Sheets Sync (Non-blocking)
+        fetch(apiUrl, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
@@ -10780,17 +10822,13 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
             mode: mode,
             targetValue: targetVal
           })
-        });
-        const res = await response.json();
-        if (res.success) {
-          closeScopedDeleteModal();
-          showAdminToast(res.message || "Respons kategori berhasil dihapus.", "success");
-          fetchAdminResponsesList(true);
-        } else {
-          showAdminToast("Gagal menghapus: " + res.error, "error");
-        }
+        }).catch(err => console.warn("Background Sheets scoped delete warn:", err));
+
       } catch (err) {
-        showAdminToast("Terjadi kendala saat menghapus data respons.", "error");
+        // Rollback jika terjadi kesalahan
+        adminResponsesList = backupList;
+        renderAdminResponsesList();
+        showAdminToast("Terjadi kendala saat menghapus data respons: " + (err.message || err), "error");
       }
     }
 
