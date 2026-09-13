@@ -4632,7 +4632,7 @@
         "Nilai_Kelompok_Min", "Nilai_Kelompok_Max",
         "Maksimal_Pilihan_Presentator_Terbaik", "Maksimal_Karakter_Evaluasi",
         "Tampilkan_Ulasan_Publik", "Kewajiban_Menilai_Penyaji",
-        "Jadwal_Aktif", "Jadwal_Mulai", "Jadwal_Selesai", "Batas_Maksimal_Respons",
+        "Jadwal_Aktif", "Jadwal_Tipe", "Jadwal_Jam_Buka", "Jadwal_Jam_Tutup", "Jadwal_Interval_Hari", "Jadwal_Tanggal_Mulai_Siklus", "Jadwal_Auto_Naik_Sesi", "Jadwal_Sesi_Maksimal", "Jadwal_Mulai", "Jadwal_Selesai", "Batas_Maksimal_Respons",
         "Pesan_Form_Belum_Buka", "Pesan_Form_Ditutup",
         "Cegah_Penilaian_Diri", "Kunci_Respons_Ganda",
         "KKM_Nilai_Kuis", "Mode_Rilis_Nilai_Kuis",
@@ -4669,6 +4669,15 @@
       handleScheduleToggle(document.getElementById('cfg_Jadwal_Aktif')?.checked || false);
       handleExamTimerToggle(document.getElementById('cfg_Timer_Ujian_Aktif')?.checked || false);
       handleCertificateToggle(document.getElementById('cfg_Sertifikat_Aktif')?.checked || false);
+
+      // Sync Tipe Jadwal & Kontrol Mingguan/Interval
+      const currentScheduleType = adminAppConfig["Jadwal_Tipe"] || "RENTANG_TANGGAL";
+      document.querySelectorAll('input[name="cfg_Jadwal_Tipe"]').forEach(radio => {
+        radio.checked = (radio.value === currentScheduleType);
+      });
+      if (typeof updateScheduleModeUI === 'function') updateScheduleModeUI(currentScheduleType);
+      if (typeof renderScheduleDaysPills === 'function') renderScheduleDaysPills();
+      if (typeof updateAutoSessionUI === 'function') updateAutoSessionUI();
 
       const settingsBadge = document.getElementById("settingsFormIdBadge");
       if (settingsBadge) settingsBadge.textContent = currentFormId || DEFAULT_PRIMARY_FORM_ID;
@@ -4730,7 +4739,7 @@
         "Nilai_Kelompok_Min", "Nilai_Kelompok_Max",
         "Maksimal_Pilihan_Presentator_Terbaik", "Maksimal_Karakter_Evaluasi",
         "Tampilkan_Ulasan_Publik", "Kewajiban_Menilai_Penyaji",
-        "Jadwal_Aktif", "Jadwal_Mulai", "Jadwal_Selesai", "Batas_Maksimal_Respons",
+        "Jadwal_Aktif", "Jadwal_Tipe", "Jadwal_Jam_Buka", "Jadwal_Jam_Tutup", "Jadwal_Interval_Hari", "Jadwal_Tanggal_Mulai_Siklus", "Jadwal_Auto_Naik_Sesi", "Jadwal_Sesi_Maksimal", "Jadwal_Mulai", "Jadwal_Selesai", "Batas_Maksimal_Respons",
         "Pesan_Form_Belum_Buka", "Pesan_Form_Ditutup",
         "Cegah_Penilaian_Diri", "Kunci_Respons_Ganda",
         "KKM_Nilai_Kuis", "Mode_Rilis_Nilai_Kuis",
@@ -4752,6 +4761,23 @@
       });
 
       updateAntiSelfHintUI();
+
+      const selScheduleType = document.querySelector('input[name="cfg_Jadwal_Tipe"]:checked');
+      if (selScheduleType) {
+        adminAppConfig["Jadwal_Tipe"] = selScheduleType.value;
+      }
+      if (typeof updateAutoSessionUI === 'function') updateAutoSessionUI();
+
+      if (adminAppConfig["Jadwal_Auto_Naik_Sesi"] === true || adminAppConfig["Jadwal_Auto_Naik_Sesi"] === 'true') {
+        if (typeof calculateComputedAutoSession === 'function') {
+          const autoSesi = calculateComputedAutoSession(adminAppConfig);
+          adminAppConfig["Sesi_Minggu_Aktif"] = autoSesi;
+          const selSesi = document.getElementById("selectQuickSesiAktif");
+          if (selSesi) selSesi.value = autoSesi;
+          const lblSesi = document.getElementById("labelCurrentActiveSesi");
+          if (lblSesi) lblSesi.textContent = autoSesi;
+        }
+      }
 
       const selFormMode = document.querySelector('input[name="cfg_Form_Mode"]:checked');
       if (selFormMode) {
@@ -4818,10 +4844,24 @@
 
     function handleQuickSesiChange(val) {
       adminAppConfig["Sesi_Minggu_Aktif"] = val;
-      document.getElementById("labelCurrentActiveSesi").textContent = val;
+      const lbl = document.getElementById("labelCurrentActiveSesi");
+      if (lbl) lbl.textContent = val;
+      const sel = document.getElementById("selectQuickSesiAktif");
+      if (sel && sel.value !== val) sel.value = val;
       triggerAutoSaveConfig();
       showAdminToast(`Sesi aktif diubah menjadi '${val}' (Tersimpan Otomatis).`, "success");
     }
+    window.handleQuickSesiChange = handleQuickSesiChange;
+
+    function stepQuickSesi(delta) {
+      const currentVal = adminAppConfig["Sesi_Minggu_Aktif"] || document.getElementById("selectQuickSesiAktif")?.value || "Minggu 1";
+      const numMatch = currentVal.match(/\d+/);
+      const currentNum = numMatch ? parseInt(numMatch[0], 10) : 1;
+      const newNum = Math.max(1, Math.min(16, currentNum + delta));
+      const newVal = `Minggu ${newNum}`;
+      handleQuickSesiChange(newVal);
+    }
+    window.stepQuickSesi = stepQuickSesi;
 
     function setQuickExamDuration(minutes) {
       const input = document.getElementById("cfg_Durasi_Ujian_Menit");
@@ -9341,6 +9381,146 @@
     }
     window.handleScheduleToggle = handleScheduleToggle;
 
+    function handleScheduleTypeChange(type) {
+      if (!type) type = "RENTANG_TANGGAL";
+      adminAppConfig["Jadwal_Tipe"] = type;
+      updateScheduleModeUI(type);
+      updateAutoSessionUI();
+    }
+    window.handleScheduleTypeChange = handleScheduleTypeChange;
+
+    function updateScheduleModeUI(type) {
+      if (!type) type = adminAppConfig["Jadwal_Tipe"] || "RENTANG_TANGGAL";
+      const fixedSec = document.getElementById("scheduleSectionFixedRange");
+      const weeklySec = document.getElementById("scheduleSectionWeekly");
+      const intervalSec = document.getElementById("scheduleSectionInterval");
+
+      if (fixedSec) {
+        if (type === "RENTANG_TANGGAL") fixedSec.classList.remove("hidden");
+        else fixedSec.classList.add("hidden");
+      }
+      if (weeklySec) {
+        if (type === "RUTIN_MINGGUAN") weeklySec.classList.remove("hidden");
+        else weeklySec.classList.add("hidden");
+      }
+      if (intervalSec) {
+        if (type === "RUTIN_INTERVAL") intervalSec.classList.remove("hidden");
+        else intervalSec.classList.add("hidden");
+      }
+
+      document.querySelectorAll('input[name="cfg_Jadwal_Tipe"]').forEach(radio => {
+        const parentLabel = radio.closest('label');
+        if (parentLabel) {
+          if (radio.value === type) {
+            radio.checked = true;
+            parentLabel.className = "flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer select-none transition bg-amber-500 text-white border-amber-500 shadow-xs";
+          } else {
+            radio.checked = false;
+            parentLabel.className = "flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer select-none transition bg-white text-zinc-700 border-zinc-200 hover:border-zinc-300";
+          }
+        }
+      });
+    }
+    window.updateScheduleModeUI = updateScheduleModeUI;
+
+    function getScheduleActiveDays() {
+      let days = adminAppConfig["Jadwal_Hari_Aktif"];
+      if (!days) return ["1"];
+      if (typeof days === 'string') {
+        try {
+          const parsed = JSON.parse(days);
+          if (Array.isArray(parsed)) return parsed.map(String);
+        } catch(e) {
+          return days.split(',').map(s => s.trim());
+        }
+      }
+      if (Array.isArray(days)) return days.map(String);
+      return ["1"];
+    }
+    window.getScheduleActiveDays = getScheduleActiveDays;
+
+    function renderScheduleDaysPills() {
+      const activeDays = getScheduleActiveDays();
+      document.querySelectorAll('.btn-schedule-day').forEach(btn => {
+        const day = btn.getAttribute('data-day');
+        if (activeDays.includes(day)) {
+          btn.className = 'btn-schedule-day px-3 py-1.5 rounded-lg border font-bold text-xs transition active:scale-95 bg-amber-500 text-white border-amber-500 shadow-xs';
+        } else {
+          btn.className = 'btn-schedule-day px-3 py-1.5 rounded-lg border font-bold text-xs transition active:scale-95 bg-white text-zinc-700 border-zinc-200 hover:border-amber-400';
+        }
+      });
+    }
+    window.renderScheduleDaysPills = renderScheduleDaysPills;
+
+    function toggleScheduleDay(dayIndex) {
+      dayIndex = String(dayIndex);
+      let activeDays = getScheduleActiveDays();
+      if (activeDays.includes(dayIndex)) {
+        if (activeDays.length > 1) {
+          activeDays = activeDays.filter(d => d !== dayIndex);
+        } else {
+          showAdminToast("Minimal satu hari harus tetap aktif.", "warning");
+          return;
+        }
+      } else {
+        activeDays.push(dayIndex);
+        activeDays.sort();
+      }
+      adminAppConfig["Jadwal_Hari_Aktif"] = activeDays;
+      renderScheduleDaysPills();
+      handleConfigInputAutoSave();
+    }
+    window.toggleScheduleDay = toggleScheduleDay;
+
+    function calculateComputedAutoSession(config) {
+      if (!config) config = adminAppConfig;
+      const maxSesi = parseInt(config["Jadwal_Sesi_Maksimal"], 10) || 10;
+      
+      let anchorDateStr = config["Jadwal_Tanggal_Mulai_Siklus"];
+      if (!anchorDateStr && config["Jadwal_Mulai"]) {
+        anchorDateStr = config["Jadwal_Mulai"].split('T')[0];
+      }
+      if (!anchorDateStr) {
+        anchorDateStr = new Date().toISOString().split('T')[0];
+      }
+
+      const anchorDate = new Date(anchorDateStr + "T00:00:00");
+      const now = new Date();
+      
+      let intervalDays = parseInt(config["Jadwal_Interval_Hari"], 10) || 7;
+      if (config["Jadwal_Tipe"] === 'RUTIN_MINGGUAN') {
+        intervalDays = 7;
+      }
+      if (intervalDays < 1) intervalDays = 7;
+
+      let computedNum = 1;
+      if (!isNaN(anchorDate.getTime()) && now >= anchorDate) {
+        const diffMs = now.getTime() - anchorDate.getTime();
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        computedNum = 1 + Math.floor(diffDays / intervalDays);
+      }
+      computedNum = Math.max(1, Math.min(maxSesi, computedNum));
+      return `Minggu ${computedNum}`;
+    }
+    window.calculateComputedAutoSession = calculateComputedAutoSession;
+
+    function updateAutoSessionUI() {
+      const isAuto = document.getElementById("cfg_Jadwal_Auto_Naik_Sesi")?.checked;
+      const container = document.getElementById("autoSessionDetailsContainer");
+      if (container) {
+        if (isAuto) {
+          container.classList.remove("hidden");
+        } else {
+          container.classList.add("hidden");
+        }
+      }
+      const badge = document.getElementById("badgeCurrentComputedSession");
+      if (badge) {
+        badge.textContent = calculateComputedAutoSession();
+      }
+    }
+    window.updateAutoSessionUI = updateAutoSessionUI;
+
     function handleExamTimerToggle(enabled) {
       const row = document.getElementById('quizTimerDetailsRow');
       if (!row) return;
@@ -9633,9 +9813,19 @@
       const kelas = adminAppConfig["Kelas"] || currentFormMeta?.kelas || "5E";
       const dosen = adminAppConfig["Dosen_Pengampu"] || currentFormMeta?.dosen || "Dosen Pengampu";
 
-      const deadline = adminAppConfig["Jadwal_Aktif"] && adminAppConfig["Jadwal_Selesai"]
-        ? new Date(adminAppConfig["Jadwal_Selesai"]).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' }) + ' WITA'
-        : "Segera sebelum perkuliahan berakhir";
+      let deadline = "Segera sebelum perkuliahan berakhir";
+      if (adminAppConfig["Jadwal_Aktif"] === true || adminAppConfig["Jadwal_Aktif"] === 'true') {
+        const jTipe = adminAppConfig["Jadwal_Tipe"] || "RENTANG_TANGGAL";
+        if (jTipe === 'RUTIN_MINGGUAN') {
+          const daysMap = { 0: 'Minggu', 1: 'Senin', 2: 'Selasa', 3: 'Rabu', 4: 'Kamis', 5: 'Jumat', 6: 'Sabtu' };
+          const activeDaysStr = (typeof getScheduleActiveDays === 'function' ? getScheduleActiveDays() : ["1"]).map(d => daysMap[d] || d).join(', ');
+          deadline = `Setiap hari ${activeDaysStr} pukul ${adminAppConfig["Jadwal_Jam_Buka"] || "08:00"} - ${adminAppConfig["Jadwal_Jam_Tutup"] || "10:00"} WITA`;
+        } else if (jTipe === 'RUTIN_INTERVAL') {
+          deadline = `Setiap ${adminAppConfig["Jadwal_Interval_Hari"] || 7} hari sekali pukul ${adminAppConfig["Jadwal_Jam_Buka"] || "08:00"} - ${adminAppConfig["Jadwal_Jam_Tutup"] || "10:00"} WITA`;
+        } else if (adminAppConfig["Jadwal_Selesai"]) {
+          deadline = new Date(adminAppConfig["Jadwal_Selesai"]).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' }) + ' WITA';
+        }
+      }
 
       const formUrl = new URL(window.location.href);
       formUrl.pathname = formUrl.pathname.replace(/admin\.html$/i, "index.html");

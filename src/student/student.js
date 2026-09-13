@@ -4559,7 +4559,47 @@ function normalizeMediaList(fieldOrMedia) {
       return `${localDateStr} pukul ${localTimeStr} ${zoneLabel} <span class="font-normal text-amber-800/80">(${witaTimeStr} WITA - Waktu Kampus)</span>`;
     }
 
+    function getCampusWitaDate(dateObj = new Date()) {
+      const utc = dateObj.getTime() + (dateObj.getTimezoneOffset() * 60000);
+      return new Date(utc + (3600000 * 8));
+    }
+
+    function calculateStudentAutoSession(cfg) {
+      if (!cfg) cfg = appConfig;
+      const maxSesi = parseInt(cfg["Jadwal_Sesi_Maksimal"], 10) || 10;
+      
+      let anchorDateStr = cfg["Jadwal_Tanggal_Mulai_Siklus"];
+      if (!anchorDateStr && cfg["Jadwal_Mulai"]) {
+        anchorDateStr = cfg["Jadwal_Mulai"].split('T')[0];
+      }
+      if (!anchorDateStr) {
+        anchorDateStr = new Date().toISOString().split('T')[0];
+      }
+
+      const anchorDate = new Date(anchorDateStr + "T00:00:00+08:00");
+      const now = new Date();
+      
+      let intervalDays = parseInt(cfg["Jadwal_Interval_Hari"], 10) || 7;
+      if (cfg["Jadwal_Tipe"] === 'RUTIN_MINGGUAN') {
+        intervalDays = 7;
+      }
+      if (intervalDays < 1) intervalDays = 7;
+
+      let computedNum = 1;
+      if (!isNaN(anchorDate.getTime()) && now >= anchorDate) {
+        const diffMs = now.getTime() - anchorDate.getTime();
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        computedNum = 1 + Math.floor(diffDays / intervalDays);
+      }
+      computedNum = Math.max(1, Math.min(maxSesi, computedNum));
+      return `Minggu ${computedNum}`;
+    }
+
     function evaluateFormScheduleStatus() {
+      if (!scheduleIntervalTimer) {
+        scheduleIntervalTimer = setInterval(evaluateFormScheduleStatus, 30000);
+      }
+
       const lockBanner = document.getElementById("formScheduleLockBanner");
       const startBtn = document.getElementById("startAssessmentBtn");
       const warningBadge = document.getElementById("deadlineWarningBadge");
@@ -4580,48 +4620,267 @@ function normalizeMediaList(fieldOrMedia) {
         blockTitle = "Formulir Sedang Dinonaktifkan";
         blockDesc = "Pengisian formulir ini saat ini sedang ditutup oleh dosen pengampu.";
       } else if (scheduleActive) {
-        const startTimeStr = appConfig["Jadwal_Mulai"];
-        const endTimeStr = appConfig["Jadwal_Selesai"];
+        const scheduleType = appConfig["Jadwal_Tipe"] || "RENTANG_TANGGAL";
         const maxResponses = parseInt(appConfig["Batas_Maksimal_Respons"]) || 0;
 
-        if (startTimeStr) {
-          const startTime = parseCampusDate(startTimeStr);
-          if (startTime && now < startTime) {
+        if (scheduleType === "RUTIN_MINGGUAN") {
+          const DAY_NAMES = { 0: 'Minggu', 1: 'Senin', 2: 'Selasa', 3: 'Rabu', 4: 'Kamis', 5: 'Jumat', 6: 'Sabtu' };
+          let activeDays = appConfig["Jadwal_Hari_Aktif"] || ["1"];
+          if (typeof activeDays === 'string') {
+            try { activeDays = JSON.parse(activeDays); } catch(e) { activeDays = activeDays.split(','); }
+          }
+          if (!Array.isArray(activeDays) || activeDays.length === 0) activeDays = [1];
+          const activeDayNums = activeDays.map(d => parseInt(d, 10));
+
+          const witaNow = getCampusWitaDate(now);
+          const witaDay = witaNow.getDay();
+          const curMinutes = witaNow.getHours() * 60 + witaNow.getMinutes();
+
+          const openStr = appConfig["Jadwal_Jam_Buka"] || "08:00";
+          const closeStr = appConfig["Jadwal_Jam_Tutup"] || "10:00";
+          const [openH, openM] = openStr.split(':').map(n => parseInt(n, 10) || 0);
+          const [closeH, closeM] = closeStr.split(':').map(n => parseInt(n, 10) || 0);
+          const openMinutes = openH * 60 + openM;
+          const closeMinutes = closeH * 60 + closeM;
+
+          const isTodayActive = activeDayNums.includes(witaDay);
+
+          let daysUntilNext = 0;
+          for (let step = 1; step <= 7; step++) {
+            const checkDay = (witaDay + step) % 7;
+            if (activeDayNums.includes(checkDay)) {
+              daysUntilNext = step;
+              break;
+            }
+          }
+          const nextDayName = DAY_NAMES[(witaDay + daysUntilNext) % 7];
+          const activeDaysList = activeDayNums.map(d => DAY_NAMES[d]).join(', ');
+
+          if (!isTodayActive) {
+            isBlocked = true;
+            blockReason = "INACTIVE_DAY";
+            blockTitle = "Bukan Jadwal Perkuliahan / Penilaian";
+            blockDesc = (appConfig["Pesan_Form_Belum_Buka"] || "Formulir penilaian belum dibuka.") + `
+              <div class="mt-3 p-3 rounded-xl bg-amber-50 border border-amber-200 text-left space-y-1.5">
+                <div class="flex items-center gap-2 text-xs font-bold text-amber-900">
+                  <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  <span>Jadwal Rutin: Hari ${activeDaysList} (Pukul ${openStr} – ${closeStr} WITA)</span>
+                </div>
+                <div class="text-[11px] text-amber-800">
+                  Sesi berikutnya akan dibuka pada hari <strong>${nextDayName}</strong> pukul <strong>${openStr} WITA</strong>.
+                </div>
+              </div>
+            `;
+          } else if (curMinutes < openMinutes) {
             isBlocked = true;
             blockReason = "BEFORE_START";
-            blockTitle = "Formulir Belum Dibuka";
-            targetTime = startTime;
-            const timeFormatted = formatSmartScheduleTime(startTime);
-            blockDesc = (appConfig["Pesan_Form_Belum_Buka"] || "Formulir penilaian belum dibuka. Perkuliahan akan dimulai sesuai jadwal.") + `<br><span class="inline-block mt-2 font-mono font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200">Dibuka pada: ${timeFormatted}</span>`;
-          }
-        }
-
-        if (!isBlocked && endTimeStr) {
-          const endTime = parseCampusDate(endTimeStr);
-          if (endTime && now > endTime) {
+            blockTitle = "Sesi Perkuliahan Hari Ini Belum Dibuka";
+            const diffMins = openMinutes - curMinutes;
+            const h = Math.floor(diffMins / 60);
+            const m = diffMins % 60;
+            const countdownText = h > 0 ? `${h} jam ${m} menit lagi` : `${m} menit lagi`;
+            blockDesc = (appConfig["Pesan_Form_Belum_Buka"] || "Formulir penilaian belum dibuka. Perkuliahan akan dimulai sesuai jadwal.") + `
+              <div class="mt-3 p-3 rounded-xl bg-amber-50 border border-amber-200 text-left space-y-1.5">
+                <div class="flex items-center gap-2 text-xs font-bold text-amber-900">
+                  <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  <span>Dibuka Hari Ini pukul ${openStr} WITA (${countdownText})</span>
+                </div>
+                <div class="text-[11px] text-amber-800">
+                  Batas waktu pengisian hari ini sampai pukul <strong>${closeStr} WITA</strong>.
+                </div>
+              </div>
+            `;
+          } else if (curMinutes > closeMinutes) {
             isBlocked = true;
             blockReason = "AFTER_END";
-            blockTitle = "Batas Waktu Pengisian Telah Berakhir";
-            const timeFormatted = formatSmartScheduleTime(endTime);
-            blockDesc = (appConfig["Pesan_Form_Ditutup"] || "Sesi penilaian telah berakhir dan batas waktu telah ditutup. Terima kasih atas partisipasi Anda.") + `<br><span class="inline-block mt-2 font-mono font-bold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200">Ditutup sejak: ${timeFormatted}</span>`;
-          } else if (endTime) {
-            // Check if deadline is approaching (< 24 hours)
-            const diffMs = endTime - now;
-            if (diffMs > 0 && diffMs < 24 * 3600 * 1000) {
-              const diffHours = Math.floor(diffMs / (3600 * 1000));
-              const diffMinutes = Math.floor((diffMs % (3600 * 1000)) / (60 * 1000));
-              if (warningBadge) {
+            blockTitle = "Sesi Perkuliahan Hari Ini Telah Berakhir";
+            blockDesc = (appConfig["Pesan_Form_Ditutup"] || "Sesi penilaian hari ini telah berakhir dan batas waktu telah ditutup.") + `
+              <div class="mt-3 p-3 rounded-xl bg-zinc-100 border border-zinc-200 text-left space-y-1.5">
+                <div class="flex items-center gap-2 text-xs font-bold text-zinc-800">
+                  <svg class="w-4 h-4 text-zinc-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  <span>Sesi Berikutnya: Hari ${nextDayName} pukul ${openStr} WITA</span>
+                </div>
+                <div class="text-[11px] text-zinc-600">
+                  Jadwal rutin mingguan: ${activeDaysList} pukul ${openStr} – ${closeStr} WITA.
+                </div>
+              </div>
+            `;
+          } else {
+            // Sesi sedang berlangsung!
+            isBlocked = false;
+            const remainingMins = closeMinutes - curMinutes;
+            if (remainingMins <= 120 && warningBadge) {
+              const h = Math.floor(remainingMins / 60);
+              const m = remainingMins % 60;
+              const timeLeftText = h > 0 ? `${h} jam ${m} menit lagi` : `${m} menit lagi`;
+              warningBadge.classList.remove("hidden");
+              warningBadge.classList.add("inline-flex");
+              warningBadge.innerHTML = `
+                <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+                <svg class="w-3.5 h-3.5 text-amber-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span>Sisa Waktu Sesi Hari Ini: <strong>${timeLeftText}</strong> (Tutup pukul ${closeStr} WITA)</span>
+              `;
+            }
+          }
+        } else if (scheduleType === "RUTIN_INTERVAL") {
+          const intervalDays = parseInt(appConfig["Jadwal_Interval_Hari"], 10) || 7;
+          let anchorDateStr = appConfig["Jadwal_Tanggal_Mulai_Siklus"];
+          if (!anchorDateStr && appConfig["Jadwal_Mulai"]) {
+            anchorDateStr = appConfig["Jadwal_Mulai"].split('T')[0];
+          }
+          if (!anchorDateStr) {
+            anchorDateStr = new Date().toISOString().split('T')[0];
+          }
+
+          const witaNow = getCampusWitaDate(now);
+          const curMinutes = witaNow.getHours() * 60 + witaNow.getMinutes();
+
+          const openStr = appConfig["Jadwal_Jam_Buka"] || "08:00";
+          const closeStr = appConfig["Jadwal_Jam_Tutup"] || "10:00";
+          const [openH, openM] = openStr.split(':').map(n => parseInt(n, 10) || 0);
+          const [closeH, closeM] = closeStr.split(':').map(n => parseInt(n, 10) || 0);
+          const openMinutes = openH * 60 + openM;
+          const closeMinutes = closeH * 60 + closeM;
+
+          const anchorDate = new Date(anchorDateStr + "T00:00:00+08:00");
+          const witaNowMidnight = new Date(witaNow.getFullYear(), witaNow.getMonth(), witaNow.getDate());
+          const anchorMidnight = new Date(anchorDate.getFullYear(), anchorDate.getMonth(), anchorDate.getDate());
+          const diffDays = Math.round((witaNowMidnight.getTime() - anchorMidnight.getTime()) / (1000 * 60 * 60 * 24));
+
+          if (diffDays < 0) {
+            isBlocked = true;
+            blockReason = "BEFORE_START";
+            blockTitle = "Siklus Pembukaan Belum Dimulai";
+            blockDesc = (appConfig["Pesan_Form_Belum_Buka"] || "Siklus pengisian formulir belum dimulai.") + `
+              <div class="mt-3 p-3 rounded-xl bg-amber-50 border border-amber-200 text-left space-y-1.5">
+                <div class="text-xs font-bold text-amber-900">
+                  Dimulai pada tanggal: ${anchorDateStr} pukul ${openStr} WITA
+                </div>
+                <div class="text-[11px] text-amber-800">
+                  Siklus pembukaan rutin setiap ${intervalDays} hari sekali.
+                </div>
+              </div>
+            `;
+          } else {
+            const cycleRemainder = diffDays % intervalDays;
+            const isCycleDay = (cycleRemainder === 0);
+
+            if (!isCycleDay) {
+              const daysUntilNext = intervalDays - cycleRemainder;
+              const nextDateObj = new Date(witaNowMidnight.getTime() + (daysUntilNext * 86400000));
+              const nextDateStr = nextDateObj.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+              isBlocked = true;
+              blockReason = "INACTIVE_CYCLE_DAY";
+              blockTitle = "Bukan Jadwal Pembukaan Siklus";
+              blockDesc = `Formulir dibuka secara rutin setiap ${intervalDays} hari sekali.<br>
+                <div class="mt-3 p-3 rounded-xl bg-amber-50 border border-amber-200 text-left space-y-1.5">
+                  <div class="flex items-center gap-2 text-xs font-bold text-amber-900">
+                    <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <span>Sesi Berikutnya: ${nextDateStr} (Pukul ${openStr} WITA)</span>
+                  </div>
+                  <div class="text-[11px] text-amber-800">
+                    Tersisa <strong>${daysUntilNext} hari lagi</strong> menuju pembukaan sesi berikutnya.
+                  </div>
+                </div>
+              `;
+            } else if (curMinutes < openMinutes) {
+              isBlocked = true;
+              blockReason = "BEFORE_START";
+              blockTitle = "Sesi Perkuliahan Hari Ini Belum Dibuka";
+              const diffMins = openMinutes - curMinutes;
+              const h = Math.floor(diffMins / 60);
+              const m = diffMins % 60;
+              const countdownText = h > 0 ? `${h} jam ${m} menit lagi` : `${m} menit lagi`;
+              blockDesc = (appConfig["Pesan_Form_Belum_Buka"] || "Formulir penilaian belum dibuka. Perkuliahan akan dimulai sesuai jadwal.") + `
+                <div class="mt-3 p-3 rounded-xl bg-amber-50 border border-amber-200 text-left space-y-1.5">
+                  <div class="flex items-center gap-2 text-xs font-bold text-amber-900">
+                    <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>Dibuka Hari Ini pukul ${openStr} WITA (${countdownText})</span>
+                  </div>
+                  <div class="text-[11px] text-amber-800">
+                    Batas waktu pengisian hari ini sampai pukul <strong>${closeStr} WITA</strong>.
+                  </div>
+                </div>
+              `;
+            } else if (curMinutes > closeMinutes) {
+              isBlocked = true;
+              blockReason = "AFTER_END";
+              blockTitle = "Sesi Hari Ini Telah Berakhir";
+              const nextDateObj = new Date(witaNowMidnight.getTime() + (intervalDays * 86400000));
+              const nextDateStr = nextDateObj.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+              blockDesc = (appConfig["Pesan_Form_Ditutup"] || "Sesi penilaian hari ini telah berakhir dan batas waktu telah ditutup.") + `
+                <div class="mt-3 p-3 rounded-xl bg-zinc-100 border border-zinc-200 text-left space-y-1.5">
+                  <div class="flex items-center gap-2 text-xs font-bold text-zinc-800">
+                    <svg class="w-4 h-4 text-zinc-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <span>Sesi Berikutnya: ${nextDateStr} (Pukul ${openStr} WITA)</span>
+                  </div>
+                  <div class="text-[11px] text-zinc-600">
+                    Siklus rutin pembukaan setiap ${intervalDays} hari sekali.
+                  </div>
+                </div>
+              `;
+            } else {
+              // Sedang berlangsung!
+              isBlocked = false;
+              const remainingMins = closeMinutes - curMinutes;
+              if (remainingMins <= 120 && warningBadge) {
+                const h = Math.floor(remainingMins / 60);
+                const m = remainingMins % 60;
+                const timeLeftText = h > 0 ? `${h} jam ${m} menit lagi` : `${m} menit lagi`;
                 warningBadge.classList.remove("hidden");
                 warningBadge.classList.add("inline-flex");
                 warningBadge.innerHTML = `
                   <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
                   <svg class="w-3.5 h-3.5 text-amber-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                  <span>Batas Pengisian: <strong>${diffHours} jam ${diffMinutes} menit lagi</strong></span>
+                  <span>Sisa Waktu Sesi Hari Ini: <strong>${timeLeftText}</strong> (Tutup pukul ${closeStr} WITA)</span>
                 `;
               }
-            } else if (warningBadge) {
-              warningBadge.classList.add("hidden");
-              warningBadge.classList.remove("inline-flex");
+            }
+          }
+        } else {
+          // Default RENTANG_TANGGAL
+          const startTimeStr = appConfig["Jadwal_Mulai"];
+          const endTimeStr = appConfig["Jadwal_Selesai"];
+
+          if (startTimeStr) {
+            const startTime = parseCampusDate(startTimeStr);
+            if (startTime && now < startTime) {
+              isBlocked = true;
+              blockReason = "BEFORE_START";
+              blockTitle = "Formulir Belum Dibuka";
+              targetTime = startTime;
+              const timeFormatted = formatSmartScheduleTime(startTime);
+              blockDesc = (appConfig["Pesan_Form_Belum_Buka"] || "Formulir penilaian belum dibuka. Perkuliahan akan dimulai sesuai jadwal.") + `<br><span class="inline-block mt-2 font-mono font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200">Dibuka pada: ${timeFormatted}</span>`;
+            }
+          }
+
+          if (!isBlocked && endTimeStr) {
+            const endTime = parseCampusDate(endTimeStr);
+            if (endTime && now > endTime) {
+              isBlocked = true;
+              blockReason = "AFTER_END";
+              blockTitle = "Batas Waktu Pengisian Telah Berakhir";
+              const timeFormatted = formatSmartScheduleTime(endTime);
+              blockDesc = (appConfig["Pesan_Form_Ditutup"] || "Sesi penilaian telah berakhir dan batas waktu telah ditutup. Terima kasih atas partisipasi Anda.") + `<br><span class="inline-block mt-2 font-mono font-bold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200">Ditutup sejak: ${timeFormatted}</span>`;
+            } else if (endTime) {
+              // Check if deadline is approaching (< 24 hours)
+              const diffMs = endTime - now;
+              if (diffMs > 0 && diffMs < 24 * 3600 * 1000) {
+                const diffHours = Math.floor(diffMs / (3600 * 1000));
+                const diffMinutes = Math.floor((diffMs % (3600 * 1000)) / (60 * 1000));
+                if (warningBadge) {
+                  warningBadge.classList.remove("hidden");
+                  warningBadge.classList.add("inline-flex");
+                  warningBadge.innerHTML = `
+                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+                    <svg class="w-3.5 h-3.5 text-amber-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>Batas Pengisian: <strong>${diffHours} jam ${diffMinutes} menit lagi</strong></span>
+                  `;
+                }
+              } else if (warningBadge) {
+                warningBadge.classList.add("hidden");
+                warningBadge.classList.remove("inline-flex");
+              }
             }
           }
         }
@@ -4711,6 +4970,12 @@ function normalizeMediaList(fieldOrMedia) {
     }
 
     function renderConfigHeader() {
+      if (appConfig && (appConfig["Jadwal_Auto_Naik_Sesi"] === true || appConfig["Jadwal_Auto_Naik_Sesi"] === "true") && typeof calculateStudentAutoSession === 'function') {
+        const computedSesi = calculateStudentAutoSession(appConfig);
+        appConfig["Sesi_Minggu_Aktif"] = computedSesi;
+        if (currentFormMeta) currentFormMeta.sesiAktif = computedSesi;
+      }
+
       const title = appConfig["Judul_Form"] || (currentFormMeta && currentFormMeta.judulForm) || `Penilaian Presentasi ${activeFormId}`;
       const matkul = appConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || "Mata Kuliah";
       const dosen = appConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || "-";
@@ -8104,6 +8369,10 @@ function normalizeMediaList(fieldOrMedia) {
             customAnswers[k] = item.name;
           }
         }
+      }
+
+      if (appConfig && (appConfig["Jadwal_Auto_Naik_Sesi"] === true || appConfig["Jadwal_Auto_Naik_Sesi"] === "true") && typeof calculateStudentAutoSession === 'function') {
+        appConfig["Sesi_Minggu_Aktif"] = calculateStudentAutoSession(appConfig);
       }
 
       const payload = {

@@ -35,7 +35,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="src/admin/admin.css?v=2.5.3">
+  <link rel="stylesheet" href="src/admin/admin.css?v=2.5.4">
   <!-- KaTeX CSS & JS for Universal Math / LaTeX / AI & Word Formula Rendering -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -512,12 +512,21 @@
             <p class="text-[10.5px] sm:text-xs text-zinc-400">Menentukan kelompok yang tampil di formulir penilaian mahasiswa. <em>Tersimpan otomatis seketika.</em></p>
           </div>
 
-          <div class="flex items-center gap-2 flex-shrink-0 w-full md:w-auto">
-            <div class="relative w-full md:w-64">
+          <div class="flex items-center gap-1.5 flex-shrink-0 w-full md:w-auto">
+            <button 
+              type="button" 
+              onclick="stepQuickSesi(-1)" 
+              title="Mundur ke Sesi Sebelumnya (1-Klik)"
+              class="min-h-[44px] min-w-[44px] px-2.5 py-2 rounded-xl border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 active:bg-zinc-200 text-zinc-700 font-bold text-xs flex items-center justify-center transition cursor-pointer shadow-2xs"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+
+            <div class="relative flex-1 md:w-56">
               <select 
                 id="selectQuickSesiAktif" 
                 onchange="handleQuickSesiChange(this.value)"
-                class="w-full px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl border border-zinc-300 bg-white font-semibold text-xs text-zinc-800 shadow-xs focus:border-zinc-900 outline-none transition cursor-pointer appearance-none truncate"
+                class="w-full min-h-[44px] px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl border border-zinc-300 bg-white font-semibold text-xs text-zinc-800 shadow-xs focus:border-zinc-900 outline-none transition cursor-pointer appearance-none truncate text-center"
               >
                 <option value="SEMUA">Semua Sesi (Buka Semua Kelompok)</option>
                 <option value="Minggu 1">Minggu 1</option>
@@ -530,13 +539,28 @@
                 <option value="Minggu 8">Minggu 8</option>
                 <option value="Minggu 9">Minggu 9</option>
                 <option value="Minggu 10">Minggu 10</option>
+                <option value="Minggu 11">Minggu 11</option>
+                <option value="Minggu 12">Minggu 12</option>
+                <option value="Minggu 13">Minggu 13</option>
+                <option value="Minggu 14">Minggu 14</option>
+                <option value="Minggu 15">Minggu 15</option>
+                <option value="Minggu 16">Minggu 16</option>
               </select>
             </div>
+
+            <button 
+              type="button" 
+              onclick="stepQuickSesi(1)" 
+              title="Maju ke Sesi Berikutnya (1-Klik)"
+              class="min-h-[44px] min-w-[44px] px-2.5 py-2 rounded-xl border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 active:bg-zinc-200 text-zinc-700 font-bold text-xs flex items-center justify-center transition cursor-pointer shadow-2xs"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+            </button>
             
             <button 
               type="button" 
               id="btnAutoSaveIndicator"
-              class="hidden md:flex items-center gap-1 px-2.5 py-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-[11px] font-semibold text-emerald-700 whitespace-nowrap"
+              class="hidden md:flex min-h-[44px] items-center gap-1 px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-[11px] font-semibold text-emerald-700 whitespace-nowrap"
             >
               <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
@@ -1262,58 +1286,218 @@
           </div>
 
           <!-- Schedule Fields Container (Visible when toggle active) -->
-          <div id="scheduleFieldsContainer" class="hidden space-y-3.5 text-xs pt-1 transition-all duration-200">
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-              <div class="space-y-1">
-                <label for="cfg_Jadwal_Mulai" class="flex items-center justify-between font-semibold text-zinc-700">
-                  <span>Waktu Mulai Dibuka:</span>
-                  <span class="text-[9.5px] font-mono font-bold text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">WITA (UTC+8)</span>
+          <div id="scheduleFieldsContainer" class="hidden space-y-4 text-xs pt-1 transition-all duration-200">
+            <!-- Mode Penjadwalan Selector -->
+            <div class="space-y-1.5 pt-1">
+              <label class="block font-bold text-zinc-800 text-xs">Pilihan Aturan Penjadwalan:</label>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <label id="lblScheduleMode_RENTANG_TANGGAL" class="flex items-center gap-2.5 p-3 rounded-xl border border-amber-500 bg-amber-50/50 hover:border-amber-600 cursor-pointer transition select-none text-xs shadow-2xs">
+                  <input type="radio" name="cfg_Jadwal_Tipe" value="RENTANG_TANGGAL" checked onchange="handleScheduleTypeChange(this.value); handleConfigInputAutoSave();" class="accent-amber-600 h-4 w-4">
+                  <div class="min-w-0">
+                    <span class="font-bold text-zinc-900 block">Sekali Jalan</span>
+                    <span class="text-[10px] text-zinc-500 block leading-tight">Rentang tanggal & waktu spesifik</span>
+                  </div>
                 </label>
-                <input 
-                  type="datetime-local" 
-                  id="cfg_Jadwal_Mulai" 
-                  onchange="handleConfigInputAutoSave()"
-                  class="w-full px-3 py-2 rounded-xl border border-zinc-300 bg-white text-xs outline-none focus:border-amber-500 transition shadow-2xs font-mono"
-                >
-                <p class="text-[10px] text-zinc-400">Kosongkan jika langsung dibuka sekarang.</p>
-              </div>
 
-              <div class="space-y-1">
-                <label for="cfg_Jadwal_Selesai" class="flex items-center justify-between font-semibold text-zinc-700">
-                  <span>Waktu Batas Tutup:</span>
-                  <span class="text-[9.5px] font-mono font-bold text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">WITA (UTC+8)</span>
+                <label id="lblScheduleMode_RUTIN_MINGGUAN" class="flex items-center gap-2.5 p-3 rounded-xl border border-zinc-200 bg-white hover:border-zinc-400 cursor-pointer transition select-none text-xs">
+                  <input type="radio" name="cfg_Jadwal_Tipe" value="RUTIN_MINGGUAN" onchange="handleScheduleTypeChange(this.value); handleConfigInputAutoSave();" class="accent-amber-600 h-4 w-4">
+                  <div class="min-w-0">
+                    <span class="font-bold text-zinc-900 block">Rutin Mingguan</span>
+                    <span class="text-[10px] text-zinc-500 block leading-tight">Pilih hari (A, B, C...) + jam harian</span>
+                  </div>
                 </label>
-                <input 
-                  type="datetime-local" 
-                  id="cfg_Jadwal_Selesai" 
-                  onchange="handleConfigInputAutoSave()"
-                  class="w-full px-3 py-2 rounded-xl border border-zinc-300 bg-white text-xs outline-none focus:border-amber-500 transition shadow-2xs font-mono"
-                >
-                <p class="text-[10px] text-zinc-400">Formulir otomatis tertutup setelah jam ini.</p>
-              </div>
 
-              <div class="space-y-1">
-                <label for="cfg_Batas_Maksimal_Respons" class="block font-semibold text-zinc-700">Batas Kuota Respons (Opsional):</label>
-                <input 
-                  type="number" 
-                  id="cfg_Batas_Maksimal_Respons" 
-                  min="0"
-                  step="1"
-                  placeholder="0 (Tanpa Batas)" 
-                  oninput="handleConfigInputAutoSave()"
-                  class="w-full px-3 py-2 rounded-xl border border-zinc-300 bg-white text-xs outline-none focus:border-amber-500 transition shadow-2xs font-mono"
-                >
-                <p class="text-[10px] text-zinc-400">Tutup otomatis jika mencapai jumlah ini.</p>
+                <label id="lblScheduleMode_RUTIN_INTERVAL" class="flex items-center gap-2.5 p-3 rounded-xl border border-zinc-200 bg-white hover:border-zinc-400 cursor-pointer transition select-none text-xs">
+                  <input type="radio" name="cfg_Jadwal_Tipe" value="RUTIN_INTERVAL" onchange="handleScheduleTypeChange(this.value); handleConfigInputAutoSave();" class="accent-amber-600 h-4 w-4">
+                  <div class="min-w-0">
+                    <span class="font-bold text-zinc-900 block">Interval Siklus</span>
+                    <span class="text-[10px] text-zinc-500 block leading-tight">Setiap N hari sekali (7 hari)</span>
+                  </div>
+                </label>
               </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-1">
+            <!-- Mode 1: Rentang Tanggal Spesifik (Sekali Jalan) -->
+            <div id="scheduleSectionFixedRange" class="space-y-3 pt-1">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div class="space-y-1">
+                  <label for="cfg_Jadwal_Mulai" class="flex items-center justify-between font-semibold text-zinc-700">
+                    <span>Waktu Mulai Dibuka:</span>
+                    <span class="text-[9.5px] font-mono font-bold text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">WITA (UTC+8)</span>
+                  </label>
+                  <input 
+                    type="datetime-local" 
+                    id="cfg_Jadwal_Mulai" 
+                    onchange="handleConfigInputAutoSave()"
+                    class="w-full px-3 py-2 rounded-xl border border-zinc-300 bg-white text-xs outline-none focus:border-amber-500 transition shadow-2xs font-mono"
+                  >
+                  <p class="text-[10px] text-zinc-400">Kosongkan jika langsung dibuka sekarang.</p>
+                </div>
+
+                <div class="space-y-1">
+                  <label for="cfg_Jadwal_Selesai" class="flex items-center justify-between font-semibold text-zinc-700">
+                    <span>Waktu Batas Tutup:</span>
+                    <span class="text-[9.5px] font-mono font-bold text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">WITA (UTC+8)</span>
+                  </label>
+                  <input 
+                    type="datetime-local" 
+                    id="cfg_Jadwal_Selesai" 
+                    onchange="handleConfigInputAutoSave()"
+                    class="w-full px-3 py-2 rounded-xl border border-zinc-300 bg-white text-xs outline-none focus:border-amber-500 transition shadow-2xs font-mono"
+                  >
+                  <p class="text-[10px] text-zinc-400">Formulir otomatis tertutup setelah waktu ini.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mode 2: Rutin Mingguan (Pilih Hari Tertentu + Jam Harian) -->
+            <div id="scheduleSectionWeekly" class="hidden space-y-3.5 pt-1">
+              <div class="space-y-1.5">
+                <label class="block font-semibold text-zinc-700">Pilih Hari Buka Mingguan:</label>
+                <div class="flex flex-wrap gap-1.5 sm:gap-2" id="containerScheduleDaysPills">
+                  <button type="button" onclick="toggleScheduleDay('1')" data-day="1" class="btn-schedule-day min-h-[44px] px-3.5 py-2 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 font-semibold text-xs text-zinc-700 transition cursor-pointer select-none">Senin</button>
+                  <button type="button" onclick="toggleScheduleDay('2')" data-day="2" class="btn-schedule-day min-h-[44px] px-3.5 py-2 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 font-semibold text-xs text-zinc-700 transition cursor-pointer select-none">Selasa</button>
+                  <button type="button" onclick="toggleScheduleDay('3')" data-day="3" class="btn-schedule-day min-h-[44px] px-3.5 py-2 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 font-semibold text-xs text-zinc-700 transition cursor-pointer select-none">Rabu</button>
+                  <button type="button" onclick="toggleScheduleDay('4')" data-day="4" class="btn-schedule-day min-h-[44px] px-3.5 py-2 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 font-semibold text-xs text-zinc-700 transition cursor-pointer select-none">Kamis</button>
+                  <button type="button" onclick="toggleScheduleDay('5')" data-day="5" class="btn-schedule-day min-h-[44px] px-3.5 py-2 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 font-semibold text-xs text-zinc-700 transition cursor-pointer select-none">Jumat</button>
+                  <button type="button" onclick="toggleScheduleDay('6')" data-day="6" class="btn-schedule-day min-h-[44px] px-3.5 py-2 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 font-semibold text-xs text-zinc-700 transition cursor-pointer select-none">Sabtu</button>
+                  <button type="button" onclick="toggleScheduleDay('0')" data-day="0" class="btn-schedule-day min-h-[44px] px-3.5 py-2 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 font-semibold text-xs text-zinc-700 transition cursor-pointer select-none">Minggu</button>
+                </div>
+                <p class="text-[10px] text-zinc-400">Pilih satu atau beberapa hari aktif ketika kuis/formulir otomatis dibuka setiap pekan.</p>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-1">
+                <div class="space-y-1">
+                  <label for="cfg_Jadwal_Jam_Buka" class="flex items-center justify-between font-semibold text-zinc-700">
+                    <span>Jam Buka Harian:</span>
+                    <span class="text-[9.5px] font-mono font-bold text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">WITA</span>
+                  </label>
+                  <input 
+                    type="time" 
+                    id="cfg_Jadwal_Jam_Buka" 
+                    value="08:00"
+                    onchange="handleConfigInputAutoSave()"
+                    class="w-full px-3 py-2 rounded-xl border border-zinc-300 bg-white text-xs outline-none focus:border-amber-500 transition shadow-2xs font-mono"
+                  >
+                  <p class="text-[10px] text-zinc-400">Formulir mulai dibuka setiap jam ini.</p>
+                </div>
+
+                <div class="space-y-1">
+                  <label for="cfg_Jadwal_Jam_Tutup" class="flex items-center justify-between font-semibold text-zinc-700">
+                    <span>Jam Tutup Harian:</span>
+                    <span class="text-[9.5px] font-mono font-bold text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">WITA</span>
+                  </label>
+                  <input 
+                    type="time" 
+                    id="cfg_Jadwal_Jam_Tutup" 
+                    value="10:00"
+                    onchange="handleConfigInputAutoSave()"
+                    class="w-full px-3 py-2 rounded-xl border border-zinc-300 bg-white text-xs outline-none focus:border-amber-500 transition shadow-2xs font-mono"
+                  >
+                  <p class="text-[10px] text-zinc-400">Formulir otomatis tertutup tepat saat jam ini berakhir.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mode 3: Interval N-Hari -->
+            <div id="scheduleSectionInterval" class="hidden space-y-3 pt-1">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div class="space-y-1">
+                  <label for="cfg_Jadwal_Interval_Hari" class="block font-semibold text-zinc-700">Interval Perulangan (Hari):</label>
+                  <div class="flex items-center gap-2">
+                    <input 
+                      type="number" 
+                      id="cfg_Jadwal_Interval_Hari" 
+                      min="1" 
+                      max="365" 
+                      value="7" 
+                      oninput="handleConfigInputAutoSave()"
+                      class="w-24 px-3 py-2 rounded-xl border border-zinc-300 bg-white text-xs font-bold outline-none focus:border-amber-500 transition shadow-2xs font-mono text-center"
+                    >
+                    <span class="text-xs font-semibold text-zinc-600">Hari Sekali (Seminggu Sekali)</span>
+                  </div>
+                  <p class="text-[10px] text-zinc-400">Atur siklus pembukaan (contoh: 7 untuk seminggu sekali).</p>
+                </div>
+
+                <div class="space-y-1">
+                  <label for="cfg_Jadwal_Tanggal_Mulai_Siklus" class="block font-semibold text-zinc-700">Tanggal Patokan Awal Siklus:</label>
+                  <input 
+                    type="date" 
+                    id="cfg_Jadwal_Tanggal_Mulai_Siklus" 
+                    onchange="handleConfigInputAutoSave()"
+                    class="w-full px-3 py-2 rounded-xl border border-zinc-300 bg-white text-xs outline-none focus:border-amber-500 transition shadow-2xs font-mono"
+                  >
+                  <p class="text-[10px] text-zinc-400">Tanggal awal dimulainya siklus pembukaan.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Fitur Otomasi Sesi Minggu Mengikuti Jadwal -->
+            <div class="p-3.5 sm:p-4 rounded-xl bg-amber-50/60 border border-amber-200/80 space-y-2.5 shadow-2xs">
+              <div class="flex items-center justify-between gap-3">
+                <div class="min-w-0 flex items-center gap-2">
+                  <div class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-900 flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                  </div>
+                  <div>
+                    <span class="font-bold text-xs sm:text-sm text-zinc-900 block">Otomatis Naikkan Sesi Minggu:</span>
+                    <span class="text-[10.5px] text-zinc-500 block leading-tight">Menaikkan sesi aktif formulir (Minggu 1 ➔ Minggu 2, dst.) secara otomatis mengikuti jadwal.</span>
+                  </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer select-none shrink-0">
+                  <input type="checkbox" id="cfg_Jadwal_Auto_Naik_Sesi" onchange="handleConfigInputAutoSave(); updateAutoSessionUI();" class="sr-only peer">
+                  <div class="w-10 h-5 bg-zinc-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-600"></div>
+                </label>
+              </div>
+
+              <div id="autoSessionDetailsContainer" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-amber-200/60">
+                <div class="space-y-1">
+                  <label for="cfg_Jadwal_Sesi_Maksimal" class="block font-semibold text-zinc-700 text-xs">Batas Sesi Maksimal:</label>
+                  <input 
+                    type="number" 
+                    id="cfg_Jadwal_Sesi_Maksimal" 
+                    min="1" 
+                    max="30" 
+                    value="10" 
+                    oninput="handleConfigInputAutoSave()"
+                    class="w-full px-3 py-1.5 rounded-lg border border-zinc-300 bg-white text-xs font-bold font-mono outline-none focus:border-amber-500"
+                  >
+                  <p class="text-[10px] text-zinc-400">Sesi berhenti naik saat mencapai batas ini (contoh: 10 untuk 10 kelompok).</p>
+                </div>
+                <div class="space-y-1">
+                  <label class="block font-semibold text-zinc-700 text-xs">Status Sesi Otomatis Terhitung:</label>
+                  <div class="flex items-center gap-1.5 py-1">
+                    <span id="badgeCurrentComputedSession" class="px-2.5 py-1 rounded-md bg-white border border-amber-300 text-amber-900 font-bold font-mono text-xs shadow-2xs">
+                      Minggu 1
+                    </span>
+                    <span class="text-[10px] text-zinc-500">(Aktif terhitung)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Batas Kuota & Pesan Penutupan -->
+            <div class="space-y-1 pt-1">
+              <label for="cfg_Batas_Maksimal_Respons" class="block font-semibold text-zinc-700">Batas Kuota Respons (Opsional):</label>
+              <input 
+                type="number" 
+                id="cfg_Batas_Maksimal_Respons" 
+                min="0" 
+                step="1" 
+                placeholder="0 (Tanpa Batas)" 
+                oninput="handleConfigInputAutoSave()" 
+                class="w-full sm:w-64 px-3 py-2 rounded-xl border border-zinc-300 bg-white text-xs outline-none focus:border-amber-500 transition shadow-2xs font-mono"
+              >
+              <p class="text-[10px] text-zinc-400">Formulir otomatis tertutup jika mencapai jumlah respons ini.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-1 border-t border-zinc-100">
               <div class="space-y-1">
                 <label for="cfg_Pesan_Form_Belum_Buka" class="block font-semibold text-zinc-700">Pesan Saat Form Belum Dibuka:</label>
                 <textarea 
                   id="cfg_Pesan_Form_Belum_Buka" 
-                  rows="2"
-                  oninput="handleConfigInputAutoSave()"
+                  rows="2" 
+                  oninput="handleConfigInputAutoSave()" 
                   placeholder="Formulir penilaian belum dibuka. Perkuliahan akan dimulai sesuai jadwal." 
                   class="w-full px-3 py-2 rounded-xl border border-zinc-300 bg-white text-xs outline-none focus:border-amber-500 transition shadow-2xs resize-none"
                 ></textarea>
@@ -1323,8 +1507,8 @@
                 <label for="cfg_Pesan_Form_Ditutup" class="block font-semibold text-zinc-700">Pesan Saat Form Sudah Ditutup:</label>
                 <textarea 
                   id="cfg_Pesan_Form_Ditutup" 
-                  rows="2"
-                  oninput="handleConfigInputAutoSave()"
+                  rows="2" 
+                  oninput="handleConfigInputAutoSave()" 
                   placeholder="Sesi penilaian telah berakhir dan batas waktu telah ditutup. Terima kasih atas partisipasi Anda." 
                   class="w-full px-3 py-2 rounded-xl border border-zinc-300 bg-white text-xs outline-none focus:border-amber-500 transition shadow-2xs resize-none"
                 ></textarea>
@@ -3802,13 +3986,13 @@ function getOrCreateFolder(folderName) {
   <!-- ========================================================================= -->
   <!-- JAVASCRIPT APP LOGIC: MULTI-FORM & ISOLATED SANDBOX ENGINE -->
   <!-- ========================================================================= -->
-  <script src="src/admin/admin.js?v=2.5.3"></script>
+  <script src="src/admin/admin.js?v=2.5.4"></script>
 
   <!-- Progressive Web App (PWA) & Instant Auto-Updater Engine -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js?v=2.5.3').then(function(reg) {
+        navigator.serviceWorker.register('/sw.js?v=2.5.4').then(function(reg) {
           reg.update();
           reg.addEventListener('updatefound', function() {
             var newWorker = reg.installing;

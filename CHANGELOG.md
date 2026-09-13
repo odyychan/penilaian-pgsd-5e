@@ -2,6 +2,26 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.4] - 2026-09-14
+
+### ⏰ Engine Penjadwalan Otomatis Berulang (Rutin Mingguan & Interval Siklus) serta Otomasi Sesi Perkuliahan
+- **🔄 Mesin Penjadwalan Multi-Mode Fleksibel (*Universal Recurring Schedule Engine*):**
+  - **Rutin Mingguan (Hari Tertentu):** Mengizinkan pembukaan akses formulir atau kuis hanya pada hari-hari perkuliahan tertentu (misalnya setiap hari Senin, Kamis, dsb.) dalam rentang jendela waktu harian yang ditentukan (misalnya pukul 08:00 – 10:00 WITA).
+  - **Interval Siklus ($N$ Hari Sekali):** Mendukung pembukaan penilaian secara periodik setiap $N$ hari sekali (misalnya setiap 7 hari sekali / seminggu sekali) terhitung dari tanggal patokan awal siklus perkuliahan.
+  - **Rentang Tanggal Tetap:** Tetap mempertahankan mode rentang tanggal awal dan akhir (backward compatible) untuk evaluasi satu kali ujian/penilaian.
+- **📈 Otomasi Penaikan Sesi Minggu Perkuliahan (*Auto-Advance Weekly Session*):**
+  - Menyediakan opsi sakelar *[Otomatis Naikkan Sesi Minggu]* di panel admin untuk menaikkan sesi formulir aktif (`Minggu 1` ➔ `Minggu 2`, dst.) secara otomatis mengikuti jalannya siklus jadwal perkuliahan.
+  - Dilengkapi kontrol *Batas Sesi Maksimal* (misalnya maksimal 10 sesi) dan lencana status sesi terhitung langsung (*live computed session badge*).
+  - Menjamin pengisian penilaian mahasiswa secara otomatis menyematkan sesi minggu yang tepat ke basis data Supabase tanpa risiko salah pilih sesi.
+- **⚡ Kontrol Cepat Stepper Sesi 1-Klik (*1-Click Session Stepper Controls*):**
+  - Menambahkan tombol stepper `[◀]` dan `[▶]` pada bilah navigasi admin untuk menaikkan atau memundurkan sesi aktif dalam 1 kali klik dengan sinkronisasi instan ke Supabase.
+- **📢 Format Tenggat Cerdas pada Pengingat WhatsApp (*Smart Broadcast Template*):**
+  - Memperbarui generator pesan broadcast WhatsApp agar secara cerdas menyusun informasi batas waktu sesuai tipe jadwal aktif (menyebutkan hari rutin mingguan atau interval siklus dan jam operasional WITA).
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.4` di seluruh berkas (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
+---
+
 ## [2.5.3] - 2026-09-14
 
 ### 🎓 Sinkronisasi Total Roster Mahasiswa & Tampilan Dinamis Topik Materi Presentasi Kelompok
