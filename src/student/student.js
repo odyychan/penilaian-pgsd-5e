@@ -33,6 +33,20 @@
       return supabaseClient;
     }
 
+    async function ensureSupabaseClient(maxRetries = 25, intervalMs = 40) {
+      if (supabaseClient) return supabaseClient;
+      if (window.supabase && typeof window.supabase.createClient === "function") {
+        return getSupabaseClient();
+      }
+      for (let i = 0; i < maxRetries; i++) {
+        await new Promise(r => setTimeout(r, intervalMs));
+        if (window.supabase && typeof window.supabase.createClient === "function") {
+          return getSupabaseClient();
+        }
+      }
+      return getSupabaseClient();
+    }
+
     // Eagerly initialize supabase client
     try {
       getSupabaseClient();
@@ -1381,6 +1395,7 @@ function normalizeMediaList(fieldOrMedia) {
 
       // 3. Background Revalidation from Supabase
       fetchInitialFormData(false);
+      setupStudentRealtimeSubscription(pin);
       setTimeout(() => loadRekapData(true), 300);
 
       window.scrollTo({ top: 0, behavior: 'instant' });
@@ -3592,16 +3607,253 @@ function normalizeMediaList(fieldOrMedia) {
     }
 
     // =========================================================================
-    // TWO-WAY REAL-TIME SYNCHRONIZATION ENGINE
+    // TWO-WAY REAL-TIME SYNCHRONIZATION ENGINE (DUAL ENGINE: SUPABASE + BUS)
     // =========================================================================
     let realtimeHeartbeatTimer = null;
     let lastConfigSyncTimestamp = Date.now();
+    let studentBroadcastBus = null;
+    let studentSupabaseRealtimeChannel = null;
+    let lastAppliedSyncHash = "";
+    let lastToastNotificationTime = 0;
+
+    // Inisialisasi Bus Antar-Tab (Browser Native BroadcastChannel: 0ms latency)
+    try {
+      if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+        studentBroadcastBus = new BroadcastChannel('pgsd_realtime_bus');
+        studentBroadcastBus.onmessage = (event) => {
+          if (event && event.data) {
+            applyIncomingRealtimeChange(event.data, 'broadcast_channel');
+          }
+        };
+      }
+    } catch (e) {
+      console.warn("Student BroadcastChannel notice:", e);
+    }
+
+    function applyIncomingRealtimeChange(change, source = 'realtime') {
+      if (!change || !change.formId || !change.type) return;
+      const currentActive = (activeFormId || DEFAULT_PRIMARY_FORM_ID || 'BK5E').toUpperCase();
+      const incomingTarget = String(change.formId).toUpperCase();
+
+      // Hanya terapkan jika paket ditujukan untuk form yang sedang aktif
+      if (incomingTarget !== currentActive && incomingTarget !== 'GLOBAL') return;
+
+      // Deduplikasi paket (mencegah eksekusi ganda jika tiba bersamaan via WS & BroadcastChannel)
+      const packetHash = `${change.type}_${change.timestamp || Date.now()}`;
+      if (lastAppliedSyncHash === packetHash) return;
+      lastAppliedSyncHash = packetHash;
+
+      console.log(`⚡ [Realtime Student Sync] Menerima sinyal instan: ${change.type} via ${source}`, change);
+
+      // Kunci Keamanan Draf Mahasiswa: Simpan isian sebelum DOM diperbarui
+      saveFormDraft();
+
+      if (change.type === 'STATUS_UPDATE') {
+        const newStatus = (change.payload && change.payload.status) || 'AKTIF';
+        if (!currentFormMeta) currentFormMeta = {};
+        currentFormMeta.status = newStatus;
+        if (change.payload.sesiAktif) currentFormMeta.sesiAktif = change.payload.sesiAktif;
+        if (change.payload.judulForm) currentFormMeta.judulForm = change.payload.judulForm;
+        if (change.payload.mataKuliah) currentFormMeta.mataKuliah = change.payload.mataKuliah;
+        if (change.payload.dosen) currentFormMeta.dosen = change.payload.dosen;
+        if (change.payload.formMode) currentFormMeta.formMode = change.payload.formMode;
+
+        localStorage.setItem("PGSD_CACHE_META_" + currentActive, JSON.stringify(currentFormMeta));
+        evaluateFormScheduleStatus();
+        renderConfigHeader();
+
+        const isClosed = ['NONAKTIF', 'SELESAI', 'TUTUP', 'DITUTUP', 'CLOSED', 'LOCKED'].includes(String(newStatus).toUpperCase());
+        const toastMsg = isClosed 
+          ? "Perhatian: Formulir ini baru saja ditutup oleh dosen pengampu. Pengisian ditangguhkan."
+          : "Formulir telah diaktifkan kembali oleh dosen pengampu. Anda dapat melanjutkan penilaian.";
+        showToast(toastMsg, isClosed ? "warning" : "success", 4000);
+
+        // Jika form sedang ditutup saat mahasiswa di dalam wizard, kunci tombol submit
+        const submitBtn = document.getElementById("btnConfirmFinalSubmit");
+        if (submitBtn) {
+          submitBtn.disabled = isClosed;
+        }
+
+      } else if (change.type === 'CONFIG_UPDATE') {
+        if (change.payload && change.payload.config) {
+          const newCfg = change.payload.config;
+          const oldSesi = appConfig && appConfig["Sesi_Minggu_Aktif"];
+          appConfig = Object.assign({}, appConfig, newCfg);
+          localStorage.setItem("PGSD_CACHE_CONFIG_" + currentActive, JSON.stringify(appConfig));
+
+          // Sinkronkan metadata judul/mata kuliah/dosen jika ada
+          if (newCfg["Judul_Form"] && currentFormMeta) currentFormMeta.judulForm = newCfg["Judul_Form"];
+          if (newCfg["Mata_Kuliah"] && currentFormMeta) currentFormMeta.mataKuliah = newCfg["Mata_Kuliah"];
+          if (newCfg["Dosen_Pengampu"] && currentFormMeta) currentFormMeta.dosen = newCfg["Dosen_Pengampu"];
+          if (newCfg["Sesi_Minggu_Aktif"] && currentFormMeta) currentFormMeta.sesiAktif = newCfg["Sesi_Minggu_Aktif"];
+
+          // Render ulang komponen terdampak
+          renderConfigHeader();
+          evaluateFormScheduleStatus();
+          checkAndApplyAuthGate();
+          renderDynamicCustomFields();
+
+          // Perbarui badge sesi di navbar
+          const navSesi = document.getElementById("badgeSesiTop");
+          if (navSesi && appConfig["Sesi_Minggu_Aktif"]) {
+            navSesi.textContent = appConfig["Sesi_Minggu_Aktif"];
+          }
+
+          // Jika Sesi Minggu Aktif diubah, perbarui filter kelompok
+          if (oldSesi !== appConfig["Sesi_Minggu_Aktif"]) {
+            renderGroupOptions();
+          }
+
+          // Pulihkan isian draf secara senyap ke dalam DOM
+          restoreFormDraft(true, true);
+          try {
+            renderAllMathInElement(document.getElementById("mainAppRoot") || document.body);
+          } catch(e) {}
+
+          // Tampilkan feedback notifikasi ringan (throttle maks 1 per 4 detik agar tidak mengganggu saat admin mengetik)
+          if (Date.now() - lastToastNotificationTime > 4000) {
+            lastToastNotificationTime = Date.now();
+            showToast("Pengaturan formulir diperbarui seketika oleh Admin.", "info", 1800);
+          }
+        }
+
+      } else if (change.type === 'SCHEMA_UPDATE') {
+        if (change.payload && change.payload.schema) {
+          currentFormSchema = change.payload.schema;
+          localStorage.setItem("PGSD_CACHE_FORM_SCHEMA_" + currentActive, JSON.stringify(currentFormSchema));
+          if (change.payload.config) {
+            appConfig = Object.assign({}, appConfig, change.payload.config);
+            localStorage.setItem("PGSD_CACHE_CONFIG_" + currentActive, JSON.stringify(appConfig));
+          }
+
+          // Re-render struktur tahapan dinamis & pulihkan draf mahasiswa secara instan
+          renderDynamicClientStages(true);
+          restoreFormDraft(true, true);
+          try {
+            renderAllMathInElement(document.getElementById("mainAppRoot") || document.body);
+          } catch(e) {}
+
+          showToast("Struktur rubrik & instrumen penilaian diperbarui seketika.", "info", 2500);
+        }
+
+      } else if (change.type === 'GROUPS_UPDATE') {
+        if (change.payload && Array.isArray(change.payload.groups)) {
+          groupsData = change.payload.groups;
+          localStorage.setItem("PGSD_CACHE_GROUPS_" + currentActive, JSON.stringify(groupsData));
+          renderGroupOptions();
+          restoreFormDraft(true, true);
+          showToast("Daftar kelompok & mahasiswa telah disinkronkan secara langsung.", "info", 2000);
+        }
+
+      } else if (change.type === 'FULL_SYNC') {
+        fetchInitialFormData(false);
+      }
+
+      // Pastikan draf selalu tetap terisi
+      restoreFormDraft(true, true);
+    }
+
+    async function setupStudentRealtimeSubscription(targetFormId) {
+      const formKey = (targetFormId || activeFormId || DEFAULT_PRIMARY_FORM_ID || 'BK5E').toUpperCase();
+      const sb = await ensureSupabaseClient();
+      if (!sb) {
+        console.warn("[Realtime] Supabase client belum siap untuk langganan form:", formKey);
+        return;
+      }
+
+      // Bersihkan channel langganan lama jika beralih form
+      if (studentSupabaseRealtimeChannel) {
+        try {
+          sb.removeChannel(studentSupabaseRealtimeChannel);
+        } catch (e) {}
+        studentSupabaseRealtimeChannel = null;
+      }
+
+      const channelName = `realtime_form_${formKey}`;
+      console.log(`⚡ [Realtime] Menghubungkan WebSocket Realtime Mahasiswa ke: ${channelName}`);
+
+      studentSupabaseRealtimeChannel = sb.channel(channelName, {
+        config: {
+          broadcast: { ack: false, self: false }
+        }
+      });
+
+      studentSupabaseRealtimeChannel
+        // 1. Supabase WebSocket Broadcast (< 40ms ke seluruh perangkat online)
+        .on('broadcast', { event: 'admin_sync' }, (message) => {
+          if (message && message.payload) {
+            applyIncomingRealtimeChange(message.payload, 'supabase_websocket_broadcast');
+          }
+        })
+        // 2. PostgreSQL WAL Changes pada tabel pgsd_form_configs (< 80ms)
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'pgsd_form_configs',
+          filter: `form_id=eq.${formKey}`
+        }, (payload) => {
+          console.log(`[Realtime WAL] Perubahan database pgsd_form_configs terdeteksi:`, payload);
+          if (payload.new) {
+            applyIncomingRealtimeChange({
+              formId: formKey,
+              type: 'CONFIG_UPDATE',
+              timestamp: Date.now(),
+              payload: {
+                config: payload.new.config_data || payload.new.app_config,
+                schema: payload.new.schema_data || payload.new.form_schema
+              }
+            }, 'supabase_postgres_changes');
+          }
+        })
+        // 3. PostgreSQL WAL Changes pada tabel pgsd_forms (< 80ms)
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'pgsd_forms',
+          filter: `form_id=eq.${formKey}`
+        }, (payload) => {
+          console.log(`[Realtime WAL] Perubahan database pgsd_forms terdeteksi:`, payload);
+          if (payload.new) {
+            applyIncomingRealtimeChange({
+              formId: formKey,
+              type: 'STATUS_UPDATE',
+              timestamp: Date.now(),
+              payload: {
+                status: payload.new.status,
+                sesiAktif: payload.new.sesi_aktif,
+                judulForm: payload.new.judul_form,
+                mataKuliah: payload.new.mata_kuliah,
+                dosen: payload.new.dosen,
+                formMode: payload.new.form_mode
+              }
+            }, 'supabase_postgres_changes');
+          }
+        })
+        // 4. PostgreSQL WAL Changes pada tabel pgsd_groups (< 80ms)
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'pgsd_groups',
+          filter: `form_id=eq.${formKey}`
+        }, (payload) => {
+          console.log(`[Realtime WAL] Perubahan kelompok terdeteksi:`, payload);
+          fetchInitialFormData(false);
+        })
+        .subscribe((status, err) => {
+          if (status === 'SUBSCRIBED') {
+            console.log(`✓ [Realtime] Mahasiswa terhubung ke channel real-time: ${channelName}`);
+          } else if (err) {
+            console.warn(`! [Realtime] Peringatan koneksi langganan:`, err);
+          }
+        });
+    }
 
     function initRealtimeSyncEngine() {
       // 0. Online / Offline Connection Event Handlers
       window.addEventListener("online", () => {
         showToast("Koneksi internet terhubung kembali. Memperbarui data penilaian...", "info");
         fetchInitialFormData(false);
+        setupStudentRealtimeSubscription(activeFormId);
         const curTab = localStorage.getItem("PGSD_ACTIVE_MAIN_TAB") || "form";
         if (curTab === 'rekap') loadRekapData(true);
       });
@@ -3615,23 +3867,22 @@ function normalizeMediaList(fieldOrMedia) {
       realtimeHeartbeatTimer = setInterval(() => {
         if (document.visibilityState === 'visible' && navigator.onLine) {
           const currentTab = localStorage.getItem("PGSD_ACTIVE_MAIN_TAB") || "form";
-          // Jika pengguna sedang membuka Rekapitulasi / Presensi, update otomatis data live
           if (currentTab === 'rekap') {
             loadRekapData(true);
           }
-          // Periodik cek perubahan Konfigurasi / Sesi Aktif oleh Admin (setiap 60s)
           if (Date.now() - lastConfigSyncTimestamp > 60000) {
             lastConfigSyncTimestamp = Date.now();
             fetchInitialFormData(false);
           }
         }
-      }, 20000); // 20 detik interval
+      }, 20000);
 
       // 2. Tab Visibility & Window Focus Sync (Instant on app revisit / unlock)
       document.addEventListener("visibilitychange", () => {
         if (document.visibilityState === "visible" && navigator.onLine) {
           const currentTab = localStorage.getItem("PGSD_ACTIVE_MAIN_TAB") || "form";
           fetchInitialFormData(false);
+          setupStudentRealtimeSubscription(activeFormId);
           if (currentTab === 'rekap') {
             loadRekapData(true);
           }
@@ -3647,17 +3898,26 @@ function normalizeMediaList(fieldOrMedia) {
         }
       });
 
-      // 3. Cross-Tab / Cross-Window Realtime Broadcast Listener
+      // 3. Cross-Tab / Cross-Window Realtime Storage Pulse Listener (< 5ms)
       window.addEventListener("storage", (e) => {
-        if (e.key === "PGSD_LAST_SUBMISSION_EVENT") {
+        if (e.key && e.key.startsWith("PGSD_REALTIME_PULSE_")) {
+          try {
+            const data = JSON.parse(e.newValue || "{}");
+            applyIncomingRealtimeChange(data, 'storage_pulse');
+          } catch(err) {}
+        } else if (e.key === "PGSD_LAST_SUBMISSION_EVENT") {
           loadRekapData(true);
-        } else if (e.key === "PGSD_CACHE_CONFIG") {
+        } else if (e.key === "PGSD_CACHE_CONFIG_" + activeFormId || e.key === "PGSD_CACHE_CONFIG") {
           try {
             appConfig = JSON.parse(e.newValue || "{}");
             renderConfigHeader();
+            evaluateFormScheduleStatus();
           } catch(err) {}
         }
       });
+
+      // Hubungkan ke Supabase Realtime channel
+      setupStudentRealtimeSubscription(activeFormId);
     }
 
     function loadLocalCache() {
@@ -4105,7 +4365,8 @@ function normalizeMediaList(fieldOrMedia) {
       const startBtn = document.getElementById("startAssessmentBtn");
       const warningBadge = document.getElementById("deadlineWarningBadge");
 
-      const isManualClosed = currentFormMeta && (currentFormMeta.status === 'NONAKTIF' || currentFormMeta.status === 'SELESAI');
+      const formStatusUpper = String((currentFormMeta && currentFormMeta.status) || 'AKTIF').toUpperCase();
+      const isManualClosed = ['NONAKTIF', 'SELESAI', 'TUTUP', 'DITUTUP', 'CLOSED', 'LOCKED'].includes(formStatusUpper);
       const scheduleActive = appConfig && (appConfig["Jadwal_Aktif"] === true || appConfig["Jadwal_Aktif"] === "true");
 
       const now = new Date();
@@ -6779,8 +7040,8 @@ function normalizeMediaList(fieldOrMedia) {
     }
 
     let isDraftAlreadyRestored = false;
-    function restoreFormDraft() {
-      if (isDraftAlreadyRestored) return;
+    function restoreFormDraft(force = false, silent = false) {
+      if (isDraftAlreadyRestored && !force) return;
       try {
         const draftKey = getFormDraftKey();
         let raw = localStorage.getItem(draftKey);
@@ -6914,7 +7175,9 @@ function normalizeMediaList(fieldOrMedia) {
           const indicator = document.getElementById("autoSaveIndicator");
           if (indicator) indicator.classList.remove("hidden");
 
-          showToast("Draf isian sebelumnya berhasil dipulihkan.", "info");
+          if (!silent) {
+            showToast("Draf isian sebelumnya berhasil dipulihkan.", "info");
+          }
         }
       } catch (e) {
         console.warn("Restore draft error notice:", e);

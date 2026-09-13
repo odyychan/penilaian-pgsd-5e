@@ -83,6 +83,95 @@
     let isSyncingQueue = false;
     let configDebounceTimer = null;
 
+    // =========================================================================
+    // INSTANT TWO-WAY REALTIME ENGINE (ADMIN BROADCASTER)
+    // =========================================================================
+    let adminBroadcastBus = null;
+    let adminSupabaseRealtimeChannel = null;
+    let adminRealtimeSubscribed = false;
+
+    // 1. Browser Native BroadcastChannel (< 1ms Latency)
+    try {
+      if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+        adminBroadcastBus = new BroadcastChannel('pgsd_realtime_bus');
+      }
+    } catch (e) {
+      console.warn("Admin BroadcastChannel notice:", e);
+    }
+
+    async function initAdminRealtimeChannel(targetFormId) {
+      const formKey = (targetFormId || currentFormId || DEFAULT_PRIMARY_FORM_ID).toUpperCase();
+      const sb = await ensureSupabaseClient();
+      if (!sb) return;
+
+      if (adminSupabaseRealtimeChannel) {
+        try {
+          sb.removeChannel(adminSupabaseRealtimeChannel);
+        } catch (e) {}
+        adminSupabaseRealtimeChannel = null;
+        adminRealtimeSubscribed = false;
+      }
+
+      const channelName = `realtime_form_${formKey}`;
+      console.log(`⚡ [Realtime Admin] Membuka saluran broadcast: ${channelName}`);
+
+      adminSupabaseRealtimeChannel = sb.channel(channelName, {
+        config: {
+          broadcast: { ack: false, self: false }
+        }
+      });
+
+      adminSupabaseRealtimeChannel.subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          adminRealtimeSubscribed = true;
+          console.log(`✓ [Realtime Admin] Saluran broadcast aktif untuk form: ${formKey}`);
+        } else {
+          adminRealtimeSubscribed = false;
+        }
+      });
+    }
+
+    function broadcastInstantAdminChange(changeType, payload = {}) {
+      const formKey = (payload.formId || currentFormId || DEFAULT_PRIMARY_FORM_ID).toUpperCase();
+      const syncPacket = {
+        formId: formKey,
+        type: changeType,
+        timestamp: Date.now(),
+        payload: payload,
+        sender: 'admin'
+      };
+
+      console.log(`⚡ [Realtime Admin Broadcast] Mengirim sinyal instan: ${changeType} untuk ${formKey}`, syncPacket);
+
+      // Jalur 1: Browser-native BroadcastChannel (Sub-millisecond < 1ms untuk tab/jendela di browser yang sama)
+      if (adminBroadcastBus) {
+        try {
+          adminBroadcastBus.postMessage(syncPacket);
+        } catch (e) {
+          console.warn("Admin bus postMessage error:", e);
+        }
+      }
+
+      // Jalur 2: LocalStorage Pulse Event (< 5ms)
+      try {
+        localStorage.setItem("PGSD_REALTIME_PULSE_" + formKey, JSON.stringify(syncPacket));
+        localStorage.setItem("PGSD_REALTIME_PULSE_GLOBAL", JSON.stringify(syncPacket));
+      } catch (e) {}
+
+      // Jalur 3: Supabase WebSocket Broadcast (< 30-50ms ke seluruh perangkat mahasiswa di luar jaringan)
+      if (adminSupabaseRealtimeChannel) {
+        try {
+          adminSupabaseRealtimeChannel.send({
+            type: 'broadcast',
+            event: 'admin_sync',
+            payload: syncPacket
+          }).catch(err => console.warn("[Supabase Realtime Broadcast Error]", err));
+        } catch (e) {
+          console.warn("[Realtime Broadcast Exception]", e);
+        }
+      }
+    }
+
     function getApiUrl() {
       return (typeof adminAppConfig !== 'undefined' && adminAppConfig && adminAppConfig["Spreadsheet_Webhook_Url"])
         || localStorage.getItem("PGSD_GLOBAL_API_URL")
@@ -2441,12 +2530,22 @@
         if (sb && task.formId) {
           try {
             if (task.type === 'config') {
+              const cfgPayload = task.payload || adminAppConfig;
               await sb.from('pgsd_form_configs').upsert({
                 form_id: task.formId,
-                config_data: task.payload || adminAppConfig,
+                config_data: cfgPayload,
                 schema_data: adminFormSchema || (typeof getBlankFormSchema === 'function' ? getBlankFormSchema() : { tahapan: [] }),
                 updated_at: new Date().toISOString()
               });
+              if (cfgPayload && (cfgPayload["Sesi_Minggu_Aktif"] || cfgPayload["Judul_Form"])) {
+                await sb.from('pgsd_forms').update({
+                  sesi_aktif: cfgPayload["Sesi_Minggu_Aktif"] || undefined,
+                  judul_form: cfgPayload["Judul_Form"] || undefined,
+                  mata_kuliah: cfgPayload["Mata_Kuliah"] || undefined,
+                  dosen: cfgPayload["Dosen_Pengampu"] || undefined,
+                  updated_at: new Date().toISOString()
+                }).eq('form_id', task.formId);
+              }
             } else if (task.type === 'groups' && Array.isArray(task.payload)) {
               // Hapus dan simpan ulang groups & students untuk form ini
               await sb.from('pgsd_students').delete().eq('form_id', task.formId);
@@ -2590,10 +2689,12 @@
     }
 
     function triggerAutoSaveMasterData() {
+      broadcastInstantAdminChange('GROUPS_UPDATE', { groups: adminMasterGroups });
       queueSyncTask('groups', adminMasterGroups);
     }
 
     function triggerAutoSaveConfig() {
+      broadcastInstantAdminChange('CONFIG_UPDATE', { config: adminAppConfig });
       queueSyncTask('config', adminAppConfig);
     }
 
@@ -3216,6 +3317,8 @@
       }
 
       initAdminRealtimeSync();
+      initRealtimeSyncEngine();
+      initAdminRealtimeChannel(paramId || DEFAULT_PRIMARY_FORM_ID);
     }
 
     window.addEventListener('popstate', function(e) {
@@ -3333,6 +3436,12 @@
 
       renderHubFormsGrid();
       updateWorkspaceStatusUI(newStatus === 'AKTIF');
+
+      // ⚡ INSTANT REALTIME BROADCAST (< 1ms)
+      broadcastInstantAdminChange('STATUS_UPDATE', { 
+        status: newStatus, 
+        formId: targetForm 
+      });
 
       showAdminToast(
         `Status formulir '${targetForm}': ${newStatus === 'AKTIF' ? 'AKTIF — Menerima Respons' : 'DITUTUP'}`,
@@ -3794,6 +3903,7 @@
     // =========================================================================
     async function openFormWorkspace(formId, updateUrlState = true) {
       currentFormId = formId || DEFAULT_PRIMARY_FORM_ID;
+      initAdminRealtimeChannel(currentFormId);
 
       if (updateUrlState) {
         const url = new URL(window.location);
@@ -4439,6 +4549,7 @@
         'EVENT_REGISTRATION': 'Pendaftaran Acara'
       };
       showAdminToast(`Mode formulir dialihkan ke: ${modeLabels[mode] || mode}`, "info");
+      handleConfigInputAutoSave(true);
 
       // Auto-save metadata and config
       ensureSupabaseClient().then(sb => {
@@ -4473,6 +4584,7 @@
     function handleEmailModeCardChange(mode) {
       adminAppConfig["Mode_Pengumpulan_Email"] = mode;
       updateEmailModeCardsUI(mode);
+      handleConfigInputAutoSave(true);
     }
 
     // =========================================================================
@@ -4685,7 +4797,7 @@
       } else {
         configDebounceTimer = setTimeout(() => {
           triggerAutoSaveConfig();
-        }, 800);
+        }, 200);
       }
     }
 
@@ -5485,6 +5597,13 @@
       localStorage.setItem(`PGSD_CACHE_CONFIG_${formKey}`, JSON.stringify(adminAppConfig));
       localStorage.removeItem(`PGSD_DRAFT_SCHEMA_${formKey}`);
       
+      // ⚡ INSTANT REALTIME BROADCAST (< 1ms)
+      broadcastInstantAdminChange('SCHEMA_UPDATE', {
+        schema: adminFormSchema,
+        config: adminAppConfig,
+        formId: formKey
+      });
+
       showAdminToast("Formulir BERHASIL Dipublikasikan! Versi terbaru aktif seketika.", "success");
 
       // 🔄 Asynchronous Background Sync to Google Sheets
@@ -11923,6 +12042,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       adminAppConfig["Google_Drive_Folder_Name"] = driveFolder;
 
       localStorage.setItem(`PGSD_CACHE_CONFIG_${targetForm}`, JSON.stringify(adminAppConfig));
+      broadcastInstantAdminChange('CONFIG_UPDATE', { config: adminAppConfig, formId: targetForm });
 
       // Simpan ke Supabase Database pgsd_form_configs & pgsd_forms
       const sb = getSupabaseClient();
@@ -12246,6 +12366,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
     function savePrintConfig(notify = false) {
       const targetForm = currentFormId || "BK5E";
       localStorage.setItem(`PGSD_CACHE_CONFIG_${targetForm}`, JSON.stringify(adminAppConfig));
+      broadcastInstantAdminChange('CONFIG_UPDATE', { config: adminAppConfig, formId: targetForm });
       queueSyncTask('config', adminAppConfig);
       updateLivePrintPreview();
       if (notify) showAdminToast("Format cetak berhasil disimpan!", "success");
