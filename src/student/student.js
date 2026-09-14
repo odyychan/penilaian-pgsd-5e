@@ -3913,6 +3913,10 @@ function normalizeMediaList(fieldOrMedia) {
           showToast("Daftar kelompok & mahasiswa telah disinkronkan secara langsung.", "info", 2000);
         }
 
+      } else if (change.type === 'RESPONSE_DELETED') {
+        if (typeof loadRekapData === 'function') {
+          loadRekapData(true);
+        }
       } else if (change.type === 'FULL_SYNC') {
         fetchInitialFormData(false);
       }

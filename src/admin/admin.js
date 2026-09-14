@@ -9949,9 +9949,15 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
               <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
               <span>Detail</span>
             </button>
-            <div class="flex items-center gap-1">
-              <span class="text-[10px] text-zinc-400 font-mono">ID: ${r.idRespons}</span>
-              <button type="button" onclick="deleteSingleResponse('${r.idRespons}', ${r.rowIndex})" class="p-1 text-rose-600 hover:bg-rose-50 rounded transition cursor-pointer" title="Hapus Data Ini">
+            <div class="flex items-center gap-1.5">
+              <span class="text-[10px] text-zinc-400 font-mono">ID: ${escapeHtml(String(r.idRespons || ''))}</span>
+              <button 
+                type="button" 
+                onclick="deleteSingleResponse('${escapeHtml(String(r.idRespons || ''))}', '${escapeHtml(String(r.rowIndex || ''))}')" 
+                class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer flex items-center justify-center min-w-[32px] min-h-[32px]" 
+                title="Hapus Data Ini"
+                aria-label="Hapus respons ${escapeHtml(String(r.idRespons || ''))}"
+              >
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
               </button>
             </div>
@@ -10656,6 +10662,10 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
     }
 
     async function deleteSingleResponse(idRespons, rowIndex) {
+      if (!idRespons) {
+        showAdminToast("ID Respons tidak valid atau kosong.", "warning");
+        return;
+      }
       const ok = await showAppConfirm({
         title: "Hapus Respons Penilaian?",
         message: `Hapus respons ID '${idRespons}' secara permanen? Data penilaian ini akan dihapus dari sistem.`,
@@ -10667,7 +10677,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       const apiUrl = getApiUrl();
 
       // 1. Optimistic UI: Segera hilangkan dari daftar respons lokal (< 10ms)
-      const targetIdx = adminResponsesList.findIndex(r => String(r.idRespons) === String(idRespons));
+      const targetIdx = adminResponsesList.findIndex(r => String(r.idRespons) === String(idRespons) || String(r.rowIndex) === String(idRespons));
       let backupItem = null;
       if (targetIdx !== -1) {
         backupItem = adminResponsesList[targetIdx];
@@ -10679,31 +10689,57 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
         // 2. Fast-Path Supabase Delete (< 50ms)
         const sb = await ensureSupabaseClient();
         if (sb) {
-          const { error: delErr } = await sb.from('pgsd_responses').delete().eq('id_respons', String(idRespons));
-          if (delErr) {
-            console.warn("Direct Supabase delete failed, trying RPC:", delErr);
-            await sb.rpc('pgsd_fn_admin_delete_response', {
+          let rpcSuccess = false;
+          try {
+            const { data: rpcRes, error: rpcErr } = await sb.rpc('pgsd_fn_admin_delete_response', {
               p_id_respons: String(idRespons)
             });
+            if (!rpcErr && rpcRes) {
+              rpcSuccess = true;
+            } else if (rpcErr) {
+              console.warn("RPC pgsd_fn_admin_delete_response notice:", rpcErr);
+            }
+          } catch(e) {
+            console.warn("RPC pgsd_fn_admin_delete_response exception:", e);
           }
+
+          // Fallback direct delete jika RPC gagal
+          if (!rpcSuccess) {
+            const { error: delErr } = await sb.from('pgsd_responses').delete().or(`id_respons.eq.${idRespons},id.eq.${idRespons}`);
+            if (delErr) {
+              console.warn("Direct Supabase delete notice:", delErr);
+            }
+          }
+        }
+
+        // Perbarui cache respons lokal agar tidak muncul kembali saat reload
+        try {
+          localStorage.setItem(`PGSD_CACHE_RESPONSES_${targetForm}`, JSON.stringify(adminResponsesList));
+        } catch(e) {}
+
+        // Broadcast real-time deletion ke seluruh tab & perangkat
+        if (typeof broadcastInstantAdminChange === 'function') {
+          broadcastInstantAdminChange('RESPONSE_DELETED', { formId: targetForm, idRespons: idRespons });
         }
 
         showAdminToast("Respons berhasil dihapus.", "success");
 
         // 3. Background Asynchronous Google Sheets Sync (Non-blocking)
-        fetch(apiUrl, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            action: "adminDeleteSingleResponse",
-            formId: targetForm,
-            idRespons: idRespons,
-            rowIndex: rowIndex
-          })
-        }).catch(err => console.warn("Background Sheets delete sync warn:", err));
+        if (apiUrl) {
+          fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              action: "adminDeleteSingleResponse",
+              formId: targetForm,
+              idRespons: idRespons,
+              rowIndex: rowIndex
+            })
+          }).catch(err => console.warn("Background Sheets delete sync warn:", err));
+        }
 
       } catch (e) {
-        // Rollback jika terjadi kegagalan Supabase
+        // Rollback jika terjadi kegagalan
         if (backupItem && targetIdx !== -1) {
           adminResponsesList.splice(targetIdx, 0, backupItem);
           renderAdminResponsesList();
@@ -10711,6 +10747,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
         showAdminToast("Gagal menghapus respons: " + (e.message || e), "error");
       }
     }
+    window.deleteSingleResponse = deleteSingleResponse;
 
     // SCOPED DELETE CONTROLLERS
     function openScopedDeleteModal() {

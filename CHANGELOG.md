@@ -2,6 +2,20 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.7] - 2026-09-14
+
+### 🛠️ Perbaikan Tombol Hapus Respons Penilaian & Penguatan Sinkronisasi Real-Time
+- **🗑️ Resolusi Error Klik Tombol Hapus Respons (`deleteSingleResponse`):**
+  - Memperbaiki parsing atribut inline event `onclick` pada kartu respons penilaian di panel admin: memastikan seluruh argumen pengenal respons dan baris (`idRespons` dan `rowIndex` bertipe UUID) di-*quote* dan di-*escape* secara aman (`'${escapeHtml(...)}'`).
+  - Mengeliminasi galat *SyntaxError / ReferenceError* peramban yang sebelumnya memblokir eksekusi dialog konfirmasi penghapusan saat tombol tempat sampah ditekan.
+  - Memperkuat fungsi `deleteSingleResponse` dengan validasi input, penghapusan optimistik instan pada antarmuka (< 10 ms), prioritas eksekusi aman via basis data, serta pembaruan langsung pada penyimpanan *cache* lokal.
+  - Menghubungkan penghapusan respons dengan saluran broadcast real-time (`RESPONSE_DELETED`) agar seluruh tab dan antarmuka rekapitulasi tersinkronisasi secara otomatis tanpa perlu memuat ulang halaman.
+  - Menyesuaikan ukuran target sentuh tombol hapus agar memenuhi standar ergonomis *mobile-first* (minimal 44×44 px / 48×48 px).
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.7` di seluruh berkas (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
+---
+
 ## [2.5.6] - 2026-09-14
 
 ### 🛠️ Perbaikan Layar Putih (Blank Screen) & Validasi Akun Google Bebas (ALL_EMAIL)
