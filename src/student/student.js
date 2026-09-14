@@ -4358,19 +4358,35 @@ function normalizeMediaList(fieldOrMedia) {
             if (pinEl) pinEl.textContent = `PIN: ${activeFormId}`;
             renderDynamicCustomFields();
 
+            const newSchemaStr = JSON.stringify(currentFormSchema);
+            const oldSchemaStr = localStorage.getItem("PGSD_CACHE_FORM_SCHEMA_" + activeFormId);
+            const newGroupsStr = JSON.stringify(groupsData);
+            const oldGroupsStr = localStorage.getItem("PGSD_CACHE_GROUPS_" + activeFormId);
+            const newConfigStr = JSON.stringify(appConfig);
+            const oldConfigStr = localStorage.getItem("PGSD_CACHE_CONFIG_" + activeFormId);
+
+            const hasStructuralChange = (newSchemaStr !== oldSchemaStr || newGroupsStr !== oldGroupsStr || newConfigStr !== oldConfigStr);
+            const hasExistingDOM = !!document.getElementById("stepSection_1");
+
             if (!isPreviewMode) {
-              localStorage.setItem("PGSD_CACHE_GROUPS_" + activeFormId, JSON.stringify(groupsData));
-              localStorage.setItem("PGSD_CACHE_CONFIG_" + activeFormId, JSON.stringify(appConfig));
+              localStorage.setItem("PGSD_CACHE_GROUPS_" + activeFormId, newGroupsStr);
+              localStorage.setItem("PGSD_CACHE_CONFIG_" + activeFormId, newConfigStr);
               localStorage.setItem("PGSD_CACHE_META_" + activeFormId, JSON.stringify(currentFormMeta));
-              localStorage.setItem("PGSD_CACHE_FORM_SCHEMA_" + activeFormId, JSON.stringify(currentFormSchema));
+              localStorage.setItem("PGSD_CACHE_FORM_SCHEMA_" + activeFormId, newSchemaStr);
               saveVisitedFormHistory(activeFormId, currentFormMeta, appConfig);
             }
 
             renderConfigHeader();
-            renderGroupOptions();
-            renderDynamicClientStages(false);
-            restoreFormDraft(true, true);
-            updateStepUI(currentStep || 1);
+            if (!hasExistingDOM || hasStructuralChange) {
+              renderGroupOptions();
+              renderDynamicClientStages(false);
+              restoreFormDraft(true, true);
+              updateStepUI(currentStep || 1, false, false, false);
+            } else {
+              updateStepMetadataFromSchema();
+              renderDynamicStepTabs();
+              updateStepUI(currentStep || 1, true, false, false);
+            }
             updateAccountHeaderUI();
             checkAndApplyAuthGate();
 
@@ -4461,11 +4477,18 @@ function normalizeMediaList(fieldOrMedia) {
             localStorage.setItem("PGSD_CACHE_CONFIG", JSON.stringify(appConfig));
           }
 
+          const hasExistingDomFallback = !!document.getElementById("stepSection_1");
           renderConfigHeader();
-          renderGroupOptions();
-          renderDynamicClientStages();
-          restoreFormDraft();
-          updateStepUI(currentStep || 1);
+          if (!hasExistingDomFallback) {
+            renderGroupOptions();
+            renderDynamicClientStages();
+            restoreFormDraft();
+            updateStepUI(currentStep || 1, false, false, false);
+          } else {
+            updateStepMetadataFromSchema();
+            renderDynamicStepTabs();
+            updateStepUI(currentStep || 1, true, false, false);
+          }
           updateAccountHeaderUI();
           checkAndApplyAuthGate();
 
@@ -4476,13 +4499,15 @@ function normalizeMediaList(fieldOrMedia) {
           }
         }
       } catch (err) {
-        renderConfigHeader();
-        renderGroupOptions();
-        renderDynamicClientStages();
-        restoreFormDraft();
-        updateStepUI(currentStep || 1);
-        updateAccountHeaderUI();
-        checkAndApplyAuthGate();
+        if (!document.getElementById("stepSection_1")) {
+          renderConfigHeader();
+          renderGroupOptions();
+          renderDynamicClientStages();
+          restoreFormDraft();
+          updateStepUI(currentStep || 1, false, false, false);
+          updateAccountHeaderUI();
+          checkAndApplyAuthGate();
+        }
       } finally {
         const loadingEl = document.getElementById("groupsLoading");
         if (loadingEl) loadingEl.classList.add("hidden");
@@ -5476,6 +5501,7 @@ function normalizeMediaList(fieldOrMedia) {
 
         // Per-instrument exception for CORE_MEMBER_FEEDBACK
         const feedbackField = findFieldInSchema(f => f.type === 'CORE_MEMBER_FEEDBACK');
+        const isFeedbackRequired = feedbackField ? (feedbackField.required !== false) : true;
         const memberScopeMode = feedbackField?.memberScopeMode || 'INHERIT_GLOBAL';
         const isGlobalAntiSelfActive = appConfig ? (appConfig["Cegah_Penilaian_Diri"] === true || appConfig["Cegah_Penilaian_Diri"] === "true" || appConfig["Cegah_Penilaian_Diri"] === undefined) : true;
 
@@ -5552,7 +5578,7 @@ function normalizeMediaList(fieldOrMedia) {
                   id="evalText_${eIdx}" 
                   data-member="${escapeHtml(member.name)}" 
                   data-is-self="true"
-                  required 
+                  ${isFeedbackRequired ? 'required' : ''} 
                   rows="3" 
                   maxlength="${maxChars}" 
                   placeholder="Ceritakan kontribusi, kendala, dan evaluasi diri Anda secara objektif..." 
@@ -5573,7 +5599,7 @@ function normalizeMediaList(fieldOrMedia) {
                   id="evalText_${eIdx}" 
                   data-member="${escapeHtml(member.name)}" 
                   data-is-self="false"
-                  required 
+                  ${isFeedbackRequired ? 'required' : ''} 
                   rows="2" 
                   maxlength="${maxChars}" 
                   placeholder="Tuliskan masukan evaluasi untuk ${escapeHtml(member.name)}..." 
@@ -5616,7 +5642,7 @@ function normalizeMediaList(fieldOrMedia) {
     }
 
     // Navigation Step
-    function updateStepUI(step, skipSave = false, pushHistoryState = false) {
+    function updateStepUI(step, skipSave = false, pushHistoryState = false, shouldScroll = false) {
       if (!document.getElementById("stepSection_1")) {
         renderDynamicClientStages();
       }
@@ -5694,28 +5720,48 @@ function normalizeMediaList(fieldOrMedia) {
         if (stageSec) renderAllMathInElement(stageSec);
       }, 40);
 
-      if (step > 1) {
-        const targetEl = document.getElementById(`stepSection_${step}`) || document.getElementById("assessmentForm");
-        if (targetEl) {
-          const headerEl = document.querySelector("header");
-          const headerHeight = headerEl ? headerEl.offsetHeight : 70;
-          const rect = targetEl.getBoundingClientRect();
-          const targetTop = window.scrollY + rect.top - headerHeight - 14;
-          window.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+      // Only scroll when explicitly requested (e.g. Next/Prev button or tab jump, never on background sync or idle heartbeat)
+      if (shouldScroll) {
+        if (step > 1) {
+          const targetEl = document.getElementById(`stepSection_${step}`) || document.getElementById("assessmentForm");
+          if (targetEl) {
+            const headerEl = document.querySelector("header");
+            const headerHeight = headerEl ? headerEl.offsetHeight : 70;
+            const rect = targetEl.getBoundingClientRect();
+            const targetTop = window.scrollY + rect.top - headerHeight - 14;
+            window.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+          } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
         } else {
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-      } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
 
-    function validateStageRequirements(stageIndex) {
+    function validateStageRequirements(stageIndex, shouldFocus = true) {
       const currentStageSec = document.getElementById(`stepSection_${stageIndex}`);
       if (!currentStageSec) return true;
 
       const isGenMode = (appConfig && (appConfig.form_mode === 'GENERAL_SURVEY' || appConfig.Form_Mode === 'GENERAL_SURVEY' || appConfig.formMode === 'GENERAL_SURVEY')) || (currentFormMeta && (currentFormMeta.formMode === 'GENERAL_SURVEY' || currentFormMeta.form_mode === 'GENERAL_SURVEY'));
       const hasCoreIdentity = !!findFieldInSchema(f => f.type === 'CORE_IDENTITY' || f.type === 'CORE_IDENTITAS');
+
+      const highlightElement = (el, toastMsg) => {
+        if (!shouldFocus || !el) {
+          if (toastMsg) showToast(toastMsg, "warning");
+          return;
+        }
+        if (typeof el.focus === 'function' && !el.disabled && el.type !== 'hidden') {
+          try { el.focus(); } catch(e) {}
+        }
+        const targetToScroll = el.closest('.bg-white, .border, .rounded-2xl, .rounded-xl') || el;
+        if (typeof targetToScroll.scrollIntoView === 'function') {
+          targetToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        targetToScroll.classList.add("ring-2", "ring-rose-500", "border-rose-500");
+        setTimeout(() => targetToScroll.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3500);
+        if (toastMsg) showToast(toastMsg, "warning");
+      };
 
       // 1. Validasi Khusus Tahap 1 (Identitas Penilai)
       if (stageIndex === 1 && hasCoreIdentity) {
@@ -5727,12 +5773,7 @@ function normalizeMediaList(fieldOrMedia) {
           const inputNim = document.getElementById("inputNim");
           const nimVal = (inputNim ? inputNim.value : '').replace(/\s+/g, '').trim();
           if (!nimVal) {
-            if (inputNim) {
-              inputNim.focus();
-              inputNim.classList.add("ring-2", "ring-rose-500", "border-rose-500");
-              setTimeout(() => inputNim.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
-            }
-            showToast("Nomor Induk Mahasiswa (NIM) wajib diisi untuk peran Mahasiswa!", "warning");
+            highlightElement(inputNim, "Nomor Induk Mahasiswa (NIM) wajib diisi untuk peran Mahasiswa!");
             return false;
           }
         }
@@ -5741,10 +5782,7 @@ function normalizeMediaList(fieldOrMedia) {
         const inputNama = document.getElementById("inputNama");
         const namaVal = (inputNama ? inputNama.value : '').trim();
         if (!namaVal && inputNama) {
-          inputNama.focus();
-          inputNama.classList.add("ring-2", "ring-rose-500", "border-rose-500");
-          setTimeout(() => inputNama.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
-          showToast("Nama Lengkap Penilai wajib diisi sebelum melanjutkan!", "warning");
+          highlightElement(inputNama, "Nama Lengkap Penilai wajib diisi sebelum melanjutkan!");
           return false;
         }
 
@@ -5757,95 +5795,108 @@ function normalizeMediaList(fieldOrMedia) {
             const emailVal = inputEmail.value.trim();
             const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
             if (!emailVal || !emailRegex.test(emailVal)) {
-              inputEmail.focus();
-              showToast("Email Penilai terverifikasi wajib terisi sebelum melanjutkan!", "warning");
+              highlightElement(inputEmail, "Email Penilai terverifikasi wajib terisi sebelum melanjutkan!");
               return false;
             }
             if (activeEmailMode === "ULM_ONLY" && !isUlmEmail(emailVal)) {
-              inputEmail.focus();
-              showToast("Email penilai wajib menggunakan domain resmi kampus (@mhs.ulm.ac.id atau @ulm.ac.id)!", "warning");
+              highlightElement(inputEmail, "Email penilai wajib menggunakan domain resmi kampus (@mhs.ulm.ac.id atau @ulm.ac.id)!");
               return false;
             }
           }
         }
       }
 
-      // 2. Validasi Khusus Tahap 2 (Kelompok & Rubrik Dasar)
-      if (stageIndex === 2 && !isGenMode) {
-        if (currentStageSec.querySelector('#groupsGrid') && !selectedGroupObj) {
-          showToast("Pilih salah satu kelompok presentator sebelum melanjutkan!", "warning");
-          const grpBox = document.getElementById("groupsGrid");
-          if (grpBox) grpBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // 2. Validasi Khusus Pemilihan Kelompok (CORE_GROUP_SELECT)
+      const groupSelectField = findFieldInSchema(f => f.type === 'CORE_GROUP_SELECT');
+      const isGroupStage = currentStageSec.querySelector('#groupsGrid') || (groupSelectField && currentStageSec.contains(document.getElementById('groupsContainer')));
+      if (isGroupStage && !isGenMode) {
+        if (!selectedGroupObj) {
+          const grpBox = document.getElementById("groupsGrid") || document.getElementById("groupsContainer");
+          highlightElement(grpBox, "Pilih salah satu kelompok presentator sebelum melanjutkan!");
           return false;
         }
       }
 
-      // 3. Validasi Seluruh Input Standar Wajib (Text, Number, Select, Textarea)
-      const requiredInputs = currentStageSec.querySelectorAll('input[required]:not([type="radio"]):not([type="checkbox"]):not([type="hidden"]), textarea[required], select[required]');
+      // 3. Validasi CORE_BEST_PRESENTER (Voting Presentator Terbaik)
+      const bestPresField = findFieldInSchema(f => f.type === 'CORE_BEST_PRESENTER');
+      const bestPresListEl = currentStageSec.querySelector('#bestPresenterList');
+      if (bestPresListEl && bestPresField && bestPresField.required !== false) {
+        if (!selectedBestPresenters || selectedBestPresenters.length === 0) {
+          const cardBox = bestPresListEl.closest('.bg-white, .border') || bestPresListEl;
+          highlightElement(cardBox, "Mohon pilih setidaknya satu pemateri terbaik (*) sebelum melanjutkan.");
+          return false;
+        }
+      }
+
+      // 4. Validasi CORE_MEMBER_FEEDBACK (Evaluasi Ulasan Anggota)
+      const feedbackField = findFieldInSchema(f => f.type === 'CORE_MEMBER_FEEDBACK');
+      const evalInputsContainer = currentStageSec.querySelector('#evaluationInputsContainer');
+      if (evalInputsContainer && feedbackField && feedbackField.required !== false) {
+        const textareas = evalInputsContainer.querySelectorAll('textarea[data-member]');
+        for (let ta of textareas) {
+          if (ta.closest('.hidden')) continue;
+          if (!ta.value || !ta.value.trim()) {
+            const memberName = ta.getAttribute('data-member') || 'pemateri';
+            highlightElement(ta, `Mohon berikan ulasan evaluasi untuk ${memberName} sebelum melanjutkan.`);
+            return false;
+          }
+        }
+      }
+
+      // 5. Validasi Seluruh Input Standar Wajib (Text, Number, Select, Textarea)
+      const requiredInputs = currentStageSec.querySelectorAll('input[required]:not([type="radio"]):not([type="checkbox"]):not([type="hidden"]), textarea[required]:not([data-member]), select[required]');
       for (let input of requiredInputs) {
-        if (input.offsetParent === null && !input.classList.contains("force-validate")) continue;
+        if (input.closest('.hidden:not([id^="stepSection_"])') && !input.classList.contains("force-validate")) continue;
 
         if (!input.value || !input.value.trim()) {
-          input.focus();
-          input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          input.classList.add("ring-2", "ring-rose-500", "border-rose-500");
-          setTimeout(() => input.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
-          showToast("Mohon lengkapi seluruh pertanyaan bertanda wajib (*) sebelum melanjutkan.", "warning");
+          highlightElement(input, "Mohon lengkapi seluruh pertanyaan bertanda wajib (*) sebelum melanjutkan.");
           return false;
         }
       }
 
-      // 4. Validasi Radio Group Wajib
+      // 6. Validasi Radio Group Wajib
       const radioGroups = {};
       currentStageSec.querySelectorAll('input[type="radio"][required]').forEach(r => {
-        if (r.name) radioGroups[r.name] = true;
+        if (r.name && !r.closest('.hidden:not([id^="stepSection_"])')) radioGroups[r.name] = true;
       });
       for (let groupName in radioGroups) {
         const checkedRadio = currentStageSec.querySelector(`input[type="radio"][name="${groupName}"]:checked`);
         if (!checkedRadio) {
           const firstRadio = currentStageSec.querySelector(`input[type="radio"][name="${groupName}"]`);
-          if (firstRadio) {
-            firstRadio.focus();
-            const parentCard = firstRadio.closest('.bg-white, .border');
-            if (parentCard) {
-              parentCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              parentCard.classList.add("ring-2", "ring-rose-500", "border-rose-500");
-              setTimeout(() => parentCard.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
-            }
-          }
-          showToast("Mohon pilih salah satu opsi pada pertanyaan bertanda wajib (*).", "warning");
+          highlightElement(firstRadio, "Mohon pilih salah satu opsi pada pertanyaan bertanda wajib (*).");
           return false;
+        }
+        if (checkedRadio.value === '__OTHER__') {
+          const card = checkedRadio.closest('.bg-white, .border, div');
+          const otherInput = card ? card.querySelector('input[type="text"][id^="cust_other_"], input[type="text"][id^="otherInputBox_"]') || card.querySelector('input[type="text"]') : null;
+          if (otherInput && (!otherInput.value || !otherInput.value.trim())) {
+            highlightElement(otherInput, "Mohon tuliskan keterangan untuk opsi 'Lainnya' yang Anda pilih.");
+            return false;
+          }
         }
       }
 
-      // 5. Validasi Checkbox Group Wajib
+      // 7. Validasi Checkbox Group Wajib
       const checkboxGroups = {};
       currentStageSec.querySelectorAll('input[type="checkbox"][required]').forEach(cb => {
         const key = cb.name || cb.id;
-        if (key) checkboxGroups[key] = true;
+        if (key && !cb.closest('.hidden:not([id^="stepSection_"])')) checkboxGroups[key] = true;
       });
       for (let cbKey in checkboxGroups) {
         const checkedCb = currentStageSec.querySelector(`input[type="checkbox"][name="${cbKey}"]:checked, input[type="checkbox"]#${cbKey}:checked`);
         if (!checkedCb) {
           const firstCb = currentStageSec.querySelector(`input[type="checkbox"][name="${cbKey}"], input[type="checkbox"]#${cbKey}`);
-          if (firstCb) {
-            firstCb.focus();
-            const parentCard = firstCb.closest('.bg-white, .border');
-            if (parentCard) {
-              parentCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              parentCard.classList.add("ring-2", "ring-rose-500", "border-rose-500");
-              setTimeout(() => parentCard.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
-            }
-          }
-          showToast("Mohon centang opsi bertanda wajib (*) sebelum melanjutkan.", "warning");
+          highlightElement(firstCb, "Mohon centang opsi bertanda wajib (*) sebelum melanjutkan.");
           return false;
         }
       }
 
-      // 6. Validasi Kustom Pertanyaan Dinamis & Batasan Lanjutan
+      // 8. Validasi Kustom Pertanyaan Dinamis & Batasan Lanjutan (data-field-id)
       const customContainers = currentStageSec.querySelectorAll('[data-field-id]');
       for (let i = 0; i < customContainers.length; i++) {
         const container = customContainers[i];
+        if (container.closest('.hidden:not([id^="stepSection_"])')) continue;
+
         const fieldId = container.getAttribute('data-field-id');
         const isRequired = container.getAttribute('data-custom-required') === 'true';
         if (!fieldId) continue;
@@ -5863,17 +5914,19 @@ function normalizeMediaList(fieldOrMedia) {
           ? fDef.label.trim() 
           : ((fDef?.description && fDef.description.trim()) || ('Pertanyaan #' + (i + 1)));
 
-        const ans = clientCustomFormAnswers[fieldId];
-        const hasFile = customUploadedFilesMap && customUploadedFilesMap[fieldId];
+        let ans = clientCustomFormAnswers[fieldId];
+        const domInput = container.querySelector('input:not([type="radio"]):not([type="checkbox"]):not([type="hidden"]), textarea, select');
+        if ((ans === undefined || ans === null || ans === '') && domInput && domInput.value) {
+          ans = domInput.value;
+          clientCustomFormAnswers[fieldId] = ans;
+        }
+        const hasFile = (customUploadedFilesMap && customUploadedFilesMap[fieldId]) || (ans && typeof ans === 'object' && ans.name);
 
         // Required check
         if (isRequired) {
           if (fDef?.type === 'STAR_RATING') {
             if (!ans || parseInt(ans) <= 0) {
-              container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              container.classList.add("ring-2", "ring-rose-500", "border-rose-500");
-              setTimeout(() => container.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
-              showToast(`Mohon berikan rating bintang pada '${qName}' sebelum melanjutkan.`, "warning");
+              highlightElement(container, `Mohon berikan rating bintang pada '${qName}' sebelum melanjutkan.`);
               return false;
             }
           } else if (fDef?.type === 'MATRIX_GRID') {
@@ -5881,34 +5934,41 @@ function normalizeMediaList(fieldOrMedia) {
             const ansObj = (typeof ans === 'object' && ans !== null) ? ans : {};
             const answeredCount = Object.keys(ansObj).length;
             if (answeredCount < rows.length) {
-              container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              container.classList.add("ring-2", "ring-rose-500", "border-rose-500");
-              setTimeout(() => container.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
-              showToast(`Mohon lengkapi seluruh baris matriks (${answeredCount}/${rows.length}) pada '${qName}' sebelum melanjutkan.`, "warning");
+              highlightElement(container, `Mohon lengkapi seluruh baris matriks (${answeredCount}/${rows.length}) pada '${qName}' sebelum melanjutkan.`);
               return false;
             }
           } else if (fDef?.type === 'SIGNATURE') {
             if (!ans || typeof ans !== 'string' || !ans.startsWith('data:image/')) {
-              container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              container.classList.add("ring-2", "ring-rose-500", "border-rose-500");
-              setTimeout(() => container.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
-              showToast(`Mohon bubuhkan tanda tangan digital Anda sebelum melanjutkan.`, "warning");
+              highlightElement(container, `Mohon bubuhkan tanda tangan digital Anda pada '${qName}' sebelum melanjutkan.`);
               return false;
             }
           } else if (fDef?.type === 'CHECKBOX') {
+            const checkedDom = container.querySelectorAll('input[type="checkbox"]:checked');
             const checkedList = Array.isArray(ans) ? ans : [];
-            if (checkedList.length === 0) {
-              container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              container.classList.add("ring-2", "ring-rose-500", "border-rose-500");
-              setTimeout(() => container.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
-              showToast(`Mohon pilih opsi pada '${qName}' sebelum melanjutkan.`, "warning");
+            if (checkedDom.length === 0 && checkedList.length === 0) {
+              highlightElement(container, `Mohon pilih opsi pada '${qName}' sebelum melanjutkan.`);
+              return false;
+            }
+          } else if (fDef?.type === 'RADIO') {
+            const checkedDom = container.querySelector('input[type="radio"]:checked');
+            if (!checkedDom && (!ans || String(ans).trim() === '')) {
+              highlightElement(container, `Mohon pilih opsi pada '${qName}' sebelum melanjutkan.`);
+              return false;
+            }
+            if (checkedDom && checkedDom.value === '__OTHER__') {
+              const otherInp = container.querySelector('input[type="text"]');
+              if (otherInp && (!otherInp.value || !otherInp.value.trim())) {
+                highlightElement(otherInp, `Mohon tuliskan jawaban untuk opsi 'Lainnya' pada '${qName}'.`);
+                return false;
+              }
+            }
+          } else if (fDef?.type === 'FILE_UPLOAD') {
+            if (!hasFile) {
+              highlightElement(container, `Mohon unggah berkas yang diperlukan pada '${qName}' sebelum melanjutkan.`);
               return false;
             }
           } else if ((ans === undefined || ans === null || String(ans).trim() === '') && !hasFile) {
-            container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            container.classList.add("ring-2", "ring-rose-500", "border-rose-500");
-            setTimeout(() => container.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
-            showToast(`Pertanyaan '${qName}' wajib diisi sebelum melanjutkan.`, "warning");
+            highlightElement(domInput || container, `Pertanyaan '${qName}' wajib diisi sebelum melanjutkan.`);
             return false;
           }
         }
@@ -5918,17 +5978,11 @@ function normalizeMediaList(fieldOrMedia) {
           const textLen = String(ans || '').trim().length;
           if (textLen > 0) {
             if (fDef.minChars && textLen < fDef.minChars) {
-              container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              container.classList.add("ring-2", "ring-rose-500", "border-rose-500");
-              setTimeout(() => container.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
-              showToast(`Jawaban '${qName}' minimal ${fDef.minChars} karakter (saat ini ${textLen} karakter).`, "warning");
+              highlightElement(domInput || container, `Jawaban '${qName}' minimal ${fDef.minChars} karakter (saat ini ${textLen} karakter).`);
               return false;
             }
             if (fDef.maxChars && textLen > fDef.maxChars) {
-              container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              container.classList.add("ring-2", "ring-rose-500", "border-rose-500");
-              setTimeout(() => container.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
-              showToast(`Jawaban '${qName}' melebihi batas maksimal ${fDef.maxChars} karakter.`, "warning");
+              highlightElement(domInput || container, `Jawaban '${qName}' melebihi batas maksimal ${fDef.maxChars} karakter.`);
               return false;
             }
           }
@@ -5936,20 +5990,15 @@ function normalizeMediaList(fieldOrMedia) {
 
         // Checkbox Min / Max selection constraint check
         if (fDef && fDef.type === 'CHECKBOX') {
-          const checkedCount = Array.isArray(ans) ? ans.length : (ans ? 1 : 0);
+          const checkedDom = container.querySelectorAll('input[type="checkbox"]:checked');
+          const checkedCount = checkedDom.length > 0 ? checkedDom.length : (Array.isArray(ans) ? ans.length : (ans ? 1 : 0));
           if (checkedCount > 0) {
             if (fDef.minSelect && checkedCount < fDef.minSelect) {
-              container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              container.classList.add("ring-2", "ring-rose-500", "border-rose-500");
-              setTimeout(() => container.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
-              showToast(`Mohon pilih minimal ${fDef.minSelect} opsi pada '${fDef.label || 'pertanyaan ini'}'.`, "warning");
+              highlightElement(container, `Mohon pilih minimal ${fDef.minSelect} opsi pada '${qName}'.`);
               return false;
             }
             if (fDef.maxSelect && checkedCount > fDef.maxSelect) {
-              container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              container.classList.add("ring-2", "ring-rose-500", "border-rose-500");
-              setTimeout(() => container.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3000);
-              showToast(`Pilihan Anda melebihi batas maksimal ${fDef.maxSelect} opsi pada '${fDef.label || 'pertanyaan ini'}'.`, "warning");
+              highlightElement(container, `Pilihan Anda melebihi batas maksimal ${fDef.maxSelect} opsi pada '${qName}'.`);
               return false;
             }
           }
@@ -5964,7 +6013,6 @@ function normalizeMediaList(fieldOrMedia) {
           const customErr = (fDef.validationErrorMsg || '').trim();
           const textVal = String(ans || '').trim();
 
-          // Only validate if field has content (or if field is CHECKBOX)
           if (textVal || fDef.type === 'CHECKBOX') {
             let isValid = true;
             let defaultErrMsg = "Input tidak sesuai ketentuan validasi.";
@@ -5975,63 +6023,63 @@ function normalizeMediaList(fieldOrMedia) {
               const targetNum2 = parseFloat(p2);
               if (isNaN(num)) {
                 isValid = false;
-                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' harus berupa angka yang valid.`;
+                defaultErrMsg = `'${qName}' harus berupa angka yang valid.`;
               } else if (vSub === 'GT' && !(num > targetNum)) {
                 isValid = false;
-                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' harus lebih besar dari ${targetNum}.`;
+                defaultErrMsg = `'${qName}' harus lebih besar dari ${targetNum}.`;
               } else if (vSub === 'GTE' && !(num >= targetNum)) {
                 isValid = false;
-                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' harus lebih besar atau sama dengan ${targetNum}.`;
+                defaultErrMsg = `'${qName}' harus lebih besar atau sama dengan ${targetNum}.`;
               } else if (vSub === 'LT' && !(num < targetNum)) {
                 isValid = false;
-                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' harus lebih kecil dari ${targetNum}.`;
+                defaultErrMsg = `'${qName}' harus lebih kecil dari ${targetNum}.`;
               } else if (vSub === 'LTE' && !(num <= targetNum)) {
                 isValid = false;
-                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' harus lebih kecil atau sama dengan ${targetNum}.`;
+                defaultErrMsg = `'${qName}' harus lebih kecil atau sama dengan ${targetNum}.`;
               } else if (vSub === 'EQ' && !(num === targetNum)) {
                 isValid = false;
-                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' harus sama dengan ${targetNum}.`;
+                defaultErrMsg = `'${qName}' harus sama dengan ${targetNum}.`;
               } else if (vSub === 'NEQ' && !(num !== targetNum)) {
                 isValid = false;
-                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' tidak boleh sama dengan ${targetNum}.`;
+                defaultErrMsg = `'${qName}' tidak boleh sama dengan ${targetNum}.`;
               } else if (vSub === 'BETWEEN' && !(num >= targetNum && num <= targetNum2)) {
                 isValid = false;
-                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' harus berada di antara ${targetNum} dan ${targetNum2}.`;
+                defaultErrMsg = `'${qName}' harus berada di antara ${targetNum} dan ${targetNum2}.`;
               } else if (vSub === 'IS_NUMBER') {
                 isValid = !isNaN(num);
-                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' harus berupa angka.`;
+                defaultErrMsg = `'${qName}' harus berupa angka.`;
               } else if (vSub === 'WHOLE_NUMBER') {
                 isValid = Number.isInteger(num);
-                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' harus berupa bilangan bulat.`;
+                defaultErrMsg = `'${qName}' harus berupa bilangan bulat.`;
               }
             } else if (vType === 'TEXT') {
               if (vSub === 'EMAIL') {
                 isValid = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(textVal);
-                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' harus berupa alamat email yang valid.`;
+                defaultErrMsg = `'${qName}' harus berupa alamat email yang valid.`;
               } else if (vSub === 'URL') {
                 isValid = /^(https?:\/\/)?[\w.-]+\.[a-z]{2,}(\/.*)?$/i.test(textVal);
-                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' harus berupa URL / tautan web yang valid.`;
+                defaultErrMsg = `'${qName}' harus berupa URL / tautan web yang valid.`;
               } else if (vSub === 'CONTAINS' && !textVal.includes(p1 || '')) {
                 isValid = false;
-                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' harus memuat teks '${p1}'.`;
+                defaultErrMsg = `'${qName}' harus memuat teks '${p1}'.`;
               } else if (vSub === 'NOT_CONTAINS' && textVal.includes(p1 || '')) {
                 isValid = false;
-                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' tidak boleh memuat teks '${p1}'.`;
+                defaultErrMsg = `'${qName}' tidak boleh memuat teks '${p1}'.`;
               }
             } else if (vType === 'LENGTH') {
               const len = textVal.length;
               const targetLen = parseInt(p1, 10) || 0;
               if (vSub === 'MIN_CHARS' && len < targetLen) {
                 isValid = false;
-                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' minimal berisi ${targetLen} karakter (saat ini ${len}).`;
+                defaultErrMsg = `'${qName}' minimal berisi ${targetLen} karakter (saat ini ${len}).`;
               } else if (vSub === 'MAX_CHARS' && len > targetLen) {
                 isValid = false;
-                defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' maksimal berisi ${targetLen} karakter (saat ini ${len}).`;
+                defaultErrMsg = `'${qName}' maksimal berisi ${targetLen} karakter (saat ini ${len}).`;
               }
             } else if (vType === 'WHATSAPP') {
               const cleanPhone = textVal.replace(/[-\s]/g, '');
               isValid = /^(\+62|62|0)8[1-9][0-9]{6,11}$/.test(cleanPhone);
-              defaultErrMsg = `Nomor WhatsApp pada '${fDef.label || 'Pertanyaan'}' tidak valid. Gunakan format nomor Indonesia (contoh: 081234567890 atau +6281234567890).`;
+              defaultErrMsg = `Nomor WhatsApp pada '${qName}' tidak valid. Gunakan format nomor Indonesia (contoh: 081234567890 atau +6281234567890).`;
             } else if (vType === 'REGEX') {
               try {
                 const re = new RegExp(p1);
@@ -6043,27 +6091,24 @@ function normalizeMediaList(fieldOrMedia) {
               } catch (e) {
                 isValid = true;
               }
-              defaultErrMsg = `'${fDef.label || 'Pertanyaan'}' tidak sesuai dengan format yang ditentukan.`;
+              defaultErrMsg = `'${qName}' tidak sesuai dengan format yang ditentukan.`;
             } else if (vType === 'SELECT_AT_LEAST' || vType === 'SELECT_AT_MOST' || vType === 'SELECT_EXACT') {
               const checkedCount = Array.isArray(ans) ? ans.length : (ans ? 1 : 0);
               const targetCount = parseInt(p1, 10) || 1;
               if (vType === 'SELECT_AT_LEAST' && checkedCount < targetCount) {
                 isValid = false;
-                defaultErrMsg = `Pilih setidaknya ${targetCount} opsi pada '${fDef.label || 'pertanyaan ini'}'.`;
+                defaultErrMsg = `Pilih setidaknya ${targetCount} opsi pada '${qName}'.`;
               } else if (vType === 'SELECT_AT_MOST' && checkedCount > targetCount) {
                 isValid = false;
-                defaultErrMsg = `Pilih paling banyak ${targetCount} opsi pada '${fDef.label || 'pertanyaan ini'}'.`;
+                defaultErrMsg = `Pilih paling banyak ${targetCount} opsi pada '${qName}'.`;
               } else if (vType === 'SELECT_EXACT' && checkedCount !== targetCount) {
                 isValid = false;
-                defaultErrMsg = `Pilih tepat ${targetCount} opsi pada '${fDef.label || 'pertanyaan ini'}'.`;
+                defaultErrMsg = `Pilih tepat ${targetCount} opsi pada '${qName}'.`;
               }
             }
 
             if (!isValid) {
-              container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              container.classList.add("ring-2", "ring-rose-500", "border-rose-500");
-              setTimeout(() => container.classList.remove("ring-2", "ring-rose-500", "border-rose-500"), 3500);
-              showToast(customErr || defaultErrMsg, "warning");
+              highlightElement(domInput || container, customErr || defaultErrMsg);
               return false;
             }
           }
@@ -6077,7 +6122,7 @@ function normalizeMediaList(fieldOrMedia) {
     let studentStepHistory = [];
 
     function navigateStageForward(stepNum) {
-      if (!validateStageRequirements(stepNum)) {
+      if (!validateStageRequirements(stepNum, true)) {
         return;
       }
 
@@ -6157,13 +6202,21 @@ function normalizeMediaList(fieldOrMedia) {
       }
     }
 
-    function goToStep(targetStep) {
+    function goToStep(targetStep, isBackward = false) {
       if (targetStep === currentStep) return;
 
       if (targetStep > currentStep) {
-        // Run strict stage validation
-        if (!validateStageRequirements(currentStep)) {
-          return;
+        // Run strict stage validation across ALL intermediate steps to prevent bypassing required questions
+        for (let s = currentStep; s < targetStep; s++) {
+          if (!validateStageRequirements(s, true)) {
+            if (s !== currentStep) {
+              updateStepUI(s, false, false, true);
+              setTimeout(() => {
+                validateStageRequirements(s, true);
+              }, 60);
+            }
+            return;
+          }
         }
 
         // Additional integrity validation when moving from Step 2 to Step 3
@@ -6216,7 +6269,7 @@ function normalizeMediaList(fieldOrMedia) {
       }
 
       // If user is navigating backwards via previous button
-      if (targetStep < currentStep) {
+      if (targetStep < currentStep && !isBackward) {
         const historyState = window.history.state;
         if (historyState && historyState.step === currentStep && window.history.length > 1) {
           window.history.back();
@@ -6224,7 +6277,7 @@ function normalizeMediaList(fieldOrMedia) {
         }
       }
 
-      updateStepUI(targetStep, false, targetStep > currentStep);
+      updateStepUI(targetStep, false, targetStep > currentStep, true);
     }
 
     // =========================================================================
@@ -8327,8 +8380,11 @@ function normalizeMediaList(fieldOrMedia) {
         // Run complete stages validation
         const totalSteps = Object.keys(stepMetadata).length || 4;
         for (let s = 1; s <= totalSteps; s++) {
-          if (!validateStageRequirements(s)) {
-            updateStepUI(s);
+          if (!validateStageRequirements(s, s === currentStep)) {
+            updateStepUI(s, false, false, true);
+            setTimeout(() => {
+              validateStageRequirements(s, true);
+            }, 60);
             return;
           }
         }

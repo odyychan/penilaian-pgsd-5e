@@ -8074,18 +8074,19 @@
     }
 
     function toggleFieldRequired(sIdx, fIdx) {
-      const f = adminFormSchema.tahapan[sIdx].fields[fIdx];
+      const f = adminFormSchema.tahapan[sIdx]?.fields?.[fIdx];
       if (f) {
         f.required = !f.required;
         renderDynamicStagesCanvas();
         markSchemaAsDirty();
-        showAdminToast(`'${f.label}' sekarang ${f.required ? 'Wajib diisi' : 'Opsional'}.`, "info");
+        triggerAutoSaveSchema();
+        showAdminToast(`'${f.label || 'Pertanyaan'}' sekarang ${f.required ? 'Wajib diisi' : 'Opsional'}.`, "info");
       }
     }
 
     function duplicateField(sIdx, fIdx) {
       pushUndoSnapshot('Duplikat Pertanyaan');
-      const f = adminFormSchema.tahapan[sIdx].fields[fIdx];
+      const f = adminFormSchema.tahapan[sIdx]?.fields?.[fIdx];
       if (!f) return;
       const copy = JSON.parse(JSON.stringify(f));
       copy.id = "fld_" + Date.now().toString(36);
@@ -8093,6 +8094,7 @@
       adminFormSchema.tahapan[sIdx].fields.splice(fIdx + 1, 0, copy);
       renderDynamicStagesCanvas();
       markSchemaAsDirty();
+      triggerAutoSaveSchema();
       showAdminToast(`Pertanyaan '${f.label}' berhasil diduplikasi ke Draf!`, "success");
     }
 

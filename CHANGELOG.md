@@ -2,6 +2,24 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.8] - 2026-09-14
+
+### 🛠️ Penegakan Ketat Validasi "Wajib Diisi" & Eliminasi Bug Auto-Scroll Idle
+- **🔒 Penguatan Penuh Validasi Status "Wajib Diisi" (Required Field Enforcement):**
+  - Mengatasi kendala pada builder formulir admin: sakelar toggle "Wajib Diisi" (`toggleFieldRequired`) dan duplikasi pertanyaan (`duplicateField`) kini langsung memicu penyimpanan otomatis (`triggerAutoSaveSchema`) ke Supabase dan menyebarkan skema terbaru secara real-time ke seluruh responden.
+  - Memperbaiki validasi instrumen di sisi mahasiswa (`validateStageRequirements`): mencakup seluruh jenis pertanyaan dinamis dan komponen inti, termasuk Voting Presentator Terbaik (`CORE_BEST_PRESENTER`), Evaluasi Masukan Kualitatif Anggota (`CORE_MEMBER_FEEDBACK`), Rating Bintang (`STAR_RATING`), Skala Linier (`RATING_SCALE`), Matriks Kriteria (`MATRIX_GRID`), Tanda Tangan Digital (`SIGNATURE`), Unggah Berkas (`FILE_UPLOAD`), Radio group dengan opsi kustom "Lainnya...", serta Kotak Centang (`CHECKBOX`).
+  - Mengatasi celah lewati tahap via tab navigasi (`goToStep`): seluruh tahapan perantara dari tahap saat ini hingga tahap tujuan kini divalidasi secara berurutan dan ketat sehingga pertanyaan wajib tidak dapat dilewati secara pintas.
+  - Memperbaiki pengabaian input pada tahapan non-aktif saat proses submit formulir (`handleFinalSubmit`): elemen input pada tahapan lain tidak lagi diabaikan karena status `offsetParent`, melainkan divalidasi secara menyeluruh dan memindahkan fokus tampilan secara visual dengan efek sorotan cincin merah (`ring-2 ring-rose-500`) dan pesan instruktif jika ada bagian wajib yang belum terisi.
+  - Menyelaraskan atribut `required` pada kolom teks evaluasi kualitatif agar dinamis mengikuti status wajib pada skema instrumen.
+- **🚀 Eliminasi Bug Auto-Scroll ke Atas saat Posisi Diam / Idle:**
+  - Mengidentifikasi dan menonaktifkan pemanggilan `window.scrollTo` yang sebelumnya terpicu setiap interval sinkronisasi latar belakang (*realtime heartbeat* 60 detik) dan saat perpindahan tab / jendela (`visibilitychange` & `focus`).
+  - Menambahkan parameter eksplisit `shouldScroll = false` sebagai nilai bawaan pada `updateStepUI`, sehingga operasi pembaruan antarmuka di latar belakang tidak mereset posisi scroll pengguna yang sedang membaca atau mengisi formulir.
+  - Memperbarui mekanisme sinkronisasi data (`fetchInitialFormData`): sistem memeriksa apakah terdapat perubahan struktural skema atau kelompok sebelum membangun ulang DOM; jika struktur tidak berubah, DOM dan posisi scroll pengguna dipertahankan 100% tanpa distorsi visual.
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.8` di seluruh berkas (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
+---
+
 ## [2.5.7] - 2026-09-14
 
 ### 🛠️ Perbaikan Tombol Hapus Respons Penilaian & Penguatan Sinkronisasi Real-Time
