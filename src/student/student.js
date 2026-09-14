@@ -3239,8 +3239,9 @@ function normalizeMediaList(fieldOrMedia) {
                     max="${maxVal}" 
                     value="85" 
                     step="1"
-                    class="w-full cursor-pointer h-2 bg-zinc-200 rounded-lg appearance-none"
+                    class="w-full cursor-grab active:cursor-grabbing appearance-none bg-transparent touch-none"
                     oninput="syncScore(this.value, 'slider')"
+                    onchange="syncScore(this.value, 'slider'); saveFormDraft();"
                   >
                 </div>
 
@@ -6581,6 +6582,7 @@ function normalizeMediaList(fieldOrMedia) {
       }
     }
 
+    let scoreDraftSaveTimer = null;
     function syncScore(val, source) {
       const num = document.getElementById("inputNilaiNumber");
       const sli = document.getElementById("inputNilaiSlider");
@@ -6590,7 +6592,10 @@ function normalizeMediaList(fieldOrMedia) {
         if (sli) sli.value = val;
       }
       updateScoreBadge(val);
-      saveFormDraft();
+      if (scoreDraftSaveTimer) clearTimeout(scoreDraftSaveTimer);
+      scoreDraftSaveTimer = setTimeout(() => {
+        saveFormDraft();
+      }, 200);
     }
 
     function updateScoreBadge(val) {

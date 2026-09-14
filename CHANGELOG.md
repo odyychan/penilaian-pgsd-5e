@@ -2,6 +2,25 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.9] - 2026-09-14
+
+### 🛠️ Perbaikan Interaksi Geser Tahan Slider Nilai & Responsivitas Touch-First
+- **🎯 Eliminasi Hambatan Geser Tahan Slider Nilai (`CORE_SCORE_RUBRIC`):**
+  - Mengidentifikasi dan mengeliminasi bug pembatalan seret (*drag abort*) pada mesin Chromium/Blink dan WebKit: properti `transform: scale(1.15)` dan `transition: transform` pada status pseudo-class `:active` bilah geser (`::-webkit-slider-thumb:active`) telah dihapus total. Perubahan skala transformasi matriks geometris saat *pointerdown* sebelumnya merusak *hit-testing* bawaan peramban sehingga sesi seret terputus seketika saat ditekan tahan.
+  - Mengganti umpan balik visual saat tombol slider ditekan tahan menggunakan efek cincin fokus cahaya (*glow ring*) elegan dan perubahan warna kontras (`box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4), 0 0 0 3px #fff, 0 0 0 5px rgba(37, 99, 235, 0.25)`) tanpa mengubah dimensi koordinat atau matriks elemen.
+- **📱 Penguatan Area Sentuh & Proteksi Gulir Mobile (`touch-action: none`):**
+  - Memperluas tinggi area interaktif kontainer bilah geser (`input[type=range]`) dari 8px (`h-2`) menjadi 40px ergonomis dengan latar transparan, memenuhi standar aksesibilitas dan kemudahan sentuh Rule 1 ($\ge 44\times 44\text{ px}$).
+  - Menetapkan `touch-action: none !important;` dan kelas `touch-none` pada input rentang nilai, sehingga deviasi gestur jari secara vertikal pada layar sentuh ponsel Android dan tablet tidak lagi terinterupsi atau terbatalkan oleh gulir halaman (*page scroll/pan-y*).
+  - Menambahkan kursor interaktif `cursor-grab` dan `active:cursor-grabbing` untuk kejelasan interaksi pengguna desktop.
+  - Menambahkan dukungan penuh lintas peramban untuk Mozilla Firefox via selektor pseudo-elemen `::-moz-range-track` dan `::-moz-range-thumb`.
+- **⚡ Optimasi Performa & Debounce Sinkronisasi Draf Nilai:**
+  - Mengoptimalkan fungsi sinkronisasi skor (`syncScore`): pembaruan input numerik (`inputNilaiNumber`) dan lencana predikat nilai (`scoreGradeBadge`) dilakukan secara instan (< 1 ms), sementara operasi serialisasi dan penulisan draf (`saveFormDraft`) didebounce selama 200 ms agar gerakan seret slider berlangsung 60 FPS tanpa jeda (*stutter*).
+  - Menambahkan event `onchange` pada slider untuk menjamin penyimpanan draf permanen saat jari atau kursor mouse dilepas (*release/touchend*).
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.9` di seluruh berkas (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
+---
+
 ## [2.5.8] - 2026-09-14
 
 ### 🛠️ Penegakan Ketat Validasi "Wajib Diisi" & Eliminasi Bug Auto-Scroll Idle

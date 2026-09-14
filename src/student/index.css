@@ -17,34 +17,73 @@
       box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
     }
 
-    /* Custom Range Slider */
+    /* Custom Range Slider (Touch-First & Cross-Browser) */
     input[type=range] {
       -webkit-appearance: none;
-      background: transparent;
+      appearance: none;
+      width: 100%;
+      height: 40px;
+      background: transparent !important;
+      cursor: grab;
+      touch-action: none !important;
+      margin: 0;
+      padding: 0;
+      outline: none;
+      border: none;
+      user-select: none;
+      -webkit-user-select: none;
     }
-    input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      height: 22px;
-      width: 22px;
-      border-radius: 50%;
-      background: #18181b;
-      cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      border: 2px solid #ffffff;
-      margin-top: -8px;
-      transition: transform 0.15s ease, background-color 0.15s ease;
-    }
-    input[type=range]::-webkit-slider-thumb:hover, 
-    input[type=range]::-webkit-slider-thumb:active {
-      transform: scale(1.15);
-      background: #2563eb;
+    input[type=range]:active {
+      cursor: grabbing;
     }
     input[type=range]::-webkit-slider-runnable-track {
       width: 100%;
-      height: 6px;
+      height: 8px;
       cursor: pointer;
       background: #e4e4e7;
       border-radius: 9999px;
+      border: none;
+    }
+    input[type=range]::-moz-range-track {
+      width: 100%;
+      height: 8px;
+      cursor: pointer;
+      background: #e4e4e7;
+      border-radius: 9999px;
+      border: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 24px;
+      width: 24px;
+      border-radius: 50%;
+      background: #18181b;
+      cursor: grab;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25), 0 0 0 2px #ffffff;
+      margin-top: -8px;
+      border: none;
+      transition: background-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    input[type=range]:active::-webkit-slider-thumb {
+      cursor: grabbing;
+      background: #2563eb;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4), 0 0 0 3px #ffffff, 0 0 0 5px rgba(37, 99, 235, 0.25);
+    }
+    input[type=range]::-moz-range-thumb {
+      height: 24px;
+      width: 24px;
+      border-radius: 50%;
+      background: #18181b;
+      cursor: grab;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25), 0 0 0 2px #ffffff;
+      border: none;
+      transition: background-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    input[type=range]:active::-moz-range-thumb {
+      cursor: grabbing;
+      background: #2563eb;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4), 0 0 0 3px #ffffff, 0 0 0 5px rgba(37, 99, 235, 0.25);
     }
 
     /* Scrollbar */
