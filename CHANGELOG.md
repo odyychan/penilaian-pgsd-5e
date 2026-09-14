@@ -2,6 +2,32 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.18] - 2026-09-14
+
+### 🛡️ Verifikasi Keabsahan Tanda Terima Digital Interaktif, QR Code Resmi, & Cek Bukti Online
+- **🔍 QR Code Interaktif & Tautan Publik Verifikasi Keabsahan:**
+  - Area tanda terima resmi dan wadah QR Code pada layar akhir (`#formSuccessReceiptCard`) kini interaktif dan dapat diklik/ditekan langsung di browser untuk membuka lembar verifikasi keabsahan data resmi.
+  - QR Code mengkodekan tautan publik verifikasi resmi (`?verify=${idRespons}`) yang dapat dipindai dengan kamera ponsel atau dibuka langsung di peramban mana pun.
+  - Menghubungkan deteksi deep-link parameter URL `?verify=` dan `?bukti=` pada inisialisasi aplikasi, sehingga pemindaian QR Code atau pembukaan tautan langsung menampilkan lembar verifikasi keabsahan data tanpa memerlukan otentikasi tambahan.
+- **🖼️ Inklusi Gambar QR Code Nyata pada Unduh Gambar & Cetak Dokumen:**
+  - Fungsi `downloadDigitalReceiptImage()` kini merender dan menyematkan QR Code nyata beresolusi tinggi di dalam kotak footer kanvas gambar PNG resmi bersama teks legalitas instansi.
+  - Fungsi `printDigitalReceipt()` menyertakan QR Code resmi dalam tata letak cetak (*print stylesheet*) dokumen fisik keikutsertaan penilaian.
+- **📜 Modal Formal Verifikasi Keabsahan Data Akademik Lengkap (*Mirip Cek Sertifikat Online*):**
+  - Antarmuka verifikasi formal (`#modalVerificationCertificate`) berstandar akademik FKIP ULM dengan lambang resmi universitas, stempel status (*"✓ TERCATAT RESMI DI BASIS DATA"*), nomor ID tanda terima, dan waktu pencatatan presisi.
+  - Menampilkan konteks perkuliahan lengkap: Mata Kuliah, Dosen Pengampu, Sesi Pertemuan, dan Program Studi.
+  - Menampilkan identitas responden penilai: Nama Lengkap, NIM, dan Peran.
+  - Menampilkan ringkasan penilaian: Kelompok yang Dinilai, Skor/Nilai Akhir, dan Presentator Terbaik bertanda bintang.
+  - Menampilkan seluruh isi evaluasi kualitatif/ulasan tertulis per pemateri serta refleksi diri yang telah diisikan oleh penilai dalam format kutipan tipografi elegan.
+  - Menampilkan jawaban instrumen kustom/tambahan (jika formulir memiliki pertanyaan tambahan).
+  - Menyediakan tombol aksi cepat terintegrasi: Salin Tautan Verifikasi, Unduh Gambar Tanda Terima (PNG), dan Cetak Bukti Resmi.
+- **🔎 Fitur Cek Bukti Penilaian Online Mandiri pada Halaman Utama (Portal):**
+  - Menambahkan tombol aksi sekunder *"Cek Bukti Penilaian Online"* pada kartu akses halaman muka portal (`#viewPortal`).
+  - Menyediakan modal pencarian ID Bukti (`#modalLookupReceipt`) yang memungkinkan mahasiswa atau dosen melacak dan memverifikasi data respons kapan saja dengan memasukkan nomor tanda terima (misal: `PGSD-REC-BK5E-...`), dilengkapi fitur tempel otomatis dari papan klip (*clipboard*) dan pesan kesalahan informatif jika nomor tidak terdaftar.
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.18` di seluruh berkas (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
+---
+
 ## [2.5.17] - 2026-09-14
 
 ### 📸 Verifikasi Visual Layar Konfirmasi & Pemberitahuan Berhasil Formulir BK5E

@@ -35,7 +35,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="src/student/index.css?v=2.5.17">
+  <link rel="stylesheet" href="src/student/index.css?v=2.5.18">
   
   <!-- Instant Zero-FOUC View Resolver (Runs synchronously before HTML paint) -->
   <script>
@@ -93,6 +93,8 @@
   <!-- Supabase High-Performance Database Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>if (!window.supabase) document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>');</script>
+  <!-- Instant In-Memory QR Code Generator -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
 <body class="min-h-screen flex flex-col bg-zinc-50 font-sans antialiased text-zinc-900">
 
@@ -284,6 +286,21 @@
             <span>Buka Formulir Penilaian</span>
             <span class="text-base font-bold">→</span>
           </button>
+
+          <!-- Secondary Action: Cek Bukti Penilaian Online -->
+          <div class="pt-1 text-center">
+            <button 
+              type="button" 
+              onclick="openLookupReceiptModal()" 
+              class="w-full min-h-[44px] py-2.5 px-4 rounded-xl border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 active:scale-[0.99] text-zinc-700 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer"
+              title="Lacak dan verifikasi bukti penilaian melalui nomor ID bukti tanda terima"
+            >
+              <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+              </svg>
+              <span>Cek Bukti Penilaian Online</span>
+            </button>
+          </div>
         </form>
 
         <!-- Divider with label -->
@@ -809,20 +826,31 @@
                 </div>
               </div>
 
-              <!-- QR Verification & Status Seal -->
-              <div class="pt-2 border-t border-zinc-200 flex items-center justify-between gap-3">
-                <div class="flex items-center gap-2">
-                  <div id="formSuccessQrBox" class="w-11 h-11 bg-white p-1 rounded-lg border border-zinc-200 shrink-0 flex items-center justify-center">
+              <!-- QR Verification & Status Seal (Interactive: Klik untuk Verifikasi Data Asli) -->
+              <div 
+                id="formSuccessVerifyBox"
+                onclick="openCurrentReceiptVerification()" 
+                class="pt-2.5 border-t border-zinc-200 flex items-center justify-between gap-3 p-2 -mx-1 rounded-xl hover:bg-emerald-50/70 active:scale-[0.99] border border-transparent hover:border-emerald-200/80 transition-all cursor-pointer group"
+                title="Klik untuk membuka verifikasi keabsahan data tanda terima resmi"
+              >
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <div id="formSuccessQrBox" class="w-11 h-11 bg-white p-1 rounded-lg border border-zinc-200 group-hover:border-emerald-400 shrink-0 flex items-center justify-center shadow-2xs group-hover:shadow-xs transition">
                     <span class="text-[9px] font-mono text-zinc-400">QR</span>
                   </div>
-                  <div class="text-[10.5px] text-zinc-500 leading-tight">
-                    <span class="font-bold text-zinc-800 block">Tervalidasi Digital</span>
-                    <span>FKIP Universitas Lambung Mangkurat</span>
+                  <div class="text-[10.5px] text-zinc-500 leading-tight truncate">
+                    <span class="font-bold text-zinc-800 group-hover:text-emerald-950 flex items-center gap-1">
+                      <span>Tervalidasi Digital</span>
+                      <svg class="w-3 h-3 text-emerald-600 opacity-70 group-hover:opacity-100 transition shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </span>
+                    <span class="text-zinc-400 group-hover:text-zinc-600 text-[9.5px]">FKIP Universitas Lambung Mangkurat</span>
                   </div>
                 </div>
-                <span class="font-mono text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full border border-emerald-200 shrink-0">
-                  ✓ TERCATAT RESMI
-                </span>
+                <div class="flex flex-col items-end gap-0.5 shrink-0">
+                  <span class="font-mono text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                    ✓ TERCATAT RESMI
+                  </span>
+                  <span class="text-[9px] text-emerald-600 font-semibold opacity-0 group-hover:opacity-100 transition hidden sm:inline">Cek Keaslian &rarr;</span>
+                </div>
               </div>
 
             </div>
@@ -1771,19 +1799,287 @@
     </div>
   </div>
 
+  <!-- ========================================================================= -->
+  <!-- MODAL: VERIFIKASI KEABSAHAN TANDA TERIMA PENILAIAN RESMI (ONLINE CREDENTIAL CHECK) -->
+  <!-- ========================================================================= -->
+  <div id="modalVerificationCertificate" class="hidden fixed inset-0 z-50 bg-zinc-950/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto no-print">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-5 sm:p-7 shadow-2xl border border-zinc-200 flex flex-col max-h-[95vh] space-y-4 my-auto fade-enter" onclick="event.stopPropagation()">
+      
+      <!-- Academic Institutional Header -->
+      <div class="flex items-start justify-between border-b border-zinc-200 pb-3 flex-shrink-0 gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <img src="assets/logo-ulm.png" alt="Logo ULM" class="w-10 h-10 object-contain shrink-0" onerror="this.style.display='none';">
+          <div class="min-w-0">
+            <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+              <span>Verifikasi Keabsahan Data</span>
+            </h2>
+            <h3 class="text-sm sm:text-base font-extrabold text-zinc-950 leading-tight truncate">
+              UNIVERSITAS LAMBUNG MANGKURAT
+            </h3>
+            <p class="text-[10px] text-zinc-500 font-medium truncate">Fakultas Keguruan dan Ilmu Pendidikan • Portal Akademik</p>
+          </div>
+        </div>
+        <button 
+          type="button" 
+          onclick="closeVerificationModal()" 
+          class="w-8 h-8 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 flex items-center justify-center cursor-pointer transition shrink-0"
+          title="Tutup lembar verifikasi"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Verification Official Banner -->
+      <div class="p-3.5 rounded-2xl bg-emerald-50/80 border border-emerald-200/90 text-emerald-950 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 flex-shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs font-bold text-sm">
+            ✓
+          </div>
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wide block text-emerald-900">Tercatat Resmi di Basis Data</span>
+            <span class="text-[11px] font-mono text-emerald-800" id="verifyModalReceiptId">-</span>
+          </div>
+        </div>
+        <div class="text-left sm:text-right text-[10.5px] text-emerald-800/90">
+          <span class="block font-medium">Waktu Verifikasi Sistem</span>
+          <span id="verifyModalTimestamp" class="font-mono font-semibold">-</span>
+        </div>
+      </div>
+
+      <!-- Scrollable Details Content -->
+      <div class="overflow-y-auto space-y-4 pr-1 text-xs flex-1 custom-scrollbar">
+        
+        <!-- Context Card (Mata Kuliah & Dosen) -->
+        <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200/80 space-y-2">
+          <div class="text-[10px] font-mono uppercase tracking-wider font-bold text-zinc-500">Konteks Perkuliahan</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <div>
+              <span class="text-zinc-400 text-[10.5px] block">Mata Kuliah:</span>
+              <span id="verifyModalMatkul" class="font-bold text-zinc-900">-</span>
+            </div>
+            <div>
+              <span class="text-zinc-400 text-[10.5px] block">Dosen Pengampu:</span>
+              <span id="verifyModalDosen" class="font-bold text-zinc-900">-</span>
+            </div>
+            <div>
+              <span class="text-zinc-400 text-[10.5px] block">Sesi / Pertemuan:</span>
+              <span id="verifyModalSesi" class="font-semibold text-zinc-800">-</span>
+            </div>
+            <div>
+              <span class="text-zinc-400 text-[10.5px] block">Program Studi:</span>
+              <span id="verifyModalProdi" class="font-semibold text-zinc-800">PGSD FKIP ULM</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Identitas Penilai Card -->
+        <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200/80 space-y-2">
+          <div class="text-[10px] font-mono uppercase tracking-wider font-bold text-zinc-500">Identitas Penilai (Responden)</div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+            <div>
+              <span class="text-zinc-400 text-[10.5px] block">Nama Lengkap:</span>
+              <span id="verifyModalNama" class="font-bold text-zinc-900">-</span>
+            </div>
+            <div>
+              <span class="text-zinc-400 text-[10.5px] block">NIM:</span>
+              <span id="verifyModalNim" class="font-mono font-bold text-zinc-900">-</span>
+            </div>
+            <div>
+              <span class="text-zinc-400 text-[10.5px] block">Peran:</span>
+              <span id="verifyModalPeran" class="font-semibold text-zinc-800">-</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hasil Penilaian Card -->
+        <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200/80 space-y-2.5">
+          <div class="text-[10px] font-mono uppercase tracking-wider font-bold text-zinc-500">Ringkasan Hasil Penilaian</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+            <div class="p-2.5 bg-white rounded-lg border border-zinc-200">
+              <span class="text-zinc-400 text-[10.5px] block">Kelompok yang Dinilai:</span>
+              <span id="verifyModalKelompok" class="font-extrabold text-sm text-zinc-900">-</span>
+            </div>
+            <div class="p-2.5 bg-emerald-50/50 rounded-lg border border-emerald-200">
+              <span class="text-emerald-700 text-[10.5px] block font-medium">Nilai / Skor Akhir:</span>
+              <span id="verifyModalNilai" class="font-mono font-extrabold text-base text-emerald-800">-</span>
+            </div>
+          </div>
+          <div class="pt-1">
+            <span class="text-zinc-400 text-[10.5px] block mb-1">Presentator Terbaik:</span>
+            <div id="verifyModalPresenters" class="flex flex-wrap gap-1.5">-</div>
+          </div>
+        </div>
+
+        <!-- Detail Masukan Kualitatif yang Diisi Pengguna -->
+        <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200/80 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-mono uppercase tracking-wider font-bold text-zinc-500">Isi Masukan &amp; Evaluasi Tertulis</span>
+            <span class="text-[10px] text-zinc-400 italic">Disimpan langsung oleh penilai</span>
+          </div>
+          <div id="verifyModalEvaluasiList" class="space-y-2">
+            <!-- Populated dynamically via renderVerificationModal() -->
+          </div>
+        </div>
+
+        <!-- Jawaban Kustom (Custom Fields) jika ada -->
+        <div id="verifyModalCustomAnswersBox" class="hidden p-3.5 rounded-xl bg-zinc-50 border border-zinc-200/80 space-y-2.5">
+          <div class="text-[10px] font-mono uppercase tracking-wider font-bold text-zinc-500">Jawaban Instrumen Tambahan</div>
+          <div id="verifyModalCustomAnswersList" class="space-y-1.5">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <!-- Official Interactive QR Code Box -->
+        <div class="p-4 rounded-2xl bg-white border border-zinc-200 text-center space-y-2 shadow-2xs">
+          <div class="inline-flex flex-col items-center justify-center p-2.5 bg-zinc-50 rounded-xl border border-zinc-200/80 shadow-2xs mx-auto">
+            <div id="verifyModalQrCanvas" class="w-32 h-32 flex items-center justify-center bg-white p-1 rounded-lg border border-zinc-200">
+              <!-- Rendered via QRCode JS -->
+            </div>
+          </div>
+          <div class="space-y-0.5">
+            <p class="text-xs font-bold text-zinc-800">Pindai untuk Verifikasi Digital di Ponsel</p>
+            <p class="text-[10.5px] text-zinc-500 max-w-sm mx-auto">Tanda terima ini dilindungi segel digital dan dapat diverifikasi kapan saja oleh Dosen Pengampu.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Action Buttons Footer -->
+      <div class="pt-3 border-t border-zinc-200 flex flex-col sm:flex-row items-center justify-between gap-2 flex-shrink-0">
+        <button 
+          type="button" 
+          onclick="copyVerificationLink()" 
+          class="w-full sm:w-auto min-h-[40px] px-3.5 py-2 rounded-xl border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
+          title="Salin tautan verifikasi online"
+        >
+          <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+          <span id="copyVerifyLinkBtnText">Salin Tautan</span>
+        </button>
+
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <button 
+            type="button" 
+            onclick="downloadDigitalReceiptImage()" 
+            class="flex-1 sm:flex-none min-h-[40px] px-3.5 py-2 rounded-xl border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            <span>Unduh Gambar</span>
+          </button>
+          <button 
+            type="button" 
+            onclick="printDigitalReceipt()" 
+            class="flex-1 sm:flex-none min-h-[40px] px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold transition active:scale-98 flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+            <span>Cetak Bukti</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: PENCARIAN & PELACAKAN ID BUKTI PENILAIAN (LOOKUP RECEIPT MODAL) -->
+  <!-- ========================================================================= -->
+  <div id="modalLookupReceipt" class="hidden fixed inset-0 z-50 bg-zinc-950/80 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto no-print">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-zinc-200 flex flex-col space-y-4 my-auto fade-enter" onclick="event.stopPropagation()">
+      
+      <!-- Header -->
+      <div class="flex items-start justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200/80 flex items-center justify-center shrink-0 shadow-2xs">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-zinc-950 leading-tight">Cek Bukti Penilaian Online</h3>
+            <p class="text-[11px] text-zinc-500 leading-snug">Verifikasi keabsahan tanda terima penilaian mahasiswa.</p>
+          </div>
+        </div>
+        <button 
+          type="button" 
+          onclick="closeLookupReceiptModal()" 
+          class="p-1 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition cursor-pointer"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <p class="text-xs text-zinc-600 leading-relaxed">
+        Masukkan nomor ID tanda terima resmi (contoh: <strong class="font-mono text-zinc-900">PGSD-REC-BK5E-...</strong>) untuk memeriksa data respon yang telah tercatat.
+      </p>
+
+      <!-- Input Form -->
+      <form onsubmit="event.preventDefault(); submitLookupReceipt();" class="space-y-3.5">
+        <div class="space-y-1.5">
+          <label for="inputLookupReceiptId" class="block text-[11px] font-bold text-zinc-600 uppercase tracking-wider">
+            NOMOR ID BUKTI TANDA TERIMA <span class="text-rose-500">*</span>
+          </label>
+          <div class="relative">
+            <input 
+              type="text" 
+              id="inputLookupReceiptId" 
+              placeholder="PGSD-REC-BK5E-XXXXXX" 
+              autocomplete="off" 
+              autocapitalize="characters" 
+              class="w-full py-3 px-3.5 pr-20 text-xs sm:text-sm font-mono font-bold text-zinc-900 uppercase rounded-xl border border-zinc-300 focus:border-zinc-900 focus:ring-4 focus:ring-zinc-900/5 outline-none transition bg-zinc-50/60 focus:bg-white select-all"
+              oninput="this.value = this.value.toUpperCase().replace(/\s+/g, '')"
+            >
+            <button 
+              type="button" 
+              onclick="pasteLookupReceiptFromClipboard()" 
+              class="absolute inset-y-1 right-1 px-2.5 text-[10.5px] font-semibold text-zinc-600 hover:text-zinc-950 bg-zinc-100 hover:bg-zinc-200/80 rounded-lg transition cursor-pointer flex items-center gap-1"
+              title="Tempel dari papan klip"
+            >
+              <span>Tempel</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="lookupReceiptError" class="hidden p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+          <svg class="w-4 h-4 text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <span id="lookupReceiptErrorText">Nomor ID Bukti tidak ditemukan.</span>
+        </div>
+
+        <div class="flex items-center gap-2 pt-1">
+          <button 
+            type="button" 
+            onclick="closeLookupReceiptModal()" 
+            class="flex-1 min-h-[44px] py-2.5 px-4 rounded-xl border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold transition cursor-pointer"
+          >
+            Batal
+          </button>
+          <button 
+            type="submit" 
+            id="btnSubmitLookupReceipt" 
+            class="flex-1 min-h-[44px] py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition active:scale-98 flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+          >
+            <svg id="lookupReceiptSpinner" class="hidden w-4 h-4 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Verifikasi Sekarang</span>
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
   <!-- Isolated Dedicated Root for Clean Browser Print -->
   <div id="printDocumentRoot" class="hidden"></div>
 
   <!-- ========================================================================= -->
   <!-- SCRIPT LOGIC -->
   <!-- ========================================================================= -->
-  <script src="src/student/student.js?v=2.5.17"></script>
+  <script src="src/student/student.js?v=2.5.18"></script>
 
   <!-- Progressive Web App (PWA) & Instant Auto-Updater Engine -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js?v=2.5.17').then(function(reg) {
+        navigator.serviceWorker.register('/sw.js?v=2.5.18').then(function(reg) {
           reg.update();
           reg.addEventListener('updatefound', function() {
             var newWorker = reg.installing;

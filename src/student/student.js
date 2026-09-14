@@ -1045,7 +1045,15 @@ function normalizeMediaList(fieldOrMedia) {
 
     document.addEventListener("DOMContentLoaded", async function() {
       initAllModernDropdowns();
-      initBackGestureEngine();
+      // Cek Deep-Link Verifikasi Bukti Tanda Terima Online (?verify= atau ?bukti=)
+      const verifyQueryParam = (new URLSearchParams(window.location.search).get('verify') || new URLSearchParams(window.location.search).get('bukti') || '').trim();
+      if (verifyQueryParam) {
+        setTimeout(() => {
+          if (typeof verifyReceiptById === 'function') {
+            verifyReceiptById(verifyQueryParam);
+          }
+        }, 120);
+      }
 
       // Double check if returning from OAuth before entering portal mode
       if (isPortalMode) {
@@ -1210,11 +1218,13 @@ function normalizeMediaList(fieldOrMedia) {
         document.querySelectorAll(".pgsd-dropdown-wrapper button").forEach(b => b.classList.remove("ring-2", "ring-indigo-500/20", "border-indigo-500"));
       }
 
-      const anyOpenModal = document.querySelector(".modal-backdrop:not(.hidden), .modal-overlay:not(.hidden), [role='dialog']:not(.hidden), #modalSwitchForm:not(.hidden), #modalClientImageZoom:not(.hidden), #modalPreSubmitReview:not(.hidden), #modalAppConfirm:not(.hidden), #printRekapModal:not(.hidden)");
+      const anyOpenModal = document.querySelector(".modal-backdrop:not(.hidden), .modal-overlay:not(.hidden), [role='dialog']:not(.hidden), #modalSwitchForm:not(.hidden), #modalClientImageZoom:not(.hidden), #modalPreSubmitReview:not(.hidden), #modalAppConfirm:not(.hidden), #printRekapModal:not(.hidden), #modalVerificationCertificate:not(.hidden), #modalLookupReceipt:not(.hidden)");
       if (anyOpenModal && anyOpenModal.id !== "viewPortal" && anyOpenModal.id !== "viewForm") {
         if (typeof closeSwitchFormModal === 'function' && anyOpenModal.id === 'modalSwitchForm') closeSwitchFormModal();
         else if (typeof closeClientImageZoom === 'function' && anyOpenModal.id === 'modalClientImageZoom') closeClientImageZoom();
         else if (typeof closePreSubmitReviewModal === 'function' && anyOpenModal.id === 'modalPreSubmitReview') closePreSubmitReviewModal();
+        else if (typeof closeVerificationModal === 'function' && anyOpenModal.id === 'modalVerificationCertificate') closeVerificationModal();
+        else if (typeof closeLookupReceiptModal === 'function' && anyOpenModal.id === 'modalLookupReceipt') closeLookupReceiptModal();
         else {
           anyOpenModal.classList.add("hidden");
           anyOpenModal.classList.remove("flex");
@@ -9372,21 +9382,93 @@ function normalizeMediaList(fieldOrMedia) {
       loadRekapData(true);
     });
 
+    // =========================================================================
+    // 🔍 QR CODE & ONLINE VERIFICATION HELPER SUITE
+    // =========================================================================
+    function getVerificationUrl(idRespons) {
+      if (!idRespons) return window.location.href;
+      const origin = window.location.origin;
+      const pathname = window.location.pathname;
+      return `${origin}${pathname}?verify=${encodeURIComponent(idRespons.trim())}`;
+    }
+
+    function renderQrCodeHelper(container, text, size = 120) {
+      if (!container) return;
+      container.innerHTML = "";
+      if (typeof QRCode !== 'undefined') {
+        try {
+          new QRCode(container, {
+            text: text,
+            width: size,
+            height: size,
+            colorDark: "#09090b",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.M
+          });
+          return;
+        } catch (e) {
+          console.warn("[QR Helper] QRCode.js error, fallback to QRServer API:", e);
+        }
+      }
+      const qrImg = document.createElement("img");
+      qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&margin=2&data=${encodeURIComponent(text)}`;
+      qrImg.alt = "QR Code Verifikasi";
+      qrImg.className = "w-full h-full object-contain rounded";
+      container.appendChild(qrImg);
+    }
+
+    function getQrCodeDataUrl(text, size = 120) {
+      return new Promise((resolve) => {
+        if (typeof QRCode !== 'undefined') {
+          try {
+            const tempDiv = document.createElement("div");
+            tempDiv.style.position = "absolute";
+            tempDiv.style.left = "-9999px";
+            tempDiv.style.top = "-9999px";
+            tempDiv.style.visibility = "hidden";
+            document.body.appendChild(tempDiv);
+            new QRCode(tempDiv, {
+              text: text,
+              width: size,
+              height: size,
+              colorDark: "#09090b",
+              colorLight: "#ffffff",
+              correctLevel: QRCode.CorrectLevel.M
+            });
+            setTimeout(() => {
+              const canvas = tempDiv.querySelector("canvas");
+              if (canvas) {
+                try {
+                  const dataUrl = canvas.toDataURL("image/png");
+                  document.body.removeChild(tempDiv);
+                  resolve(dataUrl);
+                  return;
+                } catch(e) {}
+              }
+              const img = tempDiv.querySelector("img");
+              if (img && img.src && img.src.startsWith("data:")) {
+                const dataUrl = img.src;
+                document.body.removeChild(tempDiv);
+                resolve(dataUrl);
+                return;
+              }
+              if (tempDiv.parentNode) document.body.removeChild(tempDiv);
+              resolve(`https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&margin=2&data=${encodeURIComponent(text)}`);
+            }, 60);
+            return;
+          } catch (e) {
+            console.warn("[QR Helper] Canvas QR generation fallback:", e);
+          }
+        }
+        resolve(`https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&margin=2&data=${encodeURIComponent(text)}`);
+      });
+    }
+
     function generateReceiptQRCode(receiptId, payload) {
       const qrBox = document.getElementById("receiptQrCodeBox");
       if (!qrBox) return;
-
-      const verifyData = `PGSD-ULM|ID:${receiptId}|NIM:${payload.nimPenilai || '-'}|MHS:${payload.namaPenilai || '-'}|GRP:${payload.kelompok || '-'}|SKOR:${payload.nilaiKelompok || '-'}|T:${Date.now()}`;
-      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=2&data=${encodeURIComponent(verifyData)}`;
-
-      qrBox.innerHTML = `
-        <img 
-          src="${qrUrl}" 
-          alt="QR Verifikasi" 
-          class="w-full h-full object-contain rounded"
-          onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'text-[9px] font-mono text-zinc-400 text-center leading-none p-1\\'>✓<br>VERIFIED<br>OFFLINE</div>';"
-        >
-      `;
+      const verifyUrl = getVerificationUrl(receiptId);
+      renderQrCodeHelper(qrBox, verifyUrl, 120);
     }
 
     function showSuccessSection(kelompokName, isOfflineQueued = false, payload = null, idRespons = "") {
@@ -9400,7 +9482,14 @@ function normalizeMediaList(fieldOrMedia) {
           nilaiKelompok: "-"
         },
         idRespons: finalId,
-        timestamp: now
+        timestamp: now,
+        formMeta: {
+          formId: activeFormId || (currentFormMeta && currentFormMeta.formId) || 'BK5E',
+          mataKuliah: appConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || "-",
+          dosen: appConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || "-",
+          jurusan: (appConfig["Jurusan"] || (currentFormMeta && currentFormMeta.jurusan) || "PGSD").trim(),
+          sesi: (appConfig && (appConfig["Sesi_Minggu_Aktif"] || appConfig["Sesi_Aktif"])) || (currentFormMeta && currentFormMeta.sesiAktif) || "1"
+        }
       };
 
       if (studentBroadcastBus) {
@@ -9502,19 +9591,11 @@ function normalizeMediaList(fieldOrMedia) {
         }
       }
 
-      // QR Code di Bagian Akhir
+      // QR Code di Bagian Akhir (Interactive: Mengkodekan tautan verifikasi online)
       const qrBox = document.getElementById("formSuccessQrBox");
-      if (qrBox && payload) {
-        const verifyData = `PGSD-ULM|ID:${finalId}|NIM:${payload.nimPenilai || '-'}|MHS:${payload.namaPenilai || '-'}|GRP:${payload.kelompok || '-'}|SKOR:${payload.nilaiKelompok || '-'}|T:${Date.now()}`;
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=2&data=${encodeURIComponent(verifyData)}`;
-        qrBox.innerHTML = `
-          <img 
-            src="${qrUrl}" 
-            alt="QR Verifikasi" 
-            class="w-full h-full object-contain rounded"
-            onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'text-[8px] font-mono text-zinc-400 text-center leading-none\\'>✓<br>VALID</div>';"
-          >
-        `;
+      if (qrBox) {
+        const verifyUrl = getVerificationUrl(finalId);
+        renderQrCodeHelper(qrBox, verifyUrl, 64);
       }
 
       // Status Kelompok Sesi Aktif: Ubah Teks Tombol Halaman Awal secara Cerdas
@@ -9655,13 +9736,15 @@ function normalizeMediaList(fieldOrMedia) {
       showSuccessSection(kelompokName, isOfflineQueued, payload, idRespons);
     }
 
-    function downloadDigitalReceiptImage() {
+    async function downloadDigitalReceiptImage() {
       if (!currentReceiptData) {
         showToast("Data tanda terima tidak ditemukan.", "error");
         return;
       }
       const data = currentReceiptData;
       const payload = data.payload || {};
+      const finalId = data.idRespons || ("PGSD-REC-" + (activeFormId || 'BK5E') + "-" + Date.now().toString(36).toUpperCase());
+      const verifyUrl = getVerificationUrl(finalId);
 
       const canvas = document.createElement("canvas");
       canvas.width = 1000;
@@ -9696,7 +9779,7 @@ function normalizeMediaList(fieldOrMedia) {
 
       ctx.font = "600 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
       ctx.fillStyle = "#64748b";
-      const rawJurusanReceipt = (appConfig["Jurusan"] || (currentFormMeta && currentFormMeta.jurusan) || "PGSD").trim();
+      const rawJurusanReceipt = (appConfig["Jurusan"] || (currentFormMeta && currentFormMeta.jurusan) || (data.formMeta && data.formMeta.jurusan) || "PGSD").trim();
       let prodiReceiptCanvas = "FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN • PROGRAM STUDI PGSD";
       if (rawJurusanReceipt && rawJurusanReceipt.toUpperCase() !== "PGSD") {
         prodiReceiptCanvas = `FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN • ${rawJurusanReceipt.toUpperCase().startsWith("PROGRAM STUDI") ? rawJurusanReceipt.toUpperCase() : `PROGRAM STUDI ${rawJurusanReceipt.toUpperCase()}`}`;
@@ -9733,7 +9816,7 @@ function normalizeMediaList(fieldOrMedia) {
       // Proof Number
       ctx.fillStyle = "#64748b";
       ctx.font = "600 13.5px monospace";
-      ctx.fillText(`No. Bukti: ${data.idRespons || '-'}`, 275, 226);
+      ctx.fillText(`No. Bukti: ${finalId}`, 275, 226);
 
       // 5. Details Table Rows
       const startY = 265;
@@ -9746,8 +9829,8 @@ function normalizeMediaList(fieldOrMedia) {
         ["Kelompok yang Dinilai", payload.kelompok || "-"],
         ["Nilai / Skor Kelompok", `${payload.nilaiKelompok !== undefined ? payload.nilaiKelompok : 0} / 100`],
         ["Presentator Terbaik", Array.isArray(payload.presentatorTerbaik) ? (payload.presentatorTerbaik.join(", ") || "-") : (payload.presentatorTerbaik || "-")],
-        ["Mata Kuliah", appConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || "-"],
-        ["Dosen Pengampu", appConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || "-"],
+        ["Mata Kuliah", appConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || (data.formMeta && data.formMeta.mataKuliah) || "-"],
+        ["Dosen Pengampu", appConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || (data.formMeta && data.formMeta.dosen) || "-"],
         ["Waktu Pengiriman", nowStr]
       ];
 
@@ -9777,27 +9860,60 @@ function normalizeMediaList(fieldOrMedia) {
         ctx.fillText(valText, 340, curY + 39);
       });
 
-      // 6. Clean Academic Footer Box
+      // 6. Clean Academic Footer Box with Official QR Code Included
       const footerBoxY = startY + (details.length * rowHeight) + 15;
+      const footerBoxHeight = 140;
       ctx.beginPath();
-      if (ctx.roundRect) ctx.roundRect(75, footerBoxY, 850, 100, 12);
-      else ctx.rect(75, footerBoxY, 850, 100);
+      if (ctx.roundRect) ctx.roundRect(75, footerBoxY, 850, footerBoxHeight, 12);
+      else ctx.rect(75, footerBoxY, 850, footerBoxHeight);
       ctx.fillStyle = "#f8fafc";
       ctx.fill();
       ctx.strokeStyle = "#e2e8f0";
       ctx.lineWidth = 1;
       ctx.stroke();
 
+      // Render QR Code inside Canvas
+      try {
+        const qrDataUrl = await getQrCodeDataUrl(verifyUrl, 160);
+        if (qrDataUrl) {
+          const qrImg = new Image();
+          await new Promise((resolve) => {
+            qrImg.onload = resolve;
+            qrImg.onerror = resolve;
+            qrImg.src = qrDataUrl;
+          });
+          // Draw white container for QR
+          ctx.beginPath();
+          if (ctx.roundRect) ctx.roundRect(95, footerBoxY + 12, 116, 116, 8);
+          else ctx.rect(95, footerBoxY + 12, 116, 116);
+          ctx.fillStyle = "#ffffff";
+          ctx.fill();
+          ctx.strokeStyle = "#cbd5e1";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          ctx.drawImage(qrImg, 99, footerBoxY + 16, 108, 108);
+        }
+      } catch (e) {
+        console.warn("[Download Receipt Canvas] QR draw skipped:", e);
+      }
+
+      // Footer Text on the right of QR Code
+      const textStartX = 230;
       ctx.fillStyle = "#0f172a";
-      ctx.font = "bold 14px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText("Diterbitkan oleh Portal Akademik FKIP Universitas Lambung Mangkurat", canvas.width / 2, footerBoxY + 38);
+      ctx.font = "bold 15px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      ctx.fillText("Portal Akademik FKIP Universitas Lambung Mangkurat", textStartX, footerBoxY + 38);
+
+      ctx.fillStyle = "#475569";
+      ctx.font = "12.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      ctx.fillText("Dokumen ini merupakan konfirmasi resmi keikutsertaan penilaian perkuliahan.", textStartX, footerBoxY + 64);
+
+      ctx.fillStyle = "#059669";
+      ctx.font = "bold 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      ctx.fillText("✓ Pindai QR Code di samping untuk verifikasi keabsahan data secara online.", textStartX, footerBoxY + 88);
+
       ctx.fillStyle = "#64748b";
-      ctx.font = "12px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-      ctx.fillText("Dokumen ini merupakan konfirmasi resmi keikutsertaan penilaian perkuliahan.", canvas.width / 2, footerBoxY + 62);
-      ctx.font = "11.5px monospace";
-      ctx.fillText(`Waktu Perekaman: ${nowStr}`, canvas.width / 2, footerBoxY + 82);
-      ctx.textAlign = "left";
+      ctx.font = "11px monospace";
+      ctx.fillText(`Waktu Perekaman: ${nowStr} • ID: ${finalId}`, textStartX, footerBoxY + 112);
 
       // 7. Trigger Download
       const dataUrl = canvas.toDataURL("image/png");
@@ -9813,17 +9929,19 @@ function normalizeMediaList(fieldOrMedia) {
       showToast("Bukti tanda terima digital berhasil diunduh!", "success");
     }
 
-    function printDigitalReceipt() {
+    async function printDigitalReceipt() {
       if (!currentReceiptData) {
         showToast("Data tanda terima tidak ditemukan.", "error");
         return;
       }
       const data = currentReceiptData;
       const payload = data.payload || {};
-      const finalId = data.idRespons || ("PGSD-REC-" + activeFormId + "-" + Date.now().toString(36).toUpperCase());
+      const finalId = data.idRespons || ("PGSD-REC-" + (activeFormId || 'BK5E') + "-" + Date.now().toString(36).toUpperCase());
       const nowStr = (data.timestamp ? new Date(data.timestamp) : new Date()).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'medium' }) + " WITA";
+      const verifyUrl = getVerificationUrl(finalId);
+      const qrDataUrl = await getQrCodeDataUrl(verifyUrl, 120);
 
-      const rawJurusanPrint = (appConfig["Jurusan"] || (currentFormMeta && currentFormMeta.jurusan) || "PGSD").trim();
+      const rawJurusanPrint = (appConfig["Jurusan"] || (currentFormMeta && currentFormMeta.jurusan) || (data.formMeta && data.formMeta.jurusan) || "PGSD").trim();
       let prodiReceiptPrint = "FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN • PRODI PGSD";
       if (rawJurusanPrint && rawJurusanPrint.toUpperCase() !== "PGSD") {
         prodiReceiptPrint = `FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN • ${escapeHtml(rawJurusanPrint.toUpperCase())}`;
@@ -9887,11 +10005,11 @@ function normalizeMediaList(fieldOrMedia) {
               </tr>
               <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                 <td style="padding: 10px 14px; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0;">Mata Kuliah</td>
-                <td style="padding: 10px 14px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #e2e8f0;">${appConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || '-'}</td>
+                <td style="padding: 10px 14px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #e2e8f0;">${appConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || (data.formMeta && data.formMeta.mataKuliah) || '-'}</td>
               </tr>
               <tr style="background: #ffffff; border-bottom: 1px solid #e2e8f0;">
                 <td style="padding: 10px 14px; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0;">Dosen Pengampu</td>
-                <td style="padding: 10px 14px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #e2e8f0;">${appConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || '-'}</td>
+                <td style="padding: 10px 14px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #e2e8f0;">${appConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || (data.formMeta && data.formMeta.dosen) || '-'}</td>
               </tr>
               <tr style="background: #f8fafc; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                 <td style="padding: 10px 14px; color: #64748b; font-weight: 600;">Waktu Pengiriman</td>
@@ -9900,11 +10018,15 @@ function normalizeMediaList(fieldOrMedia) {
             </tbody>
           </table>
 
-          <!-- Footer Verification Box -->
-          <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; background: #f8fafc; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
-            <div style="font-size: 11px; color: #475569; line-height: 1.45;">
-              <strong style="color: #0f172a; display: block; margin-bottom: 2px;">Portal Akademik FKIP Universitas Lambung Mangkurat</strong>
-              Dokumen ini diterbitkan resmi sebagai bukti keikutsertaan penilaian perkuliahan.
+          <!-- Footer Verification Box with Official QR Code -->
+          <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; background: #f8fafc; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <img src="${qrDataUrl}" alt="QR Verifikasi" style="width: 72px; height: 72px; border-radius: 6px; border: 1px solid #cbd5e1; background: #ffffff; padding: 2px;" />
+              <div style="font-size: 11px; color: #475569; line-height: 1.45;">
+                <strong style="color: #0f172a; display: block; margin-bottom: 2px;">Portal Akademik FKIP Universitas Lambung Mangkurat</strong>
+                Dokumen ini diterbitkan resmi sebagai bukti keikutsertaan penilaian perkuliahan.<br>
+                <span style="font-family: monospace; font-size: 9.5px; color: #059669; font-weight: bold;">Pindai QR Code di samping untuk memeriksa keabsahan data secara online.</span>
+              </div>
             </div>
             <div style="font-family: monospace; font-size: 10px; font-weight: 700; color: #065f46; text-align: right; white-space: nowrap;">
               STATUS: TERCATAT RESMI
@@ -9921,6 +10043,404 @@ function normalizeMediaList(fieldOrMedia) {
         printRoot.innerHTML = origHtml;
       }, 1500);
     }
+
+    // =========================================================================
+    // 🛡️ VERIFIKASI KEABSAHAN TANDA TERIMA & ONLINE CREDENTIAL LOOKUP
+    // =========================================================================
+    function openCurrentReceiptVerification() {
+      if (!currentReceiptData) {
+        showToast("Data tanda terima tidak ditemukan.", "error");
+        return;
+      }
+      openReceiptVerificationModal(currentReceiptData);
+    }
+
+    function openReceiptVerificationModal(receiptData) {
+      if (!receiptData) return;
+      const payload = receiptData.payload || {};
+      const formMeta = receiptData.formMeta || {};
+      const idRespons = receiptData.idRespons || "-";
+      const timestamp = receiptData.timestamp ? new Date(receiptData.timestamp) : new Date();
+
+      // Populate Header & Context
+      const elReceiptId = document.getElementById("verifyModalReceiptId");
+      const elTimestamp = document.getElementById("verifyModalTimestamp");
+      const elMatkul = document.getElementById("verifyModalMatkul");
+      const elDosen = document.getElementById("verifyModalDosen");
+      const elSesi = document.getElementById("verifyModalSesi");
+      const elProdi = document.getElementById("verifyModalProdi");
+
+      if (elReceiptId) elReceiptId.textContent = idRespons;
+      if (elTimestamp) {
+        elTimestamp.textContent = (typeof formatSmartScheduleTime === 'function')
+          ? formatSmartScheduleTime(timestamp).replace(/<[^>]*>/g, '')
+          : (timestamp.toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'medium' }) + " WITA");
+      }
+
+      if (elMatkul) elMatkul.textContent = formMeta.mataKuliah || appConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || "-";
+      if (elDosen) elDosen.textContent = formMeta.dosen || appConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || "-";
+      
+      const sesiVal = formMeta.sesi || payload.sesi || (appConfig && (appConfig["Sesi_Minggu_Aktif"] || appConfig["Sesi_Aktif"])) || (currentFormMeta && currentFormMeta.sesiAktif) || "1";
+      if (elSesi) elSesi.textContent = String(sesiVal).toLowerCase().includes("sesi") || String(sesiVal).toLowerCase().includes("minggu") ? String(sesiVal) : `Sesi / Pertemuan ${sesiVal}`;
+      
+      const rawProdi = formMeta.jurusan || (appConfig["Jurusan"] || (currentFormMeta && currentFormMeta.jurusan) || "PGSD");
+      if (elProdi) {
+        elProdi.textContent = rawProdi.toUpperCase().includes("PGSD") ? "Pendidikan Guru Sekolah Dasar (PGSD)" : rawProdi;
+      }
+
+      // Populate Identitas Penilai
+      const elNama = document.getElementById("verifyModalNama");
+      const elNim = document.getElementById("verifyModalNim");
+      const elPeran = document.getElementById("verifyModalPeran");
+
+      if (elNama) elNama.textContent = payload.namaPenilai || "-";
+      if (elNim) elNim.textContent = (payload.nimPenilai && payload.nimPenilai !== '-') ? payload.nimPenilai : "-";
+      if (elPeran) elPeran.textContent = payload.peranPenilai || "Mahasiswa Penilai";
+
+      // Populate Ringkasan Hasil
+      const elKelompok = document.getElementById("verifyModalKelompok");
+      const elNilai = document.getElementById("verifyModalNilai");
+      const elPresenters = document.getElementById("verifyModalPresenters");
+
+      if (elKelompok) elKelompok.textContent = payload.kelompok || "-";
+      if (elNilai) elNilai.textContent = `${payload.nilaiKelompok !== undefined && payload.nilaiKelompok !== null ? payload.nilaiKelompok : 0} / 100`;
+
+      if (elPresenters) {
+        let presList = [];
+        if (Array.isArray(payload.presentatorTerbaik)) {
+          presList = payload.presentatorTerbaik.filter(p => p && p !== '-');
+        } else if (typeof payload.presentatorTerbaik === 'string' && payload.presentatorTerbaik.trim() && payload.presentatorTerbaik !== '-') {
+          presList = [payload.presentatorTerbaik.trim()];
+        }
+        if (presList.length > 0) {
+          elPresenters.innerHTML = presList.map(p => `
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-semibold">
+              <span>⭐</span>
+              <span>${escapeHtml(p)}</span>
+            </span>
+          `).join("");
+        } else {
+          elPresenters.innerHTML = `<span class="text-zinc-400 italic">Tidak ada presenter terpilih</span>`;
+        }
+      }
+
+      // Populate Detail Evaluasi Kualitatif Tertulis yang Diisi Pengguna
+      const elEvaluasiList = document.getElementById("verifyModalEvaluasiList");
+      if (elEvaluasiList) {
+        elEvaluasiList.innerHTML = "";
+        const evalItems = [];
+
+        // Evaluasi detail pemateri
+        const evalDetail = payload.evaluasiDetail;
+        if (evalDetail && typeof evalDetail === 'object') {
+          Object.keys(evalDetail).forEach(key => {
+            if (key === '_partition' || key === 'quizResult' || key === 'customAnswers') return;
+            const val = evalDetail[key];
+            if (typeof val === 'string' && val.trim()) {
+              evalItems.push({
+                title: `Evaluasi Anggota Pemateri: ${key}`,
+                score: null,
+                comment: val.trim()
+              });
+            } else if (val && typeof val === 'object') {
+              const catatan = val.catatan || val.komentar || val.feedback || val.evaluasi || "";
+              const skor = val.skor !== undefined ? val.skor : (val.nilai !== undefined ? val.nilai : null);
+              if (catatan || skor !== null) {
+                evalItems.push({
+                  title: `Evaluasi Anggota: ${val.nama || val.namaMahasiswa || key}`,
+                  score: skor,
+                  comment: catatan
+                });
+              }
+            }
+          });
+        }
+
+        // Refleksi mandiri / evaluasi rekan jika tersimpan di _partition
+        if (evalDetail && evalDetail._partition) {
+          if (evalDetail._partition.refleksiMandiri && typeof evalDetail._partition.refleksiMandiri === 'object') {
+            Object.entries(evalDetail._partition.refleksiMandiri).forEach(([name, txt]) => {
+              if (txt && typeof txt === 'string' && txt.trim() && !evalItems.some(item => item.title.includes(name))) {
+                evalItems.push({
+                  title: `Refleksi Mandiri: ${name}`,
+                  score: null,
+                  comment: txt.trim()
+                });
+              }
+            });
+          }
+        }
+
+        // Catatan umum / masukan kelompok
+        if (payload.komentar || payload.masukan || payload.catatanUmum) {
+          evalItems.push({
+            title: "Masukan & Catatan Umum",
+            score: null,
+            comment: payload.komentar || payload.masukan || payload.catatanUmum
+          });
+        }
+
+        if (evalItems.length > 0) {
+          elEvaluasiList.innerHTML = evalItems.map(item => `
+            <div class="p-2.5 rounded-xl bg-white border border-zinc-200/90 shadow-2xs space-y-1">
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-bold text-zinc-900 text-xs">${escapeHtml(item.title)}</span>
+                ${item.score !== null ? `<span class="font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-[11px] border border-emerald-200">${escapeHtml(String(item.score))} Pts</span>` : ''}
+              </div>
+              <p class="text-zinc-600 text-[11.5px] leading-relaxed whitespace-pre-line italic font-serif">"${escapeHtml(item.comment || '(Tanpa catatan tambahan)')}"</p>
+            </div>
+          `).join("");
+        } else {
+          elEvaluasiList.innerHTML = `
+            <div class="p-3 rounded-xl bg-white border border-dashed border-zinc-200 text-center text-zinc-400 text-xs italic">
+              Evaluasi kualitatif dan rubrik penilaian telah terekam resmi di server database.
+            </div>
+          `;
+        }
+      }
+
+      // Custom Answers (jika ada instrumen kustom)
+      const customBox = document.getElementById("verifyModalCustomAnswersBox");
+      const customList = document.getElementById("verifyModalCustomAnswersList");
+      if (customBox && customList) {
+        const customAns = payload.customAnswers || payload.evaluasiDetail?.customAnswers;
+        if (customAns && typeof customAns === 'object' && Object.keys(customAns).length > 0) {
+          customBox.classList.remove("hidden");
+          customList.innerHTML = Object.entries(customAns).map(([k, v]) => `
+            <div class="p-2 bg-white rounded-lg border border-zinc-200 flex items-start justify-between gap-2 text-xs">
+              <span class="font-medium text-zinc-600">${escapeHtml(k)}:</span>
+              <span class="font-semibold text-zinc-900 text-right">${escapeHtml(String(v))}</span>
+            </div>
+          `).join("");
+        } else {
+          customBox.classList.add("hidden");
+          customList.innerHTML = "";
+        }
+      }
+
+      // Render Large QR Code inside Modal
+      const qrCanvas = document.getElementById("verifyModalQrCanvas");
+      if (qrCanvas) {
+        const verifyUrl = getVerificationUrl(idRespons);
+        renderQrCodeHelper(qrCanvas, verifyUrl, 128);
+      }
+
+      // Buka Modal
+      const modal = document.getElementById("modalVerificationCertificate");
+      if (modal) {
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        try {
+          history.pushState({ modal: 'verificationCertificate', id: idRespons }, '');
+        } catch(e) {}
+      }
+    }
+
+    function closeVerificationModal() {
+      const modal = document.getElementById("modalVerificationCertificate");
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+    }
+
+    async function verifyReceiptById(idRespons) {
+      if (!idRespons || typeof idRespons !== 'string') return;
+      const cleanId = idRespons.trim().toUpperCase();
+      if (!cleanId) return;
+
+      showToast("Memverifikasi keabsahan bukti tanda terima...", "info");
+
+      try {
+        const sb = await ensureSupabaseClient();
+        if (!sb) {
+          showToast("Koneksi database belum siap, silakan coba lagi.", "warning");
+          return;
+        }
+
+        const { data, error } = await sb
+          .from('pgsd_responses')
+          .select('*')
+          .eq('id_respons', cleanId)
+          .maybeSingle();
+
+        if (error) {
+          console.error("[Verify Receipt] Error querying Supabase:", error);
+          showToast("Gagal memverifikasi: " + (error.message || "Kesalahan koneksi"), "error");
+          return;
+        }
+
+        if (!data) {
+          showToast(`Nomor Bukti "${cleanId}" tidak ditemukan.`, "error");
+          const errBox = document.getElementById("lookupReceiptError");
+          const errTxt = document.getElementById("lookupReceiptErrorText");
+          if (errBox && errTxt) {
+            errBox.classList.remove("hidden");
+            errTxt.textContent = `Nomor Bukti "${cleanId}" tidak tercatat di basis data perkuliahan.`;
+          }
+          return;
+        }
+
+        // Ambil info metadata formulir jika ada
+        let formTitle = "-";
+        let dosenName = "-";
+        let matkulName = "-";
+        let prodiName = "PGSD";
+        if (data.form_id) {
+          try {
+            const { data: formData } = await sb
+              .from('pgsd_forms')
+              .select('judul_form, mata_kuliah, dosen, jurusan, sesi_aktif, kelas')
+              .eq('form_id', data.form_id)
+              .maybeSingle();
+            if (formData) {
+              formTitle = formData.judul_form || formTitle;
+              dosenName = formData.dosen || dosenName;
+              matkulName = formData.mata_kuliah || matkulName;
+              prodiName = formData.jurusan || prodiName;
+            }
+          } catch(e) {}
+        }
+
+        // Kumpulkan presenter terbaik
+        const presenters = [];
+        if (data.best_presenter_1 && data.best_presenter_1 !== '-') presenters.push(data.best_presenter_1);
+        if (data.best_presenter_2 && data.best_presenter_2 !== '-' && data.best_presenter_2 !== data.best_presenter_1) presenters.push(data.best_presenter_2);
+
+        // Kumpulkan ulasan kualitatif
+        let evalDetail = {};
+        if (data.evaluasi_detail && typeof data.evaluasi_detail === 'object') {
+          evalDetail = data.evaluasi_detail;
+        }
+
+        const receiptData = {
+          idRespons: data.id_respons || cleanId,
+          timestamp: data.created_at ? new Date(data.created_at) : new Date(),
+          payload: {
+            nimPenilai: data.nim_penilai || "-",
+            namaPenilai: data.nama_penilai || "-",
+            peranPenilai: data.peran_penilai || "Mahasiswa Penilai",
+            kelompok: data.kelompok_dinilai || "-",
+            nilaiKelompok: (data.nilai_kelompok !== undefined && data.nilai_kelompok !== null) ? data.nilai_kelompok : "-",
+            presentatorTerbaik: presenters,
+            evaluasiDetail: evalDetail,
+            customAnswers: data.custom_answers || {}
+          },
+          formMeta: {
+            formId: data.form_id,
+            title: formTitle,
+            mataKuliah: matkulName,
+            dosen: dosenName,
+            jurusan: prodiName,
+            sesi: data.sesi || "1"
+          }
+        };
+
+        currentReceiptData = receiptData;
+        closeLookupReceiptModal();
+        openReceiptVerificationModal(receiptData);
+
+      } catch (err) {
+        console.error("[Verify Receipt] Exception:", err);
+        showToast("Terjadi kesalahan saat memverifikasi data.", "error");
+      }
+    }
+
+    async function copyVerificationLink() {
+      if (!currentReceiptData) return;
+      const finalId = currentReceiptData.idRespons;
+      const verifyUrl = getVerificationUrl(finalId);
+      try {
+        await navigator.clipboard.writeText(verifyUrl);
+        const btnText = document.getElementById("copyVerifyLinkBtnText");
+        if (btnText) {
+          const orig = btnText.textContent;
+          btnText.textContent = "✓ Tautan Disalin!";
+          setTimeout(() => { btnText.textContent = orig; }, 2000);
+        }
+        showToast("Tautan verifikasi keabsahan berhasil disalin!", "success");
+      } catch (e) {
+        showToast("Gagal menyalin tautan: " + e.message, "error");
+      }
+    }
+
+    function openLookupReceiptModal() {
+      const modal = document.getElementById("modalLookupReceipt");
+      const input = document.getElementById("inputLookupReceiptId");
+      const errBox = document.getElementById("lookupReceiptError");
+      if (errBox) errBox.classList.add("hidden");
+      if (input) input.value = "";
+      if (modal) {
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        setTimeout(() => { if (input) input.focus(); }, 150);
+        try {
+          history.pushState({ modal: 'lookupReceipt' }, '');
+        } catch(e) {}
+      }
+    }
+
+    function closeLookupReceiptModal() {
+      const modal = document.getElementById("modalLookupReceipt");
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+    }
+
+    async function submitLookupReceipt() {
+      const input = document.getElementById("inputLookupReceiptId");
+      const errBox = document.getElementById("lookupReceiptError");
+      const btn = document.getElementById("btnSubmitLookupReceipt");
+      const spinner = document.getElementById("lookupReceiptSpinner");
+      if (!input) return;
+
+      const id = input.value.trim().toUpperCase();
+      if (!id) {
+        if (errBox) {
+          errBox.classList.remove("hidden");
+          const txt = document.getElementById("lookupReceiptErrorText");
+          if (txt) txt.textContent = "Silakan masukkan nomor ID tanda terima terlebih dahulu.";
+        }
+        return;
+      }
+
+      if (btn) btn.disabled = true;
+      if (spinner) spinner.classList.remove("hidden");
+
+      try {
+        await verifyReceiptById(id);
+      } finally {
+        if (btn) btn.disabled = false;
+        if (spinner) spinner.classList.add("hidden");
+      }
+    }
+
+    async function pasteLookupReceiptFromClipboard() {
+      const input = document.getElementById("inputLookupReceiptId");
+      if (!input) return;
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          input.value = text.trim().toUpperCase().replace(/\s+/g, '');
+          showToast("ID Bukti berhasil ditempel!", "info");
+        }
+      } catch (e) {
+        showToast("Gagal mengakses papan klip. Silakan ketik langsung.", "warning");
+      }
+    }
+
+    window.openCurrentReceiptVerification = openCurrentReceiptVerification;
+    window.openReceiptVerificationModal = openReceiptVerificationModal;
+    window.closeVerificationModal = closeVerificationModal;
+    window.verifyReceiptById = verifyReceiptById;
+    window.copyVerificationLink = copyVerificationLink;
+    window.openLookupReceiptModal = openLookupReceiptModal;
+    window.closeLookupReceiptModal = closeLookupReceiptModal;
+    window.submitLookupReceipt = submitLookupReceipt;
+    window.pasteLookupReceiptFromClipboard = pasteLookupReceiptFromClipboard;
+    window.downloadDigitalReceiptImage = downloadDigitalReceiptImage;
+    window.printDigitalReceipt = printDigitalReceipt;
 
     // =========================================================================
     // ⏱️ FLOATING COUNTDOWN EXAM TIMER & ANTI-CHEAT ENGINE (FEATURE B)
