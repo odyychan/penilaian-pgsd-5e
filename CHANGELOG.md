@@ -2,6 +2,22 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.22] - 2026-09-14
+
+### 🎯 Eliminasi Redundansi Tampilan: Modal Zoom QR Code Besar & Akses Langsung Cek Bukti Online
+- **🚫 Penghapusan Modal Popup Redundan:**
+  - Mengeliminasi popup modal tanda terima (`#modalVerificationCertificate`) yang sebelumnya menduplikasi kartu tanda terima yang sudah tampil di layar sukses formulir (`#formSuccessSection`).
+  - Menghilangkan friksi pengguna dari popup bertingkat (*modal fatigue*) sehingga antarmuka menjadi jauh lebih bersih, ramping, dan intuitif.
+- **🔍 Modal Layar Besar QR Code (`#modalQrCodeZoom`):**
+  - Mengintegrasikan interaksi sentuh/klik langsung pada box QR Code di layar sukses (`formSuccessVerifyBox`) dan di halaman Cek Bukti (`pageCekBuktiQrBox`).
+  - Ketika QR Code ditekan, modal pop-up zoom beresolusi tinggi (224×224 px) langsung muncul dengan tajam di tengah layar sehingga memudahkan dosen, rekan mahasiswa, atau pengawas untuk memindai bukti secara langsung dari jarak nyaman.
+  - Dilengkapi identitas nomor ID Bukti, tombol *Salin Tautan*, dan tombol *Tutup*.
+- **📄 Tombol "Lihat Selengkapnya" Langsung ke Halaman Cek Bukti:**
+  - Menempatkan tombol navigasi *"Lihat Selengkapnya"* secara elegan di bawah kartu tanda terima sukses.
+  - Sekali klik langsung membawa pengguna ke Halaman Penuh *"Cek Bukti Penilaian Online"* (`#viewCekBukti`), dengan nomor ID Bukti terisi otomatis dan seluruh detail ulasan kualitatif serta riwayat nilai langsung termuat dari Supabase.
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.22` di seluruh berkas (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
 ## [2.5.21] - 2026-09-14
 
 ### 🌐 Halaman Baru Cek Bukti Penilaian Online: Integrasi Cerdas, Navigasi Transparan, & Penempatan QR Modal

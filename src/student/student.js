@@ -1228,11 +1228,12 @@ function normalizeMediaList(fieldOrMedia) {
         document.querySelectorAll(".pgsd-dropdown-wrapper button").forEach(b => b.classList.remove("ring-2", "ring-indigo-500/20", "border-indigo-500"));
       }
 
-      const anyOpenModal = document.querySelector(".modal-backdrop:not(.hidden), .modal-overlay:not(.hidden), [role='dialog']:not(.hidden), #modalSwitchForm:not(.hidden), #modalClientImageZoom:not(.hidden), #modalPreSubmitReview:not(.hidden), #modalAppConfirm:not(.hidden), #printRekapModal:not(.hidden), #modalVerificationCertificate:not(.hidden), #modalLookupReceipt:not(.hidden)");
+      const anyOpenModal = document.querySelector(".modal-backdrop:not(.hidden), .modal-overlay:not(.hidden), [role='dialog']:not(.hidden), #modalSwitchForm:not(.hidden), #modalClientImageZoom:not(.hidden), #modalPreSubmitReview:not(.hidden), #modalAppConfirm:not(.hidden), #printRekapModal:not(.hidden), #modalQrCodeZoom:not(.hidden), #modalVerificationCertificate:not(.hidden), #modalLookupReceipt:not(.hidden)");
       if (anyOpenModal && anyOpenModal.id !== "viewPortal" && anyOpenModal.id !== "viewForm") {
         if (typeof closeSwitchFormModal === 'function' && anyOpenModal.id === 'modalSwitchForm') closeSwitchFormModal();
         else if (typeof closeClientImageZoom === 'function' && anyOpenModal.id === 'modalClientImageZoom') closeClientImageZoom();
         else if (typeof closePreSubmitReviewModal === 'function' && anyOpenModal.id === 'modalPreSubmitReview') closePreSubmitReviewModal();
+        else if (typeof closeLargeQrModal === 'function' && anyOpenModal.id === 'modalQrCodeZoom') closeLargeQrModal();
         else if (typeof closeVerificationModal === 'function' && anyOpenModal.id === 'modalVerificationCertificate') closeVerificationModal();
         else if (typeof closeLookupReceiptModal === 'function' && anyOpenModal.id === 'modalLookupReceipt') closeLookupReceiptModal();
         else {
@@ -10066,303 +10067,86 @@ function normalizeMediaList(fieldOrMedia) {
     // =========================================================================
     // 🛡️ VERIFIKASI KEABSAHAN TANDA TERIMA & ONLINE CREDENTIAL LOOKUP
     // =========================================================================
-    function openCurrentReceiptVerification() {
-      if (!currentReceiptData) {
-        showToast("Data tanda terima tidak ditemukan.", "error");
-        return;
-      }
-      openReceiptVerificationModal(currentReceiptData);
-    }
-
     function isValidVerificationText(val) {
       if (val === null || val === undefined) return false;
       const s = String(val).trim();
       return s !== "" && s !== "-" && s !== "–" && s.toLowerCase() !== "null" && s.toLowerCase() !== "undefined" && s.toLowerCase() !== "none";
     }
 
-    function toggleVerifyDetailsAccordion() {
-      const content = document.getElementById("verifyDetailsAccordionContent");
-      const icon = document.getElementById("verifyToggleDetailsIcon");
-      const label = document.getElementById("verifyToggleDetailsLabel");
-      if (!content) return;
-      const isHidden = content.classList.contains("hidden");
-      if (isHidden) {
-        content.classList.remove("hidden");
-        if (icon) icon.style.transform = "rotate(180deg)";
-        if (label) label.textContent = "Sembunyikan Ulasan & Evaluasi";
-      } else {
-        content.classList.add("hidden");
-        if (icon) icon.style.transform = "rotate(0deg)";
-        if (label) label.textContent = "Lihat Ulasan & Evaluasi Tertulis";
-      }
+    function toggleVerifyDetailsAccordion() {}
+
+    // =========================================================================
+    // 🔍 MODAL PERBESAR QR CODE & NAVIGASI CEK BUKTI RESMI (v2.5.22)
+    // =========================================================================
+    function navigateToCekBuktiFromSuccess() {
+      const receiptId = currentReceiptData ? currentReceiptData.idRespons : (document.getElementById("formSuccessReceiptId")?.textContent?.trim() || "");
+      navigateToCekBukti(receiptId, 'form');
     }
 
-    function openReceiptVerificationModal(receiptData) {
-      if (!receiptData) return;
-      const payload = receiptData.payload || {};
-      const formMeta = receiptData.formMeta || {};
-      const idRespons = receiptData.idRespons || "-";
-      const timestamp = receiptData.timestamp ? new Date(receiptData.timestamp) : new Date();
+    function openLargeQrModal(receiptIdToUse = '') {
+      const finalId = (receiptIdToUse || (currentReceiptData ? currentReceiptData.idRespons : '') || document.getElementById("formSuccessReceiptId")?.textContent?.trim() || document.getElementById("pageCekBuktiReceiptId")?.textContent?.trim() || '').trim();
+      if (!finalId || finalId === '-') return;
 
-      // Populate Header & Official Banner
-      const elReceiptId = document.getElementById("verifyModalReceiptId");
-      const elTimestamp = document.getElementById("verifyModalTimestamp");
-      if (elReceiptId) elReceiptId.textContent = idRespons;
-      if (elTimestamp) {
-        try {
-          const dateStr = timestamp.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-          const timeStr = timestamp.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
-          elTimestamp.textContent = `${dateStr}, ${timeStr} WITA`;
-        } catch(e) {
-          elTimestamp.textContent = timestamp.toLocaleString('id-ID') + " WITA";
-        }
+      const modal = document.getElementById("modalQrCodeZoom");
+      const canvas = document.getElementById("largeQrCanvas");
+      const idEl = document.getElementById("largeQrReceiptId");
+
+      if (idEl) idEl.textContent = finalId;
+      if (canvas) {
+        const verifyUrl = getVerificationUrl(finalId);
+        renderQrCodeHelper(canvas, verifyUrl, 224);
       }
 
-      // Populate Identitas Penilai (Responden)
-      const elNama = document.getElementById("verifyModalNama");
-      const elNimBadge = document.getElementById("verifyModalNimBadge");
-      if (elNama) {
-        elNama.textContent = isValidVerificationText(payload.namaPenilai) ? payload.namaPenilai : "Mahasiswa Responden";
-      }
-      if (elNimBadge) {
-        if (isValidVerificationText(payload.nimPenilai)) {
-          elNimBadge.textContent = ` (${payload.nimPenilai})`;
-          elNimBadge.classList.remove("hidden");
-        } else {
-          elNimBadge.classList.add("hidden");
-        }
-      }
-
-      // Populate Ringkasan Kelompok & Skor Nilai
-      const elKelompok = document.getElementById("verifyModalKelompok");
-      const elNilai = document.getElementById("verifyModalNilai");
-      if (elKelompok) {
-        elKelompok.textContent = isValidVerificationText(payload.kelompok) ? payload.kelompok : "-";
-      }
-      if (elNilai) {
-        if (payload.nilaiKelompok !== undefined && payload.nilaiKelompok !== null && payload.nilaiKelompok !== "-" && payload.nilaiKelompok !== "") {
-          elNilai.textContent = `${payload.nilaiKelompok} / 100`;
-          elNilai.parentElement?.classList.remove("hidden");
-        } else {
-          elNilai.textContent = "-";
-        }
-      }
-
-      // Baris Konteks Mata Kuliah (Kondisional: Sembunyikan jika kosong atau '-')
-      const elRowMatkul = document.getElementById("verifyRowMatkul");
-      const elMatkul = document.getElementById("verifyModalMatkul");
-      const matkulVal = formMeta.mataKuliah || appConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || "";
-      if (elRowMatkul && elMatkul) {
-        if (isValidVerificationText(matkulVal)) {
-          elMatkul.textContent = matkulVal;
-          elRowMatkul.classList.remove("hidden");
-        } else {
-          elRowMatkul.classList.add("hidden");
-        }
-      }
-
-      // Baris Dosen Pengampu (Kondisional: Sembunyikan jika kosong atau '-')
-      const elRowDosen = document.getElementById("verifyRowDosen");
-      const elDosen = document.getElementById("verifyModalDosen");
-      const dosenVal = formMeta.dosen || appConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || "";
-      if (elRowDosen && elDosen) {
-        if (isValidVerificationText(dosenVal)) {
-          elDosen.textContent = dosenVal;
-          elRowDosen.classList.remove("hidden");
-        } else {
-          elRowDosen.classList.add("hidden");
-        }
-      }
-
-      // Baris Sesi Pertemuan (Kondisional: Sembunyikan jika kosong atau '-')
-      const elRowSesi = document.getElementById("verifyRowSesi");
-      const elSesi = document.getElementById("verifyModalSesi");
-      const sesiVal = formMeta.sesi || payload.sesi || (appConfig && (appConfig["Sesi_Minggu_Aktif"] || appConfig["Sesi_Aktif"])) || (currentFormMeta && currentFormMeta.sesiAktif) || "";
-      if (elRowSesi && elSesi) {
-        if (isValidVerificationText(sesiVal)) {
-          elSesi.textContent = String(sesiVal).toLowerCase().includes("sesi") || String(sesiVal).toLowerCase().includes("minggu")
-            ? String(sesiVal)
-            : `Sesi / Pertemuan ${sesiVal}`;
-          elRowSesi.classList.remove("hidden");
-        } else {
-          elRowSesi.classList.add("hidden");
-        }
-      }
-
-      // Baris Presentator Terbaik (Kondisional: Hanya tampil jika ada presenter terpilih)
-      const elRowPresenters = document.getElementById("verifyRowPresenters");
-      const elPresenters = document.getElementById("verifyModalPresenters");
-      let presList = [];
-      if (Array.isArray(payload.presentatorTerbaik)) {
-        presList = payload.presentatorTerbaik.filter(p => isValidVerificationText(p));
-      } else if (typeof payload.presentatorTerbaik === 'string' && isValidVerificationText(payload.presentatorTerbaik)) {
-        presList = [payload.presentatorTerbaik.trim()];
-      }
-      if (elRowPresenters && elPresenters) {
-        if (presList.length > 0) {
-          elRowPresenters.classList.remove("hidden");
-          elPresenters.innerHTML = presList.map(p => `
-            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-semibold">
-              <span>⭐</span>
-              <span>${escapeHtml(p)}</span>
-            </span>
-          `).join("");
-        } else {
-          elRowPresenters.classList.add("hidden");
-        }
-      }
-
-      // Kumpulkan Detail Evaluasi Kualitatif Tertulis yang Diisi Pengguna
-      const evalItems = [];
-
-      // Evaluasi detail pemateri
-      const evalDetail = payload.evaluasiDetail;
-      if (evalDetail && typeof evalDetail === 'object') {
-        Object.keys(evalDetail).forEach(key => {
-          if (key === '_partition' || key === 'quizResult' || key === 'customAnswers') return;
-          const val = evalDetail[key];
-          if (typeof val === 'string' && isValidVerificationText(val)) {
-            evalItems.push({
-              title: `Evaluasi Anggota Pemateri: ${key}`,
-              score: null,
-              comment: val.trim()
-            });
-          } else if (val && typeof val === 'object') {
-            const catatan = val.catatan || val.komentar || val.feedback || val.evaluasi || "";
-            const skor = val.skor !== undefined ? val.skor : (val.nilai !== undefined ? val.nilai : null);
-            if (isValidVerificationText(catatan) || skor !== null) {
-              evalItems.push({
-                title: `Evaluasi Anggota: ${val.nama || val.namaMahasiswa || key}`,
-                score: skor,
-                comment: catatan
-              });
-            }
-          }
-        });
-      }
-
-      // Refleksi mandiri / evaluasi rekan jika tersimpan di _partition
-      if (evalDetail && evalDetail._partition) {
-        if (evalDetail._partition.refleksiMandiri && typeof evalDetail._partition.refleksiMandiri === 'object') {
-          Object.entries(evalDetail._partition.refleksiMandiri).forEach(([name, txt]) => {
-            if (isValidVerificationText(txt) && !evalItems.some(item => item.title.includes(name))) {
-              evalItems.push({
-                title: `Refleksi Mandiri: ${name}`,
-                score: null,
-                comment: txt.trim()
-              });
-            }
-          });
-        }
-      }
-
-      // Catatan umum / masukan kelompok
-      const generalFeedback = payload.komentar || payload.masukan || payload.catatanUmum;
-      if (isValidVerificationText(generalFeedback)) {
-        evalItems.push({
-          title: "Masukan & Catatan Umum",
-          score: null,
-          comment: generalFeedback.trim()
-        });
-      }
-
-      // Render Daftar Evaluasi
-      const elEvaluasiList = document.getElementById("verifyModalEvaluasiList");
-      if (elEvaluasiList) {
-        if (evalItems.length > 0) {
-          elEvaluasiList.innerHTML = evalItems.map(item => `
-            <div class="p-2.5 rounded-xl bg-white border border-zinc-200/90 shadow-2xs space-y-1">
-              <div class="flex items-center justify-between gap-2">
-                <span class="font-bold text-zinc-900 text-xs">${escapeHtml(item.title)}</span>
-                ${item.score !== null ? `<span class="font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-[11px] border border-emerald-200">${escapeHtml(String(item.score))} Pts</span>` : ''}
-              </div>
-              <p class="text-zinc-600 text-[11.5px] leading-relaxed whitespace-pre-line italic font-serif">"${escapeHtml(item.comment || '(Tanpa catatan tambahan)')}"</p>
-            </div>
-          `).join("");
-        } else {
-          elEvaluasiList.innerHTML = "";
-        }
-      }
-
-      // Custom Answers (jika ada instrumen kustom)
-      let customAnsCount = 0;
-      const customBox = document.getElementById("verifyModalCustomAnswersBox");
-      const customList = document.getElementById("verifyModalCustomAnswersList");
-      const customAns = payload.customAnswers || payload.evaluasiDetail?.customAnswers;
-      if (customBox && customList) {
-        if (customAns && typeof customAns === 'object' && Object.keys(customAns).length > 0) {
-          const validEntries = Object.entries(customAns).filter(([k, v]) => isValidVerificationText(v));
-          customAnsCount = validEntries.length;
-          if (validEntries.length > 0) {
-            customBox.classList.remove("hidden");
-            customList.innerHTML = validEntries.map(([k, v]) => `
-              <div class="p-2 bg-white rounded-lg border border-zinc-200 flex items-start justify-between gap-2 text-xs">
-                <span class="font-medium text-zinc-600">${escapeHtml(k)}:</span>
-                <span class="font-semibold text-zinc-900 text-right">${escapeHtml(String(v))}</span>
-              </div>
-            `).join("");
-          } else {
-            customBox.classList.add("hidden");
-            customList.innerHTML = "";
-          }
-        } else {
-          customBox.classList.add("hidden");
-          customList.innerHTML = "";
-        }
-      }
-
-      // Atur Accordion: Collapsed secara default ("kecuali memang pengguna ingin melihat nya")
-      const totalDetailItems = evalItems.length + customAnsCount;
-      const elSectionAccordion = document.getElementById("verifySectionAccordion");
-      const elCountBadge = document.getElementById("verifyDetailCountBadge");
-      const elAccordionContent = document.getElementById("verifyDetailsAccordionContent");
-      const elToggleLabel = document.getElementById("verifyToggleDetailsLabel");
-      const elToggleIcon = document.getElementById("verifyToggleDetailsIcon");
-
-      // Reset keadaan ke tertutup
-      if (elAccordionContent) elAccordionContent.classList.add("hidden");
-      if (elToggleLabel) elToggleLabel.textContent = "Lihat Ulasan & Evaluasi Tertulis";
-      if (elToggleIcon) elToggleIcon.style.transform = "rotate(0deg)";
-
-      if (elSectionAccordion) {
-        if (totalDetailItems > 0) {
-          elSectionAccordion.classList.remove("hidden");
-          if (elCountBadge) {
-            elCountBadge.textContent = `${totalDetailItems} Catatan`;
-            elCountBadge.classList.remove("hidden");
-          }
-        } else {
-          // Jika tidak ada ulasan/isian tertulis sama sekali, sembunyikan accordion agar bersih
-          elSectionAccordion.classList.add("hidden");
-        }
-      }
-
-      currentReceiptData = receiptData;
-
-      // Render QR Code inside Modal (ID Bukti Card)
-      const qrCanvas = document.getElementById("verifyModalQrCanvas");
-      if (qrCanvas) {
-        const verifyUrl = getVerificationUrl(idRespons);
-        renderQrCodeHelper(qrCanvas, verifyUrl, 48);
-      }
-
-      // Buka Modal
-      const modal = document.getElementById("modalVerificationCertificate");
       if (modal) {
         modal.classList.remove("hidden");
         modal.classList.add("flex");
+        modal.style.display = "flex";
         try {
-          history.pushState({ modal: 'verificationCertificate', id: idRespons }, '');
+          history.pushState({ modal: 'qrZoom', id: finalId }, '');
         } catch(e) {}
       }
     }
 
-    function closeVerificationModal() {
-      const modal = document.getElementById("modalVerificationCertificate");
+    function closeLargeQrModal() {
+      const modal = document.getElementById("modalQrCodeZoom");
       if (modal) {
         modal.classList.add("hidden");
         modal.classList.remove("flex");
+        modal.style.display = "none";
       }
+    }
+
+    async function copyLargeQrVerificationLink() {
+      const idEl = document.getElementById("largeQrReceiptId");
+      const finalId = (idEl ? idEl.textContent.trim() : (currentReceiptData ? currentReceiptData.idRespons : '')).trim();
+      if (!finalId || finalId === '-' || finalId === '') return;
+      const verifyUrl = getVerificationUrl(finalId);
+      try {
+        await navigator.clipboard.writeText(verifyUrl);
+        const btnText = document.getElementById("btnCopyLargeQrLinkText");
+        if (btnText) {
+          const orig = btnText.textContent;
+          btnText.textContent = "✓ Tautan Disalin!";
+          setTimeout(() => { btnText.textContent = orig; }, 2000);
+        }
+        showToast("Tautan verifikasi keabsahan berhasil disalin!", "success");
+      } catch (e) {
+        showToast("Gagal menyalin tautan: " + e.message, "error");
+      }
+    }
+
+    // Kompatibilitas mundur
+    function openCurrentReceiptVerification() {
+      openLargeQrModal();
+    }
+
+    function openReceiptVerificationModal(receiptData) {
+      const id = receiptData?.idRespons || (currentReceiptData ? currentReceiptData.idRespons : '');
+      openLargeQrModal(id);
+    }
+
+    function closeVerificationModal() {
+      closeLargeQrModal();
     }
 
     // =========================================================================
@@ -10949,6 +10733,10 @@ function normalizeMediaList(fieldOrMedia) {
     window.navigateToCekBukti = navigateToCekBukti;
     window.navigateBackFromCekBukti = navigateBackFromCekBukti;
     window.navigateToCekBuktiFromModal = navigateToCekBuktiFromModal;
+    window.openLargeQrModal = openLargeQrModal;
+    window.closeLargeQrModal = closeLargeQrModal;
+    window.copyLargeQrVerificationLink = copyLargeQrVerificationLink;
+    window.navigateToCekBuktiFromSuccess = navigateToCekBuktiFromSuccess;
     window.navigateToCekBuktiFromPortal = navigateToCekBuktiFromPortal;
     window.submitCekBuktiSearch = submitCekBuktiSearch;
     window.pasteCekBuktiFromClipboard = pasteCekBuktiFromClipboard;
