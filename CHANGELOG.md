@@ -2,6 +2,27 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.24] - 2026-09-14
+
+### 🎨 Redesain Cek Bukti Online: Integrasi Navigasi Header, Hero Card Minimalis & Input Dinamis
+- **🔙 Integrasi Tombol Kembali ke Header Atas (`#btnHeaderBackCekBukti`):**
+  - Memindahkan tombol kembali dari badan konten ke dalam bilah navigasi utama (`<header>`) di pojok kiri atas sehingga tata letak jauh lebih kompak, bersih, dan hemat ruang vertikal.
+  - Memenuhi standar ergonomi sentuh (*touch target >= 44px*) dengan ikon panah modern dan teks adaptif.
+  - Mengisolasi kemunculan tombol kembali secara otomatis hanya pada saat mode Cek Bukti (`html.cek-bukti-mode-active`).
+- **🚫 Eliminasi Tulisan & Badge "Layanan Verifikasi Resmi":**
+  - Menghapus badge dan baris navigasi terpisah yang sebelumnya memakan ruang vertikal secara berlebih demi tampilan yang lebih terpadu dan tidak kaku.
+- **💬 Bahasa Deskripsi Komunikatif & Segar:**
+  - Mengganti teks deskripsi yang kaku dan birokratis menjadi kalimat yang santai, lugas, dan komunikatif: *"Verifikasi keabsahan tanda terima dan masukan penilaian perkuliahan."*
+- **✨ Minimalist Hero Card (Bebas AI Slop & Backend Jargon):**
+  - Mengeliminasi 3 kartu penjelasan teknis di keadaan siaga (*Basis Data Resmi*, *Transparansi Nilai*, *QR Code Digital*) yang dinilai terlalu berlebihan (*AI slop*).
+  - Menggabungkan elemen ikon, judul, deskripsi ringkas, kotak pencarian ID Bukti (dengan tombol Tempel & Periksa), serta catatan format ID ke dalam satu *Hero Card* minimalis yang elegan dan berfokus pada fungsi utama.
+- **🔄 Input Pencarian Dinamis & Tombol "Cek ID Bukti Lainnya":**
+  - Kotak pencarian ID Bukti hanya ditampilkan di awal saat pengguna belum mencari atau saat ingin memeriksa ID lain.
+  - Ketika data bukti berhasil ditemukan (*Found State*), kotak input pencarian disembunyikan secara mulus dan digantikan oleh bilah aksi ringkas dengan tombol **"Cek ID Bukti Lainnya"** (`#btnCekBuktiLainnya`).
+  - Memberikan pengalaman pengguna yang 100% fokus pada kartu bukti tanda terima tanpa terdistraksi kolom pencarian besar di atasnya.
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.24` di seluruh berkas (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
 ## [2.5.23] - 2026-09-14
 
 ### 📐 Audit Responsivitas & Tata Letak: Eliminasi Ruang Kosong Samping & Grid Adaptif Desktop-Mobile

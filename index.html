@@ -35,7 +35,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="src/student/index.css?v=2.5.23">
+  <link rel="stylesheet" href="src/student/index.css?v=2.5.24">
   
   <!-- Instant Zero-FOUC View Resolver (Runs synchronously before HTML paint) -->
   <script>
@@ -105,6 +105,9 @@
     html.cek-bukti-mode-active #viewCekBukti {
       display: block !important;
     }
+    html.cek-bukti-mode-active #btnHeaderBackCekBukti {
+      display: inline-flex !important;
+    }
   </style>
 
   <!-- KaTeX CSS & JS for Universal Math / LaTeX / AI & Word Formula Rendering -->
@@ -125,8 +128,22 @@
   <header class="sticky top-0 z-40 bg-zinc-950 text-white border-b border-zinc-800 shadow-md w-full">
     <div class="w-full px-3.5 sm:px-6 lg:px-8 py-2 sm:py-3 flex items-center justify-between gap-2.5 sm:gap-4">
       
-      <!-- Brand & Title -->
+      <!-- Brand & Title with Cek Bukti Header Back Button -->
       <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+        <!-- Dedicated Header Back Button (Visible ONLY in Cek Bukti Mode) -->
+        <button 
+          type="button" 
+          id="btnHeaderBackCekBukti"
+          onclick="navigateBackFromCekBukti()" 
+          class="hidden min-h-[44px] px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 active:scale-95 text-zinc-200 hover:text-white border border-zinc-700/80 transition-all items-center gap-1.5 cursor-pointer text-xs font-semibold shrink-0"
+          title="Kembali"
+        >
+          <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+          <span id="btnHeaderBackCekBuktiLabel" class="hidden xs:inline">Kembali</span>
+        </button>
+
         <div class="w-7 h-7 sm:w-9 sm:h-9 flex items-center justify-center flex-shrink-0">
           <img src="assets/logo-ulm.png" alt="Logo ULM" class="w-full h-full object-contain" onerror="this.src='logo-ulm.png'" />
         </div>
@@ -372,45 +389,24 @@
     <!-- ========================================================================= -->
     <div id="viewCekBukti" class="hidden max-w-4xl lg:max-w-5xl xl:max-w-6xl w-full mx-auto space-y-4 sm:space-y-5 pt-2 sm:pt-6 pb-14 step-fade">
       
-      <!-- Top Navigation & Header -->
-      <div class="flex items-center justify-between gap-3 pb-3 border-b border-zinc-200/80">
-        <button 
-          type="button" 
-          id="btnBackCekBukti"
-          onclick="navigateBackFromCekBukti()" 
-          class="min-h-[44px] px-3.5 sm:px-4 py-2 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 active:scale-[0.99] text-zinc-700 text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-2xs"
-          title="Kembali ke tampilan sebelumnya"
-        >
-          <svg class="w-4 h-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-          </svg>
-          <span id="btnBackCekBuktiLabel">Kembali ke Beranda</span>
-        </button>
-
-        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-semibold">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span>Layanan Verifikasi Resmi</span>
-        </div>
-      </div>
-
-      <!-- Search & Input Card: Responsive Lookup Banner -->
-      <div class="bg-white rounded-2xl sm:rounded-3xl border border-zinc-200/80 p-4 sm:p-6 shadow-xs space-y-3.5">
-        <div class="space-y-1 text-left">
-          <h2 class="text-base sm:text-lg font-extrabold text-zinc-900 tracking-tight flex items-center gap-2">
-            <span class="p-1.5 rounded-xl bg-zinc-100 text-zinc-800">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-              </svg>
-            </span>
-            <span>Cek Bukti Penilaian Online</span>
+      <!-- 1. Search & Input Card: Minimalist Hero Card (Standby & Lookup State) -->
+      <div id="formCekBuktiSearchCard" class="bg-white rounded-2xl sm:rounded-3xl border border-zinc-200/90 p-6 sm:p-10 shadow-xs space-y-6 text-center max-w-2xl mx-auto">
+        <div class="space-y-2 max-w-md mx-auto">
+          <div class="w-12 h-12 rounded-2xl bg-zinc-100 border border-zinc-200/80 text-zinc-700 flex items-center justify-center mx-auto shadow-2xs">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+          </div>
+          <h2 class="text-lg sm:text-xl font-extrabold text-zinc-900 tracking-tight">
+            Cek Bukti Penilaian Online
           </h2>
-          <p class="text-xs text-zinc-500 leading-relaxed">
-            Periksa keabsahan tanda terima, skor penilaian, dan rincian ulasan kualitatif resmi yang tersimpan di basis data FKIP ULM.
+          <p class="text-xs sm:text-sm text-zinc-500 leading-relaxed">
+            Verifikasi keabsahan tanda terima dan masukan penilaian perkuliahan.
           </p>
         </div>
 
-        <!-- Search Form: Responsive Stacking on Mobile, Single Flex Row on Tablet & Desktop -->
-        <form id="formCekBuktiSearch" onsubmit="event.preventDefault(); submitCekBuktiSearch();" class="space-y-2.5 sm:space-y-0 sm:flex sm:items-center sm:gap-2.5">
+        <!-- Search Form: Responsive Stacking on Mobile, Inline Flex on Tablet & Desktop -->
+        <form id="formCekBuktiSearch" onsubmit="event.preventDefault(); submitCekBuktiSearch();" class="space-y-3 sm:space-y-0 sm:flex sm:items-center sm:gap-2.5 max-w-lg mx-auto">
           <div class="relative flex-1">
             <input 
               type="text" 
@@ -448,62 +444,36 @@
         </form>
 
         <!-- Search Error Alert -->
-        <div id="cekBuktiErrorBox" class="hidden p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5">
+        <div id="cekBuktiErrorBox" class="hidden max-w-lg mx-auto p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5 text-left">
           <svg class="w-4 h-4 text-rose-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
           <div id="cekBuktiErrorText" class="min-w-0 font-medium leading-relaxed"></div>
         </div>
+
+        <p class="text-[11.5px] text-zinc-400">
+          Format ID: <span class="font-mono font-semibold text-zinc-600">PGSD-REC-XXXX-XXXXXX</span>
+        </p>
+      </div>
+
+      <!-- 2. Action Bar when Bukti Result is Found (Replaces search card) -->
+      <div id="barCekBuktiActions" class="hidden flex items-center justify-between gap-3 pb-1">
+        <button 
+          type="button" 
+          id="btnCekBuktiLainnya" 
+          onclick="resetToSearchCekBukti()" 
+          class="min-h-[44px] px-4 py-2 rounded-xl bg-white hover:bg-zinc-50 border border-zinc-200/90 text-zinc-800 active:scale-[0.99] text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-2xs"
+          title="Periksa ID bukti lainnya"
+        >
+          <svg class="w-4 h-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <span>Cek ID Bukti Lainnya</span>
+        </button>
       </div>
 
       <!-- Result Container: Dynamic content -->
       <div id="cekBuktiResultContainer" class="space-y-4">
-
-        <!-- 1. Standby / Empty State (Engaging 3-Cards Feature Highlights) -->
-        <div id="cekBuktiStandbyState" class="bg-white rounded-2xl sm:rounded-3xl border border-zinc-200/80 p-6 sm:p-10 text-center space-y-6 shadow-xs">
-          <div class="max-w-md mx-auto space-y-2">
-            <div class="w-12 h-12 rounded-2xl bg-zinc-50 border border-zinc-200/90 text-zinc-400 flex items-center justify-center mx-auto shadow-2xs">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-              </svg>
-            </div>
-            <h3 class="text-sm sm:text-base font-bold text-zinc-800">Menunggu Input ID Bukti</h3>
-            <p class="text-xs text-zinc-500 leading-relaxed">
-              Ketikkan atau tempelkan nomor ID Bukti tanda terima di atas untuk memverifikasi keabsahan data penilaian secara transparan.
-            </p>
-          </div>
-
-          <!-- Feature Highlights Grid -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-left border-t border-zinc-100">
-            <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200/80 space-y-1">
-              <div class="flex items-center gap-1.5 text-xs font-bold text-zinc-800">
-                <span class="text-emerald-600">✓</span>
-                <span>Basis Data Resmi</span>
-              </div>
-              <p class="text-[11px] text-zinc-500 leading-relaxed">
-                Terkoneksi langsung ke server PostgreSQL Supabase FKIP ULM dengan enkripsi data aman.
-              </p>
-            </div>
-            <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200/80 space-y-1">
-              <div class="flex items-center gap-1.5 text-xs font-bold text-zinc-800">
-                <span class="text-emerald-600">✓</span>
-                <span>Transparansi Nilai</span>
-              </div>
-              <p class="text-[11px] text-zinc-500 leading-relaxed">
-                Tinjau skor rubrik, voting presentator terbaik, dan masukan kualitatif yang tercatat.
-              </p>
-            </div>
-            <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200/80 space-y-1">
-              <div class="flex items-center gap-1.5 text-xs font-bold text-zinc-800">
-                <span class="text-emerald-600">✓</span>
-                <span>QR Code Digital</span>
-              </div>
-              <p class="text-[11px] text-zinc-500 leading-relaxed">
-                Dilengkapi stempel digital dan QR Code yang dapat diperbesar untuk dipindai langsung.
-              </p>
-            </div>
-          </div>
-        </div>
 
         <!-- 2. Loading State -->
         <div id="cekBuktiLoadingState" class="hidden bg-white rounded-2xl sm:rounded-3xl border border-zinc-200/80 p-10 sm:p-14 text-center space-y-3 shadow-xs">
@@ -2313,13 +2283,13 @@
   <!-- ========================================================================= -->
   <!-- SCRIPT LOGIC -->
   <!-- ========================================================================= -->
-  <script src="src/student/student.js?v=2.5.23"></script>
+  <script src="src/student/student.js?v=2.5.24"></script>
 
   <!-- Progressive Web App (PWA) & Instant Auto-Updater Engine -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js?v=2.5.23').then(function(reg) {
+        navigator.serviceWorker.register('/sw.js?v=2.5.24').then(function(reg) {
           reg.update();
           reg.addEventListener('updatefound', function() {
             var newWorker = reg.installing;

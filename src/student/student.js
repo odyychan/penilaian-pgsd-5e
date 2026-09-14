@@ -10157,15 +10157,21 @@ function normalizeMediaList(fieldOrMedia) {
     function navigateToCekBukti(idToInspect = '', origin = 'portal') {
       cekBuktiOrigin = origin || 'portal';
 
-      // Update label tombol kembali secara cerdas berdasarkan titik masuk
-      const btnBackLabel = document.getElementById('btnBackCekBuktiLabel');
-      if (btnBackLabel) {
-        if (cekBuktiOrigin === 'form') {
-          btnBackLabel.textContent = 'Kembali ke Formulir';
-        } else {
-          btnBackLabel.textContent = 'Kembali ke Beranda';
-        }
+      // Update label tombol kembali di header secara cerdas berdasarkan titik masuk
+      const btnHeaderBackLabel = document.getElementById('btnHeaderBackCekBuktiLabel');
+      const btnHeaderBack = document.getElementById('btnHeaderBackCekBukti');
+      if (btnHeaderBackLabel) {
+        btnHeaderBackLabel.textContent = 'Kembali';
       }
+      if (btnHeaderBack) {
+        btnHeaderBack.title = (cekBuktiOrigin === 'form') ? 'Kembali ke Formulir Penilaian' : 'Kembali ke Portal Beranda';
+      }
+
+      // Perbarui judul navigasi atas
+      const navTitle = document.getElementById('navTitle');
+      const navSubtitle = document.getElementById('navSubtitle');
+      if (navTitle) navTitle.textContent = 'Cek Bukti Penilaian Online';
+      if (navSubtitle) navSubtitle.textContent = 'Layanan Verifikasi FKIP ULM';
 
       // Aktifkan mode CSS isolasi
       document.documentElement.classList.remove('portal-mode-active', 'form-mode-active');
@@ -10209,13 +10215,15 @@ function normalizeMediaList(fieldOrMedia) {
           window.history.pushState({ view: 'cekBukti', id: cleanId }, '', url.toString());
         } catch(e) {}
       } else {
-        // Keadaan Standby: menunggu input pengguna
-        const standbyState = document.getElementById('cekBuktiStandbyState');
+        // Keadaan Siaga / Standby: Tampilkan Hero Search Card minimalis
+        const searchCard = document.getElementById('formCekBuktiSearchCard');
         const loadingState = document.getElementById('cekBuktiLoadingState');
         const foundCard = document.getElementById('cekBuktiFoundCard');
-        if (standbyState) standbyState.classList.remove('hidden');
+        const barActions = document.getElementById('barCekBuktiActions');
+        if (searchCard) searchCard.classList.remove('hidden');
         if (loadingState) loadingState.classList.add('hidden');
         if (foundCard) foundCard.classList.add('hidden');
+        if (barActions) barActions.classList.add('hidden');
         if (input) {
           input.value = '';
           setTimeout(() => input.focus(), 150);
@@ -10248,6 +10256,9 @@ function normalizeMediaList(fieldOrMedia) {
         if (navTabContainer) navTabContainer.classList.remove('hidden');
         if (badgeSesiTop) badgeSesiTop.classList.remove('hidden');
         document.title = (currentFormMeta?.title ? `${currentFormMeta.title} • Form Penilaian` : "Form Penilaian Mahasiswa • FKIP ULM");
+        if (typeof renderNavHeader === 'function') {
+          renderNavHeader();
+        }
         try {
           const url = new URL(window.location.href);
           url.searchParams.set('id', activeFormId);
@@ -10268,6 +10279,34 @@ function normalizeMediaList(fieldOrMedia) {
         } catch(e) {}
         window.scrollTo({ top: 0, behavior: 'instant' });
       }
+    }
+
+    function resetToSearchCekBukti() {
+      const searchCard = document.getElementById('formCekBuktiSearchCard');
+      const loadingState = document.getElementById('cekBuktiLoadingState');
+      const foundCard = document.getElementById('cekBuktiFoundCard');
+      const barActions = document.getElementById('barCekBuktiActions');
+      const input = document.getElementById('inputCekBuktiId');
+      const errBox = document.getElementById('cekBuktiErrorBox');
+
+      if (foundCard) foundCard.classList.add('hidden');
+      if (barActions) barActions.classList.add('hidden');
+      if (loadingState) loadingState.classList.add('hidden');
+      if (errBox) errBox.classList.add('hidden');
+      if (searchCard) searchCard.classList.remove('hidden');
+
+      if (input) {
+        input.value = '';
+        setTimeout(() => input.focus(), 100);
+      }
+
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.set('view', 'bukti');
+        url.searchParams.delete('verify');
+        url.searchParams.delete('id');
+        window.history.pushState({ view: 'cekBukti' }, '', url.toString());
+      } catch(e) {}
     }
 
     function navigateToCekBuktiFromModal() {
@@ -10328,13 +10367,15 @@ function normalizeMediaList(fieldOrMedia) {
       const errBox = document.getElementById('cekBuktiErrorBox');
       const errTxt = document.getElementById('cekBuktiErrorText');
 
-      const standbyState = document.getElementById('cekBuktiStandbyState');
+      const searchCard = document.getElementById('formCekBuktiSearchCard');
       const loadingState = document.getElementById('cekBuktiLoadingState');
       const foundCard = document.getElementById('cekBuktiFoundCard');
+      const barActions = document.getElementById('barCekBuktiActions');
 
       if (errBox) errBox.classList.add('hidden');
-      if (standbyState) standbyState.classList.add('hidden');
+      if (searchCard) searchCard.classList.add('hidden');
       if (foundCard) foundCard.classList.add('hidden');
+      if (barActions) barActions.classList.add('hidden');
       if (loadingState) loadingState.classList.remove('hidden');
       if (btn) btn.disabled = true;
       if (spinner) spinner.classList.remove('hidden');
@@ -10357,7 +10398,7 @@ function normalizeMediaList(fieldOrMedia) {
 
         if (!data) {
           if (loadingState) loadingState.classList.add('hidden');
-          if (standbyState) standbyState.classList.remove('hidden');
+          if (searchCard) searchCard.classList.remove('hidden');
           if (errBox && errTxt) {
             errBox.classList.remove('hidden');
             errTxt.innerHTML = `Nomor ID Bukti <strong>"${escapeHtml(cleanId)}"</strong> tidak ditemukan atau belum tercatat di basis data perkuliahan resmi.`;
@@ -10428,6 +10469,8 @@ function normalizeMediaList(fieldOrMedia) {
         renderCekBuktiDetail(receiptData);
 
         if (loadingState) loadingState.classList.add('hidden');
+        if (searchCard) searchCard.classList.add('hidden');
+        if (barActions) barActions.classList.remove('hidden');
         if (foundCard) foundCard.classList.remove('hidden');
 
         showToast("Bukti tanda terima valid dan berhasil diverifikasi!", "success");
@@ -10435,7 +10478,7 @@ function normalizeMediaList(fieldOrMedia) {
       } catch (err) {
         console.error("[Cek Bukti] Error:", err);
         if (loadingState) loadingState.classList.add('hidden');
-        if (standbyState) standbyState.classList.remove('hidden');
+        if (searchCard) searchCard.classList.remove('hidden');
         if (errBox && errTxt) {
           errBox.classList.remove('hidden');
           errTxt.textContent = err.message || "Terjadi kesalahan saat memverifikasi bukti tanda terima.";
@@ -10446,6 +10489,12 @@ function normalizeMediaList(fieldOrMedia) {
         if (spinner) spinner.classList.add('hidden');
       }
     }
+
+    window.resetToSearchCekBukti = resetToSearchCekBukti;
+    window.navigateToCekBukti = navigateToCekBukti;
+    window.navigateBackFromCekBukti = navigateBackFromCekBukti;
+    window.submitCekBuktiSearch = submitCekBuktiSearch;
+    window.pasteCekBuktiFromClipboard = pasteCekBuktiFromClipboard;
 
     function renderCekBuktiDetail(receiptData) {
       if (!receiptData) return;
