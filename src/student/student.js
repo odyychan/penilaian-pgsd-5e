@@ -4952,10 +4952,76 @@ function normalizeMediaList(fieldOrMedia) {
         }
 
         if (isSubmittedInStorage) {
-          isBlocked = true;
-          blockReason = "ALREADY_SUBMITTED";
-          blockTitle = "Respons Telah Terkirim";
-          blockDesc = "Anda sudah pernah mengirimkan tanggapan untuk formulir ini. Sesuai pengaturan pembatasan, formulir ini hanya menerima 1 kali respons.";
+          // Hitung kelompok yang sudah dinilai oleh penilai ini di sesi aktif
+          const activeSesiForBlock = (appConfig["Sesi_Minggu_Aktif"] || appConfig["Sesi_Aktif"] || currentFormMeta?.sesiAktif || "").trim();
+          const isFilterAllSesi = !activeSesiForBlock || /^(semua|all|semua sesi|semua minggu)$/i.test(activeSesiForBlock);
+
+          // Ambil daftar kelompok di sesi aktif
+          let groupsInActiveSesi = [];
+          if (groupsData && groupsData.length > 0) {
+            groupsInActiveSesi = groupsData.filter(g => {
+              if (!isFilterAllSesi && g.sesi && g.sesi.trim().toLowerCase() !== activeSesiForBlock.toLowerCase()) return false;
+              return true;
+            });
+          }
+
+          // Ambil daftar kelompok yang sudah dinilai penilai ini
+          const alreadyFilledGroups = [];
+          if (currentRekapData) {
+            const nimKey = activeNim;
+            const emailKey = activeEmail;
+            if (nimKey && currentRekapData.nimToKelompokMap && currentRekapData.nimToKelompokMap[nimKey]) {
+              currentRekapData.nimToKelompokMap[nimKey].forEach(g => {
+                if (!alreadyFilledGroups.some(f => f.toLowerCase() === g.toLowerCase())) alreadyFilledGroups.push(g);
+              });
+            }
+            if (emailKey && currentRekapData.emailToKelompokMap && currentRekapData.emailToKelompokMap[emailKey]) {
+              currentRekapData.emailToKelompokMap[emailKey].forEach(g => {
+                if (!alreadyFilledGroups.some(f => f.toLowerCase() === g.toLowerCase())) alreadyFilledGroups.push(g);
+              });
+            }
+          }
+
+          // Cek apakah masih ada kelompok yang BELUM dinilai di sesi aktif
+          const unfilledGroups = groupsInActiveSesi.filter(g => {
+            return !alreadyFilledGroups.some(f => f.toLowerCase() === g.name.toLowerCase());
+          });
+
+          if (unfilledGroups.length === 0 && groupsInActiveSesi.length > 0) {
+            // Semua kelompok di sesi aktif sudah dinilai → blokir global
+            isBlocked = true;
+            blockReason = "ALREADY_SUBMITTED";
+            const sesiLabel = activeSesiForBlock || "sesi aktif";
+            blockTitle = "Semua Kelompok Telah Dinilai";
+            blockDesc = `Anda telah menyelesaikan penilaian untuk seluruh ${groupsInActiveSesi.length} kelompok presentator pada <strong>${escapeHtml(sesiLabel)}</strong>. Terima kasih atas partisipasi Anda!<br><span class="inline-block mt-2 font-mono font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">✓ ${alreadyFilledGroups.length} / ${groupsInActiveSesi.length} Kelompok Selesai Dinilai</span>`;
+          } else if (groupsInActiveSesi.length > 0 && alreadyFilledGroups.length > 0) {
+            // Sebagian kelompok sudah dinilai → tampilkan banner info progres (biru/indigo), jangan blokir
+            const progressBanner = document.getElementById("formScheduleLockBanner");
+            if (progressBanner) {
+              progressBanner.classList.remove("hidden");
+              // Ubah warna banner menjadi biru/indigo (informatif, bukan peringatan merah)
+              progressBanner.className = "p-4 sm:p-5 rounded-2xl bg-indigo-50/90 border border-indigo-300 text-indigo-950 space-y-2 shadow-xs fade-enter";
+              const iconContainer = progressBanner.querySelector("div div");
+              if (iconContainer) {
+                iconContainer.className = "w-8 h-8 rounded-xl bg-indigo-100 border border-indigo-300 text-indigo-800 flex items-center justify-center shrink-0";
+                iconContainer.innerHTML = `<svg class="w-4 h-4 text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+              }
+              const titleEl = document.getElementById("lockBannerTitle");
+              const descEl = document.getElementById("lockBannerDesc");
+              if (titleEl) {
+                titleEl.textContent = "Lanjutkan Penilaian Kelompok Berikutnya";
+                titleEl.className = "font-bold text-sm sm:text-base text-indigo-950";
+              }
+              if (descEl) {
+                descEl.className = "text-xs text-indigo-900 leading-relaxed pl-10.5";
+                descEl.innerHTML = `Anda sudah menilai <strong>${alreadyFilledGroups.length}</strong> dari <strong>${groupsInActiveSesi.length}</strong> kelompok presentator di sesi ini. Masih ada <strong>${unfilledGroups.length}</strong> kelompok lagi yang perlu dinilai.<br><span class="inline-block mt-1.5 font-mono text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">✓ Sudah dinilai: ${alreadyFilledGroups.map(g => escapeHtml(g)).join(", ")}</span>`;
+              }
+            }
+            // Jangan blokir — biarkan mahasiswa lanjut menilai kelompok berikutnya
+          } else if (groupsInActiveSesi.length === 0 && isSubmittedInStorage) {
+            // Tidak ada data kelompok (belum dimuat penuh) — jangan blokir keras dulu
+            // Biarkan fetchInitialFormData selesai memuat data kelompok terlebih dahulu
+          }
         }
       }
 
@@ -4984,7 +5050,10 @@ function normalizeMediaList(fieldOrMedia) {
           `;
         }
       } else {
-        if (lockBanner) lockBanner.classList.add("hidden");
+        // Only hide the lockBanner if it's NOT being used as a progress info banner
+        const lockBannerEl = document.getElementById("formScheduleLockBanner");
+        const isProgressBanner = lockBannerEl && lockBannerEl.classList.contains("bg-indigo-50/90");
+        if (lockBanner && !isProgressBanner) lockBanner.classList.add("hidden");
         if (!scheduleActive && warningBadge) {
           warningBadge.classList.add("hidden");
           warningBadge.classList.remove("inline-flex");
@@ -4992,12 +5061,17 @@ function normalizeMediaList(fieldOrMedia) {
         if (startBtn) {
           startBtn.disabled = false;
           startBtn.classList.remove("opacity-50", "cursor-not-allowed");
-          startBtn.innerHTML = `
-            <span>Mulai Pengisian Penilaian</span>
-            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-            </svg>
-          `;
+          // Cek apakah ada progres penilaian parsial (sebagian kelompok sudah dinilai)
+          const hasPartialProgress = isProgressBanner;
+          startBtn.innerHTML = hasPartialProgress
+            ? `<span>Lanjutkan Pengisian Penilaian</span>
+               <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+               </svg>`
+            : `<span>Mulai Pengisian Penilaian</span>
+               <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+               </svg>`;
         }
       }
     }

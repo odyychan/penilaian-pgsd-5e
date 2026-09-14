@@ -2,8 +2,23 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
-## [2.5.9] - 2026-09-14
+## [2.5.10] - 2026-09-14
 
+### 🔓 Dukungan Multi-Kelompok dalam Satu Sesi & Perbaikan Kunci Blokir Formulir
+- **🎯 Perbaikan Kritis: Blokir Formulir Tidak Lagi Terpicu Setelah Menilai 1 Kelompok:**
+  - Mengidentifikasi dan memperbaiki bug logika pada `checkFormBlockStatus`: fitur `Kunci_Respons_Ganda` sebelumnya memblokir formulir secara global begitu mahasiswa mengirimkan penilaian untuk kelompok **mana saja**, meskipun masih ada kelompok lain yang belum dinilai di sesi yang sama.
+  - Logika blokir kini diperbaiki: formulir hanya diblokir secara penuh apabila **semua kelompok aktif di sesi yang sedang berjalan** sudah selesai dinilai oleh penilai tersebut.
+- **📊 Banner Progres Informatif untuk Penilaian Parsial:**
+  - Saat mahasiswa telah menilai sebagian kelompok (misalnya 1 dari 2 kelompok di Minggu 1), formulir tetap terbuka dan menampilkan banner informatif berwarna indigo/biru bertuliskan **"Lanjutkan Penilaian Kelompok Berikutnya"** yang merinci kelompok mana yang sudah dinilai dan berapa kelompok yang masih tersisa.
+  - Saat **semua** kelompok di sesi aktif selesai dinilai, banner berubah menjadi konfirmasi hijau emerald: **"Semua Kelompok Telah Dinilai ✓ X / X Kelompok Selesai"** dan tombol formulir dinonaktifkan.
+- **🔒 Kunci Per-Kelompok Tetap Aktif (Kartu Kelompok di Tahap 2):**
+  - Kartu kelompok yang sudah dinilai tetap menampilkan lencana kunci **"Sudah Dinilai • Terkunci"** berwarna hijau emerald dan tidak dapat dipilih kembali, sehingga proteksi duplikasi per-kelompok tetap berjalan sempurna.
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.10` di seluruh berkas (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
+---
+
+## [2.5.9] - 2026-09-14
 ### 🛠️ Perbaikan Interaksi Geser Tahan Slider Nilai & Responsivitas Touch-First
 - **🎯 Eliminasi Hambatan Geser Tahan Slider Nilai (`CORE_SCORE_RUBRIC`):**
   - Mengidentifikasi dan mengeliminasi bug pembatalan seret (*drag abort*) pada mesin Chromium/Blink dan WebKit: properti `transform: scale(1.15)` dan `transition: transform` pada status pseudo-class `:active` bilah geser (`::-webkit-slider-thumb:active`) telah dihapus total. Perubahan skala transformasi matriks geometris saat *pointerdown* sebelumnya merusak *hit-testing* bawaan peramban sehingga sesi seret terputus seketika saat ditekan tahan.
