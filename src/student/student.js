@@ -1096,7 +1096,15 @@ function normalizeMediaList(fieldOrMedia) {
       const savedTab = (hash === "rekap" || hash === "form") ? hash : (localStorage.getItem("PGSD_ACTIVE_MAIN_TAB") || "form");
       
       switchTab(savedTab, false);
-      // Inisialisasi Auth Listener & Session Recovery
+
+      // 1. Ambil data form awal dari Supabase secara instan agar config, schema, & mode email selalu mutakhir
+      try {
+        await fetchInitialFormData(false);
+      } catch(e) {
+        console.warn("Early fetchInitialFormData notice:", e);
+      }
+
+      // 2. Inisialisasi Auth Listener & Session Recovery
       initSupabaseAuthListener();
       await ensureAuthInitialized();
 
@@ -1118,8 +1126,6 @@ function normalizeMediaList(fieldOrMedia) {
       } else {
         restoreFormDraft(false, true);
       }
-
-      await fetchInitialFormData(false);
 
       // Pre-fetch rekap data secara diam-diam di background agar instan saat dibuka
       setTimeout(() => loadRekapData(true), 400);
@@ -4153,6 +4159,7 @@ function normalizeMediaList(fieldOrMedia) {
               "Sesi_Minggu_Aktif": "Minggu 1",
               "Nilai_Kelompok_Min": "50",
               "Nilai_Kelompok_Max": "100",
+              "Mode_Pengumpulan_Email": "ALL_EMAIL",
               "Pembuat_Web_Nama": "Rodhiyah",
               "Pembuat_Web_Prefix": "Dibuat oleh"
             };
@@ -5207,6 +5214,9 @@ function normalizeMediaList(fieldOrMedia) {
       } else {
         isAntiSelfEvalActive = appConfig ? (appConfig["Cegah_Penilaian_Diri"] === true || appConfig["Cegah_Penilaian_Diri"] === "true" || appConfig["Cegah_Penilaian_Diri"] === undefined) : true;
       }
+
+      const isSingleLockActive = appConfig ? (appConfig["Kunci_Respons_Ganda"] === true || appConfig["Kunci_Respons_Ganda"] === "true") : false;
+
       // Filter kelompok berdasarkan Sesi Minggu Aktif
       const activeSesi = (typeof appConfig !== 'undefined' && (appConfig["Sesi_Minggu_Aktif"] || appConfig["Sesi_Aktif"])) 
         ? (appConfig["Sesi_Minggu_Aktif"] || appConfig["Sesi_Aktif"]).trim() 
@@ -5735,7 +5745,8 @@ function normalizeMediaList(fieldOrMedia) {
         }
 
         // Validasi Email Penilai
-        const isNoEmail = appConfig && appConfig["Mode_Pengumpulan_Email"] === "NO_EMAIL";
+        const activeEmailMode = getCurrentEmailCollectionMode();
+        const isNoEmail = (activeEmailMode === "NO_EMAIL");
         if (!isNoEmail) {
           const inputEmail = document.getElementById("inputEmail");
           if (inputEmail) {
@@ -5746,7 +5757,7 @@ function normalizeMediaList(fieldOrMedia) {
               showToast("Email Penilai terverifikasi wajib terisi sebelum melanjutkan!", "warning");
               return false;
             }
-            if (appConfig && appConfig["Mode_Pengumpulan_Email"] === "ULM_ONLY" && !isUlmEmail(emailVal)) {
+            if (activeEmailMode === "ULM_ONLY" && !isUlmEmail(emailVal)) {
               inputEmail.focus();
               showToast("Email penilai wajib menggunakan domain resmi kampus (@mhs.ulm.ac.id atau @ulm.ac.id)!", "warning");
               return false;
@@ -6872,7 +6883,8 @@ function normalizeMediaList(fieldOrMedia) {
     }
 
     function getCurrentEmailCollectionMode() {
-      return window.__OVERRIDE_EMAIL_MODE__ || appConfig["Mode_Pengumpulan_Email"] || "ULM_ONLY";
+      const mode = window.__OVERRIDE_EMAIL_MODE__ || (appConfig && appConfig["Mode_Pengumpulan_Email"]) || "ALL_EMAIL";
+      return String(mode).trim().toUpperCase();
     }
 
     function extractGoogleProfile(user) {
@@ -7021,6 +7033,8 @@ function normalizeMediaList(fieldOrMedia) {
       if (inputNama) {
         if (identity.isRosterVerified && identity.name) {
           inputNama.value = identity.name;
+        } else if (identity.profile && identity.profile.name) {
+          inputNama.value = identity.profile.name;
         } else {
           inputNama.value = "";
         }
@@ -7029,7 +7043,7 @@ function normalizeMediaList(fieldOrMedia) {
         const autoNotice = document.getElementById("namaAutoFillNotice");
         if (autoNotice) {
           if (inputNama.value) {
-            autoNotice.textContent = "Terisi otomatis (dapat diubah)";
+            autoNotice.textContent = identity.isRosterVerified ? "Terisi otomatis (dapat diubah)" : "Terisi otomatis dari akun Google (dapat diubah)";
             autoNotice.classList.remove("hidden");
           } else {
             autoNotice.classList.add("hidden");
@@ -7467,9 +7481,15 @@ function normalizeMediaList(fieldOrMedia) {
 
     function checkAndApplyAuthGate() {
       updateAccountHeaderUI();
+      const viewForm = document.getElementById("viewForm");
       const authGate = document.getElementById("formAuthGateSection");
       const overview = document.getElementById("formOverviewSection");
       const wizard = document.getElementById("formWizardContainer");
+
+      const isFormTab = (localStorage.getItem("PGSD_ACTIVE_MAIN_TAB") || "form") === "form";
+      if (isFormTab && viewForm) {
+        viewForm.classList.remove("hidden");
+      }
 
       // Safeguard: Ensure overview is visible if wizard and authGate are not actively in use
       if (overview && (!wizard || wizard.classList.contains("hidden")) && (!authGate || authGate.classList.contains("hidden"))) {
@@ -7604,11 +7624,46 @@ function normalizeMediaList(fieldOrMedia) {
       return authState.session;
     }
 
+    let configLoadPromise = null;
+    async function ensureFormConfigLoaded() {
+      if (appConfig && (appConfig["Mode_Pengumpulan_Email"] || appConfig["Judul_Form"])) {
+        return appConfig;
+      }
+      if (!configLoadPromise) {
+        configLoadPromise = (async () => {
+          try {
+            const sb = getSupabaseClient() || (window.supabase && typeof window.supabase.createClient === "function" ? (supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey)) : null);
+            if (sb) {
+              const currentId = activeFormId || localStorage.getItem('PGSD_ACTIVE_CLIENT_FORM_ID') || 'BK5E';
+              const { data, error } = await sb.from('pgsd_form_configs').select('config_data, schema_data').eq('form_id', currentId).maybeSingle();
+              if (data && data.config_data) {
+                appConfig = Object.assign({}, appConfig, data.config_data);
+                if (data.schema_data) currentFormSchema = data.schema_data;
+                try {
+                  localStorage.setItem("PGSD_CACHE_CONFIG_" + currentId, JSON.stringify(appConfig));
+                } catch(e) {}
+              }
+            }
+          } catch(e) {
+            console.warn("ensureFormConfigLoaded error:", e);
+          } finally {
+            configLoadPromise = null;
+          }
+          return appConfig;
+        })();
+      }
+      return configLoadPromise;
+    }
+
     let isAuthTransitionInProgress = false;
-    function handleAuthSessionEstablished(session, source = 'INIT') {
+    async function handleAuthSessionEstablished(session, source = 'INIT') {
       if (!session || !session.user) return;
       authState.session = session;
       authState.user = session.user;
+
+      if (!appConfig || !appConfig["Mode_Pengumpulan_Email"]) {
+        await ensureFormConfigLoaded();
+      }
 
       const profile = extractGoogleProfile(session.user);
       const mode = getCurrentEmailCollectionMode();
@@ -8030,7 +8085,7 @@ function normalizeMediaList(fieldOrMedia) {
       const emailInput = document.getElementById("inputEmail");
       const cleanEmail = (emailVal || "").trim().toLowerCase();
 
-      const emailMode = appConfig["Mode_Pengumpulan_Email"] || "ULM_ONLY";
+      const emailMode = getCurrentEmailCollectionMode();
 
       // If Mode is NO_EMAIL, email is completely optional
       if (emailMode === 'NO_EMAIL') {
@@ -9980,6 +10035,7 @@ function normalizeMediaList(fieldOrMedia) {
       const viewRekap = document.getElementById("viewRekap");
       const tabFormBtn = document.getElementById("tabFormBtn");
       const tabRekapBtn = document.getElementById("tabRekapBtn");
+      const navTabContainer = document.getElementById("navTabContainer");
       if (viewPortal) viewPortal.classList.add("hidden");
       if (navTabContainer) navTabContainer.classList.remove("hidden");
       const compactHeaderProgressBar = document.getElementById("compactHeaderProgressBar");

@@ -2,6 +2,22 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.6] - 2026-09-14
+
+### 🛠️ Perbaikan Layar Putih (Blank Screen) & Validasi Akun Google Bebas (ALL_EMAIL)
+- **🛡️ Penanganan Error Layar Putih (*White Screen of Death*):**
+  - Mengatasi galat *ReferenceError: isSingleLockActive is not defined* di fungsi `renderGroupOptions` yang sebelumnya menghentikan proses rendering formulir saat menginisialisasi kelompok presentasi.
+  - Memperbaiki deklarasi variabel `navTabContainer` di dalam fungsi `switchTab` untuk menjamin stabilitas navigasi antar-tab di seluruh peramban.
+  - Memperkuat mekanisme pengaman visibilitas tampilan (`checkAndApplyAuthGate`) agar kontainer formulir (`#viewForm`) dan seksi petunjuk formulir (`#formOverviewSection`) dijamin selalu tampil terbuka saat pengguna mengakses instrumen penilaian.
+- **🌐 Penyelarasan Penuh Mode Akun Bebas (*ALL_EMAIL* / Bebas Akun Google):**
+  - Mengeliminasi *race condition* pada saat proses *login / redirect OAuth Google*: sistem kini secara proaktif memastikan konfigurasi `Mode_Pengumpulan_Email` termutakhir dari Supabase telah terunduh sebelum melakukan validasi domain akun Google responden.
+  - Memperbarui fungsi `getCurrentEmailCollectionMode()` agar menggunakan mode `ALL_EMAIL` sebagai nilai default aman sehingga akun Google umum (`@gmail.com` dan domain non-kampus lainnya) tidak ditolak atau dianggap *domain mismatch*.
+  - Mengizinkan responden non-domain kampus pada mode `ALL_EMAIL` untuk mengisi formulir tanpa hambatan validasi email kampus, mengisi NIM secara leluasa (atau memilih peran `Lainnya / Umum`), serta mengisi nama secara otomatis dari profil akun Google.
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.6` di seluruh berkas (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
+---
+
 ## [2.5.5] - 2026-09-14
 
 ### 🎯 Peningkatan UX Penilaian, Filter Sesi Mingguan, Tanda Terima Minimalis & Performa Hapus Super Cepat
