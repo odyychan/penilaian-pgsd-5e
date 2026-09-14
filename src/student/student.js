@@ -8061,8 +8061,10 @@ function normalizeMediaList(fieldOrMedia) {
       const authGate = document.getElementById("formAuthGateSection");
       const overview = document.getElementById("formOverviewSection");
       const wizard = document.getElementById("formWizardContainer");
+      const successSec = document.getElementById("formSuccessSection");
       if (authGate) authGate.classList.add("hidden");
       if (overview) overview.classList.add("hidden");
+      if (successSec) successSec.classList.add("hidden");
       if (wizard) wizard.classList.remove("hidden");
       if (!document.getElementById("stepSection_1")) {
         renderDynamicClientStages(false);
@@ -8107,9 +8109,11 @@ function normalizeMediaList(fieldOrMedia) {
       const authGate = document.getElementById("formAuthGateSection");
       const overview = document.getElementById("formOverviewSection");
       const wizard = document.getElementById("formWizardContainer");
+      const successSec = document.getElementById("formSuccessSection");
       if (authGate) authGate.classList.add("hidden");
-      if (overview) overview.classList.remove("hidden");
       if (wizard) wizard.classList.add("hidden");
+      if (successSec) successSec.classList.add("hidden");
+      if (overview) overview.classList.remove("hidden");
       const timerBar = document.getElementById("floatingExamTimerBar");
       if (timerBar) timerBar.classList.add("hidden");
       renderOverviewGoogleStatus();
@@ -9106,7 +9110,7 @@ function normalizeMediaList(fieldOrMedia) {
           }
 
           loadRekapData(true);
-          showSuccessModal(payload.kelompok, false, payload, idRespons);
+          showSuccessSection(payload.kelompok, false, payload, idRespons);
 
           // 🔄 Background Pipeline: Sinkronkan ke Google Spreadsheet secara asinkron
           const defaultSheetUrl = DEFAULT_API_URL;
@@ -9206,7 +9210,7 @@ function normalizeMediaList(fieldOrMedia) {
             }
 
             loadRekapData(true);
-            showSuccessModal(payload.kelompok, false, payload, idRespons);
+            showSuccessSection(payload.kelompok, false, payload, idRespons);
           } else {
             showToast(res?.error || "Gagal mengirim penilaian.", "error");
           }
@@ -9244,7 +9248,7 @@ function normalizeMediaList(fieldOrMedia) {
             sessionStorage.removeItem(`PGSD_ACTIVE_VIEW_${formKey}`);
           } catch(e) {}
 
-          showSuccessModal(payload.kelompok, true, payload, idRespons);
+          showSuccessSection(payload.kelompok, true, payload, idRespons);
         }
       } finally {
         isSubmittingFinalAssessment = false;
@@ -9382,10 +9386,7 @@ function normalizeMediaList(fieldOrMedia) {
       `;
     }
 
-    function showSuccessModal(kelompokName, isOfflineQueued = false, payload = null, idRespons = "") {
-      const modal = document.getElementById("successModal");
-      if (!modal) return;
-
+    function showSuccessSection(kelompokName, isOfflineQueued = false, payload = null, idRespons = "") {
       const finalId = idRespons || ("PGSD-REC-" + activeFormId + "-" + Date.now().toString(36).toUpperCase());
       const now = new Date();
       currentReceiptData = {
@@ -9413,90 +9414,127 @@ function normalizeMediaList(fieldOrMedia) {
         } catch(e) {}
       }
 
-      const receiptIdEl = document.getElementById("receiptIdText");
-      if (receiptIdEl) receiptIdEl.textContent = finalId;
+      // Hentikan exam timer & bersihkan sesi pengerjaan
+      stopExamTimerEngine(true);
 
-      if (payload) {
-        const nimEl = document.getElementById("receiptNimPenilai");
-        if (nimEl) nimEl.textContent = payload.nimPenilai || "-";
+      // Sembunyikan wizard, overview, auth gate, compact progress bar
+      const wizard = document.getElementById("formWizardContainer");
+      const overview = document.getElementById("formOverviewSection");
+      const authGate = document.getElementById("formAuthGateSection");
+      const successSec = document.getElementById("formSuccessSection");
+      const compactHeaderProgressBar = document.getElementById("compactHeaderProgressBar");
+      const navTabContainer = document.getElementById("navTabContainer");
+      const badgeSesiTop = document.getElementById("badgeSesiTop");
 
-        const namaEl = document.getElementById("receiptNamaPenilai");
-        if (namaEl) namaEl.textContent = payload.namaPenilai || "-";
+      if (wizard) wizard.classList.add("hidden");
+      if (overview) overview.classList.add("hidden");
+      if (authGate) authGate.classList.add("hidden");
+      if (compactHeaderProgressBar) compactHeaderProgressBar.classList.add("hidden");
+      if (badgeSesiTop) badgeSesiTop.classList.remove("hidden");
+      if (navTabContainer) navTabContainer.classList.remove("hidden");
 
-        const grpEl = document.getElementById("receiptKelompokDinilai");
-        if (grpEl) grpEl.textContent = payload.kelompok || kelompokName;
+      // Pastikan viewForm tampil dan viewRekap / viewPortal sembunyi
+      const viewForm = document.getElementById("viewForm");
+      const viewRekap = document.getElementById("viewRekap");
+      const viewPortal = document.getElementById("viewPortal");
+      if (viewPortal) viewPortal.classList.add("hidden");
+      if (viewRekap) viewRekap.classList.add("hidden");
+      if (viewForm) viewForm.classList.remove("hidden");
 
-        const nilaiEl = document.getElementById("receiptNilaiKelompok");
-        if (nilaiEl) nilaiEl.textContent = payload.nilaiKelompok !== undefined ? payload.nilaiKelompok : "-";
-
-        const matkulEl = document.getElementById("receiptMataKuliah");
-        if (matkulEl) matkulEl.textContent = appConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || "-";
-
-        const dosenEl = document.getElementById("receiptDosenPengampu");
-        if (dosenEl) dosenEl.textContent = appConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || "-";
-
-        const timeEl = document.getElementById("receiptTimestampWita");
-        if (timeEl) timeEl.innerHTML = formatSmartScheduleTime(now);
-
-        generateReceiptQRCode(finalId, payload);
+      if (successSec) {
+        successSec.classList.remove("hidden");
       }
 
-      const quizCard = document.getElementById("quizResultDisplayCard");
-      const normalReceipt = document.getElementById("digitalReceiptPrintArea");
-      const quizResult = payload?.evaluasiDetail?.quizResult;
+      // Populate teks di Bagian Akhir
+      const titleEl = document.getElementById("formSuccessTitle");
+      const subtitleEl = document.getElementById("formSuccessSubtitle");
+      const receiptIdEl = document.getElementById("formSuccessReceiptId");
+      const kelompokEl = document.getElementById("formSuccessKelompok");
+      const nilaiEl = document.getElementById("formSuccessNilai");
+      const penilaiEl = document.getElementById("formSuccessPenilai");
+      const waktuEl = document.getElementById("formSuccessWaktu");
+      const rowKelompok = document.getElementById("formSuccessRowKelompok");
+      const rowNilai = document.getElementById("formSuccessRowNilai");
 
-      if (quizResult && quizCard) {
-        if (normalReceipt) normalReceipt.classList.add("hidden");
-        quizCard.classList.remove("hidden");
+      if (receiptIdEl) receiptIdEl.textContent = finalId;
 
-        const statusBadge = document.getElementById("quizStatusBadge");
-        const scoreEl = document.getElementById("quizScoreNumber");
-        const kkmEl = document.getElementById("quizKkmNumber");
-        const ptsEl = document.getElementById("quizPointsEarned");
-        const reviewSection = document.getElementById("quizReviewSection");
-        const reviewContainer = document.getElementById("quizReviewContainer");
-        const reviewCount = document.getElementById("quizReviewCount");
+      const formattedTime = (typeof formatSmartScheduleTime === 'function') 
+        ? formatSmartScheduleTime(now).replace(/<[^>]*>/g, '') 
+        : (now.toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'medium' }) + " WITA");
+      if (waktuEl) waktuEl.textContent = formattedTime;
 
-        if (scoreEl) scoreEl.textContent = quizResult.percentage;
-        if (kkmEl) kkmEl.textContent = `${quizResult.passingScore} Poin`;
-        if (ptsEl) ptsEl.textContent = `${quizResult.totalScore} / ${quizResult.maxScore} Poin`;
+      if (isOfflineQueued) {
+        if (titleEl) titleEl.textContent = "Tersimpan di Browser (Mode Offline)";
+        if (subtitleEl) subtitleEl.textContent = `Penilaian untuk ${kelompokName || 'kelompok'} telah tersimpan secara aman di browser dan akan otomatis dikirimkan ke server saat perangkat kembali online.`;
+      } else {
+        if (titleEl) titleEl.textContent = "Penilaian Berhasil Dikirim";
+        if (subtitleEl) subtitleEl.textContent = `Terima kasih, tanggapan Anda untuk ${kelompokName || 'kelompok'} telah berhasil dicatat di sistem perkuliahan FKIP ULM.`;
+      }
 
-        if (statusBadge) {
-          if (quizResult.isPassed) {
-            statusBadge.className = "text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs";
-            statusBadge.textContent = "✓ LULUS";
-          } else {
-            statusBadge.className = "text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-rose-100 text-rose-800 border border-rose-300 shadow-2xs";
-            statusBadge.textContent = "✕ REMEDIAL";
-          }
-        }
+      const isGenMode = (appConfig && (appConfig.form_mode === 'GENERAL_SURVEY' || appConfig.Form_Mode === 'GENERAL_SURVEY' || appConfig.formMode === 'GENERAL_SURVEY')) || (currentFormMeta && (currentFormMeta.formMode === 'GENERAL_SURVEY' || currentFormMeta.form_mode === 'GENERAL_SURVEY'));
+      const isQuizMode = (appConfig && (appConfig.form_mode === 'QUIZ' || appConfig.Form_Mode === 'QUIZ' || appConfig.formMode === 'QUIZ')) || (currentFormMeta && (currentFormMeta.formMode === 'QUIZ' || currentFormMeta.form_mode === 'QUIZ'));
 
-        const isManualRelease = (appConfig.Mode_Rilis_Nilai_Kuis === 'MANUAL');
-        if (isManualRelease) {
-          if (scoreEl) scoreEl.textContent = "—";
-          if (ptsEl) ptsEl.textContent = "Menunggu Rilis";
-          if (statusBadge) {
-            statusBadge.className = "text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300 shadow-2xs";
-            statusBadge.textContent = "DITINJAU";
-          }
-          if (reviewSection) reviewSection.classList.add("hidden");
+      if (payload) {
+        if (kelompokEl) kelompokEl.textContent = payload.kelompok || kelompokName || "-";
+        if (nilaiEl) nilaiEl.textContent = (payload.nilaiKelompok !== undefined && payload.nilaiKelompok !== null) ? `${payload.nilaiKelompok} / 100` : "-";
+        const penilaiText = payload.nimPenilai && payload.nimPenilai !== '-' 
+          ? `${payload.nimPenilai} - ${payload.namaPenilai || ''}` 
+          : (payload.namaPenilai || payload.email || 'Responden');
+        if (penilaiEl) penilaiEl.textContent = penilaiText;
+
+        if (isGenMode) {
+          if (rowKelompok) rowKelompok.classList.add("hidden");
+          if (rowNilai) rowNilai.classList.add("hidden");
         } else {
-          const showReview = (appConfig.Tampilkan_Kunci_Jawaban_Kuis !== false && appConfig.Tampilkan_Kunci_Jawaban_Kuis !== 'false');
-          const showFeedback = (appConfig.Tampilkan_Pembahasan_Kuis !== false && appConfig.Tampilkan_Pembahasan_Kuis !== 'false');
+          if (rowKelompok) rowKelompok.classList.remove("hidden");
+          if (rowNilai) rowNilai.classList.remove("hidden");
+        }
+      }
 
-          if (reviewSection) {
-            if (showReview && Array.isArray(quizResult.details) && quizResult.details.length > 0) {
-              reviewSection.classList.remove("hidden");
-              if (reviewCount) {
-                const correctCount = quizResult.details.filter(d => d.isCorrect).length;
-                reviewCount.textContent = `${correctCount} dari ${quizResult.details.length} Soal Benar`;
-              }
+      // QR Code di Bagian Akhir
+      const qrBox = document.getElementById("formSuccessQrBox");
+      if (qrBox && payload) {
+        const verifyData = `PGSD-ULM|ID:${finalId}|NIM:${payload.nimPenilai || '-'}|MHS:${payload.namaPenilai || '-'}|GRP:${payload.kelompok || '-'}|SKOR:${payload.nilaiKelompok || '-'}|T:${Date.now()}`;
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=2&data=${encodeURIComponent(verifyData)}`;
+        qrBox.innerHTML = `
+          <img 
+            src="${qrUrl}" 
+            alt="QR Verifikasi" 
+            class="w-full h-full object-contain rounded"
+            onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'text-[8px] font-mono text-zinc-400 text-center leading-none\\'>✓<br>VALID</div>';"
+          >
+        `;
+      }
 
-              if (reviewContainer) {
-                reviewContainer.innerHTML = quizResult.details.map((item, idx) => {
+      // Status Kelompok Sesi Aktif: Ubah Teks Tombol Halaman Awal secara Cerdas
+      const ratingStatus = getActiveSessionRatingStatus(payload?.nimPenilai, payload?.email);
+      const overviewBtnText = document.getElementById("formSuccessBtnOverviewText");
+      if (overviewBtnText) {
+        if (ratingStatus.isSessionFullyCompleted) {
+          overviewBtnText.textContent = "Kembali ke Halaman Awal";
+        } else {
+          overviewBtnText.textContent = "Nilai Kelompok Lain";
+        }
+      }
+
+      // Populasikan Quiz jika Mode Kuis
+      const quizResult = payload?.evaluasiDetail?.quizResult;
+      const quizCard = document.getElementById("formSuccessQuizCard");
+      if (quizResult && quizCard) {
+        quizCard.classList.remove("hidden");
+        const isManualRelease = (appConfig.Mode_Rilis_Nilai_Kuis === 'MANUAL');
+        const showReview = (appConfig.Tampilkan_Kunci_Jawaban_Kuis !== false && appConfig.Tampilkan_Kunci_Jawaban_Kuis !== 'false');
+        const showFeedback = (appConfig.Tampilkan_Pembahasan_Kuis !== false && appConfig.Tampilkan_Pembahasan_Kuis !== 'false');
+
+        let reviewHtml = '';
+        if (!isManualRelease && showReview && Array.isArray(quizResult.details) && quizResult.details.length > 0) {
+          reviewHtml = `
+            <div class="space-y-2 pt-2 border-t border-amber-200/80">
+              <span class="text-xs font-bold text-zinc-800">Rincian Jawaban:</span>
+              <div class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                ${quizResult.details.map((item, idx) => {
                   const ansText = Array.isArray(item.studentAnswer) ? item.studentAnswer.join(', ') : (item.studentAnswer || '(Kosong)');
                   const keyText = Array.isArray(item.correctAnswers) ? item.correctAnswers.join(', ') : (item.correctAnswers || '-');
-
                   return `
                     <div class="p-3 rounded-xl border text-xs space-y-1.5 ${item.isCorrect ? 'bg-emerald-50/50 border-emerald-200' : 'bg-rose-50/50 border-rose-200'}">
                       <div class="flex items-start justify-between gap-2">
@@ -9505,7 +9543,6 @@ function normalizeMediaList(fieldOrMedia) {
                           ${item.isCorrect ? `+${item.earnedPoints} Poin` : `0 / ${item.points} Poin`}
                         </span>
                       </div>
-
                       <div class="space-y-0.5 text-[11.5px]">
                         <div class="flex items-center gap-1.5">
                           <span class="text-zinc-500">Jawaban Anda:</span>
@@ -9518,7 +9555,6 @@ function normalizeMediaList(fieldOrMedia) {
                           </div>
                         ` : ''}
                       </div>
-
                       ${(showFeedback && item.feedback) ? `
                         <div class="p-2 rounded-lg bg-amber-50/80 border border-amber-200/70 text-[11px] text-amber-900 space-y-0.5">
                           <span class="font-bold">💡 Pembahasan:</span>
@@ -9527,73 +9563,85 @@ function normalizeMediaList(fieldOrMedia) {
                       ` : ''}
                     </div>
                   `;
-                }).join('');
-              }
-            } else {
-              reviewSection.classList.add("hidden");
-            }
-          }
+                }).join('')}
+              </div>
+            </div>
+          `;
         }
 
-        const msgEl = document.getElementById("successModalMsg");
-        if (msgEl) {
-          if (isManualRelease) {
-            msgEl.textContent = "Jawaban kuis Anda telah tersimpan. Nilai dan pembahasan akan dirilis setelah ditinjau oleh dosen pengampu.";
-          } else {
-            msgEl.innerHTML = quizResult.isPassed
-              ? `Selamat! Anda berhasil menyelesaikan kuis dan mencapai nilai KKM.`
-              : `Kuis telah selesai. Nilai Anda belum memenuhi batas ambang KKM (${quizResult.passingScore} Poin).`;
-          }
-        }
-
-      } else {
-        if (quizCard) quizCard.classList.add("hidden");
-        if (normalReceipt) normalReceipt.classList.remove("hidden");
-
-        const msgEl = document.getElementById("successModalMsg");
-        if (msgEl) {
-          if (isOfflineQueued) {
-            msgEl.innerHTML = `
-              <span class="text-amber-700 font-bold block mb-1">Tersimpan di Browser (Mode Offline)</span>
-              Evaluasi untuk <strong>${escapeHtml(kelompokName)}</strong> telah tersimpan dan akan otomatis dikirim saat online.
-            `;
-          } else {
-            msgEl.textContent = `Terima kasih, evaluasi Anda untuk ${kelompokName || 'kelompok'} telah berhasil tercatat.`;
-          }
-        }
+        quizCard.innerHTML = `
+          <div class="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50/70 border border-amber-200 shadow-xs space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-amber-900 uppercase tracking-wider font-mono flex items-center gap-1.5">
+                <span>🎯</span>
+                <span>Lembar Hasil Kuis</span>
+              </span>
+              <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-full ${quizResult.isPassed ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-rose-100 text-rose-800 border border-rose-300'}">
+                ${isManualRelease ? 'DITINJAU' : (quizResult.isPassed ? '✓ LULUS' : '✕ REMEDIAL')}
+              </span>
+            </div>
+            <div class="flex items-baseline justify-center gap-1.5 py-2 border-y border-amber-200/80">
+              <span class="text-4xl sm:text-5xl font-extrabold text-amber-950 font-mono tracking-tight">${isManualRelease ? '—' : quizResult.percentage}</span>
+              <span class="text-base sm:text-lg font-bold text-amber-700 font-mono">/ 100</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-center text-xs">
+              <div class="p-2 rounded-xl bg-white/80 border border-amber-200/60 shadow-2xs">
+                <span class="text-[10.5px] text-zinc-500 block">Ambang KKM</span>
+                <span class="font-mono font-bold text-zinc-800">${quizResult.passingScore} Poin</span>
+              </div>
+              <div class="p-2 rounded-xl bg-white/80 border border-amber-200/60 shadow-2xs">
+                <span class="text-[10.5px] text-zinc-500 block">Poin Diperoleh</span>
+                <span class="font-mono font-bold text-zinc-800">${isManualRelease ? 'Menunggu Rilis' : `${quizResult.totalScore} / ${quizResult.maxScore} Poin`}</span>
+              </div>
+            </div>
+            ${reviewHtml}
+          </div>
+        `;
+      } else if (quizCard) {
+        quizCard.classList.add("hidden");
+        quizCard.innerHTML = "";
       }
 
-      // Hentikan exam timer & bersihkan sesi pengerjaan
-      stopExamTimerEngine(true);
-
-      // Periksa dan Render Auto E-Sertifikat Digital (Feature C)
+      // Render E-Sertifikat jika memenuhi syarat
       checkAndRenderCertificate(payload, quizResult);
 
-      // Perbarui Tombol Aksi Utama di Modal Sukses Secara Dinamis Berdasarkan Sisa Kelompok
-      const actionBtn = document.getElementById("successModalActionBtn");
-      if (actionBtn) {
-        const ratingStatus = getActiveSessionRatingStatus(payload?.nimPenilai, payload?.email);
-        if (ratingStatus.isSessionFullyCompleted) {
-          actionBtn.innerHTML = `
-            <span>Selesai & Tutup Sesi</span>
-            <svg class="w-4 h-4 text-emerald-400 group-hover:text-white transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-          `;
-          actionBtn.className = "w-full min-h-[46px] py-3 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm transition active:scale-[0.99] cursor-pointer shadow-md hover:shadow-lg flex items-center justify-center gap-2 group";
-        } else {
-          actionBtn.innerHTML = `
-            <span>Lanjut Sesi / Lihat Progres</span>
-            <svg class="w-4 h-4 text-zinc-400 group-hover:text-white transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-            </svg>
-          `;
-          actionBtn.className = "w-full min-h-[46px] py-3 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-xs sm:text-sm transition active:scale-[0.99] cursor-pointer shadow-md hover:shadow-lg flex items-center justify-center gap-2 group";
-        }
+      // Tutup modal review pengisian jika terbuka
+      closePreSubmitReviewModal();
+
+      // Tutup modal popup lama agar antarmuka halaman tampil penuh
+      const modal = document.getElementById("successModal");
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
       }
 
-      modal.classList.remove("hidden");
-      modal.classList.add("flex");
+      // Populasikan juga receipt modal jika user membuka receipt print nanti
+      const modalReceiptIdEl = document.getElementById("receiptIdText");
+      if (modalReceiptIdEl) modalReceiptIdEl.textContent = finalId;
+      if (payload) {
+        const modalNimEl = document.getElementById("receiptNimPenilai");
+        if (modalNimEl) modalNimEl.textContent = payload.nimPenilai || "-";
+        const modalNamaEl = document.getElementById("receiptNamaPenilai");
+        if (modalNamaEl) modalNamaEl.textContent = payload.namaPenilai || "-";
+        const modalGrpEl = document.getElementById("receiptKelompokDinilai");
+        if (modalGrpEl) modalGrpEl.textContent = payload.kelompok || kelompokName;
+        const modalNilaiEl = document.getElementById("receiptNilaiKelompok");
+        if (modalNilaiEl) modalNilaiEl.textContent = payload.nilaiKelompok !== undefined ? payload.nilaiKelompok : "-";
+        const modalMatkulEl = document.getElementById("receiptMataKuliah");
+        if (modalMatkulEl) modalMatkulEl.textContent = appConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || "-";
+        const modalDosenEl = document.getElementById("receiptDosenPengampu");
+        if (modalDosenEl) modalDosenEl.textContent = appConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || "-";
+        const modalTimeEl = document.getElementById("receiptTimestampWita");
+        if (modalTimeEl) modalTimeEl.innerHTML = formatSmartScheduleTime(now);
+        generateReceiptQRCode(finalId, payload);
+      }
+
+      // Pastikan window scroll halus ke atas Bagian Akhir
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showSuccessModal(kelompokName, isOfflineQueued = false, payload = null, idRespons = "") {
+      showSuccessSection(kelompokName, isOfflineQueued, payload, idRespons);
     }
 
     function downloadDigitalReceiptImage() {
@@ -9999,7 +10047,8 @@ function normalizeMediaList(fieldOrMedia) {
         const wizard = document.getElementById("formWizardContainer");
         const isWizardVisible = wizard && !wizard.classList.contains("hidden");
         const successModal = document.getElementById("successModal");
-        const isSubmitted = successModal && !successModal.classList.contains("hidden");
+        const successSec = document.getElementById("formSuccessSection");
+        const isSubmitted = (successModal && !successModal.classList.contains("hidden")) || (successSec && !successSec.classList.contains("hidden"));
 
         if (!isWizardVisible || isSubmitted) return;
 
@@ -10518,21 +10567,54 @@ function normalizeMediaList(fieldOrMedia) {
       }
     }
 
-    function resetFormAndCloseModal() {
-      document.getElementById("successModal").classList.add("hidden");
-      document.getElementById("successModal").classList.remove("flex");
+    function navigateToRekapFromSuccess() {
+      const successSec = document.getElementById("formSuccessSection");
+      if (successSec) successSec.classList.add("hidden");
       clearStudentFormDraft(false);
       resetStudentForm();
+      switchTab('rekap', true);
+      loadRekapData(true);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function navigateToOverviewFromSuccess() {
+      const successSec = document.getElementById("formSuccessSection");
+      if (successSec) successSec.classList.add("hidden");
+      clearStudentFormDraft(false);
+      resetStudentForm();
+      goToInfoOverview(true);
       if (typeof evaluateFormScheduleStatus === 'function') {
         evaluateFormScheduleStatus();
       }
+      if (typeof renderGroupOptions === 'function') {
+        renderGroupOptions();
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetFormAndCloseModal() {
+      const successModal = document.getElementById("successModal");
+      if (successModal) {
+        successModal.classList.add("hidden");
+        successModal.classList.remove("flex");
+      }
+      navigateToOverviewFromSuccess();
     }
 
     function closeModalAndGoToRekap() {
-      resetFormAndCloseModal();
-      switchTab('rekap');
-      loadRekapData(true);
+      const successModal = document.getElementById("successModal");
+      if (successModal) {
+        successModal.classList.add("hidden");
+        successModal.classList.remove("flex");
+      }
+      navigateToRekapFromSuccess();
     }
+
+    window.navigateToRekapFromSuccess = navigateToRekapFromSuccess;
+    window.navigateToOverviewFromSuccess = navigateToOverviewFromSuccess;
+    window.showSuccessSection = showSuccessSection;
+    window.resetFormAndCloseModal = resetFormAndCloseModal;
+    window.closeModalAndGoToRekap = closeModalAndGoToRekap;
 
     function switchTab(tab, updateHash = true) {
       const viewPortal = document.getElementById("viewPortal");
@@ -10547,6 +10629,11 @@ function normalizeMediaList(fieldOrMedia) {
       if (compactHeaderProgressBar) compactHeaderProgressBar.classList.add("hidden");
       const badgeSesiTop = document.getElementById("badgeSesiTop");
       if (badgeSesiTop) badgeSesiTop.classList.remove("hidden");
+
+      const successSec = document.getElementById("formSuccessSection");
+      if (tab === 'rekap' && successSec) {
+        successSec.classList.add("hidden");
+      }
 
       localStorage.setItem("PGSD_ACTIVE_MAIN_TAB", tab);
       if (updateHash) {

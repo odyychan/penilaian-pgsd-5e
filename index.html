@@ -35,7 +35,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="src/student/index.css?v=2.5.14">
+  <link rel="stylesheet" href="src/student/index.css?v=2.5.15">
   
   <!-- Instant Zero-FOUC View Resolver (Runs synchronously before HTML paint) -->
   <script>
@@ -692,6 +692,143 @@
         <form id="assessmentForm" onsubmit="handleFinalSubmit(event)" class="space-y-5">
           <div id="dynamicClientStagesContainer" class="space-y-5"></div>
         </form>
+      </div>
+
+      <!-- =================================================================== -->
+      <!-- BAGIAN AKHIR: KONFIRMASI PENGIRIMAN & RINGKASAN (GOOGLE FORMS STYLE) -->
+      <!-- =================================================================== -->
+      <div id="formSuccessSection" class="hidden space-y-5 fade-enter">
+        <div class="bg-white rounded-2xl border border-zinc-200 p-6 sm:p-8 shadow-xs space-y-6 text-center">
+          
+          <!-- Icon & Header Konfirmasi -->
+          <div class="space-y-3">
+            <div class="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200/80 flex items-center justify-center mx-auto shadow-xs">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+            <div class="space-y-1">
+              <h2 id="formSuccessTitle" class="text-xl sm:text-2xl font-extrabold text-zinc-900 tracking-tight">
+                Penilaian Berhasil Dikirim
+              </h2>
+              <p id="formSuccessSubtitle" class="text-xs sm:text-sm text-zinc-500 max-w-md mx-auto leading-relaxed">
+                Tanggapan Anda telah berhasil dicatat di sistem perkuliahan FKIP ULM.
+              </p>
+            </div>
+          </div>
+
+          <!-- DUA PILIHAN NAVIGASI UTAMA (GOOGLE FORMS STYLE: REKAP HASIL ATAU HALAMAN AWAL) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg mx-auto pt-1">
+            <!-- Pilihan 1: Ke Rekapitulasi Hasil -->
+            <button 
+              type="button" 
+              id="formSuccessBtnRekap"
+              onclick="navigateToRekapFromSuccess()" 
+              class="min-h-[48px] py-3 px-5 rounded-xl bg-zinc-900 hover:bg-zinc-800 active:scale-[0.98] text-white font-bold text-xs sm:text-sm transition shadow-md hover:shadow-lg flex items-center justify-center gap-2.5 cursor-pointer order-1 sm:order-1"
+            >
+              <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+              </svg>
+              <span>Lihat Rekap Hasil</span>
+            </button>
+
+            <!-- Pilihan 2: Ke Halaman Awal / Nilai Kelompok Lain -->
+            <button 
+              type="button" 
+              id="formSuccessBtnOverview"
+              onclick="navigateToOverviewFromSuccess()" 
+              class="min-h-[48px] py-3 px-5 rounded-xl border-2 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 active:scale-[0.98] text-zinc-800 font-bold text-xs sm:text-sm transition flex items-center justify-center gap-2.5 cursor-pointer order-2 sm:order-2"
+            >
+              <svg class="w-4 h-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+              </svg>
+              <span id="formSuccessBtnOverviewText">Kembali ke Halaman Awal</span>
+            </button>
+          </div>
+
+          <!-- KARTU HASIL KUIS (KHUSUS MODE KUIS) -->
+          <div id="formSuccessQuizCard" class="hidden max-w-lg mx-auto w-full text-left pt-2 space-y-3"></div>
+
+          <!-- KARTU BUKTI TANDA TERIMA RESMI (DIGITAL RECEIPT SUMMARY) -->
+          <div id="formSuccessReceiptCard" class="max-w-lg mx-auto w-full text-left pt-2">
+            <div class="p-4 sm:p-5 rounded-2xl bg-zinc-50 border border-zinc-200/90 shadow-2xs space-y-3.5">
+              
+              <!-- Header Bukti & Tombol Cetak / Unduh -->
+              <div class="flex items-center justify-between pb-3 border-b border-zinc-200">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                  <span class="text-xs font-mono font-bold text-zinc-800 uppercase tracking-wider">Tanda Terima Resmi</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <button 
+                    type="button" 
+                    onclick="downloadDigitalReceiptImage()" 
+                    class="min-h-[36px] px-2.5 py-1.5 rounded-lg border border-zinc-200 hover:bg-white active:scale-95 text-zinc-700 text-[11px] font-semibold transition flex items-center gap-1 cursor-pointer"
+                    title="Unduh struk tanda terima sebagai gambar"
+                  >
+                    <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    <span class="hidden xs:inline">Unduh</span>
+                  </button>
+                  <button 
+                    type="button" 
+                    onclick="printDigitalReceipt()" 
+                    class="min-h-[36px] px-2.5 py-1.5 rounded-lg border border-zinc-200 hover:bg-white active:scale-95 text-zinc-700 text-[11px] font-semibold transition flex items-center gap-1 cursor-pointer"
+                    title="Cetak struk resmi tanda terima"
+                  >
+                    <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                    </svg>
+                    <span class="hidden xs:inline">Cetak</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Rincian Data Struk -->
+              <div class="space-y-2 text-xs">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-zinc-500">ID Bukti</span>
+                  <span id="formSuccessReceiptId" class="font-mono font-bold text-zinc-900 bg-white px-2 py-0.5 rounded border border-zinc-200 text-[11px] select-all truncate max-w-[200px]">-</span>
+                </div>
+                <div id="formSuccessRowKelompok" class="flex items-center justify-between gap-2">
+                  <span class="text-zinc-500">Kelompok Dinilai</span>
+                  <span id="formSuccessKelompok" class="font-bold text-emerald-700">-</span>
+                </div>
+                <div id="formSuccessRowNilai" class="flex items-center justify-between gap-2">
+                  <span class="text-zinc-500">Nilai / Skor Diberikan</span>
+                  <span id="formSuccessNilai" class="font-mono font-extrabold text-sm text-zinc-900 bg-emerald-50 px-2 py-0.5 rounded text-emerald-800 border border-emerald-200">-</span>
+                </div>
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-zinc-500">Penilai</span>
+                  <span id="formSuccessPenilai" class="font-medium text-zinc-800 text-right truncate max-w-[220px]">-</span>
+                </div>
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-zinc-500">Waktu WITA</span>
+                  <span id="formSuccessWaktu" class="font-mono text-zinc-600 text-[11px]">-</span>
+                </div>
+              </div>
+
+              <!-- QR Verification & Status Seal -->
+              <div class="pt-2 border-t border-zinc-200 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                  <div id="formSuccessQrBox" class="w-11 h-11 bg-white p-1 rounded-lg border border-zinc-200 shrink-0 flex items-center justify-center">
+                    <span class="text-[9px] font-mono text-zinc-400">QR</span>
+                  </div>
+                  <div class="text-[10.5px] text-zinc-500 leading-tight">
+                    <span class="font-bold text-zinc-800 block">Tervalidasi Digital</span>
+                    <span>FKIP Universitas Lambung Mangkurat</span>
+                  </div>
+                </div>
+                <span class="font-mono text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full border border-emerald-200 shrink-0">
+                  ✓ TERCATAT RESMI
+                </span>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
 
@@ -1640,13 +1777,13 @@
   <!-- ========================================================================= -->
   <!-- SCRIPT LOGIC -->
   <!-- ========================================================================= -->
-  <script src="src/student/student.js?v=2.5.14"></script>
+  <script src="src/student/student.js?v=2.5.15"></script>
 
   <!-- Progressive Web App (PWA) & Instant Auto-Updater Engine -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js?v=2.5.14').then(function(reg) {
+        navigator.serviceWorker.register('/sw.js?v=2.5.15').then(function(reg) {
           reg.update();
           reg.addEventListener('updatefound', function() {
             var newWorker = reg.installing;

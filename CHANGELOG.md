@@ -2,6 +2,29 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.15] - 2026-09-14
+
+### 🎯 Transisi Bagian Akhir Formulir Gaya Google Forms & Navigasi Terpadu (Rekap & Halaman Awal)
+- **📋 Implementasi Layar Konfirmasi Bagian Akhir (*Google Forms Style Ending Screen Transition*):**
+  - Mengatasi kendala di mana setelah proses pengiriman berhasil, pengguna tidak merasakan transisi yang jelas karena formulir sebelumnya hanya mengandalkan popup dialog modal mengambang.
+  - Mengadaptasi pola baku Google Forms: ketika penilaian dikirimkan, seluruh tahapan kuesioner/wizard (`#formWizardContainer`) langsung disembunyikan dan antarmuka beralih mulus ke **Bagian Akhir** (`#formSuccessSection`) di dalam halaman utama.
+- **🚀 Dua Pilihan Aksi Navigasi Utama (*Dual Primary Action Pathways*):**
+  - **Pilihan 1 — Ke Rekapitulasi Hasil (`navigateToRekapFromSuccess`):** Tombol elegan berlatar gelap kontras dengan ikon grafik batang yang langsung membersihkan draf formulir, berpindah ke Tab 2 (Rekapitulasi Hasil), memuat data terkini secara instan, dan melakukan *smooth scroll* ke bagian atas lembar rekap.
+  - **Pilihan 2 — Ke Halaman Awal / Nilai Kelompok Lain (`navigateToOverviewFromSuccess`):** Tombol berbingkai rapi yang secara cerdas mendeteksi status sisa kelompok pada sesi aktif:
+    - Jika masih ada kelompok lain yang belum dinilai: tombol otomatis bertuliskan *"Nilai Kelompok Lain"*.
+    - Jika seluruh kelompok pada sesi aktif telah selesai dinilai: tombol otomatis bertuliskan *"Kembali ke Halaman Awal"*.
+    - Mengevaluasi ulang kunci jadwal serta memperbarui status visual kartu-kartu kelompok di Landing Overview.
+- **🧾 Kartu Bukti Tanda Terima Digital Terintegrasi (*Embedded Official Digital Receipt Card*):**
+  - Menampilkan ringkasan tanda terima resmi langsung di bagian akhir: Nomor ID Bukti unik, Nama Kelompok yang Dinilai, Skor/Nilai yang Diberikan, Identitas Penilai (NIM - Nama / Email), Waktu WITA, serta QR Code validasi keaslian.
+  - Dilengkapi tombol cepat *Unduh Gambar* (`downloadDigitalReceiptImage`) dan *Cetak Bukti* (`printDigitalReceipt`) yang responsif untuk perangkat seluler maupun desktop.
+- **🎯 Dukungan Penuh Mode Kuis & Status Antrean Offline (*Quiz Engine & Offline Mode Awareness*):**
+  - Pada formulir tipe Kuis: Bagian Akhir menampilkan lembar skor persentase kuis, ambang KKM, perolehan poin, lencana kelulusan (*LULUS* / *REMEDIAL*), dan rincian pembahasan soal.
+  - Pada mode offline: menampilkan lencana peringatan ramah bahwa data telah tersimpan aman di browser dan akan disinkronkan otomatis saat tersambung internet.
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.15` di seluruh berkas (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
+---
+
 ## [2.5.14] - 2026-09-14
 
 ### 🛡️ Eliminasi Restorasi Draf Zombie, Pembersihan Status Formulir, & Penjagaan Grup Selesai
