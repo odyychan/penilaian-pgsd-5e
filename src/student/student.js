@@ -10055,6 +10055,29 @@ function normalizeMediaList(fieldOrMedia) {
       openReceiptVerificationModal(currentReceiptData);
     }
 
+    function isValidVerificationText(val) {
+      if (val === null || val === undefined) return false;
+      const s = String(val).trim();
+      return s !== "" && s !== "-" && s !== "–" && s.toLowerCase() !== "null" && s.toLowerCase() !== "undefined" && s.toLowerCase() !== "none";
+    }
+
+    function toggleVerifyDetailsAccordion() {
+      const content = document.getElementById("verifyDetailsAccordionContent");
+      const icon = document.getElementById("verifyToggleDetailsIcon");
+      const label = document.getElementById("verifyToggleDetailsLabel");
+      if (!content) return;
+      const isHidden = content.classList.contains("hidden");
+      if (isHidden) {
+        content.classList.remove("hidden");
+        if (icon) icon.style.transform = "rotate(180deg)";
+        if (label) label.textContent = "Sembunyikan Ulasan & Evaluasi";
+      } else {
+        content.classList.add("hidden");
+        if (icon) icon.style.transform = "rotate(0deg)";
+        if (label) label.textContent = "Lihat Ulasan & Evaluasi Tertulis";
+      }
+    }
+
     function openReceiptVerificationModal(receiptData) {
       if (!receiptData) return;
       const payload = receiptData.payload || {};
@@ -10062,124 +10085,167 @@ function normalizeMediaList(fieldOrMedia) {
       const idRespons = receiptData.idRespons || "-";
       const timestamp = receiptData.timestamp ? new Date(receiptData.timestamp) : new Date();
 
-      // Populate Header & Context
+      // Populate Header & Official Banner
       const elReceiptId = document.getElementById("verifyModalReceiptId");
       const elTimestamp = document.getElementById("verifyModalTimestamp");
-      const elMatkul = document.getElementById("verifyModalMatkul");
-      const elDosen = document.getElementById("verifyModalDosen");
-      const elSesi = document.getElementById("verifyModalSesi");
-      const elProdi = document.getElementById("verifyModalProdi");
-
       if (elReceiptId) elReceiptId.textContent = idRespons;
       if (elTimestamp) {
         elTimestamp.textContent = (typeof formatSmartScheduleTime === 'function')
           ? formatSmartScheduleTime(timestamp).replace(/<[^>]*>/g, '')
-          : (timestamp.toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'medium' }) + " WITA");
+          : (timestamp.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) + " WITA");
       }
 
-      if (elMatkul) elMatkul.textContent = formMeta.mataKuliah || appConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || "-";
-      if (elDosen) elDosen.textContent = formMeta.dosen || appConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || "-";
-      
-      const sesiVal = formMeta.sesi || payload.sesi || (appConfig && (appConfig["Sesi_Minggu_Aktif"] || appConfig["Sesi_Aktif"])) || (currentFormMeta && currentFormMeta.sesiAktif) || "1";
-      if (elSesi) elSesi.textContent = String(sesiVal).toLowerCase().includes("sesi") || String(sesiVal).toLowerCase().includes("minggu") ? String(sesiVal) : `Sesi / Pertemuan ${sesiVal}`;
-      
-      const rawProdi = formMeta.jurusan || (appConfig["Jurusan"] || (currentFormMeta && currentFormMeta.jurusan) || "PGSD");
-      if (elProdi) {
-        elProdi.textContent = rawProdi.toUpperCase().includes("PGSD") ? "Pendidikan Guru Sekolah Dasar (PGSD)" : rawProdi;
-      }
-
-      // Populate Identitas Penilai
+      // Populate Identitas Penilai (Responden)
       const elNama = document.getElementById("verifyModalNama");
-      const elNim = document.getElementById("verifyModalNim");
-      const elPeran = document.getElementById("verifyModalPeran");
+      const elNimBadge = document.getElementById("verifyModalNimBadge");
+      if (elNama) {
+        elNama.textContent = isValidVerificationText(payload.namaPenilai) ? payload.namaPenilai : "Mahasiswa Responden";
+      }
+      if (elNimBadge) {
+        if (isValidVerificationText(payload.nimPenilai)) {
+          elNimBadge.textContent = "NIM: " + payload.nimPenilai;
+          elNimBadge.classList.remove("hidden");
+        } else {
+          elNimBadge.classList.add("hidden");
+        }
+      }
 
-      if (elNama) elNama.textContent = payload.namaPenilai || "-";
-      if (elNim) elNim.textContent = (payload.nimPenilai && payload.nimPenilai !== '-') ? payload.nimPenilai : "-";
-      if (elPeran) elPeran.textContent = payload.peranPenilai || "Mahasiswa Penilai";
-
-      // Populate Ringkasan Hasil
+      // Populate Ringkasan Kelompok & Skor Nilai
       const elKelompok = document.getElementById("verifyModalKelompok");
       const elNilai = document.getElementById("verifyModalNilai");
-      const elPresenters = document.getElementById("verifyModalPresenters");
-
-      if (elKelompok) elKelompok.textContent = payload.kelompok || "-";
-      if (elNilai) elNilai.textContent = `${payload.nilaiKelompok !== undefined && payload.nilaiKelompok !== null ? payload.nilaiKelompok : 0} / 100`;
-
-      if (elPresenters) {
-        let presList = [];
-        if (Array.isArray(payload.presentatorTerbaik)) {
-          presList = payload.presentatorTerbaik.filter(p => p && p !== '-');
-        } else if (typeof payload.presentatorTerbaik === 'string' && payload.presentatorTerbaik.trim() && payload.presentatorTerbaik !== '-') {
-          presList = [payload.presentatorTerbaik.trim()];
+      if (elKelompok) {
+        elKelompok.textContent = isValidVerificationText(payload.kelompok) ? payload.kelompok : "-";
+      }
+      if (elNilai) {
+        if (payload.nilaiKelompok !== undefined && payload.nilaiKelompok !== null && payload.nilaiKelompok !== "-" && payload.nilaiKelompok !== "") {
+          elNilai.textContent = `${payload.nilaiKelompok} / 100`;
+          elNilai.parentElement?.classList.remove("hidden");
+        } else {
+          elNilai.textContent = "-";
         }
+      }
+
+      // Baris Konteks Mata Kuliah (Kondisional: Sembunyikan jika kosong atau '-')
+      const elRowMatkul = document.getElementById("verifyRowMatkul");
+      const elMatkul = document.getElementById("verifyModalMatkul");
+      const matkulVal = formMeta.mataKuliah || appConfig["Mata_Kuliah"] || (currentFormMeta && currentFormMeta.mataKuliah) || "";
+      if (elRowMatkul && elMatkul) {
+        if (isValidVerificationText(matkulVal)) {
+          elMatkul.textContent = matkulVal;
+          elRowMatkul.classList.remove("hidden");
+        } else {
+          elRowMatkul.classList.add("hidden");
+        }
+      }
+
+      // Baris Dosen Pengampu (Kondisional: Sembunyikan jika kosong atau '-')
+      const elRowDosen = document.getElementById("verifyRowDosen");
+      const elDosen = document.getElementById("verifyModalDosen");
+      const dosenVal = formMeta.dosen || appConfig["Dosen_Pengampu"] || (currentFormMeta && currentFormMeta.dosen) || "";
+      if (elRowDosen && elDosen) {
+        if (isValidVerificationText(dosenVal)) {
+          elDosen.textContent = dosenVal;
+          elRowDosen.classList.remove("hidden");
+        } else {
+          elRowDosen.classList.add("hidden");
+        }
+      }
+
+      // Baris Sesi Pertemuan (Kondisional: Sembunyikan jika kosong atau '-')
+      const elRowSesi = document.getElementById("verifyRowSesi");
+      const elSesi = document.getElementById("verifyModalSesi");
+      const sesiVal = formMeta.sesi || payload.sesi || (appConfig && (appConfig["Sesi_Minggu_Aktif"] || appConfig["Sesi_Aktif"])) || (currentFormMeta && currentFormMeta.sesiAktif) || "";
+      if (elRowSesi && elSesi) {
+        if (isValidVerificationText(sesiVal)) {
+          elSesi.textContent = String(sesiVal).toLowerCase().includes("sesi") || String(sesiVal).toLowerCase().includes("minggu")
+            ? String(sesiVal)
+            : `Sesi / Pertemuan ${sesiVal}`;
+          elRowSesi.classList.remove("hidden");
+        } else {
+          elRowSesi.classList.add("hidden");
+        }
+      }
+
+      // Baris Presentator Terbaik (Kondisional: Hanya tampil jika ada presenter terpilih)
+      const elRowPresenters = document.getElementById("verifyRowPresenters");
+      const elPresenters = document.getElementById("verifyModalPresenters");
+      let presList = [];
+      if (Array.isArray(payload.presentatorTerbaik)) {
+        presList = payload.presentatorTerbaik.filter(p => isValidVerificationText(p));
+      } else if (typeof payload.presentatorTerbaik === 'string' && isValidVerificationText(payload.presentatorTerbaik)) {
+        presList = [payload.presentatorTerbaik.trim()];
+      }
+      if (elRowPresenters && elPresenters) {
         if (presList.length > 0) {
+          elRowPresenters.classList.remove("hidden");
           elPresenters.innerHTML = presList.map(p => `
-            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-semibold">
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-semibold">
               <span>⭐</span>
               <span>${escapeHtml(p)}</span>
             </span>
           `).join("");
         } else {
-          elPresenters.innerHTML = `<span class="text-zinc-400 italic">Tidak ada presenter terpilih</span>`;
+          elRowPresenters.classList.add("hidden");
         }
       }
 
-      // Populate Detail Evaluasi Kualitatif Tertulis yang Diisi Pengguna
-      const elEvaluasiList = document.getElementById("verifyModalEvaluasiList");
-      if (elEvaluasiList) {
-        elEvaluasiList.innerHTML = "";
-        const evalItems = [];
+      // Kumpulkan Detail Evaluasi Kualitatif Tertulis yang Diisi Pengguna
+      const evalItems = [];
 
-        // Evaluasi detail pemateri
-        const evalDetail = payload.evaluasiDetail;
-        if (evalDetail && typeof evalDetail === 'object') {
-          Object.keys(evalDetail).forEach(key => {
-            if (key === '_partition' || key === 'quizResult' || key === 'customAnswers') return;
-            const val = evalDetail[key];
-            if (typeof val === 'string' && val.trim()) {
+      // Evaluasi detail pemateri
+      const evalDetail = payload.evaluasiDetail;
+      if (evalDetail && typeof evalDetail === 'object') {
+        Object.keys(evalDetail).forEach(key => {
+          if (key === '_partition' || key === 'quizResult' || key === 'customAnswers') return;
+          const val = evalDetail[key];
+          if (typeof val === 'string' && isValidVerificationText(val)) {
+            evalItems.push({
+              title: `Evaluasi Anggota Pemateri: ${key}`,
+              score: null,
+              comment: val.trim()
+            });
+          } else if (val && typeof val === 'object') {
+            const catatan = val.catatan || val.komentar || val.feedback || val.evaluasi || "";
+            const skor = val.skor !== undefined ? val.skor : (val.nilai !== undefined ? val.nilai : null);
+            if (isValidVerificationText(catatan) || skor !== null) {
               evalItems.push({
-                title: `Evaluasi Anggota Pemateri: ${key}`,
-                score: null,
-                comment: val.trim()
+                title: `Evaluasi Anggota: ${val.nama || val.namaMahasiswa || key}`,
+                score: skor,
+                comment: catatan
               });
-            } else if (val && typeof val === 'object') {
-              const catatan = val.catatan || val.komentar || val.feedback || val.evaluasi || "";
-              const skor = val.skor !== undefined ? val.skor : (val.nilai !== undefined ? val.nilai : null);
-              if (catatan || skor !== null) {
-                evalItems.push({
-                  title: `Evaluasi Anggota: ${val.nama || val.namaMahasiswa || key}`,
-                  score: skor,
-                  comment: catatan
-                });
-              }
+            }
+          }
+        });
+      }
+
+      // Refleksi mandiri / evaluasi rekan jika tersimpan di _partition
+      if (evalDetail && evalDetail._partition) {
+        if (evalDetail._partition.refleksiMandiri && typeof evalDetail._partition.refleksiMandiri === 'object') {
+          Object.entries(evalDetail._partition.refleksiMandiri).forEach(([name, txt]) => {
+            if (isValidVerificationText(txt) && !evalItems.some(item => item.title.includes(name))) {
+              evalItems.push({
+                title: `Refleksi Mandiri: ${name}`,
+                score: null,
+                comment: txt.trim()
+              });
             }
           });
         }
+      }
 
-        // Refleksi mandiri / evaluasi rekan jika tersimpan di _partition
-        if (evalDetail && evalDetail._partition) {
-          if (evalDetail._partition.refleksiMandiri && typeof evalDetail._partition.refleksiMandiri === 'object') {
-            Object.entries(evalDetail._partition.refleksiMandiri).forEach(([name, txt]) => {
-              if (txt && typeof txt === 'string' && txt.trim() && !evalItems.some(item => item.title.includes(name))) {
-                evalItems.push({
-                  title: `Refleksi Mandiri: ${name}`,
-                  score: null,
-                  comment: txt.trim()
-                });
-              }
-            });
-          }
-        }
+      // Catatan umum / masukan kelompok
+      const generalFeedback = payload.komentar || payload.masukan || payload.catatanUmum;
+      if (isValidVerificationText(generalFeedback)) {
+        evalItems.push({
+          title: "Masukan & Catatan Umum",
+          score: null,
+          comment: generalFeedback.trim()
+        });
+      }
 
-        // Catatan umum / masukan kelompok
-        if (payload.komentar || payload.masukan || payload.catatanUmum) {
-          evalItems.push({
-            title: "Masukan & Catatan Umum",
-            score: null,
-            comment: payload.komentar || payload.masukan || payload.catatanUmum
-          });
-        }
-
+      // Render Daftar Evaluasi
+      const elEvaluasiList = document.getElementById("verifyModalEvaluasiList");
+      if (elEvaluasiList) {
         if (evalItems.length > 0) {
           elEvaluasiList.innerHTML = evalItems.map(item => `
             <div class="p-2.5 rounded-xl bg-white border border-zinc-200/90 shadow-2xs space-y-1">
@@ -10191,30 +10257,60 @@ function normalizeMediaList(fieldOrMedia) {
             </div>
           `).join("");
         } else {
-          elEvaluasiList.innerHTML = `
-            <div class="p-3 rounded-xl bg-white border border-dashed border-zinc-200 text-center text-zinc-400 text-xs italic">
-              Evaluasi kualitatif dan rubrik penilaian telah terekam resmi di server database.
-            </div>
-          `;
+          elEvaluasiList.innerHTML = "";
         }
       }
 
       // Custom Answers (jika ada instrumen kustom)
+      let customAnsCount = 0;
       const customBox = document.getElementById("verifyModalCustomAnswersBox");
       const customList = document.getElementById("verifyModalCustomAnswersList");
+      const customAns = payload.customAnswers || payload.evaluasiDetail?.customAnswers;
       if (customBox && customList) {
-        const customAns = payload.customAnswers || payload.evaluasiDetail?.customAnswers;
         if (customAns && typeof customAns === 'object' && Object.keys(customAns).length > 0) {
-          customBox.classList.remove("hidden");
-          customList.innerHTML = Object.entries(customAns).map(([k, v]) => `
-            <div class="p-2 bg-white rounded-lg border border-zinc-200 flex items-start justify-between gap-2 text-xs">
-              <span class="font-medium text-zinc-600">${escapeHtml(k)}:</span>
-              <span class="font-semibold text-zinc-900 text-right">${escapeHtml(String(v))}</span>
-            </div>
-          `).join("");
+          const validEntries = Object.entries(customAns).filter(([k, v]) => isValidVerificationText(v));
+          customAnsCount = validEntries.length;
+          if (validEntries.length > 0) {
+            customBox.classList.remove("hidden");
+            customList.innerHTML = validEntries.map(([k, v]) => `
+              <div class="p-2 bg-white rounded-lg border border-zinc-200 flex items-start justify-between gap-2 text-xs">
+                <span class="font-medium text-zinc-600">${escapeHtml(k)}:</span>
+                <span class="font-semibold text-zinc-900 text-right">${escapeHtml(String(v))}</span>
+              </div>
+            `).join("");
+          } else {
+            customBox.classList.add("hidden");
+            customList.innerHTML = "";
+          }
         } else {
           customBox.classList.add("hidden");
           customList.innerHTML = "";
+        }
+      }
+
+      // Atur Accordion: Collapsed secara default ("kecuali memang pengguna ingin melihat nya")
+      const totalDetailItems = evalItems.length + customAnsCount;
+      const elSectionAccordion = document.getElementById("verifySectionAccordion");
+      const elCountBadge = document.getElementById("verifyDetailCountBadge");
+      const elAccordionContent = document.getElementById("verifyDetailsAccordionContent");
+      const elToggleLabel = document.getElementById("verifyToggleDetailsLabel");
+      const elToggleIcon = document.getElementById("verifyToggleDetailsIcon");
+
+      // Reset keadaan ke tertutup
+      if (elAccordionContent) elAccordionContent.classList.add("hidden");
+      if (elToggleLabel) elToggleLabel.textContent = "Lihat Ulasan & Evaluasi Tertulis";
+      if (elToggleIcon) elToggleIcon.style.transform = "rotate(0deg)";
+
+      if (elSectionAccordion) {
+        if (totalDetailItems > 0) {
+          elSectionAccordion.classList.remove("hidden");
+          if (elCountBadge) {
+            elCountBadge.textContent = `${totalDetailItems} Catatan`;
+            elCountBadge.classList.remove("hidden");
+          }
+        } else {
+          // Jika tidak ada ulasan/isian tertulis sama sekali, sembunyikan accordion agar bersih
+          elSectionAccordion.classList.add("hidden");
         }
       }
 
@@ -10222,7 +10318,7 @@ function normalizeMediaList(fieldOrMedia) {
       const qrCanvas = document.getElementById("verifyModalQrCanvas");
       if (qrCanvas) {
         const verifyUrl = getVerificationUrl(idRespons);
-        renderQrCodeHelper(qrCanvas, verifyUrl, 128);
+        renderQrCodeHelper(qrCanvas, verifyUrl, 84);
       }
 
       // Buka Modal
@@ -10281,11 +10377,11 @@ function normalizeMediaList(fieldOrMedia) {
           return;
         }
 
-        // Ambil info metadata formulir jika ada
-        let formTitle = "-";
-        let dosenName = "-";
-        let matkulName = "-";
-        let prodiName = "PGSD";
+        // Ambil info metadata formulir jika ada (default string kosong agar tidak memunculkan tanda '-')
+        let formTitle = "";
+        let dosenName = "";
+        let matkulName = "";
+        let prodiName = "";
         if (data.form_id) {
           try {
             const { data: formData } = await sb
@@ -10294,18 +10390,18 @@ function normalizeMediaList(fieldOrMedia) {
               .eq('form_id', data.form_id)
               .maybeSingle();
             if (formData) {
-              formTitle = formData.judul_form || formTitle;
-              dosenName = formData.dosen || dosenName;
-              matkulName = formData.mata_kuliah || matkulName;
-              prodiName = formData.jurusan || prodiName;
+              formTitle = formData.judul_form || "";
+              dosenName = formData.dosen || "";
+              matkulName = formData.mata_kuliah || "";
+              prodiName = formData.jurusan || "";
             }
           } catch(e) {}
         }
 
         // Kumpulkan presenter terbaik
         const presenters = [];
-        if (data.best_presenter_1 && data.best_presenter_1 !== '-') presenters.push(data.best_presenter_1);
-        if (data.best_presenter_2 && data.best_presenter_2 !== '-' && data.best_presenter_2 !== data.best_presenter_1) presenters.push(data.best_presenter_2);
+        if (isValidVerificationText(data.best_presenter_1)) presenters.push(data.best_presenter_1);
+        if (isValidVerificationText(data.best_presenter_2) && data.best_presenter_2 !== data.best_presenter_1) presenters.push(data.best_presenter_2);
 
         // Kumpulkan ulasan kualitatif
         let evalDetail = {};
@@ -10317,11 +10413,11 @@ function normalizeMediaList(fieldOrMedia) {
           idRespons: data.id_respons || cleanId,
           timestamp: data.created_at ? new Date(data.created_at) : new Date(),
           payload: {
-            nimPenilai: data.nim_penilai || "-",
-            namaPenilai: data.nama_penilai || "-",
+            nimPenilai: data.nim_penilai || "",
+            namaPenilai: data.nama_penilai || "",
             peranPenilai: data.peran_penilai || "Mahasiswa Penilai",
-            kelompok: data.kelompok_dinilai || "-",
-            nilaiKelompok: (data.nilai_kelompok !== undefined && data.nilai_kelompok !== null) ? data.nilai_kelompok : "-",
+            kelompok: data.kelompok_dinilai || "",
+            nilaiKelompok: (data.nilai_kelompok !== undefined && data.nilai_kelompok !== null) ? data.nilai_kelompok : null,
             presentatorTerbaik: presenters,
             evaluasiDetail: evalDetail,
             customAnswers: data.custom_answers || {}
@@ -10332,7 +10428,7 @@ function normalizeMediaList(fieldOrMedia) {
             mataKuliah: matkulName,
             dosen: dosenName,
             jurusan: prodiName,
-            sesi: data.sesi || "1"
+            sesi: data.sesi || ""
           }
         };
 
@@ -10433,6 +10529,7 @@ function normalizeMediaList(fieldOrMedia) {
     window.openCurrentReceiptVerification = openCurrentReceiptVerification;
     window.openReceiptVerificationModal = openReceiptVerificationModal;
     window.closeVerificationModal = closeVerificationModal;
+    window.toggleVerifyDetailsAccordion = toggleVerifyDetailsAccordion;
     window.verifyReceiptById = verifyReceiptById;
     window.copyVerificationLink = copyVerificationLink;
     window.openLookupReceiptModal = openLookupReceiptModal;

@@ -2,6 +2,26 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.19] - 2026-09-14
+
+### ✨ Penyempurnaan Antarmuka Verifikasi Keabsahan: Tampilan Ringkas, Bersih, dan Akordeon Evaluasi Interaktif
+- **🧹 Tampilan Bersih Bebas "Data Aneh" / Baris Kosong:**
+  - Mengeliminasi seluruh baris informasi kosong atau berkarakter strip (`-`), seperti *Mata Kuliah: -*, *Dosen: -*, atau *Sesi: -*.
+  - Baris informasi Mata Kuliah, Dosen Pengampu, Sesi Pertemuan, dan Presentator Terbaik kini bersifat kondisional dinamis—hanya ditampilkan apabila memiliki data riil yang sah.
+  - Memadukan ringkasan responden dan nilai ke dalam satu kartu terpadu (*unified sleek summary card*) yang estetik, rapi, dan mudah dibaca tanpa kotak-kotak abu bertumpuk yang membebani layar.
+- **📂 Akordeon Rincian Evaluasi & Masukan Tertulis (*Collapsible on Demand*):**
+  - Seluruh ulasan kualitatif tertulis per pemateri, refleksi diri, dan isian instrumen tambahan kini dikemas dalam tombol akordeon interaktif: `[ 📝 Lihat Ulasan & Evaluasi Tertulis (X Catatan) ▾ ]`.
+  - Akordeon berada dalam kondisi tertutup (*collapsed*) secara *default* saat lembar verifikasi dibuka, sehingga antarmuka tetap bersih, ringkas, dan fokus pada status keabsahan.
+  - Pengguna dapat membuka dan menutup rincian evaluasi kapan saja dengan transisi halus dan animasi rotasi ikon chevron.
+  - Jika respons tidak memiliki catatan evaluasi tertulis, wadah akordeon disembunyikan secara otomatis agar tidak memakan ruang antarmuka.
+- **📱 Presisi Responsif Mobile-First Antar-Perangkat:**
+  - Banner status keabsahan resmi (`#modalVerificationCertificate`) ditata ulang menggunakan tata letak adaptif `flex-col sm:flex-row`, mencegah teks waktu rekam bertabrakan dengan ID tanda terima pada layar ponsel sempit (320px–420px).
+  - Tampilan Segel QR Digital disesuaikan menjadi lebih ramping dan serasi berdampingan dengan teks panduan verifikasi.
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.19` di seluruh berkas (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
+---
+
 ## [2.5.18] - 2026-09-14
 
 ### 🛡️ Verifikasi Keabsahan Tanda Terima Digital Interaktif, QR Code Resmi, & Cek Bukti Online
