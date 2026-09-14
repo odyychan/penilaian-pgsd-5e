@@ -2,6 +2,20 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.11] - 2026-09-14
+
+### 🔒 Isolasi Sesi Pengguna & Penghapusan Banner Progres Personal Saat Logout
+- **🚪 Pembersihan Menyeluruh Status Penilaian Personal Saat Logout (`handleAuthLogout`):**
+  - Mengatasi kendala di mana banner progres penilaian kelompok ("Anda sudah menilai 1 dari 2 kelompok...") masih tertinggal dan terlihat di layar beranda setelah pengguna menekan tombol Keluar Akun.
+  - Memperbaiki `handleAuthLogout` dan `clearAuthSession`: seluruh penanda pengiriman lokal (`PGSD_SUBMITTED_`), draf isian tersimpan (`PGSD_STUDENT_DRAFT_`), dan elemen banner progres kini dibersihkan secara instan saat sesi diakhiri.
+- **🛡️ Penjagaan Validasi Respons Personal Hanya untuk Akun Terverifikasi:**
+  - Fungsi `checkFormBlockStatus` kini secara ketat memverifikasi status autentikasi aktif (`isIdentified`). Pengunjung yang belum login atau telah keluar dari akun tidak akan lagi menampilkan status atau riwayat penilaian milik pengguna sebelumnya.
+  - Logika pemulihan draf (`restoreFormDraft`) kini dijaga ketat: identitas penilai (NIM, Nama, Email) dari draf lokal lama tidak akan dihidupkan kembali ke dalam formulir jika formulir mewajibkan login dan pengguna saat ini dalam kondisi logout.
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.11` di seluruh berkas (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
+---
+
 ## [2.5.10] - 2026-09-14
 
 ### 🔓 Dukungan Multi-Kelompok dalam Satu Sesi & Perbaikan Kunci Blokir Formulir

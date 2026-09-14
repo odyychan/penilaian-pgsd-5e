@@ -4930,97 +4930,112 @@ function normalizeMediaList(fieldOrMedia) {
 
       // Check single response restriction (Kunci Respons Ganda)
       if (!isBlocked && (appConfig["Kunci_Respons_Ganda"] === true || appConfig["Kunci_Respons_Ganda"] === 'true')) {
-        let isSubmittedInStorage = localStorage.getItem("PGSD_SUBMITTED_" + activeFormId) === "true";
-        
-        // Verifikasi dinamis terhadap data riil di Supabase/Rekap
+        const emailMode = getCurrentEmailCollectionMode();
+        const authSession = getCurrentAuthSession();
+        const hasAuth = !!(authSession?.email || activeUserAccountEmail);
+
+        // Hanya periksa status penilaian personal jika penilai telah login / teridentifikasi
         const activeNim = (document.getElementById("inputNim")?.value || activeUserAccountNim || "").replace(/\s+/g, "").trim().toLowerCase();
-        const activeEmail = (activeUserAccountEmail || "").trim().toLowerCase();
-        
-        if (currentRekapData && (activeNim || activeEmail)) {
-          const hasInNim = !!(activeNim && currentRekapData.nimToKelompokMap && currentRekapData.nimToKelompokMap[activeNim] && currentRekapData.nimToKelompokMap[activeNim].length > 0);
-          const hasInEmail = !!(activeEmail && currentRekapData.emailToKelompokMap && currentRekapData.emailToKelompokMap[activeEmail] && currentRekapData.emailToKelompokMap[activeEmail].length > 0);
+        const activeEmail = (activeUserAccountEmail || authSession?.email || (emailMode === 'NO_EMAIL' ? document.getElementById("inputEmail")?.value : "") || "").trim().toLowerCase();
+        const isIdentified = !!(activeNim || (activeEmail && (emailMode === 'NO_EMAIL' || hasAuth)));
+
+        // Jika pengguna belum login / logout, sembunyikan banner progres personal
+        if (!isIdentified) {
+          const progressBanner = document.getElementById("formScheduleLockBanner");
+          if (progressBanner && progressBanner.classList.contains("bg-indigo-50/90")) {
+            progressBanner.classList.add("hidden");
+            progressBanner.className = "hidden p-4 sm:p-5 rounded-2xl bg-amber-50/90 border border-amber-300 text-amber-950 space-y-2 shadow-xs fade-enter";
+          }
+        } else {
+          let isSubmittedInStorage = localStorage.getItem("PGSD_SUBMITTED_" + activeFormId) === "true";
           
-          if (!hasInNim && !hasInEmail) {
-            // Data di Supabase/Rekap sudah tidak ada (dihapus admin). Buka kunci lokal seketika!
-            if (isSubmittedInStorage) {
-              localStorage.removeItem("PGSD_SUBMITTED_" + activeFormId);
-              isSubmittedInStorage = false;
+          // Verifikasi dinamis terhadap data riil di Supabase/Rekap untuk akun aktif ini
+          if (currentRekapData && (activeNim || activeEmail)) {
+            const hasInNim = !!(activeNim && currentRekapData.nimToKelompokMap && currentRekapData.nimToKelompokMap[activeNim] && currentRekapData.nimToKelompokMap[activeNim].length > 0);
+            const hasInEmail = !!(activeEmail && currentRekapData.emailToKelompokMap && currentRekapData.emailToKelompokMap[activeEmail] && currentRekapData.emailToKelompokMap[activeEmail].length > 0);
+            
+            if (!hasInNim && !hasInEmail) {
+              // Data di Supabase/Rekap sudah tidak ada (dihapus admin). Buka kunci lokal seketika!
+              if (isSubmittedInStorage) {
+                localStorage.removeItem("PGSD_SUBMITTED_" + activeFormId);
+                isSubmittedInStorage = false;
+              }
+            } else {
+              isSubmittedInStorage = true;
             }
-          } else {
-            isSubmittedInStorage = true;
           }
-        }
 
-        if (isSubmittedInStorage) {
-          // Hitung kelompok yang sudah dinilai oleh penilai ini di sesi aktif
-          const activeSesiForBlock = (appConfig["Sesi_Minggu_Aktif"] || appConfig["Sesi_Aktif"] || currentFormMeta?.sesiAktif || "").trim();
-          const isFilterAllSesi = !activeSesiForBlock || /^(semua|all|semua sesi|semua minggu)$/i.test(activeSesiForBlock);
+          if (isSubmittedInStorage) {
+            // Hitung kelompok yang sudah dinilai oleh penilai ini di sesi aktif
+            const activeSesiForBlock = (appConfig["Sesi_Minggu_Aktif"] || appConfig["Sesi_Aktif"] || currentFormMeta?.sesiAktif || "").trim();
+            const isFilterAllSesi = !activeSesiForBlock || /^(semua|all|semua sesi|semua minggu)$/i.test(activeSesiForBlock);
 
-          // Ambil daftar kelompok di sesi aktif
-          let groupsInActiveSesi = [];
-          if (groupsData && groupsData.length > 0) {
-            groupsInActiveSesi = groupsData.filter(g => {
-              if (!isFilterAllSesi && g.sesi && g.sesi.trim().toLowerCase() !== activeSesiForBlock.toLowerCase()) return false;
-              return true;
+            // Ambil daftar kelompok di sesi aktif
+            let groupsInActiveSesi = [];
+            if (groupsData && groupsData.length > 0) {
+              groupsInActiveSesi = groupsData.filter(g => {
+                if (!isFilterAllSesi && g.sesi && g.sesi.trim().toLowerCase() !== activeSesiForBlock.toLowerCase()) return false;
+                return true;
+              });
+            }
+
+            // Ambil daftar kelompok yang sudah dinilai penilai ini
+            const alreadyFilledGroups = [];
+            if (currentRekapData) {
+              const nimKey = activeNim;
+              const emailKey = activeEmail;
+              if (nimKey && currentRekapData.nimToKelompokMap && currentRekapData.nimToKelompokMap[nimKey]) {
+                currentRekapData.nimToKelompokMap[nimKey].forEach(g => {
+                  if (!alreadyFilledGroups.some(f => f.toLowerCase() === g.toLowerCase())) alreadyFilledGroups.push(g);
+                });
+              }
+              if (emailKey && currentRekapData.emailToKelompokMap && currentRekapData.emailToKelompokMap[emailKey]) {
+                currentRekapData.emailToKelompokMap[emailKey].forEach(g => {
+                  if (!alreadyFilledGroups.some(f => f.toLowerCase() === g.toLowerCase())) alreadyFilledGroups.push(g);
+                });
+              }
+            }
+
+            // Cek apakah masih ada kelompok yang BELUM dinilai di sesi aktif
+            const unfilledGroups = groupsInActiveSesi.filter(g => {
+              return !alreadyFilledGroups.some(f => f.toLowerCase() === g.name.toLowerCase());
             });
-          }
 
-          // Ambil daftar kelompok yang sudah dinilai penilai ini
-          const alreadyFilledGroups = [];
-          if (currentRekapData) {
-            const nimKey = activeNim;
-            const emailKey = activeEmail;
-            if (nimKey && currentRekapData.nimToKelompokMap && currentRekapData.nimToKelompokMap[nimKey]) {
-              currentRekapData.nimToKelompokMap[nimKey].forEach(g => {
-                if (!alreadyFilledGroups.some(f => f.toLowerCase() === g.toLowerCase())) alreadyFilledGroups.push(g);
-              });
-            }
-            if (emailKey && currentRekapData.emailToKelompokMap && currentRekapData.emailToKelompokMap[emailKey]) {
-              currentRekapData.emailToKelompokMap[emailKey].forEach(g => {
-                if (!alreadyFilledGroups.some(f => f.toLowerCase() === g.toLowerCase())) alreadyFilledGroups.push(g);
-              });
-            }
-          }
-
-          // Cek apakah masih ada kelompok yang BELUM dinilai di sesi aktif
-          const unfilledGroups = groupsInActiveSesi.filter(g => {
-            return !alreadyFilledGroups.some(f => f.toLowerCase() === g.name.toLowerCase());
-          });
-
-          if (unfilledGroups.length === 0 && groupsInActiveSesi.length > 0) {
-            // Semua kelompok di sesi aktif sudah dinilai → blokir global
-            isBlocked = true;
-            blockReason = "ALREADY_SUBMITTED";
-            const sesiLabel = activeSesiForBlock || "sesi aktif";
-            blockTitle = "Semua Kelompok Telah Dinilai";
-            blockDesc = `Anda telah menyelesaikan penilaian untuk seluruh ${groupsInActiveSesi.length} kelompok presentator pada <strong>${escapeHtml(sesiLabel)}</strong>. Terima kasih atas partisipasi Anda!<br><span class="inline-block mt-2 font-mono font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">✓ ${alreadyFilledGroups.length} / ${groupsInActiveSesi.length} Kelompok Selesai Dinilai</span>`;
-          } else if (groupsInActiveSesi.length > 0 && alreadyFilledGroups.length > 0) {
-            // Sebagian kelompok sudah dinilai → tampilkan banner info progres (biru/indigo), jangan blokir
-            const progressBanner = document.getElementById("formScheduleLockBanner");
-            if (progressBanner) {
-              progressBanner.classList.remove("hidden");
-              // Ubah warna banner menjadi biru/indigo (informatif, bukan peringatan merah)
-              progressBanner.className = "p-4 sm:p-5 rounded-2xl bg-indigo-50/90 border border-indigo-300 text-indigo-950 space-y-2 shadow-xs fade-enter";
-              const iconContainer = progressBanner.querySelector("div div");
-              if (iconContainer) {
-                iconContainer.className = "w-8 h-8 rounded-xl bg-indigo-100 border border-indigo-300 text-indigo-800 flex items-center justify-center shrink-0";
-                iconContainer.innerHTML = `<svg class="w-4 h-4 text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+            if (unfilledGroups.length === 0 && groupsInActiveSesi.length > 0) {
+              // Semua kelompok di sesi aktif sudah dinilai → blokir global
+              isBlocked = true;
+              blockReason = "ALREADY_SUBMITTED";
+              const sesiLabel = activeSesiForBlock || "sesi aktif";
+              blockTitle = "Semua Kelompok Telah Dinilai";
+              blockDesc = `Anda telah menyelesaikan penilaian untuk seluruh ${groupsInActiveSesi.length} kelompok presentator pada <strong>${escapeHtml(sesiLabel)}</strong>. Terima kasih atas partisipasi Anda!<br><span class="inline-block mt-2 font-mono font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">✓ ${alreadyFilledGroups.length} / ${groupsInActiveSesi.length} Kelompok Selesai Dinilai</span>`;
+            } else if (groupsInActiveSesi.length > 0 && alreadyFilledGroups.length > 0) {
+              // Sebagian kelompok sudah dinilai → tampilkan banner info progres (biru/indigo), jangan blokir
+              const progressBanner = document.getElementById("formScheduleLockBanner");
+              if (progressBanner) {
+                progressBanner.classList.remove("hidden");
+                // Ubah warna banner menjadi biru/indigo (informatif, bukan peringatan merah)
+                progressBanner.className = "p-4 sm:p-5 rounded-2xl bg-indigo-50/90 border border-indigo-300 text-indigo-950 space-y-2 shadow-xs fade-enter";
+                const iconContainer = progressBanner.querySelector("div div");
+                if (iconContainer) {
+                  iconContainer.className = "w-8 h-8 rounded-xl bg-indigo-100 border border-indigo-300 text-indigo-800 flex items-center justify-center shrink-0";
+                  iconContainer.innerHTML = `<svg class="w-4 h-4 text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+                }
+                const titleEl = document.getElementById("lockBannerTitle");
+                const descEl = document.getElementById("lockBannerDesc");
+                if (titleEl) {
+                  titleEl.textContent = "Lanjutkan Penilaian Kelompok Berikutnya";
+                  titleEl.className = "font-bold text-sm sm:text-base text-indigo-950";
+                }
+                if (descEl) {
+                  descEl.className = "text-xs text-indigo-900 leading-relaxed pl-10.5";
+                  descEl.innerHTML = `Anda sudah menilai <strong>${alreadyFilledGroups.length}</strong> dari <strong>${groupsInActiveSesi.length}</strong> kelompok presentator di sesi ini. Masih ada <strong>${unfilledGroups.length}</strong> kelompok lagi yang perlu dinilai.<br><span class="inline-block mt-1.5 font-mono text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">✓ Sudah dinilai: ${alreadyFilledGroups.map(g => escapeHtml(g)).join(", ")}</span>`;
+                }
               }
-              const titleEl = document.getElementById("lockBannerTitle");
-              const descEl = document.getElementById("lockBannerDesc");
-              if (titleEl) {
-                titleEl.textContent = "Lanjutkan Penilaian Kelompok Berikutnya";
-                titleEl.className = "font-bold text-sm sm:text-base text-indigo-950";
-              }
-              if (descEl) {
-                descEl.className = "text-xs text-indigo-900 leading-relaxed pl-10.5";
-                descEl.innerHTML = `Anda sudah menilai <strong>${alreadyFilledGroups.length}</strong> dari <strong>${groupsInActiveSesi.length}</strong> kelompok presentator di sesi ini. Masih ada <strong>${unfilledGroups.length}</strong> kelompok lagi yang perlu dinilai.<br><span class="inline-block mt-1.5 font-mono text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">✓ Sudah dinilai: ${alreadyFilledGroups.map(g => escapeHtml(g)).join(", ")}</span>`;
-              }
+              // Jangan blokir — biarkan mahasiswa lanjut menilai kelompok berikutnya
+            } else if (groupsInActiveSesi.length === 0 && isSubmittedInStorage) {
+              // Tidak ada data kelompok (belum dimuat penuh) — jangan blokir keras dulu
+              // Biarkan fetchInitialFormData selesai memuat data kelompok terlebih dahulu
             }
-            // Jangan blokir — biarkan mahasiswa lanjut menilai kelompok berikutnya
-          } else if (groupsInActiveSesi.length === 0 && isSubmittedInStorage) {
-            // Tidak ada data kelompok (belum dimuat penuh) — jangan blokir keras dulu
-            // Biarkan fetchInitialFormData selesai memuat data kelompok terlebih dahulu
           }
         }
       }
@@ -7490,17 +7505,30 @@ function normalizeMediaList(fieldOrMedia) {
     async function handleAuthLogout() {
       const ok = await showAppConfirm({
         title: "Keluar dari Akun?",
-        message: "Apakah Anda yakin ingin keluar dari akun penilai ini? Draf isian Anda tetap tersimpan aman di akun ini.",
+        message: "Apakah Anda yakin ingin keluar dari akun penilai ini? Sesi Anda akan dihentikan dan formulir akan dibersihkan.",
         confirmText: "Ya, Keluar Akun",
         cancelText: "Batal",
         type: "warning"
       });
       if (ok) {
         await executeSupabaseSignOut();
+        clearStudentFormDraft(false);
         resetLockedIdentityInputs();
+        try {
+          localStorage.removeItem("PGSD_SUBMITTED_" + activeFormId);
+          sessionStorage.removeItem("PGSD_SUBMITTED_" + activeFormId);
+        } catch(e) {}
+        const lockBanner = document.getElementById("formScheduleLockBanner");
+        if (lockBanner && lockBanner.classList.contains("bg-indigo-50/90")) {
+          lockBanner.classList.add("hidden");
+          lockBanner.className = "hidden p-4 sm:p-5 rounded-2xl bg-amber-50/90 border border-amber-300 text-amber-950 space-y-2 shadow-xs fade-enter";
+        }
         updateAccountHeaderUI();
         showToast("Anda telah keluar dari akun.", "info");
         goToInfoOverview();
+        if (typeof evaluateFormScheduleStatus === 'function') {
+          evaluateFormScheduleStatus();
+        }
       }
     }
 
@@ -7586,12 +7614,17 @@ function normalizeMediaList(fieldOrMedia) {
 
     function clearAuthSession() {
       const formKey = (activeFormId || 'BK5E').toUpperCase();
+      const rawFormId = (activeFormId || 'BK5E');
       try {
         localStorage.removeItem("PGSD_AUTH_SESSION_" + formKey);
         sessionStorage.removeItem("PGSD_AUTH_SESSION_" + formKey);
         localStorage.removeItem("PGSD_AUTH_SESSION_PRIMARY");
         sessionStorage.removeItem("PGSD_AUTH_SESSION_PRIMARY");
         sessionStorage.removeItem("PGSD_AUTH_INTENT");
+        localStorage.removeItem("PGSD_SUBMITTED_" + rawFormId);
+        sessionStorage.removeItem("PGSD_SUBMITTED_" + rawFormId);
+        localStorage.removeItem("PGSD_STUDENT_DRAFT_" + rawFormId);
+        sessionStorage.removeItem("PGSD_STUDENT_DRAFT_" + rawFormId);
       } catch (e) {}
 
       activeUserAccountEmail = "";
@@ -8065,25 +8098,33 @@ function normalizeMediaList(fieldOrMedia) {
         if (draft.peran) {
           onRoleChange(draft.peran);
         }
-        if (draft.nim) {
-          const nimEl = document.getElementById("inputNim");
-          if (nimEl) {
-            nimEl.value = draft.nim;
-            validateNimLive(draft.nim);
+
+        const emailMode = getCurrentEmailCollectionMode();
+        const activeAuth = getCurrentAuthSession();
+        const isAuthRequired = (emailMode !== 'NO_EMAIL');
+
+        // Hanya pulihkan identitas draft jika form tidak mewajibkan login atau jika ada sesi login aktif
+        if (!isAuthRequired || (activeAuth && activeAuth.email)) {
+          if (draft.nim) {
+            const nimEl = document.getElementById("inputNim");
+            if (nimEl) {
+              nimEl.value = draft.nim;
+              validateNimLive(draft.nim);
+            }
           }
-        }
-        if (draft.nama) {
-          const namaEl = document.getElementById("inputNama");
-          if (namaEl) namaEl.value = draft.nama;
-          activeUserAccountName = draft.nama;
-        }
-        if (draft.email) {
-          const emailEl = document.getElementById("inputEmail");
-          if (emailEl) {
-            emailEl.value = draft.email;
-            validateEmailLive(draft.email);
+          if (draft.nama) {
+            const namaEl = document.getElementById("inputNama");
+            if (namaEl) namaEl.value = draft.nama;
+            activeUserAccountName = draft.nama;
           }
-          activeUserAccountEmail = draft.email;
+          if (draft.email) {
+            const emailEl = document.getElementById("inputEmail");
+            if (emailEl) {
+              emailEl.value = draft.email;
+              validateEmailLive(draft.email);
+            }
+            activeUserAccountEmail = draft.email;
+          }
         }
 
         updateAccountHeaderUI();
