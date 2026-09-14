@@ -10034,31 +10034,72 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       });
     }
 
+    // =========================================================================
+    // PAGINATION STATE & CONTROLLERS (RESPONS INDIVIDUAL)
+    // =========================================================================
+    let responsesCurrentPage = 1;
+    let responsesPageSize = 12;
+
+    function changeResponsesPageSize(val) {
+      responsesPageSize = val === 'ALL' ? 'ALL' : (parseInt(val, 10) || 12);
+      responsesCurrentPage = 1;
+      renderAdminResponsesList();
+    }
+
+    function goToResponsesPage(pageNum) {
+      responsesCurrentPage = parseInt(pageNum, 10) || 1;
+      renderAdminResponsesList();
+      const container = document.getElementById("adminResponsesCardsContainer");
+      if (container) {
+        container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    window.changeResponsesPageSize = changeResponsesPageSize;
+    window.goToResponsesPage = goToResponsesPage;
+
     function renderAdminResponsesList() {
       const container = document.getElementById("adminResponsesCardsContainer");
       const emptyEl = document.getElementById("emptyAdminResponses");
+      const paginationEl = document.getElementById("adminResponsesPagination");
+      const paginationInfoEl = document.getElementById("responsesPaginationInfo");
+      const paginationNavEl = document.getElementById("responsesPaginationNav");
+
+      if (!container) return;
       container.innerHTML = "";
 
       const query = (document.getElementById("searchResponseInput")?.value || "").trim().toLowerCase();
       const groupFilter = document.getElementById("filterResponseGroupSelect")?.value || "ALL";
       const roleFilter = document.getElementById("filterResponseRoleSelect")?.value || "ALL";
 
-      let visibleCount = 0;
-
-      adminResponsesList.forEach(r => {
-        let isMatch = true;
+      // 1. Filter respons (mendukung pencarian nama, NIM, email, kelompok, dan nomor ID Bukti resmi)
+      const filtered = adminResponsesList.filter(r => {
         if (query) {
-          const text = `${r.namaPenilai} ${r.nim} ${r.email} ${r.kelompok}`.toLowerCase();
-          if (!text.includes(query)) isMatch = false;
+          const text = `${r.namaPenilai || ''} ${r.nim || ''} ${r.email || ''} ${r.kelompok || ''} ${r.idRespons || ''}`.toLowerCase();
+          if (!text.includes(query)) return false;
         }
-        if (groupFilter !== "ALL" && r.kelompok !== groupFilter) isMatch = false;
-        if (roleFilter !== "ALL" && (r.peran || "Mahasiswa") !== roleFilter) isMatch = false;
+        if (groupFilter !== "ALL" && r.kelompok !== groupFilter) return false;
+        if (roleFilter !== "ALL" && (r.peran || "Mahasiswa") !== roleFilter) return false;
+        return true;
+      });
 
-        if (!isMatch) return;
-        visibleCount++;
+      const totalItems = filtered.length;
 
+      // 2. Pagination Slicing
+      const pageSize = responsesPageSize === 'ALL' ? totalItems : responsesPageSize;
+      const totalPages = (pageSize > 0 && totalItems > 0) ? Math.ceil(totalItems / pageSize) : 1;
+
+      if (responsesCurrentPage > totalPages) responsesCurrentPage = totalPages;
+      if (responsesCurrentPage < 1) responsesCurrentPage = 1;
+
+      const startIndex = responsesPageSize === 'ALL' ? 0 : (responsesCurrentPage - 1) * pageSize;
+      const endIndex = responsesPageSize === 'ALL' ? totalItems : Math.min(startIndex + pageSize, totalItems);
+      const pagedList = responsesPageSize === 'ALL' ? filtered : filtered.slice(startIndex, endIndex);
+
+      // 3. Render Kartu Respons
+      pagedList.forEach(r => {
         const card = document.createElement("div");
-        card.className = "bg-white rounded-xl border border-zinc-200 p-4 shadow-xs space-y-3 flex flex-col justify-between";
+        card.className = "bg-white rounded-xl border border-zinc-200 p-4 shadow-xs space-y-3 flex flex-col justify-between hover:border-zinc-300 transition-all";
 
         const sheetsBadge = r.syncedToSheets 
           ? `<span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">Sheets</span>`
@@ -10102,7 +10143,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
               <span>Detail</span>
             </button>
             <div class="flex items-center gap-1.5">
-              <span class="text-[10px] text-zinc-400 font-mono">ID: ${escapeHtml(String(r.idRespons || ''))}</span>
+              <span class="text-[10px] text-zinc-400 font-mono select-all" title="Nomor ID Bukti">ID: ${escapeHtml(String(r.idRespons || ''))}</span>
               <button 
                 type="button" 
                 onclick="deleteSingleResponse('${escapeHtml(String(r.idRespons || ''))}', '${escapeHtml(String(r.rowIndex || ''))}')" 
@@ -10119,8 +10160,91 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
         container.appendChild(card);
       });
 
-      if (visibleCount === 0) emptyEl.classList.remove("hidden");
-      else emptyEl.classList.add("hidden");
+      // 4. Update Empty State
+      if (emptyEl) {
+        if (totalItems === 0) emptyEl.classList.remove("hidden");
+        else emptyEl.classList.add("hidden");
+      }
+
+      // 5. Update Kontrol Pagination
+      if (paginationEl) {
+        if (totalItems === 0) {
+          paginationEl.classList.add("hidden");
+        } else {
+          paginationEl.classList.remove("hidden");
+
+          if (paginationInfoEl) {
+            if (responsesPageSize === 'ALL' || totalItems <= pageSize) {
+              paginationInfoEl.textContent = `Menampilkan seluruh ${totalItems} respons`;
+            } else {
+              paginationInfoEl.textContent = `Menampilkan ${startIndex + 1}-${endIndex} dari ${totalItems} respons`;
+            }
+          }
+
+          if (paginationNavEl) {
+            if (totalPages <= 1) {
+              paginationNavEl.innerHTML = '';
+            } else {
+              let buttonsHtml = '';
+              // Tombol Sebelumnya
+              buttonsHtml += `
+                <button 
+                  type="button" 
+                  onclick="goToResponsesPage(${responsesCurrentPage - 1})" 
+                  ${responsesCurrentPage === 1 ? 'disabled' : ''} 
+                  class="min-h-[36px] min-w-[36px] px-2.5 py-1 rounded-lg border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-100 disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer text-xs font-semibold flex items-center justify-center active:scale-95"
+                  title="Halaman Sebelumnya"
+                >
+                  ‹
+                </button>
+              `;
+
+              // Deretan nomor halaman dengan elipsis
+              const pages = [];
+              for (let p = 1; p <= totalPages; p++) {
+                if (p === 1 || p === totalPages || (p >= responsesCurrentPage - 1 && p <= responsesCurrentPage + 1)) {
+                  pages.push(p);
+                } else if (pages[pages.length - 1] !== '...') {
+                  pages.push('...');
+                }
+              }
+
+              pages.forEach(p => {
+                if (p === '...') {
+                  buttonsHtml += `<span class="px-2 py-1 text-zinc-400 font-mono text-xs select-none">...</span>`;
+                } else {
+                  const isActive = p === responsesCurrentPage;
+                  buttonsHtml += `
+                    <button 
+                      type="button" 
+                      onclick="goToResponsesPage(${p})" 
+                      class="min-h-[36px] min-w-[36px] px-2.5 py-1 rounded-lg border ${isActive ? 'border-zinc-900 bg-zinc-900 text-white font-bold shadow-xs' : 'border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-100 font-medium'} transition cursor-pointer text-xs flex items-center justify-center active:scale-95"
+                    >
+                      ${p}
+                    </button>
+                  `;
+                }
+              });
+
+              // Tombol Berikutnya
+              buttonsHtml += `
+                <button 
+                  type="button" 
+                  onclick="goToResponsesPage(${responsesCurrentPage + 1})" 
+                  ${responsesCurrentPage === totalPages ? 'disabled' : ''} 
+                  class="min-h-[36px] min-w-[36px] px-2.5 py-1 rounded-lg border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-100 disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer text-xs font-semibold flex items-center justify-center active:scale-95"
+                  title="Halaman Berikutnya"
+                >
+                  ›
+                </button>
+              `;
+
+              paginationNavEl.innerHTML = buttonsHtml;
+            }
+          }
+        }
+      }
+
       renderAdminAttendanceTracker();
       syncTotalResponsesCounter(adminResponsesList.length);
       if (adminResponsesList.length === 0) {

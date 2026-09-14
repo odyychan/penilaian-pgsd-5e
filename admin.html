@@ -35,7 +35,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="src/admin/admin.css?v=2.5.24">
+  <link rel="stylesheet" href="src/admin/admin.css?v=2.5.25">
   <!-- KaTeX CSS & JS for Universal Math / LaTeX / AI & Word Formula Rendering -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -1896,8 +1896,8 @@
               <input 
                 type="text" 
                 id="searchResponseInput" 
-                oninput="renderAdminResponsesList()" 
-                placeholder="Cari nama penilai, NIM, atau kelompok..." 
+                oninput="responsesCurrentPage = 1; renderAdminResponsesList()" 
+                placeholder="Cari nama penilai, NIM, kelompok, atau ID Bukti..." 
                 class="w-full pl-8 pr-3.5 py-2 rounded-lg border border-zinc-300 text-xs focus:border-zinc-900 outline-none transition bg-zinc-50 focus:bg-white"
               >
               <svg class="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1908,7 +1908,7 @@
             <div>
               <select 
                 id="filterResponseGroupSelect" 
-                onchange="renderAdminResponsesList()" 
+                onchange="responsesCurrentPage = 1; renderAdminResponsesList()" 
                 class="w-full px-3 py-2 rounded-lg border border-zinc-300 bg-white text-xs font-medium focus:border-zinc-900 outline-none cursor-pointer"
               >
                 <option value="ALL">Semua Kelompok Dinilai</option>
@@ -1918,7 +1918,7 @@
             <div class="flex items-center gap-2">
               <select 
                 id="filterResponseRoleSelect" 
-                onchange="renderAdminResponsesList()" 
+                onchange="responsesCurrentPage = 1; renderAdminResponsesList()" 
                 class="w-full px-3 py-2 rounded-lg border border-zinc-300 bg-white text-xs font-medium focus:border-zinc-900 outline-none cursor-pointer"
               >
                 <option value="ALL">Semua Peran</option>
@@ -1944,6 +1944,32 @@
           <!-- Responses List Cards Grid -->
           <div id="adminResponsesCardsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4 pt-1 sm:pt-2">
             <!-- Rendered via renderAdminResponsesList() -->
+          </div>
+
+          <!-- Pagination Bar for Respons Individual -->
+          <div id="adminResponsesPagination" class="hidden flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 pb-1 border-t border-zinc-200/80 text-xs">
+            <div class="flex items-center gap-2 text-zinc-500 text-[11px] font-medium">
+              <span id="responsesPaginationInfo">Menampilkan 1-12 dari 0 respons</span>
+              <span class="text-zinc-300">•</span>
+              <label class="flex items-center gap-1.5 cursor-pointer">
+                <span>Per halaman:</span>
+                <select 
+                  id="responsesPageSizeSelect" 
+                  onchange="changeResponsesPageSize(this.value)" 
+                  class="px-2 py-1 rounded-lg border border-zinc-200 bg-white text-zinc-800 text-[11px] font-semibold focus:border-zinc-900 outline-none cursor-pointer"
+                >
+                  <option value="12">12</option>
+                  <option value="24">24</option>
+                  <option value="48">48</option>
+                  <option value="ALL">Semua</option>
+                </select>
+              </label>
+            </div>
+
+            <!-- Page Navigation Buttons -->
+            <div id="responsesPaginationNav" class="flex items-center gap-1 flex-wrap justify-center">
+              <!-- Dynamically populated page buttons -->
+            </div>
           </div>
 
           <!-- Empty Responses State -->
@@ -3986,13 +4012,13 @@ function getOrCreateFolder(folderName) {
   <!-- ========================================================================= -->
   <!-- JAVASCRIPT APP LOGIC: MULTI-FORM & ISOLATED SANDBOX ENGINE -->
   <!-- ========================================================================= -->
-  <script src="src/admin/admin.js?v=2.5.24"></script>
+  <script src="src/admin/admin.js?v=2.5.25"></script>
 
   <!-- Progressive Web App (PWA) & Instant Auto-Updater Engine -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js?v=2.5.24').then(function(reg) {
+        navigator.serviceWorker.register('/sw.js?v=2.5.25').then(function(reg) {
           reg.update();
           reg.addEventListener('updatefound', function() {
             var newWorker = reg.installing;

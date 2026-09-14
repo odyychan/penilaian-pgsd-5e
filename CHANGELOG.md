@@ -2,6 +2,22 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.25] - 2026-09-14
+
+### ⚡ Optimalisasi Skalabilitas Data: Pagination Interaktif Respons & Dukungan Pencarian ID Bukti
+- **🔍 Pencarian Respons Mendukung Nomor ID Bukti:**
+  - Memperluas algoritma pencarian pada tab *Respons Individual* panel admin (`#searchResponseInput`) agar mencakup kolom nomor ID Bukti resmi (`r.idRespons` / format `PGSD-REC-...`).
+  - Dosen dan admin kini dapat langsung menempelkan nomor ID Bukti tanda terima untuk menemukan data penilaian yang bersangkutan secara instan.
+  - Memperbarui placeholder input: *"Cari nama penilai, NIM, kelompok, atau ID Bukti..."*.
+- **📑 Sistem Pagination Interaktif untuk Data Respons Skala Besar:**
+  - Menerapkan kontrol pagination modern (`#adminResponsesPagination`) pada daftar kartu respons individual untuk mencegah *DOM bloat* dan menjaga kinerja rendering tetap ringan saat data respons bertambah banyak (puluhan hingga ribuan).
+  - Pilihan jumlah item per halaman fleksibel: `12`, `24`, `48`, atau `Semua`.
+  - Bilah navigasi halaman yang responsif dan *touch-friendly* ($\ge 36\text{ px}$ target sentuh dengan efek transisi halus).
+  - Indikator status dinamis: *"Menampilkan X-Y dari Z respons"* yang otomatis menyesuaikan saat filter kelompok, peran, atau kata kunci pencarian diterapkan.
+  - Reset otomatis ke halaman 1 saat pengguna mengetik kata kunci pencarian atau mengubah opsi filter.
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.25` di seluruh berkas (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
 ## [2.5.24] - 2026-09-14
 
 ### 🎨 Redesain Cek Bukti Online: Integrasi Navigasi Header, Hero Card Minimalis & Input Dinamis
