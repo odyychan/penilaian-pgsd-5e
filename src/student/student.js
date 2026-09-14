@@ -7715,8 +7715,11 @@ function normalizeMediaList(fieldOrMedia) {
         viewForm.classList.remove("hidden");
       }
 
-      // Safeguard: Ensure overview is visible if wizard and authGate are not actively in use
-      if (overview && (!wizard || wizard.classList.contains("hidden")) && (!authGate || authGate.classList.contains("hidden"))) {
+      const successSec = document.getElementById("formSuccessSection");
+      const isSuccessVisible = successSec && !successSec.classList.contains("hidden");
+
+      // Safeguard: Ensure overview is visible only if wizard, authGate, and successSec are not actively in use
+      if (overview && !isSuccessVisible && (!wizard || wizard.classList.contains("hidden")) && (!authGate || authGate.classList.contains("hidden"))) {
         overview.classList.remove("hidden");
       }
     }
@@ -9444,6 +9447,14 @@ function normalizeMediaList(fieldOrMedia) {
       if (successSec) {
         successSec.classList.remove("hidden");
       }
+
+      try {
+        localStorage.setItem("PGSD_ACTIVE_MAIN_TAB", "form");
+        const tabFormBtn = document.getElementById("tabFormBtn");
+        const tabRekapBtn = document.getElementById("tabRekapBtn");
+        if (tabFormBtn) tabFormBtn.className = "min-h-[44px] py-2 px-3 rounded-lg bg-zinc-100 text-zinc-950 shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer text-xs font-bold";
+        if (tabRekapBtn) tabRekapBtn.className = "min-h-[44px] py-2 px-3 rounded-lg text-zinc-400 hover:text-zinc-100 transition-all flex items-center justify-center gap-1.5 cursor-pointer text-xs font-medium";
+      } catch(e) {}
 
       // Populate teks di Bagian Akhir
       const titleEl = document.getElementById("formSuccessTitle");

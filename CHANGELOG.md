@@ -2,6 +2,22 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.17] - 2026-09-14
+
+### 📸 Verifikasi Visual Layar Konfirmasi & Pemberitahuan Berhasil Formulir BK5E
+- **🎨 Isolasi Presisi Layar Bagian Akhir (`#formSuccessSection`):**
+  - Menyempurnakan mekanisme pengaman (*safeguard*) pada `checkAndApplyAuthGate()` agar mendeteksi status visibilitas `#formSuccessSection`, mencegah kartu Info Formulir (*overview card*) terbuka secara tidak diinginkan di atas lembar tanda terima resmi setelah pengiriman.
+  - Memastikan sinkronisasi aktif indikator tab navbar agar tetap menyorot *"Formulir Penilaian"* dengan gaya latar putih tegas saat layar sukses ditampilkan.
+- **📸 Bukti Tangkapan Layar Komprehensif pada Formulir Aktif `BK5E`:**
+  - **Layar 1 — Modal Pratinjau & Konfirmasi Jawaban (`#modalPreSubmitReview`):** Menampilkan rincian identitas penilai (*Ahmad Rizky Pratama*), kelompok yang dinilai (*Kelompok 1*), perolehan nilai (*92/100*), nominasi presentator terbaik (*Fauzan* & *Nurul*), dan tombol aksi *"Kirim Penilaian Sekarang"*.
+  - **Layar 2 — Layar Pemberitahuan Berhasil (*Google Forms Style Ending Screen*):** Menampilkan tajuk *"Penilaian Berhasil Dikirim"*, pesan apresiasi, dua tombol navigasi utama (*"Lihat Rekap Hasil"* & *"Nilai Kelompok Lain"*), serta kartu bukti tanda terima resmi (*Digital Assessment Receipt Card*) lengkap dengan kode bukti unik (`PGSD-REC-BK5E-MU0PCP10`), rincian nilai, dan stempel QR digital resmi FKIP ULM.
+- **🧹 Protokol Pembersihan Data Uji Coba Otomatis:**
+  - Baris data uji coba yang terbuat selama verifikasi langsung dihapus seketika dari tabel `pgsd_responses` di database Supabase via REST API sehingga basis data perkuliahan tetap terjaga 100% steril.
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.17` di seluruh berkas (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
+---
+
 ## [2.5.16] - 2026-09-14
 
 ### 🐛 Resolusi ReferenceError Identitas Penilai & Verifikasi Tuntas Layar Konfirmasi BK5E
