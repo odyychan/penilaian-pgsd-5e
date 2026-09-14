@@ -2,6 +2,24 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.20] - 2026-09-14
+
+### 🏷️ Penyederhanaan Tampilan Bukti: Label Jelas "ID Bukti :" & Desain Minimalis Menenangkan
+- **🏷️ Label Eksplisit "ID Bukti :" yang Jelas & Tegas:**
+  - Menampilkan label teks `"ID Bukti :"` secara eksplisit dan kontras pada kartu identitas tanda terima, berdampingan dengan stempel status `● Terverifikasi di Database`.
+  - Kode ID tanda terima (`PGSD-REC-...`) disajikan dengan tipografi monospace tebal berjarak bersih tanpa efek sorotan blok hitam (*unintended selection highlight*).
+- **🌿 Desain Sederhana, Bersih, dan Tenang (*Anti-Clutter / Anti-Bloat*):**
+  - Mengadopsi struktur ringkasan terbukti yang bersih (*mirroring* format kartu tanda terima yang ringkas dan disukai pengguna).
+  - Menyederhanakan baris informasi dengan hierarki key-value yang tenang dan berjarak lega: `Kelompok Dinilai :`, `Skor Diberikan :`, `Penilai :`, `Waktu :`, serta baris kontekstual jika tersedia.
+  - Memadatkan format waktu menjadi representasi ringkas (misal: `14 Sep 2026, 11:59 WITA`) sehingga pas rapi dalam satu baris tanpa patahan canggung di layar ponsel.
+- **📱 Pengalaman Pengguna (UX) Minimalis:**
+  - Menghilangkan ornamen sertifikat yang berat atau berlapis-lapis yang berisiko membuat pengguna merasa jenuh atau pusing.
+  - Mengurangi ukuran Segel QR Digital menjadi proporsional (`w-14 h-14` / 56px) berdampingan rapi dengan panduan verifikasi ringkas.
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.20` di seluruh berkas (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
+---
+
 ## [2.5.19] - 2026-09-14
 
 ### ✨ Penyempurnaan Antarmuka Verifikasi Keabsahan: Tampilan Ringkas, Bersih, dan Akordeon Evaluasi Interaktif

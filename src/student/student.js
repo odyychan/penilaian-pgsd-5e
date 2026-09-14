@@ -10090,9 +10090,13 @@ function normalizeMediaList(fieldOrMedia) {
       const elTimestamp = document.getElementById("verifyModalTimestamp");
       if (elReceiptId) elReceiptId.textContent = idRespons;
       if (elTimestamp) {
-        elTimestamp.textContent = (typeof formatSmartScheduleTime === 'function')
-          ? formatSmartScheduleTime(timestamp).replace(/<[^>]*>/g, '')
-          : (timestamp.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) + " WITA");
+        try {
+          const dateStr = timestamp.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+          const timeStr = timestamp.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
+          elTimestamp.textContent = `${dateStr}, ${timeStr} WITA`;
+        } catch(e) {
+          elTimestamp.textContent = timestamp.toLocaleString('id-ID') + " WITA";
+        }
       }
 
       // Populate Identitas Penilai (Responden)
@@ -10103,7 +10107,7 @@ function normalizeMediaList(fieldOrMedia) {
       }
       if (elNimBadge) {
         if (isValidVerificationText(payload.nimPenilai)) {
-          elNimBadge.textContent = "NIM: " + payload.nimPenilai;
+          elNimBadge.textContent = ` (${payload.nimPenilai})`;
           elNimBadge.classList.remove("hidden");
         } else {
           elNimBadge.classList.add("hidden");
@@ -10314,11 +10318,11 @@ function normalizeMediaList(fieldOrMedia) {
         }
       }
 
-      // Render Large QR Code inside Modal
+      // Render QR Code inside Modal
       const qrCanvas = document.getElementById("verifyModalQrCanvas");
       if (qrCanvas) {
         const verifyUrl = getVerificationUrl(idRespons);
-        renderQrCodeHelper(qrCanvas, verifyUrl, 84);
+        renderQrCodeHelper(qrCanvas, verifyUrl, 56);
       }
 
       // Buka Modal
