@@ -2,6 +2,26 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.21] - 2026-09-14
+
+### 🌐 Halaman Baru Cek Bukti Penilaian Online: Integrasi Cerdas, Navigasi Transparan, & Penempatan QR Modal
+- **📄 Halaman Penuh Baru "Cek Bukti Penilaian Online" (`#viewCekBukti`):**
+  - Menggantikan tampilan ulasan di dalam popup modal sempit dengan halaman penuh yang terdedikasi, elegan, dan estetik.
+  - Dilengkapi kotak pencarian ID Bukti tanda terima yang interaktif di bagian atas dengan tombol tempel (*paste from clipboard*), validasi instan, dan indikator pemuatan halus.
+  - Kartu verifikasi resmi menyajikan lambang ULM, stempel keabsahan digital, ID bukti, waktu pencatatan, ringkasan skor & penilai, konteks akademik, presentator terbaik, serta seluruh rincian ulasan kualitatif tertulis secara transparan.
+  - Aksi sekunder lengkap: *Salin Tautan*, *Unduh PNG*, dan *Cetak Bukti*.
+- **🧠 Navigasi & Input Otomatis yang Cerdas (*Smart Origin Routing*):**
+  - **Dari Portal Masuk:** Tombol *"Cek Bukti Penilaian Online"* langsung mengarahkan ke halaman Cek Bukti dalam status siap input (*standby*); tombol kembali bertuliskan *"Kembali ke Beranda"*.
+  - **Dari Modal Bukti / Formulir:** Tombol *"Lihat Selengkapnya ➔"* di modal bukti otomatis menutup modal, membuka halaman Cek Bukti dengan ID terisi otomatis, langsung memuat seluruh ulasan dari Supabase; tombol kembali cerdas bertuliskan *"Kembali ke Formulir"*.
+  - **Dari Tautan Langsung / Scan QR:** Parameter query `?verify=...` atau `?bukti=...` atau `?view=bukti` langsung membuka halaman Cek Bukti dengan status *Zero-FOUC (Flash of Unstyled Content)*.
+  - Mendukung navigasi tombol mundur peramban (*browser back button popstate*) secara alami dan mulus.
+- **📱 Penataan Ulang Modal Verifikasi (`#modalVerificationCertificate`):**
+  - Menghilangkan badge teks *"Terverifikasi di Database"* dan menggantikannya dengan kode QR verifikasi langsung di sebelah kanan kotak label *"ID Bukti :"*.
+  - Menghilangkan kartu QR duplikat di bagian bawah modal sehingga tinggi modal menjadi sangat ringkas, padat, dan pas dalam satu layar tanpa perlu pengguliran (*no scroll*).
+  - Mengubah tombol ulasan menjadi tombol tautan bersih *"Lihat Selengkapnya (Buka Halaman Penuh ➔)"*.
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.21` di seluruh berkas (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
 ## [2.5.20] - 2026-09-14
 
 ### 🏷️ Penyederhanaan Tampilan Bukti: Label Jelas "ID Bukti :" & Desain Minimalis Menenangkan

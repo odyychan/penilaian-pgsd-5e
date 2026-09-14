@@ -1045,14 +1045,24 @@ function normalizeMediaList(fieldOrMedia) {
 
     document.addEventListener("DOMContentLoaded", async function() {
       initAllModernDropdowns();
-      // Cek Deep-Link Verifikasi Bukti Tanda Terima Online (?verify= atau ?bukti=)
-      const verifyQueryParam = (new URLSearchParams(window.location.search).get('verify') || new URLSearchParams(window.location.search).get('bukti') || '').trim();
+      // Cek Deep-Link Verifikasi Bukti Tanda Terima Online (?verify= atau ?bukti= atau ?view=bukti)
+      const searchParams = new URLSearchParams(window.location.search);
+      const verifyQueryParam = (searchParams.get('verify') || searchParams.get('bukti') || '').trim();
+      const viewQueryParam = (searchParams.get('view') || '').trim().toLowerCase();
       if (verifyQueryParam) {
         setTimeout(() => {
-          if (typeof verifyReceiptById === 'function') {
-            verifyReceiptById(verifyQueryParam);
+          if (typeof navigateToCekBukti === 'function') {
+            navigateToCekBukti(verifyQueryParam, 'direct');
           }
-        }, 120);
+        }, 80);
+        return;
+      } else if (viewQueryParam === 'bukti' || viewQueryParam === 'cek-bukti') {
+        setTimeout(() => {
+          if (typeof navigateToCekBukti === 'function') {
+            navigateToCekBukti('', 'portal');
+          }
+        }, 80);
+        return;
       }
 
       // Double check if returning from OAuth before entering portal mode
@@ -1230,6 +1240,15 @@ function normalizeMediaList(fieldOrMedia) {
           anyOpenModal.classList.remove("flex");
         }
         return;
+      }
+
+      // 1.5. Jika sedang di Halaman Cek Bukti Online dan popstate kembali
+      const viewCekBukti = document.getElementById("viewCekBukti");
+      if (viewCekBukti && !viewCekBukti.classList.contains("hidden")) {
+        if (typeof navigateBackFromCekBukti === 'function') {
+          navigateBackFromCekBukti();
+          return;
+        }
       }
 
       // 2. Jika sedang di Tab Rekapitulasi dan popstate kembali -> kembalikan ke Tab Form
@@ -10318,11 +10337,13 @@ function normalizeMediaList(fieldOrMedia) {
         }
       }
 
-      // Render QR Code inside Modal
+      currentReceiptData = receiptData;
+
+      // Render QR Code inside Modal (ID Bukti Card)
       const qrCanvas = document.getElementById("verifyModalQrCanvas");
       if (qrCanvas) {
         const verifyUrl = getVerificationUrl(idRespons);
-        renderQrCodeHelper(qrCanvas, verifyUrl, 56);
+        renderQrCodeHelper(qrCanvas, verifyUrl, 48);
       }
 
       // Buka Modal
@@ -10344,18 +10365,200 @@ function normalizeMediaList(fieldOrMedia) {
       }
     }
 
-    async function verifyReceiptById(idRespons) {
+    // =========================================================================
+    // 🌐 CEK BUKTI PENILAIAN ONLINE (DEDICATED FULL-PAGE VIEW ENGINE)
+    // =========================================================================
+    let cekBuktiOrigin = 'portal'; // 'portal' | 'form' | 'direct'
+
+    function navigateToCekBukti(idToInspect = '', origin = 'portal') {
+      cekBuktiOrigin = origin || 'portal';
+
+      // Update label tombol kembali secara cerdas berdasarkan titik masuk
+      const btnBackLabel = document.getElementById('btnBackCekBuktiLabel');
+      if (btnBackLabel) {
+        if (cekBuktiOrigin === 'form') {
+          btnBackLabel.textContent = 'Kembali ke Formulir';
+        } else {
+          btnBackLabel.textContent = 'Kembali ke Beranda';
+        }
+      }
+
+      // Aktifkan mode CSS isolasi
+      document.documentElement.classList.remove('portal-mode-active', 'form-mode-active');
+      document.documentElement.classList.add('cek-bukti-mode-active');
+      document.title = "Cek Bukti Penilaian Online • FKIP ULM";
+
+      // Sembunyikan view lainnya
+      const viewPortal = document.getElementById('viewPortal');
+      const viewForm = document.getElementById('viewForm');
+      const viewRekap = document.getElementById('viewRekap');
+      const navTabContainer = document.getElementById('navTabContainer');
+      const badgeSesiTop = document.getElementById('badgeSesiTop');
+      const viewCekBukti = document.getElementById('viewCekBukti');
+
+      if (viewPortal) viewPortal.classList.add('hidden');
+      if (viewForm) viewForm.classList.add('hidden');
+      if (viewRekap) viewRekap.classList.add('hidden');
+      if (navTabContainer) navTabContainer.classList.add('hidden');
+      if (badgeSesiTop) badgeSesiTop.classList.add('hidden');
+
+      if (viewCekBukti) {
+        viewCekBukti.classList.remove('hidden');
+        viewCekBukti.style.display = 'block';
+      }
+
+      window.scrollTo({ top: 0, behavior: 'instant' });
+
+      const input = document.getElementById('inputCekBuktiId');
+      const errBox = document.getElementById('cekBuktiErrorBox');
+      if (errBox) errBox.classList.add('hidden');
+
+      const cleanId = (idToInspect || '').trim().toUpperCase();
+      if (cleanId) {
+        if (input) input.value = cleanId;
+        performCekBukti(cleanId);
+        try {
+          const url = new URL(window.location.href);
+          url.searchParams.set('verify', cleanId);
+          url.searchParams.delete('id');
+          url.searchParams.delete('view');
+          window.history.pushState({ view: 'cekBukti', id: cleanId }, '', url.toString());
+        } catch(e) {}
+      } else {
+        // Keadaan Standby: menunggu input pengguna
+        const standbyState = document.getElementById('cekBuktiStandbyState');
+        const loadingState = document.getElementById('cekBuktiLoadingState');
+        const foundCard = document.getElementById('cekBuktiFoundCard');
+        if (standbyState) standbyState.classList.remove('hidden');
+        if (loadingState) loadingState.classList.add('hidden');
+        if (foundCard) foundCard.classList.add('hidden');
+        if (input) {
+          input.value = '';
+          setTimeout(() => input.focus(), 150);
+        }
+        try {
+          const url = new URL(window.location.href);
+          url.searchParams.set('view', 'bukti');
+          url.searchParams.delete('verify');
+          url.searchParams.delete('id');
+          window.history.pushState({ view: 'cekBukti' }, '', url.toString());
+        } catch(e) {}
+      }
+    }
+
+    function navigateBackFromCekBukti() {
+      document.documentElement.classList.remove('cek-bukti-mode-active');
+      const viewCekBukti = document.getElementById('viewCekBukti');
+      if (viewCekBukti) {
+        viewCekBukti.classList.add('hidden');
+        viewCekBukti.style.display = 'none';
+      }
+
+      if (cekBuktiOrigin === 'form' && activeFormId) {
+        // Kembali ke formulir yang sedang aktif
+        document.documentElement.classList.add('form-mode-active');
+        const viewForm = document.getElementById('viewForm');
+        const navTabContainer = document.getElementById('navTabContainer');
+        const badgeSesiTop = document.getElementById('badgeSesiTop');
+        if (viewForm) viewForm.classList.remove('hidden');
+        if (navTabContainer) navTabContainer.classList.remove('hidden');
+        if (badgeSesiTop) badgeSesiTop.classList.remove('hidden');
+        document.title = (currentFormMeta?.title ? `${currentFormMeta.title} • Form Penilaian` : "Form Penilaian Mahasiswa • FKIP ULM");
+        try {
+          const url = new URL(window.location.href);
+          url.searchParams.set('id', activeFormId);
+          url.searchParams.delete('verify');
+          url.searchParams.delete('view');
+          window.history.pushState({ formId: activeFormId }, '', url.toString());
+        } catch(e) {}
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      } else {
+        // Kembali ke Portal Beranda
+        showPortalView();
+        try {
+          const url = new URL(window.location.href);
+          url.searchParams.delete('verify');
+          url.searchParams.delete('view');
+          url.searchParams.delete('id');
+          window.history.pushState({ portal: true }, '', url.origin + url.pathname);
+        } catch(e) {}
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }
+    }
+
+    function navigateToCekBuktiFromModal() {
+      const receiptId = currentReceiptData ? currentReceiptData.idRespons : (document.getElementById("verifyModalReceiptId")?.textContent?.trim() || "");
+      closeVerificationModal();
+      navigateToCekBukti(receiptId, 'form');
+    }
+
+    function navigateToCekBuktiFromPortal() {
+      navigateToCekBukti('', 'portal');
+    }
+
+    async function pasteCekBuktiFromClipboard() {
+      const input = document.getElementById("inputCekBuktiId");
+      if (!input) return;
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          input.value = text.trim().toUpperCase();
+          input.focus();
+          showToast("ID Bukti berhasil ditempel dari papan klip!", "info");
+        }
+      } catch (e) {
+        input.focus();
+        showToast("Silakan ketikkan ID Bukti secara langsung.", "info");
+      }
+    }
+
+    function submitCekBuktiSearch() {
+      const input = document.getElementById("inputCekBuktiId");
+      const errBox = document.getElementById("cekBuktiErrorBox");
+      const errTxt = document.getElementById("cekBuktiErrorText");
+      if (!input) return;
+
+      const id = input.value.trim().toUpperCase();
+      if (!id) {
+        if (errBox && errTxt) {
+          errBox.classList.remove("hidden");
+          errTxt.textContent = "Silakan masukkan ID Bukti tanda terima terlebih dahulu.";
+        }
+        input.focus();
+        return;
+      }
+
+      performCekBukti(id);
+    }
+
+    async function performCekBukti(idRespons) {
       if (!idRespons || typeof idRespons !== 'string') return;
       const cleanId = idRespons.trim().toUpperCase();
       if (!cleanId) return;
 
-      showToast("Memverifikasi keabsahan bukti tanda terima...", "info");
+      const input = document.getElementById('inputCekBuktiId');
+      if (input) input.value = cleanId;
+
+      const btn = document.getElementById('btnSubmitCekBukti');
+      const spinner = document.getElementById('cekBuktiSpinner');
+      const errBox = document.getElementById('cekBuktiErrorBox');
+      const errTxt = document.getElementById('cekBuktiErrorText');
+
+      const standbyState = document.getElementById('cekBuktiStandbyState');
+      const loadingState = document.getElementById('cekBuktiLoadingState');
+      const foundCard = document.getElementById('cekBuktiFoundCard');
+
+      if (errBox) errBox.classList.add('hidden');
+      if (standbyState) standbyState.classList.add('hidden');
+      if (foundCard) foundCard.classList.add('hidden');
+      if (loadingState) loadingState.classList.remove('hidden');
+      if (btn) btn.disabled = true;
+      if (spinner) spinner.classList.remove('hidden');
 
       try {
         const sb = await ensureSupabaseClient();
         if (!sb) {
-          showToast("Koneksi database belum siap, silakan coba lagi.", "warning");
-          return;
+          throw new Error("Koneksi basis data belum siap. Periksa jaringan internet Anda.");
         }
 
         const { data, error } = await sb
@@ -10365,23 +10568,21 @@ function normalizeMediaList(fieldOrMedia) {
           .maybeSingle();
 
         if (error) {
-          console.error("[Verify Receipt] Error querying Supabase:", error);
-          showToast("Gagal memverifikasi: " + (error.message || "Kesalahan koneksi"), "error");
-          return;
+          throw new Error("Gagal mengambil data dari Supabase: " + (error.message || "Kesalahan jaringan"));
         }
 
         if (!data) {
-          showToast(`Nomor Bukti "${cleanId}" tidak ditemukan.`, "error");
-          const errBox = document.getElementById("lookupReceiptError");
-          const errTxt = document.getElementById("lookupReceiptErrorText");
+          if (loadingState) loadingState.classList.add('hidden');
+          if (standbyState) standbyState.classList.remove('hidden');
           if (errBox && errTxt) {
-            errBox.classList.remove("hidden");
-            errTxt.textContent = `Nomor Bukti "${cleanId}" tidak tercatat di basis data perkuliahan.`;
+            errBox.classList.remove('hidden');
+            errTxt.innerHTML = `Nomor ID Bukti <strong>"${escapeHtml(cleanId)}"</strong> tidak ditemukan atau belum tercatat di basis data perkuliahan resmi.`;
           }
+          showToast(`ID Bukti "${cleanId}" tidak ditemukan.`, "error");
           return;
         }
 
-        // Ambil info metadata formulir jika ada (default string kosong agar tidak memunculkan tanda '-')
+        // Ambil info metadata formulir jika ada
         let formTitle = "";
         let dosenName = "";
         let matkulName = "";
@@ -10424,7 +10625,8 @@ function normalizeMediaList(fieldOrMedia) {
             nilaiKelompok: (data.nilai_kelompok !== undefined && data.nilai_kelompok !== null) ? data.nilai_kelompok : null,
             presentatorTerbaik: presenters,
             evaluasiDetail: evalDetail,
-            customAnswers: data.custom_answers || {}
+            customAnswers: data.custom_answers || {},
+            komentar: data.komentar || data.catatan || ""
           },
           formMeta: {
             formId: data.form_id,
@@ -10437,13 +10639,265 @@ function normalizeMediaList(fieldOrMedia) {
         };
 
         currentReceiptData = receiptData;
-        closeLookupReceiptModal();
-        openReceiptVerificationModal(receiptData);
+
+        // Render detail ke tampilan halaman penuh
+        renderCekBuktiDetail(receiptData);
+
+        if (loadingState) loadingState.classList.add('hidden');
+        if (foundCard) foundCard.classList.remove('hidden');
+
+        showToast("Bukti tanda terima valid dan berhasil diverifikasi!", "success");
 
       } catch (err) {
-        console.error("[Verify Receipt] Exception:", err);
-        showToast("Terjadi kesalahan saat memverifikasi data.", "error");
+        console.error("[Cek Bukti] Error:", err);
+        if (loadingState) loadingState.classList.add('hidden');
+        if (standbyState) standbyState.classList.remove('hidden');
+        if (errBox && errTxt) {
+          errBox.classList.remove('hidden');
+          errTxt.textContent = err.message || "Terjadi kesalahan saat memverifikasi bukti tanda terima.";
+        }
+        showToast(err.message || "Gagal memverifikasi bukti tanda terima.", "error");
+      } finally {
+        if (btn) btn.disabled = false;
+        if (spinner) spinner.classList.add('hidden');
       }
+    }
+
+    function renderCekBuktiDetail(receiptData) {
+      if (!receiptData) return;
+      const payload = receiptData.payload || {};
+      const formMeta = receiptData.formMeta || {};
+      const idRespons = receiptData.idRespons || "-";
+      const timestamp = receiptData.timestamp ? new Date(receiptData.timestamp) : new Date();
+
+      // 1. Receipt ID & Timestamp
+      const elReceiptId = document.getElementById("pageCekBuktiReceiptId");
+      const elTimestamp = document.getElementById("pageCekBuktiTimestamp");
+      if (elReceiptId) elReceiptId.textContent = idRespons;
+      if (elTimestamp) {
+        try {
+          const dateStr = timestamp.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+          const timeStr = timestamp.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
+          elTimestamp.textContent = `Tercatat pada: ${dateStr}, ${timeStr} WITA`;
+        } catch(e) {
+          elTimestamp.textContent = `Tercatat pada: ${timestamp.toLocaleString('id-ID')} WITA`;
+        }
+      }
+
+      // 2. QR Code
+      const qrCanvas = document.getElementById("pageCekBuktiQrCanvas");
+      if (qrCanvas) {
+        const verifyUrl = getVerificationUrl(idRespons);
+        renderQrCodeHelper(qrCanvas, verifyUrl, 48);
+      }
+
+      // 3. Kelompok & Nilai
+      const elKelompok = document.getElementById("pageCekBuktiKelompok");
+      const elNilai = document.getElementById("pageCekBuktiNilai");
+      if (elKelompok) {
+        elKelompok.textContent = isValidVerificationText(payload.kelompok) ? payload.kelompok : "-";
+      }
+      if (elNilai) {
+        if (payload.nilaiKelompok !== undefined && payload.nilaiKelompok !== null && payload.nilaiKelompok !== "-" && payload.nilaiKelompok !== "") {
+          elNilai.textContent = `${payload.nilaiKelompok} / 100`;
+          elNilai.parentElement?.classList.remove("hidden");
+        } else {
+          elNilai.textContent = "-";
+        }
+      }
+
+      // 4. Penilai (Nama & NIM)
+      const elNama = document.getElementById("pageCekBuktiNama");
+      const elNimBadge = document.getElementById("pageCekBuktiNimBadge");
+      if (elNama) {
+        elNama.textContent = isValidVerificationText(payload.namaPenilai) ? payload.namaPenilai : "Mahasiswa Penilai";
+      }
+      if (elNimBadge) {
+        if (isValidVerificationText(payload.nimPenilai)) {
+          elNimBadge.textContent = ` (${payload.nimPenilai})`;
+          elNimBadge.classList.remove("hidden");
+        } else {
+          elNimBadge.classList.add("hidden");
+        }
+      }
+
+      // 5. Mata Kuliah
+      const elRowMatkul = document.getElementById("pageCekBuktiRowMatkul");
+      const elMatkul = document.getElementById("pageCekBuktiMatkul");
+      const matkulVal = formMeta.mataKuliah || "";
+      if (elRowMatkul && elMatkul) {
+        if (isValidVerificationText(matkulVal)) {
+          elMatkul.textContent = matkulVal;
+          elRowMatkul.classList.remove("hidden");
+        } else {
+          elRowMatkul.classList.add("hidden");
+        }
+      }
+
+      // 6. Dosen Pengampu
+      const elRowDosen = document.getElementById("pageCekBuktiRowDosen");
+      const elDosen = document.getElementById("pageCekBuktiDosen");
+      const dosenVal = formMeta.dosen || "";
+      if (elRowDosen && elDosen) {
+        if (isValidVerificationText(dosenVal)) {
+          elDosen.textContent = dosenVal;
+          elRowDosen.classList.remove("hidden");
+        } else {
+          elRowDosen.classList.add("hidden");
+        }
+      }
+
+      // 7. Sesi Pertemuan
+      const elRowSesi = document.getElementById("pageCekBuktiRowSesi");
+      const elSesi = document.getElementById("pageCekBuktiSesi");
+      const sesiVal = formMeta.sesi || "";
+      if (elRowSesi && elSesi) {
+        if (isValidVerificationText(sesiVal)) {
+          elSesi.textContent = String(sesiVal).toLowerCase().includes("sesi") || String(sesiVal).toLowerCase().includes("pertemuan")
+            ? String(sesiVal)
+            : `Sesi / Pertemuan ${sesiVal}`;
+          elRowSesi.classList.remove("hidden");
+        } else {
+          elRowSesi.classList.add("hidden");
+        }
+      }
+
+      // 8. Presentator Terbaik
+      const elRowPresenters = document.getElementById("pageCekBuktiRowPresenters");
+      const elPresenters = document.getElementById("pageCekBuktiPresenters");
+      let presList = [];
+      if (Array.isArray(payload.presentatorTerbaik)) {
+        presList = payload.presentatorTerbaik.filter(p => isValidVerificationText(p));
+      } else if (typeof payload.presentatorTerbaik === 'string' && isValidVerificationText(payload.presentatorTerbaik)) {
+        presList = [payload.presentatorTerbaik.trim()];
+      }
+      if (elRowPresenters && elPresenters) {
+        if (presList.length > 0) {
+          elRowPresenters.classList.remove("hidden");
+          elPresenters.innerHTML = presList.map(p => `
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-semibold">
+              <span>⭐</span>
+              <span>${escapeHtml(p)}</span>
+            </span>
+          `).join("");
+        } else {
+          elRowPresenters.classList.add("hidden");
+        }
+      }
+
+      // 9. Kualitatif Ulasan & Evaluasi Tertulis
+      const evalItems = [];
+      const evalDetail = payload.evaluasiDetail;
+      if (evalDetail && typeof evalDetail === 'object') {
+        Object.keys(evalDetail).forEach(key => {
+          if (key === '_partition' || key === 'quizResult' || key === 'customAnswers') return;
+          const val = evalDetail[key];
+          if (typeof val === 'string' && isValidVerificationText(val)) {
+            evalItems.push({
+              title: `Evaluasi Anggota Pemateri: ${key}`,
+              score: null,
+              comment: val.trim()
+            });
+          } else if (val && typeof val === 'object') {
+            const catatan = val.catatan || val.komentar || val.feedback || val.evaluasi || "";
+            const skor = val.skor !== undefined ? val.skor : (val.nilai !== undefined ? val.nilai : null);
+            if (isValidVerificationText(catatan) || skor !== null) {
+              evalItems.push({
+                title: `Evaluasi Anggota: ${val.nama || val.namaMahasiswa || key}`,
+                score: skor,
+                comment: catatan
+              });
+            }
+          }
+        });
+      }
+
+      const generalFeedback = payload.komentar || payload.masukan || payload.catatanUmum;
+      if (isValidVerificationText(generalFeedback)) {
+        evalItems.push({
+          title: "Masukan & Catatan Umum",
+          score: null,
+          comment: generalFeedback.trim()
+        });
+      }
+
+      const elEvaluasiList = document.getElementById("pageCekBuktiEvaluasiList");
+      const elCatatanCount = document.getElementById("pageCekBuktiCatatanCount");
+
+      if (elEvaluasiList) {
+        if (evalItems.length > 0) {
+          elEvaluasiList.innerHTML = evalItems.map(item => `
+            <div class="p-3 rounded-xl bg-zinc-50 border border-zinc-200/90 space-y-1.5 text-left">
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-bold text-zinc-900 text-xs">${escapeHtml(item.title)}</span>
+                ${item.score !== null ? `<span class="font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-[11px] border border-emerald-200">${escapeHtml(String(item.score))} Pts</span>` : ''}
+              </div>
+              <p class="text-zinc-600 text-xs leading-relaxed whitespace-pre-line italic font-serif">"${escapeHtml(item.comment || '(Tanpa catatan tambahan)')}"</p>
+            </div>
+          `).join("");
+        } else {
+          elEvaluasiList.innerHTML = `
+            <div class="p-3 rounded-xl bg-zinc-50/70 border border-zinc-200 text-zinc-400 text-xs italic text-center">
+              Tidak ada catatan evaluasi tertulis tambahan.
+            </div>
+          `;
+        }
+      }
+
+      // Custom Answers
+      let customAnsCount = 0;
+      const customBox = document.getElementById("pageCekBuktiCustomAnswersBox");
+      const customList = document.getElementById("pageCekBuktiCustomAnswersList");
+      const customAns = payload.customAnswers || payload.evaluasiDetail?.customAnswers;
+      if (customBox && customList) {
+        if (customAns && typeof customAns === 'object' && Object.keys(customAns).length > 0) {
+          const validEntries = Object.entries(customAns).filter(([k, v]) => isValidVerificationText(v));
+          customAnsCount = validEntries.length;
+          if (validEntries.length > 0) {
+            customBox.classList.remove("hidden");
+            customList.innerHTML = validEntries.map(([k, v]) => `
+              <div class="p-2 bg-white rounded-lg border border-zinc-200 flex items-start justify-between gap-2 text-xs">
+                <span class="font-medium text-zinc-600">${escapeHtml(k)}:</span>
+                <span class="font-semibold text-zinc-900 text-right">${escapeHtml(String(v))}</span>
+              </div>
+            `).join("");
+          } else {
+            customBox.classList.add("hidden");
+            customList.innerHTML = "";
+          }
+        } else {
+          customBox.classList.add("hidden");
+          customList.innerHTML = "";
+        }
+      }
+
+      const totalCatatan = evalItems.length + customAnsCount;
+      if (elCatatanCount) {
+        elCatatanCount.textContent = `${totalCatatan} Catatan`;
+      }
+    }
+
+    async function copyPageVerificationLink() {
+      if (!currentReceiptData) return;
+      const finalId = currentReceiptData.idRespons;
+      const verifyUrl = getVerificationUrl(finalId);
+      try {
+        await navigator.clipboard.writeText(verifyUrl);
+        const btnText = document.getElementById("btnCopyPageVerifyLinkText");
+        if (btnText) {
+          const orig = btnText.textContent;
+          btnText.textContent = "✓ Tautan Disalin!";
+          setTimeout(() => { btnText.textContent = orig; }, 2000);
+        }
+        showToast("Tautan verifikasi bukti berhasil disalin!", "success");
+      } catch (e) {
+        showToast("Gagal menyalin tautan: " + e.message, "error");
+      }
+    }
+
+    async function verifyReceiptById(idRespons) {
+      if (!idRespons) return;
+      navigateToCekBukti(idRespons, 'direct');
     }
 
     async function copyVerificationLink() {
@@ -10465,69 +10919,19 @@ function normalizeMediaList(fieldOrMedia) {
     }
 
     function openLookupReceiptModal() {
-      const modal = document.getElementById("modalLookupReceipt");
-      const input = document.getElementById("inputLookupReceiptId");
-      const errBox = document.getElementById("lookupReceiptError");
-      if (errBox) errBox.classList.add("hidden");
-      if (input) input.value = "";
-      if (modal) {
-        modal.classList.remove("hidden");
-        modal.classList.add("flex");
-        setTimeout(() => { if (input) input.focus(); }, 150);
-        try {
-          history.pushState({ modal: 'lookupReceipt' }, '');
-        } catch(e) {}
-      }
+      navigateToCekBuktiFromPortal();
     }
 
     function closeLookupReceiptModal() {
-      const modal = document.getElementById("modalLookupReceipt");
-      if (modal) {
-        modal.classList.add("hidden");
-        modal.classList.remove("flex");
-      }
+      navigateBackFromCekBukti();
     }
 
     async function submitLookupReceipt() {
-      const input = document.getElementById("inputLookupReceiptId");
-      const errBox = document.getElementById("lookupReceiptError");
-      const btn = document.getElementById("btnSubmitLookupReceipt");
-      const spinner = document.getElementById("lookupReceiptSpinner");
-      if (!input) return;
-
-      const id = input.value.trim().toUpperCase();
-      if (!id) {
-        if (errBox) {
-          errBox.classList.remove("hidden");
-          const txt = document.getElementById("lookupReceiptErrorText");
-          if (txt) txt.textContent = "Silakan masukkan nomor ID tanda terima terlebih dahulu.";
-        }
-        return;
-      }
-
-      if (btn) btn.disabled = true;
-      if (spinner) spinner.classList.remove("hidden");
-
-      try {
-        await verifyReceiptById(id);
-      } finally {
-        if (btn) btn.disabled = false;
-        if (spinner) spinner.classList.add("hidden");
-      }
+      submitCekBuktiSearch();
     }
 
     async function pasteLookupReceiptFromClipboard() {
-      const input = document.getElementById("inputLookupReceiptId");
-      if (!input) return;
-      try {
-        const text = await navigator.clipboard.readText();
-        if (text) {
-          input.value = text.trim().toUpperCase().replace(/\s+/g, '');
-          showToast("ID Bukti berhasil ditempel!", "info");
-        }
-      } catch (e) {
-        showToast("Gagal mengakses papan klip. Silakan ketik langsung.", "warning");
-      }
+      pasteCekBuktiFromClipboard();
     }
 
     window.openCurrentReceiptVerification = openCurrentReceiptVerification;
@@ -10542,6 +10946,15 @@ function normalizeMediaList(fieldOrMedia) {
     window.pasteLookupReceiptFromClipboard = pasteLookupReceiptFromClipboard;
     window.downloadDigitalReceiptImage = downloadDigitalReceiptImage;
     window.printDigitalReceipt = printDigitalReceipt;
+    window.navigateToCekBukti = navigateToCekBukti;
+    window.navigateBackFromCekBukti = navigateBackFromCekBukti;
+    window.navigateToCekBuktiFromModal = navigateToCekBuktiFromModal;
+    window.navigateToCekBuktiFromPortal = navigateToCekBuktiFromPortal;
+    window.submitCekBuktiSearch = submitCekBuktiSearch;
+    window.pasteCekBuktiFromClipboard = pasteCekBuktiFromClipboard;
+    window.performCekBukti = performCekBukti;
+    window.renderCekBuktiDetail = renderCekBuktiDetail;
+    window.copyPageVerificationLink = copyPageVerificationLink;
 
     // =========================================================================
     // ⏱️ FLOATING COUNTDOWN EXAM TIMER & ANTI-CHEAT ENGINE (FEATURE B)
