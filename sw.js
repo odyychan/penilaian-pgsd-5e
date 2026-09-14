@@ -5,7 +5,7 @@
  *   - Assets (images, fonts): Stale-while-revalidate
  * ============================================================ */
 
-const CACHE_VERSION = 'v2.5.15';
+const CACHE_VERSION = 'v2.5.16';
 const CACHE_NAME = `pgsd-cache-${CACHE_VERSION}`;
 const OFFLINE_URL = '/index.html';
 const STATIC_CACHE  = `pgsd-static-${CACHE_VERSION}`;
@@ -22,10 +22,10 @@ const PRECACHE_MODULES = [
   '/assets/logo-ulm.png',
   '/assets/pwa-icon-192.png',
   '/assets/pwa-icon-512.png',
-  '/src/admin/admin.css?v=2.5.15',
-  '/src/admin/admin.js?v=2.5.15',
-  '/src/student/index.css?v=2.5.15',
-  '/src/student/student.js?v=2.5.15',
+  '/src/admin/admin.css?v=2.5.16',
+  '/src/admin/admin.js?v=2.5.16',
+  '/src/student/index.css?v=2.5.16',
+  '/src/student/student.js?v=2.5.16',
 ];
 
 // ---- INSTALL: Activate immediately & precache ----

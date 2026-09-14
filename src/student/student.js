@@ -9089,8 +9089,8 @@ function normalizeMediaList(fieldOrMedia) {
           }
           if (!currentRekapData.nimToKelompokMap) currentRekapData.nimToKelompokMap = {};
           if (!currentRekapData.emailToKelompokMap) currentRekapData.emailToKelompokMap = {};
-          const cleanNim = (nim || "").replace(/\s+/g, "").trim().toLowerCase();
-          const cleanEmail = (email || "").trim().toLowerCase();
+          const cleanNim = (payload.nimPenilai || "").replace(/\s+/g, "").trim().toLowerCase();
+          const cleanEmail = (payload.email || "").trim().toLowerCase();
           const grpName = payload.kelompok;
           if (cleanNim) {
             if (!currentRekapData.nimToKelompokMap[cleanNim]) currentRekapData.nimToKelompokMap[cleanNim] = [];

@@ -2,6 +2,21 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.16] - 2026-09-14
+
+### 🐛 Resolusi ReferenceError Identitas Penilai & Verifikasi Tuntas Layar Konfirmasi BK5E
+- **🩹 Perbaikan Celah ReferenceError Fatal (`executeConfirmedFinalSubmit`):**
+  - Mengatasi akar masalah mengapa pada formulir `BK5E` layar *"Penilaian Berhasil Dikirim"* tidak muncul setelah konfirmasi review: terdapat variabel `nim` dan `email` tanpa deklarasi pada pemetaan memori optimis (`currentRekapData.nimToKelompokMap`), memicu galat JavaScript `ReferenceError: nim is not defined`.
+  - Memperbaiki referensi variabel menggunakan `payload.nimPenilai` dan `payload.email` secara konsisten, sehingga alur submit berhasil mengeksekusi `showSuccessSection()` secara mulus tanpa terputus atau terlempar ke antrean offline palsu.
+- **🧪 Pengujian End-to-End Penuh pada Formulir `BK5E`:**
+  - Melakukan simulasi submit lengkap secara langsung pada formulir perkuliahan `BK5E` melalui modal review jawaban (`openPreSubmitReviewModal` -> `btnConfirmFinalSubmit`).
+  - Terverifikasi 100%: modal review tertutup sempurna, formulir kuesioner disembunyikan, dan layar Bagian Akhir (`#formSuccessSection`) berhasil muncul dengan judul *"Penilaian Berhasil Dikirim"*, struk tanda terima resmi (`PGSD-REC-BK5E-...`), tombol *"Lihat Rekap Hasil"*, dan tombol *"Nilai Kelompok Lain"*.
+  - Menghapus kembali data entri uji coba dari tabel database Supabase secara otomatis dan bersih sehingga integritas database tetap terjaga.
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.16` di seluruh berkas (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
+---
+
 ## [2.5.15] - 2026-09-14
 
 ### 🎯 Transisi Bagian Akhir Formulir Gaya Google Forms & Navigasi Terpadu (Rekap & Halaman Awal)
