@@ -2,6 +2,24 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.13] - 2026-09-14
+
+### 🔄 Sinkronisasi Real-Time Penghitung Respons Admin & Proteksi Multi-Channel Deletion
+- **⚡ Penyelarasan Total Indikator Respons (*Real-Time Responses Counter Synchronizer*):**
+  - Mengatasi kendala angka total respons masuk (`#labelTotalResponses`) yang tetap tertahan pada nilai lama meskipun respons individual telah dihapus seluruhnya dari antarmuka.
+  - Merancang helper tersentralisasi `syncTotalResponsesCounter(count)` yang secara konsisten memperbarui label *Total Respons Masuk* (`#labelTotalResponses`), metrik eksekutif analitik (`#analyticsTotalResponses`), serta registri formulir Master Hub (`formsRegistryList`).
+  - Mengintegrasikan pemanggilan `syncTotalResponsesCounter()` ke seluruh siklus hidup respons: `renderAdminResponsesList()`, `fetchAdminFullData()`, `fetchAdminResponsesList()`, `deleteSingleResponse()`, `executeScopedDelete()`, dan `executeResetResponses()`.
+- **🛡️ Penanganan Kueri Penghapusan Respons Supabase Aman UUID (*UUID-Safe Fallback Query*):**
+  - Memperbaiki kueri *fallback* penghapusan respons langsung pada Supabase di `deleteSingleResponse()`: memvalidasi format regex UUID kolom `id` sebelum membangun predikat `.or(...)`, mencegah galat PostgreSQL `invalid input syntax for type uuid` ketika menghapus respons ber-ID kode tiket (`PGSD-REC-...`).
+- **📡 Saluran Real-Time Terpadu (*Intra-Tab, Cross-Tab & Supabase WAL*):**
+  - Menghubungkan pendengar saluran `adminBroadcastBus` dan `window storage` untuk menangkap sinyal `RESPONSE_DELETED`, `RESPONSES_RESET`, dan `NEW_RESPONSE` antar-tab secara instan (< 1 ms).
+  - Mengaktifkan langganan Postgres WAL (`postgres_changes`) pada tabel `pgsd_responses` di Supabase Realtime channel admin untuk menangani mutasi `INSERT` dan `DELETE` secara otomatis (< 80 ms).
+  - Menambahkan transmisi sinyal `NEW_RESPONSE` pada bus saat penyerahan evaluasi mahasiswa di `showSuccessModal()` sehingga admin menerima respons baru tanpa perlu muat ulang manual.
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.13` di seluruh berkas (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
+---
+
 ## [2.5.12] - 2026-09-14
 
 ### 🛡️ Gerbang Masuk Sesi Multi-Kelompok, Sinkronisasi Memori Instan, & Modal Sukses Dinamis

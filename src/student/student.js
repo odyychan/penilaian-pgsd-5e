@@ -9233,6 +9233,20 @@ function normalizeMediaList(fieldOrMedia) {
         timestamp: now
       };
 
+      if (studentBroadcastBus) {
+        try {
+          studentBroadcastBus.postMessage({
+            formId: activeFormId || DEFAULT_PRIMARY_FORM_ID || 'BK5E',
+            type: 'NEW_RESPONSE',
+            timestamp: Date.now(),
+            payload: {
+              idRespons: finalId,
+              kelompok: kelompokName
+            }
+          });
+        } catch(e) {}
+      }
+
       const receiptIdEl = document.getElementById("receiptIdText");
       if (receiptIdEl) receiptIdEl.textContent = finalId;
 

@@ -94,10 +94,78 @@
     try {
       if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
         adminBroadcastBus = new BroadcastChannel('pgsd_realtime_bus');
+        adminBroadcastBus.onmessage = (event) => {
+          const syncPacket = event.data;
+          if (!syncPacket) return;
+          const currentTarget = (currentFormId || DEFAULT_PRIMARY_FORM_ID).toUpperCase();
+          if (syncPacket.formId && String(syncPacket.formId).toUpperCase() !== currentTarget && String(syncPacket.formId).toUpperCase() !== 'GLOBAL') return;
+
+          if (syncPacket.type === 'RESPONSE_DELETED') {
+            const idResp = syncPacket.payload?.idRespons;
+            const rowIdx = syncPacket.payload?.rowIndex;
+            if (Array.isArray(adminResponsesList)) {
+              const targetIdx = adminResponsesList.findIndex(r => 
+                (idResp && String(r.idRespons) === String(idResp)) || 
+                (rowIdx && String(r.rowIndex) === String(rowIdx)) ||
+                (idResp && String(r.rowIndex) === String(idResp))
+              );
+              if (targetIdx !== -1) {
+                adminResponsesList.splice(targetIdx, 1);
+                renderAdminResponsesList();
+              }
+            }
+          } else if (syncPacket.type === 'RESPONSES_RESET') {
+            adminResponsesList = [];
+            renderAdminResponsesList();
+            if (typeof syncTotalResponsesCounter === 'function') {
+              syncTotalResponsesCounter(0);
+            }
+          } else if (syncPacket.type === 'NEW_RESPONSE') {
+            if (typeof fetchAdminResponsesList === 'function') {
+              fetchAdminResponsesList(true);
+            }
+          }
+        };
       }
     } catch (e) {
       console.warn("Admin BroadcastChannel notice:", e);
     }
+
+    // Storage Pulse Listener untuk sinkronisasi antar-tab lokal (< 5ms)
+    try {
+      window.addEventListener('storage', (event) => {
+        if (event.key && event.key.startsWith('PGSD_REALTIME_PULSE_')) {
+          try {
+            const syncPacket = JSON.parse(event.newValue || '{}');
+            if (!syncPacket) return;
+            const currentTarget = (currentFormId || DEFAULT_PRIMARY_FORM_ID).toUpperCase();
+            if (syncPacket.formId && String(syncPacket.formId).toUpperCase() !== currentTarget && String(syncPacket.formId).toUpperCase() !== 'GLOBAL') return;
+
+            if (syncPacket.type === 'RESPONSE_DELETED') {
+              const idResp = syncPacket.payload?.idRespons;
+              const rowIdx = syncPacket.payload?.rowIndex;
+              if (Array.isArray(adminResponsesList)) {
+                const targetIdx = adminResponsesList.findIndex(r => 
+                  (idResp && String(r.idRespons) === String(idResp)) || 
+                  (rowIdx && String(r.rowIndex) === String(rowIdx)) ||
+                  (idResp && String(r.rowIndex) === String(idResp))
+                );
+                if (targetIdx !== -1) {
+                  adminResponsesList.splice(targetIdx, 1);
+                  renderAdminResponsesList();
+                }
+              }
+            } else if (syncPacket.type === 'RESPONSES_RESET') {
+              adminResponsesList = [];
+              renderAdminResponsesList();
+              if (typeof syncTotalResponsesCounter === 'function') {
+                syncTotalResponsesCounter(0);
+              }
+            }
+          } catch(e) {}
+        }
+      });
+    } catch(e) {}
 
     async function initAdminRealtimeChannel(targetFormId) {
       const formKey = (targetFormId || currentFormId || DEFAULT_PRIMARY_FORM_ID).toUpperCase();
@@ -121,14 +189,67 @@
         }
       });
 
-      adminSupabaseRealtimeChannel.subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-          adminRealtimeSubscribed = true;
-          console.log(`✓ [Realtime Admin] Saluran broadcast aktif untuk form: ${formKey}`);
-        } else {
-          adminRealtimeSubscribed = false;
-        }
-      });
+      adminSupabaseRealtimeChannel
+        .on('broadcast', { event: 'admin_sync' }, (message) => {
+          if (message && message.payload) {
+            const syncPacket = message.payload;
+            if (syncPacket.type === 'RESPONSE_DELETED') {
+              const idResp = syncPacket.payload?.idRespons;
+              const rowIdx = syncPacket.payload?.rowIndex;
+              if (Array.isArray(adminResponsesList)) {
+                const targetIdx = adminResponsesList.findIndex(r => 
+                  (idResp && String(r.idRespons) === String(idResp)) || 
+                  (rowIdx && String(r.rowIndex) === String(rowIdx)) ||
+                  (idResp && String(r.rowIndex) === String(idResp))
+                );
+                if (targetIdx !== -1) {
+                  adminResponsesList.splice(targetIdx, 1);
+                  renderAdminResponsesList();
+                }
+              }
+            } else if (syncPacket.type === 'RESPONSES_RESET') {
+              adminResponsesList = [];
+              renderAdminResponsesList();
+              if (typeof syncTotalResponsesCounter === 'function') {
+                syncTotalResponsesCounter(0);
+              }
+            } else if (syncPacket.type === 'NEW_RESPONSE') {
+              if (typeof fetchAdminResponsesList === 'function') {
+                fetchAdminResponsesList(true);
+              }
+            }
+          }
+        })
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'pgsd_responses',
+          filter: `form_id=eq.${formKey}`
+        }, (payload) => {
+          console.log(`[Realtime Admin WAL] Perubahan respons terdeteksi:`, payload);
+          if (payload.eventType === 'DELETE') {
+            const deletedId = payload.old?.id_respons || payload.old?.id;
+            if (deletedId && Array.isArray(adminResponsesList)) {
+              const idx = adminResponsesList.findIndex(r => String(r.idRespons) === String(deletedId) || String(r.rowIndex) === String(deletedId));
+              if (idx !== -1) {
+                adminResponsesList.splice(idx, 1);
+                renderAdminResponsesList();
+              }
+            }
+          } else if (payload.eventType === 'INSERT') {
+            if (typeof fetchAdminResponsesList === 'function') {
+              fetchAdminResponsesList(true);
+            }
+          }
+        })
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            adminRealtimeSubscribed = true;
+            console.log(`✓ [Realtime Admin] Saluran broadcast aktif untuk form: ${formKey}`);
+          } else {
+            adminRealtimeSubscribed = false;
+          }
+        });
     }
 
     function broadcastInstantAdminChange(changeType, payload = {}) {
@@ -186,6 +307,35 @@
     function getAdminApiUrl() {
       return getApiUrl();
     }
+
+    // =========================================================================
+    // RESPONSES COUNTER REAL-TIME SYNCHRONIZER
+    // =========================================================================
+    function syncTotalResponsesCounter(count) {
+      const finalCount = (typeof count === 'number' && !isNaN(count)) 
+        ? count 
+        : (Array.isArray(adminResponsesList) ? adminResponsesList.length : 0);
+      
+      const labelEl = document.getElementById("labelTotalResponses");
+      if (labelEl) {
+        labelEl.textContent = `${finalCount} Data`;
+      }
+      
+      const analyticsTotalEl = document.getElementById("analyticsTotalResponses");
+      if (analyticsTotalEl) {
+        analyticsTotalEl.textContent = `${finalCount}`;
+      }
+
+      // Synchronize active form response count in Master Hub forms registry
+      const targetForm = currentFormId || DEFAULT_PRIMARY_FORM_ID;
+      if (typeof formsRegistryList !== 'undefined' && Array.isArray(formsRegistryList)) {
+        const regItem = formsRegistryList.find(f => (f.formId || f.id) === targetForm);
+        if (regItem) {
+          regItem.totalResponses = finalCount;
+        }
+      }
+    }
+    window.syncTotalResponsesCounter = syncTotalResponsesCounter;
 
     
     // =========================================================================
@@ -4021,7 +4171,7 @@
         }
       }
 
-      if (tabKey === 'responses' && adminResponsesList.length === 0) {
+      if (tabKey === 'responses') {
         fetchAdminResponsesList();
       }
 
@@ -4129,7 +4279,7 @@
             if (titleBanner) titleBanner.textContent = currentFormMeta.judulForm || adminAppConfig["Judul_Form"] || "Penilaian Presentasi";
             const subjBanner = document.getElementById("activeFormSubjectBanner");
             if (subjBanner) subjBanner.textContent = `${currentFormMeta.mataKuliah || adminAppConfig["Mata_Kuliah"] || ""} • ${currentFormMeta.dosen || adminAppConfig["Dosen_Pengampu"] || ""}`;
-            document.getElementById("labelTotalResponses").textContent = `${totalResp} Data`;
+            syncTotalResponsesCounter(totalResp);
             
             renderMasterGroups();
             populateConfigFormValues();
@@ -4190,7 +4340,7 @@
           if (titleBanner) titleBanner.textContent = currentFormMeta.judulForm || adminAppConfig["Judul_Form"] || "Penilaian Presentasi";
           const subjBanner = document.getElementById("activeFormSubjectBanner");
           if (subjBanner) subjBanner.textContent = `${currentFormMeta.mataKuliah || adminAppConfig["Mata_Kuliah"] || ""} • ${currentFormMeta.dosen || adminAppConfig["Dosen_Pengampu"] || ""}`;
-          document.getElementById("labelTotalResponses").textContent = `${res.totalResponses || 0} Data`;
+          syncTotalResponsesCounter(res.totalResponses || 0);
           
           renderMasterGroups();
           populateConfigFormValues();
@@ -9972,6 +10122,10 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       if (visibleCount === 0) emptyEl.classList.remove("hidden");
       else emptyEl.classList.add("hidden");
       renderAdminAttendanceTracker();
+      syncTotalResponsesCounter(adminResponsesList.length);
+      if (adminResponsesList.length === 0) {
+        renderResponsesAnalyticsDashboard();
+      }
     }
 
     function openAdminResponseDetailModal(idRespons) {
@@ -10707,7 +10861,20 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
 
           // Fallback direct delete jika RPC gagal
           if (!rpcSuccess) {
-            const { error: delErr } = await sb.from('pgsd_responses').delete().or(`id_respons.eq.${idRespons},id.eq.${idRespons}`);
+            const isRowUuid = rowIndex && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(rowIndex));
+            const isIdRespUuid = idRespons && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(idRespons));
+
+            let deleteBuilder = sb.from('pgsd_responses').delete().eq('form_id', targetForm);
+            if (isRowUuid && idRespons && !isIdRespUuid) {
+              deleteBuilder = deleteBuilder.or(`id.eq.${rowIndex},id_respons.eq.${idRespons}`);
+            } else if (isRowUuid) {
+              deleteBuilder = deleteBuilder.eq('id', rowIndex);
+            } else if (isIdRespUuid) {
+              deleteBuilder = deleteBuilder.or(`id.eq.${idRespons},id_respons.eq.${idRespons}`);
+            } else if (idRespons) {
+              deleteBuilder = deleteBuilder.eq('id_respons', String(idRespons));
+            }
+            const { error: delErr } = await deleteBuilder;
             if (delErr) {
               console.warn("Direct Supabase delete notice:", delErr);
             }
@@ -10721,7 +10888,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
 
         // Broadcast real-time deletion ke seluruh tab & perangkat
         if (typeof broadcastInstantAdminChange === 'function') {
-          broadcastInstantAdminChange('RESPONSE_DELETED', { formId: targetForm, idRespons: idRespons });
+          broadcastInstantAdminChange('RESPONSE_DELETED', { formId: targetForm, idRespons: idRespons, rowIndex: rowIndex });
         }
 
         showAdminToast("Respons berhasil dihapus.", "success");
@@ -10850,6 +11017,14 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
         }
 
         showAdminToast(`Berhasil menghapus seluruh respons kategori ${targetVal}.`, "success");
+
+        try {
+          localStorage.setItem(`PGSD_CACHE_RESPONSES_${targetForm}`, JSON.stringify(adminResponsesList));
+        } catch(e) {}
+
+        if (typeof broadcastInstantAdminChange === 'function') {
+          broadcastInstantAdminChange('RESPONSE_DELETED', { formId: targetForm, mode: mode, targetVal: targetVal });
+        }
 
         // 3. Background Asynchronous Google Sheets Sync (Non-blocking)
         fetch(apiUrl, {
@@ -12213,6 +12388,19 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
 
     async function executeResetResponses() {
       const targetForm = currentFormId || DEFAULT_PRIMARY_FORM_ID;
+      
+      // Optimistic UI: Kosongkan memori lokal dan sinkronkan counter seketika (< 5ms)
+      adminResponsesList = [];
+      renderAdminResponsesList();
+      syncTotalResponsesCounter(0);
+      try {
+        localStorage.removeItem(`PGSD_CACHE_RESPONSES_${targetForm}`);
+      } catch(e) {}
+      renderResponsesAnalyticsDashboard();
+      if (typeof broadcastInstantAdminChange === 'function') {
+        broadcastInstantAdminChange('RESPONSES_RESET', { formId: targetForm });
+      }
+
       try {
         // 1. Kosongkan respons di basis data utama Supabase
         const sb = await ensureSupabaseClient();
