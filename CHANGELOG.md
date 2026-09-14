@@ -2,6 +2,25 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.23] - 2026-09-14
+
+### 📐 Audit Responsivitas & Tata Letak: Eliminasi Ruang Kosong Samping & Grid Adaptif Desktop-Mobile
+- **🖥️ Perluasan Kontainer & Pemanfaatan Layar Penuh (`max-w-6xl`):**
+  - Mengaudit dan mengatasi masalah tampilan *"sisi kiri dan kanan kosong"* pada layar lebar (Desktop, Laptop, Tablet Landscape).
+  - Mengubah lebar kontainer Halaman Cek Bukti (`#viewCekBukti`) dari yang sebelumnya kaku sempit (`max-w-xl` / 576px) menjadi kontainer adaptif proporsional (`max-w-4xl lg:max-w-5xl xl:max-w-6xl w-full mx-auto`).
+  - Menghilangkan ruang kosong mubazir di kedua sisi dan menyajikan konten secara seimbang, megah, dan proporsional.
+- **✨ Bilah Pencarian ID Bukti Adaptif (Responsive Search Banner):**
+  - Mengubah form pencarian ID Bukti tanda terima menjadi tata letak *inline horizontal* pada tablet dan desktop (`sm:flex sm:items-center sm:gap-2.5`) dengan input fleksibel dan tombol aksi sejajar di kanan.
+  - Tetap mempertahankan tata letak bertumpuk yang ergonomis dan mudah dijangkau jempol pada perangkat seluler/smartphone (*touch-target >= 44px*).
+- **🌟 Tata Letak Sertifikat 2-Kolom Terpadu pada Desktop (`lg:grid lg:grid-cols-12`):**
+  - **Kolom Kiri (`lg:col-span-5`):** Kartu identitas tanda terima dengan nomor ID Bukti monospace, tanggal pencatatan, QR Code interaktif, kartu ringkasan penilaian (Kelompok, Skor / 100, Penilai, Mata Kuliah, Dosen, Sesi), serta bilah tombol aksi (Salin Tautan, Unduh PNG, Cetak Bukti).
+  - **Kolom Kanan (`lg:col-span-7`):** Kartu sorotan presentator terbaik berbintang serta daftar evaluasi kualitatif dan instrumen tambahan yang nyaman dibaca tanpa memerlukan pengguliran berlebih.
+  - Pada layar ponsel, grid otomatis bertransformasi menjadi 1 kolom vertikal yang rapi (*mobile-first*).
+- **💡 Keadaan Siaga (Standby State) yang Informatif & Estetik:**
+  - Menggantikan tampilan kosong sebelumnya dengan kisi 3 kartu sorotan fitur verifikasi resmi: *Basis Data Resmi Supabase*, *Transparansi Nilai*, dan *QR Code Digital Otentik*.
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.23` di seluruh berkas (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
 ## [2.5.22] - 2026-09-14
 
 ### 🎯 Eliminasi Redundansi Tampilan: Modal Zoom QR Code Besar & Akses Langsung Cek Bukti Online
