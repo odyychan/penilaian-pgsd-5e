@@ -4619,6 +4619,52 @@ function normalizeMediaList(fieldOrMedia) {
       return `Minggu ${computedNum}`;
     }
 
+    function getActiveSessionRatingStatus(targetNim, targetEmail) {
+      const activeSesi = (appConfig["Sesi_Minggu_Aktif"] || appConfig["Sesi_Aktif"] || currentFormMeta?.sesiAktif || "").trim();
+      const isFilterAllSesi = !activeSesi || /^(semua|all|semua sesi|semua minggu)$/i.test(activeSesi);
+
+      let groupsInActiveSesi = [];
+      if (groupsData && groupsData.length > 0) {
+        groupsInActiveSesi = groupsData.filter(g => {
+          if (!isFilterAllSesi && g.sesi && g.sesi.trim().toLowerCase() !== activeSesi.toLowerCase()) return false;
+          return true;
+        });
+      }
+
+      const activeNim = (targetNim || document.getElementById("inputNim")?.value || activeUserAccountNim || "").replace(/\s+/g, "").trim().toLowerCase();
+      const activeEmail = (targetEmail || activeUserAccountEmail || getCurrentAuthSession()?.email || "").trim().toLowerCase();
+
+      const alreadyFilledGroups = [];
+      if (currentRekapData) {
+        if (activeNim && currentRekapData.nimToKelompokMap && currentRekapData.nimToKelompokMap[activeNim]) {
+          currentRekapData.nimToKelompokMap[activeNim].forEach(g => {
+            if (!alreadyFilledGroups.some(f => f.toLowerCase() === g.toLowerCase())) alreadyFilledGroups.push(g);
+          });
+        }
+        if (activeEmail && currentRekapData.emailToKelompokMap && currentRekapData.emailToKelompokMap[activeEmail]) {
+          currentRekapData.emailToKelompokMap[activeEmail].forEach(g => {
+            if (!alreadyFilledGroups.some(f => f.toLowerCase() === g.toLowerCase())) alreadyFilledGroups.push(g);
+          });
+        }
+      }
+
+      const unfilledGroups = groupsInActiveSesi.filter(g => {
+        return !alreadyFilledGroups.some(f => f.toLowerCase() === g.name.toLowerCase());
+      });
+
+      const isSessionFullyCompleted = groupsInActiveSesi.length > 0 && unfilledGroups.length === 0;
+      const hasPartialProgress = groupsInActiveSesi.length > 0 && alreadyFilledGroups.length > 0 && unfilledGroups.length > 0;
+
+      return {
+        activeSesi,
+        groupsInActiveSesi,
+        alreadyFilledGroups,
+        unfilledGroups,
+        isSessionFullyCompleted,
+        hasPartialProgress
+      };
+    }
+
     function evaluateFormScheduleStatus() {
       if (!scheduleIntervalTimer) {
         scheduleIntervalTimer = setInterval(evaluateFormScheduleStatus, 30000);
@@ -4966,49 +5012,16 @@ function normalizeMediaList(fieldOrMedia) {
           }
 
           if (isSubmittedInStorage) {
-            // Hitung kelompok yang sudah dinilai oleh penilai ini di sesi aktif
-            const activeSesiForBlock = (appConfig["Sesi_Minggu_Aktif"] || appConfig["Sesi_Aktif"] || currentFormMeta?.sesiAktif || "").trim();
-            const isFilterAllSesi = !activeSesiForBlock || /^(semua|all|semua sesi|semua minggu)$/i.test(activeSesiForBlock);
+            const status = getActiveSessionRatingStatus(activeNim, activeEmail);
 
-            // Ambil daftar kelompok di sesi aktif
-            let groupsInActiveSesi = [];
-            if (groupsData && groupsData.length > 0) {
-              groupsInActiveSesi = groupsData.filter(g => {
-                if (!isFilterAllSesi && g.sesi && g.sesi.trim().toLowerCase() !== activeSesiForBlock.toLowerCase()) return false;
-                return true;
-              });
-            }
-
-            // Ambil daftar kelompok yang sudah dinilai penilai ini
-            const alreadyFilledGroups = [];
-            if (currentRekapData) {
-              const nimKey = activeNim;
-              const emailKey = activeEmail;
-              if (nimKey && currentRekapData.nimToKelompokMap && currentRekapData.nimToKelompokMap[nimKey]) {
-                currentRekapData.nimToKelompokMap[nimKey].forEach(g => {
-                  if (!alreadyFilledGroups.some(f => f.toLowerCase() === g.toLowerCase())) alreadyFilledGroups.push(g);
-                });
-              }
-              if (emailKey && currentRekapData.emailToKelompokMap && currentRekapData.emailToKelompokMap[emailKey]) {
-                currentRekapData.emailToKelompokMap[emailKey].forEach(g => {
-                  if (!alreadyFilledGroups.some(f => f.toLowerCase() === g.toLowerCase())) alreadyFilledGroups.push(g);
-                });
-              }
-            }
-
-            // Cek apakah masih ada kelompok yang BELUM dinilai di sesi aktif
-            const unfilledGroups = groupsInActiveSesi.filter(g => {
-              return !alreadyFilledGroups.some(f => f.toLowerCase() === g.name.toLowerCase());
-            });
-
-            if (unfilledGroups.length === 0 && groupsInActiveSesi.length > 0) {
+            if (status.isSessionFullyCompleted) {
               // Semua kelompok di sesi aktif sudah dinilai → blokir global
               isBlocked = true;
               blockReason = "ALREADY_SUBMITTED";
-              const sesiLabel = activeSesiForBlock || "sesi aktif";
+              const sesiLabel = status.activeSesi || "sesi aktif";
               blockTitle = "Semua Kelompok Telah Dinilai";
-              blockDesc = `Anda telah menyelesaikan penilaian untuk seluruh ${groupsInActiveSesi.length} kelompok presentator pada <strong>${escapeHtml(sesiLabel)}</strong>. Terima kasih atas partisipasi Anda!<br><span class="inline-block mt-2 font-mono font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">✓ ${alreadyFilledGroups.length} / ${groupsInActiveSesi.length} Kelompok Selesai Dinilai</span>`;
-            } else if (groupsInActiveSesi.length > 0 && alreadyFilledGroups.length > 0) {
+              blockDesc = `Anda telah menyelesaikan penilaian untuk seluruh ${status.groupsInActiveSesi.length} kelompok presentator pada <strong>${escapeHtml(sesiLabel)}</strong>. Terima kasih atas partisipasi Anda!<br><span class="inline-block mt-2 font-mono font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">✓ ${status.alreadyFilledGroups.length} / ${status.groupsInActiveSesi.length} Kelompok Selesai Dinilai</span>`;
+            } else if (status.hasPartialProgress) {
               // Sebagian kelompok sudah dinilai → tampilkan banner info progres (biru/indigo), jangan blokir
               const progressBanner = document.getElementById("formScheduleLockBanner");
               if (progressBanner) {
@@ -5028,11 +5041,11 @@ function normalizeMediaList(fieldOrMedia) {
                 }
                 if (descEl) {
                   descEl.className = "text-xs text-indigo-900 leading-relaxed pl-10.5";
-                  descEl.innerHTML = `Anda sudah menilai <strong>${alreadyFilledGroups.length}</strong> dari <strong>${groupsInActiveSesi.length}</strong> kelompok presentator di sesi ini. Masih ada <strong>${unfilledGroups.length}</strong> kelompok lagi yang perlu dinilai.<br><span class="inline-block mt-1.5 font-mono text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">✓ Sudah dinilai: ${alreadyFilledGroups.map(g => escapeHtml(g)).join(", ")}</span>`;
+                  descEl.innerHTML = `Anda sudah menilai <strong>${status.alreadyFilledGroups.length}</strong> dari <strong>${status.groupsInActiveSesi.length}</strong> kelompok presentator di sesi ini. Masih ada <strong>${status.unfilledGroups.length}</strong> kelompok lagi yang perlu dinilai.<br><span class="inline-block mt-1.5 font-mono text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">✓ Sudah dinilai: ${status.alreadyFilledGroups.map(g => escapeHtml(g)).join(", ")}</span>`;
                 }
               }
               // Jangan blokir — biarkan mahasiswa lanjut menilai kelompok berikutnya
-            } else if (groupsInActiveSesi.length === 0 && isSubmittedInStorage) {
+            } else if (status.groupsInActiveSesi.length === 0 && isSubmittedInStorage) {
               // Tidak ada data kelompok (belum dimuat penuh) — jangan blokir keras dulu
               // Biarkan fetchInitialFormData selesai memuat data kelompok terlebih dahulu
             }
@@ -7911,6 +7924,15 @@ function normalizeMediaList(fieldOrMedia) {
 
       // Mode 1: NO_EMAIL -> bypass langsung buka form (anonim)
       if (mode === 'NO_EMAIL') {
+        if (appConfig && (appConfig["Kunci_Respons_Ganda"] === true || appConfig["Kunci_Respons_Ganda"] === 'true')) {
+          const ratingStatus = getActiveSessionRatingStatus();
+          if (ratingStatus.isSessionFullyCompleted) {
+            showToast("Anda telah menyelesaikan penilaian untuk seluruh kelompok pada sesi ini.", "info");
+            goToInfoOverview();
+            if (typeof evaluateFormScheduleStatus === 'function') evaluateFormScheduleStatus();
+            return;
+          }
+        }
         openAssessmentForm();
         return;
       }
@@ -7942,6 +7964,19 @@ function normalizeMediaList(fieldOrMedia) {
 
       const identity = resolveStudentIdentity(profile, mode);
 
+      // 🛡️ GATEKEEPER SESI: Periksa apakah seluruh kelompok di sesi aktif sudah dinilai
+      if (appConfig && (appConfig["Kunci_Respons_Ganda"] === true || appConfig["Kunci_Respons_Ganda"] === 'true')) {
+        const ratingStatus = getActiveSessionRatingStatus(identity.nim, identity.email);
+        if (ratingStatus.isSessionFullyCompleted) {
+          showToast("Anda telah menyelesaikan penilaian untuk seluruh kelompok pada sesi ini.", "info");
+          goToInfoOverview();
+          if (typeof evaluateFormScheduleStatus === 'function') {
+            evaluateFormScheduleStatus();
+          }
+          return;
+        }
+      }
+
       openAssessmentForm();
       applyLockedIdentity(identity);
       renderAccountBar(identity);
@@ -7951,6 +7986,18 @@ function normalizeMediaList(fieldOrMedia) {
     }
 
     function openAssessmentForm(pushState = false) {
+      // 🛡️ HARD DEFENSE: Pastikan sesi aktif belum dinilai penuh untuk akun aktif
+      if (appConfig && (appConfig["Kunci_Respons_Ganda"] === true || appConfig["Kunci_Respons_Ganda"] === 'true')) {
+        const ratingStatus = getActiveSessionRatingStatus();
+        if (ratingStatus.isSessionFullyCompleted) {
+          goToInfoOverview();
+          if (typeof evaluateFormScheduleStatus === 'function') {
+            evaluateFormScheduleStatus();
+          }
+          return;
+        }
+      }
+
       isPortalMode = false;
       document.documentElement.classList.add('form-mode-active');
       document.documentElement.classList.remove('portal-mode-active');
@@ -8933,6 +8980,28 @@ function normalizeMediaList(fieldOrMedia) {
             localStorage.setItem("PGSD_LAST_SUBMISSION_EVENT", Date.now().toString());
           } catch(e) {}
 
+          // ⚡ SINKRONISASI OPTIMIS INSTAN KE MEMORI REKAPITULASI (< 1 ms)
+          if (!currentRekapData) {
+            currentRekapData = { summary: [], nimToKelompokMap: {}, emailToKelompokMap: {}, rawResponses: [] };
+          }
+          if (!currentRekapData.nimToKelompokMap) currentRekapData.nimToKelompokMap = {};
+          if (!currentRekapData.emailToKelompokMap) currentRekapData.emailToKelompokMap = {};
+          const cleanNim = (nim || "").replace(/\s+/g, "").trim().toLowerCase();
+          const cleanEmail = (email || "").trim().toLowerCase();
+          const grpName = payload.kelompok;
+          if (cleanNim) {
+            if (!currentRekapData.nimToKelompokMap[cleanNim]) currentRekapData.nimToKelompokMap[cleanNim] = [];
+            if (!currentRekapData.nimToKelompokMap[cleanNim].some(g => g.toLowerCase() === grpName.toLowerCase())) {
+              currentRekapData.nimToKelompokMap[cleanNim].push(grpName);
+            }
+          }
+          if (cleanEmail) {
+            if (!currentRekapData.emailToKelompokMap[cleanEmail]) currentRekapData.emailToKelompokMap[cleanEmail] = [];
+            if (!currentRekapData.emailToKelompokMap[cleanEmail].some(g => g.toLowerCase() === grpName.toLowerCase())) {
+              currentRekapData.emailToKelompokMap[cleanEmail].push(grpName);
+            }
+          }
+
           loadRekapData(true);
           showSuccessModal(payload.kelompok, false, payload, idRespons);
 
@@ -9319,6 +9388,29 @@ function normalizeMediaList(fieldOrMedia) {
 
       // Periksa dan Render Auto E-Sertifikat Digital (Feature C)
       checkAndRenderCertificate(payload, quizResult);
+
+      // Perbarui Tombol Aksi Utama di Modal Sukses Secara Dinamis Berdasarkan Sisa Kelompok
+      const actionBtn = document.getElementById("successModalActionBtn");
+      if (actionBtn) {
+        const ratingStatus = getActiveSessionRatingStatus(payload?.nimPenilai, payload?.email);
+        if (ratingStatus.isSessionFullyCompleted) {
+          actionBtn.innerHTML = `
+            <span>Selesai & Tutup Sesi</span>
+            <svg class="w-4 h-4 text-emerald-400 group-hover:text-white transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          `;
+          actionBtn.className = "w-full min-h-[46px] py-3 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm transition active:scale-[0.99] cursor-pointer shadow-md hover:shadow-lg flex items-center justify-center gap-2 group";
+        } else {
+          actionBtn.innerHTML = `
+            <span>Lanjut Sesi / Lihat Progres</span>
+            <svg class="w-4 h-4 text-zinc-400 group-hover:text-white transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          `;
+          actionBtn.className = "w-full min-h-[46px] py-3 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-xs sm:text-sm transition active:scale-[0.99] cursor-pointer shadow-md hover:shadow-lg flex items-center justify-center gap-2 group";
+        }
+      }
 
       modal.classList.remove("hidden");
       modal.classList.add("flex");
@@ -10201,6 +10293,9 @@ function normalizeMediaList(fieldOrMedia) {
       document.getElementById("successModal").classList.remove("flex");
       clearStudentFormDraft(false);
       resetStudentForm();
+      if (typeof evaluateFormScheduleStatus === 'function') {
+        evaluateFormScheduleStatus();
+      }
     }
 
     function closeModalAndGoToRekap() {

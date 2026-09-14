@@ -2,6 +2,24 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.12] - 2026-09-14
+
+### 🛡️ Gerbang Masuk Sesi Multi-Kelompok, Sinkronisasi Memori Instan, & Modal Sukses Dinamis
+- **🚪 Proteksi Gerbang Masuk Formulir (*Session Completion Gatekeeper*):**
+  - Menerapkan verifikasi ketat pada fungsi `startAssessmentForm()`, `continueAssessmentWithAuthenticatedUser()`, dan `openAssessmentForm()`: jika akun mahasiswa telah selesai menilai seluruh kelompok pada sesi perkuliahan yang sedang aktif, akses masuk ke formulir wizard ditolak seketika.
+  - Pengguna secara aman ditahan di Halaman Info Overview dengan notifikasi toast informatif, lencana banner hijau emerald *"Semua Kelompok Telah Dinilai"*, dan tombol aksi yang terkunci (*"Formulir Ditutup"*).
+- **⚡ Sinkronisasi Optimis Memori Rekapitulasi (< 1 ms):**
+  - Memperbarui fungsi `submitStudentEvaluation()`: begitu pengiriman respon berhasil disimpan di database, pemetaan kelompok yang dinilai (`nimToKelompokMap` dan `emailToKelompokMap`) langsung disinkronkan secara optimis di memori lokal saat itu juga tanpa bergantung pada jeda latensi query jaringan.
+- **🎯 Tombol Aksi Modal Sukses Dinamis Berbasis Sisa Kelompok:**
+  - Menyesuaikan tombol aksi utama pada modal sukses (*#successModalActionBtn*):
+    - Jika masih terdapat kelompok yang belum dinilai pada sesi tersebut: tombol menampilkan label *"Lanjut Sesi / Lihat Progres"*.
+    - Jika kelompok yang baru saja dinilai adalah kelompok terakhir pada sesi tersebut: tombol otomatis berubah menjadi *"Selesai & Tutup Sesi"*.
+  - Mengklik tombol aksi ini secara mulus menutup modal, mereset draf isian kelompok sebelumnya, dan mengarahkan kembali ke Halaman Info Overview yang langsung ter-update secara real-time.
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.12` di seluruh berkas (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
+---
+
 ## [2.5.11] - 2026-09-14
 
 ### 🔒 Isolasi Sesi Pengguna & Penghapusan Banner Progres Personal Saat Logout
