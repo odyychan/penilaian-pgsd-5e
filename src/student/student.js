@@ -1108,6 +1108,13 @@ function normalizeMediaList(fieldOrMedia) {
       initSupabaseAuthListener();
       await ensureAuthInitialized();
 
+      // 3. Muat data rekap dan respons penilai SECARA INSTAN (< 30ms) sebelum evaluasi draf / status
+      try {
+        await loadRekapData(true);
+      } catch(e) {
+        console.warn("Early loadRekapData notice:", e);
+      }
+
       checkAndApplyAuthGate();
 
       // Deteksi Pemulihan Draf saat Ter-refresh Tidak Sengaja
@@ -1119,16 +1126,31 @@ function normalizeMediaList(fieldOrMedia) {
       const session = getCurrentAuthSession();
       const isAuthenticated = (emailMode === 'NO_EMAIL') || (session && session.email);
 
-      if (lastActiveView === 'wizard' && savedDraft && isAuthenticated) {
-        // Pengguna ter-refresh saat sedang aktif mengisi formulir: langsung buka wizard dan pulihkan draf seketika
-        openAssessmentForm();
-        restoreFormDraft(true, false);
+      const activeNim = (session?.nim || activeUserAccountNim || "").replace(/\s+/g, "").trim().toLowerCase();
+      const activeEmail = (session?.email || activeUserAccountEmail || "").trim().toLowerCase();
+      const ratingStatus = getActiveSessionRatingStatus(activeNim, activeEmail);
+
+      // Jika seluruh kelompok pada sesi aktif ini sudah dinilai:
+      if (ratingStatus.isSessionFullyCompleted) {
+        clearStudentFormDraft(false);
+        try { sessionStorage.removeItem('PGSD_ACTIVE_VIEW_' + formKey); } catch(e) {}
+        goToInfoOverview();
+        if (typeof evaluateFormScheduleStatus === 'function') evaluateFormScheduleStatus();
+      } else if (lastActiveView === 'wizard' && savedDraft && isAuthenticated) {
+        // Jika draf yang tersimpan ternyata untuk kelompok yang sudah dinilai, bersihkan draf dan kembali ke overview
+        if (savedDraft.groupName && ratingStatus.alreadyFilledGroups.some(g => g.toLowerCase() === savedDraft.groupName.toLowerCase())) {
+          clearStudentFormDraft(false);
+          try { sessionStorage.removeItem('PGSD_ACTIVE_VIEW_' + formKey); } catch(e) {}
+          goToInfoOverview();
+          if (typeof evaluateFormScheduleStatus === 'function') evaluateFormScheduleStatus();
+        } else {
+          openAssessmentForm();
+          restoreFormDraft(true, false);
+        }
       } else {
         restoreFormDraft(false, true);
+        goToInfoOverview();
       }
-
-      // Pre-fetch rekap data secara diam-diam di background agar instan saat dibuka
-      setTimeout(() => loadRekapData(true), 400);
 
       // Inisialisasi Sinkronisasi Real-Time 2 Arah
       initRealtimeSyncEngine();
@@ -6946,12 +6968,31 @@ function normalizeMediaList(fieldOrMedia) {
 
     function saveFormDraft() {
       try {
+        if (isSubmittingFinalAssessment) return;
+
+        // Hanya simpan draf jika wizard formulir sedang aktif / terbuka
+        const wizard = document.getElementById("formWizardContainer");
+        if (!wizard || wizard.classList.contains("hidden")) {
+          return;
+        }
+
         const peran = currentEvaluatorRole || "Mahasiswa";
         const nim = document.getElementById("inputNim") ? document.getElementById("inputNim").value : "";
         const email = document.getElementById("inputEmail") ? document.getElementById("inputEmail").value : "";
         const nama = document.getElementById("inputNama") ? document.getElementById("inputNama").value : "";
         const groupName = selectedGroupObj ? selectedGroupObj.name : "";
         const nilai = document.getElementById("inputNilaiNumber") ? document.getElementById("inputNilaiNumber").value : "85";
+
+        // 🛡️ INTEGRITY: Jangan pernah simpan draf untuk kelompok yang sudah selesai dinilai oleh akun ini
+        const activeNim = (nim || activeUserAccountNim || "").replace(/\s+/g, "").trim().toLowerCase();
+        const activeEmail = (email || activeUserAccountEmail || getCurrentAuthSession()?.email || "").trim().toLowerCase();
+        const ratingStatus = getActiveSessionRatingStatus(activeNim, activeEmail);
+        if (ratingStatus.isSessionFullyCompleted) {
+          return;
+        }
+        if (groupName && ratingStatus.alreadyFilledGroups.some(g => g.toLowerCase() === groupName.toLowerCase())) {
+          return;
+        }
         
         const evaluasi = {};
         document.querySelectorAll("#evaluationInputsContainer textarea").forEach(ta => {
@@ -7527,6 +7568,7 @@ function normalizeMediaList(fieldOrMedia) {
         await executeSupabaseSignOut();
         clearStudentFormDraft(false);
         resetLockedIdentityInputs();
+        resetStudentForm();
         try {
           localStorage.removeItem("PGSD_SUBMITTED_" + activeFormId);
           sessionStorage.removeItem("PGSD_SUBMITTED_" + activeFormId);
@@ -8130,6 +8172,25 @@ function normalizeMediaList(fieldOrMedia) {
           return;
         }
 
+        // 🛡️ INTEGRITY: Periksa apakah kelompok dalam draf sudah selesai dinilai atau sesi sudah rampung
+        const activeNim = (draft.nim || activeUserAccountNim || document.getElementById("inputNim")?.value || "").replace(/\s+/g, "").trim().toLowerCase();
+        const activeEmail = (draft.email || activeUserAccountEmail || getCurrentAuthSession()?.email || "").trim().toLowerCase();
+        const ratingStatus = getActiveSessionRatingStatus(activeNim, activeEmail);
+
+        if (ratingStatus.isSessionFullyCompleted) {
+          console.log(`[PGSD Draft] Seluruh kelompok di sesi aktif telah selesai dinilai. Draf dibersihkan.`);
+          clearStudentFormDraft(false);
+          updateDraftResetButtonVisibility();
+          return;
+        }
+
+        if (draft.groupName && ratingStatus.alreadyFilledGroups.some(g => g.toLowerCase() === draft.groupName.toLowerCase())) {
+          console.log(`[PGSD Draft] Draf untuk kelompok "${draft.groupName}" dibersihkan karena kelompok ini sudah dinilai.`);
+          clearStudentFormDraft(false);
+          updateDraftResetButtonVisibility();
+          return;
+        }
+
         // 1. Pulihkan Jawaban Kustom & Berkas Terlebih Dahulu
         if (draft.customAnswers && typeof draft.customAnswers === 'object') {
           clientCustomFormAnswers = Object.assign({}, draft.customAnswers);
@@ -8272,15 +8333,15 @@ function normalizeMediaList(fieldOrMedia) {
 
       const formKey = (activeFormId || DEFAULT_PRIMARY_FORM_ID || 'BK5E').toUpperCase();
       try {
-        const email = activeUserAccountEmail || (document.getElementById("inputEmail")?.value || "").trim();
-        if (email) {
-          const cleanEmail = email.toLowerCase().replace(/[^a-z0-9]/g, '_');
-          localStorage.removeItem(`PGSD_DRAFT_${formKey}_${cleanEmail}`);
+        const prefix = `PGSD_DRAFT_${formKey}_`;
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && (k.startsWith(prefix) || k === `PGSD_FORM_DRAFT_${formKey}` || k === 'PGSD_FORM_DRAFT')) {
+            keysToRemove.push(k);
+          }
         }
-        localStorage.removeItem(`PGSD_DRAFT_${formKey}_LATEST`);
-        localStorage.removeItem(`PGSD_DRAFT_${formKey}_DEFAULT`);
-        localStorage.removeItem(`PGSD_FORM_DRAFT_${formKey}`);
-        localStorage.removeItem("PGSD_FORM_DRAFT");
+        keysToRemove.forEach(k => localStorage.removeItem(k));
         sessionStorage.removeItem(`PGSD_DRAFT_${formKey}_LATEST`);
         sessionStorage.removeItem(`PGSD_ACTIVE_VIEW_${formKey}`);
       } catch (e) {}
@@ -8973,6 +9034,44 @@ function normalizeMediaList(fieldOrMedia) {
           clearStudentFormDraft(false);
 
           clientCustomFormAnswers = {};
+          customUploadedFilesMap = {};
+          selectedGroupObj = null;
+          selectedGroupIndex = -1;
+          selectedBestPresenters = [];
+          studentStepHistory = [];
+          currentStep = 1;
+          isDraftAlreadyRestored = false;
+
+          // Bersihkan isian textarea kualitatif dan penghitung karakter di DOM
+          document.querySelectorAll("#evaluationInputsContainer textarea").forEach(ta => {
+            ta.value = "";
+          });
+          document.querySelectorAll("[id^='charCount_']").forEach(cc => {
+            const maxChars = parseInt(appConfig["Maksimal_Karakter_Evaluasi"] || 500);
+            cc.textContent = `0/${maxChars}`;
+          });
+
+          // Uncheck radio pilihan kelompok & pulihkan gaya kartu kelompok
+          const radioChecked = document.querySelector("input[name='selectedGroup']:checked");
+          if (radioChecked) radioChecked.checked = false;
+          document.querySelectorAll("input[name='selectedGroup']").forEach(r => { r.checked = false; });
+          document.querySelectorAll(".group-card").forEach(c => {
+            c.className = "group-card flex flex-col justify-between p-3.5 sm:p-4 rounded-lg border border-zinc-200 hover:border-zinc-400 bg-white cursor-pointer transition-all";
+          });
+
+          // Reset nilai kelompok ke default
+          const numEl = document.getElementById("inputNilaiNumber");
+          const sliEl = document.getElementById("inputNilaiSlider");
+          if (numEl) numEl.value = "85";
+          if (sliEl) sliEl.value = "85";
+          updateScoreBadge(85);
+
+          // Hapus penanda active view wizard
+          const formKey = (activeFormId || DEFAULT_PRIMARY_FORM_ID || 'BK5E').toUpperCase();
+          try {
+            sessionStorage.removeItem(`PGSD_ACTIVE_VIEW_${formKey}`);
+          } catch(e) {}
+
           currentFormResponseCount++;
           try {
             localStorage.setItem("PGSD_SUBMITTED_" + activeFormId, "true");
@@ -9000,6 +9099,10 @@ function normalizeMediaList(fieldOrMedia) {
             if (!currentRekapData.emailToKelompokMap[cleanEmail].some(g => g.toLowerCase() === grpName.toLowerCase())) {
               currentRekapData.emailToKelompokMap[cleanEmail].push(grpName);
             }
+          }
+
+          if (typeof renderGroupOptions === 'function') {
+            renderGroupOptions();
           }
 
           loadRekapData(true);
@@ -9061,9 +9164,47 @@ function normalizeMediaList(fieldOrMedia) {
             clearStudentFormDraft(false);
 
             clientCustomFormAnswers = {};
+            customUploadedFilesMap = {};
+            selectedGroupObj = null;
+            selectedGroupIndex = -1;
+            selectedBestPresenters = [];
+            studentStepHistory = [];
+            currentStep = 1;
+            isDraftAlreadyRestored = false;
+
+            document.querySelectorAll("#evaluationInputsContainer textarea").forEach(ta => {
+              ta.value = "";
+            });
+            document.querySelectorAll("[id^='charCount_']").forEach(cc => {
+              const maxChars = parseInt(appConfig["Maksimal_Karakter_Evaluasi"] || 500);
+              cc.textContent = `0/${maxChars}`;
+            });
+
+            const radioChecked = document.querySelector("input[name='selectedGroup']:checked");
+            if (radioChecked) radioChecked.checked = false;
+            document.querySelectorAll("input[name='selectedGroup']").forEach(r => { r.checked = false; });
+            document.querySelectorAll(".group-card").forEach(c => {
+              c.className = "group-card flex flex-col justify-between p-3.5 sm:p-4 rounded-lg border border-zinc-200 hover:border-zinc-400 bg-white cursor-pointer transition-all";
+            });
+
+            const numEl = document.getElementById("inputNilaiNumber");
+            const sliEl = document.getElementById("inputNilaiSlider");
+            if (numEl) numEl.value = "85";
+            if (sliEl) sliEl.value = "85";
+            updateScoreBadge(85);
+
+            const formKey = (activeFormId || DEFAULT_PRIMARY_FORM_ID || 'BK5E').toUpperCase();
+            try {
+              sessionStorage.removeItem(`PGSD_ACTIVE_VIEW_${formKey}`);
+            } catch(e) {}
+
             localStorage.removeItem("PGSD_CACHE_REKAP_" + activeFormId);
             localStorage.setItem("PGSD_LAST_SUBMISSION_EVENT", Date.now().toString());
             
+            if (typeof renderGroupOptions === 'function') {
+              renderGroupOptions();
+            }
+
             loadRekapData(true);
             showSuccessModal(payload.kelompok, false, payload, idRespons);
           } else {
@@ -9078,6 +9219,31 @@ function normalizeMediaList(fieldOrMedia) {
           closePreSubmitReviewModal();
           savePendingSubmission(payload, idRespons);
           clearStudentFormDraft(false);
+
+          clientCustomFormAnswers = {};
+          customUploadedFilesMap = {};
+          selectedGroupObj = null;
+          selectedGroupIndex = -1;
+          selectedBestPresenters = [];
+          studentStepHistory = [];
+          currentStep = 1;
+          isDraftAlreadyRestored = false;
+
+          document.querySelectorAll("#evaluationInputsContainer textarea").forEach(ta => {
+            ta.value = "";
+          });
+          const radioChecked = document.querySelector("input[name='selectedGroup']:checked");
+          if (radioChecked) radioChecked.checked = false;
+          document.querySelectorAll("input[name='selectedGroup']").forEach(r => { r.checked = false; });
+          document.querySelectorAll(".group-card").forEach(c => {
+            c.className = "group-card flex flex-col justify-between p-3.5 sm:p-4 rounded-lg border border-zinc-200 hover:border-zinc-400 bg-white cursor-pointer transition-all";
+          });
+
+          const formKey = (activeFormId || DEFAULT_PRIMARY_FORM_ID || 'BK5E').toUpperCase();
+          try {
+            sessionStorage.removeItem(`PGSD_ACTIVE_VIEW_${formKey}`);
+          } catch(e) {}
+
           showSuccessModal(payload.kelompok, true, payload, idRespons);
         }
       } finally {
@@ -10291,15 +10457,65 @@ function normalizeMediaList(fieldOrMedia) {
     window.downloadStudentCertificate = downloadStudentCertificate;
 
     function resetStudentForm() {
+      // 1. Uncheck and clear all group selection state
       const radioChecked = document.querySelector("input[name='selectedGroup']:checked");
       if (radioChecked) radioChecked.checked = false;
+      document.querySelectorAll("input[name='selectedGroup']").forEach(r => { r.checked = false; });
       document.querySelectorAll(".group-card").forEach(c => {
         c.className = "group-card flex flex-col justify-between p-3.5 sm:p-4 rounded-lg border border-zinc-200 hover:border-zinc-400 bg-white cursor-pointer transition-all";
       });
       selectedGroupObj = null;
+      selectedGroupIndex = -1;
       selectedBestPresenters = [];
+
+      // 2. Clear qualitative evaluation inputs & character counters
+      document.querySelectorAll("#evaluationInputsContainer textarea").forEach(ta => {
+        ta.value = "";
+      });
+      document.querySelectorAll("[id^='charCount_']").forEach(cc => {
+        const maxChars = parseInt(appConfig["Maksimal_Karakter_Evaluasi"] || 500);
+        cc.textContent = `0/${maxChars}`;
+      });
+
+      // 3. Clear custom questions answers & uploaded files map
+      clientCustomFormAnswers = {};
+      customUploadedFilesMap = {};
+
+      // 4. Reset score to default (85)
+      const defaultScore = 85;
+      const numEl = document.getElementById("inputNilaiNumber");
+      const sliEl = document.getElementById("inputNilaiSlider");
+      if (numEl) numEl.value = defaultScore;
+      if (sliEl) sliEl.value = defaultScore;
+      updateScoreBadge(defaultScore);
+
+      // 5. Reset presenter cards selection UI
+      if (typeof refreshAllBestPresenterCards === 'function') {
+        refreshAllBestPresenterCards();
+      }
+      if (typeof updateBestPresenterBadge === 'function') {
+        updateBestPresenterBadge();
+      }
+
+      // 6. Reset step history and current step
+      studentStepHistory = [];
+      currentStep = 1;
+      isDraftAlreadyRestored = false;
+
+      // 7. Clear wizard active view from session storage
+      const formKey = (activeFormId || DEFAULT_PRIMARY_FORM_ID || 'BK5E').toUpperCase();
+      try {
+        sessionStorage.removeItem(`PGSD_ACTIVE_VIEW_${formKey}`);
+      } catch(e) {}
+
+      // 8. Go back to Overview and reset Wizard UI to Step 1
       goToInfoOverview();
       updateStepUI(1);
+
+      // 9. Re-render groups so locked/completed status is accurately reflected
+      if (typeof renderGroupOptions === 'function') {
+        renderGroupOptions();
+      }
     }
 
     function resetFormAndCloseModal() {

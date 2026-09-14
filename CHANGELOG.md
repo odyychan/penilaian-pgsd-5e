@@ -2,6 +2,26 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.14] - 2026-09-14
+
+### 🛡️ Eliminasi Restorasi Draf Zombie, Pembersihan Status Formulir, & Penjagaan Grup Selesai
+- **🧹 Pembersihan Menyeluruh Input DOM & Memori Pasca-Pengiriman (*Complete Post-Submission State Purge*):**
+  - Mengatasi kendala di mana setelah penilaian untuk suatu kelompok terkirim, isian kualitatif teks, pilihan kelompok, dan skor tidak terhapus sempurna dari elemen DOM sehingga terpicu auto-save draf lama (*zombie draft*).
+  - Memperbarui `executeConfirmedFinalSubmit()` (baik jalur utama Supabase maupun fallback): langsung mereset `selectedGroupObj`, `selectedGroupIndex`, `selectedBestPresenters`, membersihkan seluruh `textarea` di `#evaluationInputsContainer`, mereset slider dan angka skor ke 85, menghapus pilihan radio `selectedGroup`, mengosongkan riwayat langkah, dan menghapus penanda `PGSD_ACTIVE_VIEW`.
+- **🛡️ Penjagaan Validasi Kelompok yang Telah Dinilai pada Pemulihan Draf (*Submitted Group Guard in Draft Restoration*):**
+  - Menambahkan pengecekan integritas di `restoreFormDraft()`: jika draf yang ditemukan di penyimpanan lokal memuat `groupName` yang sudah pernah dikirimkan atau dinilai oleh akun penilai ini di sesi aktif, draf tersebut otomatis dibuang (`clearStudentFormDraft`) dan tidak lagi dihidupkan ke antarmuka wizard.
+  - Memperbaiki `saveFormDraft()`: draf tidak akan lagi disimpan jika formulir sedang dalam proses submit (`isSubmittingFinalAssessment`), jika tampilan wizard sedang tersembunyi, atau jika kelompok tersebut telah selesai dinilai.
+- **⚡ Prapemuatan Rekapitulasi Sinkron Instan pada Inisialisasi Aplikasi (`initStudentApp`):**
+  - Mengubah siklus inisialisasi aplikasi mahasiswa: memuat data rekapitulasi secara instan (`await loadRekapData(true)`) sebelum mengevaluasi draf atau memeriksa status gerbang penilaian.
+  - Dengan demikian, data `nimToKelompokMap` dan `emailToKelompokMap` selalu 100% mutakhir saat aplikasi dibuka, mencegah pembukaan wizard secara keliru pada sesi atau kelompok yang telah selesai dinilai.
+- **🔄 Pembersihan Menyeluruh Seluruh Kunci Draf Lokal (`clearStudentFormDraft` & `resetStudentForm`):**
+  - Memperbarui `clearStudentFormDraft()` agar secara menyeluruh memindai dan menghapus semua kunci draf berawalan `PGSD_DRAFT_{formId}_` di `localStorage` dan `sessionStorage`.
+  - Memperbaiki `resetStudentForm()` agar membersihkan seluruh elemen input formulir, teks kualitatif, serta mengembalikan pilihan radio kartu kelompok ke status awal.
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.14` di seluruh berkas (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
+---
+
 ## [2.5.13] - 2026-09-14
 
 ### 🔄 Sinkronisasi Real-Time Penghitung Respons Admin & Proteksi Multi-Channel Deletion
