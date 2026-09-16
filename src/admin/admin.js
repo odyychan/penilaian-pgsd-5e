@@ -10323,15 +10323,83 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
 
       let evalHtml = '';
       if (Object.keys(evalDetailObj).length > 0) {
-        for (let mNim in evalDetailObj) {
-          const ulasan = evalDetailObj[mNim];
+        const allAdminStudents = (adminMasterGroups || []).flatMap(grp => (grp.members || []).map(m => ({ ...m, kelompok: grp.name })));
+
+        const isMetadataKey = (k) => {
+          if (!k || typeof k !== 'string') return true;
+          const lower = k.toLowerCase().trim();
+          return lower.startsWith('_') || ['partition', '_partition', 'quizresult', 'quiz_result', 'customanswers', 'custom_answers', 'uploadedfiles', 'uploaded_files'].includes(lower);
+        };
+
+        const evalEntries = [];
+        let hasDirectKeys = false;
+        for (let k in evalDetailObj) {
+          if (!isMetadataKey(k)) {
+            hasDirectKeys = true;
+            evalEntries.push({ memberKey: k, ulasanRaw: evalDetailObj[k] });
+          }
+        }
+
+        // Fallback jika evaluasi hanya tersimpan di dalam _partition
+        if (!hasDirectKeys && evalDetailObj._partition && typeof evalDetailObj._partition === 'object') {
+          const rekan = evalDetailObj._partition.evaluasiRekan || {};
+          const mandiri = evalDetailObj._partition.refleksiMandiri || {};
+          for (let k in rekan) {
+            if (!isMetadataKey(k)) evalEntries.push({ memberKey: k, ulasanRaw: rekan[k], isSelf: false });
+          }
+          for (let k in mandiri) {
+            if (!isMetadataKey(k)) evalEntries.push({ memberKey: k, ulasanRaw: mandiri[k], isSelf: true });
+          }
+        }
+
+        for (const item of evalEntries) {
+          const { memberKey, ulasanRaw } = item;
+          if (!ulasanRaw) continue;
+
+          let ulasanText = '';
+          if (typeof ulasanRaw === 'string') {
+            ulasanText = ulasanRaw.trim();
+          } else if (typeof ulasanRaw === 'object' && ulasanRaw !== null) {
+            ulasanText = (ulasanRaw.catatan || ulasanRaw.komentar || ulasanRaw.ulasan || ulasanRaw.feedback || '').trim();
+          }
+          if (!ulasanText || ulasanText === '[object Object]' || ulasanText.startsWith('{"')) continue;
+
+          // Resolusi nama mahasiswa & NIM
+          const foundStud = allAdminStudents.find(s => 
+            String(s.nim).trim() === String(memberKey).trim() || 
+            String(s.name).trim().toLowerCase() === String(memberKey).trim().toLowerCase()
+          );
+
+          let displayNama = memberKey;
+          let displayNim = '';
+          if (foundStud && foundStud.name) {
+            displayNama = foundStud.name;
+            if (foundStud.nim && String(foundStud.nim).trim() !== String(memberKey).trim()) {
+              displayNim = foundStud.nim;
+            } else if (foundStud.nim) {
+              displayNim = foundStud.nim;
+            }
+          }
+
+          // Cek apakah refleksi mandiri
+          const isSelf = item.isSelf !== undefined 
+            ? item.isSelf 
+            : Boolean(
+                (evalDetailObj._partition?.refleksiMandiri && evalDetailObj._partition.refleksiMandiri[memberKey]) ||
+                (resp.nim && foundStud?.nim && String(resp.nim).trim() === String(foundStud.nim).trim()) ||
+                (resp.namaPenilai && String(resp.namaPenilai).trim().toLowerCase() === String(displayNama).trim().toLowerCase())
+              );
+
           evalHtml += `
-            <div class="p-3 rounded-xl bg-white border border-zinc-200/70 space-y-1 text-xs">
-              <span class="font-semibold text-zinc-800 flex items-center gap-1.5">
-                <svg class="w-3.5 h-3.5 text-zinc-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                <span>Mahasiswa / NIM: <span class="font-mono text-zinc-600">${escapeHtml(mNim)}</span></span>
-              </span>
-              <p class="text-zinc-700 italic bg-zinc-50 p-2.5 rounded-lg border border-zinc-100 whitespace-pre-wrap pl-6">"${escapeHtml(ulasan)}"</p>
+            <div class="p-3 rounded-xl ${isSelf ? 'bg-purple-50/60 border border-purple-200/80' : 'bg-white border border-zinc-200/70'} space-y-1.5 text-xs">
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-semibold ${isSelf ? 'text-purple-950' : 'text-zinc-800'} flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5 ${isSelf ? 'text-purple-600' : 'text-zinc-500'} shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                  <span>Mahasiswa / NIM: <span class="font-mono ${isSelf ? 'text-purple-800 font-bold' : 'text-zinc-700 font-medium'}">${escapeHtml(displayNama)}${displayNim && displayNim !== displayNama ? ` (${escapeHtml(displayNim)})` : ''}</span></span>
+                </span>
+                ${isSelf ? '<span class="px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 text-[10px] font-bold shrink-0">Refleksi Diri</span>' : '<span class="px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600 text-[10px] font-medium shrink-0">Evaluasi Rekan</span>'}
+              </div>
+              <p class="${isSelf ? 'text-purple-900 bg-white/80 border-purple-100' : 'text-zinc-700 bg-zinc-50 border-zinc-100'} italic p-2.5 rounded-lg border whitespace-pre-wrap pl-6">"${escapeHtml(ulasanText)}"</p>
             </div>
           `;
         }
@@ -10573,7 +10641,26 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
           if (['SECTION_HEADER', 'VIDEO', 'IMAGE', 'DIVIDER'].includes(field.type)) return;
           if (field.id === 'fld_core_group' || field.id === 'fld_core_score' || field.id === 'fld_core_voting') return;
 
-          const fAnswers = answersByField[field.id] || [];
+          let fAnswers = answersByField[field.id] || [];
+          if (field.type === 'CORE_MEMBER_FEEDBACK') {
+            const allFb = [];
+            adminResponsesList.forEach(r => {
+              let evObj = {};
+              try {
+                evObj = typeof r.evaluasiDetail === 'string' ? JSON.parse(r.evaluasiDetail) : (r.evaluasiDetail || {});
+              } catch(e) {}
+              const isMeta = k => !k || typeof k !== 'string' || k.startsWith('_') || ['partition', '_partition', 'quizresult', 'quiz_result', 'customanswers', 'custom_answers', 'uploadedfiles', 'uploaded_files'].includes(k.toLowerCase().trim());
+              for (let k in evObj) {
+                if (isMeta(k)) continue;
+                let val = evObj[k];
+                let txt = typeof val === 'string' ? val.trim() : (typeof val === 'object' && val ? (val.catatan || val.komentar || val.ulasan || val.feedback || '').trim() : '');
+                if (txt && txt !== '[object Object]' && !txt.startsWith('{"')) {
+                  allFb.push(`[${k}] ${txt}`);
+                }
+              }
+            });
+            fAnswers = allFb;
+          }
           const fTotal = fAnswers.length;
 
           let chartContent = '';
@@ -13458,17 +13545,54 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
           const penilaiName = r.nama_penilai || r.namaPenilai || 'Penilai';
           const evalDetail = r.evaluasi_detail || r.evaluasiDetail || {};
           if (typeof evalDetail === 'object' && evalDetail !== null) {
-            Object.entries(evalDetail).forEach(([memberKey, ulasanText]) => {
-              if (memberKey === 'uploadedFiles' || !ulasanText) return;
+            const isMetadataKey = (k) => {
+              if (!k || typeof k !== 'string') return true;
+              const lower = k.toLowerCase().trim();
+              return lower.startsWith('_') || ['partition', '_partition', 'quizresult', 'quiz_result', 'customanswers', 'custom_answers', 'uploadedfiles', 'uploaded_files'].includes(lower);
+            };
+
+            const evalEntries = [];
+            let hasDirectKeys = false;
+            for (let k in evalDetail) {
+              if (!isMetadataKey(k)) {
+                hasDirectKeys = true;
+                evalEntries.push([k, evalDetail[k]]);
+              }
+            }
+
+            if (!hasDirectKeys && evalDetail._partition && typeof evalDetail._partition === 'object') {
+              const rekan = evalDetail._partition.evaluasiRekan || {};
+              const mandiri = evalDetail._partition.refleksiMandiri || {};
+              for (let k in rekan) {
+                if (!isMetadataKey(k)) evalEntries.push([k, rekan[k]]);
+              }
+              for (let k in mandiri) {
+                if (!isMetadataKey(k)) evalEntries.push([k, mandiri[k]]);
+              }
+            }
+
+            evalEntries.forEach(([memberKey, ulasanText]) => {
+              if (isMetadataKey(memberKey) || !ulasanText) return;
+              let finalUlasan = '';
+              if (typeof ulasanText === 'string') {
+                finalUlasan = ulasanText.trim();
+              } else if (typeof ulasanText === 'object' && ulasanText !== null) {
+                finalUlasan = (ulasanText.catatan || ulasanText.komentar || ulasanText.ulasan || ulasanText.feedback || '').trim();
+              }
+              if (!finalUlasan || finalUlasan === '[object Object]' || finalUlasan.startsWith('{"')) return;
+
               let memberName = memberKey;
-              const foundStud = allAdminStudents.find(s => String(s.nim).trim() === String(memberKey).trim());
+              const foundStud = allAdminStudents.find(s => 
+                String(s.nim).trim() === String(memberKey).trim() || 
+                String(s.name).trim().toLowerCase() === String(memberKey).trim().toLowerCase()
+              );
               if (foundStud && foundStud.name) {
-                memberName = `${foundStud.name} (${memberKey})`;
+                memberName = foundStud.nim ? `${foundStud.name} (${foundStud.nim})` : foundStud.name;
               }
               if (!evaluasiList[memberName]) evaluasiList[memberName] = [];
               evaluasiList[memberName].push({
                 penilai: penilaiName,
-                ulasan: ulasanText
+                ulasan: finalUlasan
               });
             });
           }

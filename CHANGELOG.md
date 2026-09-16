@@ -2,6 +2,22 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.26] - 2026-09-17
+
+### 🛠️ Perbaikan Bug Detail Respons: Eliminasi Kebocoran `_partition`, Resolusi Identitas & Badge Refleksi Mandiri
+- **🛡️ Eliminasi Kebocoran Metadata Partisi (`_partition`):**
+  - Memperbaiki algoritma parsing evaluasi kualitatif pada modal Detail Respons Penilaian panel admin (`openAdminResponseDetailModal`) agar secara ketat menyaring seluruh atribut internal (`_partition`, `quizResult`, `customAnswers`, `uploadedFiles`, serta kunci berawalan `_`).
+  - Mengeliminasi bug tampilan entri semu *"Mahasiswa / NIM: _partition"* yang sebelumnya menampilkan nilai objek mentah `"[object Object]"`.
+  - Menerapkan pengaman (*type & value guard*) di seluruh modul mahasiswa (`student.js`) dan panel admin (`admin.js`) agar nilai kosong atau objek bertipe `[object Object]` tidak pernah dirender ke antarmuka pengguna.
+- **✨ Resolusi Identitas Mahasiswa & Lencana Refleksi Mandiri Terpadu:**
+  - Mengintegrasikan pencocokan data anggota dengan basis data mahasiswa (`adminMasterGroups`) sehingga modal menampilkan format nama dan NIM yang rapi dan terverifikasi.
+  - Menyematkan lencana visual adaptif: *"Refleksi Mandiri"* (nuansa ungu lembut) dan *"Evaluasi Rekan"* (nuansa netral) untuk membedakan evaluasi diri dengan masukan rekan sejawat.
+  - Menambahkan mekanisme fallback cerdas yang mampu membaca evaluasi anggota baik dari tingkat root maupun dari partisi terisolasi.
+- **📊 Agregasi Catatan Kualitatif pada Dasbor Analitik Respons:**
+  - Menyempurnakan pemetaan respons kualitatif untuk field evaluasi masukan pemateri (`CORE_MEMBER_FEEDBACK`) pada tab ringkasan analitik respons admin.
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.26` di seluruh berkas (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
 ## [2.5.25] - 2026-09-14
 
 ### ⚡ Optimalisasi Skalabilitas Data: Pagination Interaktif Respons & Dukungan Pencarian ID Bukti

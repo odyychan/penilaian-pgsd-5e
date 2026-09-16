@@ -8517,9 +8517,15 @@ function normalizeMediaList(fieldOrMedia) {
       let evalListHtml = "";
       if (payload.evaluasiDetail && typeof payload.evaluasiDetail === 'object') {
         for (let member in payload.evaluasiDetail) {
-          if (member === 'uploadedFiles') continue;
-          const textVal = payload.evaluasiDetail[member];
-          if (textVal) {
+          if (member === '_partition' || member === 'uploadedFiles' || member === 'quizResult' || member === 'customAnswers' || member.startsWith('_') || member.toLowerCase().includes('partition')) continue;
+          const rawVal = payload.evaluasiDetail[member];
+          let textVal = '';
+          if (typeof rawVal === 'string') {
+            textVal = rawVal.trim();
+          } else if (typeof rawVal === 'object' && rawVal !== null) {
+            textVal = (rawVal.catatan || rawVal.komentar || rawVal.ulasan || rawVal.feedback || '').trim();
+          }
+          if (textVal && textVal !== '[object Object]' && !textVal.startsWith('{"')) {
             const isSelf = payload.refleksiMandiri && payload.refleksiMandiri[member];
             evalListHtml += `
               <div class="p-2.5 rounded-lg ${isSelf ? 'bg-purple-50/70 border border-purple-200' : 'bg-zinc-50 border border-zinc-200/70'} text-xs">
@@ -10623,18 +10629,18 @@ function normalizeMediaList(fieldOrMedia) {
       const evalDetail = payload.evaluasiDetail;
       if (evalDetail && typeof evalDetail === 'object') {
         Object.keys(evalDetail).forEach(key => {
-          if (key === '_partition' || key === 'quizResult' || key === 'customAnswers') return;
+          if (key === '_partition' || key === 'quizResult' || key === 'customAnswers' || key === 'uploadedFiles' || key.startsWith('_') || key.toLowerCase().includes('partition')) return;
           const val = evalDetail[key];
-          if (typeof val === 'string' && isValidVerificationText(val)) {
+          if (typeof val === 'string' && isValidVerificationText(val) && val.trim() !== '[object Object]') {
             evalItems.push({
               title: `Evaluasi Anggota Pemateri: ${key}`,
               score: null,
               comment: val.trim()
             });
           } else if (val && typeof val === 'object') {
-            const catatan = val.catatan || val.komentar || val.feedback || val.evaluasi || "";
+            const catatan = (val.catatan || val.komentar || val.feedback || val.evaluasi || "").trim();
             const skor = val.skor !== undefined ? val.skor : (val.nilai !== undefined ? val.nilai : null);
-            if (isValidVerificationText(catatan) || skor !== null) {
+            if ((isValidVerificationText(catatan) || skor !== null) && catatan !== '[object Object]' && !catatan.startsWith('{"')) {
               evalItems.push({
                 title: `Evaluasi Anggota: ${val.nama || val.namaMahasiswa || key}`,
                 score: skor,
@@ -11669,17 +11675,23 @@ function normalizeMediaList(fieldOrMedia) {
                   nilai: r.nilai_kelompok
                 });
                 if (r.evaluasi_detail && typeof r.evaluasi_detail === 'object') {
-                  const evKeys = Object.keys(r.evaluasi_detail);
+                  const evKeys = Object.keys(r.evaluasi_detail).filter(k => k !== '_partition' && k !== 'uploadedFiles' && k !== 'quizResult' && k !== 'customAnswers' && !k.startsWith('_') && !k.toLowerCase().includes('partition'));
                   groupMap[grp].totalKomentar += evKeys.length;
                   evKeys.forEach(sName => {
                     const text = r.evaluasi_detail[sName];
-                    if (text && String(text).trim()) {
+                    let ulasanText = '';
+                    if (typeof text === 'string') {
+                      ulasanText = text.trim();
+                    } else if (typeof text === 'object' && text !== null) {
+                      ulasanText = (text.catatan || text.komentar || text.ulasan || text.feedback || '').trim();
+                    }
+                    if (ulasanText && ulasanText !== '[object Object]' && !ulasanText.startsWith('{"')) {
                       if (!groupMap[grp].evaluasiList[sName]) groupMap[grp].evaluasiList[sName] = [];
                       groupMap[grp].evaluasiList[sName].push({
                         penilai: r.nama_penilai || 'Anonim',
                         peran: r.peran_penilai || 'Mahasiswa',
                         nim: r.nim_penilai || '-',
-                        ulasan: String(text).trim(),
+                        ulasan: ulasanText,
                         timestamp: r.created_at
                       });
                     }
