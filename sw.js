@@ -1,11 +1,11 @@
-/* ============================================================
- * sw.js — Service Worker | Platform Penilaian FKIP ULM
+﻿/* ============================================================
+ * sw.js â€” Service Worker | Platform Penilaian FKIP ULM
  * Strategy:
  *   - HTML & Code Modules (/src/*): Network-first (always fresh, fallback to cache)
  *   - Assets (images, fonts): Stale-while-revalidate
  * ============================================================ */
 
-const CACHE_VERSION = 'v2.5.30';
+const CACHE_VERSION = 'v2.5.31';
 const CACHE_NAME = `pgsd-cache-${CACHE_VERSION}`;
 const OFFLINE_URL = '/index.html';
 const STATIC_CACHE  = `pgsd-static-${CACHE_VERSION}`;
@@ -58,7 +58,7 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
   if (!url.origin.includes(self.location.origin)) return;
 
-  // 1. JS/CSS modules & HTML pages — Network-first (Always fetch fresh from server, fallback to cache)
+  // 1. JS/CSS modules & HTML pages â€” Network-first (Always fetch fresh from server, fallback to cache)
   if (url.pathname.startsWith('/src/') || url.pathname.endsWith('.html') || url.pathname === '/' || url.pathname === '/admin') {
     event.respondWith(
       fetch(event.request)
@@ -74,7 +74,7 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // 2. Static Assets (Images, Icons) — Stale-while-revalidate
+  // 2. Static Assets (Images, Icons) â€” Stale-while-revalidate
   event.respondWith(
     caches.match(event.request).then(cached => {
       const fetchPromise = fetch(event.request).then(res => {

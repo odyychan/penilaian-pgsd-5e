@@ -12771,10 +12771,36 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       if (inputUrl) inputUrl.value = globalUrl;
       if (inputFolder) inputFolder.value = globalFolder;
 
+      // ✅ Bersihkan field kata sandi saat modal dibuka
+      const inputCurrPass = document.getElementById("inputGlobalCurrentAdminPassword");
+      const inputNewPass = document.getElementById("inputGlobalNewAdminPassword");
+      const passStatus = document.getElementById("adminPasswordChangeStatus");
+      if (inputCurrPass) { inputCurrPass.value = ""; inputCurrPass.type = "password"; }
+      if (inputNewPass) { inputNewPass.value = ""; inputNewPass.type = "password"; }
+      if (passStatus) { passStatus.className = "hidden text-[11px] font-medium rounded-lg px-2.5 py-1.5 leading-snug"; passStatus.textContent = ""; }
+      // Reset eye icons
+      document.querySelectorAll("#modalGlobalSettings .eye-icon-show").forEach(el => el.classList.remove("hidden"));
+      document.querySelectorAll("#modalGlobalSettings .eye-icon-hide").forEach(el => el.classList.add("hidden"));
+
+      // ✅ Isi statistik dari data nyata
       const statForms = document.getElementById("statGlobalForms");
       const statGroups = document.getElementById("statGlobalGroups");
       const statStudents = document.getElementById("statGlobalStudents");
-      if (statForms) statForms.textContent = formsRegistryList.length || "2";
+      const visibleForms = (formsRegistryList || []).filter(f => {
+        const fId = f.formId || DEFAULT_PRIMARY_FORM_ID;
+        return !(fId === "DEBUG" || (fId && fId.toUpperCase().startsWith("DBG_")));
+      });
+      if (statForms) statForms.textContent = visibleForms.length || formsRegistryList.length || "0";
+      if (statGroups) {
+        const totalGroups = (adminMasterGroups || []).length;
+        statGroups.textContent = totalGroups > 0 ? totalGroups : (visibleForms.reduce((acc, f) => acc + (f.totalKelompok || 0), 0) || "–");
+      }
+      if (statStudents) {
+        let totalStu = 0;
+        (adminMasterGroups || []).forEach(g => { totalStu += (g.members || []).length; });
+        if (totalStu === 0) totalStu = visibleForms.reduce((acc, f) => acc + (f.totalMahasiswa || 0), 0);
+        statStudents.textContent = totalStu > 0 ? totalStu : "–";
+      }
 
       updateDebugModeUI();
 
@@ -12812,24 +12838,42 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
       const currentPass = document.getElementById("inputGlobalCurrentAdminPassword")?.value.trim();
       const newPass = document.getElementById("inputGlobalNewAdminPassword")?.value.trim();
       const btn = document.getElementById("btnUpdateAdminPass");
+      const statusEl = document.getElementById("adminPasswordChangeStatus");
 
+      // ── Helper: tampilkan status inline ──
+      function showPassStatus(msg, type) {
+        if (!statusEl) return;
+        statusEl.classList.remove("hidden", "bg-emerald-50", "text-emerald-700", "bg-red-50", "text-red-700", "bg-amber-50", "text-amber-700");
+        if (type === "success") statusEl.classList.add("bg-emerald-50", "text-emerald-700");
+        else if (type === "error") statusEl.classList.add("bg-red-50", "text-red-700");
+        else statusEl.classList.add("bg-amber-50", "text-amber-700");
+        statusEl.textContent = msg;
+      }
+
+      // Validasi
       if (!currentPass) {
-        showAdminToast("Masukkan kata sandi admin saat ini!", "warning");
+        showPassStatus("⚠ Masukkan kata sandi saat ini terlebih dahulu.", "warning");
         document.getElementById("inputGlobalCurrentAdminPassword")?.focus();
         return;
       }
-      if (!newPass || newPass.length < 4) {
-        showAdminToast("Kata sandi baru minimal 4 karakter!", "warning");
+      if (!newPass || newPass.length < 6) {
+        showPassStatus("⚠ Kata sandi baru minimal 6 karakter.", "warning");
+        document.getElementById("inputGlobalNewAdminPassword")?.focus();
+        return;
+      }
+      if (currentPass === newPass) {
+        showPassStatus("⚠ Kata sandi baru harus berbeda dengan kata sandi saat ini.", "warning");
         document.getElementById("inputGlobalNewAdminPassword")?.focus();
         return;
       }
 
       if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '<span class="flex items-center gap-1"><svg class="w-3 h-3 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Menyimpan...</span>';
+        btn.innerHTML = '<span class="flex items-center gap-1"><svg class="w-3 h-3 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>Menyimpan...</span>';
       }
+      if (statusEl) { statusEl.classList.add("hidden"); statusEl.textContent = ""; }
 
-      // 🛡️ 100% SECURE EDGE FUNCTION PASSWORD UPDATE
+      // 🛡️ SECURE: Password update via Supabase Edge Function (zero plaintext on frontend)
       try {
         const resp = await fetch(ADMIN_AUTH_EDGE_URL, {
           method: "POST",
@@ -12849,25 +12893,41 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
         if (resp.ok && data.success) {
           if (data.token) sessionStorage.setItem("PGSD_ADMIN_SESSION_TOKEN", data.token);
 
-          if (document.getElementById("inputGlobalCurrentAdminPassword")) {
-            document.getElementById("inputGlobalCurrentAdminPassword").value = "";
-          }
-          if (document.getElementById("inputGlobalNewAdminPassword")) {
-            document.getElementById("inputGlobalNewAdminPassword").value = "";
-          }
-          showAdminToast(data.message || "Kata sandi admin berhasil diperbarui secara aman!", "success");
+          // Bersihkan input setelah berhasil
+          const inputCurr = document.getElementById("inputGlobalCurrentAdminPassword");
+          const inputNew = document.getElementById("inputGlobalNewAdminPassword");
+          if (inputCurr) { inputCurr.value = ""; inputCurr.type = "password"; }
+          if (inputNew) { inputNew.value = ""; inputNew.type = "password"; }
+          // Reset eye icons
+          document.querySelectorAll("#modalGlobalSettings .eye-icon-show").forEach(el => el.classList.remove("hidden"));
+          document.querySelectorAll("#modalGlobalSettings .eye-icon-hide").forEach(el => el.classList.add("hidden"));
+
+          showPassStatus("✅ " + (data.message || "Kata sandi admin berhasil diperbarui secara aman!"), "success");
+          showAdminToast(data.message || "Kata sandi admin berhasil diperbarui!", "success");
         } else {
-          showAdminToast(data?.error || "Gagal mengubah kata sandi admin.", "error");
+          showPassStatus("✕ " + (data?.error || "Gagal mengubah kata sandi. Coba lagi."), "error");
         }
       } catch (err) {
         console.error("Update admin pass error:", err);
-        showAdminToast("Gagal menghubungi server autentikasi. Silakan periksa koneksi internet Anda.", "error");
+        showPassStatus("✕ Gagal menghubungi server. Periksa koneksi internet Anda.", "error");
       } finally {
         if (btn) {
           btn.disabled = false;
-          btn.innerHTML = '<span>Simpan</span>';
+          btn.innerHTML = 'Simpan';
         }
       }
+    }
+
+    // ✅ Toggle password visibility (ikon mata) pada input password
+    function togglePasswordVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      const isHidden = input.type === "password";
+      input.type = isHidden ? "text" : "password";
+      const showIcon = btn.querySelector(".eye-icon-show");
+      const hideIcon = btn.querySelector(".eye-icon-hide");
+      if (showIcon) showIcon.classList.toggle("hidden", isHidden);
+      if (hideIcon) hideIcon.classList.toggle("hidden", !isHidden);
     }
 
     async function testGlobalApiConnection() {
@@ -13029,7 +13089,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
 
         const backupPayload = {
           app: "PGSD_5E_ASSESSMENT_SYSTEM",
-          version: "2.2.50",
+          version: "2.5.31",
           timestamp: new Date().toISOString(),
           counts: {
             forms: forms.length,

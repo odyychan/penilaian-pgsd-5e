@@ -2,6 +2,36 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.31] - 2026-09-17
+
+### 🔐 Perbaikan Menyeluruh Modal Setelan Sistem & Keamanan Kata Sandi Admin
+
+- **🛡️ Keamanan Sistem Autentikasi Admin Ditingkatkan:**
+  - Memperbaiki celah keamanan kritis di Supabase Edge Function `admin-auth`: seluruh kunci rahasia (`salt`, `signing key`) kini dibaca secara eksklusif dari Supabase Edge Function Secrets via `Deno.env.get()`, bukan lagi sebagai nilai statis di kode sumber.
+  - Membalik prioritas verifikasi kata sandi: **hash di database diverifikasi lebih dahulu** (mencerminkan perubahan terkini via panel admin), baru kemudian env secret sebagai *fallback* saat hash DB belum ada (setup awal).
+  - Menambahkan logika *seeding otomatis* `ADMIN_SIGNING_SECRET` ke tabel `pgsd_admin_secrets` agar fungsi PostgreSQL `pgsd_is_admin()` dapat bekerja dengan benar untuk validasi RLS.
+  - Menambahkan pengecekan eksplisit: jika DB hash ditemukan tapi tidak cocok, verifikasi langsung gagal (tidak jatuh ke env plaintext), mencegah bypass keamanan.
+  - Menaikkan batas minimal panjang kata sandi dari 4 menjadi **6 karakter**, konsisten di frontend dan edge function.
+
+- **🔑 Ikon Mata (Toggle Tampilkan/Sembunyikan) pada Input Kata Sandi:**
+  - Menambahkan tombol ikon mata interaktif pada kedua kolom input kata sandi di Setelan Sistem: "Kata sandi saat ini" dan "Kata sandi baru (min. 6 karakter)".
+  - Ikon mata beralih antara tampilkan (`👁`) dan sembunyikan (`👁‍🗨`) secara visual, disertai `autocomplete` attributes yang benar untuk keamanan.
+  - Ikon mata dan tipe input direset otomatis saat modal dibuka ulang.
+
+- **✅ Umpan Balik Inline pada Perubahan Kata Sandi:**
+  - Menambahkan area status `#adminPasswordChangeStatus` langsung di bawah input kata sandi.
+  - Pesan berhasil ditampilkan dalam kotak hijau (`bg-emerald-50`), pesan gagal dalam kotak merah (`bg-red-50`), dan validasi awal dalam kotak kuning.
+  - Semua kolom input kata sandi dibersihkan secara otomatis setelah perubahan berhasil.
+
+- **📊 Statistik Modal Setelan Sistem Diisi dari Data Nyata:**
+  - Memperbaiki bug: elemen `statGlobalGroups` dan `statGlobalStudents` sebelumnya tidak pernah diisi nilainya (selalu menampilkan nilai hardcoded dari HTML).
+  - Sekarang statistik Formulir, Kelompok, dan Mahasiswa diambil dari data runtime (`adminMasterGroups`, `formsRegistryList`) dengan eksklusif menyaring form sandbox DEBUG.
+
+- **🧹 Pemeliharaan & Perbaikan Minor:**
+  - Field kata sandi di modal Setelan Sistem kini dibersihkan otomatis setiap kali modal dibuka.
+  - Memperbaiki versi string pada file cadangan (*backup*) yang sebelumnya hardcoded ke `"2.2.50"`, sekarang menggunakan versi aktual `"2.5.31"`.
+  - Meningkatkan versi aplikasi ke `v2.5.31` di seluruh berkas sistem (`index.html`, `admin.html`, `sw.js`, `CHANGELOG.md`, `admin-auth/index.ts`).
+
 ## [2.5.30] - 2026-09-17
 
 ### 🔄 Sinkronisasi Presisi Tab Navigasi & Tampilan Konten saat Refresh / Hard Reload

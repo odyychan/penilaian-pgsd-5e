@@ -1,8 +1,4 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-// =========================================================================
-// 🛡️ SUPABASE EDGE FUNCTION: SECURE ADMIN AUTHENTICATION & PASSWORD MANAGER
-// =========================================================================
+﻿import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -10,290 +6,180 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const DEFAULT_SALT = "pgsd_5e_secret_salt_2026";
-const SIGNING_SECRET_KEY = "c78912e54f0a4593bc82136e7a2b9041d8e57390f12a3b4c5d6e7f8091a2b3c4";
+function getSalt() {
+  return (Deno.env.get("ADMIN_SALT") || Deno.env.get("PGSD_ADMIN_SALT") || "pgsd_5e_secret_salt_2026").trim();
+}
+function getSigningKey() {
+  return (Deno.env.get("ADMIN_SIGNING_KEY") || Deno.env.get("PGSD_SIGNING_KEY") || "c78912e54f0a4593bc82136e7a2b9041d8e57390f12a3b4c5d6e7f8091a2b3c4").trim();
+}
+function getSupabaseCredentials() {
+  return { url: Deno.env.get("SUPABASE_URL") || null, serviceKey: Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || null };
+}
 
-// Helper: Hash password with SHA-256
-async function hashPassword(pass: string): Promise<string> {
+async function hashPassword(pass) {
   const encoder = new TextEncoder();
-  const data = encoder.encode(pass + "_" + DEFAULT_SALT);
+  const data = encoder.encode(pass + "_" + getSalt());
   const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+  return Array.from(new Uint8Array(hashBuffer)).map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-// Helper: Get signing secret for session tokens (matches PostgreSQL pgsd_is_admin)
-function getSigningSecret(): string {
-  return SIGNING_SECRET_KEY;
+async function getSigningSecretFromDb() {
+  const { url, serviceKey } = getSupabaseCredentials();
+  if (!url || !serviceKey) return null;
+  try {
+    const res = await fetch(`${url}/rest/v1/pgsd_admin_secrets?key=eq.ADMIN_SIGNING_SECRET&select=value_hash`, { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } });
+    if (res.ok) { const rows = await res.json(); if (rows && rows.length > 0 && rows[0].value_hash) return rows[0].value_hash; }
+  } catch {}
+  return null;
 }
 
-// Helper: Sign session token with HMAC-SHA256
-async function createSessionToken(): Promise<{ token: string; expiresAt: number }> {
+async function createSessionToken(signingSecret) {
   const now = Date.now();
-  const expiresAt = now + 24 * 60 * 60 * 1000; // 24 hours
+  const expiresAt = now + 24 * 60 * 60 * 1000;
   const payload = JSON.stringify({ role: "admin", iat: now, exp: expiresAt });
-
+  const secretKey = (signingSecret || getSigningKey()) + "_" + getSalt();
   const encoder = new TextEncoder();
-  const keyData = encoder.encode(getSigningSecret() + "_" + DEFAULT_SALT);
-  const cryptoKey = await crypto.subtle.importKey(
-    "raw",
-    keyData,
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"]
-  );
-
+  const cryptoKey = await crypto.subtle.importKey("raw", encoder.encode(secretKey), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   const signature = await crypto.subtle.sign("HMAC", cryptoKey, encoder.encode(payload));
-  const sigHex = Array.from(new Uint8Array(signature))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-
-  const b64Payload = btoa(payload);
-  const token = `${b64Payload}.${sigHex}`;
-  return { token, expiresAt };
+  const sigHex = Array.from(new Uint8Array(signature)).map((b) => b.toString(16).padStart(2, "0")).join("");
+  return { token: `${btoa(payload)}.${sigHex}`, expiresAt };
 }
 
-// Helper: Verify session token
-async function verifySessionToken(token: string): Promise<boolean> {
+async function verifySessionToken(token) {
   try {
     const parts = token.split(".");
     if (parts.length !== 2) return false;
-
     const [b64Payload, sigHex] = parts;
     const payloadStr = atob(b64Payload);
     const payload = JSON.parse(payloadStr);
-
     if (!payload.exp || Date.now() > payload.exp) return false;
     if (payload.role !== "admin") return false;
-
+    const sigBytes = new Uint8Array(sigHex.match(/.{1,2}/g)?.map((byte) => parseInt(byte, 16)) || []);
+    const dbKey = await getSigningSecretFromDb();
+    const keysToTry = dbKey ? [dbKey + "_" + getSalt(), getSigningKey() + "_" + getSalt()] : [getSigningKey() + "_" + getSalt()];
     const encoder = new TextEncoder();
-    const keyData = encoder.encode(getSigningSecret() + "_" + DEFAULT_SALT);
-    const cryptoKey = await crypto.subtle.importKey(
-      "raw",
-      keyData,
-      { name: "HMAC", hash: "SHA-256" },
-      false,
-      ["verify"]
-    );
-
-    const sigBytes = new Uint8Array(
-      sigHex.match(/.{1,2}/g)?.map((byte) => parseInt(byte, 16)) || []
-    );
-
-    return await crypto.subtle.verify("HMAC", cryptoKey, sigBytes, encoder.encode(payloadStr));
-  } catch {
+    for (const secretKey of keysToTry) {
+      try {
+        const cryptoKey = await crypto.subtle.importKey("raw", encoder.encode(secretKey), { name: "HMAC", hash: "SHA-256" }, false, ["verify"]);
+        const valid = await crypto.subtle.verify("HMAC", cryptoKey, sigBytes, encoder.encode(payloadStr));
+        if (valid) return true;
+      } catch {}
+    }
     return false;
-  }
+  } catch { return false; }
 }
 
-// Helper: Verify input password against Supabase Secret or Database Salted Hash (Zero hardcoded fallback)
-async function verifyInputPassword(inputPass: string): Promise<{ valid: boolean; source: string }> {
-  const inputHash = await hashPassword(inputPass);
-  const envPass = (Deno.env.get("ADMIN_PASSWORD") || Deno.env.get("PGSD_ADMIN_PASSWORD") || "").trim();
-
-  // 1. Prioritas 1: Supabase Secrets (ADMIN_PASSWORD di Supabase Edge Function Secrets)
-  if (envPass && inputPass === envPass) {
-    // Sinkronkan hash ke tabel database di background jika berbeda
-    savePasswordHashToDatabase(inputPass).catch(() => {});
-    return { valid: true, source: "SUPABASE_ENV_SECRET" };
-  }
-
-  // 2. Prioritas 2: Hash tersimpan di database pgsd_admin_secrets (dari Ubah Password di Admin)
-  const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-
-  if (supabaseUrl && serviceKey) {
+async function verifyInputPassword(inputPass) {
+  const { url, serviceKey } = getSupabaseCredentials();
+  if (url && serviceKey) {
     try {
-      const res = await fetch(
-        `${supabaseUrl}/rest/v1/pgsd_admin_secrets?key=eq.ADMIN_PASSWORD_HASH&select=value_hash`,
-        {
-          headers: {
-            apikey: serviceKey,
-            Authorization: `Bearer ${serviceKey}`,
-          },
-        }
-      );
+      const inputHash = await hashPassword(inputPass);
+      const res = await fetch(`${url}/rest/v1/pgsd_admin_secrets?key=eq.ADMIN_PASSWORD_HASH&select=value_hash`, { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } });
       if (res.ok) {
         const rows = await res.json();
         if (rows && rows.length > 0 && rows[0].value_hash) {
-          const dbHash = rows[0].value_hash;
-          if (inputHash === dbHash) {
-            return { valid: true, source: "SUPABASE_DB_CUSTOM" };
-          }
+          if (inputHash === rows[0].value_hash) return { valid: true, source: "SUPABASE_DB_CUSTOM" };
+          return { valid: false, source: "DB_MISMATCH" };
         }
       }
-    } catch {
-      // Fall through
-    }
+    } catch {}
   }
-
+  const envPass = (Deno.env.get("ADMIN_PASSWORD") || Deno.env.get("PGSD_ADMIN_PASSWORD") || "").trim();
+  if (envPass && inputPass === envPass) {
+    savePasswordHashToDatabase(inputPass).catch(() => {});
+    saveSigningSecretToDatabase().catch(() => {});
+    return { valid: true, source: "SUPABASE_ENV_SECRET" };
+  }
   return { valid: false, source: "UNKNOWN" };
 }
 
-// Helper: Save new salted hash to database pgsd_admin_secrets
-async function savePasswordHashToDatabase(newPass: string): Promise<boolean> {
-  const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  if (!supabaseUrl || !serviceKey) return false;
-
+async function savePasswordHashToDatabase(newPass) {
+  const { url, serviceKey } = getSupabaseCredentials();
+  if (!url || !serviceKey) return false;
   try {
     const newHash = await hashPassword(newPass);
-    const payload = {
-      key: "ADMIN_PASSWORD_HASH",
-      value_hash: newHash,
-      updated_at: new Date().toISOString(),
-    };
-
-    const res = await fetch(`${supabaseUrl}/rest/v1/pgsd_admin_secrets`, {
+    const res = await fetch(`${url}/rest/v1/pgsd_admin_secrets`, {
       method: "POST",
-      headers: {
-        apikey: serviceKey,
-        Authorization: `Bearer ${serviceKey}`,
-        "Content-Type": "application/json",
-        Prefer: "resolution=merge-duplicates",
-      },
-      body: JSON.stringify(payload),
+      headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}`, "Content-Type": "application/json", Prefer: "resolution=merge-duplicates" },
+      body: JSON.stringify({ key: "ADMIN_PASSWORD_HASH", value_hash: newHash, updated_at: new Date().toISOString() }),
     });
-
     return res.ok;
-  } catch {
-    return false;
-  }
+  } catch { return false; }
 }
 
-// =========================================================================
-// 🚀 MAIN HTTP HANDLER
-// =========================================================================
-serve(async (req: Request) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
+async function saveSigningSecretToDatabase() {
+  const { url, serviceKey } = getSupabaseCredentials();
+  if (!url || !serviceKey) return false;
+  const existing = await getSigningSecretFromDb();
+  if (existing) return true;
+  try {
+    const res = await fetch(`${url}/rest/v1/pgsd_admin_secrets`, {
+      method: "POST",
+      headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}`, "Content-Type": "application/json", Prefer: "resolution=merge-duplicates" },
+      body: JSON.stringify({ key: "ADMIN_SIGNING_SECRET", value_hash: getSigningKey(), updated_at: new Date().toISOString() }),
+    });
+    return res.ok;
+  } catch { return false; }
+}
 
+serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
     const url = new URL(req.url);
-    let body: any = {};
-    if (req.method === "POST") {
-      try {
-        body = await req.json();
-      } catch {
-        body = {};
-      }
-    }
-
+    let body = {};
+    if (req.method === "POST") { try { body = await req.json(); } catch { body = {}; } }
     const action = body.action || url.searchParams.get("action") || "verify";
 
-    // ACTION: STATUS
     if (action === "status") {
       const envPass = Deno.env.get("ADMIN_PASSWORD") || Deno.env.get("PGSD_ADMIN_PASSWORD");
-      return new Response(
-        JSON.stringify({
-          success: true,
-          auth_ready: true,
-          has_env_secret: !!(envPass && envPass.trim() !== ""),
-        }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 200,
-        }
-      );
+      const { url: sbUrl, serviceKey } = getSupabaseCredentials();
+      if (sbUrl && serviceKey) saveSigningSecretToDatabase().catch(() => {});
+      return new Response(JSON.stringify({ success: true, auth_ready: true, has_env_secret: !!(envPass && envPass.trim()), has_db_config: !!(sbUrl && serviceKey) }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 });
     }
 
-    // ACTION: VERIFY
     if (action === "verify") {
       const inputPass = String(body.password || "").trim();
-      if (!inputPass) {
-        return new Response(
-          JSON.stringify({ success: false, error: "Kata sandi wajib diisi." }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
-        );
-      }
-
+      if (!inputPass) return new Response(JSON.stringify({ success: false, error: "Kata sandi wajib diisi." }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 });
       const { valid, source } = await verifyInputPassword(inputPass);
       if (valid) {
-        const { token, expiresAt } = await createSessionToken();
-        return new Response(
-          JSON.stringify({
-            success: true,
-            message: "Autentikasi admin berhasil.",
-            token: token,
-            expires_at: expiresAt,
-            source: source,
-          }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
-        );
+        saveSigningSecretToDatabase().catch(() => {});
+        const dbKey = await getSigningSecretFromDb();
+        const { token, expiresAt } = await createSessionToken(dbKey || undefined);
+        return new Response(JSON.stringify({ success: true, message: "Autentikasi admin berhasil.", token, expires_at: expiresAt, source }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 });
       } else {
-        // Artificial delay against brute-force & timing attacks
-        await new Promise((resolve) => setTimeout(resolve, 600));
-        return new Response(
-          JSON.stringify({
-            success: false,
-            error: "Kata sandi admin tidak valid. Akses ditolak.",
-          }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
-        );
+        await new Promise((resolve) => setTimeout(resolve, 800));
+        return new Response(JSON.stringify({ success: false, error: "Kata sandi admin tidak valid. Akses ditolak." }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 });
       }
     }
 
-    // ACTION: VERIFY_TOKEN
     if (action === "verify_token") {
       const token = String(body.token || "").trim();
       const isValid = await verifySessionToken(token);
-      return new Response(
-        JSON.stringify({ success: isValid, valid: isValid }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: isValid ? 200 : 401 }
-      );
+      return new Response(JSON.stringify({ success: isValid, valid: isValid }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: isValid ? 200 : 401 });
     }
 
-    // ACTION: CHANGE_PASSWORD
     if (action === "change_password" || action === "update_password") {
       const currentPass = String(body.current_password || "").trim();
       const newPass = String(body.new_password || "").trim();
-
-      if (!currentPass || !newPass) {
-        return new Response(
-          JSON.stringify({ success: false, error: "Kata sandi lama dan baru wajib diisi." }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
-        );
-      }
-
+      if (!currentPass || !newPass) return new Response(JSON.stringify({ success: false, error: "Kata sandi lama dan baru wajib diisi." }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 });
+      if (newPass.length < 6) return new Response(JSON.stringify({ success: false, error: "Kata sandi baru minimal 6 karakter." }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 });
       const { valid: isCurrentValid } = await verifyInputPassword(currentPass);
       if (!isCurrentValid) {
-        return new Response(
-          JSON.stringify({ success: false, error: "Kata sandi saat ini tidak cocok." }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
-        );
+        await new Promise((resolve) => setTimeout(resolve, 800));
+        return new Response(JSON.stringify({ success: false, error: "Kata sandi saat ini tidak cocok. Periksa kembali." }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 });
       }
-
-      if (newPass.length < 4) {
-        return new Response(
-          JSON.stringify({ success: false, error: "Kata sandi baru minimal 4 karakter." }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
-        );
-      }
-
+      const { url: sbUrl, serviceKey } = getSupabaseCredentials();
+      if (!sbUrl || !serviceKey) return new Response(JSON.stringify({ success: false, error: "Konfigurasi database tidak tersedia. Pastikan SUPABASE_URL dan SUPABASE_SERVICE_ROLE_KEY diatur di Supabase Edge Function Secrets." }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 });
       const saved = await savePasswordHashToDatabase(newPass);
-      const { token, expiresAt } = await createSessionToken();
-
-      return new Response(
-        JSON.stringify({
-          success: true,
-          message: "Kata sandi admin berhasil diperbarui secara aman.",
-          token: token,
-          expires_at: expiresAt,
-          saved_to_database: saved,
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
-      );
+      if (!saved) return new Response(JSON.stringify({ success: false, error: "Gagal menyimpan kata sandi ke database. Pastikan tabel pgsd_admin_secrets sudah dibuat via SQL Editor." }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 });
+      await saveSigningSecretToDatabase();
+      const dbKey = await getSigningSecretFromDb();
+      const { token, expiresAt } = await createSessionToken(dbKey || undefined);
+      return new Response(JSON.stringify({ success: true, message: "Kata sandi admin berhasil diperbarui dan tersinkron ke database secara aman.", token, expires_at: expiresAt, saved_to_database: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 });
     }
 
-    return new Response(
-      JSON.stringify({ success: false, error: `Aksi "${action}" tidak dikenal.` }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
-    );
-  } catch (err: any) {
-    return new Response(
-      JSON.stringify({ success: false, error: err.message || "Internal Server Error" }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
-    );
+    return new Response(JSON.stringify({ success: false, error: `Aksi "${action}" tidak dikenal.` }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 });
+  } catch (err) {
+    return new Response(JSON.stringify({ success: false, error: err.message || "Internal Server Error" }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 });
   }
 });
