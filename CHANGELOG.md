@@ -27,6 +27,10 @@ Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Pe
   - Memperbaiki bug: elemen `statGlobalGroups` dan `statGlobalStudents` sebelumnya tidak pernah diisi nilainya (selalu menampilkan nilai hardcoded dari HTML).
   - Sekarang statistik Formulir, Kelompok, dan Mahasiswa diambil dari data runtime (`adminMasterGroups`, `formsRegistryList`) dengan eksklusif menyaring form sandbox DEBUG.
 
+- **🔤 Restorasi Presisi Encoding UTF-8 (Eliminasi Mojibake):**
+  - Mengatasi masalah kerusakan rendering simbol dan karakter khusus (*mojibake*) seperti `Â© 2026 â€¢ Admin` menjadi `© 2026 • Admin`, placeholder login admin `••••••••`, tanda panah navigasi `←` dan `→`, simbol centang/silang `✕`, bintang `⭐`, dan peringatan `⚠️`.
+  - Menghapus UTF-8 BOM (*Byte Order Mark*) di seluruh berkas proyek (`index.html`, `admin.html`, `sw.js`) dan memastikan seluruh berkas tersimpan dalam format UTF-8 murni tanpa distorsi encoding.
+
 - **🧹 Pemeliharaan & Perbaikan Minor:**
   - Field kata sandi di modal Setelan Sistem kini dibersihkan otomatis setiap kali modal dibuka.
   - Memperbaiki versi string pada file cadangan (*backup*) yang sebelumnya hardcoded ke `"2.2.50"`, sekarang menggunakan versi aktual `"2.5.31"`.
