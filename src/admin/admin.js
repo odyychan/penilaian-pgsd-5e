@@ -9886,16 +9886,65 @@
     }
     window.closeStudentAttendanceModal = closeStudentAttendanceModal;
 
+    function handleAttendanceStatusRadioChange() {
+      const checkedRadio = document.querySelector('input[name="attRadioStatus"]:checked');
+      const status = (checkedRadio?.value || 'HADIR').toUpperCase();
+      
+      const permContainer = document.getElementById("attPermContainer");
+      if (permContainer) {
+        if (status === 'HADIR') {
+          permContainer.classList.add("hidden");
+        } else {
+          permContainer.classList.remove("hidden");
+        }
+      }
+
+      // Update modal badge preview
+      const badge = document.getElementById("attModalCurrentBadge");
+      if (badge) {
+        if (status === 'SAKIT') {
+          badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-amber-100 text-amber-800 border border-amber-200 shrink-0";
+          badge.textContent = "Sakit 🤒";
+        } else if (status === 'IZIN') {
+          badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-indigo-100 text-indigo-800 border border-indigo-200 shrink-0";
+          badge.textContent = "Izin ✉️";
+        } else if (status === 'ALPHA') {
+          badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-rose-100 text-rose-800 border border-rose-200 shrink-0";
+          badge.textContent = "Alpha 🚫";
+        } else {
+          badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-zinc-200 text-zinc-700 shrink-0";
+          badge.textContent = "Hadir";
+        }
+      }
+    }
+    window.handleAttendanceStatusRadioChange = handleAttendanceStatusRadioChange;
+
     function updateAttendanceModalStatusForSesi() {
       const selectedSesi = document.getElementById("attSelectSesi")?.value || activeAttendanceModalTarget.sesi || "Minggu 1";
       const nim = activeAttendanceModalTarget.nim;
       const attData = getStudentAttendanceStatus(nim, selectedSesi);
       const status = (attData.status || 'HADIR').toUpperCase();
 
-      // Check radio button
+      // Check attendance status radio button
       const radios = document.querySelectorAll('input[name="attRadioStatus"]');
       radios.forEach(r => {
         r.checked = (r.value === status);
+      });
+
+      // Permission radio button & container visibility
+      const permContainer = document.getElementById("attPermContainer");
+      if (permContainer) {
+        if (status === 'HADIR') {
+          permContainer.classList.add("hidden");
+        } else {
+          permContainer.classList.remove("hidden");
+        }
+      }
+
+      const isAllowed = (attData.allowSubmit === true || attData.allowSubmit === "true");
+      const permRadios = document.querySelectorAll('input[name="attRadioPermission"]');
+      permRadios.forEach(r => {
+        r.checked = (r.value === (isAllowed ? 'ALLOWED' : 'BLOCKED'));
       });
 
       const inputNote = document.getElementById("attInputNote");
@@ -9933,6 +9982,12 @@
       const checkedRadio = document.querySelector('input[name="attRadioStatus"]:checked');
       if (checkedRadio) chosenStatus = checkedRadio.value;
 
+      let allowSubmit = false;
+      if (chosenStatus !== 'HADIR') {
+        const checkedPerm = document.querySelector('input[name="attRadioPermission"]:checked');
+        allowSubmit = checkedPerm ? (checkedPerm.value === 'ALLOWED') : false;
+      }
+
       if (!adminAppConfig["Attendance_Records"]) adminAppConfig["Attendance_Records"] = {};
       if (!adminAppConfig["Attendance_Records"][sesi]) adminAppConfig["Attendance_Records"][sesi] = {};
 
@@ -9948,6 +10003,7 @@
           nama: nama,
           status: chosenStatus,
           catatan: note,
+          allowSubmit: allowSubmit,
           updated_at: new Date().toISOString()
         };
       }
@@ -9957,7 +10013,9 @@
       renderAdminAttendanceTracker();
 
       const statusLabels = { SAKIT: 'Sakit 🤒', IZIN: 'Izin ✉️', ALPHA: 'Alpha 🚫', HADIR: 'Hadir' };
-      showAdminToast(`Status presensi ${nama} (${statusLabels[chosenStatus] || chosenStatus}) untuk ${sesi} berhasil disimpan!`, "success");
+      const permLabel = allowSubmit ? ' (Boleh Mengisi)' : ' (Kunci Form)';
+      const msgSuffix = chosenStatus !== 'HADIR' ? permLabel : '';
+      showAdminToast(`Status presensi ${nama} (${statusLabels[chosenStatus] || chosenStatus}${msgSuffix}) untuk ${sesi} berhasil disimpan!`, "success");
     }
     window.handleSaveStudentAttendance = handleSaveStudentAttendance;
 
@@ -10065,10 +10123,6 @@
       }
       if (inScopeGroups.length === 0) inScopeGroups = (adminMasterGroups || []).map(g => g.name);
 
-      let submittedCount = 0;
-      let missingCount = 0;
-      let excusedCount = 0;
-
       const studentStatuses = allStudents.map(student => {
         const studentNimClean = student.nim.toLowerCase();
         const studentNamaClean = student.nama.toLowerCase();
@@ -10100,14 +10154,7 @@
         const attRecord = getStudentAttendanceStatus(student.nim, currentTargetSesi);
         const attStatus = (attRecord.status || 'HADIR').toUpperCase();
         const isExcused = (attStatus === 'SAKIT' || attStatus === 'IZIN' || attStatus === 'ALPHA');
-
-        if (isExcused) {
-          excusedCount++;
-          if (attStatus === 'ALPHA') missingCount++;
-        } else {
-          if (isSubmitted) submittedCount++;
-          else missingCount++;
-        }
+        const allowSubmit = (attRecord.allowSubmit === true || attRecord.allowSubmit === 'true');
 
         return {
           ...student,
@@ -10118,13 +10165,20 @@
           ratedGroups: matchedResponses.map(r => r.kelompok),
           attendanceStatus: attStatus,
           attendanceNote: attRecord.catatan || '',
-          isExcused: isExcused
+          isExcused: isExcused,
+          allowSubmit: allowSubmit
         };
       });
 
-      // Update counters & progress bar (fair formula: excluded students don't lower class participation)
+      // Filter counters strictly aligned with the tabs (100% mutually consistent)
+      const submittedCount = studentStatuses.filter(s => s.isSubmitted).length;
+      const missingCount = studentStatuses.filter(s => !s.isSubmitted && s.attendanceStatus !== 'SAKIT' && s.attendanceStatus !== 'IZIN').length;
+      const excusedCount = studentStatuses.filter(s => s.isExcused).length;
+
+      // Update counters & progress bar (fair formula: excluded students who did not submit don't lower class participation)
       const totalStudents = allStudents.length;
-      const validParticipants = Math.max(1, totalStudents - (studentStatuses.filter(s => s.attendanceStatus === 'SAKIT' || s.attendanceStatus === 'IZIN').length));
+      const excusedNonSubmitting = studentStatuses.filter(s => !s.isSubmitted && (s.attendanceStatus === 'SAKIT' || s.attendanceStatus === 'IZIN')).length;
+      const validParticipants = Math.max(1, totalStudents - excusedNonSubmitting);
       const percent = totalStudents > 0 ? Math.min(100, Math.round((submittedCount / validParticipants) * 100)) : 0;
 
       const elPercent = document.getElementById("trackerParticipationPercent");
@@ -10203,35 +10257,27 @@
 
         // Right status element
         let statusElementHtml = '';
-        if (st.attendanceStatus === 'SAKIT') {
+        if (st.attendanceStatus === 'SAKIT' || st.attendanceStatus === 'IZIN' || st.attendanceStatus === 'ALPHA') {
+          const isSakit = st.attendanceStatus === 'SAKIT';
+          const isIzin = st.attendanceStatus === 'IZIN';
+          const badgeColor = isSakit ? 'bg-amber-100 text-amber-900 border-amber-200' : isIzin ? 'bg-indigo-100 text-indigo-900 border-indigo-200' : 'bg-rose-100 text-rose-900 border-rose-200';
+          const badgeText = isSakit ? 'Sakit 🤒' : isIzin ? 'Izin ✉️' : 'Alpha 🚫';
+          const linkColor = isSakit ? 'text-amber-700 hover:text-amber-900' : isIzin ? 'text-indigo-700 hover:text-indigo-900' : 'text-rose-700 hover:text-rose-900';
+          const permTag = st.allowSubmit
+            ? `<span class="inline-flex items-center gap-0.5 text-[8.5px] font-semibold text-emerald-700 bg-emerald-100/90 px-1.5 py-0.5 rounded border border-emerald-200 leading-tight">✍️ Boleh Isi</span>`
+            : `<span class="inline-flex items-center gap-0.5 text-[8.5px] font-semibold text-rose-700 bg-rose-100/90 px-1.5 py-0.5 rounded border border-rose-200 leading-tight">🔒 Form Kunci</span>`;
+          const scoreSubTag = st.isSubmitted ? `<span class="inline-flex items-center gap-0.5 text-[8.5px] font-mono font-bold text-emerald-800 bg-emerald-100 px-1.5 py-0.5 rounded border border-emerald-200/80">✓ ${st.submittedCount} Nilai</span>` : '';
+
           statusElementHtml = `
             <div class="shrink-0 text-right space-y-1">
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-amber-100 text-amber-900 border border-amber-200 block" title="${escapeHtml(st.attendanceNote || 'Sakit')}">
-                Sakit 🤒
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono ${badgeColor} border block" title="${escapeHtml(st.attendanceNote || badgeText)}">
+                ${badgeText}
               </span>
-              <button type="button" onclick="openStudentAttendanceModal('${escapeHtml(st.nim)}', '${escapeHtml(st.nama)}', '${escapeHtml(st.kelompok)}', '${escapeHtml(currentTargetSesi)}')" class="text-[9.5px] font-semibold text-amber-700 hover:text-amber-900 underline cursor-pointer">
-                Ubah
-              </button>
-            </div>
-          `;
-        } else if (st.attendanceStatus === 'IZIN') {
-          statusElementHtml = `
-            <div class="shrink-0 text-right space-y-1">
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-indigo-100 text-indigo-900 border border-indigo-200 block" title="${escapeHtml(st.attendanceNote || 'Izin')}">
-                Izin ✉️
-              </span>
-              <button type="button" onclick="openStudentAttendanceModal('${escapeHtml(st.nim)}', '${escapeHtml(st.nama)}', '${escapeHtml(st.kelompok)}', '${escapeHtml(currentTargetSesi)}')" class="text-[9.5px] font-semibold text-indigo-700 hover:text-indigo-900 underline cursor-pointer">
-                Ubah
-              </button>
-            </div>
-          `;
-        } else if (st.attendanceStatus === 'ALPHA') {
-          statusElementHtml = `
-            <div class="shrink-0 text-right space-y-1">
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-rose-100 text-rose-900 border border-rose-200 block" title="${escapeHtml(st.attendanceNote || 'Alpha')}">
-                Alpha 🚫
-              </span>
-              <button type="button" onclick="openStudentAttendanceModal('${escapeHtml(st.nim)}', '${escapeHtml(st.nama)}', '${escapeHtml(st.kelompok)}', '${escapeHtml(currentTargetSesi)}')" class="text-[9.5px] font-semibold text-rose-700 hover:text-rose-900 underline cursor-pointer">
+              <div class="flex items-center justify-end gap-1 flex-wrap">
+                ${scoreSubTag}
+                ${permTag}
+              </div>
+              <button type="button" onclick="openStudentAttendanceModal('${escapeHtml(st.nim)}', '${escapeHtml(st.nama)}', '${escapeHtml(st.kelompok)}', '${escapeHtml(currentTargetSesi)}')" class="text-[9.5px] font-semibold ${linkColor} underline cursor-pointer">
                 Ubah
               </button>
             </div>
@@ -13378,7 +13424,7 @@
 
         const backupPayload = {
           app: "PGSD_5E_ASSESSMENT_SYSTEM",
-          version: "2.5.33",
+          version: "2.5.34",
           timestamp: new Date().toISOString(),
           counts: {
             forms: forms.length,

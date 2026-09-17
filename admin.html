@@ -35,7 +35,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="src/admin/admin.css?v=2.5.33">
+  <link rel="stylesheet" href="src/admin/admin.css?v=2.5.34">
   <!-- KaTeX CSS & JS for Universal Math / LaTeX / AI & Word Formula Rendering -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -3193,34 +3193,56 @@
           <label class="block font-semibold text-zinc-700">Status Kehadiran Sesi:</label>
           <div class="grid grid-cols-2 gap-2">
             <label class="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 cursor-pointer transition">
-              <input type="radio" name="attRadioStatus" value="HADIR" checked class="text-zinc-900 focus:ring-0 cursor-pointer">
+              <input type="radio" name="attRadioStatus" value="HADIR" checked onchange="handleAttendanceStatusRadioChange()" class="text-zinc-900 focus:ring-0 cursor-pointer">
               <div>
                 <div class="font-bold text-xs text-zinc-800">Hadir (Wajib)</div>
                 <div class="text-[10px] text-zinc-400">Wajib mengisi penilaian</div>
               </div>
             </label>
             <label class="flex items-center gap-2 p-2.5 rounded-xl border border-amber-200 bg-amber-50/50 hover:bg-amber-50 cursor-pointer transition">
-              <input type="radio" name="attRadioStatus" value="SAKIT" class="text-amber-600 focus:ring-0 cursor-pointer">
+              <input type="radio" name="attRadioStatus" value="SAKIT" onchange="handleAttendanceStatusRadioChange()" class="text-amber-600 focus:ring-0 cursor-pointer">
               <div>
                 <div class="font-bold text-xs text-amber-900">Sakit 🤒</div>
                 <div class="text-[10px] text-amber-700">Bebas dari tagihan</div>
               </div>
             </label>
             <label class="flex items-center gap-2 p-2.5 rounded-xl border border-indigo-200 bg-indigo-50/50 hover:bg-indigo-50 cursor-pointer transition">
-              <input type="radio" name="attRadioStatus" value="IZIN" class="text-indigo-600 focus:ring-0 cursor-pointer">
+              <input type="radio" name="attRadioStatus" value="IZIN" onchange="handleAttendanceStatusRadioChange()" class="text-indigo-600 focus:ring-0 cursor-pointer">
               <div>
                 <div class="font-bold text-xs text-indigo-900">Izin ✉️</div>
                 <div class="text-[10px] text-indigo-700">Dispensasi resmi</div>
               </div>
             </label>
             <label class="flex items-center gap-2 p-2.5 rounded-xl border border-rose-200 bg-rose-50/50 hover:bg-rose-50 cursor-pointer transition">
-              <input type="radio" name="attRadioStatus" value="ALPHA" class="text-rose-600 focus:ring-0 cursor-pointer">
+              <input type="radio" name="attRadioStatus" value="ALPHA" onchange="handleAttendanceStatusRadioChange()" class="text-rose-600 focus:ring-0 cursor-pointer">
               <div>
                 <div class="font-bold text-xs text-rose-900">Alpha 🚫</div>
                 <div class="text-[10px] text-rose-700">Tanpa keterangan</div>
               </div>
             </label>
           </div>
+        </div>
+
+        <!-- Attendance Form Fill Permission (Tampil jika status != HADIR) -->
+        <div id="attPermContainer" class="hidden space-y-1.5 p-3 rounded-xl bg-zinc-50 border border-zinc-200 transition-all">
+          <label class="block font-semibold text-zinc-700">Hak Akses Formulir Penilaian:</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center gap-2 p-2.5 rounded-xl border border-rose-200 bg-rose-50/50 hover:bg-rose-50 cursor-pointer transition">
+              <input type="radio" name="attRadioPermission" value="BLOCKED" checked class="text-rose-600 focus:ring-0 cursor-pointer">
+              <div>
+                <div class="font-bold text-xs text-rose-900">Tidak Boleh Mengisi 🔒</div>
+                <div class="text-[10px] text-rose-700">Kunci form evaluasi untuk mahasiswa ini</div>
+              </div>
+            </label>
+            <label class="flex items-center gap-2 p-2.5 rounded-xl border border-emerald-200 bg-emerald-50/50 hover:bg-emerald-50 cursor-pointer transition">
+              <input type="radio" name="attRadioPermission" value="ALLOWED" class="text-emerald-600 focus:ring-0 cursor-pointer">
+              <div>
+                <div class="font-bold text-xs text-emerald-900">Boleh Mengisi ✍️</div>
+                <div class="text-[10px] text-emerald-700">Dapat mengisi penilaian sukarela</div>
+              </div>
+            </label>
+          </div>
+          <p class="text-[10.5px] text-zinc-400">Jika "Tidak Boleh Mengisi", form mahasiswa akan diblokir dengan keterangan dispensasi resmi.</p>
         </div>
 
         <!-- Optional Note -->
@@ -4141,13 +4163,13 @@ function getOrCreateFolder(folderName) {
   <!-- ========================================================================= -->
   <!-- JAVASCRIPT APP LOGIC: MULTI-FORM & ISOLATED SANDBOX ENGINE -->
   <!-- ========================================================================= -->
-  <script src="src/admin/admin.js?v=2.5.33"></script>
+  <script src="src/admin/admin.js?v=2.5.34"></script>
 
   <!-- Progressive Web App (PWA) & Instant Auto-Updater Engine -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js?v=2.5.33').then(function(reg) {
+        navigator.serviceWorker.register('/sw.js?v=2.5.34').then(function(reg) {
           reg.update();
           reg.addEventListener('updatefound', function() {
             var newWorker = reg.installing;

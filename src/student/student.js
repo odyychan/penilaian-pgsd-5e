@@ -6651,25 +6651,82 @@ function normalizeMediaList(fieldOrMedia) {
 
       if (foundStudent) {
         if (iconEl) iconEl.classList.remove("hidden");
-        if (nimInput) nimInput.className = "w-full pl-3.5 pr-16 py-2.5 rounded-xl border border-emerald-500 text-xs sm:text-sm font-mono focus:border-emerald-600 outline-none transition bg-emerald-50/20";
         
-        if (feedbackBox) {
-          feedbackBox.className = "text-xs rounded-xl p-2.5 bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center justify-between";
-          feedbackBox.innerHTML = `
-            <div class="flex items-center gap-2">
-              <span class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center flex-shrink-0">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
-                </svg>
-              </span>
-              <div>
-                <span class="font-bold block">${escapeHtml(foundStudent.name)}</span>
-                <span class="text-[10px] text-emerald-700 block font-medium">${escapeHtml(foundGroupName)} (${escapeHtml(foundGroupSesi)})</span>
+        const activeSesi = (typeof appConfig !== 'undefined' && (appConfig["Sesi_Minggu_Aktif"] || appConfig["Sesi_Aktif"])) 
+          ? (appConfig["Sesi_Minggu_Aktif"] || appConfig["Sesi_Aktif"]).trim() 
+          : "Minggu 1";
+        const attRec = getStudentAttendanceRecord(cleanNim, foundStudent.name, activeSesi);
+        const attStatus = (attRec?.status || "").toUpperCase();
+        const isExcused = (attStatus === "SAKIT" || attStatus === "IZIN" || attStatus === "ALPHA");
+        const allowSubmit = (attRec?.allowSubmit === true || attRec?.allowSubmit === "true");
+        const isBlocked = isExcused && !allowSubmit;
+
+        if (isBlocked) {
+          const statusLabel = attStatus === "SAKIT" ? "Sakit 🤒" : (attStatus === "IZIN" ? "Izin ✉️" : "Alpha 🚫");
+          const noteText = attRec?.catatan ? ` (${escapeHtml(attRec.catatan)})` : "";
+          if (nimInput) nimInput.className = "w-full pl-3.5 pr-16 py-2.5 rounded-xl border border-rose-400 text-xs sm:text-sm font-mono focus:border-rose-600 outline-none transition bg-rose-50/25";
+          if (feedbackBox) {
+            feedbackBox.className = "text-xs rounded-xl p-3 bg-rose-50 border border-rose-200 text-rose-900 space-y-1";
+            feedbackBox.innerHTML = `
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center flex-shrink-0 text-xs font-bold">🔒</span>
+                  <div>
+                    <span class="font-bold block">${escapeHtml(foundStudent.name)}</span>
+                    <span class="text-[10px] text-rose-700 block font-medium">${escapeHtml(foundGroupName)} • ${statusLabel}${noteText}</span>
+                  </div>
+                </div>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-rose-200/80 font-bold text-rose-800 shrink-0">Kunci Form</span>
               </div>
-            </div>
-            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-200/80 font-bold text-emerald-800">Terdaftar</span>
-          `;
-          feedbackBox.classList.remove("hidden");
+              <p class="text-[10.5px] text-rose-700 leading-tight pt-1 border-t border-rose-200/60">
+                Anda tercatat <strong>${statusLabel}</strong> pada ${escapeHtml(activeSesi)}. Sesuai kebijakan pengajar, Anda dibebaskan dari pengisian formulir evaluasi ini (form dikunci).
+              </p>
+            `;
+            feedbackBox.classList.remove("hidden");
+          }
+        } else if (isExcused && allowSubmit) {
+          const statusLabel = attStatus === "SAKIT" ? "Sakit 🤒" : (attStatus === "IZIN" ? "Izin ✉️" : "Alpha 🚫");
+          const noteText = attRec?.catatan ? ` (${escapeHtml(attRec.catatan)})` : "";
+          if (nimInput) nimInput.className = "w-full pl-3.5 pr-16 py-2.5 rounded-xl border border-amber-400 text-xs sm:text-sm font-mono focus:border-amber-600 outline-none transition bg-amber-50/20";
+          if (feedbackBox) {
+            feedbackBox.className = "text-xs rounded-xl p-3 bg-amber-50 border border-amber-200 text-amber-900 space-y-1";
+            feedbackBox.innerHTML = `
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="w-5 h-5 rounded-full bg-amber-600 text-white flex items-center justify-center flex-shrink-0 text-xs font-bold">✍️</span>
+                  <div>
+                    <span class="font-bold block">${escapeHtml(foundStudent.name)}</span>
+                    <span class="text-[10px] text-amber-700 block font-medium">${escapeHtml(foundGroupName)} • ${statusLabel}${noteText}</span>
+                  </div>
+                </div>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-amber-200/80 font-bold text-amber-800 shrink-0">Boleh Mengisi</span>
+              </div>
+              <p class="text-[10.5px] text-amber-700 leading-tight pt-1 border-t border-amber-200/60">
+                Anda tercatat <strong>${statusLabel}</strong> pada ${escapeHtml(activeSesi)}. Pengajar memberikan izin bagi Anda untuk mengisi formulir penilaian ini secara sukarela.
+              </p>
+            `;
+            feedbackBox.classList.remove("hidden");
+          }
+        } else {
+          if (nimInput) nimInput.className = "w-full pl-3.5 pr-16 py-2.5 rounded-xl border border-emerald-500 text-xs sm:text-sm font-mono focus:border-emerald-600 outline-none transition bg-emerald-50/20";
+          if (feedbackBox) {
+            feedbackBox.className = "text-xs rounded-xl p-2.5 bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center justify-between";
+            feedbackBox.innerHTML = `
+              <div class="flex items-center gap-2">
+                <span class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center flex-shrink-0">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </span>
+                <div>
+                  <span class="font-bold block">${escapeHtml(foundStudent.name)}</span>
+                  <span class="text-[10px] text-emerald-700 block font-medium">${escapeHtml(foundGroupName)} (${escapeHtml(foundGroupSesi)})</span>
+                </div>
+              </div>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-200/80 font-bold text-emerald-800">Terdaftar</span>
+            `;
+            feedbackBox.classList.remove("hidden");
+          }
         }
 
         if (inputNama) {
@@ -6749,6 +6806,12 @@ function normalizeMediaList(fieldOrMedia) {
         if (!isNimValid && nim.length < 6) {
           showToast("Masukkan NIM mahasiswa yang valid!", "warning");
           if (nimInput) nimInput.focus();
+          return;
+        }
+
+        // Integrity guard: cek apakah mahasiswa berhalangan dan form dikunci
+        if (isStudentAttendanceBlocked(nim, nama)) {
+          showToast("Akses Ditolak: Anda tercatat berhalangan hadir pada sesi ini dan formulir evaluasi dikunci.", "error", 6000);
           return;
         }
       }
@@ -8760,6 +8823,14 @@ function normalizeMediaList(fieldOrMedia) {
       const email = emailEl ? emailEl.value.trim() : "";
       const nama = namaEl ? namaEl.value.trim() : "";
       const nim = nimEl ? nimEl.value.trim() : "-";
+
+      // 🛡️ INTEGRITY GUARD: Blokir Pengiriman jika Mahasiswa Berhalangan & Form Dikunci
+      if (currentEvaluatorRole === 'Mahasiswa' && isStudentAttendanceBlocked(nim, nama)) {
+        showToast("Pengiriman ditolak: Anda tercatat berhalangan hadir pada sesi ini dan formulir evaluasi dikunci.", "error", 6000);
+        updateStepUI(1);
+        return;
+      }
+
       let nilai = nilaiEl ? parseFloat(nilaiEl.value) : 85;
       if (isNaN(nilai)) nilai = 85;
 
@@ -12152,6 +12223,21 @@ function normalizeMediaList(fieldOrMedia) {
     }
     window.getStudentAttendanceRecord = getStudentAttendanceRecord;
 
+    function isStudentAttendanceBlocked(nim, name, targetSesi) {
+      if (!nim && !name) return false;
+      const activeSesi = targetSesi || ((typeof appConfig !== 'undefined' && (appConfig["Sesi_Minggu_Aktif"] || appConfig["Sesi_Aktif"])) 
+        ? (appConfig["Sesi_Minggu_Aktif"] || appConfig["Sesi_Aktif"]).trim() 
+        : "Minggu 1");
+      const attRec = getStudentAttendanceRecord(nim, name, activeSesi);
+      if (!attRec) return false;
+      const status = (attRec.status || "").toUpperCase();
+      const isExcused = (status === "SAKIT" || status === "IZIN" || status === "ALPHA");
+      if (!isExcused) return false;
+      // Mahasiswa diblokir jika allowSubmit bukan true
+      return attRec.allowSubmit !== true && attRec.allowSubmit !== "true";
+    }
+    window.isStudentAttendanceBlocked = isStudentAttendanceBlocked;
+
     function populatePresensiFilters() {
       const scopeSelect = document.getElementById("presensiScopeFilter");
       const presenterSelect = document.getElementById("presensiPresenterFilter");
@@ -12261,7 +12347,7 @@ function normalizeMediaList(fieldOrMedia) {
           <option value="ALL">Semua Status</option>
           <option value="SUDAH">Sudah Menilai</option>
           <option value="BELUM">Belum Menilai</option>
-          <option value="PENYAJI">Anggota Penyaji</option>
+          <option value="PENYAJI">Penyaji / Bebas</option>
           <option value="EXCUSED">Berhalangan (Sakit/Izin/Alpha)</option>
         `;
       }
@@ -12512,7 +12598,17 @@ function normalizeMediaList(fieldOrMedia) {
         let matrixStatusCategory = "BELUM";
         let matrixStatusLabel = "Belum Mengisi";
 
-        if (isStudentExcused) {
+        if (totalTargets > 0 && filledTargetsCount === totalTargets) {
+          matrixStatusCategory = "LENGKAP";
+          matrixStatusLabel = isStudentExcused 
+            ? `Selesai (${studentExcusedLabel})` 
+            : (isPresenterInActiveSession ? "Selesai (Penyaji)" : "Selesai");
+        } else if (totalTargets === 0) {
+          matrixStatusCategory = "LENGKAP";
+          matrixStatusLabel = isStudentExcused 
+            ? `Selesai (${studentExcusedLabel})` 
+            : (isPresenterInActiveSession ? "Selesai (Penyaji)" : "Selesai");
+        } else if (isStudentExcused) {
           if (filledTargetsCount > 0) {
             matrixStatusCategory = "SEBAGIAN";
             matrixStatusLabel = `${studentExcusedLabel} • Sebagian (${filledTargetsCount}/${totalTargets})`;
@@ -12523,12 +12619,6 @@ function normalizeMediaList(fieldOrMedia) {
             matrixStatusCategory = "EXCUSED";
             matrixStatusLabel = studentExcusedLabel;
           }
-        } else if (totalTargets === 0) {
-          matrixStatusCategory = "LENGKAP";
-          matrixStatusLabel = isPresenterInActiveSession ? "Selesai (Penyaji)" : "Selesai";
-        } else if (filledTargetsCount === totalTargets) {
-          matrixStatusCategory = "LENGKAP";
-          matrixStatusLabel = isPresenterInActiveSession ? "Selesai (Penyaji)" : "Selesai";
         } else if (filledTargetsCount > 0) {
           matrixStatusCategory = "SEBAGIAN";
           matrixStatusLabel = `Sebagian (${filledTargetsCount}/${totalTargets})`;
@@ -12632,12 +12722,12 @@ function normalizeMediaList(fieldOrMedia) {
         // Mode Single Presenter
         if (cardTitle1) cardTitle1.textContent = "Total Mahasiswa";
         if (cardTitle2) cardTitle2.textContent = "Sudah Menilai";
-        if (cardTitle3) cardTitle3.textContent = "Anggota Penyaji";
+        if (cardTitle3) cardTitle3.textContent = "Penyaji / Bebas";
         if (cardTitle4) cardTitle4.textContent = "Belum Menilai";
         if (cardTitle5) cardTitle5.textContent = "Berhalangan";
 
         const countSudah = baseScopeList.filter(s => s.singleStatusCategory === "SUDAH").length;
-        const countPenyaji = baseScopeList.filter(s => s.singleStatusCategory === "PENYAJI").length;
+        const countPenyaji = baseScopeList.filter(s => s.singleStatusCategory === "PENYAJI" || s.singleStatusCategory === "BEBAS").length;
         const countBelum = baseScopeList.filter(s => s.singleStatusCategory === "BELUM").length;
         const countExcused = baseScopeList.filter(s => s.singleStatusCategory === "EXCUSED").length;
 
@@ -12658,7 +12748,13 @@ function normalizeMediaList(fieldOrMedia) {
         if (!isSinglePresenterMode) {
           if (statusFilter !== "ALL" && s.matrixStatusCategory !== statusFilter) return false;
         } else {
-          if (statusFilter !== "ALL" && s.singleStatusCategory !== statusFilter) return false;
+          if (statusFilter !== "ALL") {
+            if (statusFilter === "PENYAJI") {
+              if (s.singleStatusCategory !== "PENYAJI" && s.singleStatusCategory !== "BEBAS") return false;
+            } else if (s.singleStatusCategory !== statusFilter) {
+              return false;
+            }
+          }
         }
 
         if (searchQuery) {
@@ -12680,7 +12776,7 @@ function normalizeMediaList(fieldOrMedia) {
         if (!isSinglePresenterMode) {
           let headersHtml = `
             <th class="sticky top-0 left-0 z-40 px-1 py-1.5 w-8 min-w-[32px] max-w-[32px] text-center border-r border-zinc-200 font-mono text-[10px] sm:text-[11px] text-zinc-500 whitespace-nowrap" style="background-color: #f4f4f5 !important;">#</th>
-            <th class="sticky top-0 left-[32px] z-40 px-2.5 py-1.5 min-w-[135px] sm:min-w-[160px] max-w-[160px] sm:max-w-[200px] text-left border-r border-zinc-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)] font-semibold text-[11px] sm:text-xs text-zinc-700 whitespace-nowrap" style="background-color: #f4f4f5 !important;">Mahasiswa &amp; NIM</th>
+            <th class="sticky top-0 left-[32px] z-40 px-2 sm:px-2.5 py-1.5 w-[160px] sm:w-[195px] min-w-[150px] sm:min-w-[180px] max-w-[200px] sm:max-w-[240px] text-left border-r border-zinc-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)] font-semibold text-[11px] sm:text-xs text-zinc-700 whitespace-nowrap" style="background-color: #f4f4f5 !important;">Mahasiswa &amp; NIM</th>
             <th class="sticky top-0 z-30 bg-zinc-100 px-1.5 sm:px-2 py-1.5 text-center min-w-[60px] sm:min-w-[75px] border-r border-zinc-200 text-[10px] sm:text-xs font-semibold text-zinc-600 whitespace-nowrap" style="background-color: #f4f4f5 !important;">Kel. Asal</th>
           `;
 
@@ -12730,7 +12826,7 @@ function normalizeMediaList(fieldOrMedia) {
           // Single Presenter Focused Headers
           tableHeaderRow.innerHTML = `
             <th class="sticky top-0 left-0 z-40 px-1 py-1.5 w-8 min-w-[32px] max-w-[32px] text-center border-r border-zinc-200 font-mono text-[10px] sm:text-[11px] text-zinc-500 whitespace-nowrap" style="background-color: #f4f4f5 !important;">#</th>
-            <th class="sticky top-0 left-[32px] z-40 px-2.5 py-1.5 min-w-[135px] sm:min-w-[160px] max-w-[180px] sm:max-w-[220px] text-left border-r border-zinc-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)] font-semibold text-[11px] sm:text-xs text-zinc-700 whitespace-nowrap" style="background-color: #f4f4f5 !important;">Mahasiswa &amp; NIM</th>
+            <th class="sticky top-0 left-[32px] z-40 px-2 sm:px-2.5 py-1.5 w-[160px] sm:w-[195px] min-w-[150px] sm:min-w-[180px] max-w-[200px] sm:max-w-[240px] text-left border-r border-zinc-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)] font-semibold text-[11px] sm:text-xs text-zinc-700 whitespace-nowrap" style="background-color: #f4f4f5 !important;">Mahasiswa &amp; NIM</th>
             <th class="sticky top-0 z-30 px-2 sm:px-3 py-1.5 text-center min-w-[65px] sm:min-w-[85px] border-r border-zinc-200 text-[10px] sm:text-xs font-semibold text-zinc-600 whitespace-nowrap" style="background-color: #f4f4f5 !important;">Kel. Asal</th>
             <th class="sticky top-0 z-30 px-2 sm:px-3 py-1.5 text-center min-w-[110px] sm:min-w-[130px] border-r border-zinc-200 bg-emerald-50/80 border-b-2 border-b-emerald-500 whitespace-nowrap shadow-2xs">
               <div class="flex flex-col items-center">
@@ -12875,9 +12971,9 @@ function normalizeMediaList(fieldOrMedia) {
             return `
               <tr class="hover:bg-zinc-100/70 transition text-zinc-800 border-b border-zinc-100/80 ${rowBgClass}">
                 <td class="sticky left-0 z-20 py-1 sm:py-1.5 px-1 text-center font-mono text-zinc-400 text-[10px] sm:text-[11px] border-r border-zinc-200 whitespace-nowrap w-8 min-w-[32px] max-w-[32px]" style="${solidBgStyle}">${idx + 1}</td>
-                <td class="sticky left-[32px] z-20 py-1 sm:py-1.5 px-2.5 min-w-[135px] sm:min-w-[160px] max-w-[160px] sm:max-w-[200px] border-r border-zinc-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)] whitespace-nowrap" style="${solidBgStyle}">
-                  <div class="font-semibold text-zinc-900 leading-tight text-[10.5px] sm:text-xs">${s.name}</div>
-                  <div class="font-mono text-zinc-400 text-[8.5px] sm:text-[10px] mt-0.2">${s.nim}</div>
+                <td class="sticky left-[32px] z-20 py-1 sm:py-1.5 px-2 sm:px-2.5 w-[160px] sm:w-[195px] min-w-[150px] sm:min-w-[180px] max-w-[200px] sm:max-w-[240px] border-r border-zinc-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]" style="${solidBgStyle}">
+                  <div class="font-semibold text-zinc-900 leading-tight text-[10.5px] sm:text-xs break-words whitespace-normal">${s.name}</div>
+                  <div class="font-mono text-zinc-400 text-[8.5px] sm:text-[10px] mt-0.5 whitespace-nowrap">${s.nim}</div>
                 </td>
                 <td class="py-1 sm:py-1.5 px-1.5 sm:px-2.5 text-center border-r border-zinc-200 text-[10px] sm:text-xs font-medium text-zinc-600 whitespace-nowrap">
                   ${s.kelompok}
@@ -12940,9 +13036,9 @@ function normalizeMediaList(fieldOrMedia) {
             return `
               <tr class="hover:bg-zinc-100/70 transition text-zinc-800 border-b border-zinc-100/80 ${rowBgClass}">
                 <td class="sticky left-0 z-20 py-1 sm:py-1.5 px-1 text-center font-mono text-zinc-400 text-[10px] sm:text-[11px] border-r border-zinc-200 whitespace-nowrap w-8 min-w-[32px] max-w-[32px]" style="${solidBgStyle}">${idx + 1}</td>
-                <td class="sticky left-[32px] z-20 py-1 sm:py-1.5 px-2.5 min-w-[135px] sm:min-w-[160px] max-w-[180px] sm:max-w-[220px] border-r border-zinc-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)] whitespace-nowrap" style="${solidBgStyle}">
-                  <div class="font-semibold text-zinc-900 leading-tight text-[10.5px] sm:text-xs">${s.name}</div>
-                  <div class="font-mono text-zinc-400 text-[8.5px] sm:text-[10px] mt-0.2">${s.nim}</div>
+                <td class="sticky left-[32px] z-20 py-1 sm:py-1.5 px-2 sm:px-2.5 w-[160px] sm:w-[195px] min-w-[150px] sm:min-w-[180px] max-w-[200px] sm:max-w-[240px] border-r border-zinc-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]" style="${solidBgStyle}">
+                  <div class="font-semibold text-zinc-900 leading-tight text-[10.5px] sm:text-xs break-words whitespace-normal">${s.name}</div>
+                  <div class="font-mono text-zinc-400 text-[8.5px] sm:text-[10px] mt-0.5 whitespace-nowrap">${s.nim}</div>
                 </td>
                 <td class="py-1 sm:py-1.5 px-2 sm:px-3 text-center border-r border-zinc-200 text-[10px] sm:text-xs font-medium text-zinc-600 whitespace-nowrap">
                   ${s.kelompok}

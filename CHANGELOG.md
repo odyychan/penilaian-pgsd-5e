@@ -2,6 +2,30 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.34] - 2026-09-17
+
+### 🔒 Opsi Hak Akses Pengisian Presensi Sakit/Izin, Akurasi Perhitungan Data, dan Wrapping Teks Nama Mahasiswa
+
+- **✍️ Opsi Hak Akses Pengisian Formulir Mahasiswa Berhalangan (`#attPermContainer`):**
+  - Menghadirkan seleksi radio hak pengisian di modal presensi Panel Admin (`#modalStudentAttendance`):
+    - **Tidak Boleh Mengisi 🔒 (`BLOCKED` - default):** Mengunci akses formulir evaluasi untuk mahasiswa yang berhalangan hadir pada sesi terkait dengan penjelasan dispensasi resmi.
+    - **Boleh Mengisi ✍️ (`ALLOWED`):** Memberikan keleluasaan bagi mahasiswa yang berhalangan hadir (misal: sakit ringan atau izin kegiatan dari luar kelas) untuk tetap mengisi penilaian secara sukarela.
+  - Penegakan integritas formulir di portal mahasiswa (`validateNimLive` & `handleFinalSubmit`): sistem menampilkan kotak informasi adaptif saat NIM dimasukkan dan memblokir pengiriman formulir jika status diatur *Tidak Boleh Mengisi*.
+  - Menampilkan lencana status hak pengisian (`🔒 Form Kunci` vs `✍️ Boleh Isi`) pada kartu mahasiswa di Pelacak Partisipasi Admin.
+
+- **📐 Perbaikan Teks Tumpang Tindih (Wrapping / Break-Words Kolom Nama):**
+  - Mengatasi kendala teks nama mahasiswa yang meluap (*overflow*) dan menabrak kolom *Kel. Asal* pada tabel Matriks Keterisian Penilaian maupun Single Presentator.
+  - Menerapkan `break-words whitespace-normal` dengan alokasi lebar kolom yang proporsional (`w-[160px] sm:w-[195px] min-w-[150px] sm:min-w-[180px] max-w-[200px] sm:max-w-[240px]`), sehingga nama mahasiswa panjang dapat terurai ke baris berikutnya secara rapi tanpa distorsi antarmuka.
+
+- **🎯 Akurasi & Konsistensi 100% Perhitungan Data Keseluruhan:**
+  - **Kategori Status Matriks:** Mahasiswa yang berhalangan hadir namun mengisi lengkap seluruh target penilaian dihitung secara akurat sebagai status `LENGKAP` (Selesai), bukan diturunkan menjadi status sebagian.
+  - **Distribusi Kategori Mutually Exclusive (100% Pas):** Memastikan seluruh kategori status pada ringkasan matriks (`LENGKAP`, `SEBAGIAN`, `BELUM`, `EXCUSED`) saling lepas tanpa ada data yang terhitung ganda atau hilang.
+  - **Sinkronisasi Mode Single Presenter:** Mengikutsertakan kategori anggota penyaji dan mahasiswa bebas penilaian (`PENYAJI` & `BEBAS`) ke dalam kartu statistik ke-3, menjamin penjumlahan akumulasi kartu tepat 100% dari total mahasiswa kelas.
+  - **Pelacak Partisipasi Admin:** Menyelaraskan filter tab dan pil penghitung (*count pill*) untuk kategori *Semua*, *Belum Menilai*, *Sudah Menilai*, dan *Berhalangan* agar 100% presisi sesuai jumlah kartu yang ditampilkan.
+
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.34` di seluruh berkas sistem (`index.html`, `admin.html`, `sw.js`, `src/admin/admin.js`, dan `CHANGELOG.md`).
+
 ## [2.5.33] - 2026-09-17
 
 ### 📊 Integrasi Indikator Presensi (Sakit, Izin, Alpha) pada Rekapitulasi Hasil (BK5E)
