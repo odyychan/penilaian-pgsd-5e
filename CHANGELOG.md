@@ -2,6 +2,21 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.30] - 2026-09-17
+
+### 🔄 Sinkronisasi Presisi Tab Navigasi & Tampilan Konten saat Refresh / Hard Reload
+- **🛡️ Penyelarasan Penuh Tab "Rekapitulasi Hasil" dan Kontainer View:**
+  - Mengatasi masalah ketidaksinkronan tampilan pada saat pengguna melakukan *refresh* atau *hard reload* halaman ketika berada pada tab Rekapitulasi Hasil.
+  - Memperbaiki alur inisialisasi `DOMContentLoaded` agar tidak lagi memaksakan pemanggilan `goToInfoOverview()` yang sebelumnya secara diam-diam memunculkan kontainer `#viewForm` di balik tab `#tabRekapBtn` yang sedang aktif.
+  - Menghilangkan notifikasi *toast* yang tidak diinginkan pada pemuatan awal (*silent refresh*) dengan menyertakan parameter `isSilent = true` pada eksekusi `switchTab` saat inisialisasi dokumen.
+- **🔄 Sinkronisasi Dua Arah pada `goToInfoOverview`, `checkAndApplyAuthGate`, dan `popstate`:**
+  - Memperbarui fungsi `goToInfoOverview()` untuk secara eksplisit memperbarui penanda kelas visual tombol tab navigasi (`tabFormBtn` aktif dan `tabRekapBtn` tidak aktif) serta menyimpan status ke penyimpanan lokal.
+  - Memperkuat pengaman `checkAndApplyAuthGate()` agar senantiasa menghormati tab aktif pengguna (`PGSD_ACTIVE_MAIN_TAB`), memastikan kontainer formulir disembunyikan dan kontainer rekapitulasi tetap terbuka saat tab Rekapitulasi sedang aktif.
+  - Menambahkan penjaga kondisi pada *listener* `popstate` peramban agar tidak mereset pengguna dari tab Rekapitulasi ke Formulir ketika navigasi internal atau *reload* terjadi pada URL dengan hash `#rekap`.
+  - Menambahkan *listener* `hashchange` otomatis guna menyelaraskan navigasi riwayat peramban (*back/forward*) secara instan.
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.30` di seluruh berkas sistem (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
 ## [2.5.29] - 2026-09-17
 
 ### ⚡ Perbaikan Masalah Persistensi Konfigurasi & Auto-Save Kanvas Form Builder ke Supabase

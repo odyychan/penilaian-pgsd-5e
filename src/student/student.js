@@ -1115,7 +1115,7 @@ function normalizeMediaList(fieldOrMedia) {
       const hash = (window.location.hash || "").replace("#", "").toLowerCase();
       const savedTab = (hash === "rekap" || hash === "form") ? hash : (localStorage.getItem("PGSD_ACTIVE_MAIN_TAB") || "form");
       
-      switchTab(savedTab, false);
+      switchTab(savedTab, false, true);
 
       // 1. Ambil data form awal dari Supabase secara instan agar config, schema, & mode email selalu mutakhir
       try {
@@ -1150,26 +1150,33 @@ function normalizeMediaList(fieldOrMedia) {
       const activeEmail = (session?.email || activeUserAccountEmail || "").trim().toLowerCase();
       const ratingStatus = getActiveSessionRatingStatus(activeNim, activeEmail);
 
-      // Jika seluruh kelompok pada sesi aktif ini sudah dinilai:
-      if (ratingStatus.isSessionFullyCompleted) {
-        clearStudentFormDraft(false);
-        try { sessionStorage.removeItem('PGSD_ACTIVE_VIEW_' + formKey); } catch(e) {}
-        goToInfoOverview();
-        if (typeof evaluateFormScheduleStatus === 'function') evaluateFormScheduleStatus();
-      } else if (lastActiveView === 'wizard' && savedDraft && isAuthenticated) {
-        // Jika draf yang tersimpan ternyata untuk kelompok yang sudah dinilai, bersihkan draf dan kembali ke overview
-        if (savedDraft.groupName && ratingStatus.alreadyFilledGroups.some(g => g.toLowerCase() === savedDraft.groupName.toLowerCase())) {
+      // 🛡️ SINKRONISASI VIEW & TAB YANG KOKOH PADA SAAT REFRESH / HARD RELOAD
+      if (savedTab === 'rekap') {
+        // Jika tab aktif adalah Rekapitulasi, pulihkan draf form di memori tanpa memindahkan view
+        restoreFormDraft(false, true);
+        switchTab('rekap', false, true);
+      } else {
+        // Jika tab aktif adalah Formulir Penilaian
+        if (ratingStatus.isSessionFullyCompleted) {
           clearStudentFormDraft(false);
           try { sessionStorage.removeItem('PGSD_ACTIVE_VIEW_' + formKey); } catch(e) {}
           goToInfoOverview();
           if (typeof evaluateFormScheduleStatus === 'function') evaluateFormScheduleStatus();
+        } else if (lastActiveView === 'wizard' && savedDraft && isAuthenticated) {
+          // Jika draf yang tersimpan ternyata untuk kelompok yang sudah dinilai, bersihkan draf dan kembali ke overview
+          if (savedDraft.groupName && ratingStatus.alreadyFilledGroups.some(g => g.toLowerCase() === savedDraft.groupName.toLowerCase())) {
+            clearStudentFormDraft(false);
+            try { sessionStorage.removeItem('PGSD_ACTIVE_VIEW_' + formKey); } catch(e) {}
+            goToInfoOverview();
+            if (typeof evaluateFormScheduleStatus === 'function') evaluateFormScheduleStatus();
+          } else {
+            openAssessmentForm();
+            restoreFormDraft(true, false);
+          }
         } else {
-          openAssessmentForm();
-          restoreFormDraft(true, false);
+          restoreFormDraft(false, true);
+          goToInfoOverview();
         }
-      } else {
-        restoreFormDraft(false, true);
-        goToInfoOverview();
       }
 
       // Inisialisasi Sinkronisasi Real-Time 2 Arah
@@ -1257,7 +1264,8 @@ function normalizeMediaList(fieldOrMedia) {
 
       // 2. Jika sedang di Tab Rekapitulasi dan popstate kembali -> kembalikan ke Tab Form
       const viewRekap = document.getElementById("viewRekap");
-      if (viewRekap && !viewRekap.classList.contains("hidden")) {
+      const currentHash = (window.location.hash || "").replace("#", "").toLowerCase();
+      if (viewRekap && !viewRekap.classList.contains("hidden") && currentHash !== 'rekap') {
         switchTab('form', false);
         return;
       }
@@ -1579,7 +1587,7 @@ function normalizeMediaList(fieldOrMedia) {
 
       const hash = (window.location.hash || "").replace("#", "").toLowerCase();
       const savedTab = (hash === "rekap" || hash === "form") ? hash : (localStorage.getItem("PGSD_ACTIVE_MAIN_TAB") || "form");
-      switchTab(savedTab, false);
+      switchTab(savedTab, false, true);
 
       updateStepUI(1);
       updateAccountHeaderUI();
@@ -7739,13 +7747,17 @@ function normalizeMediaList(fieldOrMedia) {
     function checkAndApplyAuthGate() {
       updateAccountHeaderUI();
       const viewForm = document.getElementById("viewForm");
+      const viewRekap = document.getElementById("viewRekap");
       const authGate = document.getElementById("formAuthGateSection");
       const overview = document.getElementById("formOverviewSection");
       const wizard = document.getElementById("formWizardContainer");
 
-      const isFormTab = (localStorage.getItem("PGSD_ACTIVE_MAIN_TAB") || "form") === "form";
-      if (isFormTab && viewForm) {
-        viewForm.classList.remove("hidden");
+      const currentTab = localStorage.getItem("PGSD_ACTIVE_MAIN_TAB") || "form";
+      if (currentTab === "form") {
+        if (viewForm) viewForm.classList.remove("hidden");
+      } else if (currentTab === "rekap") {
+        if (viewForm) viewForm.classList.add("hidden");
+        if (viewRekap) viewRekap.classList.remove("hidden");
       }
 
       const successSec = document.getElementById("formSuccessSection");
@@ -11514,7 +11526,7 @@ function normalizeMediaList(fieldOrMedia) {
     window.resetFormAndCloseModal = resetFormAndCloseModal;
     window.closeModalAndGoToRekap = closeModalAndGoToRekap;
 
-    function switchTab(tab, updateHash = true) {
+    function switchTab(tab, updateHash = true, isSilent = false) {
       const viewPortal = document.getElementById("viewPortal");
       const viewForm = document.getElementById("viewForm");
       const viewRekap = document.getElementById("viewRekap");
@@ -11561,9 +11573,20 @@ function normalizeMediaList(fieldOrMedia) {
         if (hasLocalData) {
           renderBothRekapViews();
         }
-        loadRekapData(false);
+        loadRekapData(isSilent);
       }
     }
+
+    // 🛡️ Sinkronisasi Otomatis saat Hash Peramban Berubah (Back / Forward / Link External)
+    window.addEventListener('hashchange', function() {
+      const hash = (window.location.hash || "").replace("#", "").toLowerCase();
+      if (hash === "rekap" || hash === "form") {
+        const curTab = localStorage.getItem("PGSD_ACTIVE_MAIN_TAB") || "form";
+        if (hash !== curTab) {
+          switchTab(hash, false, true);
+        }
+      }
+    });
 
     // =========================================================================
     // REKAPITULASI DATA LOGIC (KELOMPOK & INDIVIDU PEMATERI)
