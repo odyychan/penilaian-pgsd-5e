@@ -7313,14 +7313,16 @@
 
       // 12. CORE MEMBER FEEDBACK
       if (f.type === 'CORE_MEMBER_FEEDBACK') {
+        const reviewMaxChars = adminAppConfig["Maksimal_Karakter_Evaluasi"] || 500;
         const reviewPublic = adminAppConfig["Tampilkan_Ulasan_Publik"] || "AKTIF";
         const penyajiRule = adminAppConfig["Kewajiban_Menilai_Penyaji"] || "BEBAS_PENUH_DI_SESINYA";
         const memberScopeMode = f.memberScopeMode || 'INHERIT_GLOBAL';
+        const isShowReviewerName = (f.showReviewerName !== false && f.showReviewerName !== 'ANONYMOUS' && f.showReviewerName !== 'HIDE') && (adminAppConfig["Tampilkan_Nama_Penilai_Di_Ulasan"] !== 'SEMBUNYIKAN');
 
         return `
           <div class="space-y-3 pt-1">
             <div class="p-4 rounded-xl border border-zinc-200 bg-zinc-50 space-y-3 text-xs">
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
                 
                 <div class="space-y-1">
                   <span class="text-[10px] text-zinc-500 font-mono font-semibold block">Batas Maks Karakter:</span>
@@ -7342,6 +7344,17 @@
                   >
                     <option value="AKTIF" ${reviewPublic === 'AKTIF' ? 'selected' : ''}>Tampilkan di Rekap</option>
                     <option value="NONAKTIF" ${reviewPublic === 'NONAKTIF' ? 'selected' : ''}>Khusus Admin</option>
+                  </select>
+                </div>
+
+                <div class="space-y-1">
+                  <span class="text-[10px] text-zinc-500 font-mono font-semibold block">Nama Penilai di Ulasan:</span>
+                  <select 
+                    onchange="handleInlineFieldUpdate(${sIdx}, ${fIdx}, 'showReviewerName', this.value === 'SHOW'); handleInlineConfigUpdate('Tampilkan_Nama_Penilai_Di_Ulasan', this.value === 'SHOW' ? 'TAMPILKAN' : 'SEMBUNYIKAN');"
+                    class="w-full text-xs font-medium text-zinc-800 bg-white border border-zinc-200 px-2.5 py-1.5 rounded-lg outline-none cursor-pointer shadow-2xs"
+                  >
+                    <option value="SHOW" ${isShowReviewerName ? 'selected' : ''}>Tampilkan Nama (Transparan)</option>
+                    <option value="ANONYMOUS" ${!isShowReviewerName ? 'selected' : ''}>Sembunyikan (Anonim)</option>
                   </select>
                 </div>
 
@@ -9062,10 +9075,16 @@
         pVoting.classList.remove("hidden");
       } else if (mode === 'REVIEW') {
         titleEl.textContent = "Pengaturan Ulasan Kualitatif Tiap Pemateri";
-        subEl.textContent = "Atur panjang karakter, visibilitas ulasan, dan aturan kelompok penyaji.";
+        subEl.textContent = "Atur panjang karakter, visibilitas ulasan, anonimitas penilai, dan aturan kelompok penyaji.";
         document.getElementById("core_review_max_chars").value = adminAppConfig["Maksimal_Karakter_Evaluasi"] || 500;
         document.getElementById("core_review_public").value = adminAppConfig["Tampilkan_Ulasan_Publik"] || "AKTIF";
         document.getElementById("core_review_penyaji_rule").value = adminAppConfig["Kewajiban_Menilai_Penyaji"] || "BEBAS_PENUH_DI_SESINYA";
+        const feedbackFld = (adminFormSchema && adminFormSchema.tahapan) ? (adminFormSchema.tahapan.flatMap(s => s.fields || []).find(f => f.type === 'CORE_MEMBER_FEEDBACK')) : null;
+        const isShowRev = (feedbackFld && (feedbackFld.showReviewerName === false || feedbackFld.showReviewerName === 'ANONYMOUS' || feedbackFld.showReviewerName === 'HIDE')) 
+          ? false 
+          : (adminAppConfig["Tampilkan_Nama_Penilai_Di_Ulasan"] !== 'SEMBUNYIKAN');
+        const revShowEl = document.getElementById("core_review_show_reviewer");
+        if (revShowEl) revShowEl.value = isShowRev ? "TAMPILKAN" : "SEMBUNYIKAN";
         pReview.classList.remove("hidden");
       } else if (mode === 'IDENTITY') {
         titleEl.textContent = "Pengaturan Validasi Domain Email Penilai";
@@ -9094,6 +9113,19 @@
         adminAppConfig["Maksimal_Karakter_Evaluasi"] = parseInt(document.getElementById("core_review_max_chars").value || 500);
         adminAppConfig["Tampilkan_Ulasan_Publik"] = document.getElementById("core_review_public").value;
         adminAppConfig["Kewajiban_Menilai_Penyaji"] = document.getElementById("core_review_penyaji_rule").value;
+        const revShowEl = document.getElementById("core_review_show_reviewer");
+        if (revShowEl) {
+          adminAppConfig["Tampilkan_Nama_Penilai_Di_Ulasan"] = revShowEl.value;
+          if (adminFormSchema && Array.isArray(adminFormSchema.tahapan)) {
+            for (let st of adminFormSchema.tahapan) {
+              for (let fld of (st.fields || [])) {
+                if (fld.type === 'CORE_MEMBER_FEEDBACK') {
+                  fld.showReviewerName = (revShowEl.value === 'TAMPILKAN');
+                }
+              }
+            }
+          }
+        }
       } else if (mode === 'IDENTITY') {
         adminAppConfig["Domain_Email_Wajib"] = document.getElementById("core_identity_domains").value.trim();
       }

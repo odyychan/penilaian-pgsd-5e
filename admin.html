@@ -35,7 +35,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="src/admin/admin.css?v=2.5.26">
+  <link rel="stylesheet" href="src/admin/admin.css?v=2.5.27">
   <!-- KaTeX CSS & JS for Universal Math / LaTeX / AI & Word Formula Rendering -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -2653,6 +2653,14 @@
             </select>
           </div>
           <div class="space-y-1">
+            <label class="block font-semibold text-zinc-700">Identitas Nama Penilai pada Ulasan Mahasiswa</label>
+            <select id="core_review_show_reviewer" class="w-full px-3 py-2 rounded-lg border border-zinc-300 bg-white font-medium focus:border-zinc-900 outline-none cursor-pointer">
+              <option value="TAMPILKAN">Tampilkan Nama Penilai (Transparan)</option>
+              <option value="SEMBUNYIKAN">Sembunyikan Nama Penilai (Anonim)</option>
+            </select>
+            <p class="text-[11px] text-zinc-400">Jika disembunyikan, identitas penilai pada kartu ulasan pemateri akan ditampilkan sebagai 'Penilai: Anonim'.</p>
+          </div>
+          <div class="space-y-1">
             <label class="block font-semibold text-zinc-700">Aturan Kewajiban Menilai bagi Kelompok Penyaji</label>
             <select id="core_review_penyaji_rule" class="w-full px-3 py-2 rounded-lg border border-zinc-300 bg-white font-medium focus:border-zinc-900 outline-none cursor-pointer">
               <option value="BEBAS_PENUH_DI_SESINYA">Bebas Menilai / Fokus Tampil (Otomatis selesai &amp; label 'Bebas' di matriks)</option>
@@ -4012,13 +4020,13 @@ function getOrCreateFolder(folderName) {
   <!-- ========================================================================= -->
   <!-- JAVASCRIPT APP LOGIC: MULTI-FORM & ISOLATED SANDBOX ENGINE -->
   <!-- ========================================================================= -->
-  <script src="src/admin/admin.js?v=2.5.26"></script>
+  <script src="src/admin/admin.js?v=2.5.27"></script>
 
   <!-- Progressive Web App (PWA) & Instant Auto-Updater Engine -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js?v=2.5.26').then(function(reg) {
+        navigator.serviceWorker.register('/sw.js?v=2.5.27').then(function(reg) {
           reg.update();
           reg.addEventListener('updatefound', function() {
             var newWorker = reg.installing;

@@ -11768,6 +11768,10 @@ function normalizeMediaList(fieldOrMedia) {
             const summaryArray = calcSummaryForResponses(respList);
             const summaryMhs = calcSummaryForResponses(respList.filter(r => (r.peran_penilai || 'Mahasiswa') === 'Mahasiswa'));
 
+            const feedbackField = findFieldInSchema(f => f.type === 'CORE_MEMBER_FEEDBACK');
+            const isAnonReviewer = (feedbackField && (feedbackField.showReviewerName === false || feedbackField.showReviewerName === 'ANONYMOUS' || feedbackField.showReviewerName === 'HIDE' || feedbackField.hideReviewerName === true)) || 
+                                   (appConfig && (appConfig.Tampilkan_Nama_Penilai_Di_Ulasan === 'SEMBUNYIKAN' || appConfig.Tampilkan_Nama_Penilai === 'NONAKTIF' || appConfig.Tampilkan_Nama_Penilai === false));
+
             const res = {
               success: true,
               summary: summaryArray,
@@ -11775,7 +11779,8 @@ function normalizeMediaList(fieldOrMedia) {
               nimToKelompokMap: nimToKelompokMap,
               nameToKelompokMap: nameToKelompokMap,
               emailToKelompokMap: emailToKelompokMap,
-              isPublicReviewVisible: true,
+              isPublicReviewVisible: (appConfig["Tampilkan_Ulasan_Publik"] !== "NONAKTIF"),
+              isReviewerAnonymous: Boolean(isAnonReviewer),
               responses: respList.map(r => ({
                 idRespons: r.id_respons,
                 timestamp: new Date(r.created_at).toLocaleString('id-ID'),
@@ -13035,14 +13040,26 @@ function normalizeMediaList(fieldOrMedia) {
           } else if (ulasanList.length === 0) {
             reviewsContent = `<p class="text-xs text-zinc-400 italic">Belum ada catatan ulasan tertulis.</p>`;
           } else {
+            const feedbackField = findFieldInSchema(f => f.type === 'CORE_MEMBER_FEEDBACK');
+            const isAnon = currentRekapData?.isReviewerAnonymous ?? (
+              (feedbackField && (feedbackField.showReviewerName === false || feedbackField.showReviewerName === 'ANONYMOUS' || feedbackField.showReviewerName === 'HIDE' || feedbackField.hideReviewerName === true)) ||
+              (appConfig && (appConfig.Tampilkan_Nama_Penilai_Di_Ulasan === 'SEMBUNYIKAN' || appConfig.Tampilkan_Nama_Penilai === 'NONAKTIF' || appConfig.Tampilkan_Nama_Penilai === false))
+            );
+
             // Tampilkan maksimal 3 ulasan teratas
             const top3Reviews = ulasanList.slice(0, 3);
             const listItems = top3Reviews.map(u => `
               <li class="bg-white p-3 rounded-lg border border-zinc-200 text-xs text-zinc-700 space-y-1.5 shadow-2xs">
-                <p class="leading-relaxed text-zinc-800">"${u.ulasan}"</p>
+                <p class="leading-relaxed text-zinc-800">"${escapeHtml(u.ulasan)}"</p>
                 <div class="flex items-center justify-between text-[10px] text-zinc-400 pt-1 border-t border-zinc-100">
-                  <span class="font-medium text-zinc-500">Penilai: ${u.penilai}</span>
-                  <span class="font-mono">${grp.sesi}</span>
+                  ${isAnon 
+                    ? `<span class="font-medium text-zinc-400 italic flex items-center gap-1">
+                         <svg class="w-3 h-3 text-zinc-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                         <span>Penilai: Anonim</span>
+                       </span>`
+                    : `<span class="font-medium text-zinc-500">Penilai: ${escapeHtml(u.penilai || 'Anonim')}</span>`
+                  }
+                  <span class="font-mono">${escapeHtml(grp.sesi)}</span>
                 </div>
               </li>
             `).join("");
@@ -13254,17 +13271,26 @@ function normalizeMediaList(fieldOrMedia) {
       if (allReviews.length === 0) {
         listEl.innerHTML = `<li class="text-xs text-zinc-400 italic p-4 text-center bg-zinc-50 border border-zinc-200 rounded-lg">Belum ada catatan masukan tertulis untuk pemateri ini.</li>`;
       } else {
+        const feedbackField = findFieldInSchema(f => f.type === 'CORE_MEMBER_FEEDBACK');
+        const isAnon = currentRekapData?.isReviewerAnonymous ?? (
+          (feedbackField && (feedbackField.showReviewerName === false || feedbackField.showReviewerName === 'ANONYMOUS' || feedbackField.showReviewerName === 'HIDE' || feedbackField.hideReviewerName === true)) ||
+          (appConfig && (appConfig.Tampilkan_Nama_Penilai_Di_Ulasan === 'SEMBUNYIKAN' || appConfig.Tampilkan_Nama_Penilai === 'NONAKTIF' || appConfig.Tampilkan_Nama_Penilai === false))
+        );
+
         allReviews.forEach((u, idx) => {
           const li = document.createElement("li");
           li.className = "bg-white p-3.5 rounded-lg border border-zinc-200 text-xs text-zinc-700 space-y-1.5 shadow-2xs";
           li.innerHTML = `
             <div class="flex items-center justify-between text-[10px] text-zinc-400 font-mono">
               <span>#${idx + 1} Catatan Audiens</span>
-              <span>${groupSesi}</span>
+              <span>${escapeHtml(groupSesi)}</span>
             </div>
             <p class="leading-relaxed text-zinc-900 font-medium">"${escapeHtml(u.ulasan)}"</p>
             <div class="text-[10px] text-zinc-500 pt-1 border-t border-zinc-100 text-right">
-              Penilai: <strong class="text-zinc-700">${escapeHtml(u.penilai)}</strong>
+              ${isAnon 
+                ? `<span class="italic text-zinc-400 font-medium">Penilai: Anonim</span>` 
+                : `Penilai: <strong class="text-zinc-700">${escapeHtml(u.penilai || 'Anonim')}</strong>`
+              }
             </div>
           `;
           listEl.appendChild(li);

@@ -2,6 +2,18 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.27] - 2026-09-17
+
+### 🔒 Fitur Privasi Ulasan: Opsi Sembunyikan Identitas Penilai (Anonimitas Pemateri)
+- **🔒 Pengaturan Privasi & Anonimitas Penilai Ulasan Pemateri (`CORE_MEMBER_FEEDBACK`):**
+  - Menyediakan opsi konfigurasi baru *"Nama Penilai di Ulasan"* pada kartu pertanyaan blok inti evaluasi pemateri di kanvas form builder serta modal pengaturan blok inti (`modalCoreFieldSettings`).
+  - Dosen dan admin dapat memilih antara **Tampilkan Nama (Transparan)** atau **Sembunyikan (Anonim)** secara fleksibel per instrumen penilaian.
+  - Saat opsi anonim dipilih, identitas nama penilai pada kartu ulasan pemateri di tab Rekapitulasi Mahasiswa (`rekapIndividuCards`) dan modal rincian seluruh masukan audiens (`studentReviewModal`) secara otomatis disamarkan menjadi **Penilai: Anonim** dengan sentuhan ikon privasi yang elegan.
+- **🔄 Penyelarasan Dinamis Visibilitas Ulasan Rekapitulasi Publik:**
+  - Menghubungkan flag `isPublicReviewVisible` secara dinamis ke konfigurasi instrumen (`Tampilkan_Ulasan_Publik`), memastikan bahwa kebijakan visibilitas ulasan dosen diterapkan secara konsisten di seluruh klien.
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.27` di seluruh berkas (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
 ## [2.5.26] - 2026-09-17
 
 ### 🛠️ Perbaikan Bug Detail Respons: Eliminasi Kebocoran `_partition`, Resolusi Identitas & Badge Refleksi Mandiri
