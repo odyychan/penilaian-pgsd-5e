@@ -2,6 +2,31 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.32] - 2026-09-17
+
+### 🗓️ Sistem Manajemen Presensi & Dispensasi Ketidakhadiran Mingguan (BK5E)
+
+- **📋 Presensi Sesi Mingguan Terisolasi (Hadir / Sakit / Izin / Alpha):**
+  - Mengimplementasikan fitur pencatatan presensi spesifik per sesi minggu (`Attendance_Records` di dalam `adminAppConfig`), sehingga dispensasi kehadiran (Sakit, Izin, Alpha) yang diberikan pada suatu minggu (misal Minggu 1) terisolasi secara rapi dan otomatis kembali normal (`HADIR`) pada sesi minggu berikutnya tanpa perlu reset manual.
+  - Menghadirkan modal presensi mahasiswa `#modalStudentAttendance` di Panel Admin untuk mengatur status kehadiran per mahasiswa dan per sesi minggu disertai catatan/alasan dispensasi resmi (misal: "Surat dokter", "Dispensasi lomba", dsb.).
+  - Tersinkronisasi dua arah secara *realtime* ke database Supabase (`pgsd_form_configs` kolom `config_data`) serta tercakup dalam berkas cadangan (*backup/restore*).
+
+- **📊 Pembaruan Cerdas Pelacak Partisipasi (Attendance Tracker):**
+  - Menambahkan tombol filter tab **`Berhalangan`** beserta indikator penghitung (*counter pill*) untuk menyaring mahasiswa yang berhalangan hadir (Sakit, Izin, Alpha).
+  - Menampilkan lencana (*badge*) status visual pada kartu mahasiswa di pelacak partisipasi: `🤒 Sakit`, `✉️ Izin`, `🚫 Alpha`, `✓ Sudah Menilai`, dan `✕ Belum Menilai`.
+  - Tombol aksi cepat presensi langsung dari setiap kartu mahasiswa untuk mempermudah dosen/admin mengubah status presensi dalam 1 klik.
+  - Memperbaiki rumus persentase partisipasi kelas: mahasiswa yang berhalangan resmi (Sakit/Izin) tidak lagi menurunkan persentase partisipasi kelas secara tidak adil.
+
+- **📢 Pengingat WhatsApp Cerdas (Pemisahan Otomatis Mahasiswa Berhalangan):**
+  - Memperbarui generator teks pengingat WhatsApp (`copyWhatsAppAttendanceReminder`): mahasiswa yang berhalangan resmi (Sakit/Izin) otomatis dikeluarkan dari daftar tagihan penunggak nilai.
+  - Menambahkan bagian khusus di pesan WhatsApp: *"Keterangan Mahasiswa Berhalangan Hadir (Sesi Ini)"* lengkap dengan nama, kelompok, status (Sakit/Izin), dan alasan/catatan resmi.
+
+- **🛡️ Proteksi Voting Presentator Terbaik (`CORE_BEST_PRESENTER`):**
+  - Pada formulir mahasiswa, anggota kelompok penyaji yang ditandai berhalangan hadir (`SAKIT`, `IZIN`, `ALPHA`, atau `NONAKTIF`) pada sesi minggu aktif otomatis dinonaktifkan dari kartu voting *Presentator Terbaik* dengan tanda visual garis coret dan keterangan status, mencegah audiens salah memilih presenter yang tidak hadir di kelas.
+
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.32` di seluruh berkas sistem (`index.html`, `admin.html`, `sw.js`, `src/admin/admin.js`, dan `CHANGELOG.md`).
+
 ## [2.5.31] - 2026-09-17
 
 ### 🔐 Perbaikan Menyeluruh Modal Setelan Sistem & Keamanan Kata Sandi Admin

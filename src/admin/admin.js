@@ -9798,18 +9798,186 @@
 
     function setAttendanceTrackerFilter(filter) {
       currentAttendanceFilter = filter;
-      ['ALL', 'MISSING', 'SUBMITTED'].forEach(f => {
+      ['ALL', 'MISSING', 'SUBMITTED', 'EXCUSED'].forEach(f => {
         const btn = document.getElementById(`btnTrackerFilter_${f}`);
         if (btn) {
           if (f === filter) {
             btn.className = "px-2.5 py-1 rounded-lg font-bold bg-white text-zinc-900 shadow-2xs cursor-pointer text-xs transition";
           } else {
-            btn.className = "px-2.5 py-1 rounded-lg font-medium text-zinc-500 hover:bg-white/60 cursor-pointer text-xs transition";
+            let colorCls = "text-zinc-500 hover:bg-white/60";
+            if (f === 'MISSING') colorCls = "text-rose-700 hover:bg-white/60";
+            else if (f === 'SUBMITTED') colorCls = "text-emerald-700 hover:bg-white/60";
+            else if (f === 'EXCUSED') colorCls = "text-amber-700 hover:bg-white/60";
+            btn.className = `px-2.5 py-1 rounded-lg font-medium ${colorCls} cursor-pointer text-xs transition`;
           }
         }
       });
       renderAdminAttendanceTracker();
     }
+
+    // =========================================================================
+    // 🗓️ PRESENSI & DISPENSASI KETIDAKHADIRAN MINGGUAN (SAKIT / IZIN / ALPHA)
+    // =========================================================================
+    function getAttendanceRecordsForSession(targetSesi) {
+      if (!adminAppConfig || typeof adminAppConfig !== 'object') return {};
+      const allRecords = adminAppConfig["Attendance_Records"] || {};
+      return allRecords[targetSesi] || {};
+    }
+
+    function getStudentAttendanceStatus(nim, targetSesi) {
+      if (!nim) return { status: 'HADIR', catatan: '' };
+      const records = getAttendanceRecordsForSession(targetSesi);
+      const cleanNim = String(nim).replace(/\s+/g, '').trim().toLowerCase();
+      for (const [recNim, data] of Object.entries(records)) {
+        if (String(recNim).replace(/\s+/g, '').trim().toLowerCase() === cleanNim) {
+          return data || { status: 'HADIR', catatan: '' };
+        }
+      }
+      return { status: 'HADIR', catatan: '' };
+    }
+
+    let activeAttendanceModalTarget = { nim: '', nama: '', kelompok: '', sesi: '' };
+
+    function openStudentAttendanceModal(nim, nama, kelompok, targetSesi) {
+      activeAttendanceModalTarget = { nim, nama, kelompok, sesi: targetSesi };
+      
+      const elNimHidden = document.getElementById("attStudentNim");
+      const elNamaHidden = document.getElementById("attStudentNama");
+      const elNameText = document.getElementById("attModalStudentName");
+      const elNimText = document.getElementById("attModalStudentNim");
+      const elGroupText = document.getElementById("attModalStudentGroup");
+      const elSelectSesi = document.getElementById("attSelectSesi");
+
+      if (elNimHidden) elNimHidden.value = nim;
+      if (elNamaHidden) elNamaHidden.value = nama;
+      if (elNameText) elNameText.textContent = nama || "Mahasiswa";
+      if (elNimText) elNimText.textContent = nim || "-";
+      if (elGroupText) elGroupText.textContent = kelompok || "-";
+
+      // Populate session dropdown
+      if (elSelectSesi) {
+        const uniqueSessions = new Set();
+        const activeSesi = (adminAppConfig["Sesi_Minggu_Aktif"] || adminAppConfig["Sesi_Aktif"] || currentFormMeta?.sesiAktif || "Minggu 1").trim();
+        uniqueSessions.add(activeSesi);
+        (adminMasterGroups || []).forEach(g => { if (g.sesi) uniqueSessions.add(g.sesi.trim()); });
+        const sortedSessions = Array.from(uniqueSessions).sort((a, b) => {
+          const na = extractAdminSesiNumber(a);
+          const nb = extractAdminSesiNumber(b);
+          return na !== nb ? na - nb : a.localeCompare(b, undefined, { numeric: true });
+        });
+
+        elSelectSesi.innerHTML = sortedSessions.map(s => 
+          `<option value="${escapeHtml(s)}" ${s === targetSesi ? 'selected' : ''}>${escapeHtml(s)}</option>`
+        ).join('');
+        
+        if (!elSelectSesi.value && sortedSessions.length > 0) elSelectSesi.value = sortedSessions[0];
+      }
+
+      updateAttendanceModalStatusForSesi();
+
+      const modal = document.getElementById("modalStudentAttendance");
+      if (modal) modal.classList.remove("hidden");
+    }
+    window.openStudentAttendanceModal = openStudentAttendanceModal;
+
+    function closeStudentAttendanceModal() {
+      const modal = document.getElementById("modalStudentAttendance");
+      if (modal) modal.classList.add("hidden");
+    }
+    window.closeStudentAttendanceModal = closeStudentAttendanceModal;
+
+    function updateAttendanceModalStatusForSesi() {
+      const selectedSesi = document.getElementById("attSelectSesi")?.value || activeAttendanceModalTarget.sesi || "Minggu 1";
+      const nim = activeAttendanceModalTarget.nim;
+      const attData = getStudentAttendanceStatus(nim, selectedSesi);
+      const status = (attData.status || 'HADIR').toUpperCase();
+
+      // Check radio button
+      const radios = document.querySelectorAll('input[name="attRadioStatus"]');
+      radios.forEach(r => {
+        r.checked = (r.value === status);
+      });
+
+      const inputNote = document.getElementById("attInputNote");
+      if (inputNote) inputNote.value = attData.catatan || "";
+
+      // Update modal badge
+      const badge = document.getElementById("attModalCurrentBadge");
+      if (badge) {
+        if (status === 'SAKIT') {
+          badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-amber-100 text-amber-800 border border-amber-200 shrink-0";
+          badge.textContent = "Sakit 🤒";
+        } else if (status === 'IZIN') {
+          badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-indigo-100 text-indigo-800 border border-indigo-200 shrink-0";
+          badge.textContent = "Izin ✉️";
+        } else if (status === 'ALPHA') {
+          badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-rose-100 text-rose-800 border border-rose-200 shrink-0";
+          badge.textContent = "Alpha 🚫";
+        } else {
+          badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-zinc-200 text-zinc-700 shrink-0";
+          badge.textContent = "Hadir";
+        }
+      }
+    }
+    window.updateAttendanceModalStatusForSesi = updateAttendanceModalStatusForSesi;
+
+    function handleSaveStudentAttendance(e) {
+      if (e && typeof e.preventDefault === 'function') e.preventDefault();
+      const sesi = document.getElementById("attSelectSesi")?.value || activeAttendanceModalTarget.sesi || "Minggu 1";
+      const nim = activeAttendanceModalTarget.nim;
+      const nama = activeAttendanceModalTarget.nama;
+      const cleanNim = String(nim).replace(/\s+/g, '').trim();
+      const note = document.getElementById("attInputNote")?.value.trim() || "";
+
+      let chosenStatus = 'HADIR';
+      const checkedRadio = document.querySelector('input[name="attRadioStatus"]:checked');
+      if (checkedRadio) chosenStatus = checkedRadio.value;
+
+      if (!adminAppConfig["Attendance_Records"]) adminAppConfig["Attendance_Records"] = {};
+      if (!adminAppConfig["Attendance_Records"][sesi]) adminAppConfig["Attendance_Records"][sesi] = {};
+
+      if (chosenStatus === 'HADIR') {
+        delete adminAppConfig["Attendance_Records"][sesi][cleanNim];
+        // Clean empty session bucket
+        if (Object.keys(adminAppConfig["Attendance_Records"][sesi]).length === 0) {
+          delete adminAppConfig["Attendance_Records"][sesi];
+        }
+      } else {
+        adminAppConfig["Attendance_Records"][sesi][cleanNim] = {
+          nim: cleanNim,
+          nama: nama,
+          status: chosenStatus,
+          catatan: note,
+          updated_at: new Date().toISOString()
+        };
+      }
+
+      triggerAutoSaveConfig();
+      closeStudentAttendanceModal();
+      renderAdminAttendanceTracker();
+
+      const statusLabels = { SAKIT: 'Sakit 🤒', IZIN: 'Izin ✉️', ALPHA: 'Alpha 🚫', HADIR: 'Hadir' };
+      showAdminToast(`Status presensi ${nama} (${statusLabels[chosenStatus] || chosenStatus}) untuk ${sesi} berhasil disimpan!`, "success");
+    }
+    window.handleSaveStudentAttendance = handleSaveStudentAttendance;
+
+    function handleResetStudentAttendance() {
+      const sesi = document.getElementById("attSelectSesi")?.value || activeAttendanceModalTarget.sesi || "Minggu 1";
+      const cleanNim = String(activeAttendanceModalTarget.nim).replace(/\s+/g, '').trim();
+
+      if (adminAppConfig["Attendance_Records"] && adminAppConfig["Attendance_Records"][sesi]) {
+        delete adminAppConfig["Attendance_Records"][sesi][cleanNim];
+        if (Object.keys(adminAppConfig["Attendance_Records"][sesi]).length === 0) {
+          delete adminAppConfig["Attendance_Records"][sesi];
+        }
+        triggerAutoSaveConfig();
+      }
+
+      closeStudentAttendanceModal();
+      renderAdminAttendanceTracker();
+      showAdminToast(`Status presensi ${activeAttendanceModalTarget.nama} dikembalikan ke Hadir (${sesi}).`, "info");
+    }
+    window.handleResetStudentAttendance = handleResetStudentAttendance;
 
     function getAllRosterStudents() {
       const students = [];
@@ -9875,26 +10043,31 @@
       const allStudents = getAllRosterStudents();
       const searchQuery = (document.getElementById("trackerSearchInput")?.value || "").trim().toLowerCase();
 
-      // Determine in-scope target groups
+      // Determine in-scope target groups and reference session
       let inScopeGroups = [];
+      let currentTargetSesi = activeSesi;
       if (scopeFilter === "ALL" || isAllSession) {
         inScopeGroups = (adminMasterGroups || []).map(g => g.name);
       } else if (scopeFilter === "ACTIVE_ONLY") {
         inScopeGroups = (adminMasterGroups || []).filter(g => g.sesi && g.sesi.toLowerCase() === activeSesi.toLowerCase()).map(g => g.name);
+        currentTargetSesi = activeSesi;
       } else if (scopeFilter.startsWith("SESI_")) {
-        const specificSesi = scopeFilter.replace("SESI_", "").trim().toLowerCase();
-        inScopeGroups = (adminMasterGroups || []).filter(g => g.sesi && g.sesi.trim().toLowerCase() === specificSesi).map(g => g.name);
+        const specificSesi = scopeFilter.replace("SESI_", "").trim();
+        inScopeGroups = (adminMasterGroups || []).filter(g => g.sesi && g.sesi.trim().toLowerCase() === specificSesi.toLowerCase()).map(g => g.name);
+        currentTargetSesi = specificSesi;
       } else {
         // UP_TO_ACTIVE
         inScopeGroups = (adminMasterGroups || []).filter(g => {
           if (!g.sesi) return true;
           return extractAdminSesiNumber(g.sesi) <= activeSesiNum;
         }).map(g => g.name);
+        currentTargetSesi = activeSesi;
       }
       if (inScopeGroups.length === 0) inScopeGroups = (adminMasterGroups || []).map(g => g.name);
 
       let submittedCount = 0;
       let missingCount = 0;
+      let excusedCount = 0;
 
       const studentStatuses = allStudents.map(student => {
         const studentNimClean = student.nim.toLowerCase();
@@ -9922,8 +10095,19 @@
           : studentTargetGroups.every(tg => validScopeResponses.some(r => (r.kelompok || "").trim().toLowerCase() === tg.toLowerCase()));
 
         const isSubmitted = isFullySubmitted || validScopeResponses.length > 0;
-        if (isSubmitted) submittedCount++;
-        else missingCount++;
+
+        // Check attendance exemption for current session
+        const attRecord = getStudentAttendanceStatus(student.nim, currentTargetSesi);
+        const attStatus = (attRecord.status || 'HADIR').toUpperCase();
+        const isExcused = (attStatus === 'SAKIT' || attStatus === 'IZIN' || attStatus === 'ALPHA');
+
+        if (isExcused) {
+          excusedCount++;
+          if (attStatus === 'ALPHA') missingCount++;
+        } else {
+          if (isSubmitted) submittedCount++;
+          else missingCount++;
+        }
 
         return {
           ...student,
@@ -9931,38 +10115,51 @@
           isFullySubmitted,
           submittedCount: validScopeResponses.length,
           totalTargets: studentTargetGroups.length,
-          ratedGroups: matchedResponses.map(r => r.kelompok)
+          ratedGroups: matchedResponses.map(r => r.kelompok),
+          attendanceStatus: attStatus,
+          attendanceNote: attRecord.catatan || '',
+          isExcused: isExcused
         };
       });
 
-      // Update counters & progress bar
+      // Update counters & progress bar (fair formula: excluded students don't lower class participation)
       const totalStudents = allStudents.length;
-      const percent = totalStudents > 0 ? Math.round((submittedCount / totalStudents) * 100) : 0;
+      const validParticipants = Math.max(1, totalStudents - (studentStatuses.filter(s => s.attendanceStatus === 'SAKIT' || s.attendanceStatus === 'IZIN').length));
+      const percent = totalStudents > 0 ? Math.min(100, Math.round((submittedCount / validParticipants) * 100)) : 0;
 
       const elPercent = document.getElementById("trackerParticipationPercent");
       const elCountSub = document.getElementById("trackerCountSubmitted");
       const elCountMis = document.getElementById("trackerCountMissing");
+      const elCountExc = document.getElementById("trackerCountExcused");
       const elBar = document.getElementById("trackerProgressBar");
 
       const pillAll = document.getElementById("countPill_ALL");
       const pillMis = document.getElementById("countPill_MISSING");
       const pillSub = document.getElementById("countPill_SUBMITTED");
+      const pillExc = document.getElementById("countPill_EXCUSED");
 
       if (elPercent) elPercent.textContent = `${percent}%`;
       if (elCountSub) elCountSub.textContent = `Sudah: ${submittedCount}`;
       if (elCountMis) elCountMis.textContent = `Belum: ${missingCount}`;
+      if (elCountExc) elCountExc.textContent = `Berhalangan: ${excusedCount}`;
       if (elBar) elBar.style.width = `${percent}%`;
 
       if (pillAll) pillAll.textContent = totalStudents;
       if (pillMis) pillMis.textContent = missingCount;
       if (pillSub) pillSub.textContent = submittedCount;
+      if (pillExc) pillExc.textContent = excusedCount;
 
       // Filter and render cards
       let visibleStudents = studentStatuses.filter(s => {
-        if (currentAttendanceFilter === 'MISSING' && s.isSubmitted) return false;
+        if (currentAttendanceFilter === 'MISSING') {
+          // Hanya tampilkan yang belum menilai dan BUKAN izin/sakit resmi
+          if (s.attendanceStatus === 'SAKIT' || s.attendanceStatus === 'IZIN') return false;
+          if (s.isSubmitted) return false;
+        }
         if (currentAttendanceFilter === 'SUBMITTED' && !s.isSubmitted) return false;
+        if (currentAttendanceFilter === 'EXCUSED' && !s.isExcused) return false;
         if (searchQuery) {
-          const text = `${s.nama} ${s.nim} ${s.kelompok}`.toLowerCase();
+          const text = `${s.nama} ${s.nim} ${s.kelompok} ${s.attendanceStatus} ${s.attendanceNote}`.toLowerCase();
           if (!text.includes(searchQuery)) return false;
         }
         return true;
@@ -9970,8 +10167,8 @@
 
       if (visibleStudents.length === 0) {
         listContainer.innerHTML = `
-          <div class="col-span-full p-4 text-center text-xs text-zinc-400">
-            Tidak ada mahasiswa yang sesuai dengan filter saat ini.
+          <div class="col-span-full p-6 text-center text-xs text-zinc-400">
+            Tidak ada mahasiswa yang sesuai dengan kriteria filter saat ini.
           </div>
         `;
         return;
@@ -9979,33 +10176,109 @@
 
       visibleStudents.forEach((st, idx) => {
         const card = document.createElement("div");
-        card.className = `p-3 rounded-xl border flex items-center justify-between gap-2.5 transition ${st.isSubmitted ? 'bg-emerald-50/50 border-emerald-200' : 'bg-white border-zinc-200 shadow-2xs'}`;
+        
+        let cardBgBorder = "bg-white border-zinc-200 shadow-2xs";
+        let iconBgText = "bg-rose-100 text-rose-800";
+        let iconSymbol = "✕";
+
+        if (st.attendanceStatus === 'SAKIT') {
+          cardBgBorder = "bg-amber-50/60 border-amber-200 shadow-2xs";
+          iconBgText = "bg-amber-100 text-amber-900";
+          iconSymbol = "🤒";
+        } else if (st.attendanceStatus === 'IZIN') {
+          cardBgBorder = "bg-indigo-50/60 border-indigo-200 shadow-2xs";
+          iconBgText = "bg-indigo-100 text-indigo-900";
+          iconSymbol = "✉️";
+        } else if (st.attendanceStatus === 'ALPHA') {
+          cardBgBorder = "bg-rose-50/80 border-rose-300 shadow-2xs";
+          iconBgText = "bg-rose-200 text-rose-900";
+          iconSymbol = "🚫";
+        } else if (st.isSubmitted) {
+          cardBgBorder = "bg-emerald-50/50 border-emerald-200";
+          iconBgText = "bg-emerald-100 text-emerald-800";
+          iconSymbol = "✓";
+        }
+
+        card.className = `p-3 rounded-xl border flex items-center justify-between gap-2.5 transition ${cardBgBorder}`;
+
+        // Right status element
+        let statusElementHtml = '';
+        if (st.attendanceStatus === 'SAKIT') {
+          statusElementHtml = `
+            <div class="shrink-0 text-right space-y-1">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-amber-100 text-amber-900 border border-amber-200 block" title="${escapeHtml(st.attendanceNote || 'Sakit')}">
+                Sakit 🤒
+              </span>
+              <button type="button" onclick="openStudentAttendanceModal('${escapeHtml(st.nim)}', '${escapeHtml(st.nama)}', '${escapeHtml(st.kelompok)}', '${escapeHtml(currentTargetSesi)}')" class="text-[9.5px] font-semibold text-amber-700 hover:text-amber-900 underline cursor-pointer">
+                Ubah
+              </button>
+            </div>
+          `;
+        } else if (st.attendanceStatus === 'IZIN') {
+          statusElementHtml = `
+            <div class="shrink-0 text-right space-y-1">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-indigo-100 text-indigo-900 border border-indigo-200 block" title="${escapeHtml(st.attendanceNote || 'Izin')}">
+                Izin ✉️
+              </span>
+              <button type="button" onclick="openStudentAttendanceModal('${escapeHtml(st.nim)}', '${escapeHtml(st.nama)}', '${escapeHtml(st.kelompok)}', '${escapeHtml(currentTargetSesi)}')" class="text-[9.5px] font-semibold text-indigo-700 hover:text-indigo-900 underline cursor-pointer">
+                Ubah
+              </button>
+            </div>
+          `;
+        } else if (st.attendanceStatus === 'ALPHA') {
+          statusElementHtml = `
+            <div class="shrink-0 text-right space-y-1">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-rose-100 text-rose-900 border border-rose-200 block" title="${escapeHtml(st.attendanceNote || 'Alpha')}">
+                Alpha 🚫
+              </span>
+              <button type="button" onclick="openStudentAttendanceModal('${escapeHtml(st.nim)}', '${escapeHtml(st.nama)}', '${escapeHtml(st.kelompok)}', '${escapeHtml(currentTargetSesi)}')" class="text-[9.5px] font-semibold text-rose-700 hover:text-rose-900 underline cursor-pointer">
+                Ubah
+              </button>
+            </div>
+          `;
+        } else if (st.isSubmitted) {
+          statusElementHtml = `
+            <div class="shrink-0 text-right space-y-1">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-emerald-100 text-emerald-800 border border-emerald-200/80 block">
+                ${st.submittedCount}${st.totalTargets > 0 ? '/' + st.totalTargets : ''} Nilai
+              </span>
+              <button type="button" onclick="openStudentAttendanceModal('${escapeHtml(st.nim)}', '${escapeHtml(st.nama)}', '${escapeHtml(st.kelompok)}', '${escapeHtml(currentTargetSesi)}')" class="text-[9.5px] font-medium text-zinc-400 hover:text-zinc-700 cursor-pointer" title="Ubah status kehadiran">
+                Presensi
+              </button>
+            </div>
+          `;
+        } else {
+          statusElementHtml = `
+            <div class="shrink-0 text-right space-y-1">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-rose-100 text-rose-800 border border-rose-200/80 block">
+                Belum
+              </span>
+              <button type="button" onclick="openStudentAttendanceModal('${escapeHtml(st.nim)}', '${escapeHtml(st.nama)}', '${escapeHtml(st.kelompok)}', '${escapeHtml(currentTargetSesi)}')" class="text-[9.5px] font-semibold text-zinc-500 hover:text-zinc-800 underline cursor-pointer" title="Tandai Sakit / Izin / Alpha">
+                + Presensi
+              </button>
+            </div>
+          `;
+        }
 
         card.innerHTML = `
           <div class="min-w-0 flex items-center gap-2.5">
-            <span class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold font-mono shrink-0 ${st.isSubmitted ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
-              ${st.isSubmitted ? '✓' : '✕'}
+            <span class="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold font-mono shrink-0 ${iconBgText}">
+              ${iconSymbol}
             </span>
             <div class="min-w-0">
-              <h5 class="font-bold text-xs text-zinc-900 truncate">${st.nama}</h5>
-              <div class="flex items-center gap-1.5 text-[10px] text-zinc-500 font-mono">
+              <div class="flex items-center gap-1.5">
+                <h5 class="font-bold text-xs text-zinc-900 truncate">${escapeHtml(st.nama)}</h5>
+                ${st.attendanceNote ? `<span class="text-[10px] text-zinc-400 font-normal italic truncate" title="${escapeHtml(st.attendanceNote)}">(${escapeHtml(st.attendanceNote)})</span>` : ''}
+              </div>
+              <div class="flex items-center gap-1.5 text-[10px] text-zinc-500 font-mono mt-0.5">
                 <span>${st.nim || '-'}</span>
                 <span>•</span>
-                <span class="font-sans font-semibold text-zinc-600">${st.kelompok}</span>
+                <span class="font-sans font-semibold text-zinc-600">${escapeHtml(st.kelompok)}</span>
               </div>
             </div>
           </div>
 
-          <div class="shrink-0 text-right">
-            ${st.isSubmitted 
-              ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-emerald-100 text-emerald-800 border border-emerald-200/80 block">
-                  ${st.submittedCount}${st.totalTargets > 0 ? '/' + st.totalTargets : ''} Nilai
-                 </span>`
-              : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-rose-100 text-rose-800 border border-rose-200/80 block">
-                  Belum
-                 </span>`
-            }
-          </div>
+          ${statusElementHtml}
         `;
 
         listContainer.appendChild(card);
@@ -10019,29 +10292,37 @@
       const isAllSession = (activeSesi.toUpperCase() === "SEMUA" || activeSesi.toUpperCase() === "ALL");
       const activeSesiNum = extractAdminSesiNumber(activeSesi);
 
-      // Determine in-scope target groups
+      // Determine in-scope target groups and reference session
       let inScopeGroups = [];
+      let currentTargetSesi = activeSesi;
       let scopeDescription = `Hingga Sesi Aktif (${activeSesi})`;
+
       if (scopeFilter === "ALL" || isAllSession) {
         inScopeGroups = (adminMasterGroups || []).map(g => g.name);
         scopeDescription = "Seluruh Sesi (Penuh Semester)";
       } else if (scopeFilter === "ACTIVE_ONLY") {
         inScopeGroups = (adminMasterGroups || []).filter(g => g.sesi && g.sesi.toLowerCase() === activeSesi.toLowerCase()).map(g => g.name);
+        currentTargetSesi = activeSesi;
         scopeDescription = `Khusus Sesi Aktif (${activeSesi})`;
       } else if (scopeFilter.startsWith("SESI_")) {
         const specificSesi = scopeFilter.replace("SESI_", "").trim();
         inScopeGroups = (adminMasterGroups || []).filter(g => g.sesi && g.sesi.trim().toLowerCase() === specificSesi.toLowerCase()).map(g => g.name);
+        currentTargetSesi = specificSesi;
         scopeDescription = `Khusus ${specificSesi}`;
       } else {
         inScopeGroups = (adminMasterGroups || []).filter(g => {
           if (!g.sesi) return true;
           return extractAdminSesiNumber(g.sesi) <= activeSesiNum;
         }).map(g => g.name);
+        currentTargetSesi = activeSesi;
       }
       if (inScopeGroups.length === 0) inScopeGroups = (adminMasterGroups || []).map(g => g.name);
 
       const allStudents = getAllRosterStudents();
-      const missingStudents = allStudents.filter(student => {
+      const trulyMissing = [];
+      const excusedStudents = [];
+
+      allStudents.forEach(student => {
         const studentNimClean = student.nim.toLowerCase();
         const studentNamaClean = student.nama.toLowerCase();
         const studentGrpClean = (student.kelompok || "").trim().toLowerCase();
@@ -10058,7 +10339,18 @@
           return studentTargetGroups.some(tg => tg.toLowerCase() === ratedGrp);
         });
 
-        return validScopeResponses.length === 0;
+        const isSubmitted = studentTargetGroups.length === 0 
+          ? true 
+          : studentTargetGroups.every(tg => validScopeResponses.some(r => (r.kelompok || "").trim().toLowerCase() === tg.toLowerCase())) || validScopeResponses.length > 0;
+
+        const attRecord = getStudentAttendanceStatus(student.nim, currentTargetSesi);
+        const attStatus = (attRecord.status || 'HADIR').toUpperCase();
+
+        if (attStatus === 'SAKIT' || attStatus === 'IZIN') {
+          excusedStudents.push({ ...student, status: attStatus, catatan: attRecord.catatan });
+        } else if (!isSubmitted) {
+          trulyMissing.push({ ...student, status: attStatus, catatan: attRecord.catatan });
+        }
       });
 
       const judulForm = adminAppConfig["Judul_Form"] || currentFormMeta?.judulForm || "Penilaian Peer-Assessment";
@@ -10085,45 +10377,42 @@
       if (!formUrl.pathname.endsWith("index.html")) formUrl.pathname = formUrl.pathname.replace(/\/?$/, "/index.html");
       formUrl.search = `?id=${encodeURIComponent(currentFormId || DEFAULT_PRIMARY_FORM_ID)}`;
 
-      let message = `📢 *PENGINGAT PENGISIAN PENILAIAN PEER-ASSESSMENT*
-`;
-      message += `----------------------------------------
-`;
-      message += `📖 *Mata Kuliah:* ${mataKuliah}
-`;
-      message += `🏫 *Kelas:* ${kelas} | *Dosen:* ${dosen}
-`;
-      message += `📝 *Formulir:* ${judulForm}
-`;
-      message += `🎯 *Cakupan Sesi:* ${scopeDescription}
-`;
-      message += `⏱️ *Batas Waktu:* ${deadline}
-`;
-      message += `----------------------------------------
+      let message = `📢 *PENGINGAT PENGISIAN PENILAIAN PEER-ASSESSMENT*\n`;
+      message += `----------------------------------------\n`;
+      message += `📖 *Mata Kuliah:* ${mataKuliah}\n`;
+      message += `🏫 *Kelas:* ${kelas} | *Dosen:* ${dosen}\n`;
+      message += `📝 *Formulir:* ${judulForm}\n`;
+      message += `🎯 *Cakupan Sesi:* ${scopeDescription}\n`;
+      message += `⏱️ *Batas Waktu:* ${deadline}\n`;
+      message += `----------------------------------------\n\n`;
 
-`;
-
-      if (missingStudents.length === 0) {
-        message += `🎉 *Luar biasa!* Seluruh mahasiswa (${allStudents.length} orang) telah menyelesaikan pengisian penilaian untuk ${scopeDescription}. Terima kasih!`;
+      if (trulyMissing.length === 0) {
+        message += `🎉 *Luar biasa!* Seluruh mahasiswa aktif (${allStudents.length - excusedStudents.length} orang) telah menyelesaikan pengisian penilaian untuk ${scopeDescription}. Terima kasih!\n\n`;
       } else {
-        message += `Berikut daftar *${missingStudents.length} mahasiswa* yang *belum mengisi* penilaian (${scopeDescription}):
-
-`;
-        missingStudents.forEach((st, idx) => {
-          message += `${idx + 1}. ${st.nama} (${st.nim}) - ${st.kelompok}
-`;
+        message += `Berikut daftar *${trulyMissing.length} mahasiswa* yang *belum mengisi* penilaian (${scopeDescription}):\n\n`;
+        trulyMissing.forEach((st, idx) => {
+          const alphaTag = st.status === 'ALPHA' ? ' [Alpha]' : '';
+          message += `${idx + 1}. ${st.nama} (${st.nim}) - ${st.kelompok}${alphaTag}\n`;
         });
-        message += `
-Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi berikut:
-`;
-        message += `🔗 *${formUrl.toString()}*
-
-`;
-        message += `Terima kasih atas kerja sama dan kedisiplinan rekan-rekan semua. 🙏`;
+        message += `\nMohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi berikut:\n`;
+        message += `🔗 *${formUrl.toString()}*\n\n`;
       }
 
+      // Append excused section if any
+      if (excusedStudents.length > 0) {
+        message += `🏥 *Keterangan Mahasiswa Berhalangan Hadir (${currentTargetSesi}):*\n`;
+        excusedStudents.forEach((st, idx) => {
+          const tag = st.status === 'SAKIT' ? 'Sakit 🤒' : 'Izin ✉️';
+          const noteText = st.catatan ? ` (${st.catatan})` : '';
+          message += `• ${st.nama} (${st.nim}) - ${st.kelompok}: *${tag}*${noteText}\n`;
+        });
+        message += `\n`;
+      }
+
+      message += `Terima kasih atas kerja sama dan kedisiplinan rekan-rekan semua. 🙏`;
+
       navigator.clipboard.writeText(message).then(() => {
-        showAdminToast(`Draf pesan WhatsApp (${missingStudents.length} mahasiswa belum mengisi [${scopeDescription}]) berhasil disalin!`, "success");
+        showAdminToast(`Draf pesan WhatsApp (${trulyMissing.length} belum mengisi, ${excusedStudents.length} berhalangan) berhasil disalin!`, "success");
       }).catch(err => {
         const textarea = document.createElement("textarea");
         textarea.value = message;
@@ -10131,7 +10420,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
         textarea.select();
         document.execCommand("copy");
         document.body.removeChild(textarea);
-        showAdminToast(`Draf pesan WhatsApp (${missingStudents.length} mahasiswa) berhasil disalin!`, "success");
+        showAdminToast(`Draf pesan WhatsApp berhasil disalin!`, "success");
       });
     }
 
@@ -13089,7 +13378,7 @@ Mohon rekan-rekan di atas untuk segera mengisi penilaian melalui tautan resmi be
 
         const backupPayload = {
           app: "PGSD_5E_ASSESSMENT_SYSTEM",
-          version: "2.5.31",
+          version: "2.5.32",
           timestamp: new Date().toISOString(),
           counts: {
             forms: forms.length,

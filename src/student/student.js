@@ -5608,6 +5608,14 @@ function normalizeMediaList(fieldOrMedia) {
           ""
         ).trim().toLowerCase();
 
+        // Ambil data presensi untuk sesi aktif
+        const activeSesi = (typeof appConfig !== 'undefined' && (appConfig["Sesi_Minggu_Aktif"] || appConfig["Sesi_Aktif"])) 
+          ? (appConfig["Sesi_Minggu_Aktif"] || appConfig["Sesi_Aktif"]).trim() 
+          : (currentFormMeta?.sesiAktif || "Minggu 1");
+
+        const attRecords = (typeof appConfig !== 'undefined' && appConfig["Attendance_Records"]) || {};
+        const sessionAttRecords = attRecords[activeSesi] || {};
+
         selectedGroupObj.members.forEach((member, mIdx) => {
           const mNim = String(member.nim || "").replace(/\s+/g, "").trim().toLowerCase();
           const mName = String(member.name || "").trim().toLowerCase();
@@ -5615,6 +5623,62 @@ function normalizeMediaList(fieldOrMedia) {
 
           // Jika blockSelfVote aktif, sembunyikan diri sendiri dari pilihan voting
           if (isSelf && (blockSelfVote === 'BLOCK_SELF' || blockSelfVote === true || blockSelfVote === 'true')) {
+            return;
+          }
+
+          // Cek apakah anggota kelompok berhalangan hadir pada sesi aktif (Sakit/Izin/Alpha/Nonaktif)
+          let isExcusedAbsent = false;
+          let absentLabel = "";
+          
+          if (member.status === 'NONAKTIF') {
+            isExcusedAbsent = true;
+            absentLabel = "Nonaktif";
+          }
+
+          for (const [recNim, recData] of Object.entries(sessionAttRecords)) {
+            const cleanRecNim = String(recNim).replace(/\s+/g, "").trim().toLowerCase();
+            const cleanRecName = String(recData?.nama || "").trim().toLowerCase();
+            if ((mNim && cleanRecNim === mNim) || (mName && cleanRecName === mName)) {
+              const st = (recData.status || '').toUpperCase();
+              if (st === 'SAKIT') {
+                isExcusedAbsent = true;
+                absentLabel = "Sakit 🤒";
+              } else if (st === 'IZIN') {
+                isExcusedAbsent = true;
+                absentLabel = "Izin ✉️";
+              } else if (st === 'ALPHA') {
+                isExcusedAbsent = true;
+                absentLabel = "Tidak Hadir 🚫";
+              }
+              break;
+            }
+          }
+
+          // Jika berhalangan hadir, tampilkan kartu terkunci (disabled)
+          if (isExcusedAbsent) {
+            const item = document.createElement("div");
+            item.id = `bestPresCard_${mIdx}`;
+            item.className = "flex items-center p-3 sm:p-3.5 rounded-xl border border-dashed border-zinc-300 bg-zinc-50 opacity-60 cursor-not-allowed select-none min-h-[44px]";
+            item.onclick = () => {
+              showToast(`${member.name} berhalangan hadir (${absentLabel}) pada sesi ${activeSesi} sehingga tidak dapat dipilih sebagai presentator terbaik.`, "warning");
+            };
+            item.innerHTML = `
+              <div class="shrink-0 flex items-center justify-center">
+                <span class="w-7 h-7 rounded-full border border-zinc-300 flex items-center justify-center text-zinc-400 font-bold text-xs bg-zinc-100">
+                  —
+                </span>
+              </div>
+              <div class="ml-3 min-w-0 flex-1">
+                <div class="flex items-center justify-between gap-1.5">
+                  <span class="font-bold text-xs sm:text-sm text-zinc-500 line-through truncate">${escapeHtml(member.name)}</span>
+                  <span class="text-[9.5px] font-semibold px-2 py-0.5 rounded-md bg-zinc-200 text-zinc-700 shrink-0">
+                    ${absentLabel}
+                  </span>
+                </div>
+                <span class="text-[10.5px] text-zinc-400 font-mono block mt-0.5">${escapeHtml(member.nim || 'NIM -')}</span>
+              </div>
+            `;
+            bestList.appendChild(item);
             return;
           }
 
