@@ -2,6 +2,20 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.28] - 2026-09-17
+
+### 🛡️ Keamanan & Otorisasi Cetak Rekap: Proteksi Kata Sandi Admin & Zero-Trust Print Gate
+- **🔐 Proteksi Otorisasi Kata Sandi Admin pada Tombol Cetak Rekapitulasi:**
+  - Mengamankan tombol *\"Cetak Rekap\"* pada kartu Rekapitulasi Hasil Penilaian halaman mahasiswa (`index.html`) dengan mewajibkan verifikasi kata sandi administrator sebelum lembar pratinjau cetak resmi (`printRekapModal`) dapat dibuka.
+  - Membangun antarmuka modal otorisasi khusus (`#modalAdminPrintAuth`) dengan desain modern, responsif, dan touch-first (ikon gembok, input kata sandi dengan tombol toggle tampilkan/sembunyikan, autofocus, pesan kesalahan interaktif, dan spinner pemrosesan).
+  - Menghubungkan proses verifikasi secara eksklusif ke Supabase Edge Function `admin-auth` di sisi server (*server-side*), mematuhi prinsip keamanan tanpa hardcode secret dan perlindungan terhadap *brute-force*.
+- **🛡️ Defense-in-Depth Guards & Kunci Sesi Cepat:**
+  - Menerapkan pengaman berlapis (*multi-tier guards*) pada `openPrintRekapModal()` dan `executeBrowserPrint()`, memastikan pemanggilan langsung dari konsol peramban tanpa sesi token admin yang valid akan otomatis dibatalkan dan dialihkan ke modal autentikasi.
+  - Menyediakan tombol *\"Kunci Sesi\"* pada bilah header pratinjau cetak agar dosen/administrator dapat segera menghapus token otorisasi dari peramban setelah selesai mencetak pada perangkat bersama.
+  - Memperbaiki penanganan baris tabel rekapitulasi kosong pada `renderPrintPreviewContent` agar terhindar dari galat variabel.
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.28` di seluruh berkas sistem (`index.html`, `admin.html`, `sw.js`, dan `CHANGELOG.md`).
+
 ## [2.5.27] - 2026-09-17
 
 ### 🔒 Fitur Privasi Ulasan: Opsi Sembunyikan Identitas Penilai (Anonimitas Pemateri)

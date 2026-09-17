@@ -3,6 +3,7 @@
     const DEFAULT_DRIVE_FOLDER_ID = "1ZYnP40AaCoaqu6-H2ZNfYuS-RshCWURK";
     const DEFAULT_SPREADSHEET_ID = "1MAZqzRyau1mECqamnU9Bj3TALRJYDrA1WLQFesJ4wG4";
     const GOOGLE_SYNC_EDGE_URL = "https://eychjnqmqpxzxukiwbqf.supabase.co/functions/v1/google-sync";
+    const ADMIN_AUTH_EDGE_URL = "https://eychjnqmqpxzxukiwbqf.supabase.co/functions/v1/admin-auth";
     
     function getApiUrl() {
       return localStorage.getItem("PGSD_API_URL") || DEFAULT_API_URL;
@@ -820,11 +821,12 @@ function normalizeMediaList(fieldOrMedia) {
       }
 
       // 2. Prioritas 2: Tutup modal / popup / lightbox yang sedang terbuka
-      const openModal = document.querySelector(".modal-backdrop:not(.hidden), .modal-overlay:not(.hidden), [role='dialog']:not(.hidden), #modalSwitchForm:not(.hidden), #modalClientImageZoom:not(.hidden), #modalPreSubmitReview:not(.hidden), #modalAppConfirm:not(.hidden), #printRekapModal:not(.hidden)");
+      const openModal = document.querySelector(".modal-backdrop:not(.hidden), .modal-overlay:not(.hidden), [role='dialog']:not(.hidden), #modalSwitchForm:not(.hidden), #modalClientImageZoom:not(.hidden), #modalPreSubmitReview:not(.hidden), #modalAppConfirm:not(.hidden), #printRekapModal:not(.hidden), #modalAdminPrintAuth:not(.hidden)");
       if (openModal && openModal.id !== "viewPortal" && openModal.id !== "viewForm") {
         if (typeof closeSwitchFormModal === 'function' && openModal.id === 'modalSwitchForm') closeSwitchFormModal();
         else if (typeof closeClientImageZoom === 'function' && openModal.id === 'modalClientImageZoom') closeClientImageZoom();
         else if (typeof closePreSubmitReviewModal === 'function' && openModal.id === 'modalPreSubmitReview') closePreSubmitReviewModal();
+        else if (typeof closeAdminPrintPasswordModal === 'function' && openModal.id === 'modalAdminPrintAuth') closeAdminPrintPasswordModal();
         else {
           openModal.classList.add("hidden");
           openModal.classList.remove("flex");
@@ -1228,7 +1230,7 @@ function normalizeMediaList(fieldOrMedia) {
         document.querySelectorAll(".pgsd-dropdown-wrapper button").forEach(b => b.classList.remove("ring-2", "ring-indigo-500/20", "border-indigo-500"));
       }
 
-      const anyOpenModal = document.querySelector(".modal-backdrop:not(.hidden), .modal-overlay:not(.hidden), [role='dialog']:not(.hidden), #modalSwitchForm:not(.hidden), #modalClientImageZoom:not(.hidden), #modalPreSubmitReview:not(.hidden), #modalAppConfirm:not(.hidden), #printRekapModal:not(.hidden), #modalQrCodeZoom:not(.hidden), #modalVerificationCertificate:not(.hidden), #modalLookupReceipt:not(.hidden)");
+      const anyOpenModal = document.querySelector(".modal-backdrop:not(.hidden), .modal-overlay:not(.hidden), [role='dialog']:not(.hidden), #modalSwitchForm:not(.hidden), #modalClientImageZoom:not(.hidden), #modalPreSubmitReview:not(.hidden), #modalAppConfirm:not(.hidden), #printRekapModal:not(.hidden), #modalQrCodeZoom:not(.hidden), #modalVerificationCertificate:not(.hidden), #modalLookupReceipt:not(.hidden), #modalAdminPrintAuth:not(.hidden)");
       if (anyOpenModal && anyOpenModal.id !== "viewPortal" && anyOpenModal.id !== "viewForm") {
         if (typeof closeSwitchFormModal === 'function' && anyOpenModal.id === 'modalSwitchForm') closeSwitchFormModal();
         else if (typeof closeClientImageZoom === 'function' && anyOpenModal.id === 'modalClientImageZoom') closeClientImageZoom();
@@ -1236,6 +1238,7 @@ function normalizeMediaList(fieldOrMedia) {
         else if (typeof closeLargeQrModal === 'function' && anyOpenModal.id === 'modalQrCodeZoom') closeLargeQrModal();
         else if (typeof closeVerificationModal === 'function' && anyOpenModal.id === 'modalVerificationCertificate') closeVerificationModal();
         else if (typeof closeLookupReceiptModal === 'function' && anyOpenModal.id === 'modalLookupReceipt') closeLookupReceiptModal();
+        else if (typeof closeAdminPrintPasswordModal === 'function' && anyOpenModal.id === 'modalAdminPrintAuth') closeAdminPrintPasswordModal();
         else {
           anyOpenModal.classList.add("hidden");
           anyOpenModal.classList.remove("flex");
@@ -13480,9 +13483,178 @@ function normalizeMediaList(fieldOrMedia) {
     }
 
     // =========================================================================
+    // 🔐 SISTEM OTORISASI ADMIN UNTUK CETAK REKAPITULASI (ZERO-TRUST PRINT GATE)
+    // =========================================================================
+    function isCurrentAdminSessionActive() {
+      const token = sessionStorage.getItem("PGSD_ADMIN_SESSION_TOKEN");
+      if (!token) return false;
+      try {
+        const parts = token.split(".");
+        if (parts.length === 2) {
+          const payload = JSON.parse(atob(parts[0]));
+          if (payload.exp && Date.now() < payload.exp && payload.role === "admin") {
+            return true;
+          }
+        }
+      } catch (e) {
+        console.warn("Pengecekan token sesi admin:", e);
+      }
+      return false;
+    }
+
+    function handlePrintRekapClick() {
+      if (isCurrentAdminSessionActive()) {
+        openPrintRekapModal();
+      } else {
+        openAdminPrintPasswordModal();
+      }
+    }
+
+    function openAdminPrintPasswordModal() {
+      const modal = document.getElementById("modalAdminPrintAuth");
+      if (!modal) return;
+      
+      const input = document.getElementById("inputAdminPrintPassword");
+      const errBox = document.getElementById("adminPrintAuthError");
+      const errText = document.getElementById("adminPrintAuthErrorText");
+      const btn = document.getElementById("btnSubmitAdminPrintAuth");
+      const spinner = document.getElementById("adminPrintAuthSpinner");
+      const btnText = document.getElementById("btnSubmitAdminPrintAuthText");
+
+      if (input) {
+        input.value = "";
+        input.type = "password";
+      }
+      const iconOpen = document.getElementById("iconEyeOpenAdminPrint");
+      const iconClosed = document.getElementById("iconEyeClosedAdminPrint");
+      if (iconOpen) iconOpen.classList.remove("hidden");
+      if (iconClosed) iconClosed.classList.add("hidden");
+
+      if (errBox) errBox.classList.add("hidden");
+      if (errText) errText.textContent = "";
+
+      if (btn) btn.disabled = false;
+      if (spinner) spinner.classList.add("hidden");
+      if (btnText) btnText.textContent = "Verifikasi & Buka";
+
+      modal.classList.remove("hidden");
+      setTimeout(() => {
+        if (input) input.focus();
+      }, 100);
+    }
+
+    function closeAdminPrintPasswordModal() {
+      const modal = document.getElementById("modalAdminPrintAuth");
+      if (modal) modal.classList.add("hidden");
+      const input = document.getElementById("inputAdminPrintPassword");
+      if (input) input.value = "";
+      const errBox = document.getElementById("adminPrintAuthError");
+      if (errBox) errBox.classList.add("hidden");
+    }
+
+    function toggleAdminPrintPasswordVisibility() {
+      const input = document.getElementById("inputAdminPrintPassword");
+      const iconOpen = document.getElementById("iconEyeOpenAdminPrint");
+      const iconClosed = document.getElementById("iconEyeClosedAdminPrint");
+      if (!input) return;
+
+      if (input.type === "password") {
+        input.type = "text";
+        if (iconOpen) iconOpen.classList.add("hidden");
+        if (iconClosed) iconClosed.classList.remove("hidden");
+      } else {
+        input.type = "password";
+        if (iconOpen) iconOpen.classList.remove("hidden");
+        if (iconClosed) iconClosed.classList.add("hidden");
+      }
+    }
+
+    async function submitAdminPrintPassword(e) {
+      if (e && typeof e.preventDefault === "function") e.preventDefault();
+      
+      const input = document.getElementById("inputAdminPrintPassword");
+      const enteredPass = input ? input.value.trim() : "";
+      const btn = document.getElementById("btnSubmitAdminPrintAuth");
+      const spinner = document.getElementById("adminPrintAuthSpinner");
+      const btnText = document.getElementById("btnSubmitAdminPrintAuthText");
+      const errBox = document.getElementById("adminPrintAuthError");
+      const errText = document.getElementById("adminPrintAuthErrorText");
+
+      if (!enteredPass) {
+        if (errBox && errText) {
+          errText.textContent = "Kata sandi admin wajib diisi.";
+          errBox.classList.remove("hidden");
+        }
+        if (input) input.focus();
+        return;
+      }
+
+      if (btn) btn.disabled = true;
+      if (spinner) spinner.classList.remove("hidden");
+      if (btnText) btnText.textContent = "Memverifikasi...";
+      if (errBox) errBox.classList.add("hidden");
+
+      try {
+        const resp = await fetch(ADMIN_AUTH_EDGE_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_CONFIG.anonKey,
+            "Authorization": `Bearer ${SUPABASE_CONFIG.anonKey}`
+          },
+          body: JSON.stringify({ action: "verify", password: enteredPass })
+        });
+
+        const resData = await resp.json().catch(() => ({}));
+        if (resp.ok && resData && resData.success) {
+          if (resData.token) {
+            sessionStorage.setItem("PGSD_ADMIN_SESSION_TOKEN", resData.token);
+            sessionStorage.setItem("PGSD_ADMIN_AUTH", "true");
+          }
+          closeAdminPrintPasswordModal();
+          showToast("Autentikasi admin berhasil. Membuka dokumen rekap...", "success");
+          openPrintRekapModal();
+        } else {
+          const errMsg = (resData && resData.error) ? resData.error : "Kata sandi admin tidak valid. Akses ditolak.";
+          if (errBox && errText) {
+            errText.textContent = errMsg;
+            errBox.classList.remove("hidden");
+          }
+          if (input) {
+            input.select();
+            input.focus();
+          }
+        }
+      } catch (err) {
+        console.error("Gagal memverifikasi kata sandi admin:", err);
+        if (errBox && errText) {
+          errText.textContent = "Gagal menghubungi server autentikasi. Silakan periksa koneksi internet.";
+          errBox.classList.remove("hidden");
+        }
+      } finally {
+        if (btn) btn.disabled = false;
+        if (spinner) spinner.classList.add("hidden");
+        if (btnText) btnText.textContent = "Verifikasi & Buka";
+      }
+    }
+
+    function lockAdminPrintSession() {
+      sessionStorage.removeItem("PGSD_ADMIN_SESSION_TOKEN");
+      sessionStorage.removeItem("PGSD_ADMIN_AUTH");
+      closePrintRekapModal();
+      showToast("Sesi akses cetak admin berhasil dikunci.", "info");
+    }
+
+    // =========================================================================
     // FITUR CETAK REKAP HASIL LAPORAN RESMI (PRINT & PDF)
     // =========================================================================
     function openPrintRekapModal() {
+      // 🛡️ Defense-in-depth: Pastikan otorisasi admin aktif sebelum membuka modal cetak
+      if (!isCurrentAdminSessionActive()) {
+        closePrintRekapModal();
+        openAdminPrintPasswordModal();
+        return;
+      }
       const modal = document.getElementById("printRekapModal");
       const groupSelect = document.getElementById("printScopeGroupSelect");
       const sesiSelect = document.getElementById("printScopeSesiSelect");
@@ -13757,7 +13929,7 @@ function normalizeMediaList(fieldOrMedia) {
           `;
 
           if (summaryList.length === 0) {
-            html += `
+            mainContentHtml += `
               <tr>
                 <td colspan="7" style="padding: 10px; text-align: center; color: #6b7280; font-style: italic; border: 1px solid #000000;">
                   Tidak ada data penilaian yang sesuai dengan kriteria filter.
@@ -14017,6 +14189,13 @@ function normalizeMediaList(fieldOrMedia) {
     });
 
     function executeBrowserPrint() {
+      // 🛡️ Defense-in-depth: Tolak eksekusi cetak jika sesi admin belum terverifikasi
+      if (!isCurrentAdminSessionActive()) {
+        closePrintRekapModal();
+        openAdminPrintPasswordModal();
+        showToast("Otorisasi admin diperlukan untuk mencetak laporan.", "warning");
+        return;
+      }
       const toastEl = document.getElementById("toast");
       if (toastEl) toastEl.classList.add("hidden");
       renderPrintPreviewContent();
@@ -14029,4 +14208,12 @@ function normalizeMediaList(fieldOrMedia) {
         window.print();
       }, 50);
     }
-  
+
+    // Ekspor fungsi otorisasi cetak admin ke window untuk trigger inline HTML
+    window.isCurrentAdminSessionActive = isCurrentAdminSessionActive;
+    window.handlePrintRekapClick = handlePrintRekapClick;
+    window.openAdminPrintPasswordModal = openAdminPrintPasswordModal;
+    window.closeAdminPrintPasswordModal = closeAdminPrintPasswordModal;
+    window.toggleAdminPrintPasswordVisibility = toggleAdminPrintPasswordVisibility;
+    window.submitAdminPrintPassword = submitAdminPrintPassword;
+    window.lockAdminPrintSession = lockAdminPrintSession;
