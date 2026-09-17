@@ -2,6 +2,23 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.29] - 2026-09-17
+
+### ⚡ Perbaikan Masalah Persistensi Konfigurasi & Auto-Save Kanvas Form Builder ke Supabase
+- **🛠️ Eliminasi Galat HTTP 400 (PGRST204) pada Publikasi Skema ke Supabase:**
+  - Memperbaiki bug kritis pada fungsi `publishFormSchema()` yang sebelumnya menyertakan kolom non-eksisten (`app_config` dan `form_schema`), yang menyebabkan operasi *upsert* ke tabel `pgsd_form_configs` ditolak oleh PostgREST Supabase dengan kode kesalahan HTTP 400.
+  - Memastikan seluruh operasi penyimpanan menggunakan kolom basis data resmi PostgreSQL: `config_data` dan `schema_data`.
+  - Menambahkan penanganan galat (*error handler*) yang ketat sehingga kegagalan penyimpanan di Supabase tidak lagi disembunyikan.
+- **🔄 Auto-Save Otomatis & Sinkronisasi Dua Arah Kontrol Kanvas Form Builder:**
+  - Mengintegrasikan mekanisme auto-save debounced otomatis pada fungsi `handleInlineConfigUpdate` dan `handleInlineFieldUpdate`, memastikan setiap perubahan pengaturan pada kanvas (seperti *Nama Penilai di Ulasan*, *Batas Maksimal Karakter*, *Visibilitas Publik*, dan *Aturan Penyaji*) langsung tersimpan ke Supabase PostgreSQL tanpa mengharuskan klik manual tombol publikasi.
+  - Menerapkan sinkronisasi dua arah konsisten antara `adminAppConfig["Tampilkan_Nama_Penilai_Di_Ulasan"]` dengan atribut `showReviewerName` pada instrumen `CORE_MEMBER_FEEDBACK`, mencegah nilai kembali ke *default* saat halaman dimuat ulang (*refresh*).
+  - Mendaftarkan kunci konfigurasi `"Tampilkan_Nama_Penilai_Di_Ulasan"` ke dalam daftar registri sinkronisasi `populateConfigFormValues` dan `handleConfigInputAutoSave`.
+- **🛡️ Penjaminan Anonimitas Penilai di Tab Rekapitulasi Mahasiswa:**
+  - Memperbaiki logika evaluasi anonimitas pada modul `student.js` (`loadRekapData`, `renderRekapIndividu`, `openStudentReviewModal`), memastikan penyamaran nama penilai menjadi `Penilai: Anonim` diterapkan secara akurat baik dari konfigurasi instrumen maupun skema form.
+  - Menghapus definisi duplikat `triggerAutoSaveSchema` di `admin.js` dan menyatukannya ke dalam satu pipa sinkronisasi terpadu.
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.29` di seluruh berkas sistem (`sw.js` dan `CHANGELOG.md`).
+
 ## [2.5.28] - 2026-09-17
 
 ### 🛡️ Keamanan & Otorisasi Cetak Rekap: Proteksi Kata Sandi Admin & Zero-Trust Print Gate

@@ -4249,9 +4249,9 @@
               formMode: formRow.form_mode || 'PEER_ASSESSMENT'
             };
 
-            adminAppConfig = (configRow && (configRow.app_config || configRow.config_data)) || {};
+            adminAppConfig = (configRow && (configRow.config_data || configRow.app_config)) || {};
             if (!adminAppConfig.form_mode && formRow.form_mode) adminAppConfig.form_mode = formRow.form_mode;
-            adminFormSchema = (configRow && (configRow.form_schema || configRow.schema_data)) || (targetForm === DEFAULT_PRIMARY_FORM_ID ? getDefaultFormSchema(adminAppConfig) : getBlankFormSchema());
+            adminFormSchema = (configRow && (configRow.schema_data || configRow.form_schema)) || (targetForm === DEFAULT_PRIMARY_FORM_ID ? getDefaultFormSchema(adminAppConfig) : getBlankFormSchema());
 
             adminMasterGroups = groupsRows.map(g => ({
               id: g.id,
@@ -4781,7 +4781,7 @@
         "Pembuat_Web_Prefix", "Pembuat_Web_Nama", "Pembuat_Web_Nim",
         "Nilai_Kelompok_Min", "Nilai_Kelompok_Max",
         "Maksimal_Pilihan_Presentator_Terbaik", "Maksimal_Karakter_Evaluasi",
-        "Tampilkan_Ulasan_Publik", "Kewajiban_Menilai_Penyaji",
+        "Tampilkan_Ulasan_Publik", "Tampilkan_Nama_Penilai_Di_Ulasan", "Kewajiban_Menilai_Penyaji",
         "Jadwal_Aktif", "Jadwal_Tipe", "Jadwal_Jam_Buka", "Jadwal_Jam_Tutup", "Jadwal_Interval_Hari", "Jadwal_Tanggal_Mulai_Siklus", "Jadwal_Auto_Naik_Sesi", "Jadwal_Sesi_Maksimal", "Jadwal_Mulai", "Jadwal_Selesai", "Batas_Maksimal_Respons",
         "Pesan_Form_Belum_Buka", "Pesan_Form_Ditutup",
         "Cegah_Penilaian_Diri", "Kunci_Respons_Ganda",
@@ -4888,7 +4888,7 @@
         "Pembuat_Web_Prefix", "Pembuat_Web_Nama", "Pembuat_Web_Nim",
         "Nilai_Kelompok_Min", "Nilai_Kelompok_Max",
         "Maksimal_Pilihan_Presentator_Terbaik", "Maksimal_Karakter_Evaluasi",
-        "Tampilkan_Ulasan_Publik", "Kewajiban_Menilai_Penyaji",
+        "Tampilkan_Ulasan_Publik", "Tampilkan_Nama_Penilai_Di_Ulasan", "Kewajiban_Menilai_Penyaji",
         "Jadwal_Aktif", "Jadwal_Tipe", "Jadwal_Jam_Buka", "Jadwal_Jam_Tutup", "Jadwal_Interval_Hari", "Jadwal_Tanggal_Mulai_Siklus", "Jadwal_Auto_Naik_Sesi", "Jadwal_Sesi_Maksimal", "Jadwal_Mulai", "Jadwal_Selesai", "Batas_Maksimal_Respons",
         "Pesan_Form_Belum_Buka", "Pesan_Form_Ditutup",
         "Cegah_Penilaian_Diri", "Kunci_Respons_Ganda",
@@ -5194,10 +5194,12 @@
                 description: "Ulasan kualitatif untuk setiap anggota pemateri kelompok.",
                 required: true,
                 scope: "PER_KELOMPOK",
+                showReviewerName: (config["Tampilkan_Nama_Penilai_Di_Ulasan"] !== "SEMBUNYIKAN"),
                 config: {
                   maxChars: parseInt(config["Maksimal_Karakter_Evaluasi"] || 500),
                   publicDisplay: config["Tampilkan_Ulasan_Publik"] || "AKTIF",
-                  penyajiRule: config["Kewajiban_Menilai_Penyaji"] || "BEBAS_PENUH_DI_SESINYA"
+                  penyajiRule: config["Kewajiban_Menilai_Penyaji"] || "BEBAS_PENUH_DI_SESINYA",
+                  showReviewerName: (config["Tampilkan_Nama_Penilai_Di_Ulasan"] !== "SEMBUNYIKAN")
                 }
               }
             ]
@@ -5212,6 +5214,23 @@
           adminFormSchema = getDefaultFormSchema(adminAppConfig);
         } else {
           adminFormSchema = getBlankFormSchema();
+        }
+      }
+      // Sinkronisasi dua arah konsisten antara adminAppConfig & field CORE_MEMBER_FEEDBACK
+      if (adminFormSchema && Array.isArray(adminFormSchema.tahapan)) {
+        for (const st of adminFormSchema.tahapan) {
+          for (const fld of (st.fields || [])) {
+            if (fld.type === 'CORE_MEMBER_FEEDBACK') {
+              if (adminAppConfig && adminAppConfig["Tampilkan_Nama_Penilai_Di_Ulasan"] !== undefined) {
+                fld.showReviewerName = (adminAppConfig["Tampilkan_Nama_Penilai_Di_Ulasan"] !== "SEMBUNYIKAN");
+                if (!fld.config) fld.config = {};
+                fld.config.showReviewerName = (adminAppConfig["Tampilkan_Nama_Penilai_Di_Ulasan"] !== "SEMBUNYIKAN");
+              } else if (fld.showReviewerName !== undefined) {
+                if (!adminAppConfig) adminAppConfig = {};
+                adminAppConfig["Tampilkan_Nama_Penilai_Di_Ulasan"] = (fld.showReviewerName === false || fld.showReviewerName === 'ANONYMOUS' || fld.showReviewerName === 'HIDE') ? "SEMBUNYIKAN" : "TAMPILKAN";
+              }
+            }
+          }
         }
       }
     }
@@ -5763,12 +5782,33 @@
       }
     }
 
+    let schemaAutoSaveTimer = null;
     function triggerDebouncedAutoSave() {
       markSchemaAsDirty();
+      if (schemaAutoSaveTimer) clearTimeout(schemaAutoSaveTimer);
+      schemaAutoSaveTimer = setTimeout(() => {
+        triggerAutoSaveSchema();
+      }, 400);
     }
 
     function triggerAutoSaveSchema() {
-      markSchemaAsDirty();
+      const formKey = currentFormId || DEFAULT_PRIMARY_FORM_ID;
+      try {
+        localStorage.setItem(`PGSD_CACHE_FORM_SCHEMA_${formKey}`, JSON.stringify(adminFormSchema));
+        localStorage.setItem(`PGSD_CACHE_CONFIG_${formKey}`, JSON.stringify(adminAppConfig));
+        localStorage.setItem(`PGSD_DRAFT_SCHEMA_${formKey}`, JSON.stringify(adminFormSchema));
+        localStorage.setItem(`PGSD_DRAFT_CONFIG_${formKey}`, JSON.stringify(adminAppConfig));
+      } catch (e) {}
+      broadcastInstantAdminChange('SCHEMA_UPDATE', {
+        schema: adminFormSchema,
+        config: adminAppConfig,
+        formId: formKey
+      });
+      broadcastInstantAdminChange('CONFIG_UPDATE', {
+        config: adminAppConfig,
+        formId: formKey
+      });
+      queueSyncTask('config', adminAppConfig);
     }
 
     async function publishFormSchema() {
@@ -5786,10 +5826,15 @@
             form_id: formKey,
             config_data: adminAppConfig,
             schema_data: adminFormSchema,
-            app_config: adminAppConfig,
-            form_schema: adminFormSchema,
             updated_at: new Date().toISOString()
           });
+
+          if (confErr) {
+            console.error("Supabase publish error:", confErr);
+            showAdminToast("Gagal mempublikasikan ke Supabase: " + (confErr.message || "Database error"), "error");
+            setSyncState('error');
+            return;
+          }
 
           // Juga perbarui metadata di pgsd_forms
           await sb.from('pgsd_forms').update({
@@ -5803,9 +5848,7 @@
             updated_at: new Date().toISOString()
           }).eq('form_id', formKey);
 
-          if (!confErr) {
-            sbSuccess = true;
-          }
+          sbSuccess = true;
         } catch (err) {
           console.warn("Supabase publish notice:", err);
         }
@@ -5877,10 +5920,22 @@
     function handleInlineFieldUpdate(sIdx, fIdx, prop, val) {
       if (!adminFormSchema || !adminFormSchema.tahapan[sIdx]?.fields[fIdx]) return;
       adminFormSchema.tahapan[sIdx].fields[fIdx][prop] = val;
+
+      // Sinkronisasi otomatis properti kartu ulasan ke adminAppConfig
+      if (prop === 'showReviewerName') {
+        const isShow = Boolean(val);
+        adminAppConfig['Tampilkan_Nama_Penilai_Di_Ulasan'] = isShow ? 'TAMPILKAN' : 'SEMBUNYIKAN';
+        const fld = adminFormSchema.tahapan[sIdx].fields[fIdx];
+        if (!fld.config) fld.config = {};
+        fld.config.showReviewerName = isShow;
+      }
+
       markSchemaAsDirty();
 
       if (prop === 'label') updateLiveMathBadge(val, `liveMathQuestionLabel_${sIdx}_${fIdx}`);
       else if (prop === 'description') updateLiveMathBadge(val, `liveMathQuestionDesc_${sIdx}_${fIdx}`);
+
+      triggerDebouncedAutoSave();
     }
 
     function toggleQuestionDescField(sIdx, fIdx) {
@@ -5909,7 +5964,23 @@
 
     function handleInlineConfigUpdate(key, val) {
       adminAppConfig[key] = val;
+
+      // Sinkronisasi otomatis ke field CORE_MEMBER_FEEDBACK jika terkait ulasan
+      if (key === 'Tampilkan_Nama_Penilai_Di_Ulasan' && adminFormSchema && Array.isArray(adminFormSchema.tahapan)) {
+        const isShow = (val !== 'SEMBUNYIKAN');
+        for (const st of adminFormSchema.tahapan) {
+          for (const fld of (st.fields || [])) {
+            if (fld.type === 'CORE_MEMBER_FEEDBACK') {
+              fld.showReviewerName = isShow;
+              if (!fld.config) fld.config = {};
+              fld.config.showReviewerName = isShow;
+            }
+          }
+        }
+      }
+
       markSchemaAsDirty();
+      triggerDebouncedAutoSave();
     }
 
 
@@ -9043,9 +9114,7 @@
       showAdminToast("Struktur formulir berhasil diperbarui.", "info");
     }
 
-    function triggerAutoSaveSchema() {
-      queueSyncTask('config', adminAppConfig);
-    }
+    // triggerAutoSaveSchema is centrally managed above with debouncing & full schema cache
     // CORE FIELD MODAL CONTROLLERS
     function openEditCoreFieldModal(mode) {
       document.getElementById("core_settings_mode").value = mode;

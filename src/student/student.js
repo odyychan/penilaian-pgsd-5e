@@ -8142,6 +8142,13 @@ function normalizeMediaList(fieldOrMedia) {
       if (compactHeaderProgressBar) compactHeaderProgressBar.classList.add("hidden");
       if (badgeSesiTop) badgeSesiTop.classList.remove("hidden");
 
+      // 🛡️ Selaraskan tombol tab navigasi agar 100% konsisten dengan viewForm
+      const tabFormBtn = document.getElementById("tabFormBtn");
+      const tabRekapBtn = document.getElementById("tabRekapBtn");
+      if (tabFormBtn) tabFormBtn.className = "min-h-[44px] py-2 px-3 rounded-lg bg-zinc-100 text-zinc-950 shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer text-xs font-bold";
+      if (tabRekapBtn) tabRekapBtn.className = "min-h-[44px] py-2 px-3 rounded-lg text-zinc-400 hover:text-zinc-100 transition-all flex items-center justify-center gap-1.5 cursor-pointer text-xs font-medium";
+      try { localStorage.setItem("PGSD_ACTIVE_MAIN_TAB", "form"); } catch(e) {}
+
       const authGate = document.getElementById("formAuthGateSection");
       const overview = document.getElementById("formOverviewSection");
       const wizard = document.getElementById("formWizardContainer");
@@ -11772,8 +11779,9 @@ function normalizeMediaList(fieldOrMedia) {
             const summaryMhs = calcSummaryForResponses(respList.filter(r => (r.peran_penilai || 'Mahasiswa') === 'Mahasiswa'));
 
             const feedbackField = findFieldInSchema(f => f.type === 'CORE_MEMBER_FEEDBACK');
-            const isAnonReviewer = (feedbackField && (feedbackField.showReviewerName === false || feedbackField.showReviewerName === 'ANONYMOUS' || feedbackField.showReviewerName === 'HIDE' || feedbackField.hideReviewerName === true)) || 
-                                   (appConfig && (appConfig.Tampilkan_Nama_Penilai_Di_Ulasan === 'SEMBUNYIKAN' || appConfig.Tampilkan_Nama_Penilai === 'NONAKTIF' || appConfig.Tampilkan_Nama_Penilai === false));
+            const isFieldAnon = feedbackField && (feedbackField.showReviewerName === false || feedbackField.showReviewerName === 'ANONYMOUS' || feedbackField.showReviewerName === 'HIDE' || feedbackField.hideReviewerName === true);
+            const isConfigAnon = appConfig && (appConfig.Tampilkan_Nama_Penilai_Di_Ulasan === 'SEMBUNYIKAN' || appConfig.Tampilkan_Nama_Penilai === 'NONAKTIF' || appConfig.Tampilkan_Nama_Penilai === false);
+            const isAnonReviewer = Boolean(isFieldAnon || isConfigAnon);
 
             const res = {
               success: true,
@@ -13044,10 +13052,9 @@ function normalizeMediaList(fieldOrMedia) {
             reviewsContent = `<p class="text-xs text-zinc-400 italic">Belum ada catatan ulasan tertulis.</p>`;
           } else {
             const feedbackField = findFieldInSchema(f => f.type === 'CORE_MEMBER_FEEDBACK');
-            const isAnon = currentRekapData?.isReviewerAnonymous ?? (
-              (feedbackField && (feedbackField.showReviewerName === false || feedbackField.showReviewerName === 'ANONYMOUS' || feedbackField.showReviewerName === 'HIDE' || feedbackField.hideReviewerName === true)) ||
-              (appConfig && (appConfig.Tampilkan_Nama_Penilai_Di_Ulasan === 'SEMBUNYIKAN' || appConfig.Tampilkan_Nama_Penilai === 'NONAKTIF' || appConfig.Tampilkan_Nama_Penilai === false))
-            );
+            const isFieldAnon = feedbackField && (feedbackField.showReviewerName === false || feedbackField.showReviewerName === 'ANONYMOUS' || feedbackField.showReviewerName === 'HIDE' || feedbackField.hideReviewerName === true);
+            const isConfigAnon = appConfig && (appConfig.Tampilkan_Nama_Penilai_Di_Ulasan === 'SEMBUNYIKAN' || appConfig.Tampilkan_Nama_Penilai === 'NONAKTIF' || appConfig.Tampilkan_Nama_Penilai === false);
+            const isAnon = Boolean(isFieldAnon || isConfigAnon || (currentRekapData && currentRekapData.isReviewerAnonymous));
 
             // Tampilkan maksimal 3 ulasan teratas
             const top3Reviews = ulasanList.slice(0, 3);
@@ -13275,10 +13282,9 @@ function normalizeMediaList(fieldOrMedia) {
         listEl.innerHTML = `<li class="text-xs text-zinc-400 italic p-4 text-center bg-zinc-50 border border-zinc-200 rounded-lg">Belum ada catatan masukan tertulis untuk pemateri ini.</li>`;
       } else {
         const feedbackField = findFieldInSchema(f => f.type === 'CORE_MEMBER_FEEDBACK');
-        const isAnon = currentRekapData?.isReviewerAnonymous ?? (
-          (feedbackField && (feedbackField.showReviewerName === false || feedbackField.showReviewerName === 'ANONYMOUS' || feedbackField.showReviewerName === 'HIDE' || feedbackField.hideReviewerName === true)) ||
-          (appConfig && (appConfig.Tampilkan_Nama_Penilai_Di_Ulasan === 'SEMBUNYIKAN' || appConfig.Tampilkan_Nama_Penilai === 'NONAKTIF' || appConfig.Tampilkan_Nama_Penilai === false))
-        );
+        const isFieldAnon = feedbackField && (feedbackField.showReviewerName === false || feedbackField.showReviewerName === 'ANONYMOUS' || feedbackField.showReviewerName === 'HIDE' || feedbackField.hideReviewerName === true);
+        const isConfigAnon = appConfig && (appConfig.Tampilkan_Nama_Penilai_Di_Ulasan === 'SEMBUNYIKAN' || appConfig.Tampilkan_Nama_Penilai === 'NONAKTIF' || appConfig.Tampilkan_Nama_Penilai === false);
+        const isAnon = Boolean(isFieldAnon || isConfigAnon || (currentRekapData && currentRekapData.isReviewerAnonymous));
 
         allReviews.forEach((u, idx) => {
           const li = document.createElement("li");
