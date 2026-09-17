@@ -12101,6 +12101,57 @@ function normalizeMediaList(fieldOrMedia) {
     }
     window.extractSesiNumber = extractSesiNumber;
 
+    // Helper: Ambil catatan presensi mahasiswa untuk sesi tertentu atau sesi aktif
+    function getStudentAttendanceRecord(nim, name, targetSesi) {
+      const attRecords = (typeof appConfig !== 'undefined' && appConfig["Attendance_Records"]) || {};
+      if (!attRecords || typeof attRecords !== 'object') return null;
+
+      const cleanNim = String(nim || "").replace(/\s+/g, "").trim().toLowerCase();
+      const cleanName = String(name || "").trim().toLowerCase();
+
+      // Jika targetSesi spesifik disediakan, prioritaskan sesi tersebut
+      if (targetSesi && targetSesi !== 'ALL') {
+        const sessionRecs = attRecords[targetSesi] || {};
+        for (const [recNim, recData] of Object.entries(sessionRecs)) {
+          const cRecNim = String(recNim || "").replace(/\s+/g, "").trim().toLowerCase();
+          const cRecName = String(recData?.nama || "").trim().toLowerCase();
+          if ((cleanNim && cleanNim !== '-' && cRecNim === cleanNim) || (cleanName && cRecName === cleanName)) {
+            return { ...recData, sesi: targetSesi };
+          }
+        }
+        return null;
+      }
+
+      // Jika targetSesi 'ALL' atau kosong, periksa sesi aktif terlebih dahulu
+      const activeSesi = (typeof appConfig !== 'undefined' && (appConfig["Sesi_Minggu_Aktif"] || appConfig["Sesi_Aktif"])) 
+        ? (appConfig["Sesi_Minggu_Aktif"] || appConfig["Sesi_Aktif"]).trim() 
+        : (currentRekapData?.activeSession || "Minggu 1");
+
+      if (attRecords[activeSesi]) {
+        for (const [recNim, recData] of Object.entries(attRecords[activeSesi])) {
+          const cRecNim = String(recNim || "").replace(/\s+/g, "").trim().toLowerCase();
+          const cRecName = String(recData?.nama || "").trim().toLowerCase();
+          if ((cleanNim && cleanNim !== '-' && cRecNim === cleanNim) || (cleanName && cRecName === cleanName)) {
+            return { ...recData, sesi: activeSesi };
+          }
+        }
+      }
+
+      // Jika belum ditemukan, periksa di seluruh sesi yang pernah tercatat
+      for (const [sesiKey, sessionRecs] of Object.entries(attRecords)) {
+        if (typeof sessionRecs !== 'object' || !sessionRecs) continue;
+        for (const [recNim, recData] of Object.entries(sessionRecs)) {
+          const cRecNim = String(recNim || "").replace(/\s+/g, "").trim().toLowerCase();
+          const cRecName = String(recData?.nama || "").trim().toLowerCase();
+          if ((cleanNim && cleanNim !== '-' && cRecNim === cleanNim) || (cleanName && cRecName === cleanName)) {
+            return { ...recData, sesi: sesiKey };
+          }
+        }
+      }
+      return null;
+    }
+    window.getStudentAttendanceRecord = getStudentAttendanceRecord;
+
     function populatePresensiFilters() {
       const scopeSelect = document.getElementById("presensiScopeFilter");
       const presenterSelect = document.getElementById("presensiPresenterFilter");
@@ -12203,6 +12254,7 @@ function normalizeMediaList(fieldOrMedia) {
           <option value="LENGKAP">Selesai</option>
           <option value="SEBAGIAN">Sebagian</option>
           <option value="BELUM">Belum Mengisi</option>
+          <option value="EXCUSED">Berhalangan (Sakit/Izin/Alpha)</option>
         `;
       } else {
         statusSelect.innerHTML = `
@@ -12210,6 +12262,7 @@ function normalizeMediaList(fieldOrMedia) {
           <option value="SUDAH">Sudah Menilai</option>
           <option value="BELUM">Belum Menilai</option>
           <option value="PENYAJI">Anggota Penyaji</option>
+          <option value="EXCUSED">Berhalangan (Sakit/Izin/Alpha)</option>
         `;
       }
 
@@ -12230,10 +12283,13 @@ function normalizeMediaList(fieldOrMedia) {
       updatePresensiStatusOptions(selectedPresenter, "ALL");
       renderRekapPresensi();
     }
+    window.onPresensiPresenterFilterChange = onPresensiPresenterFilterChange;
 
     function filterPresensiDisplay() {
       renderRekapPresensi();
     }
+    window.filterPresensiDisplay = filterPresensiDisplay;
+    window.renderRekapPresensi = renderRekapPresensi;
 
     function renderRekapPresensi() {
       const tableHeaderRow = document.getElementById("presensiTableHeaderRow");
@@ -12242,10 +12298,12 @@ function normalizeMediaList(fieldOrMedia) {
       const sudahMhsBadge = document.getElementById("presensiSudahMhs");
       const sebagianMhsBadge = document.getElementById("presensiSebagianMhs");
       const belumMhsBadge = document.getElementById("presensiBelumMhs");
+      const berhalanganMhsBadge = document.getElementById("presensiBerhalanganMhs");
       const cardTitle1 = document.getElementById("presensiCardTitle1");
       const cardTitle2 = document.getElementById("presensiCardTitle2");
       const cardTitle3 = document.getElementById("presensiCardTitle3");
       const cardTitle4 = document.getElementById("presensiCardTitle4");
+      const cardTitle5 = document.getElementById("presensiCardTitle5");
       const tableTitleEl = document.getElementById("presensiTableTitle");
       const tableSubtitleEl = document.getElementById("presensiTableSubtitle");
       const countLabel = document.getElementById("presensiFilterResultCount");
@@ -12433,10 +12491,39 @@ function normalizeMediaList(fieldOrMedia) {
         const totalTargets = targetGroupsToEvaluate.length;
         const filledTargetsCount = targetGroupsToEvaluate.filter(tg => filledKelompok.some(fk => fk.toLowerCase() === tg.toLowerCase())).length;
 
+        // Deteksi rekaman presensi mahasiswa pada sesi evaluasi target
+        let studentAttRecord = null;
+        if (isSinglePresenterMode) {
+          studentAttRecord = getStudentAttendanceRecord(student.nim, student.name, singlePresenterSesi || activeSesi);
+        } else if (scopeFilter.startsWith("SESI_")) {
+          const specificSesi = scopeFilter.replace("SESI_", "").trim();
+          studentAttRecord = getStudentAttendanceRecord(student.nim, student.name, specificSesi);
+        } else if (scopeFilter === "ACTIVE_ONLY" || scopeFilter === "UP_TO_ACTIVE") {
+          studentAttRecord = getStudentAttendanceRecord(student.nim, student.name, activeSesi);
+        } else {
+          studentAttRecord = getStudentAttendanceRecord(student.nim, student.name, activeSesi) 
+            || getStudentAttendanceRecord(student.nim, student.name, null);
+        }
+
+        const studentAttStatus = (studentAttRecord?.status || "").toUpperCase();
+        const isStudentExcused = (studentAttStatus === "SAKIT" || studentAttStatus === "IZIN" || studentAttStatus === "ALPHA");
+        const studentExcusedLabel = studentAttStatus === "SAKIT" ? "Sakit 🤒" : (studentAttStatus === "IZIN" ? "Izin ✉️" : "Alpha 🚫");
+
         let matrixStatusCategory = "BELUM";
         let matrixStatusLabel = "Belum Mengisi";
 
-        if (totalTargets === 0) {
+        if (isStudentExcused) {
+          if (filledTargetsCount > 0) {
+            matrixStatusCategory = "SEBAGIAN";
+            matrixStatusLabel = `${studentExcusedLabel} • Sebagian (${filledTargetsCount}/${totalTargets})`;
+          } else if (isPresenterInActiveSession) {
+            matrixStatusCategory = "EXCUSED";
+            matrixStatusLabel = `${studentExcusedLabel} (Penyaji)`;
+          } else {
+            matrixStatusCategory = "EXCUSED";
+            matrixStatusLabel = studentExcusedLabel;
+          }
+        } else if (totalTargets === 0) {
           matrixStatusCategory = "LENGKAP";
           matrixStatusLabel = isPresenterInActiveSession ? "Selesai (Penyaji)" : "Selesai";
         } else if (filledTargetsCount === totalTargets) {
@@ -12458,7 +12545,23 @@ function normalizeMediaList(fieldOrMedia) {
         const isSameSessionSingle = isSinglePresenterMode && (studentSesi && singlePresenterSesi && studentSesi.toLowerCase() === singlePresenterSesi.toLowerCase());
         const isExemptSingle = isSinglePresenterMode && !isPresenterOfSingle && (kewajibanPenyaji === "BEBAS_PENUH_DI_SESINYA" && isSameSessionSingle);
 
-        if (isPresenterOfSingle) {
+        const singleAttRecord = isSinglePresenterMode ? getStudentAttendanceRecord(student.nim, student.name, singlePresenterSesi || activeSesi) : null;
+        const singleAttStatus = (singleAttRecord?.status || "").toUpperCase();
+        const isSingleExcused = (singleAttStatus === "SAKIT" || singleAttStatus === "IZIN" || singleAttStatus === "ALPHA");
+        const singleExcusedLabel = singleAttStatus === "SAKIT" ? "Sakit 🤒" : (singleAttStatus === "IZIN" ? "Izin ✉️" : "Alpha 🚫");
+
+        if (isSingleExcused) {
+          if (hasFilledSingle) {
+            singleStatusCategory = "SUDAH";
+            singleStatusLabel = "Sudah Menilai";
+          } else if (isPresenterOfSingle) {
+            singleStatusCategory = "EXCUSED";
+            singleStatusLabel = `Penyaji (${singleExcusedLabel})`;
+          } else {
+            singleStatusCategory = "EXCUSED";
+            singleStatusLabel = singleExcusedLabel;
+          }
+        } else if (isPresenterOfSingle) {
           singleStatusCategory = "PENYAJI";
           singleStatusLabel = "Anggota Penyaji";
         } else if (hasFilledSingle) {
@@ -12482,6 +12585,8 @@ function normalizeMediaList(fieldOrMedia) {
           isPresenterOfSingle,
           hasFilledSingle,
           isExemptSingle,
+          isStudentExcused,
+          studentExcusedLabel,
           matrixStatusCategory,
           matrixStatusLabel,
           singleStatusCategory,
@@ -12506,36 +12611,46 @@ function normalizeMediaList(fieldOrMedia) {
         if (cardTitle2) cardTitle2.textContent = "Selesai";
         if (cardTitle3) cardTitle3.textContent = "Sebagian";
         if (cardTitle4) cardTitle4.textContent = "Belum Mengisi";
+        if (cardTitle5) cardTitle5.textContent = "Berhalangan";
 
         const countLengkap = baseScopeList.filter(s => s.matrixStatusCategory === "LENGKAP").length;
         const countSebagian = baseScopeList.filter(s => s.matrixStatusCategory === "SEBAGIAN").length;
         const countBelum = baseScopeList.filter(s => s.matrixStatusCategory === "BELUM").length;
+        const countExcused = baseScopeList.filter(s => s.matrixStatusCategory === "EXCUSED").length;
+
         const pctLengkap = totalStudents > 0 ? Math.round((countLengkap / totalStudents) * 100) : 0;
         const pctSebagian = totalStudents > 0 ? Math.round((countSebagian / totalStudents) * 100) : 0;
         const pctBelum = totalStudents > 0 ? Math.round((countBelum / totalStudents) * 100) : 0;
+        const pctExcused = totalStudents > 0 ? Math.round((countExcused / totalStudents) * 100) : 0;
 
         if (totalMhsBadge) totalMhsBadge.textContent = `${totalStudents} Mahasiswa`;
         if (sudahMhsBadge) sudahMhsBadge.textContent = `${countLengkap} (${pctLengkap}%)`;
         if (sebagianMhsBadge) sebagianMhsBadge.textContent = `${countSebagian} (${pctSebagian}%)`;
         if (belumMhsBadge) belumMhsBadge.textContent = `${countBelum} (${pctBelum}%)`;
+        if (berhalanganMhsBadge) berhalanganMhsBadge.textContent = `${countExcused} (${pctExcused}%)`;
       } else {
         // Mode Single Presenter
         if (cardTitle1) cardTitle1.textContent = "Total Mahasiswa";
         if (cardTitle2) cardTitle2.textContent = "Sudah Menilai";
         if (cardTitle3) cardTitle3.textContent = "Anggota Penyaji";
         if (cardTitle4) cardTitle4.textContent = "Belum Menilai";
+        if (cardTitle5) cardTitle5.textContent = "Berhalangan";
 
         const countSudah = baseScopeList.filter(s => s.singleStatusCategory === "SUDAH").length;
         const countPenyaji = baseScopeList.filter(s => s.singleStatusCategory === "PENYAJI").length;
         const countBelum = baseScopeList.filter(s => s.singleStatusCategory === "BELUM").length;
+        const countExcused = baseScopeList.filter(s => s.singleStatusCategory === "EXCUSED").length;
+
         const pctSudah = totalStudents > 0 ? Math.round((countSudah / totalStudents) * 100) : 0;
         const pctPenyaji = totalStudents > 0 ? Math.round((countPenyaji / totalStudents) * 100) : 0;
         const pctBelum = totalStudents > 0 ? Math.round((countBelum / totalStudents) * 100) : 0;
+        const pctExcused = totalStudents > 0 ? Math.round((countExcused / totalStudents) * 100) : 0;
 
         if (totalMhsBadge) totalMhsBadge.textContent = `${totalStudents} Mahasiswa`;
         if (sudahMhsBadge) sudahMhsBadge.textContent = `${countSudah} (${pctSudah}%)`;
         if (sebagianMhsBadge) sebagianMhsBadge.textContent = `${countPenyaji} (${pctPenyaji}%)`;
         if (belumMhsBadge) belumMhsBadge.textContent = `${countBelum} (${pctBelum}%)`;
+        if (berhalanganMhsBadge) berhalanganMhsBadge.textContent = `${countExcused} (${pctExcused}%)`;
       }
 
       // 6. Filter Tabel berdasarkan Status Kepatuhan & Pencarian
@@ -12657,7 +12772,25 @@ function normalizeMediaList(fieldOrMedia) {
               const isSameSession = (s.studentSesi && gSesi && s.studentSesi.toLowerCase() === gSesi.toLowerCase());
               const isExempt = (kewajibanPenyaji === "BEBAS_PENUH_DI_SESINYA" && isSameSession && !isMember);
 
+              // Cek presensi mahasiswa pada sesi kelompok ini (gSesi)
+              const cellAttRecord = getStudentAttendanceRecord(s.nim, s.name, gSesi);
+              const cellAttStatus = (cellAttRecord?.status || "").toUpperCase();
+              const isCellExcused = (cellAttStatus === "SAKIT" || cellAttStatus === "IZIN" || cellAttStatus === "ALPHA");
+              const cellExcusedTag = cellAttStatus === "SAKIT" ? "Sakit 🤒" : (cellAttStatus === "IZIN" ? "Izin ✉️" : "Alpha 🚫");
+              const cellExcusedBg = cellAttStatus === "SAKIT" 
+                ? "bg-amber-100 text-amber-900 border-amber-300"
+                : cellAttStatus === "IZIN"
+                  ? "bg-indigo-100 text-indigo-900 border-indigo-300"
+                  : "bg-rose-100 text-rose-900 border-rose-300";
+
               if (isMember) {
+                if (isCellExcused) {
+                  return `
+                    <td class="py-1 sm:py-1.5 px-1 text-center border-r border-zinc-200 bg-amber-50/40 whitespace-nowrap">
+                      <span class="inline-block px-1 py-0.5 rounded text-[8px] sm:text-[9.5px] font-bold ${cellExcusedBg} border leading-none" title="${s.name} ${cellExcusedTag} pada sesi ${gSesi}">${cellExcusedTag}</span>
+                    </td>
+                  `;
+                }
                 return `
                   <td class="py-1 sm:py-1.5 px-1 text-center border-r border-zinc-200 bg-purple-50/30 whitespace-nowrap">
                     <span class="inline-block px-1 py-0.5 rounded text-[8.5px] sm:text-[10px] font-semibold bg-purple-100 text-purple-800 border border-purple-200 leading-none" title="${s.name} adalah penyaji ${g.name}">Penyaji</span>
@@ -12669,6 +12802,12 @@ function normalizeMediaList(fieldOrMedia) {
                     <span class="inline-flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-emerald-100 text-emerald-700 shadow-2xs" title="Sudah dinilai">
                       <svg class="w-2.5 h-2.5 sm:w-3 sm:h-3 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                     </span>
+                  </td>
+                `;
+              } else if (isCellExcused && isTargetInSession) {
+                return `
+                  <td class="py-1 sm:py-1.5 px-1 text-center border-r border-zinc-200 bg-amber-50/20 whitespace-nowrap">
+                    <span class="inline-block px-1 py-0.5 rounded text-[8px] sm:text-[9px] font-semibold ${cellExcusedBg} border leading-none" title="${s.name} berhalangan (${cellExcusedTag}) pada sesi ${gSesi}">${cellExcusedTag}</span>
                   </td>
                 `;
               } else if (isExempt) {
@@ -12705,6 +12844,22 @@ function normalizeMediaList(fieldOrMedia) {
               finalBadgeHtml = `
                 <span class="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded text-[9.5px] sm:text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200 whitespace-nowrap">
                   <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                  <span>${s.matrixStatusLabel}</span>
+                </span>
+              `;
+            } else if (s.matrixStatusCategory === "EXCUSED") {
+              const isAlpha = s.matrixStatusLabel.includes("Alpha") || s.matrixStatusLabel.includes("Tidak Hadir");
+              const isIzin = s.matrixStatusLabel.includes("Izin");
+              const badgeStyle = isAlpha 
+                ? "bg-rose-100 text-rose-900 border-rose-300"
+                : isIzin 
+                  ? "bg-indigo-50 text-indigo-900 border-indigo-200"
+                  : "bg-amber-50 text-amber-900 border-amber-200";
+              const dotStyle = isAlpha ? "bg-rose-600" : isIzin ? "bg-indigo-600" : "bg-amber-500";
+
+              finalBadgeHtml = `
+                <span class="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded text-[9.5px] sm:text-[11px] font-bold ${badgeStyle} border whitespace-nowrap">
+                  <span class="w-1.5 h-1.5 rounded-full ${dotStyle}"></span>
                   <span>${s.matrixStatusLabel}</span>
                 </span>
               `;
@@ -12755,6 +12910,22 @@ function normalizeMediaList(fieldOrMedia) {
                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9.5px] sm:text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
                   <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                   <span>Sudah Menilai</span>
+                </span>
+              `;
+            } else if (s.singleStatusCategory === "EXCUSED") {
+              const isAlpha = s.singleStatusLabel.includes("Alpha") || s.singleStatusLabel.includes("Tidak Hadir");
+              const isIzin = s.singleStatusLabel.includes("Izin");
+              const badgeStyle = isAlpha 
+                ? "bg-rose-100 text-rose-900 border-rose-300"
+                : isIzin 
+                  ? "bg-indigo-50 text-indigo-900 border-indigo-200"
+                  : "bg-amber-50 text-amber-900 border-amber-200";
+              const dotStyle = isAlpha ? "bg-rose-600" : isIzin ? "bg-indigo-600" : "bg-amber-500";
+
+              singleBadgeHtml = `
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9.5px] sm:text-[11px] font-bold ${badgeStyle} border whitespace-nowrap">
+                  <span class="w-1.5 h-1.5 rounded-full ${dotStyle}"></span>
+                  <span>${s.singleStatusLabel}</span>
                 </span>
               `;
             } else {
@@ -13047,12 +13218,28 @@ function normalizeMediaList(fieldOrMedia) {
 
         let presentersHtml = `<p class="text-xs text-zinc-400 italic">Belum ada suara.</p>`;
         if (grp.rankedPresenters && grp.rankedPresenters.length > 0) {
-          presentersHtml = grp.rankedPresenters.map((p, idx) => `
-            <div class="flex items-center justify-between gap-2 text-xs bg-zinc-50 hover:bg-zinc-100/70 px-3 py-2 rounded-lg border border-zinc-100 transition">
-              <span class="font-medium text-zinc-800 truncate flex-1">${idx === 0 ? '#1 ' : (idx === 1 ? '#2 ' : '#3 ')} ${p.name}</span>
-              <span class="font-mono font-semibold text-zinc-700 bg-zinc-200/80 px-2 py-0.5 rounded text-[11px] whitespace-nowrap flex-shrink-0">${p.votes} Suara</span>
-            </div>
-          `).join("");
+          presentersHtml = grp.rankedPresenters.map((p, idx) => {
+            const pAtt = getStudentAttendanceRecord(p.nim, p.name, grp.sesi);
+            const pStatus = (pAtt?.status || "").toUpperCase();
+            let pAttTag = "";
+            if (pStatus === "SAKIT") {
+              pAttTag = `<span class="text-[9px] font-semibold text-amber-900 bg-amber-100 border border-amber-300 px-1 py-0.2 rounded leading-none">Sakit 🤒</span>`;
+            } else if (pStatus === "IZIN") {
+              pAttTag = `<span class="text-[9px] font-semibold text-indigo-900 bg-indigo-100 border border-indigo-300 px-1 py-0.2 rounded leading-none">Izin ✉️</span>`;
+            } else if (pStatus === "ALPHA") {
+              pAttTag = `<span class="text-[9px] font-semibold text-rose-900 bg-rose-100 border border-rose-300 px-1 py-0.2 rounded leading-none">Alpha 🚫</span>`;
+            }
+
+            return `
+              <div class="flex items-center justify-between gap-2 text-xs bg-zinc-50 hover:bg-zinc-100/70 px-3 py-2 rounded-lg border border-zinc-100 transition">
+                <div class="flex items-center gap-1.5 truncate flex-1 min-w-0">
+                  <span class="font-medium text-zinc-800 truncate">${idx === 0 ? '#1 ' : (idx === 1 ? '#2 ' : '#3 ')} ${p.name}</span>
+                  ${pAttTag}
+                </div>
+                <span class="font-mono font-semibold text-zinc-700 bg-zinc-200/80 px-2 py-0.5 rounded text-[11px] whitespace-nowrap flex-shrink-0">${p.votes} Suara</span>
+              </div>
+            `;
+          }).join("");
         }
 
         card.innerHTML = `
@@ -13190,6 +13377,17 @@ function normalizeMediaList(fieldOrMedia) {
             `;
           }
 
+          const attRecord = getStudentAttendanceRecord(sNim, sName, grp.sesi);
+          const attStatus = (attRecord?.status || "").toUpperCase();
+          let presensiBadgeHtml = "";
+          if (attStatus === "SAKIT") {
+            presensiBadgeHtml = `<span class="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-900 bg-amber-50 border border-amber-300 px-1.5 py-0.5 rounded flex-shrink-0" title="Berhalangan hadir (Sakit) pada sesi ${escapeHtml(grp.sesi)}"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Sakit 🤒</span>`;
+          } else if (attStatus === "IZIN") {
+            presensiBadgeHtml = `<span class="inline-flex items-center gap-1 text-[10px] font-semibold text-indigo-900 bg-indigo-50 border border-indigo-300 px-1.5 py-0.5 rounded flex-shrink-0" title="Berhalangan hadir (Izin) pada sesi ${escapeHtml(grp.sesi)}"><span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>Izin ✉️</span>`;
+          } else if (attStatus === "ALPHA") {
+            presensiBadgeHtml = `<span class="inline-flex items-center gap-1 text-[10px] font-semibold text-rose-900 bg-rose-50 border border-rose-300 px-1.5 py-0.5 rounded flex-shrink-0" title="Tidak hadir (Alpha) pada sesi ${escapeHtml(grp.sesi)}"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Alpha 🚫</span>`;
+          }
+
           card.innerHTML = `
             <!-- Clickable Accordion Header (Non-Truncate Full Name, Default Collapsed) -->
             <div 
@@ -13197,9 +13395,10 @@ function normalizeMediaList(fieldOrMedia) {
               class="p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 cursor-pointer hover:bg-zinc-50/80 transition select-none"
             >
               <div class="min-w-0 flex-1">
-                <div class="flex flex-wrap items-center gap-2">
+                <div class="flex flex-wrap items-center gap-1.5">
                   <h4 class="font-bold text-zinc-900 text-xs sm:text-sm leading-snug break-words">${sName}</h4>
                   ${sNim ? `<span class="text-[10px] font-mono text-zinc-500 bg-zinc-100 border border-zinc-200 px-1.5 py-0.5 rounded flex-shrink-0">${sNim}</span>` : ''}
+                  ${presensiBadgeHtml}
                 </div>
                 <p class="text-[11px] text-zinc-500 mt-0.5">${grp.kelompok} • ${grp.sesi}</p>
               </div>
@@ -13309,18 +13508,31 @@ function normalizeMediaList(fieldOrMedia) {
 
       const foundGroup = groupsData.find(g => g.name === groupName);
       if (foundGroup) {
-        sesiEl.textContent = `Sesi: ${foundGroup.sesi || 'Minggu 1'}`;
+        const grpSesi = foundGroup.sesi || 'Minggu 1';
+        sesiEl.textContent = `Sesi: ${grpSesi}`;
         countEl.textContent = `${(foundGroup.members || []).length} Anggota`;
 
         (foundGroup.members || []).forEach((m, idx) => {
+          const mAtt = getStudentAttendanceRecord(m.nim, m.name, grpSesi);
+          const mStatus = (mAtt?.status || "").toUpperCase();
+          let mAttBadge = "";
+          if (mStatus === "SAKIT") {
+            mAttBadge = `<span class="inline-flex items-center gap-1 text-[9px] font-semibold text-amber-900 bg-amber-100/90 border border-amber-300 px-1.5 py-0.5 rounded shrink-0 leading-none"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Sakit 🤒</span>`;
+          } else if (mStatus === "IZIN") {
+            mAttBadge = `<span class="inline-flex items-center gap-1 text-[9px] font-semibold text-indigo-900 bg-indigo-100/90 border border-indigo-300 px-1.5 py-0.5 rounded shrink-0 leading-none"><span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>Izin ✉️</span>`;
+          } else if (mStatus === "ALPHA") {
+            mAttBadge = `<span class="inline-flex items-center gap-1 text-[9px] font-semibold text-rose-900 bg-rose-100/90 border border-rose-300 px-1.5 py-0.5 rounded shrink-0 leading-none"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Alpha 🚫</span>`;
+          }
+
           const li = document.createElement("li");
           li.className = "flex items-center justify-between p-2.5 rounded-lg bg-zinc-50 border border-zinc-200 text-xs";
           li.innerHTML = `
-            <div class="flex items-center gap-2 min-w-0">
+            <div class="flex items-center gap-2 min-w-0 flex-1 mr-2">
               <span class="w-5 h-5 rounded bg-zinc-200 text-zinc-700 font-mono font-bold text-[10px] flex items-center justify-center flex-shrink-0">
                 ${idx + 1}
               </span>
               <span class="font-medium text-zinc-900 truncate">${m.name}</span>
+              ${mAttBadge}
             </div>
             <span class="text-[11px] font-mono text-zinc-500 bg-white px-2 py-0.5 rounded border border-zinc-200 flex-shrink-0">
               ${m.nim || 'NIM -'}

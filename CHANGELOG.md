@@ -2,6 +2,31 @@
 
 Dokumentasi seluruh pembaruan, perbaikan, dan peningkatan fitur pada Platform Penilaian & Evaluasi Akademik FKIP Universitas Lambung Mangkurat.
 
+## [2.5.33] - 2026-09-17
+
+### 📊 Integrasi Indikator Presensi (Sakit, Izin, Alpha) pada Rekapitulasi Hasil (BK5E)
+
+- **📈 Kartu Statistik Presensi 5 Kolom Responsif (`#presensiStatGrid`):**
+  - Menambahkan kartu ringkasan ke-5 khusus **Berhalangan** (`#presensiBerhalanganMhs` & `#presensiCardTitle5`) yang menghitung jumlah dan persentase mahasiswa berhalangan (Sakit, Izin, Alpha) secara presisi.
+  - Memperbarui grid ringkasan menjadi 5 kolom (`grid-cols-2 sm:grid-cols-3 lg:grid-cols-5`) dengan adaptasi tata letak yang stabil di layar mobile, tablet, hingga desktop 4K tanpa distorsi visual.
+
+- **🎛️ Filter Status Kepatuhan Diperluas:**
+  - Menambahkan opsi filter **`Berhalangan (Sakit/Izin/Alpha)`** (`value="EXCUSED"`) pada menu seleksi Status Kepatuhan, baik dalam Mode Matriks Penuh maupun Mode Single Presentator.
+  - Memudahkan dosen dan admin menyaring mahasiswa yang berhalangan dalam satu kali klik.
+
+- **📑 Matriks Keterisian Penilaian yang Adil & Transparan:**
+  - **Sel Kelompok Penyaji:** Anggota kelompok yang sakit, izin, atau alpha pada sesi tampilnya kini ditandai dengan lencana khusus (`Sakit 🤒`, `Izin ✉️`, `Alpha 🚫`) menggantikan lencana default `Penyaji`.
+  - **Sel Audiens/Penilai:** Mahasiswa yang berhalangan hadir pada sesi presentasi kelompok terkait kini ditandai dengan lencana status presensi resmi, bukan tanda silang merah `Belum dinilai`.
+  - **Kolom Status Akhir:** Menampilkan lencana berstatus berhalangan yang rapi dan elegan (kuning amber untuk Sakit, indigo untuk Izin, rose untuk Alpha).
+
+- **🧑‍🏫 Indikator Presensi pada Rekap Individu & Modal Info Kelompok:**
+  - **Header Akordeon Rekap Individu:** Menampilkan lencana kehadiran di samping nama dan NIM pemateri jika yang bersangkutan tercatat sakit, izin, atau alpha pada sesi kelompoknya.
+  - **Peringkat Suara Kelompok:** Menampilkan tanda status di samping nama kandidat presentator terbaik yang berhalangan hadir.
+  - **Modal Detail Kelompok (`openGroupInfoModal`):** Menampilkan lencana status presensi di samping nama anggota kelompok yang berhalangan pada sesi tersebut.
+
+- **⚡ Pembaruan Versi Semantik Aplikasi:**
+  - Meningkatkan versi aplikasi ke `v2.5.33` di seluruh berkas sistem (`index.html`, `admin.html`, `sw.js`, `src/admin/admin.js`, dan `CHANGELOG.md`).
+
 ## [2.5.32] - 2026-09-17
 
 ### 🗓️ Sistem Manajemen Presensi & Dispensasi Ketidakhadiran Mingguan (BK5E)

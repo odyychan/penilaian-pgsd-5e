@@ -35,7 +35,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="src/student/index.css?v=2.5.32">
+  <link rel="stylesheet" href="src/student/index.css?v=2.5.33">
   
   <!-- Instant Zero-FOUC View Resolver (Runs synchronously before HTML paint) -->
   <script>
@@ -1428,8 +1428,8 @@
 
         <!-- Container Rekap 3: STATUS PENGISIAN PRESENSI MAHASISWA -->
         <div id="rekapPresensiContainer" class="space-y-4 hidden">
-          <!-- Stat Summary Badges (Responsive 4-Cards Grid) -->
-          <div id="presensiStatGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+          <!-- Stat Summary Badges (Responsive 5-Cards Grid) -->
+          <div id="presensiStatGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3">
             <!-- Card 1: Total -->
             <div class="p-2.5 sm:p-3 rounded-lg bg-zinc-50 border border-zinc-200 flex items-center justify-between">
               <div>
@@ -1480,6 +1480,15 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
               </span>
+            </div>
+
+            <!-- Card 5: Berhalangan (Sakit/Izin/Alpha) -->
+            <div id="presensiCard5Box" class="p-2.5 sm:p-3 rounded-lg bg-amber-50/60 border border-amber-200 flex items-center justify-between col-span-2 sm:col-span-1">
+              <div>
+                <span id="presensiCardTitle5" class="text-[10px] sm:text-[11px] font-medium text-amber-800 block leading-tight">Berhalangan</span>
+                <span id="presensiBerhalanganMhs" class="text-xs sm:text-sm font-bold font-mono text-amber-900">0 (0%)</span>
+              </div>
+              <span class="p-1 sm:p-1.5 rounded bg-amber-200/60 text-amber-900 shrink-0 text-sm">🤒</span>
             </div>
           </div>
 
@@ -2396,13 +2405,13 @@
   <!-- ========================================================================= -->
   <!-- SCRIPT LOGIC -->
   <!-- ========================================================================= -->
-  <script src="src/student/student.js?v=2.5.32"></script>
+  <script src="src/student/student.js?v=2.5.33"></script>
 
   <!-- Progressive Web App (PWA) & Instant Auto-Updater Engine -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js?v=2.5.32').then(function(reg) {
+        navigator.serviceWorker.register('/sw.js?v=2.5.33').then(function(reg) {
           reg.update();
           reg.addEventListener('updatefound', function() {
             var newWorker = reg.installing;
